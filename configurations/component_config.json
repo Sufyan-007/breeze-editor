@@ -1,0 +1,45 @@
+{
+    "cmp_uuid": {
+        "name": "ABC",
+        "containingFile":"ABC.js",
+        "stateVars": [
+            {"name": "isLoggedIn", "type": "String", "defaultValue": "FALSE"}
+        ],
+        "propsVars": [
+            {"name": "type", "type": "String", "defaultValue": "CHECKIN"}
+        ],
+        "functions": [
+            {
+                "name": "handleInputChange",
+                "parameters": [
+                    {
+                        "name":"event"
+                    }
+                ],
+                "body": "const newValue = event.target.value;setInputValue(newValue); "
+            }
+        ],
+        "html": "<div> {{isLoggedIn}} - {{type}} <TEMP /> </div>",
+        "imports": [
+            {
+                "filepath" : "",
+                "importAll" : false,
+                "imports" : [
+                    "Add"
+                ]
+            }
+        ]
+    },
+    "cmp2_uuid": {
+            "name": "TEMP",
+            "containingFile":"common/TEMP.js",
+            "stateVars": [
+            ],
+            "propsVars": [
+            ],
+            "functions":[
+            ],
+            "html": "<div> Temp component</div>"
+        }
+    
+}
