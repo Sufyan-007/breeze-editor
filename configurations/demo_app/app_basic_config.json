@@ -1,0 +1,9 @@
+{
+    "name": "my_react_app2",
+    "description": "A custom React app",
+    "author": "Your Name",
+    "defaultComponent": "cmp_uuid",
+    "path" : "/home/raj/Desktop/bridge/bridge_generated_projects",
+    "components_src_dir" : "src"
+}
+    

@@ -1,6 +1,0 @@
-{
-    "name": "my_react_app",
-    "description": "A custom React app",
-    "author": "Your Name",
-    "defaultComponent": "cmp_uuid"
-}
