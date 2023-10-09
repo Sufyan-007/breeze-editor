@@ -10,8 +10,7 @@ def create_react_app_with_config_and_component(project_name, config):
     config.pop("defaultComponent", None)
 
     config_json = json.dumps(config)
-    subprocess.run(["npx", "create-react-app", project_name, "--template",
-                   "cra-template", "--use-npm"], text=True, input=config_json, cwd=config['path'])
+    subprocess.run(["npx", "create-react-app", project_name], text=True, input=config_json, cwd=config['path'])
 
     # Create the default component
     with open(f"{project_name}/src/{component_name}.js", "w") as component_file:
@@ -55,7 +54,7 @@ config_input = '''
 config = json.loads(config_input)
 project_name = config["name"]
 
-from utils.config_reader import read_config_file
+from utils.config_reader import read_config_file, read_file_json, write_file
 from utils.app_consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
 from component_generator import ComponentGenerator, gen_single_import
 
@@ -63,7 +62,7 @@ class AppGenerator:
 
     app_config_dir = None
     app_config = None
-    comp_config = None
+    comp_config = None 
     routing_config = None
 
     def __init__(self, app_config_dir):
@@ -73,6 +72,7 @@ class AppGenerator:
     def read_configs(self):
         self.app_config = read_config_file(CONFIG_FILES_PATH['APP_CONFIG'])
         self.comp_config = read_config_file(CONFIG_FILES_PATH['COMPONENT_CONFIG'])
+        print(self.comp_config)
         self.routing_config = read_config_file(CONFIG_FILES_PATH['ROUTING_CONFIG'])
 
     def generate_app(self):
@@ -80,6 +80,9 @@ class AppGenerator:
 
         # Create React App using create-react-app 
         self.create_react_app()
+
+        # Install dependecies
+        self.install_dependencies()
 
         # Set base path for the components
         self.setup_base_path_for_comps()
@@ -127,6 +130,20 @@ class AppGenerator:
 
             jsconfig_file.write(conf)
 
+    def install_dependencies(self):
+        app_dependencies = self.app_config['dependencies']
+        package_json = read_file_json(f"{self.app_config['path']}/{self.app_config['name']}/package.json")
+
+        print(package_json)
+        for dep in app_dependencies:
+            package_json['dependencies'][dep] = app_dependencies[dep]  
+        
+        package_json['devDependencies'] = {}
+        package_json['devDependencies']['web-vitals'] = "^3.5.0"
+
+        write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
+
+        subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
 
 
     def write_components(self):

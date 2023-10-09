@@ -5,3 +5,5 @@ CONFIG_FILES_PATH = {
     'COMPONENT_CONFIG': 'component_config',
     'ROUTING_CONFIG' : 'routing_config'
 }
+
+NEW_LINE_CHAR = "\n"

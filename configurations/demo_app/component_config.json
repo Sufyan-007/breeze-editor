@@ -1,44 +1,162 @@
 {
+    "main_comp":{
+        "name": "Main",
+        "containingFile": "components/Main.js",
+        "stateVars": [],
+        "propsVars": [],
+        "functions": [],
+        "html": "<BrowserRouter>\n       <Routes>\n      <Route path=\"/temp\" element={<TEMP />} ></Route>\n    <Route path=\"/\" element={<ABC />}>\n    </Route>\n    </Routes>\n</BrowserRouter>",
+        "imports": {
+            "components": [
+                "cmp2_uuid",
+                "cmp_uuid"
+            ],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-router-dom",
+                    "import_entity": "BrowserRouter",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-router-dom",
+                    "import_entity": "Routes",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-router-dom",
+                    "import_entity": "Route",
+                    "import_type" : "SINGLE"
+                }
+            ]
+        },
+        "hooks": []
+    },
     "cmp_uuid": {
         "name": "ABC",
-        "containingFile":"components/ABC.js",
+        "containingFile": "components/ABC.js",
         "stateVars": [
-            {"name": "isLoggedIn", "type": "String", "defaultValue": "FALSE"}
+            {
+                "name": "isLoggedIn",
+                "type": "String",
+                "defaultValue": "FALSE",
+                "$id": "STATE_VARS/VAR1_UUID"
+            },
+            {
+                "name": "isError",
+                "type": "BOOLEAN",
+                "defaultValue": false,
+                "$id": "STATE_VARS/VAR2_UUID"
+            },
+            {
+                "name": "tempData",
+                "type": "ARRAY",
+                "defaultValue": [],
+                "$id": "STATE_VARS/TEMP_DATA"
+            }
         ],
         "propsVars": [
-            {"name": "type", "type": "String", "defaultValue": "CHECKIN"}
+            {
+                "name": "type",
+                "type": "String",
+                "defaultValue": "CHECKIN",
+                "$id": "PROPS_VARS/VAR1_UUID"
+            }
+        ],
+        "otherVars": [
+            {
+                "declarationType": "CONST",
+                "varType": "OBJECT",
+                "$id": "OTHER_VARS/VAR1_UUID",
+                "PROPERTIES": {
+                    "isAll": {
+                        "type": "LITERAL",
+                        "value": false
+                    }
+                }
+            }
         ],
         "functions": [
             {
                 "name": "handleInputChange",
+                "$id": "FUNCTIONS/UUID1",
+                "isAnonymous": false,
                 "parameters": [
                     {
-                        "name":"event"
+                        "name": "event"
                     }
                 ],
-                "body": "const newValue = event.target.value;setInputValue(newValue); "
+                "isAsync": false,
+                "body": "const newValue = event.target.value; "
+            },
+            {
+                "name": "loadData",
+                "$id": "FUNCTIONS/F2",
+                "isAnonymous": false,
+                "parameters": [],
+                "isAsync": true,
+                "body":     "const resp = await axios.get('https://jsonplaceholder.typicode.com/todos').then(resp => { \nconsole.log(resp.data);\n return resp;\n});\n setTempData(resp.data);\n"
+            },
+            {
+                "name": "",
+                "$id": "FUNCTIONS/A1",
+                "isAnonymous": true,
+                "parameters": [],
+                "isAsync": false,
+                "body": "loadData();"
             }
         ],
-        "html": "<div> {isLoggedIn} - {type} <TEMP /> </div>",
+        "html": "<div> <h3>List of Todos</h3> {tempData.map( item => { \nreturn (<div style={{ padding: '10px 5px', backgroundColor : '#8080803d', margin: '2px'}}> \n{item.title} \n</div>) \n})} </div>",
         "imports": {
-            "components" : [
+            "components": [
                 "cmp2_uuid"
+            ],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "axios",
+                    "import_entity": "axios",
+                    "import_type" : "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react",
+                    "import_entity": "useEffect",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-router-dom",
+                    "import_entity": "Router",
+                    "import_type" : "SINGLE"
+                }
             ]
-        }
+        },
+        "hooks": [
+            {
+                "type": "USE_EFFECT",
+                "dependantVars": [
+                ],
+                "implementation": {
+                    "type": "FUNCTION",
+                    "$ref": "FUNCTIONS/A1"
+                }
+            }
+        ]
     },
     "cmp2_uuid": {
-            "name": "TEMP",
-            "containingFile":"components/common/TEMP.js",
-            "stateVars": [
-            ],
-            "propsVars": [
-            ],
-            "functions":[
-            ],
-            "html": "<div> Temp component</div>",
-            "imports": {
-                "components": []
-             }
-        }
-    
+        "name": "TEMP",
+        "containingFile": "components/common/TEMP.js",
+        "stateVars": [],
+        "propsVars": [],
+        "functions": [],
+        "html": "<div> Temp component</div>",
+        "imports": {
+            "components": [],
+            "other": []
+        },
+        "hooks": []
+    }
 }
