@@ -5,9 +5,11 @@ from utils.path_extractor import get_path_without_ext
 
 
 
-def generate_imports_code(component_config, all_config):
+def generate_imports_code(component_config, all_config,all_store_config):
     # print(component_config)
-    imported_components = component_config['imports']['components'] 
+    imported_components = component_config['imports']['components']
+    imported_store = component_config['imports'].get('store',[]) 
+ 
     import_statements = []
 
     # Handle import for components
@@ -16,6 +18,14 @@ def generate_imports_code(component_config, all_config):
         comp_path = get_path_without_ext(related_comp['containingFile'])
 
         import_statement = f'import {related_comp["name"]} from \'{comp_path}\';'
+        import_statements.append(import_statement)
+
+    # Handle import for redux store
+    for i in imported_store:
+        related_store = all_store_config[i]
+        store_path = get_path_without_ext(related_store['containingFile'])
+
+        import_statement = f'import {related_store["name"]} from \'{store_path}\';'
         import_statements.append(import_statement)
 
     # Handle other imports
@@ -46,9 +56,11 @@ class ComponentGenerator():
     app_config = None
     components_dir = None
 
-    def __init__(self, app_config, all_comp_config):
+    def __init__(self, app_config, all_comp_config,all_context_comp_config=[],all_store_config=[]):
         self.app_config = app_config
         self.all_comp_config = all_comp_config
+        self.all_store_config = all_store_config
+        self.all_context_comp_config = all_context_comp_config
         self.components_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
 
     def write_all_components(self):
@@ -56,7 +68,13 @@ class ComponentGenerator():
 
         for component_config in configs:
             self.write_component(component_config)
+    
+    def write_all_contexts(self):
+        configs =  list(self.all_context_comp_config.values())
 
+        for component_config in configs:
+            self.write_component(component_config)
+    
     def write_component(self, comp_config):
         react_component_code = self.generate_react_component_code(comp_config)
         # print(react_component_code)
@@ -80,23 +98,40 @@ class ComponentGenerator():
     def generate_react_component_code(self, config):
         # component_uuid = config['component_uuid']
         all_config = self.all_comp_config
+        all_store_config = self.all_store_config
         name = config['name']
         state_vars = config['stateVars']
         props_vars = config['propsVars']
         html = config['html']
         functions = config['functions']
 
-        # state_vars = []
-
-        # for var in state_vars:
-        #     var_val_default_ = var
-
+        wrapper_store = config.get("wrapper_store",None)
+        if wrapper_store is None:
+            html = "<div>%s</div>"%(html)
+        else:
+            if "store" in config["imports"]:
+                config["imports"]["store"].append(wrapper_store)
+            else:
+                config["imports"]["store"] = [
+                    wrapper_store
+                ]
+            config["imports"]["other"].append(
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-redux",
+                    "import_entity": "Provider",
+                    "import_type" : "SINGLE"
+                })
+            
+            store = all_store_config[wrapper_store]
+            html = "<Provider store={%s}>%s</Provider>"%(store["name"],html)
         print(state_vars)
 
         state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_val(var["defaultValue"])});' for var in state_vars])
         props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
+        
         # functions_code = '\n\n'.join()
-        import_stats = generate_imports_code(config, all_config)
+        import_stats = generate_imports_code(config, all_config,all_store_config)
 
         print(state_vars_declaration)
         functions_definition = '\n\n'.join([f'def {func["name"]}(event):' for func in functions])
@@ -114,24 +149,22 @@ class ComponentGenerator():
             hooks.append(HookCodeHelper.generate_hook_code(hook_conf, config))
 
 
-        react_component = f'''
-            import React, {{ useState }} from 'react';
-            {import_stats}
+        react_component = """
+            import React, { useState } from 'react';
+            %s
 
-            const {name} = (props) => {{
-                {state_vars_declaration}
-                {props_vars_declaration}
-                
-                {NEW_LINE_CHAR.join(hooks)}
-
-                {NEW_LINE_CHAR.join(functions_code)}
+            const %s = (props) => {
+                %s
+                %s
+                %s
+                %s
                 return (
-                    <div>{html}</div>
+                    %s
                 );
-            }};
+            }
 
-            export default {name};
-        '''
+            export default %s;
+        """%(import_stats,name,state_vars_declaration,props_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html,name)
 
         return react_component
 
