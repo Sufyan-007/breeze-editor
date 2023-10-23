@@ -4,43 +4,6 @@ import json
 from utils import formatter
 
 
-def create_react_app_with_config_and_component(project_name, config):
-    component_name = config.get("defaultComponent", "DefaultComponent")
-    # Remove the component name from config
-    config.pop("defaultComponent", None)
-
-    config_json = json.dumps(config)
-    subprocess.run(["npx", "create-react-app", project_name], text=True, input=config_json, cwd=config['path'])
-
-    # Create the default component
-    with open(f"{project_name}/src/{component_name}.js", "w") as component_file:
-        component_code = f"""
-import React from 'react';
-
-function {component_name}() {{
-    return (
-        <div>
-            <p>This is the {component_name} component.</p>
-        </div>
-    );
-}}
-
-export default {component_name};
-"""
-        component_file.write(component_code)
-
-
-def change_main_component(project_name):
-    comp_config_file = open('./configurations/component_config.json')
-    component_config = json.load(comp_config_file)
-
-    app_config_file = open('./configurations/app_basic_config.json')
-    app_config = json.load(app_config_file)
-    project_path = app_config['path']
-
-
-
-
 # JSON input with custom configurations and default component name
 config_input = '''
 {
@@ -58,6 +21,8 @@ from utils.config_reader import read_config_file, read_file_json, write_file
 from utils.app_consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
 from component_generator import ComponentGenerator, gen_single_import
 from routing_handler import RouteHandler
+from reducer_generator import ReducerGenerator
+from redux_store_generator import ReduxStoreGenerator
 
 class AppGenerator:
 
@@ -65,6 +30,9 @@ class AppGenerator:
     app_config = None
     comp_config = None 
     routing_config = None
+    reducer_config = None
+    redux_store_config = None
+
 
     def __init__(self, app_config_dir):
         self.app_config_dir = app_config_dir
@@ -73,6 +41,10 @@ class AppGenerator:
     def read_configs(self):
         self.app_config = read_config_file(CONFIG_FILES_PATH['APP_CONFIG'])
         self.comp_config = read_config_file(CONFIG_FILES_PATH['COMPONENT_CONFIG'])
+        self.context_comp_config = read_config_file(CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG'])
+        self.reducer_config = read_config_file(CONFIG_FILES_PATH['REDUCER_CONFIG'])
+        self.redux_store_config = read_config_file(CONFIG_FILES_PATH['REDUX_STORE_CONFIG'])
+
         print(self.comp_config)
         self.routing_config = read_config_file(CONFIG_FILES_PATH['ROUTING_CONFIG'])
 
@@ -93,6 +65,13 @@ class AppGenerator:
 
         # Write All components
         self.write_components()
+
+        # Write All reducer
+        self.write_reducers()
+
+        # Write All reducer
+        self.write_redux_store()
+
 
     def create_react_app(self):
         project_name = self.app_config['name']
@@ -155,33 +134,18 @@ class AppGenerator:
 
 
     def write_components(self):
-        comp_generator = ComponentGenerator(all_comp_config=self.comp_config, app_config=self.app_config)
+        comp_generator = ComponentGenerator(all_comp_config=self.comp_config, app_config=self.app_config,all_context_comp_config=self.context_comp_config,all_store_config=self.redux_store_config)
         comp_generator.write_all_components()
+        comp_generator.write_all_contexts()
 
+    def write_reducers(self):
+        reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)
+        reducer_generator.write_all_reducers()
 
+    def write_redux_store(self):
+        redux_store_generator = ReduxStoreGenerator(all_redux_store_config=self.redux_store_config,all_reducer_config=self.reducer_config, app_config=self.app_config,all_comp_config=self.comp_config)
+        redux_store_generator.write_all_store()
 
 
 app_generator = AppGenerator(APP_CONFIG_PATH)
 app_generator.generate_app()
-
-# {
-#     "name": "MyReactApp",
-#     "version": "1.0.0",
-#     "description": "A custom React app",
-#     "author": "Your Name",
-#     "template": "cra-template",
-#     "useNpm": true,
-#     "typescript": true,
-#     "eslint": "react-app",
-#     "stylelint": true,
-#     "jest": true,
-#     "jestTimeout": 5000,
-#     "testingLibrary": true,
-#     "cypress": true,
-#     "useTemplate": true,
-#     "usePnp": true,
-#     "useEslint": true,
-#     "useFlow": false,
-#     "useTs": false,
-#     "useTslint": false
-# }

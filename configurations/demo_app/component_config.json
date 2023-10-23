@@ -6,6 +6,7 @@
         "propsVars": [],
         "functions": [],
         "html": "<BrowserRouter>\n       <Routes>\n      <Route path=\"/temp\" element={<TEMP />} ></Route>\n    <Route path=\"/\" element={<ABC />}>\n    </Route>\n    </Routes>\n</BrowserRouter>",
+        "wrapper_store" : "redux_store_uuid",
         "imports": {
             "components": [
                 "cmp2_uuid",
@@ -158,5 +159,42 @@
             "other": []
         },
         "hooks": []
+    },
+    "cmp3_uuid": {
+        "name": "Counter",
+        "containingFile": "components/Counter.js",
+        "stateVars": [
+            {
+                "name": "incrementAmount",
+                "type": "int",
+                "defaultValue": 0,
+                "$id": "STATE_VARS/VAR1_UUID"
+            }
+        ],
+        "propsVars": [],
+        "otherVars": [],
+        "functions": [],
+        "html": "<div> <h3>List of Todos</h3> </div>",
+        "imports": {
+            "components": [
+                
+            ],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-redux",
+                    "import_entity": "useSelector",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-redux",
+                    "import_entity": "useDispatch",
+                    "import_type" : "SINGLE"
+                }
+            ]
+        },
+        "hooks": [
+        ]
     }
 }
