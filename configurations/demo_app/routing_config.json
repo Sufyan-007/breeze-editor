@@ -2,15 +2,23 @@
     "routes": [
         {
             "path": "/",
-            "component": "Home"
+            "redirectTo" : "/home"
+        },
+        {
+            "component": "cmp_uuid",
+            "path" : "/home"
         },
         {
             "path": "/about",
-            "component": "About"
+            "component": "cmp2_uuid"
+        },
+        {
+            "path": "/about/home",
+            "component": "cmp_uuid"
         },
         {
             "path": "/contact",
-            "component": "Contact"
+            "component": "cmp2_uuid"
         }
     ]
 }
