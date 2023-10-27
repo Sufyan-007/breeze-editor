@@ -169,30 +169,7 @@ class ComponentGenerator():
         return react_component
 
 
-class FunctionCodeGenerator:
-    @staticmethod
-    def generate_function(function_def, comp_config):
-        
-        func_name = ""
-        if function_def['isAnonymous'] is False:
-            func_name = f"const {function_def['name']} = "
-
-        
-        # print(function_def)
-        function_code = f"""
-
-            {func_name} {"" if function_def['isAsync'] is not True else "async"} ( {", ".join([p['name'] for p in  function_def['parameters']])}) => {{
-                
-                {function_def['body']}
-
-            }}
-
-        """
-
-        return function_code
-
-    
-
+from function_code_generator import FunctionCodeGenerator
 class HookCodeHelper:
 
 

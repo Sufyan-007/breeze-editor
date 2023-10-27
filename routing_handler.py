@@ -1,6 +1,7 @@
 from utils.path_extractor import get_path_without_ext
 from component_generator import generate_imports_code
 from utils.app_consts import NEW_LINE_CHAR
+from function_code_generator import FunctionCodeGenerator
 
 class RouteHandler:
     app_config = None
@@ -28,7 +29,9 @@ class RouteHandler:
                 "path": path,
                 "component": route.get("component"),
                 "childRoutes": [],
-                "redirectTo" : route.get("redirectTo", None)
+                "redirectTo" : route.get("redirectTo", None),
+                "action" : route.get("action", None),
+                "loader" : route.get("loader", None)
             }
 
         # Iterate through the routes to add child routes
@@ -76,6 +79,8 @@ class RouteHandler:
         
         generated_code = self.get_app_routing_code(routing_code)
 
+        print("--------")
+        print(generated_code)
         generated_code =  f'''
             {NEW_LINE_CHAR.join(import_statements)}
 
@@ -90,12 +95,13 @@ class RouteHandler:
         code = ""
         for route in routes:
             # print(route)
-
+            props_code = self.generate_route_props(route)
+            print(props_code)
             if route['redirectTo']:
-                code += f'''<Route path="{route['path']}" element={{<Navigate to='{route['redirectTo']}' />}} />'''
+                code += f'''<Route path="{route['path']}" element={{<Navigate to='{route['redirectTo']}' />}} {props_code} />'''
             else:
                 code += f'''
-                <Route path="{route['path']}" element={{<{self.get_comp_name_by_id(route['component'])} />}}{' index' if route['path'] == '/' else ''} {'/' if not route['childRoutes'] else ''}>
+                <Route path="{route['path']}" element={{<{self.get_comp_name_by_id(route['component'])} />}}{' index' if route['path'] == '/' else ''} {'/' if not route['childRoutes'] else ''} {props_code}>
                 '''
                 if route['childRoutes']:
                     for childRoute in route['childRoutes']:
@@ -107,18 +113,47 @@ class RouteHandler:
         return code
 
 
+    def generate_route_props(self, route_config):
+        
+        props_code = []
+
+        print("ROUTE_CONFIG")
+
+        print(route_config)
+
+        if route_config.get("action", None):
+            code = "action = {"
+            code += FunctionCodeGenerator.generate_function(route_config['action']['implementation'], None)
+            code += "\n }"
+            props_code.append(code)
+
+        if route_config.get("loader",  None):
+            code = "loader = {"
+            code += FunctionCodeGenerator.generate_function(route_config['action']['implementation'], None)
+            code += "\n }"
+            props_code.append(code)
+
+        print(props_code)
+        return "  ".join(props_code)
+
     def get_app_routing_code(self, routing_code):
         react_code = f'''
         import React from 'react';
-        import {{ Routes, Route, Navigate, BrowserRouter }} from 'react-router-dom';
+        import {{ Routes, Route, Navigate, BrowserRouter, createBrowserRouter, createRoutesFromElements, RouterProvider }} from "react-router-dom";
+        
+        const routes = createBrowserRouter (
+          createRoutesFromElements(
+          <Route>
+                {routing_code}
+                </Route>
+            )
+        );
 
         function App() {{
             return (
-            <BrowserRouter>
-                <Routes>
-                    {routing_code}
-                </Routes>
-            </BrowserRouter>
+            <div>
+                    <RouterProvider router={{routes}} />
+            </div>
             );
         }}
 
