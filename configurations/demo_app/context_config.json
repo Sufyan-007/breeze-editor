@@ -46,7 +46,22 @@
                 "body": "return await new Promise((resolve, reject) => { const user = Pool.getCurrentUser();\nif(user){\nuser.getSession((err,session) =>{\nif(err){\nreject();\n}else{\nresolve(session);\n}\n})}})"
             }
         ],
-        "html": "<AccountContext.Provider value={{authenticate , getSession }}>\n{props.children}\n</AccountContext.Provider>",
+        "html":{
+            "tagName": "AccountContext.Provider",
+            "type" : "Element",
+            "children": [{
+              "tagName": "",
+              "type": "Expression",
+              "children" : [
+                  {
+                    "type" : "code",
+                    "code" : "props.children"
+                }
+              ]
+            }
+            ]
+        },
+        
         "imports": {
             "components": [
                 "cmp2_uuid"

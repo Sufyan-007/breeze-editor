@@ -2,7 +2,7 @@ import json
 import subprocess
 import os
 from utils.path_extractor import get_path_without_ext
-
+from html_generator import HTMLGenerator
 
 
 def generate_imports_code(component_config, all_config,all_store_config):
@@ -102,12 +102,15 @@ class ComponentGenerator():
         name = config['name']
         state_vars = config['stateVars']
         props_vars = config['propsVars']
-        html = config['html']
+        html_config = config['html']
+        html_code = HTMLGenerator.generateHTML(html_config)
+
+        print(html_code)
         functions = config['functions']
 
         wrapper_store = config.get("wrapper_store",None)
         if wrapper_store is None:
-            html = "<div>%s</div>"%(html)
+            html_code = "<div>%s</div>"%(html_code)
         else:
             if "store" in config["imports"]:
                 config["imports"]["store"].append(wrapper_store)
@@ -124,7 +127,7 @@ class ComponentGenerator():
                 })
             
             store = all_store_config[wrapper_store]
-            html = "<Provider store={%s}>%s</Provider>"%(store["name"],html)
+            html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
         print(state_vars)
 
         state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_val(var["defaultValue"])});' for var in state_vars])
@@ -164,7 +167,7 @@ class ComponentGenerator():
             }
 
             export default %s;
-        """%(import_stats,name,state_vars_declaration,props_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html,name)
+        """%(import_stats,name,state_vars_declaration,props_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
 
         return react_component
 

@@ -5,7 +5,7 @@
         "stateVars": [],
         "propsVars": [],
         "functions": [],
-        "html": "<BrowserRouter>\n       <Routes>\n      <Route path=\"/temp\" element={<TEMP />} ></Route>\n    <Route path=\"/\" element={<ABC />}>\n    </Route>\n    </Routes>\n</BrowserRouter>",
+        "html": {},
         "wrapper_store": "redux_store_uuid",
         "imports": {
             "components": [
@@ -115,7 +115,133 @@
                 "body": "loadData();"
             }
         ],
-        "html": "<div> <h3>List of Todos</h3> {tempData.map( item => { \nreturn (<div style={{ padding: '10px 5px', backgroundColor : '#8080803d', margin: '2px'}}> \n{item.title} \n</div>) \n})} </div>",
+        "html": {
+            "tagName": "div",
+            "type": "Element",
+            "children": [
+                {
+                    "type": "Element",
+                    "tagName": "div",
+                    "attributes": {
+                        "style": "height:10rpx;width: 20rpx;"
+                    },
+                    "children": [
+                        {
+                            "type": "Element",
+                            "tagName": "Layout",
+                            "attributes": {},
+                            "children": [
+                                {
+                                    "type": "Element",
+                                    "tagName": "Header",
+                                    "attributes": {},
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "icon",
+                                            "attributes": {},
+                                            "children": []
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "Content",
+                                    "attributes": {},
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Sidebar",
+                                            "attributes": {},
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Nav",
+                                                    "attributes": {},
+                                                    "children": [
+                                                        {
+                                                            "type": "Element",
+                                                            "tagName": "div",
+                                                            "attributes": {},
+                                                            "children": [
+                                                                {
+                                                                    "type": "Expression",
+                                                                    "children": [
+                                                                        {
+
+                                                                            "type": "map",
+                                                                            "variable": "allData",
+                                                                            "code": "const a = 1;",
+                                                                            "callbackParams": [
+                                                                                "item",
+                                                                                "index"
+                                                                            ],
+                                                                            "attributes": {},
+                                                                            "children": [
+                                                                                {
+                                                                                    "type": "Element",
+                                                                                    "tagName": "div",
+                                                                                    "attributes": {},
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "type" : "text",
+                                                                                            "text": "List of todos"
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Expression",
+                                                                    "children" : [
+                                                                        {
+                                                                            "type": "condition",
+                                                                            "condition": "isLoggedin",
+                                                                            "variable": "allData",
+                                                                            "trueCase": {
+                                                                                "type": "Element",
+                                                                                "tagName": "div",
+                                                                                "attributes": {},
+                                                                                "children": []
+                                                                            },
+                                                                            "falseCase": {
+                                                                                "type": "Element",
+                                                                                "tagName": "div",
+                                                                                "attributes": {},
+                                                                                "children": []
+                                                                            }
+
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "MainContent",
+                                            "attributes": {},
+                                            "children": []
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "Footer",
+                                    "attributes": {},
+                                    "children": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
         "imports": {
             "components": [
                 "cmp2_uuid"
@@ -158,7 +284,16 @@
         "stateVars": [],
         "propsVars": [],
         "functions": [],
-        "html": "<div> Temp component</div>",
+        "html": {
+            "tagName": "div",
+            "type": "Element",
+            "children": [
+                {
+                    "type": "text",
+                    "text": "div"
+                }
+            ]
+        },
         "imports": {
             "components": [],
             "other": []
@@ -179,7 +314,22 @@
         "propsVars": [],
         "otherVars": [],
         "functions": [],
-        "html": "<div> <h3>List of Todos</h3> </div>",
+        "html": {
+            "tagName": "div",
+            "type": "Element",
+            "children": [
+                {
+                    "tagName": "h3",
+                    "type": "Element",
+                    "children": [
+                        {
+                            "type": "text",
+                            "text": "List of Todos"
+                        }
+                    ]
+                }
+            ]
+        },
         "imports": {
             "components": [],
             "other": [
