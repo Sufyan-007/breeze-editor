@@ -20,6 +20,8 @@ project_name = config["name"]
 from utils.config_reader import read_config_file, read_file_json, write_file
 from utils.app_consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
 from component_generator import ComponentGenerator, gen_single_import
+from api_client_generator import GenerateAPIClient
+
 from reducer_generator import ReducerGenerator
 from redux_store_generator import ReduxStoreGenerator
 
@@ -54,22 +56,26 @@ class AppGenerator:
         self.create_react_app()
 
         # Install dependecies
-        self.install_dependencies()
+        # self.install_dependencies()
 
         # Set base path for the components
-        self.setup_base_path_for_comps()
+        # self.setup_base_path_for_comps()
 
         # Modify main component (App.js)
-        self.modify_main_component()
+        # self.modify_main_component()
 
-        # Write All components
-        self.write_components()
+        # # Write All components
+        # self.write_components()
 
-        # Write All reducer
-        self.write_reducers()
+        # # Write All reducer
+        # self.write_reducers()
 
-        # Write All reducer
-        self.write_redux_store()
+        # # Write All reducer
+        # self.write_redux_store()
+
+        # Generate API client from yaml
+        self.generate_api_client()
+
 
 
     def create_react_app(self):
@@ -109,6 +115,10 @@ class AppGenerator:
 
             jsconfig_file.write(conf)
 
+    def generate_api_client(self):
+        api_client_generator = GenerateAPIClient(app_config=self.app_config)
+        api_client_generator.read_yaml()
+        
     def install_dependencies(self):
         app_dependencies = self.app_config['dependencies']
         package_json = read_file_json(f"{self.app_config['path']}/{self.app_config['name']}/package.json")
@@ -123,10 +133,8 @@ class AppGenerator:
         write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
 
         subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
-
-
     def write_components(self):
-        comp_generator = ComponentGenerator(all_comp_config=self.comp_config, app_config=self.app_config,all_context_comp_config=self.context_comp_config,all_store_config=self.redux_store_config)
+        comp_generator = ComponentGenerator(all_comp_config=self.comp_config, app_config=self.app_config,all_context_comp_config=self.context_comp_config,all_store_config=self.redux_store_config,all_reducer_config=self.reducer_config)
         comp_generator.write_all_components()
         comp_generator.write_all_contexts()
 

@@ -11,6 +11,10 @@
         {
             "path": "/contact",
             "component": "Contact"
+        },
+        {
+            "path": "/counter",
+            "component": "Counter"
         }
     ]
 }

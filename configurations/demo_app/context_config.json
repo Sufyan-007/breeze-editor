@@ -5,17 +5,7 @@
         "stateVars": [],
         "propsVars": [],
         "otherVars": [
-            {
-                "declarationType" : "CONST",
-                "varType" : "OBJECT",
-                "$id" : "OTHER_VARS/VAR1_UUID",
-                "PROPERTIES" : {
-                    "isAll" : {
-                        "type" : "LITERAL",
-                        "value" : " new createContext()"
-                    }
-                }
-            }
+            
         ],
         "functions": [
             

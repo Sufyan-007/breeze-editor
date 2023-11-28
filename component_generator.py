@@ -5,7 +5,7 @@ from utils.path_extractor import get_path_without_ext
 
 
 
-def generate_imports_code(component_config, all_config,all_store_config):
+def generate_imports_code(component_config, all_config,all_store_config,all_reducer_config):
     # print(component_config)
     imported_components = component_config['imports']['components']
     imported_store = component_config['imports'].get('store',[]) 
@@ -38,6 +38,17 @@ def generate_imports_code(component_config, all_config,all_store_config):
                 import_statement = f'import  {{{imp["import_entity"]}}} from \'{imp["from"]}\' ;'
             
             import_statements.append(import_statement)
+        
+        elif imp['TYPE'] == "REDUCER_FUNCTION":
+            related_reducer = all_reducer_config.get(imp["from"])
+            path = get_path_without_ext(related_reducer['containingFile'])
+
+            if imp['import_entity'] == 'SELECTOR':
+                import_statement = "import  {select%s} from '%s';"%(related_reducer["stateVarName"],path)
+            else:
+                import_statement = f'import  {{{imp["import_entity"]}}} from \'{path}\' ;'
+            
+            import_statements.append(import_statement)
 
     return '\n'.join(import_statements)
 
@@ -56,11 +67,13 @@ class ComponentGenerator():
     app_config = None
     components_dir = None
 
-    def __init__(self, app_config, all_comp_config,all_context_comp_config=[],all_store_config=[]):
+    def __init__(self, app_config, all_comp_config,all_context_comp_config={},all_store_config={},all_reducer_config={}):
         self.app_config = app_config
         self.all_comp_config = all_comp_config
         self.all_store_config = all_store_config
         self.all_context_comp_config = all_context_comp_config
+        self.all_reducer_config = all_reducer_config
+
         self.components_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
 
     def write_all_components(self):
@@ -99,9 +112,13 @@ class ComponentGenerator():
         # component_uuid = config['component_uuid']
         all_config = self.all_comp_config
         all_store_config = self.all_store_config
+        all_reducer_config = self.all_reducer_config
+
         name = config['name']
         state_vars = config['stateVars']
         props_vars = config['propsVars']
+        other_vars = config.get('otherVars',[])
+
         html = config['html']
         functions = config['functions']
 
@@ -130,8 +147,20 @@ class ComponentGenerator():
         state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_val(var["defaultValue"])});' for var in state_vars])
         props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
         
+        # other vars
+        other_vars_declaration = ""
+        for ovar in other_vars:
+            print("99999999999999999999999999999")
+            print(config.get("name"))
+            print(ovar.get("name"))
+            print(ovar.get("className"))
+            parameters = ""
+            if len(ovar.get("parameters",[]))> 0:
+                parameters = ",".join(ovar["parameters"])
+            other_vars_declaration = other_vars_declaration + " \n %s %s = %s(%s);"%(ovar["declarationType"],ovar.get("name"),ovar.get("className"),parameters)
+        
         # functions_code = '\n\n'.join()
-        import_stats = generate_imports_code(config, all_config,all_store_config)
+        import_stats = generate_imports_code(config, all_config,all_store_config,all_reducer_config)
 
         print(state_vars_declaration)
         functions_definition = '\n\n'.join([f'def {func["name"]}(event):' for func in functions])
@@ -158,13 +187,14 @@ class ComponentGenerator():
                 %s
                 %s
                 %s
+                %s
                 return (
                     %s
                 );
             }
 
             export default %s;
-        """%(import_stats,name,state_vars_declaration,props_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html,name)
+        """%(import_stats,name,state_vars_declaration,other_vars_declaration,props_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html,name)
 
         return react_component
 

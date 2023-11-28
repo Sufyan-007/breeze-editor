@@ -5,11 +5,12 @@
         "stateVars": [],
         "propsVars": [],
         "functions": [],
-        "html": "<BrowserRouter>\n       <Routes>\n      <Route path=\"/temp\" element={<TEMP />} ></Route>\n    <Route path=\"/\" element={<ABC />}>\n    </Route>\n    </Routes>\n</BrowserRouter>",
+        "html": "<BrowserRouter>\n       <Routes>\n      <Route path=\"/temp\" element={<TEMP />} ></Route>\n <Route path=\"/counter\" element={<Counter />} ></Route>\n    <Route path=\"/\" element={<ABC />}>\n    </Route>\n    </Routes>\n</BrowserRouter>",
         "wrapper_store" : "redux_store_uuid",
         "imports": {
             "components": [
                 "cmp2_uuid",
+                "cmp3_uuid",
                 "cmp_uuid"
             ],
             "other": [
@@ -67,17 +68,6 @@
             }
         ],
         "otherVars": [
-            {
-                "declarationType": "CONST",
-                "varType": "OBJECT",
-                "$id": "OTHER_VARS/VAR1_UUID",
-                "PROPERTIES": {
-                    "isAll": {
-                        "type": "LITERAL",
-                        "value": false
-                    }
-                }
-            }
         ],
         "functions": [
             {
@@ -172,9 +162,27 @@
             }
         ],
         "propsVars": [],
-        "otherVars": [],
+        "otherVars": [
+            
+            {
+                "$id": "OTHER_VARS/VAR2_UUID",
+                "declarationType": "const",
+                "name": "count",
+                "varType": "OBJECT",
+                "className":"useSelector",
+                "parameters": ["selectcounter"]
+            },
+            {
+                "$id": "OTHER_VARS/VAR3_UUID",
+                "declarationType": "const",
+                "name": "dispatch",
+                "varType": "OBJECT",
+                "className":"useDispatch",
+                "parameters ": []
+            }
+        ],
         "functions": [],
-        "html": "<div> <h3>List of Todos</h3> </div>",
+        "html": "<div><div><button aria-label='Increment value' onClick={() => dispatch(increment())}> + </button> <span>{count}</span> <button aria-label='Decrement value' onClick={() => dispatch(decrement())}> - </button></div><div><input aria-label='Set increment amount' value={incrementAmount} onChange={e => setIncrementAmount(e.target.value)}/> <button onClick={() => dispatch(incrementByAmount(Number(incrementAmount) || 0))}> Add count </button></div></div>",
         "imports": {
             "components": [
                 
@@ -191,7 +199,32 @@
                     "from": "react-redux",
                     "import_entity": "useDispatch",
                     "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE": "REDUCER_FUNCTION",
+                    "from": "reducer1_uuid",
+                    "import_entity": "decrement",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE": "REDUCER_FUNCTION",
+                    "from": "reducer1_uuid",
+                    "import_entity": "increment",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE": "REDUCER_FUNCTION",
+                    "from": "reducer1_uuid",
+                    "import_entity": "SELECTOR",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE": "REDUCER_FUNCTION",
+                    "from": "reducer1_uuid",
+                    "import_entity": "incrementByAmount",
+                    "import_type" : "SINGLE"
                 }
+                
             ]
         },
         "hooks": [
