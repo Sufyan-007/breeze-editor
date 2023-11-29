@@ -180,8 +180,32 @@ class GenerateAPIClient():
             for parameter in parameters:
                 if parameter.get("required",False) is True:
                     required_params.append(parameter)
+                
+                if parameter.get("in") == "path":
+                    api_options_keys.append("path")
+                    name = parameter["name"]
+                    func_args.append(name)
                     
-                if parameter.get("in") == "body":
+                    paths.append(" '%s' : %s"%(name,name))
+                    if "path" in api_options:
+                        api_options["path"][name] = name
+                    else:
+                        api_options["path"] = {}
+                        api_options["path"][name] = name
+            
+                elif parameter.get("in") == "query":
+                    api_options_keys.append("query")
+                    name = parameter["name"]
+                    queries.append(" '%s' : %s"%(name,name))
+
+                    func_args.append(name)
+                    if "query" in api_options:
+                        api_options["query"][name] = name
+                    else:
+                        api_options["query"] = {}
+                        api_options["query"][name] = name
+                
+                elif parameter.get("in") == "body":
                     api_options_keys.append("body")
                     if "schema" in parameter:
                         ref = None
@@ -212,30 +236,7 @@ class GenerateAPIClient():
                         arr_obj_code = req_body
                         api_options["body"] = "arrObj"
 
-                elif parameter.get("in") == "path":
-                    api_options_keys.append("path")
-                    name = parameter["name"]
-                    func_args.append(name)
-                    
-                    paths.append(" '%s' : %s"%(name,name))
-                    if "path" in api_options:
-                        api_options["path"][name] = name
-                    else:
-                        api_options["path"] = {}
-                        api_options["path"][name] = name
-            
-                elif parameter.get("in") == "query":
-                    api_options_keys.append("query")
-                    name = parameter["name"]
-                    queries.append(" '%s' : %s"%(name,name))
-
-                    func_args.append(name)
-                    if "query" in api_options:
-                        api_options["query"][name] = name
-                    else:
-                        api_options["query"] = {}
-                        api_options["query"][name] = name
-            
+                
             react_code = react_code.replace("{FUNC_NAME}",func_name)
             required_params_code = []
             for para in required_params:

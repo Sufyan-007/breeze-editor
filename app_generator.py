@@ -22,6 +22,7 @@ from utils.app_consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
 from component_generator import ComponentGenerator, gen_single_import
 from api_client_generator import GenerateAPIClient
 
+from routing_handler import RouteHandler
 from reducer_generator import ReducerGenerator
 from redux_store_generator import ReduxStoreGenerator
 
@@ -86,23 +87,30 @@ class AppGenerator:
 
 
     def modify_main_component(self):
-        default_comp_config = self.comp_config[self.app_config['defaultComponent']]
+        # default_comp_config = self.comp_config[self.app_config['defaultComponent']]
+        # with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
+        #     component_code = f"""
+        #         import React from 'react';
+        #         {gen_single_import(default_comp_config['name'], default_comp_config['containingFile'])}
+
+        #         function App() {{
+        #             return (
+        #                 <{default_comp_config['name']} />
+        #             );
+        #         }}
+
+        #         export default App;
+        #     """
+
+        #     formatted_code = formatter.format_by_prettier(component_code)
+        #     component_file.write(formatted_code)
+        route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
+        react_code = route_handler.handle_routing_code()
+        print("------")
+        print(react_code)
         with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-            component_code = f"""
-                import React from 'react';
-                {gen_single_import(default_comp_config['name'], default_comp_config['containingFile'])}
-
-                function App() {{
-                    return (
-                        <{default_comp_config['name']} />
-                    );
-                }}
-
-                export default App;
-            """
-
-            formatted_code = formatter.format_by_prettier(component_code)
-            component_file.write(formatted_code)
+            formatted_code = formatter.format_by_prettier(react_code)
+            component_file.write(formatted_code)        
 
     def setup_base_path_for_comps(self):
         with open(f"{self.app_config['path']}/{self.app_config['name']}/jsconfig.json", "w+") as jsconfig_file:

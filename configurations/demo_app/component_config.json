@@ -1,12 +1,12 @@
 {
-    "main_comp":{
+    "main_comp": {
         "name": "Main",
         "containingFile": "components/Main.js",
         "stateVars": [],
         "propsVars": [],
         "functions": [],
-        "html": "<BrowserRouter>\n       <Routes>\n      <Route path=\"/temp\" element={<TEMP />} ></Route>\n <Route path=\"/counter\" element={<Counter />} ></Route>\n    <Route path=\"/\" element={<ABC />}>\n    </Route>\n    </Routes>\n</BrowserRouter>",
-        "wrapper_store" : "redux_store_uuid",
+        "html": {},
+        "wrapper_store": "redux_store_uuid",
         "imports": {
             "components": [
                 "cmp2_uuid",
@@ -18,19 +18,19 @@
                     "TYPE": "THIRD_PARTY",
                     "from": "react-router-dom",
                     "import_entity": "BrowserRouter",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 },
                 {
                     "TYPE": "THIRD_PARTY",
                     "from": "react-router-dom",
                     "import_entity": "Routes",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 },
                 {
                     "TYPE": "THIRD_PARTY",
                     "from": "react-router-dom",
                     "import_entity": "Route",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 }
             ]
         },
@@ -74,11 +74,13 @@
                 "name": "handleInputChange",
                 "$id": "FUNCTIONS/UUID1",
                 "isAnonymous": false,
-                "parameters": [
-                    {
-                        "name": "event"
-                    }
-                ],
+                "parameters": {
+                    "list": [
+                        {
+                            "name": "event"
+                        }
+                    ]
+                },
                 "isAsync": false,
                 "body": "const newValue = event.target.value; "
             },
@@ -86,20 +88,150 @@
                 "name": "loadData",
                 "$id": "FUNCTIONS/F2",
                 "isAnonymous": false,
-                "parameters": [],
+                "parameters": {
+                    "list": []
+                },
                 "isAsync": true,
-                "body":     "const resp = await axios.get('https://jsonplaceholder.typicode.com/todos').then(resp => { \nconsole.log(resp.data);\n return resp;\n});\n setTempData(resp.data);\n"
+                "body": "const resp = await axios.get('https://jsonplaceholder.typicode.com/todos').then(resp => { \nconsole.log(resp.data);\n return resp;\n});\n setTempData(resp.data);\n"
             },
             {
                 "name": "",
                 "$id": "FUNCTIONS/A1",
                 "isAnonymous": true,
-                "parameters": [],
+                "parameters": {
+                    "list": []
+                },
                 "isAsync": false,
                 "body": "loadData();"
             }
         ],
-        "html": "<div> <h3>List of Todos</h3> {tempData.map( item => { \nreturn (<div style={{ padding: '10px 5px', backgroundColor : '#8080803d', margin: '2px'}}> \n{item.title} \n</div>) \n})} </div>",
+        "html": {
+            "tagName": "div",
+            "type": "Element",
+            "children": [
+                {
+                    "type": "Element",
+                    "tagName": "div",
+                    "attributes": {
+                        "style": "height:10rpx;width: 20rpx;"
+                    },
+                    "children": [
+                        {
+                            "type": "Element",
+                            "tagName": "Layout",
+                            "attributes": {},
+                            "children": [
+                                {
+                                    "type": "Element",
+                                    "tagName": "Header",
+                                    "attributes": {},
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "icon",
+                                            "attributes": {},
+                                            "children": []
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "Content",
+                                    "attributes": {},
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Sidebar",
+                                            "attributes": {},
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Nav",
+                                                    "attributes": {},
+                                                    "children": [
+                                                        {
+                                                            "type": "Element",
+                                                            "tagName": "div",
+                                                            "attributes": {},
+                                                            "children": [
+                                                                {
+                                                                    "type": "Expression",
+                                                                    "children": [
+                                                                        {
+
+                                                                            "type": "map",
+                                                                            "variable": "allData",
+                                                                            "code": "const a = 1;",
+                                                                            "callbackParams": [
+                                                                                "item",
+                                                                                "index"
+                                                                            ],
+                                                                            "attributes": {},
+                                                                            "children": [
+                                                                                {
+                                                                                    "type": "Element",
+                                                                                    "tagName": "div",
+                                                                                    "attributes": {},
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "type" : "text",
+                                                                                            "text": "List of todos"
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Expression",
+                                                                    "children" : [
+                                                                        {
+                                                                            "type": "condition",
+                                                                            "condition": "isLoggedin",
+                                                                            "variable": "allData",
+                                                                            "trueCase": {
+                                                                                "type": "Element",
+                                                                                "tagName": "div",
+                                                                                "attributes": {},
+                                                                                "children": []
+                                                                            },
+                                                                            "falseCase": {
+                                                                                "type": "Element",
+                                                                                "tagName": "div",
+                                                                                "attributes": {},
+                                                                                "children": []
+                                                                            }
+
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "MainContent",
+                                            "attributes": {},
+                                            "children": []
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "Footer",
+                                    "attributes": {},
+                                    "children": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
         "imports": {
             "components": [
                 "cmp2_uuid"
@@ -109,27 +241,26 @@
                     "TYPE": "THIRD_PARTY",
                     "from": "axios",
                     "import_entity": "axios",
-                    "import_type" : "FULL"
+                    "import_type": "FULL"
                 },
                 {
                     "TYPE": "THIRD_PARTY",
                     "from": "react",
                     "import_entity": "useEffect",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 },
                 {
                     "TYPE": "THIRD_PARTY",
                     "from": "react-router-dom",
                     "import_entity": "Router",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 }
             ]
         },
         "hooks": [
             {
                 "type": "USE_EFFECT",
-                "dependantVars": [
-                ],
+                "dependantVars": [],
                 "implementation": {
                     "type": "FUNCTION",
                     "$ref": "FUNCTIONS/A1"
@@ -143,7 +274,16 @@
         "stateVars": [],
         "propsVars": [],
         "functions": [],
-        "html": "<div> Temp component</div>",
+        "html": {
+            "tagName": "div",
+            "type": "Element",
+            "children": [
+                {
+                    "type": "text",
+                    "text": "div"
+                }
+            ]
+        },
         "imports": {
             "components": [],
             "other": []
@@ -182,52 +322,40 @@
             }
         ],
         "functions": [],
-        "html": "<div><div><button aria-label='Increment value' onClick={() => dispatch(increment())}> + </button> <span>{count}</span> <button aria-label='Decrement value' onClick={() => dispatch(decrement())}> - </button></div><div><input aria-label='Set increment amount' value={incrementAmount} onChange={e => setIncrementAmount(e.target.value)}/> <button onClick={() => dispatch(incrementByAmount(Number(incrementAmount) || 0))}> Add count </button></div></div>",
+        "html": {
+            "tagName": "div",
+            "type": "Element",
+            "children": [
+                {
+                    "tagName": "h3",
+                    "type": "Element",
+                    "children": [
+                        {
+                            "type": "text",
+                            "text": "List of Todos"
+                        }
+                    ]
+                }
+            ]
+        },
         "imports": {
-            "components": [
-                
-            ],
+            "components": [],
             "other": [
                 {
                     "TYPE": "THIRD_PARTY",
                     "from": "react-redux",
                     "import_entity": "useSelector",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 },
                 {
                     "TYPE": "THIRD_PARTY",
                     "from": "react-redux",
                     "import_entity": "useDispatch",
-                    "import_type" : "SINGLE"
-                },
-                {
-                    "TYPE": "REDUCER_FUNCTION",
-                    "from": "reducer1_uuid",
-                    "import_entity": "decrement",
-                    "import_type" : "SINGLE"
-                },
-                {
-                    "TYPE": "REDUCER_FUNCTION",
-                    "from": "reducer1_uuid",
-                    "import_entity": "increment",
-                    "import_type" : "SINGLE"
-                },
-                {
-                    "TYPE": "REDUCER_FUNCTION",
-                    "from": "reducer1_uuid",
-                    "import_entity": "SELECTOR",
-                    "import_type" : "SINGLE"
-                },
-                {
-                    "TYPE": "REDUCER_FUNCTION",
-                    "from": "reducer1_uuid",
-                    "import_entity": "incrementByAmount",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 }
                 
             ]
         },
-        "hooks": [
-        ]
+        "hooks": []
     }
 }

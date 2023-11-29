@@ -1,0 +1,78 @@
+{
+    "get_/pet/{petId}": {
+        "petId" : {
+            "type" : "integer",
+            "mapping" : "id"
+        }
+    },
+    "post_/pet/{petId}": {
+        "petId" : {
+            "type" : "integer",
+            "mapping" : "id"
+        },
+        "name" : {
+            "type" : "string",
+            "mapping" : "petName"
+        },
+        "status" : {
+            "type" : "string",
+            "mapping" : "status"
+        }
+    },
+    "delete_/pet/{petId}": {
+        "petId" : {
+            "type" : "integer",
+            "mapping" : "id"
+        }
+    },
+    "post_/pet": {
+        "body" : {
+            "type" : "object",
+            "schema" : "$pet",
+            "mapping" : {
+                "id" : {
+                    "type" : "integer",
+                    "mapping" : "id"
+                },
+                "category" : {
+                    "type" : "string",
+                    "mapping" : "categoryName"
+                },
+                "name" : {
+                    "type" : "string",
+                    "mapping" : "name"
+                },
+                "photoUrls" : {
+                    "type" : "array",
+                    "item_type" : "string",
+                    "mapping" : "url"
+                }
+            }
+        }
+    },
+    "post_/user/createWithArray": {
+        "body" : {
+            "type" : "array",
+            "item_type" : "object",
+            "schema" : "$user",
+            "mapping" : {
+                "id" : {
+                    "type" : "integer",
+                    "mapping" : "id"
+                },
+                "username" : {
+                    "type" : "string",
+                    "mapping" : "username"
+                },
+                "firstName" : {
+                    "type" : "string",
+                    "mapping" : "firstName"
+                },
+                "lastName" : {
+                    "type" : "string",
+                    "mapping" : "lastName"
+                }
+            }
+        }
+    }
+}
