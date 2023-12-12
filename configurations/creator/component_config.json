@@ -4,6 +4,7 @@
         "containingFile": "components/Main.js",
         "stateVars": [],
         "propsVars": [],
+        "otherVars" : [],
         "functions": [],
         "html": {},
         "wrapper_store": "redux_store_uuid",
@@ -47,7 +48,7 @@
                     "author": "",
                     "default_component": "",
                     "strictMode": "FALSE",
-                    "component_src_dir": "",
+                    "component_src_dir": "src",
                     "dependencies": []
                 },
                 "$id": "STATE_VARS/PROJECT_DATA"
@@ -459,99 +460,6 @@
                                             ]
                                         }
                                     ]
-                                },
-                                {
-                                    "type": "Element",
-                                    "tagName": "div",
-                                    "attributes": {
-                                        "style": {
-                                            "type": "OBJECT",
-                                            "value": {
-                                                "marginTop": "10px"
-                                            }
-                                        }
-                                    },
-                                    "children": [
-                                        {
-                                            "type": "text",
-                                            "text": "Select File Path"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "tagName": "div",
-                                    "type": "Element",
-                                    "children": [
-                                        {
-                                            "type": "Element",
-                                            "tagName": "input",
-                                            "attributes": {
-                                                "style": {
-                                                    "type": "OBJECT",
-                                                    "value": {
-                                                        "display": "none"
-                                                    }
-                                                },
-                                                "name": {
-                                                    "type": "LITERAL",
-                                                    "value": "file"
-                                                },
-                                                "id": {
-                                                    "type": "LITERAL",
-                                                    "value": "file"
-                                                },
-                                                "type": {
-                                                    "type": "LITERAL",
-                                                    "value": "file"
-                                                },
-                                                "placeholder": {
-                                                    "type": "LITERAL",
-                                                    "value": " "
-                                                },
-                                                "onChange": {
-                                                    "type": "FUNCTION",
-                                                    "value": {
-                                                        "name": "",
-                                                        "$id": "FUNCTIONS/A1",
-                                                        "isAnonymous": true,
-                                                        "parameters": {
-                                                            "list": [
-                                                                {
-                                                                    "name": "event"
-                                                                }
-                                                            ]
-                                                        },
-                                                        "isAsync": false,
-                                                        "body": "handleInputChange('component_src_dir', event.target.value) ;"
-                                                    }
-                                                }
-                                            },
-                                            "children": []
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Element",
-                                    "tagName": "input",
-                                    "attributes": {
-                                        "name": {
-                                            "type": "LITERAL",
-                                            "value": "component_src_dir"
-                                        },
-                                        "id": {
-                                            "type": "LITERAL",
-                                            "value": "component_src_dir"
-                                        },
-                                        "placeholder": {
-                                            "type": "LITERAL",
-                                            "value": " "
-                                        },
-                                        "type": {
-                                            "type": "LITERAL",
-                                            "value": "text"
-                                        }
-                                    },
-                                    "children": []
                                 },
                                 {
                                     "type": "Element",
