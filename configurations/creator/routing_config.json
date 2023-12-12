@@ -39,7 +39,7 @@
             }
         },
         {
-            "component": "cmp_uuid",
+            "component": "create_app_page",
             "path": "/home"
         }
     ]

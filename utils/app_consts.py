@@ -6,9 +6,8 @@ CONFIG_FILES_PATH = {
     'CONTEXT_COMPONENT_CONFIG': 'context_config',
     'ROUTING_CONFIG' : 'routing_config',
     'REDUCER_CONFIG' : 'reducer_config',
-    'REDUX_STORE_CONFIG' : 'redux_store_config'
-
-
+    'REDUX_STORE_CONFIG' : 'redux_store_config',
+    'CSS_CONFIG' : 'css_config'
 }
 
 NEW_LINE_CHAR = "\n"

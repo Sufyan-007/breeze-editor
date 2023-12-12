@@ -1,0 +1,26 @@
+{
+    "redux_store_uuid": {
+        "name": "configureStore",
+        "containingFile": "store/Store.js",
+        "reducer": [
+           {
+                "name": "counter",
+                "value": "reducer1_uuid"    
+            }
+        ],
+        "imports": {
+            "reducer": [
+                "reducer1_uuid"
+            ],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "@reduxjs/toolkit",
+                    "import_entity": "{configureStore}",
+                    "import_type" : "FULL"
+
+                }
+            ]
+        }        
+    }
+}
