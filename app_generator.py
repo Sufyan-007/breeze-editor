@@ -57,22 +57,22 @@ class AppGenerator:
         self.create_react_app()
 
         # Install dependecies
-        # self.install_dependencies()
+        self.install_dependencies()
 
         # Set base path for the components
-        # self.setup_base_path_for_comps()
+        self.setup_base_path_for_comps()
 
         # Modify main component (App.js)
-        # self.modify_main_component()
+        self.modify_main_component()
 
-        # # Write All components
-        # self.write_components()
+        # Write All components
+        self.write_components()
 
-        # # Write All reducer
-        # self.write_reducers()
+        # Write All reducer
+        self.write_reducers()
 
-        # # Write All reducer
-        # self.write_redux_store()
+        # Write All reducer
+        self.write_redux_store()
 
         # Generate API client from yaml
         self.generate_api_client()
@@ -105,12 +105,12 @@ class AppGenerator:
         #     formatted_code = formatter.format_by_prettier(component_code)
         #     component_file.write(formatted_code)
         route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
-        react_code = route_handler.handle_routing_code()
-        print("------")
-        print(react_code)
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-            formatted_code = formatter.format_by_prettier(react_code)
-            component_file.write(formatted_code)        
+        # react_code = route_handler.handle_routing_code()
+        # print("------")
+        # print(react_code)
+        # with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
+        #     formatted_code = formatter.format_by_prettier(react_code)
+        #     component_file.write(formatted_code)        
 
     def setup_base_path_for_comps(self):
         with open(f"{self.app_config['path']}/{self.app_config['name']}/jsconfig.json", "w+") as jsconfig_file:
@@ -144,7 +144,7 @@ class AppGenerator:
     def write_components(self):
         comp_generator = ComponentGenerator(all_comp_config=self.comp_config, app_config=self.app_config,all_context_comp_config=self.context_comp_config,all_store_config=self.redux_store_config,all_reducer_config=self.reducer_config)
         comp_generator.write_all_components()
-        comp_generator.write_all_contexts()
+        # comp_generator.write_all_contexts()
 
     def write_reducers(self):
         reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)

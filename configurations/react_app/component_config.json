@@ -357,5 +357,117 @@
             ]
         },
         "hooks": []
+    },
+    "cmp4_uuid": {
+        "name": "Posts",
+        "containingFile": "components/Post.js",
+        "stateVars": [
+            {
+                "name": "userId",
+                "type": "int",
+                "defaultValue": 0,
+                "$id": "STATE_VARS/VAR1_UUID"
+            },
+            {
+                "name": "id",
+                "type": "int",
+                "defaultValue": 0,
+                "$id": "STATE_VARS/VAR2_UUID"
+            },{
+                "name": "title",
+                "type": "String",
+                "defaultValue": 0,
+                "$id": "STATE_VARS/VAR3_UUID"
+            },{
+                "name": "body",
+                "type": "String",
+                "defaultValue": 0,
+                "$id": "STATE_VARS/VAR4_UUID"
+            }
+        ],
+        "propsVars": [],
+        "otherVars": [
+        ],
+        "functions": [
+            {
+                "name": "handleInputChange",
+                "$id": "FUNCTIONS/UUID1",
+                "isAnonymous": false,
+                "parameters": {
+                    "list": [
+                        {
+                            "name": "event"
+                        }
+                    ]
+                },
+                "isAsync": false,
+                "body": "const newValue = event.target.value; "
+            },
+            {
+                "name": "loadData",
+                "$id": "FUNCTIONS/F2",
+                "isAnonymous": false,
+                "parameters": {
+                    "list": []
+                },
+                "isAsync": true,
+                "body": "const resp = await getPosts();\n setPosts(resp.data);\n"
+            },
+            {
+                "name": "",
+                "$id": "FUNCTIONS/A1",
+                "isAnonymous": true,
+                "parameters": {
+                    "list": []
+                },
+                "isAsync": false,
+                "body": "loadData();"
+            }
+        ],
+        
+        "html": {
+            "tagName": "div",
+            "type": "Element",
+            "children": [
+                {
+                    "tagName": "h3",
+                    "type": "Element",
+                    "children": [
+                        {
+                            "type": "text",
+                            "text": "List of Posts"
+                        }
+                    ]
+                }
+            ]
+        },
+        "imports": {
+            "components": [],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-redux",
+                    "import_entity": "useSelector",
+                    "import_type": "SINGLE"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-redux",
+                    "import_entity": "useDispatch",
+                    "import_type": "SINGLE"
+                }
+                
+            ]
+        },
+        "hooks": [
+            {
+                "type": "USE_EFFECT",
+                "dependantVars": [],
+                "implementation": {
+                    "type": "FUNCTION",
+                    "$ref": "FUNCTIONS/A1"
+                }
+            }
+        ]
     }
 }

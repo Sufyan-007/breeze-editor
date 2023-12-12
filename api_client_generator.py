@@ -35,6 +35,7 @@ def remove_circular_refs(ob, _seen=None):
 
 PRIMARY_DATA_TYPE_INITIAL_VAL = {
     'integer' : 0,
+    'number' : 0,
     'string' : '',
     'array' : [],
     'boolean' : 'false'
@@ -54,10 +55,12 @@ class GenerateAPIClient():
         
     def read_yaml(self):
 
-        with open(r"configurations/demo_app/sample_swagger.yaml") as file:
+        with open(r"/home/yash/Documents/Projects/Breeze/breezeui/configurations/demo_app/sample_swagger.yml") as file:
             documents = yaml.full_load(file)
             paths = documents.get("paths",{})
-            definitions  = documents.get("definitions",{})
+            definitions  = documents.get("components",{})
+            if definitions is not None:
+                definitions = definitions.get("schemas",{})
             service_tags = {}
 
             ## attached the core functionality to call an API in the react app
@@ -72,11 +75,12 @@ class GenerateAPIClient():
                 if service is not None:
                     tags = service.get("tags",[])
                     service_func = service.get("code","")
-                    for tag in tags:
-                        if tag in service_tags:
-                            service_tags.get(tag).append(service_func)
-                        else:
-                            service_tags[tag] = [service_func]
+                    if tags is not None:
+                        for tag in tags:
+                            if tag in service_tags:
+                                service_tags.get(tag).append(service_func)
+                            else:
+                                service_tags[tag] = [service_func]
                     print("------------------------")
                     print(service_func)
 
@@ -93,13 +97,11 @@ class GenerateAPIClient():
 
 
             for definition in definitions:
-                print(definition)
                 data_model = self.generate_data_model(definitions[definition],definitions)
                 s = json.dumps(remove_circular_refs(data_model))
                 content = "const %s = %s; export default %s;"%(definition,s,definition)
                 filename = definition+".js"
                 self.write_file("model",filename,content)
-                print(data_model)
     
     def write_file(self,folder,filename,content):
         path =f"{self.app_config['path']}/{self.app_config['name']}/src/{folder}/"
@@ -115,7 +117,11 @@ class GenerateAPIClient():
     def initialize_data_type(self,init_state,key,obj,definition):
         
         if "type" in obj:
-            if obj["type"] == 'array':
+            if obj["type"] == 'object':
+                init_state[key] = [self.generate_data_model(obj,definition)]
+            
+                
+            elif obj["type"] == 'array':
                     items = obj["items"]
                     if 'type' in items:
                         init_state[key] = PRIMARY_DATA_TYPE_INITIAL_VAL[obj["type"]]
@@ -151,9 +157,14 @@ class GenerateAPIClient():
                 "tags" : tags,
                 "code": code
             }
+        return {
+            "tags" : [],
+            "code" : None
+        }
             
     def generate_service_function(self,method,path,obj,definitions):
             func_name = obj.get("operationId","test")
+            func_name = func_name.replace("-","_")
             parameters = obj.get("parameters",{})
             func_args = []
             required_params = []
@@ -161,7 +172,7 @@ class GenerateAPIClient():
             req_body = {}
             api_options_keys = []
             react_code = """
-                const {FUNC_NAME} = async ({FUNC_ARGS}) => {
+                export const {FUNC_NAME} = async ({FUNC_ARGS}) => {
                     {REQUIRED_VALIDATION_CODE}
                     {ARR_OBJ_CODE}
                     const  apiOptions = {API_OPTIONS} 
@@ -176,6 +187,43 @@ class GenerateAPIClient():
             queries = []
             paths = []
             definition =  None
+            print(obj)
+            if "requestBody" in obj:
+                requestBody = obj.get("requestBody")
+                content = requestBody.get("content",{})
+                app_json = content.get("application/json",{})
+                api_options_keys.append("body")
+                ref = None
+
+                if "schema" in app_json:
+                    is_array = False
+                    schema = app_json["schema"]
+                    if "type" in schema and schema["type"] == "array":
+                        is_array = True
+                        items = schema["items"]
+                        ref = items["$ref"]
+                        if "reactStateObjArray" not in func_args:
+                            func_args.append("reactStateObjArray")
+                
+                    else:
+                        ref = app_json["schema"]["$ref"]
+                        if "reactStateObj" not in func_args:
+                            func_args.append("reactStateObj")
+                        
+                    ref = ref.split("/")[-1]
+                    model = definitions[ref]
+                    resp = self.generate_request_body_model(is_array,model,definitions)
+                    req_body = resp["code"]
+                    required_props = resp["required_props"]
+                    for prop in required_props: 
+                        required_params.append(prop)
+                    if is_array is False:
+                        api_options["body"] = req_body
+                    else:
+                        arr_obj_code = req_body
+                        api_options["body"] = "arrObj"
+
+
 
             for parameter in parameters:
                 if parameter.get("required",False) is True:

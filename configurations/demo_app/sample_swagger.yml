@@ -1,0 +1,198 @@
+openapi: 3.0.0
+info:
+  title: OpenAI API
+  description: The OpenAI REST API. Please see https://platform.openai.com/docs/api-reference for more details.
+  version: "2.0.0"
+  termsOfService: https://openai.com/policies/terms-of-use
+  contact:
+    name: OpenAI Support
+    url: https://help.openai.com/
+  license:
+    name: MIT
+    url: https://github.com/openai/openai-openapi/blob/master/LICENSE
+servers:
+  - url: https://api.openai.com/v1
+tags:
+  - name: Post
+    description: Sample posts.
+  - name: Comment
+    description: Comments from posts.
+  
+paths:
+  # Note: When adding an endpoint, make sure you also add it in the `groups` section, in the end of this file,
+  # under the appropriate group
+  /posts:
+    post:
+      operationId: createPost
+      tags:
+        - Post
+      summary: Creates a post response for the given  conversation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostDetails"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDetails"
+
+    get:
+      operationId: getPosts
+      tags:
+        - Post
+      summary: Returns a list of posts that belong to the user's organization.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListPostsResponse"
+  
+  /posts/{postId}:
+    get:
+      operationId: getPost
+      tags:
+        - Post
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: number
+            # ideally this will be an actual ID, so this will always work from browser
+            example: 1
+          description: The ID of the post to use for this request
+      
+      summary: Returns a post that belong to the user's organization.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDetails"
+  
+  /comments:
+    get:
+      operationId: getComments
+      tags:
+        - Comment
+      summary: Returns a list of comments that belong to the user's post.
+      parameters:
+        - in: query
+          name: postId
+          required: false
+          schema:
+            type: number
+          description: Only return comments with the given post.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListCommntsResponse"
+  
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: "bearer"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: false
+        param:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: false
+      required:
+        - type
+        - message
+        - param
+        - code
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+      required:
+        - error
+
+    CommentDetails:
+      type: object
+      properties:
+        id:
+          description: id of post
+          type: number
+        userId:
+          description: id of user
+          type: number
+        title:
+          description: title of post
+          type: string
+        body:
+          description: body of post
+          type: string
+      
+    PostDetails:
+      type: object
+      properties:
+        id:
+          description: id of post
+          type: number
+        userId:
+          description: id of user
+          type: number
+        title:
+          description: title of post
+          type: string
+        body:
+          description: body of post
+          type: string
+        
+        
+      required:
+        - id
+        - userId
+
+    CreatePostResponse:
+      type: object
+      description: Represents a chat completion response returned by model, based on the provided input.
+      properties:
+        id:
+          type: number
+          description: id of post.
+        
+    ListPostsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostDetails"
+        
+    ListCommntsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommentDetails"
+    
+    
