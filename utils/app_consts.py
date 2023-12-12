@@ -7,7 +7,9 @@ CONFIG_FILES_PATH = {
     'ROUTING_CONFIG' : 'routing_config',
     'REDUCER_CONFIG' : 'reducer_config',
     'REDUX_STORE_CONFIG' : 'redux_store_config',
-    'CSS_CONFIG' : 'css_config'
+    'CSS_CONFIG' : 'css_config',
+    'SWAGGER_CONTENT' : 'sample_swagger'
+
 }
 
 NEW_LINE_CHAR = "\n"

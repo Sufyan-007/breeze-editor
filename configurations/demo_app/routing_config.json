@@ -41,6 +41,22 @@
         {
             "component": "cmp_uuid",
             "path": "/home"
+        },
+        {
+            "path": "/about",
+            "component": "cmp2_uuid"
+        },
+        {
+            "path": "/about/home",
+            "component": "cmp_uuid"
+        },
+        {
+            "path": "/contact",
+            "component": "Contact"
+        },
+        {
+            "path": "/counter",
+            "component": "Counter"
         }
     ]
 }

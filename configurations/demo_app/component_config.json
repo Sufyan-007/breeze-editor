@@ -10,6 +10,7 @@
         "imports": {
             "components": [
                 "cmp2_uuid",
+                "cmp3_uuid",
                 "cmp_uuid"
             ],
             "other": [
@@ -67,17 +68,6 @@
             }
         ],
         "otherVars": [
-            {
-                "declarationType": "CONST",
-                "varType": "OBJECT",
-                "$id": "OTHER_VARS/VAR1_UUID",
-                "PROPERTIES": {
-                    "isAll": {
-                        "type": "LITERAL",
-                        "value": false
-                    }
-                }
-            }
         ],
         "functions": [
             {
@@ -312,7 +302,25 @@
             }
         ],
         "propsVars": [],
-        "otherVars": [],
+        "otherVars": [
+            
+            {
+                "$id": "OTHER_VARS/VAR2_UUID",
+                "declarationType": "const",
+                "name": "count",
+                "varType": "OBJECT",
+                "className":"useSelector",
+                "parameters": ["selectcounter"]
+            },
+            {
+                "$id": "OTHER_VARS/VAR3_UUID",
+                "declarationType": "const",
+                "name": "dispatch",
+                "varType": "OBJECT",
+                "className":"useDispatch",
+                "parameters ": []
+            }
+        ],
         "functions": [],
         "html": {
             "tagName": "div",
@@ -345,6 +353,7 @@
                     "import_entity": "useDispatch",
                     "import_type": "SINGLE"
                 }
+                
             ]
         },
         "hooks": []
