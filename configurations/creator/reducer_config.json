@@ -1,0 +1,51 @@
+{
+    "reducer1_uuid": {
+        "name": "counterSlice",
+        "containingFile": "reducer/CounterReducer.js",
+        "stateVarName": "counter",
+        "initialState" : 0,
+        "reducers": [
+            
+            {
+                "name": "increment",
+                "$id": "REDUCER/UUID1",
+                "parameters": [],
+                "isAsync": true,
+                "logic": "state.value += 1;"
+                
+            },
+            {
+                "name": "decrement",
+                "$id": "REDUCER/UUID2",
+                "parameters": [],
+                "isAsync": true,
+                "logic": "state.value -= 1;"
+                
+            },{
+                "name": "incrementByAmount",
+                "$id": "REDUCER/UUID3",
+                "parameters": [
+                    {
+                        "name": "action"
+                    }
+                ],
+                "isAsync": true,
+                "logic": "state.value += action.payload;"
+                
+            }
+        ],
+        "imports": {
+            "components": [
+            ],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "@reduxjs/toolkit",
+                    "import_entity": "createSlice",
+                    "import_type" : "FULL"
+
+                }
+            ]
+        }        
+    }
+}

@@ -1,6 +1,25 @@
+from function_code_generator import FunctionCodeGenerator
+
 class HTMLGenerator:
     def __init__(self):
         pass
+
+    @staticmethod
+    def generateAttributeCode(attr, value):
+
+        # print("----")
+        # print(value)
+        if value.get('type') == 'LITERAL':
+             return f'"{value.get("value")}"'
+        elif value.get('type') == 'OBJECT':
+             return f"{{{value.get('value')}}}"
+        elif value.get('type') == 'VARIABLE':
+             return f"{{{value.get('value')}}}"
+        elif value.get('type') == "FUNCTION":
+            #  print("------------FUNCTION------------")
+            #  print(FunctionCodeGenerator.generate_function(value.get('value'), {}))
+             return f"{{{FunctionCodeGenerator.generate_function(value.get('value'), {})}}}"
+        return ""
 
     @staticmethod
     def generateHTML(config):
@@ -11,7 +30,7 @@ class HTMLGenerator:
             attributes = config.get('attributes', {})
             children = config.get('children', [])
 
-            attribute_str = ' '.join([f'{attr}="{value}"' for attr, value in attributes.items()])
+            attribute_str = ' '.join([f'{attr}={HTMLGenerator.generateAttributeCode(attr, value)}' for attr, value in attributes.items()])
             open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
             close_tag = f'</{tag_name}>'
 
@@ -56,7 +75,7 @@ class HTMLGenerator:
                     
                 """
 
-        elif config.get('operation') == "code":
+        elif config.get('type') == "code":
                 return f""" {config['code']} """
         
         return ""

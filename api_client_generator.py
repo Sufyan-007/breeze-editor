@@ -5,7 +5,7 @@ import os
 from utils.path_extractor import get_path_without_ext
 import yaml
 from utils.app_consts import APP_CONFIG_PATH
-from configurations.demo_app import react_request_code
+from configurations.creator import react_request_code
 
 from utils.file_utils import create_dir_if_not_exists, get_dir_path_from_file
 from utils.app_consts import NEW_LINE_CHAR
@@ -55,7 +55,7 @@ class GenerateAPIClient():
         
     def read_yaml(self):
 
-        with open(r"/home/yash/Documents/Projects/Breeze/breezeui/configurations/demo_app/sample_swagger.yml") as file:
+        with open(f"{APP_CONFIG_PATH}/yaml/sample_swagger.yml") as file:
             documents = yaml.full_load(file)
             paths = documents.get("paths",{})
             definitions  = documents.get("components",{})
@@ -391,13 +391,13 @@ class GenerateAPIClient():
         code = ""
         if isinstance(parameter,str):
             code = """ if(!reactStateObj.hasOwnProperty('%s')){
-                            validationErrors.push["%s is required"]
+                            validationErrors.push("%s is required")
                         }
                 """%(parameter,parameter)
         else:
             name = parameter.get("name")
             code = """ if(%s == null || %s == ''){
-                            validationErrors.push["%s is required"]
+                            validationErrors.push("%s is required")
                         }
                 """%(name,name,name)
         return code

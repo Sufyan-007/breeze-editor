@@ -3,6 +3,7 @@ import subprocess
 import os
 from utils.path_extractor import get_path_without_ext
 from html_generator import HTMLGenerator
+from import_helper import ImportHelper
 
 
 def generate_imports_code(component_config, all_config,all_store_config,all_reducer_config):
@@ -65,13 +66,15 @@ from utils.formatter import format_val
 
 class ComponentGenerator():
     app_config = None
-    components_dir = None
+    src_dir = None
 
     def __init__(self, app_config, all_comp_config,all_context_comp_config={},all_store_config={},all_reducer_config={}):
         self.app_config = app_config
         self.all_comp_config = all_comp_config
         self.all_store_config = all_store_config
         self.all_context_comp_config = all_context_comp_config
+        self.src_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
+        self.app_config['APP_SOURCE_DIR'] = self.src_dir 
         self.all_reducer_config = all_reducer_config
 
         self.components_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
@@ -93,7 +96,10 @@ class ComponentGenerator():
         # print(react_component_code)
 
         # Get the output file name from the JSON configuration
-        output_file = f"{self.components_dir}/{comp_config['containingFile']}"
+        output_file = f"{self.src_dir}/{comp_config['containingFile']}"
+
+        # print("REACTCOMPONENT")
+        # print(react_component_code)
 
         formatted_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=react_component_code, text=True)
 
@@ -162,7 +168,10 @@ class ComponentGenerator():
             other_vars_declaration = other_vars_declaration + " \n %s %s = %s(%s);"%(ovar["declarationType"],ovar.get("name"),ovar.get("className"),parameters)
         
         # functions_code = '\n\n'.join()
-        import_stats = generate_imports_code(config, all_config,all_store_config,all_reducer_config)
+
+
+        import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
+        # import_stats = generate_imports_code(config, all_config,all_store_config,all_reducer_config)
 
         print(state_vars_declaration)
         functions_definition = '\n\n'.join([f'def {func["name"]}(event):' for func in functions])

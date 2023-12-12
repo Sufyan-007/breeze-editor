@@ -2,7 +2,7 @@
 import subprocess
 import json
 from utils import formatter
-
+import pathlib
 
 # JSON input with custom configurations and default component name
 config_input = '''
@@ -25,6 +25,10 @@ from api_client_generator import GenerateAPIClient
 from routing_handler import RouteHandler
 from reducer_generator import ReducerGenerator
 from redux_store_generator import ReduxStoreGenerator
+from service_generator import ServiceHandler
+from import_helper import ImportHelper
+from dependencies_manager import DependencyManager
+from style_handler import StyleHandler
 
 class AppGenerator:
 
@@ -42,10 +46,14 @@ class AppGenerator:
 
     def read_configs(self):
         self.app_config = read_config_file(CONFIG_FILES_PATH['APP_CONFIG'])
+        self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
         self.comp_config = read_config_file(CONFIG_FILES_PATH['COMPONENT_CONFIG'])
         self.context_comp_config = read_config_file(CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG'])
         self.reducer_config = read_config_file(CONFIG_FILES_PATH['REDUCER_CONFIG'])
         self.redux_store_config = read_config_file(CONFIG_FILES_PATH['REDUX_STORE_CONFIG'])
+        self.app_config['MAPPINGS'] = {}
+        self.app_config['CSS_CONFIG'] = read_config_file(CONFIG_FILES_PATH['CSS_CONFIG'])
+        self.prepare_path_mappings() 
 
         print(self.comp_config)
         self.routing_config = read_config_file(CONFIG_FILES_PATH['ROUTING_CONFIG'])
@@ -73,10 +81,57 @@ class AppGenerator:
 
         # Write All reducer
         self.write_redux_store()
+        # Write css
+        self.write_style_files()
+
+        # Write All components
+        self.write_components()
+
+        # Write All services
+        self.write_services()
+
+        # Write All reducer
+        self.write_reducers()
+        # # Write All reducer
+        # self.write_redux_store()
 
         # Generate API client from yaml
         self.generate_api_client()
 
+
+
+    def write_services(self):
+        # imp_helper = ImportHelper()
+        service_handler = ServiceHandler(self.app_config)
+        service_handler.generate_services_code()
+        # pass
+
+    # Handle generation of style related files
+    def write_style_files(self):
+        StyleHandler.generate_style_code(self.app_config)
+        
+
+    def prepare_path_mappings(self):
+        service_paths = self.read_all_services_path()
+        self.app_config['MAPPINGS']['SERVICES'] = {}
+
+        for service_path in service_paths:
+            service_config = read_file_json(service_path)
+            print(service_config['$id'])
+            self.app_config['MAPPINGS']['SERVICES'][service_config['$id']] = service_config['path']
+
+        
+    def read_all_services_path(self):
+        print("READ")
+        service_config_path = f"{APP_CONFIG_PATH}/services"
+
+        all_services_path = pathlib.Path(service_config_path)
+
+        all_services_path = list(all_services_path.rglob("*.json"))
+
+        print(all_services_path)
+
+        return all_services_path
 
 
     def create_react_app(self):
@@ -87,30 +142,30 @@ class AppGenerator:
 
 
     def modify_main_component(self):
-        # default_comp_config = self.comp_config[self.app_config['defaultComponent']]
-        # with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-        #     component_code = f"""
-        #         import React from 'react';
-        #         {gen_single_import(default_comp_config['name'], default_comp_config['containingFile'])}
+        default_comp_config = self.comp_config[self.app_config['defaultComponent']]
+        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
+            component_code = f"""
+                import React from 'react';
+                {gen_single_import(default_comp_config['name'], default_comp_config['containingFile'])}
 
-        #         function App() {{
-        #             return (
-        #                 <{default_comp_config['name']} />
-        #             );
-        #         }}
+                function App() {{
+                    return (
+                        <{default_comp_config['name']} />
+                    );
+                }}
 
-        #         export default App;
-        #     """
+                export default App;
+            """
 
-        #     formatted_code = formatter.format_by_prettier(component_code)
-        #     component_file.write(formatted_code)
+            formatted_code = formatter.format_by_prettier(component_code)
+            component_file.write(formatted_code)
         route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
-        # react_code = route_handler.handle_routing_code()
-        # print("------")
-        # print(react_code)
-        # with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-        #     formatted_code = formatter.format_by_prettier(react_code)
-        #     component_file.write(formatted_code)        
+        react_code = route_handler.handle_routing_code()
+        print("------")
+        print(react_code)
+        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
+            formatted_code = formatter.format_by_prettier(react_code)
+            component_file.write(formatted_code)        
 
     def setup_base_path_for_comps(self):
         with open(f"{self.app_config['path']}/{self.app_config['name']}/jsconfig.json", "w+") as jsconfig_file:
@@ -141,6 +196,11 @@ class AppGenerator:
         write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
 
         subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
+
+        if package_json['dependencies'].get('bootstrap') is not None:
+            DependencyManager().handle_bootstrap(app_config=self.app_config)
+
+
     def write_components(self):
         comp_generator = ComponentGenerator(all_comp_config=self.comp_config, app_config=self.app_config,all_context_comp_config=self.context_comp_config,all_store_config=self.redux_store_config,all_reducer_config=self.reducer_config)
         comp_generator.write_all_components()

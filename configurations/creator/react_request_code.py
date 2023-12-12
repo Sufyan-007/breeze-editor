@@ -1,6 +1,133 @@
+
 REQUEST = """
+
+// ready to use
+export class ApiError extends Error {
+    constructor(request, response, message) {
+      super(message)
+  
+      this.name = "ApiError"
+      this.url = response.url
+      this.status = response.status
+      this.statusText = response.statusText
+      this.body = response.body
+      this.request = request
+    }
+  }
+  /* generated using openapi-typescript-codegen -- do no edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export class CancelError extends Error {
+    constructor(message) {
+      super(message)
+      this.name = "CancelError"
+    }
+  
+    get isCancelled() {
+      return true
+    }
+  }
+  
+export class CancelablePromise {
+  #isResolved
+  #isRejected
+  #isCancelled
+  #cancelHandlers
+  #promise
+  #resolve
+  #reject
+
+  constructor(executor) {
+    this.#isResolved = false
+    this.#isRejected = false
+    this.#isCancelled = false
+    this.#cancelHandlers = []
+    this.#promise = new Promise((resolve, reject) => {
+      this.#resolve = resolve
+      this.#reject = reject
+
+      const onResolve = value => {
+        if (this.#isResolved || this.#isRejected || this.#isCancelled) {
+          return
+        }
+        this.#isResolved = true
+        this.#resolve?.(value)
+      }
+
+      const onReject = reason => {
+        if (this.#isResolved || this.#isRejected || this.#isCancelled) {
+          return
+        }
+        this.#isRejected = true
+        this.#reject?.(reason)
+      }
+
+      const onCancel = cancelHandler => {
+        if (this.#isResolved || this.#isRejected || this.#isCancelled) {
+          return
+        }
+        this.#cancelHandlers.push(cancelHandler)
+      }
+
+      Object.defineProperty(onCancel, "isResolved", {
+        get: () => this.#isResolved
+      })
+
+      Object.defineProperty(onCancel, "isRejected", {
+        get: () => this.#isRejected
+      })
+
+      Object.defineProperty(onCancel, "isCancelled", {
+        get: () => this.#isCancelled
+      })
+
+      return executor(onResolve, onReject, onCancel)
+    })
+  }
+
+  get [Symbol.toStringTag]() {
+    return "Cancellable Promise"
+  }
+
+  then(onFulfilled, onRejected) {
+    return this.#promise.then(onFulfilled, onRejected)
+  }
+
+  catch(onRejected) {
+    return this.#promise.catch(onRejected)
+  }
+
+  finally(onFinally) {
+    return this.#promise.finally(onFinally)
+  }
+
+  cancel() {
+    if (this.#isResolved || this.#isRejected || this.#isCancelled) {
+      return
+    }
+    this.#isCancelled = true
+    if (this.#cancelHandlers.length) {
+      try {
+        for (const cancelHandler of this.#cancelHandlers) {
+          cancelHandler()
+        }
+      } catch (error) {
+        console.warn("Cancellation threw an error", error)
+        return
+      }
+    }
+    this.#cancelHandlers.length = 0
+    this.#reject?.(new CancelError("Request aborted"))
+  }
+
+  get isCancelled() {
+    return this.#isCancelled
+  }
+}
+  
   // ready to use
-export const isDefined = value => {
+  export const isDefined = value => {
     return value !== undefined && value !== null
   }
 
@@ -78,10 +205,18 @@ export const isDefined = value => {
   }
   
   const getUrl = ( options) => {
-  
-    const url = `${path}`
+    
+    let url = `https://jsonplaceholder.typicode.com${options.url}`
     if (options.query) {
       return `${url}${getQueryString(options.query)}`
+    }
+    if (options.path) {
+      let obj = options.path;
+      for(let key in obj){
+        url = url.replace(`{${key}}`,obj[key])
+      } 
+      
+      return `${url}`
     }
     return url
   }
@@ -325,4 +460,5 @@ export const request = ( options) => {
     })
   }
   
+
 """
