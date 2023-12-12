@@ -5,7 +5,7 @@ class ImportHelper:
         pass
 
     @staticmethod
-    def generate_imports_code(component_config, all_config,all_store_config, app_configs={}):
+    def generate_imports_code(component_config, all_config,all_store_config, all_reducer_config, app_configs={}):
         # print(component_config)
         imported_components = component_config['imports'].get('components',[])
         imported_store = component_config['imports'].get('store',[]) 
@@ -39,6 +39,16 @@ class ImportHelper:
                 
                 import_statements.append(import_statement)
             
+            elif imp['TYPE'] == "REDUCER_FUNCTION":
+                related_reducer = all_reducer_config.get(imp["from"])
+                path = get_path_without_ext(related_reducer['containingFile'])
+
+                if imp['import_entity'] == 'SELECTOR':
+                    import_statement = "import  {select%s} from '%s';"%(related_reducer["stateVarName"],path)
+                else:
+                    import_statement = f'import  {{{imp["import_entity"]}}} from \'{path}\' ;'
+                
+                import_statements.append(import_statement)
             elif imp['TYPE'] == "SERVICE":
                 print("---SERVICE TYPE****")
                 print(app_configs['MAPPINGS']['SERVICES'][imp["from"]])
