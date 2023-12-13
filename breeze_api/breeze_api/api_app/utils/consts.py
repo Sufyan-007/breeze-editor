@@ -10,6 +10,6 @@ CONFIG_FILES_PATH = {
 
 }
 
-APP_CONFIG_PATH = "/home/raj/Desktop/bridge/processor/bridge_ui_server/breezeui/configurations"
+APP_CONFIG_PATH = "/home/yash/Documents/Projects/Breeze/breezeui/configurations"
 
 NEW_LINE_CHAR = "\n"

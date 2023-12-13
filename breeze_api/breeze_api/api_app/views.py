@@ -39,12 +39,9 @@ class SwaggerSchemaView(APIView):
         schema = generator.get_schema(request=request)
 
         return Response(schema)
+@method_decorator(csrf_exempt, name='dispatch')
 class ConfigWriter(APIView):
     
-    @method_decorator(name='post',decorator= swagger_auto_schema(
-        request_body=ConfigWriterSerializer ,
-        responses={200: FETCH_CAR_SUCCESS} 
-    ))
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
         app_config_writer = AppConfigWriter()

@@ -78,12 +78,14 @@ class AppGenerator:
         # Modify main component (App.js)
         self.modify_main_component()
 
-        # # Write All components
-        # self.write_components()
+        # Write All components
+        self.write_components()
 
-        # # Write All reducer
-        # self.write_reducers()
+        # Write All reducer
+        self.write_reducers()
 
+        # Write All reducer
+        self.write_redux_store()
         # Write css
         self.write_style_files()
 
@@ -145,23 +147,23 @@ class AppGenerator:
 
 
     def modify_main_component(self):
-        # default_comp_config = self.comp_config[self.app_config['defaultComponent']]
-        # with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-        #     component_code = f"""
-        #         import React from 'react';
-        #         {gen_single_import(default_comp_config['name'], default_comp_config['containingFile'])}
+        default_comp_config = self.comp_config[self.app_config['defaultComponent']]
+        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
+            component_code = f"""
+                import React from 'react';
+                {gen_single_import(default_comp_config['name'], default_comp_config['containingFile'])}
 
-        #         function App() {{
-        #             return (
-        #                 <{default_comp_config['name']} />
-        #             );
-        #         }}
+                function App() {{
+                    return (
+                        <{default_comp_config['name']} />
+                    );
+                }}
 
-        #         export default App;
-        #     """
+                export default App;
+            """
 
-        #     formatted_code = formatter.format_by_prettier(component_code)
-        #     component_file.write(formatted_code)
+            formatted_code = formatter.format_by_prettier(component_code)
+            component_file.write(formatted_code)
         route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
         react_code = route_handler.handle_routing_code()
         print("------")
@@ -207,7 +209,7 @@ class AppGenerator:
     def write_components(self):
         comp_generator = ComponentGenerator(all_comp_config=self.comp_config, app_config=self.app_config,all_context_comp_config=self.context_comp_config,all_store_config=self.redux_store_config,all_reducer_config=self.reducer_config)
         comp_generator.write_all_components()
-        comp_generator.write_all_contexts()
+        # comp_generator.write_all_contexts()
 
     def write_reducers(self):
         reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)

@@ -51,8 +51,7 @@ class ImportHelper:
                 import_statements.append(import_statement)
             elif imp['TYPE'] == "SERVICE":
                 print("---SERVICE TYPE****")
-                print(app_configs['MAPPINGS']['SERVICES'][imp["from"]])
-                import_path = app_configs['MAPPINGS']['SERVICES'][imp["from"]]
+                import_path = imp["from"]
                 import_statement = f'import {{ {imp["import_entity"]} }} from \'{import_path}\' ;'
 
                 import_statements.append(import_statement)

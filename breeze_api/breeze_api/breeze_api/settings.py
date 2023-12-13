@@ -25,7 +25,6 @@ SECRET_KEY = 'django-insecure-hh4qly@tb_ebux-dwzbzxikco5+!%=0$phbk9^%%w-@3(1hfr^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -40,9 +39,21 @@ INSTALLED_APPS = [
     'rest_framework',
     'api_app',
     'rest_framework_swagger',       # Swagger 
-    'drf_yasg'                      # Yet Another Swagger generator
+    'drf_yasg',
+    "corsheaders"
+                      # Yet Another Swagger generator
+]
+CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = [
+    "127.0.0.1", 
+    "localhost"
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1", 
+    "http://localhost"
+]
+CORS_ALLOW_CREDENTIALS = False
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -52,6 +63,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware'
 ]
 
 ROOT_URLCONF = 'breeze_api.urls'

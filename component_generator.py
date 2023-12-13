@@ -122,7 +122,7 @@ class ComponentGenerator():
 
         name = config['name']
         state_vars = config['stateVars']
-        other_vars = config['otherVars']
+        other_vars = config.get('otherVars',[])
         props_vars = config['propsVars']
         html_config = config['html']
         html_code = HTMLGenerator.generateHTML(html_config)
@@ -205,7 +205,7 @@ class ComponentGenerator():
             }
 
             export default %s;
-        """%(import_stats,name,state_vars_declaration,props_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
+        """%(import_stats,name,state_vars_declaration,other_vars_declaration,props_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
 
         return react_component
 

@@ -38,7 +38,7 @@ class AppConfigWriter:
 
         app_config_dir = f"{APP_CONFIG_PATH}/{app_config['name']}"
 
-        comp_config = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
+        comp_config = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
 
         write_file(f"{comp_config}.json", json.dumps(main_comp_config))
 
@@ -65,6 +65,8 @@ class AppConfigWriter:
 
         # write configuration
         write_file(f"{app_config_path}.json", json.dumps(app_current_config))
+
+        
 
         self.write_basic_main_comp_config(app_current_config)
 
