@@ -9,8 +9,7 @@ class GenerateProject:
         
         print("***********************************")
         print("RUNNING PROJECT GENERATION SCRIPT")
-        subprocess.run(["npx", "create-react-app", project_config['name'], "--template",
-                    "cra-template", "--use-npm"], text=True, input=app_config_dump, cwd=self.app_config['path'])
+        subprocess.run(["python3", "/home/raj/Desktop/bridge/processor/bridge_ui_server/breezeui/app_generator.py", project_config['name']])
 
         print("PROJECT GENERATION SCRIPT COMPLETED")
         print("***********************************")

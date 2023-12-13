@@ -2,6 +2,7 @@ from ..utils.consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
 from ..utils.file_helper import read_json_file, write_file, create_dir_if_not_exists
 import json
 from ..utils.request_code import REQUEST
+from generate_project import GenerateProject
 
 class AppConfigWriter:
     def __init__(self):
@@ -73,3 +74,6 @@ class AppConfigWriter:
         self.write_basic_main_comp_config(app_current_config)
 
         self.write_basic_config_files(app_current_config)
+
+        GenerateProject.generate_project(app_current_config)
+
