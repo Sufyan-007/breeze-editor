@@ -11,8 +11,16 @@ class AppConfigWriter:
     def write_basic_config_files(self, app_config):
         app_config_dir = f"{APP_CONFIG_PATH}/{app_config['name']}"
 
+        basic_routing_config = {
+            "routes": [
+                {
+                    "path": "/",
+                    "component": f"'{app_config['defaultComponent']}'"
+                }
+            ]
+        }
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG']}.json", json.dumps({}))
-        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", json.dumps({}))
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", json.dumps(basic_routing_config))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUCER_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUX_STORE_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CSS_CONFIG']}.json", json.dumps({}))
@@ -63,6 +71,8 @@ class AppConfigWriter:
 
 
         app_current_config = data
+
+        app_current_config['components_src_dir'] = 'src'
 
         print(app_current_config)
 
