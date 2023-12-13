@@ -4,7 +4,6 @@ import subprocess
 import os
 from utils.path_extractor import get_path_without_ext
 import yaml
-from utils.app_consts import APP_CONFIG_PATH
 from configurations.demo_app import react_request_code
 
 from utils.file_utils import create_dir_if_not_exists, get_dir_path_from_file

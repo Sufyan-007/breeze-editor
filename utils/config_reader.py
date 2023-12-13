@@ -1,9 +1,8 @@
 import json
-from .app_consts import APP_CONFIG_PATH
 
 
-def read_config_file(file_path, ext=".json"):
-    config_file = open(f"{APP_CONFIG_PATH}/{file_path}{ext}")
+def read_config_file(config_path, file_path, ext=".json"):
+    config_file = open(f"{config_path}/{file_path}{ext}")
     json_config = json.load(config_file)
     return json_config
 

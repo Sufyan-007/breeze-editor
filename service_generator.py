@@ -9,7 +9,7 @@ import pathlib
 # list(desktop.rglob("*"))
 
 
-from utils.app_consts import APP_CONFIG_PATH
+# from utils.app_consts import APP_CONFIG_PATH
 from function_code_generator import FunctionCodeGenerator
 from utils.config_reader import read_file_json
 from import_helper import ImportHelper
@@ -27,7 +27,7 @@ class ServiceHandler():
 
     def read_all_services_path(self):
         print("READ")
-        service_config_path = f"{APP_CONFIG_PATH}/services"
+        service_config_path = f"{self.app_config['APP_CONFIG_PATH']}/services"
 
         all_services_path = pathlib.Path(service_config_path)
 

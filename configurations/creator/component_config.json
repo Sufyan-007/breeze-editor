@@ -48,6 +48,7 @@
                     "author": "",
                     "default_component": "",
                     "strictMode": "FALSE",
+                    "path" : "",
                     "component_src_dir": "src",
                     "dependencies": []
                 },
@@ -456,6 +457,82 @@
                                                 {
                                                     "type": "text",
                                                     "text": "Default Component Name"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "input-container ic2"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "input",
+                                            "attributes": {
+                                                "type": {
+                                                    "type": "LITERAL",
+                                                    "value": "text"
+                                                },
+                                                "name": {
+                                                    "type": "LITERAL",
+                                                    "value": "path"
+                                                },
+                                                "id": {
+                                                    "type": "LITERAL",
+                                                    "value": "path"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "input"
+                                                },
+                                                "placeholder": {
+                                                    "type": "LITERAL",
+                                                    "value": " "
+                                                },
+                                                "onChange": {
+                                                    "type": "FUNCTION",
+                                                    "value": {
+                                                        "name": "",
+                                                        "$id": "FUNCTIONS/A1",
+                                                        "isAnonymous": true,
+                                                        "parameters": {
+                                                            "list": [
+                                                                {
+                                                                    "name": "event"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "isAsync": false,
+                                                        "body": "handleInputChange('path', event.target.value) ;"
+                                                    }
+                                                }
+                                            },
+                                            "children": []
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "label",
+                                            "attributes": {
+                                                "htmlFor": {
+                                                    "type": "LITERAL",
+                                                    "value": "path"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "placeholder"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Project Path"
                                                 }
                                             ]
                                         }

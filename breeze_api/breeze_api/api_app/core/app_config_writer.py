@@ -5,7 +5,15 @@ import json
 class AppConfigWriter:
     def __init__(self):
         pass
+    
+    def write_basic_config_files(self, app_config):
+        app_config_dir = f"{APP_CONFIG_PATH}/{app_config['name']}"
 
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG']}.json", json.dumps({}))
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", json.dumps({}))
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUCER_CONFIG']}.json", json.dumps({}))
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUX_STORE_CONFIG']}.json", json.dumps({}))
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CSS_CONFIG']}.json", json.dumps({}))
     
     def write_basic_main_comp_config(self, app_config):
         main_comp_config = {
@@ -59,3 +67,5 @@ class AppConfigWriter:
         write_file(f"{app_config_path}.json", json.dumps(app_current_config))
 
         self.write_basic_main_comp_config(app_current_config)
+
+        self.write_basic_config_files(app_current_config)

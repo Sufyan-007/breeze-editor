@@ -1,4 +1,5 @@
-APP_CONFIG_PATH = "/home/yash/Documents/Projects/Breeze/breezeui/configurations/demo_app"
+CONFIG_PATH = "/home/raj/Desktop/bridge/processor/bridge_ui_server/breezeui/configurations"
+
 
 CONFIG_FILES_PATH = {
     'APP_CONFIG' : 'app_basic_config',

@@ -18,7 +18,7 @@ config = json.loads(config_input)
 project_name = config["name"]
 
 from utils.config_reader import read_config_file, read_file_json, write_file
-from utils.app_consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
+from utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from component_generator import ComponentGenerator, gen_single_import
 from api_client_generator import GenerateAPIClient
 
@@ -29,6 +29,10 @@ from service_generator import ServiceHandler
 from import_helper import ImportHelper
 from dependencies_manager import DependencyManager
 from style_handler import StyleHandler
+import sys
+
+APP_CONFIG_PATH =  f"{CONFIG_PATH}/{sys.argv[1]}"
+print("-------------", APP_CONFIG_PATH)
 
 class AppGenerator:
 
@@ -45,18 +49,19 @@ class AppGenerator:
         self.read_configs()
 
     def read_configs(self):
-        self.app_config = read_config_file(CONFIG_FILES_PATH['APP_CONFIG'])
+        self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
+        self.app_config['APP_CONFIG_PATH'] = APP_CONFIG_PATH
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
-        self.comp_config = read_config_file(CONFIG_FILES_PATH['COMPONENT_CONFIG'])
-        self.context_comp_config = read_config_file(CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG'])
-        self.reducer_config = read_config_file(CONFIG_FILES_PATH['REDUCER_CONFIG'])
-        self.redux_store_config = read_config_file(CONFIG_FILES_PATH['REDUX_STORE_CONFIG'])
+        self.comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
+        self.context_comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG'])
+        self.reducer_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['REDUCER_CONFIG'])
+        self.redux_store_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['REDUX_STORE_CONFIG'])
         self.app_config['MAPPINGS'] = {}
-        self.app_config['CSS_CONFIG'] = read_config_file(CONFIG_FILES_PATH['CSS_CONFIG'])
+        self.app_config['CSS_CONFIG'] = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CSS_CONFIG'])
         self.prepare_path_mappings() 
 
         print(self.comp_config)
-        self.routing_config = read_config_file(CONFIG_FILES_PATH['ROUTING_CONFIG'])
+        self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
 
     def generate_app(self):
         project_name = self.app_config['name']
