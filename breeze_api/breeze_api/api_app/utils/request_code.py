@@ -1,6 +1,6 @@
 
 REQUEST = """
-    REQUEST = """"""
+REQUEST = \"\"\"
 // ready to use
 export class ApiError extends Error {
     constructor(request, response, message) {
@@ -461,4 +461,4 @@ export const request = ( options) => {
   }
   
 
-"""""" """
+\"\"\" """

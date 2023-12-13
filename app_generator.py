@@ -101,7 +101,7 @@ class AppGenerator:
         # self.write_redux_store()
 
         # Generate API client from yaml
-        self.generate_api_client()
+        # self.generate_api_client()
 
 
 

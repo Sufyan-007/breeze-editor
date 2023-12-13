@@ -2,7 +2,7 @@ from ..utils.consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
 from ..utils.file_helper import read_json_file, write_file, create_dir_if_not_exists
 import json
 from ..utils.request_code import REQUEST
-from generate_project import GenerateProject
+from .generate_project import GenerateProject
 
 class AppConfigWriter:
     def __init__(self):
@@ -15,7 +15,7 @@ class AppConfigWriter:
             "routes": [
                 {
                     "path": "/",
-                    "component": f"'{app_config['defaultComponent']}'"
+                    "component": f"{app_config['defaultComponent']}"
                 }
             ]
         }
@@ -35,7 +35,19 @@ class AppConfigWriter:
                 "propsVars": [],
                 "otherVars" : [],
                 "functions": [],
-                "html": {},
+                "html": {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "text",
+                                            "text": "This is main page"
+                                        }
+                                    ]
+                                },
                 "wrapper_store": None,
                 "imports": {
                     "components": [
@@ -75,7 +87,12 @@ class AppConfigWriter:
         app_current_config['components_src_dir'] = 'src'
 
         print(app_current_config)
+        app_current_config["dependencies"] = {
+            "react-router-dom": "*",
+            "bootstrap": "^5.3.2"
 
+        }
+        
         # write configuration
         write_file(f"{app_config_path}.json", json.dumps(app_current_config))
 
