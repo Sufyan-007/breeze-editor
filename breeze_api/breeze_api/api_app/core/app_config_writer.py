@@ -1,6 +1,7 @@
 from ..utils.consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
 from ..utils.file_helper import read_json_file, write_file, create_dir_if_not_exists
 import json
+from ..utils.request_code import REQUEST
 
 class AppConfigWriter:
     def __init__(self):
@@ -14,7 +15,8 @@ class AppConfigWriter:
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUCER_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUX_STORE_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CSS_CONFIG']}.json", json.dumps({}))
-    
+        write_file(f"{app_config_dir}/react_request_code.py", REQUEST)
+
     def write_basic_main_comp_config(self, app_config):
         main_comp_config = {
             app_config['defaultComponent'] : {
