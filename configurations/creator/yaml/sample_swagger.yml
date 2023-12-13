@@ -17,10 +17,25 @@ tags:
     description: Sample posts.
   - name: Comment
     description: Comments from posts.
+  - name: Config
+    description: Comments from posts.
   
 paths:
   # Note: When adding an endpoint, make sure you also add it in the `groups` section, in the end of this file,
   # under the appropriate group
+  /breeze/config-writer/:
+    post:
+      operationId: saveAppConfiguration
+      summary: Crete basic app config.
+      tags : 
+        - Config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppConfigDetails"
+          
   /posts:
     post:
       operationId: createPost
@@ -132,7 +147,20 @@ components:
           $ref: "#/components/schemas/Error"
       required:
         - error
-
+    AppConfigDetails:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        author:
+          type: string
+        defaultComponent:
+          type: string
+        dependencies:
+          type: string 
+  
     CommentDetails:
       type: object
       properties:

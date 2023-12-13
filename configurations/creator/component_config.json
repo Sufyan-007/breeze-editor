@@ -43,10 +43,10 @@
                 "name": "projectData",
                 "type": "OBJECT",
                 "defaultValue": {
-                    "project_name": "",
-                    "desc": "",
+                    "name": "",
+                    "description": "",
                     "author": "",
-                    "default_component": "",
+                    "defaultComponent": "",
                     "strictMode": "FALSE",
                     "component_src_dir": "src",
                     "dependencies": []
@@ -87,8 +87,8 @@
                 "parameters": {
                     "list": []
                 },
-                "isAsync": false,
-                "body": "console.log(projectData); \n setIsSaving(true);\n setTimeout(() => { setIsSaving(false); } , 2000) ; "
+                "isAsync": true,
+                "body": "console.log(projectData); \n setIsSaving(true);\n await saveAppConfiguration(projectData); \n setIsSaving(false); "
             },
             {
                 "name": "getPostFun",
@@ -187,11 +187,11 @@
                                                 },
                                                 "name": {
                                                     "type": "LITERAL",
-                                                    "value": "project_name"
+                                                    "value": "name"
                                                 },
                                                 "id": {
                                                     "type": "LITERAL",
-                                                    "value": "project_name"
+                                                    "value": "name"
                                                 },
                                                 "className": {
                                                     "type": "LITERAL",
@@ -215,7 +215,7 @@
                                                             ]
                                                         },
                                                         "isAsync": false,
-                                                        "body": "handleInputChange('project_name', event.target.value) ;"
+                                                        "body": "handleInputChange('name', event.target.value) ;"
                                                     }
                                                 }
                                             },
@@ -227,7 +227,7 @@
                                             "attributes": {
                                                 "htmlFor": {
                                                     "type": "LITERAL",
-                                                    "value": "project_name"
+                                                    "value": "name"
                                                 },
                                                 "className": {
                                                     "type": "LITERAL",
@@ -259,11 +259,11 @@
                                             "attributes": {
                                                 "name": {
                                                     "type": "LITERAL",
-                                                    "value": "desc"
+                                                    "value": "description"
                                                 },
                                                 "id": {
                                                     "type": "LITERAL",
-                                                    "value": "desc"
+                                                    "value": "description"
                                                 },
                                                 "cols": {
                                                     "type": "LITERAL",
@@ -295,7 +295,7 @@
                                                             ]
                                                         },
                                                         "isAsync": false,
-                                                        "body": "handleInputChange('desc', event.target.value) ;"
+                                                        "body": "handleInputChange('description', event.target.value) ;"
                                                     }
                                                 }
                                             },
@@ -307,7 +307,7 @@
                                             "attributes": {
                                                 "htmlFor": {
                                                     "type": "LITERAL",
-                                                    "value": "desc"
+                                                    "value": "description"
                                                 },
                                                 "className": {
                                                     "type": "LITERAL",
@@ -415,11 +415,11 @@
                                             "attributes": {
                                                 "name": {
                                                     "type": "LITERAL",
-                                                    "value": "default_component"
+                                                    "value": "defaultComponent"
                                                 },
                                                 "id": {
                                                     "type": "LITERAL",
-                                                    "value": "default_component"
+                                                    "value": "defaultComponent"
                                                 },
                                                 "className": {
                                                     "type": "LITERAL",
@@ -443,7 +443,7 @@
                                                             ]
                                                         },
                                                         "isAsync": false,
-                                                        "body": "handleInputChange('default_component', event.target.value) ;"
+                                                        "body": "handleInputChange('defaultComponent', event.target.value) ;"
                                                     }
                                                 }
                                             },
@@ -455,7 +455,7 @@
                                             "attributes": {
                                                 "htmlFor": {
                                                     "type": "LITERAL",
-                                                    "value": "default_component"
+                                                    "value": "defaultComponent"
                                                 },
                                                 "className": {
                                                     "type": "LITERAL",
@@ -466,6 +466,46 @@
                                                 {
                                                     "type": "text",
                                                     "text": "Default Component Name"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "label",
+                                            "attributes": {
+                                                "htmlFor": {
+                                                    "type": "LITERAL",
+                                                    "value": "components_src_dir"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "placeholder"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Component Source Ddirectory"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "label",
+                                            "attributes": {
+                                                "htmlFor": {
+                                                    "type": "LITERAL",
+                                                    "value": "path"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "placeholder"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Project path"
                                                 }
                                             ]
                                         }
@@ -621,6 +661,12 @@
                     "TYPE" : "SERVICE",
                     "from" : "service/PostService.js",
                     "import_entity": "getPost",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE" : "SERVICE",
+                    "from" : "service/ConfigService.js",
+                    "import_entity": "saveAppConfiguration",
                     "import_type" : "SINGLE"
                 }
             ],
