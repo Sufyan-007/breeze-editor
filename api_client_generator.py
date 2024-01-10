@@ -95,12 +95,12 @@ class GenerateAPIClient():
                 self.write_file(folder_name,filename,content)
 
 
-            for definition in definitions:
-                data_model = self.generate_data_model(definitions[definition],definitions)
-                s = json.dumps(remove_circular_refs(data_model))
-                content = "const %s = %s; export default %s;"%(definition,s,definition)
-                filename = definition+".js"
-                self.write_file("model",filename,content)
+            # for definition in definitions:
+            #     data_model = self.generate_data_model(definitions[definition],definitions)
+            #     s = json.dumps(remove_circular_refs(data_model))
+            #     content = "const %s = %s; export default %s;"%(definition,s,definition)
+            #     filename = definition+".js"
+            #     self.write_file("model",filename,content)
     
     def write_file(self,folder,filename,content):
         path =f"{self.app_config['path']}/{self.app_config['name']}/src/{folder}/"
@@ -187,6 +187,7 @@ class GenerateAPIClient():
             paths = []
             definition =  None
             print(obj)
+            ref=None
             if "requestBody" in obj:
                 requestBody = obj.get("requestBody")
                 content = requestBody.get("content",{})
@@ -201,17 +202,24 @@ class GenerateAPIClient():
                         is_array = True
                         items = schema["items"]
                         ref = items["$ref"]
-                        if "reactStateObjArray" not in func_args:
-                            func_args.append("reactStateObjArray")
+                        # if "reactStateObjArray" not in func_args:
+                        #     func_args.append("reactStateObjArray")
                 
                     else:
                         ref = app_json["schema"]["$ref"]
-                        if "reactStateObj" not in func_args:
-                            func_args.append("reactStateObj")
+                        # if "reactStateObj" not in func_args:
+                        #     func_args.append("reactStateObj")
                         
                     ref = ref.split("/")[-1]
+                    if ref not in func_args:
+                        func_args.append(ref)
+                        
                     model = definitions[ref]
-                    resp = self.generate_request_body_model(is_array,model,definitions)
+                    resp = self.generate_request_body_model(is_array,ref,model,definitions)
+                    tem =self.extract_schema_and_generate_js_class(model,definitions,ref)
+                    filename = ref+".js"
+                    self.write_file("model",filename,tem)
+    
                     req_body = resp["code"]
                     required_props = resp["required_props"]
                     for prop in required_props: 
@@ -255,24 +263,25 @@ class GenerateAPIClient():
                 elif parameter.get("in") == "body":
                     api_options_keys.append("body")
                     if "schema" in parameter:
-                        ref = None
                         is_array = False
                         schema = parameter["schema"]
                         if "type" in schema and schema["type"] == "array":
                             is_array = True
                             items = schema["items"]
                             ref = items["$ref"]
-                            if "reactStateObjArray" not in func_args:
-                                func_args.append("reactStateObjArray")
+                            # if "reactStateObjArray" not in func_args:
+                            #     func_args.append("reactStateObjArray")
                     
                         else:
                             ref = parameter["schema"]["$ref"]
-                            if "reactStateObj" not in func_args:
-                                func_args.append("reactStateObj")
-                            
+                            # if "reactStateObj" not in func_args:
+                            #     func_args.append(ref)
+                        if ref not in func_args:
+                            func_args.append(ref)
+                      
                     ref = ref.split("/")[-1]
                     model = definitions[ref]
-                    resp = self.generate_request_body_model(is_array,model,definitions)
+                    resp = self.generate_request_body_model(is_array,ref,model,definitions)
                     req_body = resp["code"]
                     required_props = resp["required_props"]
                     for prop in required_props: 
@@ -287,7 +296,7 @@ class GenerateAPIClient():
             react_code = react_code.replace("{FUNC_NAME}",func_name)
             required_params_code = []
             for para in required_params:
-                required_params_code.append(self.generate_code_for_required_params(para))
+                required_params_code.append(self.generate_code_for_required_params(ref,para))
             if len(required_params_code)>0:
                 required_validation_code = """
                     let validationErrors = [];
@@ -331,7 +340,7 @@ class GenerateAPIClient():
 
             return react_code
 
-    def generate_request_body_model(self,is_array,definition,definitions):
+    def generate_request_body_model(self,is_array,ref,definition,definitions):
         resp = {
             "code" : None,
             "required_props" : []
@@ -346,15 +355,15 @@ class GenerateAPIClient():
             for key,property in properties.items():
                 if "type" in property:
                     if property.get("type") in PRIMARY_DATA_TYPES:
-                        body[key] = f'reactStateObj.{key}'
+                        body[key] = f'{ref}.{key}'
                     elif property.get("type") == "array":
                         items = property.get("items")
-                        body[key] = f'reactStateObj.{key}'
+                        body[key] = f'{ref}.{key}'
                 elif "$ref" in property :
                     ref = property.get("$ref")    
-                    body[key] = f'reactStateObj.{key}'
+                    body[key] = f'{ref}.{key}'
             for i in body:
-                pairs.append(" '%s' : reactStateObj.%s"%(i,i))
+                pairs.append(" '%s' : %s.%s"%(i,ref,i))
             reactStateObj ="{"+",".join(pairs)+"}"
             resp["code"] = reactStateObj
             return resp
@@ -386,13 +395,13 @@ class GenerateAPIClient():
             resp["code"]= s1
             return resp
 
-    def generate_code_for_required_params(self,parameter):
+    def generate_code_for_required_params(self,ref,parameter):
         code = ""
         if isinstance(parameter,str):
-            code = """ if(!reactStateObj.hasOwnProperty('%s')){
+            code = """ if(!%s.hasOwnProperty('%s')){
                             validationErrors.push("%s is required")
                         }
-                """%(parameter,parameter)
+                """%(ref,parameter,parameter)
         else:
             name = parameter.get("name")
             code = """ if(%s == null || %s == ''){
@@ -400,3 +409,76 @@ class GenerateAPIClient():
                         }
                 """%(name,name,name)
         return code
+
+    def extract_schema_and_generate_js_class(self,schema,all_schemas, schema_name):
+    
+        file_content = """"""
+        class_name = schema_name.capitalize()
+        imports = self.get_imports(schema)
+        print('imports', imports)
+        for import_name in imports:
+            file_content = "\n" +f"import {import_name} from './{import_name}'\n"
+        file_content += "\n" + f"export default class {class_name} {{\n"
+        file_content += "\n" + f"    constructor() {{\n"
+        for property_name, property_schema in schema['properties'].items():
+            # print(property_schema, "ps")
+            property_type = self._translate_js_type(property_schema['type'])
+            if property_type in ('object', 'Array') and property_schema.get('items', {}).get('$ref'):
+                dependency_schema_name = property_schema.get('items', {})['$ref'].split('/')[-1]
+                file_content += "\n" +f"        this._{property_name} = new {dependency_schema_name.capitalize()}();\n"
+            elif property_type == 'array' and property_schema.get('items', {}).get('$ref'):
+                # Skip generation for arrays with refs
+                pass
+            else:
+                file_content += "\n" +f"        this._{property_name} = '';\n"
+        file_content += "\n" +f"    }}\n"
+        # Write the rest of the class properties and methods here, within the `with` block
+        for property_name, property_schema in schema['properties'].items():
+                property_type = self._translate_js_type(property_schema['type'])
+                if property_type == 'Array' and property_schema.get('items', {}).get('$ref'):
+                    dependency_schema_name = property_schema.get('items', {})['$ref'].split('/')[-1]
+                    dependency_schema = all_schemas.get(dependency_schema_name)
+                    # Generate getter with nested property access
+                    file_content += "\n" +f"    get {property_name}() {{\n"
+                    file_content += "\n" +f"        return ";
+                    file_content += "\n" +f"       this._{property_name} ";
+                    
+                    file_content += "\n" +f"    }}\n"
+                    # Generate setter with nested property updates
+                    file_content += "\n" +f"    set {property_name}(value) {{\n"
+                    for property in dependency_schema['properties'].keys():
+                        file_content += "\n" +f"        this._{property_name}.{property}(value.{property}) \n"  # Update nested properties
+                    file_content += "\n" +f"    }}\n"
+                else:  # Handle non-array properties
+                    property_type = self._translate_js_type(property_schema['type'])
+                    file_content += "\n" +f"    get {property_name}() {{\n"
+                    file_content += "\n" +f"        return this._{property_name};\n"
+                    file_content += "\n" +f"    }}\n"
+                    file_content += "\n" +f"    set {property_name}(value) {{\n"
+                    file_content += "\n" +f"        if (typeof value !== '{property_type}') {{\n"
+                    file_content += "\n" +f"            throw new TypeError('{property_name} must be of type {property_type}');\n"
+                    file_content += "\n" +f"        }}\n"
+                    file_content += "\n" +f"        this._{property_name} = value;\n"
+                    file_content += "\n" +f"    }}\n"
+        file_content += "\n" +f"    }}\n"
+        print(file_content)
+        return file_content
+
+    def get_imports(self,schema):
+        imports = []
+        for property_name, property_schema in schema['properties'].items():
+            # print(property_name, property_schema)
+            if property_schema.get('type') in ('object', 'array') and property_schema.get('items').get('$ref'):
+                dependency_schema_name = property_schema.get('items')['$ref'].split('/')[-1]
+                imports.append(dependency_schema_name.capitalize())
+            # print(imports, "imports")
+        return imports
+    def _translate_js_type(self,python_type):
+        type_map = {
+            'string': 'string',
+            'integer': 'number',
+            'number': 'number',
+            'boolean': 'boolean',
+            'array': 'Array',  # Handle arrays separately
+        }
+        return type_map.get(python_type, python_type)

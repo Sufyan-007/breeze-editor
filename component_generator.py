@@ -4,7 +4,7 @@ import os
 from utils.path_extractor import get_path_without_ext
 from html_generator import HTMLGenerator
 from import_helper import ImportHelper
-
+from api_parameters_mapping import APIParametersMapping
 
 def generate_imports_code(component_config, all_config,all_store_config,all_reducer_config):
     # print(component_config)
@@ -76,7 +76,7 @@ class ComponentGenerator():
         self.src_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
         self.app_config['APP_SOURCE_DIR'] = self.src_dir 
         self.all_reducer_config = all_reducer_config
-
+        # self.mapping_config = mapping_config
         self.components_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
 
     def write_all_components(self):
@@ -174,25 +174,39 @@ class ComponentGenerator():
         # import_stats = generate_imports_code(config, all_config,all_store_config,all_reducer_config)
 
         print(state_vars_declaration)
-        functions_definition = '\n\n'.join([f'def {func["name"]}(event):' for func in functions])
-        functions_body = '\n'.join([f'    {func["body"]}' for func in functions])
+        # functions_definition = '\n\n'.join([f'def {func["name"]}(event):' for func in functions])
+        # functions_body = '\n'.join([f'    {func["body"]}' for func in functions])
 
         functions_code = []
-
+        api_parameters_mapping = APIParametersMapping(app_config=self.app_config)
+        
         for func_conf in config['functions']:
-            if func_conf['isAnonymous'] is not True:
-                functions_code.append(FunctionCodeGenerator.generate_function(func_conf, config))
+            if func_conf.get("func_type") == "MAPPER_FUNC":
+                func = api_parameters_mapping.generate_mapping_function(func_conf["name"],func_conf)
+                print("===============================================")
+                functions_code.append(func)
+
+            else:
+                if func_conf['isAnonymous'] is not True:
+                    functions_code.append(FunctionCodeGenerator.generate_function(func_conf, config))
 
         
         hooks = []
         for hook_conf in config['hooks']:
             hooks.append(HookCodeHelper.generate_hook_code(hook_conf, config))
+        
+        # api_parameters_mapping = APIParametersMapping(app_config=self.app_config)
+        # for mapping in config.get("mapping_func",[]):
+        #     api_mappings = self.mapping_config[mapping["id"]]["mapping_config"]
+        #     func = api_parameters_mapping.generate_mapping_function(mapping["name"],api_mappings)
+        #     print("===============================================")
+        #     functions_code.append(func)
 
 
         react_component = """
             import React, { useState } from 'react';
             %s
-
+            
             const %s = (props) => {
                 %s
                 %s
