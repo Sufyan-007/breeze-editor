@@ -41,6 +41,22 @@
         {
             "component": "create_app_page",
             "path": "/home"
+        },
+        {
+            "component": "react_bootstrap",
+            "path": "/bootstrap"
+        },
+        {
+            "component": "post_component",
+            "path": "/post"
+        },
+        {
+            "component": "post_component",
+            "path": "/post/:id"
+        },
+        {
+            "component": "post_list",
+            "path": "/posts"
         }
     ]
 }

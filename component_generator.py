@@ -150,18 +150,13 @@ class ComponentGenerator():
             
             store = all_store_config[wrapper_store]
             html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
-        print(state_vars)
-
+        
         state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_val(var["defaultValue"])});' for var in state_vars])
         props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
         
         # other vars
         other_vars_declaration = ""
         for ovar in other_vars:
-            print("99999999999999999999999999999")
-            print(config.get("name"))
-            print(ovar.get("name"))
-            print(ovar.get("className"))
             parameters = ""
             if len(ovar.get("parameters",[]))> 0:
                 parameters = ",".join(ovar["parameters"])
@@ -173,7 +168,6 @@ class ComponentGenerator():
         import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
         # import_stats = generate_imports_code(config, all_config,all_store_config,all_reducer_config)
 
-        print(state_vars_declaration)
         # functions_definition = '\n\n'.join([f'def {func["name"]}(event):' for func in functions])
         # functions_body = '\n'.join([f'    {func["body"]}' for func in functions])
 
@@ -183,14 +177,12 @@ class ComponentGenerator():
         for func_conf in config['functions']:
             if func_conf.get("func_type") == "MAPPER_FUNC":
                 func = api_parameters_mapping.generate_mapping_function(func_conf["name"],func_conf)
-                print("===============================================")
                 functions_code.append(func)
 
             else:
                 if func_conf['isAnonymous'] is not True:
                     functions_code.append(FunctionCodeGenerator.generate_function(func_conf, config))
 
-        
         hooks = []
         for hook_conf in config['hooks']:
             hooks.append(HookCodeHelper.generate_hook_code(hook_conf, config))

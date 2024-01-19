@@ -148,17 +148,15 @@ class GenerateAPIClient():
         return init_state
 
     def generate_service(self,path,obj,definitions):
+        tags = []
+        code = ''
         for method in obj:
             method = method
-            code= self.generate_service_function(method,path,obj[method],definitions)
+            code+= "\n" + self.generate_service_function(method,path,obj[method],definitions)
             tags = obj[method].get("tags")
-            return {
-                "tags" : tags,
-                "code": code
-            }
         return {
-            "tags" : [],
-            "code" : None
+            "tags" : tags,
+            "code": code
         }
             
     def generate_service_function(self,method,path,obj,definitions):
@@ -176,7 +174,7 @@ class GenerateAPIClient():
                     {ARR_OBJ_CODE}
                     const  apiOptions = {API_OPTIONS} 
                     const resp = await request(apiOptions)
-                    console.log(resp);
+                    return resp
                 };
             """
             api_options = {
@@ -468,7 +466,7 @@ class GenerateAPIClient():
         imports = []
         for property_name, property_schema in schema['properties'].items():
             # print(property_name, property_schema)
-            if property_schema.get('type') in ('object', 'array') and property_schema.get('items').get('$ref'):
+            if property_schema.get('type') in ('object', 'array') and property_schema.get('items',{}).get('$ref'):
                 dependency_schema_name = property_schema.get('items')['$ref'].split('/')[-1]
                 imports.append(dependency_schema_name.capitalize())
             # print(imports, "imports")

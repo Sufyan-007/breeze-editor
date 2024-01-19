@@ -13,6 +13,9 @@ class HTMLGenerator:
              return f'"{value.get("value")}"'
         elif value.get('type') == 'OBJECT':
              return f"{{{value.get('value')}}}"
+        elif value.get('type') == 'BOOLEAN':
+             return f"{{{value.get('value')}}}"
+        
         elif value.get('type') == 'VARIABLE':
              return f"{{{value.get('value')}}}"
         elif value.get('type') == "FUNCTION":
