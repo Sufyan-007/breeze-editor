@@ -206,7 +206,7 @@ export class CancelablePromise {
   
   const getUrl = ( options) => {
     
-    let url = `http://localhost:8000${options.url}`
+    let url = `https://jsonplaceholder.typicode.com${options.url}`
     if (options.query) {
       return `${url}${getQueryString(options.query)}`
     }

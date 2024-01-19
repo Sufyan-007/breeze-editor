@@ -4,7 +4,7 @@
         "containingFile": "components/Main.js",
         "stateVars": [],
         "propsVars": [],
-        "otherVars" : [],
+        "otherVars": [],
         "functions": [],
         "html": {},
         "wrapper_store": "redux_store_uuid",
@@ -48,7 +48,7 @@
                     "author": "",
                     "defaultComponent": "",
                     "strictMode": "FALSE",
-                    "path" : "",
+                    "path": "",
                     "component_src_dir": "src",
                     "dependencies": []
                 },
@@ -82,6 +82,70 @@
                 "body": "console.log(prop, value); \n setProjectData({...projectData, [prop] : value}); "
             },
             {
+                "name": "saveApiConfigMapper",
+                "$id": "FUNCTIONS/UUID5",
+                "isAnonymous": false,
+                "parameters": {
+                    "postId": {
+                        "type": "variable_mapping",
+                        "value": "id"
+                    }
+                },
+                "func_type": "MAPPER_FUNC",
+                "isAsync": false,
+                "schemas": {
+                    "AppConfigDetails": {
+                        "type": "object_mapping",
+                        "root": true,
+                        "value": null,
+                        "properties": {
+                            "name": {
+                                "type": "variable_mapping",
+                                "value": "appName"
+                            },
+                            "description": {
+                                "type": "variable_mapping",
+                                "value": "description"
+                            },
+                            "path": {
+                                "type": "variable_mapping",
+                                "value": "path"
+                            },
+                            "author": {
+                                "type": "variable_mapping",
+                                "value": "author"
+                            },
+                            "defaultComponent": {
+                                "type": "variable_mapping",
+                                "value": "defaultComponent"
+                            },
+                            "dependencies": {
+                                "type": "array_object",
+                                "items": {
+                                    "type": "object_mapping",
+                                    "ref": "DependencyObject"
+                                }
+                            }
+                        }
+                    },
+                    "DependencyObject": {
+                        "root": false,
+                        "type": "object_mapping",
+                        "value": "appDependencies",
+                        "properties": {
+                            "name": {
+                                "type": "variable_mapping",
+                                "value": "name"
+                            },
+                            "value": {
+                                "type": "variable_mapping",
+                                "value": "value"
+                            }
+                        }
+                    }
+                }
+            },
+            {
                 "name": "saveAppConfig",
                 "$id": "FUNCTIONS/FUN2",
                 "isAnonymous": false,
@@ -99,12 +163,12 @@
                     "list": []
                 },
                 "isAsync": false,
-                "body": " let resp =  getPost(2); console.log(resp); "
+                "body": " console.log(); "
             }
         ],
         "html": {
             "type": "Element",
-            "tagName": "",
+            "tagName": "div",
             "children": [
                 {
                     "type": "Element",
@@ -264,7 +328,7 @@
                                                 },
                                                 "id": {
                                                     "type": "LITERAL",
-                                                    "value": "description"
+                                                    "value": "{{appCongig.id}}"
                                                 },
                                                 "cols": {
                                                     "type": "LITERAL",
@@ -467,46 +531,6 @@
                                                 {
                                                     "type": "text",
                                                     "text": "Default Component Name"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Element",
-                                            "tagName": "label",
-                                            "attributes": {
-                                                "htmlFor": {
-                                                    "type": "LITERAL",
-                                                    "value": "components_src_dir"
-                                                },
-                                                "className": {
-                                                    "type": "LITERAL",
-                                                    "value": "placeholder"
-                                                }
-                                            },
-                                            "children": [
-                                                {
-                                                    "type": "text",
-                                                    "text": "Component Source Ddirectory"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Element",
-                                            "tagName": "label",
-                                            "attributes": {
-                                                "htmlFor": {
-                                                    "type": "LITERAL",
-                                                    "value": "path"
-                                                },
-                                                "className": {
-                                                    "type": "LITERAL",
-                                                    "value": "placeholder"
-                                                }
-                                            },
-                                            "children": [
-                                                {
-                                                    "type": "text",
-                                                    "text": "Project path"
                                                 }
                                             ]
                                         }
@@ -735,16 +759,16 @@
                     "import_type": "SINGLE"
                 },
                 {
-                    "TYPE" : "SERVICE",
-                    "from" : "service/PostService.js",
+                    "TYPE": "SERVICE",
+                    "from": "service/PostService.js",
                     "import_entity": "getPost",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 },
                 {
-                    "TYPE" : "SERVICE",
-                    "from" : "service/ConfigService.js",
+                    "TYPE": "SERVICE",
+                    "from": "service/ConfigService.js",
                     "import_entity": "saveAppConfiguration",
-                    "import_type" : "SINGLE"
+                    "import_type": "SINGLE"
                 }
             ],
             "styles": [
@@ -764,5 +788,1279 @@
                 }
             }
         ]
-    }
+    },
+    "react_bootstrap": {
+        "name": "ReactBootstrap",
+        "containingFile": "components/ReactBootstrap.js",
+        "stateVars": [],
+        "propsVars": [],
+        "otherVars": [],
+        "functions": [],
+        "html": {
+            "type": "Element",
+            "tagName": "Container",
+            "children": [
+                {
+                    "type": "Element",
+                    "tagName": "Row",
+                    "children": [
+                        {
+                            "tagName": "Col",
+                            "type": "Element",
+                            "children": [
+                                {
+                                    "type": "Element",
+                                    "tagName": "Form",
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Form.Group",
+                                            "attributes": {
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "mb-3"
+                                                },
+                                                "controlId": {
+                                                    "type": "LITERAL",
+                                                    "value": "formBasicEmail"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Label",
+                                                    "children": [
+                                                        {
+                                                            "type": "text",
+                                                            "text": "Email address"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Control",
+                                                    "attributes": {
+                                                        "type": {
+                                                            "type": "LITERAL",
+                                                            "value": "email"
+                                                        },
+                                                        "placeholder": {
+                                                            "type": "LITERAL",
+                                                            "value": "Enter email"
+                                                        }
+                                                    },
+                                                    "children": []
+                                                },
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Text",
+                                                    "attributes": {
+                                                        "className": {
+                                                            "type": "LITERAL",
+                                                            "value": "text-muted"
+                                                        }
+                                                    },
+                                                    "children": [
+                                                        {
+                                                            "type": "text",
+                                                            "text": "Email address"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Form.Group",
+                                            "attributes": {
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "mb-3"
+                                                },
+                                                "controlId": {
+                                                    "type": "LITERAL",
+                                                    "value": "formBasicPassword"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Label",
+                                                    "children": [
+                                                        {
+                                                            "type": "text",
+                                                            "text": "Password"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Control",
+                                                    "attributes": {
+                                                        "type": {
+                                                            "type": "LITERAL",
+                                                            "value": "password"
+                                                        },
+                                                        "placeholder": {
+                                                            "type": "LITERAL",
+                                                            "value": "password"
+                                                        }
+                                                    },
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Form.Group",
+                                            "attributes": {
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "mb-3"
+                                                },
+                                                "controlId": {
+                                                    "type": "LITERAL",
+                                                    "value": "formBasicCheckbox"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Check",
+                                                    "attributes": {
+                                                        "type": {
+                                                            "type": "LITERAL",
+                                                            "value": "checkbox"
+                                                        },
+                                                        "label": {
+                                                            "type": "LITERAL",
+                                                            "value": "Check me out"
+                                                        }
+                                                    },
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Button",
+                                            "attributes": {
+                                                "variant": {
+                                                    "type": "LITERAL",
+                                                    "value": "primary"
+                                                },
+                                                "type": {
+                                                    "type": "LITERAL",
+                                                    "value": "submit"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Submit"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "imports": {
+            "components": [],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Row",
+                    "import_entity": "Row",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Col",
+                    "import_entity": "Col",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Button",
+                    "import_entity": "Button",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Form",
+                    "import_entity": "Form",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Container",
+                    "import_entity": "Container",
+                    "import_type": "FULL"
+                }
+            ],
+            "styles": [
+                {
+                    "TYPE": "CUSTOM",
+                    "from": "CREATED_APP_CSS"
+                }
+            ]
+        },
+        "hooks": []
+    },
+    "post_component": {
+        "name": "PostComp",
+        "containingFile": "components/PostComp.js",
+        "stateVars": [
+            {
+                "name": "postData",
+                "type": "OBJECT",
+                "defaultValue": {
+                    "id": 0,
+                    "userId": 0,
+                    "title": "",
+                    "body": ""
+                },
+                "$id": "STATE_VARS/POST_DATA"
+            }
+        ],
+        "propsVars": [],
+        "otherVars": [
+            {
+                "name" : "{id}",
+                "declarationType" : "let",
+                "className" : "useParams",
+                "parameters" : []
+            }
+        ],
+        "functions": [
+            {
+                "name": "useEffect",
+                "$id": "FUNCTIONS/UUID2",
+                "isAnonymous": true,
+                "parameters": {
+                    "list": []
+                },
+                "isAsync": false,
+                "body": "if(id){async function fetchData() {try {const res = await getPost(id);setPostData(res)} catch (error) {}}fetchData();}"
+            },
+            {
+                "name": "handleInputChange",
+                "$id": "FUNCTIONS/UUID1",
+                "isAnonymous": false,
+                "parameters": {
+                    "list": [
+                        {
+                            "name": "prop"
+                        },
+                        {
+                            "name": "value"
+                        }
+                    ]
+                },
+                "isAsync": false,
+                "body": "console.log(prop, value); \n setPostData({...postData, [prop] : value}); "
+            },
+            {
+                "name": "savePost",
+                "$id": "FUNCTIONS/UUID3",
+                "isAnonymous": false,
+                "parameters": {
+                    "list": []
+                },
+                "isAsync": true,
+                "body": " let res = {}; if(id){res = await editPost(id); }else{res = await createPost(postData);}setPostData(res);"
+            },
+            {
+                "name": "resetPostData",
+                "$id": "FUNCTIONS/UUID4",
+                "isAnonymous": false,
+                "parameters": {
+                    "list": []
+                },
+                "isAsync": true,
+                "body": "setPostData({'id': 0,'userId': 0,'title': '','body': ''}); "
+            }
+        ],
+        "html": {
+            "type": "Element",
+            "tagName": "Container",
+            "children": [
+                {
+                    "type": "Element",
+                    "tagName": "Row",
+                    "children": [
+                        {
+                            "tagName": "Col",
+                            "type": "Element",
+                            "children": [
+                                {
+                                    "type": "Element",
+                                    "tagName": "Form",
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Form.Group",
+                                            "attributes": {
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "mb-3"
+                                                },
+                                                "controlId": {
+                                                    "type": "LITERAL",
+                                                    "value": "id"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Label",
+                                                    "children": [
+                                                        {
+                                                            "type": "text",
+                                                            "text": "Id"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Control",
+                                                    "attributes": {
+                                                        "type": {
+                                                            "type": "LITERAL",
+                                                            "value": "number"
+                                                        },
+                                                        "placeholder": {
+                                                            "type": "LITERAL",
+                                                            "value": "Enter Id"
+                                                        },
+                                                        "value": {
+                                                            "type": "VARIABLE",
+                                                            "value": "postData.id"
+                                                        },
+                                                        "readOnly":{
+                                                            "type": "BOOLEAN",
+                                                            "value": "true"
+                                                        },
+                                                        "onChange": {
+                                                            "type": "FUNCTION",
+                                                            "value": {
+                                                                "name": "",
+                                                                "$id": "FUNCTIONS/A1",
+                                                                "isAnonymous": true,
+                                                                "parameters": {
+                                                                    "list": [
+                                                                        {
+                                                                            "name": "event"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "isAsync": false,
+                                                                "body": "handleInputChange('id', event.target.value) ;"
+                                                            }
+                                                        }
+                                                    },
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Form.Group",
+                                            "attributes": {
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "mb-3"
+                                                },
+                                                "controlId": {
+                                                    "type": "LITERAL",
+                                                    "value": "userId"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Label",
+                                                    "children": [
+                                                        {
+                                                            "type": "text",
+                                                            "text": "User Id"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Control",
+                                                    "attributes": {
+                                                        "type": {
+                                                            "type": "LITERAL",
+                                                            "value": "number"
+                                                        },
+                                                        "placeholder": {
+                                                            "type": "LITERAL",
+                                                            "value": "Enter User Id"
+                                                        },
+                                                        "value": {
+                                                            "type": "VARIABLE",
+                                                            "value": "postData.userId"
+                                                        },
+                                                        "onChange": {
+                                                            "type": "FUNCTION",
+                                                            "value": {
+                                                                "name": "",
+                                                                "$id": "FUNCTIONS/A1",
+                                                                "isAnonymous": true,
+                                                                "parameters": {
+                                                                    "list": [
+                                                                        {
+                                                                            "name": "event"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "isAsync": false,
+                                                                "body": "handleInputChange('userId', event.target.value) ;"
+                                                            }
+                                                        }
+                                                    },
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Form.Group",
+                                            "attributes": {
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "mb-3"
+                                                },
+                                                "controlId": {
+                                                    "type": "LITERAL",
+                                                    "value": "title"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Label",
+                                                    "children": [
+                                                        {
+                                                            "type": "text",
+                                                            "text": "Post Title"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Control",
+                                                    "attributes": {
+                                                        "type": {
+                                                            "type": "LITERAL",
+                                                            "value": "text"
+                                                        },
+                                                        "placeholder": {
+                                                            "type": "LITERAL",
+                                                            "value": "Enter Post Title"
+                                                        },
+                                                        "value": {
+                                                            "type": "VARIABLE",
+                                                            "value": "postData.title"
+                                                        },
+                                                        "onChange": {
+                                                            "type": "FUNCTION",
+                                                            "value": {
+                                                                "name": "",
+                                                                "$id": "FUNCTIONS/A1",
+                                                                "isAnonymous": true,
+                                                                "parameters": {
+                                                                    "list": [
+                                                                        {
+                                                                            "name": "event"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "isAsync": false,
+                                                                "body": "handleInputChange('title', event.target.value) ;"
+                                                            }
+                                                        }
+                                                    },
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Form.Group",
+                                            "attributes": {
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "mb-3"
+                                                },
+                                                "controlId": {
+                                                    "type": "LITERAL",
+                                                    "value": "body"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Label",
+                                                    "children": [
+                                                        {
+                                                            "type": "text",
+                                                            "text": "Post Body"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Element",
+                                                    "tagName": "Form.Control",
+                                                    "attributes": {
+                                                        "type": {
+                                                            "type": "LITERAL",
+                                                            "value": "text"
+                                                        },
+                                                        "placeholder": {
+                                                            "type": "LITERAL",
+                                                            "value": "Enter Post Body"
+                                                        },
+                                                        "value": {
+                                                            "type": "VARIABLE",
+                                                            "value": "postData.body"
+                                                        },
+                                                        "onChange": {
+                                                            "type": "FUNCTION",
+                                                            "value": {
+                                                                "name": "",
+                                                                "$id": "FUNCTIONS/A1",
+                                                                "isAnonymous": true,
+                                                                "parameters": {
+                                                                    "list": [
+                                                                        {
+                                                                            "name": "event"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "isAsync": false,
+                                                                "body": "handleInputChange('body', event.target.value) ;"
+                                                            }
+                                                        }
+                                                    },
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "Button",
+                                            "attributes": {
+                                                "variant": {
+                                                    "type": "LITERAL",
+                                                    "value": "primary"
+                                                },
+                                                "onClick": {
+                                                    "type": "FUNCTION",
+                                                    "value": {
+                                                        "name": "",
+                                                        "$id": "FUNCTIONS/A3",
+                                                        "isAnonymous": true,
+                                                        "parameters": {
+                                                            "list": [
+                                                               
+                                                            ]
+                                                        },
+                                                        "isAsync": false,
+                                                        "body": "savePost() ;"
+                                                    }
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Submit"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "imports": {
+            "components": [],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react",
+                    "import_entity": "useEffect",
+                    "import_type": "SINGLE"
+                  },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Row",
+                    "import_entity": "Row",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Col",
+                    "import_entity": "Col",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Button",
+                    "import_entity": "Button",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Form",
+                    "import_entity": "Form",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-bootstrap/Container",
+                    "import_entity": "Container",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "SERVICE",
+                    "from": "service/PostService.js",
+                    "import_entity": "createPost",
+                    "import_type": "SINGLE"
+                },
+                {
+                    "TYPE": "SERVICE",
+                    "from": "service/PostService.js",
+                    "import_entity": "editPost",
+                    "import_type": "SINGLE"
+                },
+                {
+                    "TYPE": "SERVICE",
+                    "from": "service/PostService.js",
+                    "import_entity": "getPost",
+                    "import_type": "SINGLE"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react-router-dom",
+                    "import_entity": "useParams",
+                    "import_type": "SINGLE"
+                }
+            ],
+            "styles": [
+                {
+                    "TYPE": "CUSTOM",
+                    "from": "CREATED_APP_CSS"
+                }
+            ]
+        },
+        "hooks": [
+            {
+                "type": "USE_EFFECT",
+                "dependantVars": [],
+                "implementation": {
+                    "type": "FUNCTION",
+                    "$ref": "FUNCTIONS/UUID2"
+                }
+            }
+        ]
+    },
+    
+      "post_list": {
+        "name": "PostListComp",
+        "containingFile": "components/PostListComp.js",
+        "stateVars": [
+          {
+            "name": "posts",
+            "type": "ARRAY",
+            "defaultValue": [],
+            "$id": "STATE_VARS/POSTS"
+          },
+          {
+            "name": "isLoading",
+            "type": "BOOLEAN",
+            "defaultValue": true,
+            "$id": "STATE_VARS/IS_LOADING"
+          },
+          {
+            "name": "error",
+            "type": "STRING",
+            "defaultValue": "",
+            "$id": "STATE_VARS/ERROR"
+          },
+          {
+            "name": "show",
+            "type": "BOOLEAN",
+            "defaultValue": false,
+            "$id": "STATE_VARS/SHOW"
+          },
+          {
+            "name": "currentPage",
+            "type": "VARIABLE",
+            "defaultValue": "1",
+            "$id": "STATE_VARS/CURRENT_PAGE"
+          },
+          {
+            "name": "postsPerPage",
+            "type": "VARIABLE",
+            "defaultValue": "5",
+            "$id": "STATE_VARS/POSTS_PER_PAGE"
+          },
+          {
+            "name": "totalPosts",
+            "type": "VARIABLE",
+            "defaultValue": "0",
+            "$id": "STATE_VARS/TOTAL_POSTS"
+          }
+        ],
+        "propsVars": [],
+        "otherVars":[
+            {
+                "name" : "navigate",
+                "declarationType" : "const",
+                "className" : "useNavigate",
+                "parameters" : []
+            },
+            {
+                "name": "startIndex",
+                "declarationType": "const",
+                "parameters":["(currentPage - 1) * postsPerPage"],
+                "className": ""
+            },
+            {
+                "name": "endIndex",
+                "declarationType": "const",
+                "parameters":["currentPage * postsPerPage"],
+                "className": ""
+            },
+            {
+                "name": "postsToDisplay",
+                "declarationType": "const",
+                "parameters":["posts.slice(startIndex, endIndex)" ],
+                "className": ""
+            }
+        ],
+        "functions": [
+            {
+                "name": "useEffect",
+                "$id": "FUNCTIONS/UUID1",
+                "isAnonymous": true,
+                "parameters": {
+                  "list": []
+                  },
+                "isAsync": false,
+                "body": " async function fetchData() { try { const res = await getPosts();setPosts(res);setTotalPosts(res.length);setError(null);} catch (error) {setError(error.message);} finally {setIsLoading(false);} }fetchData();"
+              },
+          {
+            "name": "handleModelShow",
+            "$id": "FUNCTIONS/UUID2",
+            "isAnonymous": false,
+            "parameters": {
+                "list":[]
+            },
+            "isAsync": false,
+            "body": " setShow(true); "
+        },
+        {
+            "name": "handleModelClose",
+            "$id": "FUNCTIONS/UUID3",
+            "isAnonymous": false,
+            "parameters": {
+                "list":[]
+            },
+            "isAsync": false,
+            "body": " setShow(false); "
+        },
+        {
+            "name": "editPost",
+            "$id": "FUNCTIONS/UUID4",
+            "isAnonymous": false,
+            "parameters": {
+                "list": [
+                    {
+                        "name": "id"
+                    }
+                ]
+            },
+            "isAsync": false,
+            "body": " navigate(`/post/${id}`, { replace: true }); "
+        }
+        ],
+        "html": {
+            "type": "Element",
+            "tagName": "Container",
+            "children": [
+              {
+                "type": "Element",
+                "tagName": "Row",
+                "children": [
+                    {
+                        "type": "Element",
+                        "tagName": "Col",
+                        "children": [
+                            {
+                              "type": "Element",
+                              "tagName": "Table",
+                              "attributes": {
+                                  "variant":{
+                                      "type":"LITERAL",
+                                      "value":"dark"
+                                  }
+                              },
+                              "children": [
+                                {
+                                  "type": "Element",
+                                  "tagName": "thead",
+                                  "children": [
+                                    {
+                                      "type": "Element",
+                                      "tagName": "tr",
+                                      "children": [
+                                        {
+                                          "type": "Element",
+                                          "tagName": "th",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "text": "Post ID"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "Element",
+                                          "tagName": "th",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "text": "Title"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "Element",
+                                          "tagName": "th",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "text": "User ID"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "Element",
+                                          "tagName": "th",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "text": "Body"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "Element",
+                                          "tagName": "th",
+                                          "attributes":{
+                                              "colSpan":{"type": "VARIABLE",
+                                              "value": "2"}
+                                          },
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "text": "Actions"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "Element",
+                                  "tagName": "tbody",
+                                  "children": [
+                                      {
+                                                  "type": "Expression",
+                                                  "children": [
+                                                      {
+                                                          "type": "map",
+                                                          "variable": "postsToDisplay",
+                                                          "code": "",
+                                                          "callbackParams": [
+                                                              "post"
+                                                          ],
+                                                          "attributes": {},
+                                                          "children": [
+                                                              {
+                                                                  "type": "Element",
+                                                                  "tagName": "tr",
+                                                                  "attributes": {
+                                                                    "key":{
+                                                                        "type":"VARIABLE",
+                                                                        "value":"post.id"
+                                                                    }
+                                                                  },
+                                                                  "children": [
+                                                                      {
+                                                                          "type":"Element",
+                                                                          "tagName": "td",
+                                                                          "attributes": {},
+                                                                          "children":[
+                                                                              {
+                                                                                  "type": "Expression",
+                                                                                  "children": [
+                                                                                      {
+                                                                                          "type": "code",
+                                                                                          "code": "post.id"
+                                                                                      }
+                                                                                  ]
+                                                                              }
+                                                                          ]
+                                                                      },
+                                                                      {
+                                                                          "type":"Element",
+                                                                          "tagName": "td",
+                                                                          "attributes": {},
+                                                                          "children":[{
+                                                                              "type": "Expression",
+                                                                                  "children": [{
+                                                                                      "type": "code",
+                                                                                      "code": "post.title"
+                                                                      }]}]
+                                                                      },
+                                                                      {
+                                                                          "type":"Element",
+                                                                          "tagName": "td",
+                                                                          "attributes": {},
+                                                                          "children":[{
+                                                                              "type": "Expression",
+                                                                                  "children": [{
+                                                                                      "type": "code",
+                                                                                      "code": "post.userId"
+                                                                      }]}]
+                                                                      },
+                                                                      {
+                                                                          "type":"Element",
+                                                                          "tagName": "td",
+                                                                          "attributes": {},
+                                                                          "children":[{
+                                                                              "type": "Expression",
+                                                                                  "children": [{
+                                                                                      "type": "code",
+                                                                                      "code": "post.body"
+                                                                      }]}]
+                                                                      },
+                                                                      {
+                                                                        "type": "Element",
+                                                                        "tagName": "td",
+                                                                        "attributes": {},
+                                                                        "children":[
+                                                                            {
+                                                                                "type":"Element",
+                                                                                "tagName": "Button",
+                                                                                "attributes": {
+                                                                                    "variant":{
+                                                                                        "type":"LITERAL",
+                                                                                        "value":"primary"
+                                                                                    },
+                                                                                    "onClick":{
+                                                                                        "type":"FUNCTION",
+                                                                                        "value": {
+                                                                                            "name": "",
+                                                                                            "$id": "FUNCTIONS/A1",
+                                                                                            "isAnonymous": true,
+                                                                                            "parameters": {
+                                                                                                "list":[]
+                                                                                            },
+                                                                                            "isAsync": false,
+                                                                                            "body": "editPost(post.id) ;"
+                                                                                        }
+                                                                                      }
+                                                                                },
+                                                                                "children":[{
+                                                                                    "type": "text",
+                                                                                    "text": "Edit"
+                                                                                  }]
+                                                                            }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "type":"Element",
+                                                                        "tagName":"td",
+                                                                        "attributes":{},
+                                                                        "children":[
+                                                                            {
+                                                                                "type":"Element",
+                                                                                "tagName": "Button",
+                                                                                "attributes": {
+                                                                                    "variant":{
+                                                                                        "type":"LITERAL",
+                                                                                        "value":"danger"
+                                                                                    },
+                                                                                    "onClick":{
+                                                                                      "type":"FUNCTION",
+                                                                                      "value": {
+                                                                                          "name": "",
+                                                                                          "$id": "FUNCTIONS/A1",
+                                                                                          "isAnonymous": true,
+                                                                                          "parameters": {
+                                                                                              "list":[]
+                                                                                          },
+                                                                                          "isAsync": false,
+                                                                                          "body": "handleModelShow() ;"
+                                                                                      }
+                                                                                    }
+                                                                                },
+                                                                                "children":[{
+                                                                                    "type": "text",
+                                                                                    "text": "Delete"
+                                                                                  }]
+                                                                            }
+                                                                        ]
+                                                                      }
+                                                                  ]
+                                                              }
+                                                          ]
+                                                      }
+                                                  ]
+                                              
+                                          
+                                      }
+                                  ]
+                                }
+                              ]
+                            },{
+                                "type": "Element",
+                                "tagName":"Pagination",
+                                "attributes":{
+                                    "className":{
+                                        "type":"LITERAL",
+                                        "value":"justify-content-center"
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "type": "Expression",
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "text": "Array.from("
+                                            },
+                                            {
+                                                "type" : "Expression",
+                                                "children":[
+                                                    {
+                                                      "type":"text",
+                                                      "text": "length: Math.ceil(totalPosts / postsPerPage)"  
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "text": ", (_, i) => ("
+                                            },
+                                            {
+                                                "type": "Element",
+                                                "tagName": "Pagination.Item",
+                                                "attributes":{
+                                                    "key":{
+                                                        "type": "VARIABLE",
+                                                        "value": "i+1"
+                                                    },
+                                                    "active": {
+                                                        "type": "VARIABLE",
+                                                        "value": "currentPage === i +1"
+                                                    },
+                                                    "onClick":{
+                                                        "type": "VARIABLE",
+                                                        "value" : "() => setCurrentPage( i +1 )"
+                                                    }
+                                                },
+                                                "children":[
+                                                    {
+                                                        "type": "Expression",
+                                                        "children":[
+                                                            {
+                                                                "type": "text",
+                                                            "text": "i+1"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type":"text",
+                                                "text": "))"
+                                            }
+                                        ]
+                                       
+                                    }
+                                ]
+                            }
+                          ]
+                    },
+                    {
+                        "type": "Element",
+                        "tagName": "Col",
+                        "children": [
+                            {
+                                "type": "Element",
+                                "tagName": "Modal",
+                                "attributes": {
+                                    "show":{
+                                        "type": "VARIABLE",
+                                        "value":"show"
+                                    },
+                                    "onHide":{
+                                        "type": "VARIABLE",
+                                        "value": "handleModelClose"
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "type": "Element",
+                                        "tagName": "Modal.Header",
+                                        "children":[
+                                            {
+                                                "type": "Element",
+                                                "tagName": "Modal.Title",
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "text": "Alert User"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "Element",
+                                        "tagName": "Modal.Body",
+                                        "children":[
+                                            {
+                                                "type":"text",
+                                                "text": "Are you sure you want to delete this modal"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "Element",
+                                        "tagName": "Modal.Footer",
+                                        "children":[
+                                            {
+                                                "type":"Element",
+                                                "tagName": "Button",
+                                                "attributes": {
+                                                    "variant":{
+                                                        "type":"LITERAL",
+                                                        "value":"secondary"
+                                                    },
+                                                    "onClick":{
+                                                      "type":"FUNCTION",
+                                                      "value": {
+                                                          "name": "",
+                                                          "$id": "FUNCTIONS/A2",
+                                                          "isAnonymous": true,
+                                                          "parameters": {
+                                                            "list":[]
+                                                        },
+                                                          "isAsync": false,
+                                                          "body": "handleModelClose() ;"
+                                                      }
+                                                    }
+                                                },
+                                                "children":[{
+                                                    "type": "text",
+                                                    "text": "Close"
+                                                  }]
+                                            },
+                                            {
+                                                "type":"Element",
+                                                "tagName": "Button",
+                                                "attributes": {
+                                                    "variant":{
+                                                        "type":"LITERAL",
+                                                        "value":"primary"
+                                                    },
+                                                    "onClick":{
+                                                      "type":"FUNCTION",
+                                                      "value": {
+                                                          "name": "",
+                                                          "$id": "FUNCTIONS/A3",
+                                                          "isAnonymous": true,
+                                                          "parameters": {
+                                                            "list":[]
+                                                        },
+                                                          "isAsync": false,
+                                                          "body": "handleModelClose() \n console.log('Delete Clicked') ;"
+                                                      }
+                                                    }
+                                                },
+                                                "children":[{
+                                                    "type": "text",
+                                                    "text": "Delete"
+                                                  }]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]  
+                    }
+                ]
+              }
+            ]
+          }
+          ,
+        "imports": {
+          "components": [],
+          "other": [
+            {
+                "TYPE": "THIRD_PARTY",
+                "from": "react-bootstrap",
+                "import_entity": "Table, Container, Button, Row, Col, Modal, Pagination",
+                "import_type": "SINGLE"
+              },
+              {
+                "TYPE": "THIRD_PARTY",
+                "from": "react",
+                "import_entity": "useEffect",
+                "import_type": "SINGLE"
+              },
+            
+            {
+                "TYPE": "SERVICE",
+                "from": "service/PostService.js",
+                "import_entity": "getPosts",
+                "import_type":"SINGLE"
+              },
+              {
+                  "TYPE": "THIRD_PARTY",
+                  "from": "react-router-dom",
+                  "import_entity": "useNavigate",
+                  "import_type": "SINGLE"
+              }
+          ],
+          "styles": []
+        },
+        "hooks": [
+            {
+                "type": "USE_EFFECT",
+                "dependantVars": [],
+                "implementation": {
+                    "type": "FUNCTION",
+                    "$ref": "FUNCTIONS/UUID1"
+                }
+            }
+        ]
+      }
 }

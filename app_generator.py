@@ -21,6 +21,8 @@ from utils.config_reader import read_config_file, read_file_json, write_file
 from utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from component_generator import ComponentGenerator, gen_single_import
 from api_client_generator import GenerateAPIClient
+from api_parameters_mapping import APIParametersMapping
+
 
 from routing_handler import RouteHandler
 from reducer_generator import ReducerGenerator
@@ -30,6 +32,7 @@ from import_helper import ImportHelper
 from dependencies_manager import DependencyManager
 from style_handler import StyleHandler
 import sys
+import pathlib
 
 APP_CONFIG_PATH =  f"{CONFIG_PATH}/{sys.argv[1]}"
 print("-------------", APP_CONFIG_PATH)
@@ -38,11 +41,26 @@ class AppGenerator:
 
     app_config_dir = None
     app_config = None
-    comp_config = None 
+    comp_config = {} 
+    # mapping_config = {}
     routing_config = None
     reducer_config = None
     redux_store_config = None
 
+    # def read_mapping_configs_path(self):
+    #     mapping_config_path = f"{APP_CONFIG_PATH}/mapping"
+    #     all_mapping_path = []
+    #     all_mapping_path = pathlib.Path(mapping_config_path)
+    #     all_mapping_path = list(all_mapping_path.rglob("*.json"))
+    #     return all_mapping_path
+    
+    # def prepare_mapping_config(self):
+    #     mapping_paths = self.read_mapping_configs_path()
+
+    #     for mapping_path in mapping_paths:
+    #         mapping_config = read_file_json(mapping_path)
+    #         print(mapping_config['$id'])
+    #         self.mapping_config[mapping_config['$id']] = mapping_config
 
     def __init__(self, app_config_dir):
         self.app_config_dir = app_config_dir
@@ -65,18 +83,18 @@ class AppGenerator:
         self.app_config['MAPPINGS'] = {}
         self.app_config['CSS_CONFIG'] = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CSS_CONFIG'])
         self.prepare_path_mappings() 
+        # self.prepare_mapping_config()
 
-        print(self.comp_config)
         self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
 
     def generate_app(self):
         project_name = self.app_config['name']
 
         # Create React App using create-react-app 
-        self.create_react_app()
+        # self.create_react_app()
 
         # Install dependecies
-        self.install_dependencies()
+        # self.install_dependencies()
 
         # Set base path for the components
         self.setup_base_path_for_comps()
@@ -108,6 +126,8 @@ class AppGenerator:
 
         # Generate API client from yaml
         self.generate_api_client()
+
+
 
 
 
@@ -235,7 +255,14 @@ class AppGenerator:
 
 
     def write_components(self):
-        comp_generator = ComponentGenerator(all_comp_config=self.comp_config, app_config=self.app_config,all_context_comp_config=self.context_comp_config,all_store_config=self.redux_store_config,all_reducer_config=self.reducer_config)
+        comp_generator = ComponentGenerator(
+            all_comp_config=self.comp_config, 
+            app_config=self.app_config,
+            all_context_comp_config=self.context_comp_config,
+            all_store_config=self.redux_store_config,
+            all_reducer_config=self.reducer_config
+            # mapping_config=self.mapping_config
+            )
         comp_generator.write_all_components()
         # comp_generator.write_all_contexts()
 
