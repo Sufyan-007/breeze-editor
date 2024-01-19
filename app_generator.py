@@ -52,7 +52,13 @@ class AppGenerator:
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.app_config['APP_CONFIG_PATH'] = APP_CONFIG_PATH
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
+        
+        # Read config of component written in component_config file
         self.comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
+        
+        # Read component config from different files and prepare map of config for all
+        self.prepare_comp_config()
+
         self.context_comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG'])
         self.reducer_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['REDUCER_CONFIG'])
         self.redux_store_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['REDUX_STORE_CONFIG'])
@@ -137,6 +143,20 @@ class AppGenerator:
         print(all_services_path)
 
         return all_services_path
+    
+    # Read components path
+    def read_components_configs_path(self):
+        comp_config_path = f"{APP_CONFIG_PATH}/app_components"
+
+        all_comp_path = []
+
+        
+        all_comp_path = pathlib.Path(comp_config_path)
+
+        
+        all_comp_path = list(all_comp_path.rglob("component_*.json"))
+
+        return all_comp_path
 
 
     def create_react_app(self):
@@ -204,6 +224,14 @@ class AppGenerator:
 
         if package_json['dependencies'].get('bootstrap') is not None:
             DependencyManager().handle_bootstrap(app_config=self.app_config)
+
+    def prepare_comp_config(self):
+        comp_paths = self.read_components_configs_path()
+
+        for comp_path in comp_paths:
+            comp_config = read_file_json(comp_path)
+            print(comp_config['$id'])
+            self.comp_config[comp_config['$id']] = comp_config
 
 
     def write_components(self):
