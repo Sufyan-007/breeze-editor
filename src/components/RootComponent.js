@@ -8,7 +8,7 @@ import Variables from "./Variables";
 import Functions from "./Functions";
 
 export default function RootComponent({ name, component, ...props }) {
-    console.log(component)
+    
     const [Component, setComponent] = useState(component)
     const { configService } = useContext(ServiceContext)
     const [showHtml, setShowHtml] = useState(false)

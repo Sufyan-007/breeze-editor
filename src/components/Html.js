@@ -47,23 +47,22 @@ export default function Html({ Val, changeParent, ...props }) {
 
     }
 
-    function updateChild(key, child, offset=0) {
+    function updateChild(key, child, offset = 0) {
         console.log(offset)
-        const index= key>0? key+offset:0
+        const index = key > 0 ? key + offset : 0
         const children = [...value.children]
         children.splice(key, 1)
 
         if (child) {
-            children.splice(index,0,child)
+            children.splice(index, 0, child)
         }
 
         setValue(value => {
             const newVal = { ...value, children }
             changeParent(newVal)
-            console.log(newVal)
             return newVal
         })
-        if(!child || offset!==0){
+        if (!child || offset !== 0) {
             setShowChild(false)
         }
 
@@ -91,19 +90,33 @@ export default function Html({ Val, changeParent, ...props }) {
         }
         const children = [...value.children, newDiv]
         setValue(value => {
-            const newVal= { ...value, children }
+            const newVal = { ...value, children }
             changeParent(newVal)
             return newVal
         })
         setShowChild(true)
     }
 
-    function handleHover(){
-        const iFrame= document.getElementById("iFrame")
-        if(iFrame){
-            const iFrameContent = iFrame.contentDocument || iFrame.contentWindow.document
-            console.log(iFrameContent)
-        }
+    var previousVal = ""
+
+    function handleHover(change) {
+        // Cors issue here with iFrame
+
+        // const iFrame = document.getElementById("iFrame")
+        // const id = value.attributes.id?.value
+
+        // if (iFrame && id ) {
+        //     const iFrameContent = iFrame.contentDocument || iFrame.contentWindow.document
+        //     const div = iFrameContent.getElementById(id)
+        //     if(div){
+        //         if (change) {
+        //             previousVal = div.style["background-color"]
+        //             div.style["background-color"] = "#ddd";
+        //         } else {
+        //             div.style["background-color"] = previousVal
+        //         }
+        //     }
+        // }
     }
 
     if (value.type === 'Element') {
@@ -156,7 +169,7 @@ export default function Html({ Val, changeParent, ...props }) {
                         :
                         <div className="ms-4" />
                     }
-                    <div id={value.attributes.id?.value} className="w-100 card bg-light d-flex justify-content-between flex-row" onMouseEnter={handleHover} onMouseLeave={handleHover}>
+                    <div id={value.attributes.id?.value} className="w-100 card bg-light d-flex justify-content-between flex-row" onMouseEnter={() => handleHover(true)} onMouseLeave={() => handleHover(false)}>
                         <div>{value.tagName}</div>
                         {/* <button className="btn p-0 mx-1" onClick={openModal}>
                             <img className=" h-75 " src={threeDots} alt="" />
@@ -178,10 +191,10 @@ export default function Html({ Val, changeParent, ...props }) {
                                 <div className="dropdown-item my-1  " onClick={addText} >
                                     Add Text
                                 </div>
-                                <div className="dropdown-item my-1  " onClick={()=>{changeParent(value,-1)}} >
+                                <div className="dropdown-item my-1  " onClick={() => { changeParent(value, -1) }} >
                                     Move Up
                                 </div>
-                                <div className="dropdown-item my-1  " onClick={()=>{changeParent(value,1)}}>
+                                <div className="dropdown-item my-1  " onClick={() => { changeParent(value, 1) }}>
                                     Move Down
                                 </div>
 
@@ -197,7 +210,7 @@ export default function Html({ Val, changeParent, ...props }) {
                 {
                     hasChildren && showChild ?
                         <div className="col ms-2 m-0 border-2 border-start border-1 border-black ">
-                            {value.children.map((child, index) => <Html key={index} Val={child} className="row" changeParent={(Val,offest=0) => updateChild(index, Val,offest)} />)}
+                            {value.children.map((child, index) => <Html key={index} Val={child} className="row" changeParent={(Val, offest = 0) => updateChild(index, Val, offest)} />)}
                         </div> :
                         null
                 }
@@ -241,10 +254,10 @@ export default function Html({ Val, changeParent, ...props }) {
                                 <div className="dropdown-item my-1 " onClick={openModal} >
                                     Edit
                                 </div>
-                                <div className="dropdown-item my-1  " onClick={()=>{changeParent(value,-1)}}>
+                                <div className="dropdown-item my-1  " onClick={() => { changeParent(value, -1) }}>
                                     Move Up
                                 </div>
-                                <div className="dropdown-item my-1  " onClick={()=>{changeParent(value,1)}} >
+                                <div className="dropdown-item my-1  " onClick={() => { changeParent(value, 1) }} >
                                     Move Down
                                 </div>
                                 <div className="dropdown-item my-1 bg-danger " onClick={() => { changeParent(null) }} >

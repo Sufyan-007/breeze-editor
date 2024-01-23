@@ -1,19 +1,72 @@
 import { useSelector } from 'react-redux'
-import { useState } from 'react'
+import { useRef, useState, useContext } from 'react'
+import { ServiceContext } from "../store/Context";
+import { Modal, Button, Form} from 'react-bootstrap'
+
 import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 import RootComponent from './RootComponent'
+
+
 export default function ComponentTree({ ...props }) {
     const config = useSelector((state) => state.config)
+    const { configService } = useContext(ServiceContext)
 
     const [showDropdown, setShowDropdown] = useState(false)
+    const [ showModal, setShowModal] = useState(false)
+    const newCompRef= useRef()
+
+
 
     function toggleDropdown() {
         setShowDropdown((state) => !state)
     }
 
+
+    function closeModal(added){
+        if(added){
+            const name=newCompRef.current[0].value
+            const route = newCompRef.current[1].value
+            if(name){
+                configService.addComponent(name,route)
+            }
+        }
+        setShowModal(false)
+    }
+
     return (
         <div {...props}>
+            <Modal show={showModal} onHide={()=>closeModal(false)}>
+                <Modal.Header>
+                    Add Component
+                </Modal.Header>
+                <Modal.Body>
+                    <Form ref={newCompRef}>
+                        <Form.Group>
+                            <Form.Label>
+                                Component Name
+                            </Form.Label>
+                            <Form.Control  />
+                        </Form.Group>
+                        <Form.Group name="route">
+                            <Form.Label>
+                                Route
+                            </Form.Label>
+                            <Form.Control name='route' placeholder='(optional)' />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+
+                <Modal.Footer>
+                        <Button variant="secondary" onClick={() => { closeModal(false); }} >
+                            Cancel
+                        </Button>
+                        <Button variant="primary" onClick={() => { closeModal(true); }}>
+                            Update
+                        </Button>
+                    </Modal.Footer>
+
+            </Modal>
             <div className="container-fluid my-1">
                 <div className="row">
                     <div className="d-flex fw-bold fs-5">
@@ -34,7 +87,7 @@ export default function ComponentTree({ ...props }) {
                 }
                 {showDropdown?
                     <div className="row">
-                        <button className=' offset-3 col-3 btn btn-secondary w-50'>
+                        <button className=' offset-3 col-3 btn btn-secondary w-50' onClick={()=>setShowModal(true)}>
                             Add Component
                         </button>
                     </div>

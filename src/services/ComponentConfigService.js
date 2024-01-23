@@ -26,6 +26,16 @@ class ComponentConfigService {
             {method: "POST",headers: { 'Content-Type': 'application/json' },body: JSON.stringify(data)}
         )).json()
         console.log(config);
+        this.dispatch(setConfig(config))
+    }
+
+    async addComponent(name,route){
+        
+        const response = await (await fetch("http://localhost:8000/editor/add-component/" + this.projectName+"/",
+            {method: "POST",headers: { 'Content-Type': 'application/json' },body: JSON.stringify({name,route})}
+        )).json()
+        this.dispatch(setConfig(response.config))
+        this.dispatch(setRouterConfig(response.routes))
     }
 
 

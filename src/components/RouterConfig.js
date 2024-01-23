@@ -33,6 +33,13 @@ export default function RouterConfig({ ...props }) {
                 {showDropdown ?
                     Object.entries(routerConfig.routes).map(([index, route]) => <Route className="row"  route={route}/>)
                     : null}
+
+                {showDropdown?<div className="row">
+                    <button className='btn btn-secondary col-3 m-2 p-0'>
+                        add route
+                    </button>
+                </div>
+                :null}
             </div>
         </div>
     )
