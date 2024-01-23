@@ -1,0 +1,62 @@
+{
+    "mapping_config" : {
+        "parameters": {
+            "postId": {
+                "type": "variable_mapping",
+                "value": "id"
+            }
+        },
+        "schemas": {
+            "AppConfigDetails": {
+                "type": "object_mapping",
+                "root" : true,
+                "value": null,
+                "properties": {
+                    "name": {
+                        "type": "variable_mapping",
+                        "value": "appName"
+                    },
+                    "description": {
+                        "type": "variable_mapping",
+                        "value": "description"
+                    },
+                    "path": {
+                        "type": "variable_mapping",
+                        "value": "path"
+                    },
+                    "author": {
+                        "type": "variable_mapping",
+                        "value": "author"
+                    },
+                    "defaultComponent": {
+                        "type": "variable_mapping",
+                        "value": "defaultComponent"
+                    },
+                    "dependencies": {
+                        "type": "array_object",
+                        "items" : {
+                            "type": "object_mapping",
+                            "ref": "DependencyObject"
+                        }
+                    }
+                }
+            },
+            "DependencyObject": {
+                "root" : false,
+                "type": "object_mapping",
+                "value": "appDependencies",
+                "properties": {
+                    "name": {
+                        "type": "variable_mapping",
+                        "value": "name"
+                    },
+                    "value": {
+                        "type": "variable_mapping",
+                        "value": "value"
+                    }
+                }
+            }
+        }
+    },
+    "$id" : "MAPIING_UUID1"
+}
