@@ -52,18 +52,17 @@ function Editor() {
             </div>
           </div>
         </div>
-        <div className=" row flex-grow-1 overflow-hidden">
-          <div className=" col-3  bg-dark-subtle overflow-x-hidden ">
-            <ComponentTree className="row my-2 border-bottom  border-black" />
-            <RouterConfig className="row my-2 border-bottom border-black" />
-            <ContextConfig className="row my-2 border-bottom border-black" />
-          </div>
-
+          <div className=" row flex-grow-1 overflow-hidden">
+            <div className=" col-3  bg-dark-subtle overflow-y-auto h-100" >
+              <ComponentTree className="row my-2  border-bottom  border-black" />
+              <RouterConfig className="row my-2 border-bottom border-black" />
+              <ContextConfig className="row my-2 border-bottom border-black" />
+            </div>
 
           <div className="col m-0 p-0 overflow-hidden">
             {
               portNumber ?
-                <iframe id="frameID" src={"http://localhost:" + portNumber + "/" + route} style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} className='border-1 border border-black' title='a' frameborder="0"></iframe>
+                <iframe id="iFrame" src={"http://localhost:" + portNumber + "/" + route} style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} className='border-1 border border-black' title='a' frameborder="0"></iframe>
                 : null
             }
           </div>

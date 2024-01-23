@@ -14,7 +14,7 @@ export default function ComponentTree({ ...props }) {
 
     return (
         <div {...props}>
-            <div className="container-fluid">
+            <div className="container-fluid my-1">
                 <div className="row">
                     <div className="d-flex fw-bold fs-5">
                         <button className="btn  p-0 m-0  shadow-none" onClick={toggleDropdown}>
@@ -29,8 +29,16 @@ export default function ComponentTree({ ...props }) {
                 </div>
                 {showDropdown ?
                     Object.entries(config).map(([k, v]) => <RootComponent key={k} name={k} component={v} className=" row m-1 " />)
+
                     : null
                 }
+                {showDropdown?
+                    <div className="row">
+                        <button className=' offset-3 col-3 btn btn-secondary w-50'>
+                            Add Component
+                        </button>
+                    </div>
+                :null}
             </div>
         </div>
     )

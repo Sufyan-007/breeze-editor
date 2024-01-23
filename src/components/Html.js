@@ -8,10 +8,10 @@ import { Modal, Button, Form, } from "react-bootstrap"
 export default function Html({ Val, changeParent, ...props }) {
 
     const [value, setValue] = useState(Val)
-
     const [showChild, setShowChild] = useState(false)
     const hasChildren = value.children?.length > 0
     const [showModal, setShowModal] = useState(false)
+
 
     function toggleShowChild() {
         setShowChild((showChild) => !showChild)
@@ -96,7 +96,14 @@ export default function Html({ Val, changeParent, ...props }) {
             return newVal
         })
         setShowChild(true)
+    }
 
+    function handleHover(){
+        const iFrame= document.getElementById("iFrame")
+        if(iFrame){
+            const iFrameContent = iFrame.contentDocument || iFrame.contentWindow.document
+            console.log(iFrameContent)
+        }
     }
 
     if (value.type === 'Element') {
@@ -118,7 +125,13 @@ export default function Html({ Val, changeParent, ...props }) {
                                 <Form.Label>
                                     ClassName
                                 </Form.Label>
-                                <Form.Control placeholder="className" value={value.attributes.className?.value} onChange={(event) => { updateAttribute("className", event.target.value) }} />
+                                <Form.Control placeholder="className" value={value.attributes?.className?.value} onChange={(event) => { updateAttribute("className", event.target.value) }} />
+                            </Form.Group>
+                            <Form.Group >
+                                <Form.Label>
+                                    Id
+                                </Form.Label>
+                                <Form.Control placeholder="id" value={value.attributes?.id?.value} onChange={(event) => { updateAttribute("id", event.target.value) }} />
                             </Form.Group>
                         </Form>
                     </Modal.Body>
@@ -143,7 +156,7 @@ export default function Html({ Val, changeParent, ...props }) {
                         :
                         <div className="ms-4" />
                     }
-                    <div className="w-100 card d-flex justify-content-between flex-row">
+                    <div id={value.attributes.id?.value} className="w-100 card bg-light d-flex justify-content-between flex-row" onMouseEnter={handleHover} onMouseLeave={handleHover}>
                         <div>{value.tagName}</div>
                         {/* <button className="btn p-0 mx-1" onClick={openModal}>
                             <img className=" h-75 " src={threeDots} alt="" />
