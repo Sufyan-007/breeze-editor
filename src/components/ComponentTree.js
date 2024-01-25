@@ -65,7 +65,6 @@ export default function ComponentTree({ ...props }) {
                             Update
                         </Button>
                     </Modal.Footer>
-
             </Modal>
             <div className="container-fluid my-1">
                 <div className="row">

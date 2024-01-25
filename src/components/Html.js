@@ -79,13 +79,26 @@ export default function Html({ Val, changeParent, ...props }) {
         setValue(value => {
             return { ...value, children }
         })
+        setShowChild(true)
     }
 
     function addChild() {
+        const id = value.attributes.id.value+"-"+value.children.length
+        var tagName="div";
+        if(value.tagName==="Container" || value.tagName==="Col"){
+            tagName="Row"
+        }
+        if(value.tagName==="Row"){
+            tagName="Col"
+        }
+
         const newDiv = {
             "type": "Element",
-            "attributes": { "className": { "type": "LITERAL", "value": "" } },
-            "tagName": "div",
+            "attributes": {
+                "className": { "type": "LITERAL", "value": "" },
+                "id": { "type": "LITERAL", "value":id },
+            },
+            "tagName": tagName,
             "children": []
         }
         const children = [...value.children, newDiv]
@@ -97,26 +110,17 @@ export default function Html({ Val, changeParent, ...props }) {
         setShowChild(true)
     }
 
-    var previousVal = ""
+    
 
-    function handleHover(change) {
+    function handleHover(highlight) {
         // Cors issue here with iFrame
 
-        // const iFrame = document.getElementById("iFrame")
-        // const id = value.attributes.id?.value
+        const iFrame = document.getElementById("iFrame")
+        const id = value.attributes.id?.value
 
-        // if (iFrame && id ) {
-        //     const iFrameContent = iFrame.contentDocument || iFrame.contentWindow.document
-        //     const div = iFrameContent.getElementById(id)
-        //     if(div){
-        //         if (change) {
-        //             previousVal = div.style["background-color"]
-        //             div.style["background-color"] = "#ddd";
-        //         } else {
-        //             div.style["background-color"] = previousVal
-        //         }
-        //     }
-        // }
+        if (iFrame && id ) {
+            iFrame.contentWindow.postMessage({id,highlight}, '*')
+        }
     }
 
     if (value.type === 'Element') {
@@ -182,7 +186,7 @@ export default function Html({ Val, changeParent, ...props }) {
                                 <img className=" h-75 " src={threeDots} alt="" />
                             </button>
                             <div className="dropdown-menu p-0 my-1 " aria-labelledby="dropdownMenuButton">
-                                <div className="dropdown-item my-1 " onClick={openModal} >
+                                <div className="dropdown-item my-1  " onClick={openModal} >
                                     Edit
                                 </div>
                                 <div className="dropdown-item my-1  " onClick={addChild} >

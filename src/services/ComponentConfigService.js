@@ -12,7 +12,7 @@ class ComponentConfigService {
     }
 
     async getRouterConfig() {
-        const routerConfig=await (await fetch("http://localhost:8000/editor/read-router-config/" + this.projectName)).json()
+        const routerConfig = await (await fetch("http://localhost:8000/editor/read-router-config/" + this.projectName)).json()
         this.dispatch(setRouterConfig(routerConfig))
     }
 
@@ -22,20 +22,34 @@ class ComponentConfigService {
     }
 
     async updateComponent(data) {
-        const config = await (await fetch("http://localhost:8000/editor/write-config/" + this.projectName+"/",
-            {method: "POST",headers: { 'Content-Type': 'application/json' },body: JSON.stringify(data)}
+        const config = await (await fetch("http://localhost:8000/editor/write-config/" + this.projectName + "/",
+            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
         )).json()
         console.log(config);
         this.dispatch(setConfig(config))
     }
 
-    async addComponent(name,route){
-        
-        const response = await (await fetch("http://localhost:8000/editor/add-component/" + this.projectName+"/",
-            {method: "POST",headers: { 'Content-Type': 'application/json' },body: JSON.stringify({name,route})}
+    async addComponent(name, route) {
+
+        const response = await (await fetch("http://localhost:8000/editor/add-component/" + this.projectName + "/",
+            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) }
         )).json()
         this.dispatch(setConfig(response.config))
-        this.dispatch(setRouterConfig(response.routes))
+        if (route) {
+            this.addRoute(route, response.comp)
+        }
+    }
+
+    async addRoute(route, component,redirectTo=null) {
+        console.log(route, component, redirectTo)
+        if (route && (component||redirectTo) ) {
+            const response = await (await fetch("http://localhost:8000/editor/add-route/" + this.projectName + "/",
+                { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ route,component,redirectTo }) }
+            )).json()
+            console.log(response)
+            this.dispatch(setRouterConfig(response))
+        }
+
     }
 
 
