@@ -2,10 +2,8 @@ import { useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router';
 import ComponentConfigService from '../services/ComponentConfigService';
 import { useDispatch } from 'react-redux'
-import ComponentTree from './ComponentTree';
 import { ServiceContext } from '../store/Context';
-import RouterConfig from './RouterConfig';
-import ContextConfig from './ContextConfig';
+import Sidebar from './Sidebar';
 
 function Editor() {
   const dispatch = useDispatch()
@@ -54,11 +52,8 @@ function Editor() {
           </div>
         </div>
         <div className=" row flex-grow-1 overflow-hidden">
-          <div className=" col-3  bg-dark-subtle overflow-y-auto h-100" >
-            <ComponentTree className="row my-2  border-bottom  border-black" />
-            <RouterConfig className="row my-2 border-bottom border-black" />
-            <ContextConfig className="row my-2 border-bottom border-black" />
-          </div>
+          <Sidebar className=" col-3  bg-dark-subtle overflow-y-auto h-100" />
+          
 
           <div className="col m-0 p-0 overflow-hidden">
             {

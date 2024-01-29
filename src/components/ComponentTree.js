@@ -8,9 +8,11 @@ import downArrow from "../assets/icons/arrow_down_icon.svg"
 import RootComponent from './RootComponent'
 
 
-export default function ComponentTree({ ...props }) {
+export default function ComponentTree({ selectComponent, ...props }) {
     const config = useSelector((state) => state.config)
     const { configService } = useContext(ServiceContext)
+    
+
 
     const [showDropdown, setShowDropdown] = useState(false)
     const [ showModal, setShowModal] = useState(false)
@@ -33,6 +35,10 @@ export default function ComponentTree({ ...props }) {
         }
         setShowModal(false)
     }
+
+    
+
+    
 
     return (
         <div {...props}>
@@ -80,7 +86,7 @@ export default function ComponentTree({ ...props }) {
                     </div>
                 </div>
                 {showDropdown ?
-                    Object.entries(config).map(([k, v]) => <RootComponent key={k} name={k} component={v} className=" row m-1 " />)
+                    Object.entries(config).map(([k, v]) => <RootComponent key={k} name={k} component={v} selectComponent={selectComponent} className=" row m-1 " />)
 
                     : null
                 }

@@ -5,7 +5,8 @@ import threeDots from "../assets/icons/three_dots_icon.svg"
 import React from "react"
 import { Modal, Button, Form, } from "react-bootstrap"
 
-export default function Html({ Val, changeParent, ...props }) {
+
+export default function Html({ Val, changeParent, pushSelection, ...props }) {
 
     const [value, setValue] = useState(Val)
     const [showChild, setShowChild] = useState(false)
@@ -173,7 +174,7 @@ export default function Html({ Val, changeParent, ...props }) {
                         :
                         <div className="ms-4" />
                     }
-                    <div id={value.attributes.id?.value} className="w-100 card bg-light d-flex justify-content-between flex-row" onMouseEnter={() => handleHover(true)} onMouseLeave={() => handleHover(false)}>
+                    <div id={value.attributes.id?.value} className="w-100 card  bg-light d-flex justify-content-between flex-row" onClick={()=>pushSelection(value)} onMouseEnter={() => handleHover(true)} onMouseLeave={() => handleHover(false)}>
                         <div>{value.tagName}</div>
                         {/* <button className="btn p-0 mx-1" onClick={openModal}>
                             <img className=" h-75 " src={threeDots} alt="" />
@@ -214,7 +215,7 @@ export default function Html({ Val, changeParent, ...props }) {
                 {
                     hasChildren && showChild ?
                         <div className="col ms-2 m-0 border-2 border-start border-1 border-black ">
-                            {value.children.map((child, index) => <Html key={index} Val={child} className="row" changeParent={(Val, offest = 0) => updateChild(index, Val, offest)} />)}
+                            {value.children.map((child, index) => <Html pushSelection={pushSelection} key={index} Val={child} className="row" changeParent={(Val, offest = 0) => updateChild(index, Val, offest)} />)}
                         </div> :
                         null
                 }
