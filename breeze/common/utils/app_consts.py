@@ -1,5 +1,5 @@
 
-CONFIG_PATH = "/home/yash/Documents/Projects/Breeze/breezeui/configurations"
+CONFIG_PATH = "/home/sufyan/Documents/Projects/Breeze_editor_repo/breezeui/configurations"
 
 CONFIG_FILES_PATH = {
     'APP_CONFIG' : 'app_basic_config',
