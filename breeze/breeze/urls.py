@@ -35,7 +35,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('config-writer/', include('apps.configuration_writer.urls')),
     path('code-generator/', include('apps.code_generator.urls')),
-
+    path("editor/", include('apps.editor_api.urls')),
     path('api/swagger', schema_view.with_ui('swagger', cache_timeout=0),
          name='schema-swagger-ui'),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui')
