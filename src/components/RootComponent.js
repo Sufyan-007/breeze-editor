@@ -20,7 +20,7 @@ export default function RootComponent({ name, component,selectComponent, ...prop
         <div {...props}>
             <div className="container-fluid border border-dark-subtle border-2">
                 <div className=" d-flex justify-content-between my-2 fw-bold">
-                    <button className="btn" onClick={()=>selectComponent({elem:component,isComp:true})} >{name}</button>
+                    <button className="btn text-white" onClick={()=>selectComponent({elem:component,isComp:true})} >{name}</button>
                     <button className="btn btn-secondary btn-sm " onClick={updateComponent}>Update</button>
                 </div>
             </div>

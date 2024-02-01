@@ -1,9 +1,11 @@
-import { useMemo, useRef, useState } from 'react'
+import {  useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router';
 import ComponentConfigService from '../services/ComponentConfigService';
+import SidebarService from "../services/SidebarService"
 import { useDispatch } from 'react-redux'
 import { ServiceContext } from '../store/Context';
 import Sidebar from './Sidebar';
+import ElementConfig from './ElementConfig';
 
 function Editor() {
   const dispatch = useDispatch()
@@ -19,27 +21,27 @@ function Editor() {
     }
   }, [projectName, dispatch])
 
+  const sidebarService = useMemo(() => {
+    return new SidebarService()
+  }, [])
+
 
 
   function setPort() {
-
     const routeI = routeInput.current.value
     const input = portInput.current.value
     if ((input >= 0 && input !== portNumber) || route !== routeI) {
       setPortNumber(input)
       setRoute(routeI)
     }
-    else {
-      // setPortNumber("")
-    }
   }
 
 
 
   return (
-    <ServiceContext.Provider value={{ configService }}>
+    <ServiceContext.Provider value={{ configService, sidebarService }}>
       <div className="container-fluid vh-100 d-flex flex-column ">
-        <div className=" navbar  bg-dark row">
+        <div className=" navbar row" style={{backgroundColor:"#151518"}}>
           <div className="container-fluid">
             <div className=" navbar-brand text-white">
               Breeze Studio
@@ -52,8 +54,8 @@ function Editor() {
           </div>
         </div>
         <div className=" row flex-grow-1 overflow-hidden">
-          <Sidebar className=" col-3  bg-dark-subtle overflow-y-auto h-100" />
-          
+          <Sidebar className=" col-3   overflow-y-auto h-100 fs-6 text-white" style={{ width: "16rem", backgroundColor: "#303033" }} />
+
 
           <div className="col m-0 p-0 overflow-hidden">
             {
@@ -62,6 +64,9 @@ function Editor() {
                 : null
             }
           </div>
+          <ElementConfig className="col-1" style={{ width: "15rem", backgroundColor: "#303033" }} />
+
+
         </div>
       </div>
     </ServiceContext.Provider>

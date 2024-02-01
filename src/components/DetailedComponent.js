@@ -6,27 +6,11 @@ import { ServiceContext } from "../store/Context";
 import Variables from "./Variables";
 import Functions from "./Functions";
 import arrowReturn from "../assets/icons/arrow-return-left.svg";
-import DetailedHtml from "./DetailedHtml";
+
 
 
 export default function DetailedComponent({ component, resetSelection, ...props }) {
     const name = component.name
-
-
-    const [selectionStack, setSelectionStack] = useState([])
-    const pushSelection = (elem) => {
-        console.log(elem)
-        setSelectionStack(prevStack => [...prevStack, elem]);
-    }
-    const popSelection = () => {
-        setSelectionStack(prevStack => {
-            const newStack = [...prevStack];
-            newStack.pop();
-            return newStack;
-        });
-    }
-    const sidebarSelection = selectionStack.length > 0 ? selectionStack[selectionStack.length - 1] : null;
-
 
     const [Component, setComponent] = useState(component)
     const [showHtml, setShowHtml] = useState(false)
@@ -48,16 +32,11 @@ export default function DetailedComponent({ component, resetSelection, ...props 
         }
     }
 
-    if (sidebarSelection) {
-        return (
-            <DetailedHtml {...props} elem={sidebarSelection} popSelection={popSelection} pushSelection={pushSelection} />
-        )
-    }
 
     return (
         <div {...props}>
             <div className="container-fluid">
-                <div className="d-flex m-1 fw-bold fs-4">
+                <div className="d-flex m-1 fw-bold fs-5">
                     <button className=" d-flex my-2 p-0  btn" onClick={resetSelection}>
                         <img src={arrowReturn} className="me-2" style={{ height: '1rem' }} alt="" />
                     </button>
@@ -65,7 +44,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                 </div>
 
 
-                <div className="row mt-3 border-top py-2 fs-5 border-black border-bottom">
+                <div className="row mt-3 border-top py-2 fs-6 border-black border-bottom">
                     <div className="d-flex ">
                         <button className="btn  p-0 m-0  shadow-none" >
                             {false ?
@@ -78,7 +57,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                     </div>
                 </div>
 
-                <div className="row py-2 fs-5 border-black   border-bottom">
+                <div className="row py-2 fs-6 border-black   border-bottom">
                     <div className="d-flex ">
                         <button className="btn  p-0 m-0  shadow-none" >
                             {false ?
@@ -90,7 +69,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                         Prop Variables
                     </div>
                 </div>
-                <div className="row  py-2 fs-5 border-black border-bottom">
+                <div className="row  py-2 fs-6 border-black border-bottom">
                     <div className="d-flex ">
                         <button className="btn  p-0 m-0  shadow-none" >
                             {false ?
@@ -112,7 +91,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                 </div>
 
 
-                <div className="row py-2 fs-5 border-black border-bottom">
+                <div className="row py-2 fs-6 border-black border-bottom">
                     <div className="d-flex ">
                         <button className="btn  p-0 m-0  shadow-none" >
                             {false ?
@@ -134,7 +113,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                 </div>
 
 
-                <div className="row py-2 fs-5 border-black border-bottom">
+                <div className="row py-2 fs-6 border-black border-bottom">
                     <div className="d-flex ">
                         <button className="btn  p-0 m-0  shadow-none" >
                             {false ?
@@ -147,7 +126,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                     </div>
                 </div>
 
-                <div className="row py-2 fs-5 border-black border-bottom">
+                <div className="row py-2 fs-6 border-black border-bottom">
                     <div className="d-flex ">
                         <button className="btn  p-0 m-0  shadow-none" >
                             {false ?
@@ -163,7 +142,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
 
 
                 <div className="row py-2 border-black border-bottom">
-                    <div className="d-flex fs-5  ">
+                    <div className="d-flex fs-6  ">
                         <button className="btn  p-0 m-0  shadow-none" onClick={toggleHtml}>
                             {showHtml ?
                                 <img src={downArrow} height={24} alt="" />
@@ -174,7 +153,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                         HTML Tree
                     </div>
                     {showHtml ? <div className="col  ">
-                        <Html Val={Component.html} className="row mx-1 " pushSelection={pushSelection} changeParent={(val) => updateHtml(val)} />
+                        <Html Val={Component.html} className="row mx-1 " changeParent={(val) => updateHtml(val)} />
                     </div> : null}
                 </div>
             </div>

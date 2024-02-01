@@ -56,7 +56,7 @@ export default function DetailedHtml(params) {
                         Children Tree
                     </div>
                     {showHtml ? <div className="col  ">
-                        <Html Val={elem} className="row mx-1 " pushSelection={pushSelection} changeParent={(val) => console.log(val)} />
+                        <Html Val={elem} className="row mx-1 "  changeParent={(val) => console.log(val)} />
                     </div> : null}
                 </div>
             </div>
