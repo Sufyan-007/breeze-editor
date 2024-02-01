@@ -4,7 +4,7 @@ import os
 from common.utils.path_extractor import get_path_without_ext
 
 
-from common.utils.file_utils import create_dir_if_not_exists, get_dir_path_from_file
+from common.utils.file_utils import create_parent_dir_if_not_exists, get_dir_path_from_file
 from common.utils.app_consts import NEW_LINE_CHAR
 from common.utils.formatter import format_val
 
@@ -62,7 +62,7 @@ class ReduxStoreGenerator():
         formatted_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=react_store_code, text=True)
 
         # Create parent dir if not exists
-        create_dir_if_not_exists(output_file)
+        create_parent_dir_if_not_exists(output_file)
 
         # print("output file", output_file)
         # Write the reducer code to the specified output file

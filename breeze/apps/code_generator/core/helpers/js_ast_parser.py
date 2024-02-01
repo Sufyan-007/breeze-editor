@@ -1,35 +1,12 @@
 import execjs
 import json
 import pathlib
-# from temp_react_code import javascript_code1
-# from ..js4_parser import get_ast
 import traceback 
-# from .utils.file_utils import create_dir_if_not_exists, write_file 
 import subprocess
 import os
-
-
-def get_dir_path_from_file(file_path):
-    return os.path.dirname(file_path)
-
-def create_dir_if_not_exists(file_path):
-    dir_path = get_dir_path_from_file(file_path)
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-
-def is_dir_exists(dir_path):
-    return os.path.isdir(dir_path)
-
-def write_file(file_path, content, mode="w"):
-    with open(file_path, mode) as jsconfig_file:
-
-        jsconfig_file.write(content)
-
-
-def get_filename_without_ext(file_path):
-    return os.path.splitext(os.path.basename(file_path))[0]
-
-THIRD_PARTY_CONFIG_PATH = "/home/raj/Desktop/bridge/processor/bridge_ui_server/breezeui/third_party_configs"
+from common.utils.app_consts import THIRD_PARTY_CONFIG_PATH, THIRD_PARTY_DIR, JS_FILE_PATH, JS_FUNCTION_NAME
+from common.utils.file_utils import get_filename_without_ext
+from common.utils.file_helper import write_file, create_dir_if_not_exists
 
 def get_ast(script_path, function_name, *args):
     command = ["node", script_path, function_name,  *args]
@@ -146,11 +123,6 @@ def read_all_comp_files_path(dir_path, file_type):
     return all_comp_path
 
 
-COMP_DIR = "/home/raj/Desktop/bridge/npm_libraries/react_bootstrap/react-bootstrap/src"
-
-JS_FILE_PATH = '/home/raj/Desktop/bridge/processor/ast_parser/index.js'
-JS_FUNCTION_NAME = 'get_ast'
-
 def get_exports_of_file(ast_config):
     program_body = ast_config['body']
     exports_config = []
@@ -183,6 +155,7 @@ def get_exports_of_file(ast_config):
 
 
 def save_comp_config(props,  comp_config):
+    lib_name = "react-bootstrap"
     initial_config = {
         "type": "COMPONENT",
         "name": comp_config['name'],
@@ -208,18 +181,19 @@ def save_comp_config(props,  comp_config):
 
     print(props, comp_config)
     
-    write_file(f"{THIRD_PARTY_CONFIG_PATH}/{file_name}",  json.dumps(initial_config))
+    create_dir_if_not_exists(f"{THIRD_PARTY_CONFIG_PATH}/{lib_name}", True)
+    write_file(f"{THIRD_PARTY_CONFIG_PATH}/{lib_name}/{file_name}",  json.dumps(initial_config))
 
     
 
 def fetch_props_from_comps():
-    comp_files = read_all_comp_files_path(COMP_DIR, "tsx") 
+    comp_files = read_all_comp_files_path(THIRD_PARTY_DIR, "tsx") 
     comp_files.sort()
     output = ""
     lib_name = "react-bootstrap"
     # comp_files = ["/home/raj/Desktop/bridge/processor/bridge_ui_server/testing_ts.tsx"]
     comp_files = comp_files[0:10]
-    create_dir_if_not_exists(THIRD_PARTY_CONFIG_PATH)
+    create_dir_if_not_exists(THIRD_PARTY_CONFIG_PATH, True)
     for fl in comp_files:
         f = open(fl, "r")
         file_content = f.read()
@@ -255,11 +229,11 @@ def fetch_props_from_comps():
 
         output = output + f"----------------------\n"
 
-        print("---------------------")
+        # print("---------------------")
 
-        log_file = open("/home/raj/Desktop/bridge/processor/bridge_ui_server/generated_props.log", "w")
-        log_file.write(output)
-        log_file.close()
+        # log_file = open("/home/raj/Desktop/bridge/processor/bridge_ui_server/generated_props.log", "w")
+        # log_file.write(output)
+        # log_file.close()
 
 fetch_props_from_comps()
 

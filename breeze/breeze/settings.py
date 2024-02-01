@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'apps.configuration_writer',
+    'apps.configuration_reader',
     'apps.code_generator',
     'rest_framework_swagger',       # Swagger 
     'drf_yasg',

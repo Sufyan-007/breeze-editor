@@ -1,6 +1,7 @@
 {
     "main_comp": {
         "name": "Main",
+        "$id" : "MAIN",
         "containingFile": "components/Main.js",
         "stateVars": [],
         "propsVars": [],
@@ -37,6 +38,7 @@
     },
     "create_app_page": {
         "name": "CreateAppPage",
+        "$id" : "CREATE_APP_PAGE",
         "containingFile": "components/CreateAppPage.js",
         "stateVars": [
             {
@@ -791,6 +793,7 @@
     },
     "react_bootstrap": {
         "name": "ReactBootstrap",
+        "$id" : "REACT_BOOTSTRAP",
         "containingFile": "components/ReactBootstrap.js",
         "stateVars": [],
         "propsVars": [],
@@ -1014,6 +1017,7 @@
     },
     "post_component": {
         "name": "PostComp",
+        "$id" : "POST_COMP",
         "containingFile": "components/PostComp.js",
         "stateVars": [
             {
@@ -1478,6 +1482,7 @@
     
     "post_list": {
     "name": "PostListComp",
+    "$id" : "POST_LIST",
     "containingFile": "components/PostListComp.js",
     "stateVars": [
         {
