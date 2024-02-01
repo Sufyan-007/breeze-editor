@@ -8,9 +8,11 @@ import downArrow from "../assets/icons/arrow_down_icon.svg"
 import RootComponent from './RootComponent'
 
 
-export default function ComponentTree({ ...props }) {
+export default function ComponentTree({ selectComponent, ...props }) {
     const config = useSelector((state) => state.config)
     const { configService } = useContext(ServiceContext)
+    
+
 
     const [showDropdown, setShowDropdown] = useState(false)
     const [ showModal, setShowModal] = useState(false)
@@ -33,6 +35,10 @@ export default function ComponentTree({ ...props }) {
         }
         setShowModal(false)
     }
+
+    
+
+    
 
     return (
         <div {...props}>
@@ -68,7 +74,7 @@ export default function ComponentTree({ ...props }) {
             </Modal>
             <div className="container-fluid my-1">
                 <div className="row">
-                    <div className="d-flex fw-bold fs-5">
+                    <div className="d-flex  fw-bold fs-5">
                         <button className="btn  p-0 m-0  shadow-none" onClick={toggleDropdown}>
                             {showDropdown ?
                                 <img src={downArrow} height={24} alt="" />
@@ -80,15 +86,17 @@ export default function ComponentTree({ ...props }) {
                     </div>
                 </div>
                 {showDropdown ?
-                    Object.entries(config).map(([k, v]) => <RootComponent key={k} name={k} component={v} className=" row m-1 " />)
+                    Object.entries(config).map(([k, v]) => <RootComponent key={k} name={k} component={v} selectComponent={selectComponent} className=" row m-1 " />)
 
                     : null
                 }
                 {showDropdown?
-                    <div className="row">
-                        <button className=' offset-3 col-3 btn btn-secondary w-50' onClick={()=>setShowModal(true)}>
-                            Add Component
-                        </button>
+                    <div className="row my-2">
+                        <div className='d-flex justify-content-around'>
+                            <button className='   btn btn-secondary ' onClick={()=>setShowModal(true)}>
+                                Add Component
+                            </button>
+                        </div>
                     </div>
                 :null}
             </div>
