@@ -1,0 +1,757 @@
+{
+    
+    "text_comp_config": {
+        "name": "CreateAppPage",
+        "containingFile": "components/CreateAppPage.js",
+        "stateVars": [
+            {
+                "name": "projectData",
+                "type": "OBJECT",
+                "defaultValue": {
+                    "name": "",
+                    "description": "",
+                    "author": "",
+                    "defaultComponent": "",
+                    "strictMode": "FALSE",
+                    "path" : "",
+                    "component_src_dir": "src",
+                    "dependencies": []
+                },
+                "$id": "STATE_VARS/PROJECT_DATA"
+            },
+            {
+                "name": "isSaving",
+                "type": "BOOLEAN",
+                "defaultValue": false,
+                "$id": "STATE_VARS/IS_SAVING"
+            }
+        ],
+        "propsVars": [],
+        "otherVars": [],
+        "functions": [
+            {
+                "name": "handleInputChange",
+                "$id": "FUNCTIONS/UUID1",
+                "isAnonymous": false,
+                "parameters": {
+                    "list": [
+                        {
+                            "name": "prop"
+                        },
+                        {
+                            "name": "value"
+                        }
+                    ]
+                },
+                "isAsync": false,
+                "body": "console.log(prop, value); \n setProjectData({...projectData, [prop] : value}); "
+            },
+            {
+                "name": "saveApiConfigMapper",
+                "$id": "FUNCTIONS/UUID5",
+                "isAnonymous": false,
+                "parameters": {
+                    "postId": {
+                        "type": "variable_mapping",
+                        "value": "id"
+                    }
+                },
+                "func_type" : "MAPPER_FUNC",
+                "isAsync": false,
+                "schemas": {
+                    "AppConfigDetails": {
+                        "type": "object_mapping",
+                        "root" : true,
+                        "value": null,
+                        "properties": {
+                            "name": {
+                                "type": "variable_mapping",
+                                "value": "appName"
+                            },
+                            "description": {
+                                "type": "variable_mapping",
+                                "value": "description"
+                            },
+                            "path": {
+                                "type": "variable_mapping",
+                                "value": "path"
+                            },
+                            "author": {
+                                "type": "variable_mapping",
+                                "value": "author"
+                            },
+                            "defaultComponent": {
+                                "type": "variable_mapping",
+                                "value": "defaultComponent"
+                            },
+                            "dependencies": {
+                                "type": "array_object",
+                                "items" : {
+                                    "type": "object_mapping",
+                                    "ref": "DependencyObject"
+                                }
+                            }
+                        }
+                    },
+                    "DependencyObject": {
+                        "root" : false,
+                        "type": "object_mapping",
+                        "value": "appDependencies",
+                        "properties": {
+                            "name": {
+                                "type": "variable_mapping",
+                                "value": "name"
+                            },
+                            "value": {
+                                "type": "variable_mapping",
+                                "value": "value"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "name": "saveAppConfig",
+                "$id": "FUNCTIONS/FUN2",
+                "isAnonymous": false,
+                "parameters": {
+                    "list": []
+                },
+                "isAsync": true,
+                "body": "console.log(projectData); \n setIsSaving(true);\n await saveAppConfiguration(projectData); \n setIsSaving(false); "
+            },
+            {
+                "name": "getPostFun",
+                "$id": "FUNCTIONS/FUN3",
+                "isAnonymous": true,
+                "parameters": {
+                    "list": []
+                },
+                "isAsync": false,
+                "body": " console.log(); "
+            }
+        ],
+        "html": {
+            "type": "Element",
+            "tagName": "",
+            "children": [
+                {
+                    "type": "Element",
+                    "tagName": "div",
+                    "attributes": {
+                        "className": {
+                            "type": "LITERAL",
+                            "value": "align-items-center d-flex justify-content-center"
+                        }
+                    },
+                    "children": [
+                        {
+                            "tagName": "div",
+                            "type": "Element",
+                            "attributes": {
+                                "style": {
+                                    "type": "OBJECT",
+                                    "value": {
+                                        "padding": "50px",
+                                        "margin": "auto",
+                                        "display": "flex",
+                                        "justifyContent": "center",
+                                        "flexDirection": "column"
+                                    }
+                                },
+                                "className": {
+                                    "type": "LITERAL",
+                                    "value": "form"
+                                }
+                            },
+                            "children": [
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "title text-center"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "text",
+                                            "text": "Creator App"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "subtitle text-center"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "text",
+                                            "text": "Let's create your app!"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "input-container ic1"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "input",
+                                            "attributes": {
+                                                "type": {
+                                                    "type": "LITERAL",
+                                                    "value": "text"
+                                                },
+                                                "name": {
+                                                    "type": "LITERAL",
+                                                    "value": "name"
+                                                },
+                                                "id": {
+                                                    "type": "LITERAL",
+                                                    "value": "name"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "input"
+                                                },
+                                                "placeholder": {
+                                                    "type": "LITERAL",
+                                                    "value": " "
+                                                },
+                                                "onChange": {
+                                                    "type": "FUNCTION",
+                                                    "value": {
+                                                        "name": "",
+                                                        "$id": "FUNCTIONS/A1",
+                                                        "isAnonymous": true,
+                                                        "parameters": {
+                                                            "list": [
+                                                                {
+                                                                    "name": "event"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "isAsync": false,
+                                                        "body": "handleInputChange('name', event.target.value) ;"
+                                                    }
+                                                }
+                                            },
+                                            "children": []
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "label",
+                                            "attributes": {
+                                                "htmlFor": {
+                                                    "type": "LITERAL",
+                                                    "value": "name"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "placeholder"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Project name"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "input-container ic2"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "textarea",
+                                            "attributes": {
+                                                "name": {
+                                                    "type": "LITERAL",
+                                                    "value": "description"
+                                                },
+                                                "id": {
+                                                    "type": "LITERAL",
+                                                    "value": "description"
+                                                },
+                                                "cols": {
+                                                    "type": "LITERAL",
+                                                    "value": "30"
+                                                },
+                                                "rows": {
+                                                    "type": "LITERAL",
+                                                    "value": "10"
+                                                },
+                                                "placeholder": {
+                                                    "type": "LITERAL",
+                                                    "value": " "
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "input"
+                                                },
+                                                "onChange": {
+                                                    "type": "FUNCTION",
+                                                    "value": {
+                                                        "name": "",
+                                                        "$id": "FUNCTIONS/F2",
+                                                        "isAnonymous": true,
+                                                        "parameters": {
+                                                            "list": [
+                                                                {
+                                                                    "name": "event"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "isAsync": false,
+                                                        "body": "handleInputChange('description', event.target.value) ;"
+                                                    }
+                                                }
+                                            },
+                                            "children": []
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "label",
+                                            "attributes": {
+                                                "htmlFor": {
+                                                    "type": "LITERAL",
+                                                    "value": "description"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "placeholder"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Description"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "input-container ic2"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "input",
+                                            "attributes": {
+                                                "name": {
+                                                    "type": "LITERAL",
+                                                    "value": "author"
+                                                },
+                                                "id": {
+                                                    "type": "LITERAL",
+                                                    "value": "author"
+                                                },
+                                                "type": {
+                                                    "type": "LITERAL",
+                                                    "value": "text"
+                                                },
+                                                "placeholder": {
+                                                    "type": "LITERAL",
+                                                    "value": " "
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "input"
+                                                },
+                                                "onChange": {
+                                                    "type": "FUNCTION",
+                                                    "value": {
+                                                        "name": "",
+                                                        "$id": "FUNCTIONS/F3",
+                                                        "isAnonymous": true,
+                                                        "parameters": {
+                                                            "list": [
+                                                                {
+                                                                    "name": "event"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "isAsync": false,
+                                                        "body": "handleInputChange('author', event.target.value) ;"
+                                                    }
+                                                }
+                                            },
+                                            "children": []
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "label",
+                                            "attributes": {
+                                                "htmlFor": {
+                                                    "type": "LITERAL",
+                                                    "value": "author"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "placeholder"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Author Name"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "input-container ic2"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "input",
+                                            "attributes": {
+                                                "name": {
+                                                    "type": "LITERAL",
+                                                    "value": "defaultComponent"
+                                                },
+                                                "id": {
+                                                    "type": "LITERAL",
+                                                    "value": "defaultComponent"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "input"
+                                                },
+                                                "placeholder": {
+                                                    "type": "LITERAL",
+                                                    "value": " "
+                                                },
+                                                "onChange": {
+                                                    "type": "FUNCTION",
+                                                    "value": {
+                                                        "name": "",
+                                                        "$id": "FUNCTIONS/F2",
+                                                        "isAnonymous": true,
+                                                        "parameters": {
+                                                            "list": [
+                                                                {
+                                                                    "name": "event"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "isAsync": false,
+                                                        "body": "handleInputChange('defaultComponent', event.target.value) ;"
+                                                    }
+                                                }
+                                            },
+                                            "children": []
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "label",
+                                            "attributes": {
+                                                "htmlFor": {
+                                                    "type": "LITERAL",
+                                                    "value": "defaultComponent"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "placeholder"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Default Component Name"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "input-container ic2"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "input",
+                                            "attributes": {
+                                                "type": {
+                                                    "type": "LITERAL",
+                                                    "value": "text"
+                                                },
+                                                "name": {
+                                                    "type": "LITERAL",
+                                                    "value": "path"
+                                                },
+                                                "id": {
+                                                    "type": "LITERAL",
+                                                    "value": "path"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "input"
+                                                },
+                                                "placeholder": {
+                                                    "type": "LITERAL",
+                                                    "value": " "
+                                                },
+                                                "onChange": {
+                                                    "type": "FUNCTION",
+                                                    "value": {
+                                                        "name": "",
+                                                        "$id": "FUNCTIONS/A1",
+                                                        "isAnonymous": true,
+                                                        "parameters": {
+                                                            "list": [
+                                                                {
+                                                                    "name": "event"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "isAsync": false,
+                                                        "body": "handleInputChange('path', event.target.value) ;"
+                                                    }
+                                                }
+                                            },
+                                            "children": []
+                                        },
+                                        {
+                                            "type": "Element",
+                                            "tagName": "label",
+                                            "attributes": {
+                                                "htmlFor": {
+                                                    "type": "LITERAL",
+                                                    "value": "path"
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "placeholder"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Project Path"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Element",
+                                    "tagName": "div",
+                                    "attributes": {
+                                        "style": {
+                                            "type": "OBJECT",
+                                            "value": {
+                                                "marginTop": "40px"
+                                            }
+                                        },
+                                        "className": {
+                                            "type": "LITERAL",
+                                            "value": "text-center"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "Element",
+                                            "tagName": "button",
+                                            "attributes": {
+                                                "style": {
+                                                    "type": "OBJECT",
+                                                    "value": {
+                                                        "padding": "10px",
+                                                        "backgroundColor": "#7A0059",
+                                                        "borderRadius": "5px",
+                                                        "border": "none",
+                                                        "fontSize": "16px",
+                                                        "color": "white"
+                                                    }
+                                                },
+                                                "className": {
+                                                    "type": "LITERAL",
+                                                    "value": "btn btn-primary fw-bold"
+                                                },
+                                                "name": {
+                                                    "type": "LITERAL",
+                                                    "value": "file"
+                                                },
+                                                "id": {
+                                                    "type": "LITERAL",
+                                                    "value": "file"
+                                                },
+                                                "type": {
+                                                    "type": "LITERAL",
+                                                    "value": "file"
+                                                },
+                                                "onClick": {
+                                                    "type": "FUNCTION",
+                                                    "value": {
+                                                        "name": "",
+                                                        "$id": "",
+                                                        "isAnonymous": true,
+                                                        "parameters": {
+                                                            "list": [
+                                                                {
+                                                                    "name": "event"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "isAsync": false,
+                                                        "body": "saveAppConfig();"
+                                                    }
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "text",
+                                                    "text": "Create App"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "tagName": "div",
+                                    "type": "Element",
+                                    "children": [
+                                        {
+                                            "type": "Expression",
+                                            "children": [
+                                                {
+                                                    "type": "map",
+                                                    "variable": "projectData.dependencies",
+                                                    "code": "const a = 1;",
+                                                    "callbackParams": [
+                                                        "dep"
+                                                    ],
+                                                    "attributes": {},
+                                                    "children": [
+                                                        {
+                                                            "type": "Element",
+                                                            "tagName": "div",
+                                                            "attributes": {},
+                                                            "children": [
+                                                                {
+                                                                    "type": "Expression",
+                                                                    "children": [
+                                                                        {
+                                                                            "type": "code",
+                                                                            "code": "dep.name"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "text",
+                                                                    "text": " : "
+                                                                },
+                                                                {
+                                                                    "type": "Expression",
+                                                                    "children": [
+                                                                        {
+                                                                            "type": "code",
+                                                                            "code": "dep.version"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "imports": {
+            "components": [],
+            "other": [
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "axios",
+                    "import_entity": "axios",
+                    "import_type": "FULL"
+                },
+                {
+                    "TYPE": "THIRD_PARTY",
+                    "from": "react",
+                    "import_entity": "useEffect",
+                    "import_type": "SINGLE"
+                },
+                {
+                    "TYPE" : "SERVICE",
+                    "from" : "service/PostService.js",
+                    "import_entity": "getPost",
+                    "import_type" : "SINGLE"
+                },
+                {
+                    "TYPE" : "SERVICE",
+                    "from" : "service/ConfigService.js",
+                    "import_entity": "saveAppConfiguration",
+                    "import_type" : "SINGLE"
+                }
+            ],
+            "styles": [
+                {
+                    "TYPE": "CUSTOM",
+                    "from": "CREATED_APP_CSS"
+                }
+            ]
+        },
+        "hooks": [
+            {
+                "type": "USE_EFFECT",
+                "dependantVars": [],
+                "implementation": {
+                    "type": "FUNCTION",
+                    "$ref": "FUNCTIONS/FUN3"
+                }
+            }
+        ]
+    }
+}

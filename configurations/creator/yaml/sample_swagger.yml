@@ -11,7 +11,7 @@ info:
     name: MIT
     url: https://github.com/openai/openai-openapi/blob/master/LICENSE
 servers:
-  - url: https://api.openai.com/v1
+  - url: http://api.openai.com/v1
 tags:
   - name: Post
     description: Sample posts.
@@ -91,27 +91,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PostDetails"
-  
-  /comments:
-    get:
-      operationId: getComments
+    put:
+      operationId: editPost
       tags:
-        - Comment
-      summary: Returns a list of comments that belong to the user's post.
+        - Post
       parameters:
-        - in: query
+        - in: path
           name: postId
-          required: false
+          required: true
           schema:
             type: number
-          description: Only return comments with the given post.
+            # ideally this will be an actual ID, so this will always work from browser
+            example: 1
+          description: The ID of the post to use for this request
+      
+      summary: Returns a post that belong to the user's organization.
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListCommntsResponse"
+                $ref: "#/components/schemas/PostDetails"
+  
   
 components:
   securitySchemes:
@@ -120,6 +122,7 @@ components:
       scheme: "bearer"
 
   schemas:
+    
     Error:
       type: object
       properties:
@@ -140,13 +143,8 @@ components:
         - message
         - param
         - code
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          $ref: "#/components/schemas/Error"
-      required:
-        - error
+    
+    
     AppConfigDetails:
       type: object
       properties:
@@ -161,24 +159,9 @@ components:
         defaultComponent:
           type: string
         dependencies:
-          type: string 
+          type: object
+          $ref: "#/components/schemas/DependencyObject"
   
-    CommentDetails:
-      type: object
-      properties:
-        id:
-          description: id of post
-          type: number
-        userId:
-          description: id of user
-          type: number
-        title:
-          description: title of post
-          type: string
-        body:
-          description: body of post
-          type: string
-      
     PostDetails:
       type: object
       properties:
@@ -200,6 +183,20 @@ components:
         - id
         - userId
 
+    DependencyObject: 
+      type: object
+      properties:
+        obj:
+          type: object
+          $ref: "#/components/schemas/Error"
+
+        name:
+          description: name of dependency
+          type: string
+        value:
+          description: value of dependency
+          type: string
+      
     CreatePostResponse:
       type: object
       description: Represents a chat completion response returned by model, based on the provided input.
