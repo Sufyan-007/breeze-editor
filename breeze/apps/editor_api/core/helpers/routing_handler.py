@@ -137,7 +137,7 @@ class RouteHandler:
 
     def get_app_routing_code(self, routing_code):
         react_code = f'''
-        import React from 'react';
+        import React, {{useEffect}} from 'react';
         import {{ Routes, Route, Navigate, BrowserRouter, createBrowserRouter, createRoutesFromElements, RouterProvider }} from "react-router-dom";
         
         const routes = createBrowserRouter (
@@ -147,8 +147,29 @@ class RouteHandler:
                 </Route>
             )
         );
-
         function App() {{
+                
+            useEffect(() => {{
+                        const handleMessage = (event) => {{
+                            if (event.origin === 'http://localhost:3000') {{
+                            const id = event.data.id;
+                            const highlight = event.data.highlight
+                            const elem = document.getElementById(event.data.id)
+                            if (elem) {{
+                            if (highlight) {{
+                                elem.classList.add("custom-highlight")
+                            }}
+                            else {{
+                                elem.classList.remove("custom-highlight")
+                            }}
+                            }}
+                        }}
+                                        }};
+                        window.addEventListener('message', handleMessage);
+                        return () => {{
+                        window.removeEventListener('message', handleMessage);
+                        }};
+            }}, []);
             return (
             <div>
                     <RouterProvider router={{routes}} />
