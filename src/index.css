@@ -21,3 +21,7 @@ code {
   font-size: 14px !important;
   
 }
+
+.btn{
+  border: 0 !important;
+}

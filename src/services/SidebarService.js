@@ -6,9 +6,9 @@ class SidebarService{
     getSelectedElem(){
         return this.selectedElemSub
     }
-    setSelectedElem(elem,updateSub=new Subject()){
-
-        this.selectedElemSub.next({elem,updateSub})
+    setSelectedElem(elem,component){
+        const updateSub=new Subject()
+        this.selectedElemSub.next({elem,component,updateSub})
         return updateSub
     }
 }

@@ -12,7 +12,7 @@ import arrowReturn from "../assets/icons/arrow-return-left.svg";
 export default function DetailedComponent({ component, resetSelection, ...props }) {
     const name = component.name
 
-    const [Component, setComponent] = useState(component)
+    const [comp, setComponent] = useState(component)
     const [showHtml, setShowHtml] = useState(false)
     const { configService } = useContext(ServiceContext)
 
@@ -24,13 +24,22 @@ export default function DetailedComponent({ component, resetSelection, ...props 
     function updateHtml(html) {
         if (html) {
             setComponent((component) => {
-                const comp = { ...component, html: html }
+                const comp = { ...component,  html }
                 configService.updateComponent(comp)
                 return comp
             })
             console.log("updateHtml")
         }
     }
+
+    function updateFunctions(functions){
+        setComponent((component) => {
+            const comp = { ...component,functions }
+            configService.updateComponent(comp)
+            return comp
+        })
+    }
+    
 
 
     return (
@@ -69,49 +78,11 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                         Prop Variables
                     </div>
                 </div>
-                <div className="row  py-2 fs-6 border-black border-bottom">
-                    <div className="d-flex ">
-                        <button className="btn  p-0 m-0  shadow-none" >
-                            {false ?
-                                <img src={downArrow} height={24} alt="" />
-                                :
-                                <img src={rightArrow} height={24} alt="" />
-                            }
-                        </button>
-                        State Variables
-                    </div>
-                    {false ?
-                        <div className="col">
-                            {Object.entries(Component.stateVars).map(([index, variable]) => <Variables className="row m-1 " key={variable['$id']} variable={variable} />)}
-                            <button className="btn btn-secondary row w-50 btn-sm m-1 ms-4">
-                                Add Variables
-                            </button>
-                        </div>
-                        : null}
-                </div>
 
+                <Variables comp={comp} className="row  py-2 fs-6 border-black border-bottom" />
+                    
 
-                <div className="row py-2 fs-6 border-black border-bottom">
-                    <div className="d-flex ">
-                        <button className="btn  p-0 m-0  shadow-none" >
-                            {false ?
-                                <img src={downArrow} height={24} alt="" />
-                                :
-                                <img src={rightArrow} height={24} alt="" />
-                            }
-                        </button>
-                        Functions
-                    </div>
-                    {false ?
-                        <div className="col">
-                            {Object.entries(Component.functions).map(([index, func]) => <Functions className="row m-1 " key={func['$id']} func={func} />)}
-                            <button className="btn btn-secondary row w-50 btn-sm m-1 ms-4">
-                                Add Function
-                            </button>
-                        </div>
-                        : null}
-                </div>
-
+                <Functions functions={comp.functions} updateFunctions={updateFunctions} className="row py-2 fs-6 border-black border-bottom" />
 
                 <div className="row py-2 fs-6 border-black border-bottom">
                     <div className="d-flex ">
@@ -153,7 +124,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                         HTML Tree
                     </div>
                     {showHtml ? <div className="col  ">
-                        <Html Val={Component.html} className="row mx-1 " changeParent={(val) => updateHtml(val)} />
+                        <Html Val={comp.html} component={comp} className="row mx-1 " changeParent={(val) => updateHtml(val)} />
                     </div> : null}
                 </div>
             </div>
