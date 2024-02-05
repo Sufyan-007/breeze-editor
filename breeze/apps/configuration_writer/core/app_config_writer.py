@@ -1,4 +1,4 @@
-from common.consts.consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
+from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.file_helper import read_json_file, write_file, create_dir_if_not_exists
 import json
 from common.utils.request_code import REQUEST
@@ -9,7 +9,7 @@ class AppConfigWriter:
         pass
     
     def write_basic_config_files(self, app_config):
-        app_config_dir = f"{APP_CONFIG_PATH}/{app_config['name']}"
+        app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
 
         basic_routing_config = {
             "routes": [
@@ -59,15 +59,14 @@ class AppConfigWriter:
             }
         }
 
-        app_config_dir = f"{APP_CONFIG_PATH}/{app_config['name']}"
+        app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
 
         comp_config = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
 
         write_file(f"{comp_config}.json", json.dumps(main_comp_config))
 
-
     def create_or_update_app_config(self, data):
-        app_config_dir = f"{APP_CONFIG_PATH}/{data['name']}"
+        app_config_dir = f"{CONFIG_PATH}/{data['name']}"
 
         # Create Dir if not exists for config folder
         create_dir_if_not_exists(app_config_dir)
@@ -96,11 +95,45 @@ class AppConfigWriter:
         # write configuration
         write_file(f"{app_config_path}.json", json.dumps(app_current_config))
 
-        
-
         self.write_basic_main_comp_config(app_current_config)
 
         self.write_basic_config_files(app_current_config)
 
         GenerateProject.generate_project(app_current_config)
+    
+    def create_or_update_component_config(self,app_name, key,data):
+        
+        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
+
+        comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
+        current_comp_config = {}
+        # Read old config
+        try:
+            current_comp_config = read_json_file(comp_config_path)
+        except FileNotFoundError as e:
+            print(e)
+            current_comp_config = {}
+
+        current_comp_config[key] = data
+        
+        # write configuration
+        write_file(f"{comp_config_path}.json", json.dumps(current_comp_config))
+
+    def update_component_html_config(self,app_name, key,html_data):
+        
+        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
+
+        comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
+        current_comp_config = {}
+        # Read old config
+        try:
+            current_comp_config = read_json_file(comp_config_path)
+        except FileNotFoundError as e:
+            print(e)
+            current_comp_config = {}
+
+        current_comp_config[key]["html"] = html_data
+        
+        # write configuration
+        write_file(f"{comp_config_path}.json", json.dumps(current_comp_config))
 

@@ -1,3 +1,5 @@
+# Path of directory where the configuration for projects are stored
+CONFIG_PATH = "/home/raj/Desktop/bridge/processor/bridge_ui_server/breezeui/configurations"
 
 CONFIG_PATH = "/home/sufyan/Documents/Projects/Breeze_editor_repo/breezeui/configurations"
 
@@ -14,3 +16,10 @@ CONFIG_FILES_PATH = {
 }
 
 NEW_LINE_CHAR = "\n"
+
+# Path of dir where third party component should be read
+THIRD_PARTY_DIR = "/home/raj/Desktop/bridge/npm_libraries/react_bootstrap/react-bootstrap/src"
+
+# Path of file where the javascript parser is stored
+JS_FILE_PATH = '/home/raj/Desktop/bridge/processor/BRIDGE_MAIN_PROJECT/breezeui/ast_parser/index.js'
+JS_FUNCTION_NAME = 'get_ast'

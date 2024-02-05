@@ -9,7 +9,6 @@ import pathlib
 # list(desktop.rglob("*"))
 
 
-# from utils.app_consts import APP_CONFIG_PATH
 from .helpers.function_code_generator import FunctionCodeGenerator
 from common.utils.config_reader import read_file_json
 from .helpers.import_helper import ImportHelper

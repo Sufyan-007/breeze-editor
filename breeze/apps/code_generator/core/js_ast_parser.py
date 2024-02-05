@@ -1,9 +1,34 @@
 import execjs
 import json
 import pathlib
-from temp_react_code import javascript_code1
-from js4_parser import get_ast
 import traceback 
+import subprocess
+import os
+import inspect
+import sys
+
+# from core.generate_project import AppGenerator
+from common.utils.app_consts import THIRD_PARTY_CONFIG_PATH, THIRD_PARTY_DIR, JS_FILE_PATH, JS_FUNCTION_NAME
+from common.utils.file_utils import get_filename_without_ext
+from common.utils.file_helper import write_file, create_dir_if_not_exists
+
+# Go to root of the django project breezeui/breeze
+# Run  python3 -m apps.code_generator.core.js_ast_parser
+
+def get_ast(script_path, function_name, *args):
+    command = ["node", script_path, function_name,  *args]
+    result = subprocess.run(command, capture_output=True, text=True)
+    
+    # print(result.stdout)
+
+    if result.returncode == 0:
+        return result.stdout
+        # pass
+        # print("JavaScript function executed successfully.")
+        # print("Output:", result.stdout)
+    else:
+        print("Error executing JavaScript function.")
+        print("Error:", result.stderr)
 
 def generate_ast_js(code):
     js_code = f'''
@@ -43,7 +68,7 @@ def generate_ast_to_comp_config(ast_config):
 
     if prop_var_config is None:
         print("No Props defined")
-        return "No Props defined"
+        return []
     # print(prop_var_config)
     for prop_conf in prop_var_config['init']['properties']:
         app_prop_conf = get_prop_config(prop_conf)
@@ -105,17 +130,14 @@ def read_all_comp_files_path(dir_path, file_type):
     return all_comp_path
 
 
-COMP_DIR = "/home/raj/Desktop/bridge/npm_libraries/react_bootstrap/react-bootstrap/src"
-
-JS_FILE_PATH = '/home/raj/Desktop/bridge/processor/ast_parser/index.js'
-JS_FUNCTION_NAME = 'get_ast'
-
 def get_exports_of_file(ast_config):
     program_body = ast_config['body']
     exports_config = []
     for conf in program_body:
         if conf['type'] in ['ExportDefaultDeclaration', 'ExportNamedDeclaration']:
             exports_config.append(conf)
+
+    
 
     
     export_vars = []
@@ -139,12 +161,46 @@ def get_exports_of_file(ast_config):
     pass
 
 
+def save_comp_config(props,  comp_config):
+    lib_name = "react-bootstrap"
+    initial_config = {
+        "type": "COMPONENT",
+        "name": comp_config['name'],
+        "$id": comp_config['id'],
+        "version": "V_0",
+        "containingFile": comp_config['path'],
+        "stateVars": [
+        ],
+        "propsVars": comp_config['propsVars'],
+        "otherVars": [],
+        "functions": [],
+        "html": {},
+        "wrapper_store": None,
+        "imports": {
+            "components": [],
+            "other": []
+        },
+        "hooks": [],
+        "exports" : comp_config['exports']
+    }
+
+    file_name = f"component_{comp_config['id']}.json"
+
+    print(props, comp_config)
+    
+    create_dir_if_not_exists(f"{THIRD_PARTY_CONFIG_PATH}/{lib_name}")
+    write_file(f"{THIRD_PARTY_CONFIG_PATH}/{lib_name}/{file_name}",  json.dumps(initial_config))
+
+    
 
 def fetch_props_from_comps():
-    comp_files = read_all_comp_files_path(COMP_DIR, "tsx") 
+    comp_files = read_all_comp_files_path(THIRD_PARTY_DIR, "tsx") 
     comp_files.sort()
     output = ""
-    comp_files = ["/home/raj/Desktop/bridge/processor/bridge_ui_server/testing_ts.tsx"]
+    lib_name = "react-bootstrap"
+    # comp_files = ["/home/raj/Desktop/bridge/processor/bridge_ui_server/testing_ts.tsx"]
+    comp_files = comp_files[0:10]
+    create_dir_if_not_exists(THIRD_PARTY_CONFIG_PATH)
     for fl in comp_files:
         f = open(fl, "r")
         file_content = f.read()
@@ -158,8 +214,21 @@ def fetch_props_from_comps():
             # print(type(json.loads(ast)))
             ast = json.loads(ast)
             # print(ast)
-            get_exports_of_file(ast)
+            export_vars = get_exports_of_file(ast)
+
+
             props = generate_ast_to_comp_config(ast)
+
+
+            comp_config = {
+                "name" : get_filename_without_ext(fl),
+                "id" : f"{lib_name}_{get_filename_without_ext(fl)}",
+                "path" : str(fl),
+                "propsVars" : props,
+                "exports" : export_vars
+            }
+
+            save_comp_config(props, comp_config)
             output = output + f"{props}\n"
         except Exception as e:
             traceback.print_exc()
@@ -167,11 +236,12 @@ def fetch_props_from_comps():
 
         output = output + f"----------------------\n"
 
-        print("---------------------")
+        # print("---------------------")
 
-        log_file = open("/home/raj/Desktop/bridge/processor/bridge_ui_server/generated_props.log", "w")
-        log_file.write(output)
-        log_file.close()
+        # log_file = open("/home/raj/Desktop/bridge/processor/bridge_ui_server/generated_props.log", "w")
+        # log_file.write(output)
+        # log_file.close()
 
 fetch_props_from_comps()
+
 

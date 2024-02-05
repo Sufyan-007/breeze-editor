@@ -1,5 +1,5 @@
 
-from common.utils.file_utils import get_dir_path_from_file, create_dir_if_not_exists
+from common.utils.file_utils import get_dir_path_from_file, create_parent_dir_if_not_exists
 
 
 
@@ -24,7 +24,7 @@ class StyleHandler:
                 print('CSS TYPE')
                 file_path = f"{app_config['APP_SOURCE_DIR']}/{style_config['containingFile']}"
 
-                create_dir_if_not_exists(file_path)
+                create_parent_dir_if_not_exists(file_path)
 
                 with open(file_path, 'w') as file:
                     file.write(style_config['content'])
