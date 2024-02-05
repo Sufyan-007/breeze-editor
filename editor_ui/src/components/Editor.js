@@ -60,7 +60,7 @@ function Editor() {
           <div className="col m-0 p-0 overflow-hidden">
             {
               portNumber ?
-                <iframe ref={iFrameRef} id="iFrame" sandbox="allow-cross-origin allow-scripts allow-popups allow-forms" src={"http://localhost:" + portNumber + "/" + route} style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} className='border-1 border border-black' title='a' frameborder="0"></iframe>
+                <iframe ref={iFrameRef} id="iFrame" src={"http://localhost:" + portNumber + "/" + route} style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} className='border-1 border border-black' title='a' frameborder="0"></iframe>
                 : null
             }
           </div>

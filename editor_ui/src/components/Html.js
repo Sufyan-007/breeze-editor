@@ -5,7 +5,7 @@ import threeDots from "../assets/icons/three_dots_icon.svg"
 import React from "react"
 import { ServiceContext } from "../store/Context";
 
-export default function Html({ Val, changeParent, ...props }) {
+export default function Html({ Val, component, changeParent, ...props }) {
 
     const [value, setValue] = useState(Val)
     const [showChild, setShowChild] = useState(false)
@@ -23,7 +23,7 @@ export default function Html({ Val, changeParent, ...props }) {
                 ref.current.classList.add("bg-dark")
                 updateSub=selectedElem.updateSub.subscribe((elem)=>{
                     setValue(elem)
-                    sidebarService.setSelectedElem(elem)
+                    sidebarService.setSelectedElem(elem,component)
                     changeParent(elem)
                 })
             }else{
@@ -34,7 +34,7 @@ export default function Html({ Val, changeParent, ...props }) {
             sub.unsubscribe()
             updateSub?.unsubscribe()
         }
-    },[sidebarService,value,ref,changeParent])
+    },[sidebarService,value,ref,changeParent,component])
 
 
     function toggleShowChild() {
@@ -111,15 +111,14 @@ export default function Html({ Val, changeParent, ...props }) {
         }
     }
 
-    function selectedElement() {
-         sidebarService.setSelectedElem(value)
+    function selecteElement() {
+        sidebarService.setSelectedElem(value,component)
         
     }
 
     if (value.type === 'Element') {
         return (
             <div {...props} >
-                
                 <div ref={ref} className=" p-0 d-flex justify-content-between "  >
                     <div className="d-flex w-100 ">
                         {hasChildren ?
@@ -133,7 +132,7 @@ export default function Html({ Val, changeParent, ...props }) {
                             : <div className="" style={{ marginLeft: "21px" }} />
                         }
                         <div className="w-100 btn d-flex text-white p-0 mx-1  border-0 "
-                            onClick={selectedElement}
+                            onClick={selecteElement}
                             onMouseEnter={()=>handleHover(true)}
                             onMouseLeave={()=>handleHover(false)}
                         >
@@ -172,7 +171,9 @@ export default function Html({ Val, changeParent, ...props }) {
                 {
                     hasChildren && showChild ?
                         <div className="col ms-2 m-0  border-start border-1 border-black ">
-                            {value.children.map((child, index) => <Html key={index} Val={child} className="row" changeParent={(Val, offest = 0) => updateChild(index, Val, offest)} />)}
+                            {value.children.map((child, index) =>
+                             <Html component={component} key={index} Val={child} className="row" changeParent={(Val, offest = 0) => updateChild(index, Val, offest)} />)
+                            }
                         </div> :
                         null
                 }
@@ -183,10 +184,14 @@ export default function Html({ Val, changeParent, ...props }) {
         return (
             <div {...props}>
                 
-                <div className="p-0 d-flex" >
+                <div ref={ref} className="p-0 d-flex" >
                     <div className=" ms-4" />
                     <div className="w-100  d-flex justify-content-between flex-row">
-                        <div className="btn p-0 text-white border-0">Text : {value.text.length>12?value.text.slice(0,10)+"..":value.text} </div>
+                        <div className="w-100 btn d-flex text-white p-0 mx-1  border-0 "
+                            onClick={selecteElement}
+                        >
+                            Text : {value.text.length>12?value.text.slice(0,10)+"..":value.text}
+                        </div>
                         <div className=" dropdown ">
                             <button className="btn p-0 mx-1"
 
