@@ -65,7 +65,6 @@ class AppConfigWriter:
 
         write_file(f"{comp_config}.json", json.dumps(main_comp_config))
 
-
     def create_or_update_app_config(self, data):
         app_config_dir = f"{APP_CONFIG_PATH}/{data['name']}"
 
@@ -96,11 +95,45 @@ class AppConfigWriter:
         # write configuration
         write_file(f"{app_config_path}.json", json.dumps(app_current_config))
 
-        
-
         self.write_basic_main_comp_config(app_current_config)
 
         self.write_basic_config_files(app_current_config)
 
         GenerateProject.generate_project(app_current_config)
+    
+    def create_or_update_component_config(self,app_name, key,data):
+        
+        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
+
+        comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
+        current_comp_config = {}
+        # Read old config
+        try:
+            current_comp_config = read_json_file(comp_config_path)
+        except FileNotFoundError as e:
+            print(e)
+            current_comp_config = {}
+
+        current_comp_config[key] = data
+        
+        # write configuration
+        write_file(f"{comp_config_path}.json", json.dumps(current_comp_config))
+
+    def update_component_html_config(self,app_name, key,html_data):
+        
+        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
+
+        comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
+        current_comp_config = {}
+        # Read old config
+        try:
+            current_comp_config = read_json_file(comp_config_path)
+        except FileNotFoundError as e:
+            print(e)
+            current_comp_config = {}
+
+        current_comp_config[key]["html"] = html_data
+        
+        # write configuration
+        write_file(f"{comp_config_path}.json", json.dumps(current_comp_config))
 
