@@ -1,10 +1,9 @@
-import {  useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router';
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Outlet, useParams } from 'react-router';
 import ComponentConfigService from '../services/ComponentConfigService';
 import SidebarService from "../services/SidebarService"
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { ServiceContext } from '../store/Context';
-import Sidebar from './Sidebar';
 import ElementConfig from './ElementConfig';
 
 function Editor() {
@@ -12,7 +11,7 @@ function Editor() {
   const iFrameRef = useRef()
   const [portNumber, setPortNumber] = useState("")
   const [route, setRoute] = useState("")
-  const { projectName } = useParams()
+  const { projectName, componentName } = useParams()
   const portInput = useRef();
   const routeInput = useRef();
   const configService = useMemo(() => {
@@ -20,11 +19,25 @@ function Editor() {
       return new ComponentConfigService(projectName, dispatch)
     }
   }, [projectName, dispatch])
-
+  const routerConfig = useSelector(state => state.routerConfig)
   const sidebarService = useMemo(() => {
     return new SidebarService()
   }, [])
 
+  useEffect(()=>{
+    if(componentName && routerConfig.routes){
+      for( const route of routerConfig.routes){
+        if(route.component===componentName){
+          const r = route.path.substring(1)
+          console.log(r)
+          setRoute(r)
+          routeInput.current.value=r
+          break
+        }
+      }
+      
+    }
+  },[componentName,routerConfig])
 
 
   function setPort() {
@@ -41,7 +54,7 @@ function Editor() {
   return (
     <ServiceContext.Provider value={{ configService, sidebarService }}>
       <div className="container-fluid vh-100 d-flex flex-column ">
-        <div className=" navbar row" style={{backgroundColor:"#151518"}}>
+        <div className=" navbar row" style={{ backgroundColor: "#151518" }}>
           <div className="container-fluid">
             <div className=" navbar-brand text-white">
               Breeze Studio
@@ -54,7 +67,9 @@ function Editor() {
           </div>
         </div>
         <div className=" row flex-grow-1 overflow-hidden">
-          <Sidebar className=" col-3   overflow-y-auto h-100 fs-6 text-white" style={{ width: "16rem", backgroundColor: "#303033" }} />
+          <div className=" col-3   overflow-y-auto h-100 fs-6 text-white" style={{ width: "16rem", backgroundColor: "#303033" }} >
+            <Outlet />
+          </div>
 
 
           <div className="col m-0 p-0 overflow-hidden">

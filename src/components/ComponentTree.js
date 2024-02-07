@@ -2,13 +2,12 @@ import { useSelector } from 'react-redux'
 import { useRef, useState, useContext } from 'react'
 import { ServiceContext } from "../store/Context";
 import { Modal, Button, Form} from 'react-bootstrap'
-
 import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 import RootComponent from './RootComponent'
+import { router } from '../App'
 
-
-export default function ComponentTree({ selectComponent, ...props }) {
+export default function ComponentTree({  ...props }) {
     const config = useSelector((state) => state.config)
     const { configService } = useContext(ServiceContext)
     
@@ -86,7 +85,7 @@ export default function ComponentTree({ selectComponent, ...props }) {
                     </div>
                 </div>
                 {showDropdown ?
-                    Object.entries(config).map(([k, v]) => <RootComponent key={k} name={k} component={v} selectComponent={selectComponent} className=" row m-1 " />)
+                    Object.entries(config).map(([k, v]) => <RootComponent key={k} name={k} component={v}  className=" row m-1 " />)
 
                     : null
                 }

@@ -8,9 +8,6 @@ export default function Sidebar({ ...props }) {
 
     const [sidebarSelection, setSidebarSelection] = useState(null)
 
-    const selectComponent = (elem) => {
-        setSidebarSelection(elem);
-    }
 
     const resetSelection = () => {
         setSidebarSelection(null);
@@ -29,7 +26,7 @@ export default function Sidebar({ ...props }) {
         return (
 
             <div {...props}>
-                <ComponentTree selectComponent={selectComponent} className="row my-2  border-bottom  border-black" />
+                <ComponentTree  className="row my-2  border-bottom  border-black" />
                 <RouterConfig className="row my-2 border-bottom border-black" />
                 <ContextConfig className="row my-2 border-bottom border-black" />
 
