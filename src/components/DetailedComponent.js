@@ -3,9 +3,9 @@ import { useContext, useState } from "react";
 import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 import { ServiceContext } from "../store/Context";
-import Variables from "./Variables";
 import Functions from "./Functions";
 import arrowReturn from "../assets/icons/arrow-return-left.svg";
+import StateVariables from "./StateVariables";
 
 
 
@@ -21,11 +21,24 @@ export default function DetailedComponent({ component, resetSelection, ...props 
     }
 
 
-    function updateHtml(html) {
+    function updateStateVariables(stateVars){
+        setComponent((component)=>{
+            const comp = {...component,stateVars}
+            configService.updateComponent(comp)
+            return comp
+        })
+    }
+
+
+    function updateHtml(html,importComp) {
         if (html) {
             setComponent((component) => {
                 const comp = { ...component,  html }
+                if(importComp && !comp.imports.components.includes(importComp)){
+                    comp.imports={ ...comp.imports ,components: [...comp.imports.components,importComp]}                       
+                }
                 configService.updateComponent(comp)
+                console.log(comp)
                 return comp
             })
             console.log("updateHtml")
@@ -79,7 +92,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                     </div>
                 </div>
 
-                <Variables comp={comp} className="row  py-2 fs-6 border-black border-bottom" />
+                <StateVariables stateVars={comp.stateVars} updateStateVariables={updateStateVariables} className="row  py-2 fs-6 border-black border-bottom" />
                     
 
                 <Functions functions={comp.functions} updateFunctions={updateFunctions} className="row py-2 fs-6 border-black border-bottom" />
@@ -124,7 +137,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                         HTML Tree
                     </div>
                     {showHtml ? <div className="col  ">
-                        <Html Val={comp.html} component={comp} className="row mx-1 " changeParent={(val) => updateHtml(val)} />
+                        <Html Val={comp.html} component={comp} className="row mx-1 " changeParent={(val,importComp=null) => updateHtml(val,importComp)} />
                     </div> : null}
                 </div>
             </div>
