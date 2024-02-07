@@ -9,7 +9,7 @@ import ElementConfig from './ElementConfig';
 function Editor() {
   const dispatch = useDispatch()
   const iFrameRef = useRef()
-  const [portNumber, setPortNumber] = useState("")
+  const [portNumber, setPortNumber] = useState("3001")
   const [route, setRoute] = useState("")
   const { projectName, componentName } = useParams()
   const portInput = useRef();
