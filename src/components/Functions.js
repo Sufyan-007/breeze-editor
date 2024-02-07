@@ -4,7 +4,7 @@ import downArrow from "../assets/icons/arrow_down_icon.svg"
 import { Modal, Form } from "react-bootstrap"
 
 
-export default function Functions({ functions,updateFunctions, ...props }) {
+export default function Functions({ functions, updateFunctions, ...props }) {
     const [showFunctions, setShowFunctions] = useState(false)
     const [modalFunc, setModalFunc] = useState(null)
     const formRef = useRef()
@@ -12,25 +12,28 @@ export default function Functions({ functions,updateFunctions, ...props }) {
     function closeModal(index) {
         if (index) {
             const name = formRef.current.querySelector('#name').value;
-            const id = "FUNCTIONS/UUID"+functions.length
+
             const params = formRef.current.querySelector('#parameters').value
-            const list = params.split(/[\s,]+/).filter(value => value.trim() !== '').map(name=> {return {name}})
+            const list = params.split(/[\s,]+/).filter(value => value.trim() !== '').map(name => { return { name } })
             const parameters = { list }
             const isAnonymous = formRef.current.querySelector('#isAnonymous').checked;
             const isAsync = formRef.current.querySelector('#isAsync').checked;
             const body = formRef.current.querySelector('#body').value;
-            if(name){
+            if (name) {
                 const funcs = [...functions]
-                const f= {name,id,parameters,isAnonymous,isAsync,body}
-                if(funcs[index]){
+                if (funcs[index]) {
+                    const id = funcs[index]["$id"]
+                    const f = { name, "$id":id, parameters, isAnonymous, isAsync, body }
                     funcs[index] = f
-                }else{
+                } else {
+                    const id = "FUNCTIONS/UUID" + (functions.length + 1)
+                    const f = { name, "$id":id, parameters, isAnonymous, isAsync, body }
                     funcs.push(f)
                 }
                 console.log(funcs)
                 updateFunctions(funcs)
                 setModalFunc(null)
-            }else{
+            } else {
                 alert("Name cannot be empty")
             }
         }
@@ -98,7 +101,7 @@ export default function Functions({ functions,updateFunctions, ...props }) {
                             {func.name}
                         </div>
                     )}
-                    <button className="btn btn-secondary row w-50 btn-sm m-1 ms-4" onClick={()=>setModalFunc(functions.length)}>
+                    <button className="btn btn-secondary row w-50 btn-sm m-1 ms-4" onClick={() => setModalFunc(functions.length+1)}>
                         Add Function
                     </button>
                 </div>
