@@ -125,11 +125,12 @@ export default function Html({ Val, component, changeParent, ...props }) {
             const children = [...value.children, newDiv]
             setValue(value => {
                 const newVal = { ...value, children }
-                changeParent(newVal,imp)
+                changeParent(newVal,0,imp)
                 return newVal
             })
             sidebarService.setSelectedElem(newDiv)
             setShowChild(true)
+            setShowModal(false)
         }
         else {
             setShowModal(false)
