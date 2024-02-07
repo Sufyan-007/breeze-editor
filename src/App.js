@@ -6,6 +6,7 @@ import Main from './components/Main';
 import configureStore from './store/Store'
 import { Provider } from 'react-redux';
 import Sidebar from './components/Sidebar';
+import DetailedComponent from './components/DetailedComponent';
 
 export const router = createBrowserRouter(
   [
@@ -15,7 +16,7 @@ export const router = createBrowserRouter(
       children:[
         {
           path:"/editor/:projectName/comp/:componentName",
-          element: <div >Hello</div>
+          element: <DetailedComponent />
         },
         {
           path:"/editor/:projectName",
