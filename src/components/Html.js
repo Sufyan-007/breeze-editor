@@ -59,7 +59,7 @@ export default function Html({ Val, component, changeParent, ...props }) {
 
         setValue(value => {
             const newVal = { ...value, children }
-            changeParent(newVal,importComp)
+            changeParent(newVal,offset,importComp)
             return newVal
         })
 
