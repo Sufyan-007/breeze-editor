@@ -1,29 +1,50 @@
 import Html from "./Html";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { useSelector } from "react-redux";
 import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 import { ServiceContext } from "../store/Context";
 import Functions from "./Functions";
 import arrowReturn from "../assets/icons/arrow-return-left.svg";
 import StateVariables from "./StateVariables";
+import { router } from "../App";
+import Hooks from "./Hooks";
 
 
+export default function DetailedComponent({ ...props }) {
 
-export default function DetailedComponent({ component, resetSelection, ...props }) {
-    const name = component.name
+    const { projectName, componentName } = useParams()
+    const config = useSelector((state) => state.config)
+    const component = config[componentName]
 
+    const name = componentName
     const [comp, setComponent] = useState(component)
     const [showHtml, setShowHtml] = useState(false)
     const { configService } = useContext(ServiceContext)
+    useEffect(() => { setComponent(component) }, [component])
+    if (!component || !comp) {
+        return null
+    }
 
     function toggleHtml() {
         setShowHtml((state) => !state)
     }
 
 
-    function updateStateVariables(stateVars){
-        setComponent((component)=>{
-            const comp = {...component,stateVars}
+    function updateStateVariables(stateVars) {
+        setComponent((component) => {
+            const comp = { ...component, stateVars }
+            configService.updateComponent(comp)
+            return comp
+        })
+    }
+
+    function updateHooks(hooks){
+        // console.log("update hooks")
+        // console.log(hooks)
+        setComponent((component) => {
+            const comp = { ...component, hooks }
             configService.updateComponent(comp)
             return comp
         })
@@ -45,21 +66,23 @@ export default function DetailedComponent({ component, resetSelection, ...props 
         }
     }
 
-    function updateFunctions(functions){
+    function updateFunctions(functions) {
         setComponent((component) => {
-            const comp = { ...component,functions }
+            const comp = { ...component, functions }
             configService.updateComponent(comp)
             return comp
         })
     }
-    
 
+    function goHome() {
+        router.navigate("/editor/" + projectName)
+    }
 
     return (
         <div {...props}>
             <div className="container-fluid">
                 <div className="d-flex m-1 fw-bold fs-5">
-                    <button className=" d-flex my-2 p-0  btn" onClick={resetSelection}>
+                    <button className=" d-flex my-2 p-0  btn" onClick={goHome}>
                         <img src={arrowReturn} className="me-2" style={{ height: '1rem' }} alt="" />
                     </button>
                     {name}
@@ -93,22 +116,11 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                 </div>
 
                 <StateVariables stateVars={comp.stateVars} updateStateVariables={updateStateVariables} className="row  py-2 fs-6 border-black border-bottom" />
-                    
+
 
                 <Functions functions={comp.functions} updateFunctions={updateFunctions} className="row py-2 fs-6 border-black border-bottom" />
 
-                <div className="row py-2 fs-6 border-black border-bottom">
-                    <div className="d-flex ">
-                        <button className="btn  p-0 m-0  shadow-none" >
-                            {false ?
-                                <img src={downArrow} height={24} alt="" />
-                                :
-                                <img src={rightArrow} height={24} alt="" />
-                            }
-                        </button>
-                        Hooks
-                    </div>
-                </div>
+                <Hooks comp={comp} updateHooks={updateHooks} className="row  py-2 fs-6 border-black border-bottom" />
 
                 <div className="row py-2 fs-6 border-black border-bottom">
                     <div className="d-flex ">
@@ -137,7 +149,7 @@ export default function DetailedComponent({ component, resetSelection, ...props 
                         HTML Tree
                     </div>
                     {showHtml ? <div className="col  ">
-                        <Html Val={comp.html} component={comp} className="row mx-1 " changeParent={(val,importComp=null) => updateHtml(val,importComp)} />
+                        <Html Val={comp.html} component={comp} className="row mx-1 " changeParent={(val,offeset=0, importComp = null) => updateHtml(val, importComp)} />
                     </div> : null}
                 </div>
             </div>

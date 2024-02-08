@@ -5,12 +5,24 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Main from './components/Main';
 import configureStore from './store/Store'
 import { Provider } from 'react-redux';
+import Sidebar from './components/Sidebar';
+import DetailedComponent from './components/DetailedComponent';
 
 export const router = createBrowserRouter(
   [
     {
       path: "/editor/:projectName",
-      element: <Editor />
+      element: <Editor />,
+      children:[
+        {
+          path:"/editor/:projectName/comp/:componentName",
+          element: <DetailedComponent />
+        },
+        {
+          path:"/editor/:projectName",
+          element: <Sidebar />
+        }
+      ]
     },
     {
       path: "/",
