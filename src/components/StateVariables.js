@@ -30,6 +30,7 @@ export default function StateVariables({ stateVars, updateStateVariables, ...pro
                     const v = { name,$id,type, defaultValue }
                     vars.push(v)
                 }
+                console.log(defaultValue)
                 updateStateVariables(vars)
                 setModalVar(null)
             } else {
@@ -45,7 +46,7 @@ export default function StateVariables({ stateVars, updateStateVariables, ...pro
         <div {...props}>
             <Modal show={modalVar} onHide={() => closeModal(false)}>
                 <Modal.Header>
-                    Functions
+                    State Variables
                 </Modal.Header>
                 <Modal.Body>
                     <Form ref={formRef}>
@@ -53,14 +54,14 @@ export default function StateVariables({ stateVars, updateStateVariables, ...pro
                             <Form.Label>
                                 Name
                             </Form.Label>
-                            <Form.Control id="name" placeholder="Function name" defaultValue={stateVars[modalVar]?.name} />
+                            <Form.Control id="name" placeholder="Variable Name" defaultValue={stateVars[modalVar]?.name} />
                         </Form.Group>
 
                         <Form.Group>
                             <Form.Label>
                                 Default Value 
                             </Form.Label>
-                            <Form.Control id="defaultValue" as="textarea" placeholder="Function name" defaultValue={JSON.stringify(stateVars[modalVar]?.defaultValue)} />
+                            <Form.Control id="defaultValue" as="textarea" placeholder="Default value" defaultValue={JSON.stringify(stateVars[modalVar]?.defaultValue)} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -88,7 +89,7 @@ export default function StateVariables({ stateVars, updateStateVariables, ...pro
                             {stateVar.name}
                         </div>
                     )}
-                    <button className="btn btn-secondary  btn-sm m-1 ms-4" onClick={() => setModalVar(stateVars.length)}>
+                    <button className="btn btn-secondary  btn-sm m-1 ms-4" onClick={() => setModalVar(stateVars.length+1)}>
                         Add State Variable
                     </button>
                 </div>

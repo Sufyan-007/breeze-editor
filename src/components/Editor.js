@@ -60,7 +60,7 @@ function Editor() {
               Breeze Studio
             </div>
             <div>
-              <input ref={portInput} type="text" className="p-1 m-1 " placeholder='Port Number' />
+              <input ref={portInput} defaultValue="3001" type="text" className="p-1 m-1 " placeholder='Port Number' />
               <input ref={routeInput} type="text" className="p-1" placeholder='Route' />
               <button className=" btn btn-primary m-1" onClick={setPort}> Go</button>
             </div>
@@ -82,7 +82,7 @@ function Editor() {
           <ElementConfig className="col-1" style={{ width: "15rem", backgroundColor: "#303033" }} />
 
 
-        </div>
+        </div>  
       </div>
     </ServiceContext.Provider>
   );

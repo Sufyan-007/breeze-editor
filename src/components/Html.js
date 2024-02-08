@@ -78,35 +78,6 @@ export default function Html({ Val, component, changeParent, ...props }) {
         setShowModal(true)
     }
 
-    // function addChild() {
-    //     const id = value.attributes.id.value + "-" + value.children.length
-    //     var tagName = "div";
-    //     if (value.tagName === "Container" || value.tagName === "Col") {
-    //         tagName = "Row"
-    //     }
-    //     if (value.tagName === "Row") {
-    //         tagName = "Col"
-    //     }
-
-    //     const newDiv = {
-    //         "type": "Element",
-    //         "attributes": {
-    //             "className": { "type": "LITERAL", "value": "" },
-    //             "id": { "type": "LITERAL", "value": id },
-    //         },
-    //         "tagName": tagName,
-    //         "children": []
-    //     }
-    //     const children = [...value.children, newDiv]
-    //     setValue(value => {
-    //         const newVal = { ...value, children }
-    //         changeParent(newVal)
-    //         return newVal
-    //     })
-    //     sidebarService.setSelectedElem(newDiv)
-    //     setShowChild(true)
-    // }
-
     function closeModal(add) {
         if (add) {
             const tagName = tagInput.current.value
@@ -166,6 +137,7 @@ export default function Html({ Val, component, changeParent, ...props }) {
                                 <Form.Label>Component </Form.Label>
                                 <Form.Select ref={tagInput}>
                                     <option value="div">div</option>
+                                    <option value="EXPRESSION">EXPRESSION</option>
                                     {Object.keys(config).map((comp) =>
                                         <option value={comp}>{comp}</option>
                                     )}
