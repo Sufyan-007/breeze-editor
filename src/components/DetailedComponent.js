@@ -9,6 +9,7 @@ import Functions from "./Functions";
 import arrowReturn from "../assets/icons/arrow-return-left.svg";
 import StateVariables from "./StateVariables";
 import { router } from "../App";
+import Hooks from "./Hooks";
 
 
 export default function DetailedComponent({ ...props }) {
@@ -21,7 +22,7 @@ export default function DetailedComponent({ ...props }) {
     const [comp, setComponent] = useState(component)
     const [showHtml, setShowHtml] = useState(false)
     const { configService } = useContext(ServiceContext)
-    useEffect(() => { console.log("s"); setComponent(component) }, [component])
+    useEffect(() => { setComponent(component) }, [component])
     if (!component || !comp) {
         return null
     }
@@ -34,6 +35,16 @@ export default function DetailedComponent({ ...props }) {
     function updateStateVariables(stateVars) {
         setComponent((component) => {
             const comp = { ...component, stateVars }
+            configService.updateComponent(comp)
+            return comp
+        })
+    }
+
+    function updateHooks(hooks){
+        // console.log("update hooks")
+        // console.log(hooks)
+        setComponent((component) => {
+            const comp = { ...component, hooks }
             configService.updateComponent(comp)
             return comp
         })
@@ -109,18 +120,7 @@ export default function DetailedComponent({ ...props }) {
 
                 <Functions functions={comp.functions} updateFunctions={updateFunctions} className="row py-2 fs-6 border-black border-bottom" />
 
-                <div className="row py-2 fs-6 border-black border-bottom">
-                    <div className="d-flex ">
-                        <button className="btn  p-0 m-0  shadow-none" >
-                            {false ?
-                                <img src={downArrow} height={24} alt="" />
-                                :
-                                <img src={rightArrow} height={24} alt="" />
-                            }
-                        </button>
-                        Hooks
-                    </div>
-                </div>
+                <Hooks comp={comp} updateHooks={updateHooks} className="row  py-2 fs-6 border-black border-bottom" />
 
                 <div className="row py-2 fs-6 border-black border-bottom">
                     <div className="d-flex ">
