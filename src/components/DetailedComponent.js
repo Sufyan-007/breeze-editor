@@ -1,4 +1,4 @@
-import Html from "./Html";
+import HtmlTree from "./HtmlTree";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useSelector } from "react-redux";
@@ -10,6 +10,7 @@ import arrowReturn from "../assets/icons/arrow-return-left.svg";
 import StateVariables from "./StateVariables";
 import { router } from "../App";
 import Hooks from "./Hooks";
+import PropVariables from "./PropVariables";
 
 
 export default function DetailedComponent({ ...props }) {
@@ -35,6 +36,14 @@ export default function DetailedComponent({ ...props }) {
     function updateStateVariables(stateVars) {
         setComponent((component) => {
             const comp = { ...component, stateVars }
+            configService.updateComponent(comp)
+            return comp
+        })
+    }
+
+    function updatePropVariables(propsVars) {
+        setComponent((component) => {
+            const comp = { ...component, propsVars }
             configService.updateComponent(comp)
             return comp
         })
@@ -102,18 +111,7 @@ export default function DetailedComponent({ ...props }) {
                     </div>
                 </div>
 
-                <div className="row py-2 fs-6 border-black   border-bottom">
-                    <div className="d-flex ">
-                        <button className="btn  p-0 m-0  shadow-none" >
-                            {false ?
-                                <img src={downArrow} height={24} alt="" />
-                                :
-                                <img src={rightArrow} height={24} alt="" />
-                            }
-                        </button>
-                        Prop Variables
-                    </div>
-                </div>
+                <PropVariables propVars={comp.propsVars} updatePropVars={updatePropVariables} className="row  py-2 fs-6 border-black border-bottom"/>
 
                 <StateVariables stateVars={comp.stateVars} updateStateVariables={updateStateVariables} className="row  py-2 fs-6 border-black border-bottom" />
 
@@ -149,7 +147,7 @@ export default function DetailedComponent({ ...props }) {
                         HTML Tree
                     </div>
                     {showHtml ? <div className="col  ">
-                        <Html Val={comp.html} component={comp} className="row mx-1 " changeParent={(val,offeset=0, importComp = null) => updateHtml(val, importComp)} />
+                        <HtmlTree Val={comp.html} component={comp} className="row mx-1 " changeParent={(val,offeset=0, importComp = null) => updateHtml(val, importComp)} />
                     </div> : null}
                 </div>
             </div>

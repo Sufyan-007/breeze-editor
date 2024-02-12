@@ -67,7 +67,7 @@ function Editor() {
           </div>
         </div>
         <div className=" row flex-grow-1 overflow-hidden">
-          <div className=" col-3   overflow-y-auto h-100 fs-6 text-white" style={{ width: "16rem", backgroundColor: "#303033" }} >
+          <div className=" col-3   overflow-y-auto h-100 fs-6 text-white" style={{ width: "18rem" , backgroundColor: "#303033" }} >
             <Outlet />
           </div>
 
