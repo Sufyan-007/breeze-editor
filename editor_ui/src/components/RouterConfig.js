@@ -6,8 +6,8 @@ import { useSelector } from 'react-redux'
 import Route from './Route'
 import { Modal, Button, Form } from 'react-bootstrap'
 
-export default function RouterConfig({ ...props }) {
-    const routerConfig = useSelector(state => state.routerConfig)
+    export default function RouterConfig({ ...props }) {
+        const routerConfig = useSelector(state => state.routerConfig)
     const [showDropdown, setShowDropdown] = useState(false)
     const [showModal, setShowModal] = useState(false)
     const { configService } = useContext(ServiceContext)
