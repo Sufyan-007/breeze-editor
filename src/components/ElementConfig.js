@@ -1,6 +1,7 @@
 import { ServiceContext } from "../store/Context"
 import { useContext, useEffect, useState } from "react"
 import { Form } from "react-bootstrap"
+import ExpressionConfig from "./ExpressionConfig"
 export default function ElementConfig({ ...props }) {
 
     const { sidebarService } = useContext(ServiceContext)
@@ -18,7 +19,9 @@ export default function ElementConfig({ ...props }) {
 
 
     function updateElem(key, value) {
+        
         setSelectedElement((selectedElem) => {
+            // console.log({ ...selectedElem, elem: { ...elem, [key]: value } })
             return { ...selectedElem, elem: { ...elem, [key]: value } }
         })
     }
@@ -50,15 +53,15 @@ export default function ElementConfig({ ...props }) {
     }
 
     function removeAttribute(key) {
-        const attributes= {...elem.attributes}
+        const attributes = { ...elem.attributes }
         delete attributes[key]
         updateElem("attributes", attributes)
     }
-    
-    function changeAttributeType(key, variable){
-        const type = variable?"VARIABLE":"LITERAL"
-        const val = {...elem.attributes[key],type}
-        updateAttribute(key,val)
+
+    function changeAttributeType(key, variable) {
+        const type = variable ? "VARIABLE" : "LITERAL"
+        const val = { ...elem.attributes[key], type }
+        updateAttribute(key, val)
     }
 
     if (!elem) {
@@ -93,9 +96,32 @@ export default function ElementConfig({ ...props }) {
             </div>
         )
     }
-    if (elem.type !== "Element") {
+    if (elem.type === "Expression") {
 
-        return null
+        return (
+            <div {...props}>
+                <div className="container-fluid text-white h-100 p-0 d-flex flex-column">
+                    <div className="row  p-1 border-bottom border-white">
+                        <button className=" btn-close btn-close-white" onClick={() => sidebarService.setSelectedElem(null)}>
+                        </button>
+                        Text
+                    </div>
+                    <ExpressionConfig elem={elem} updateElem={updateElem} className="row flex-grow-1 my-1" />
+
+                    <div className="row  py-2">
+                        <div className="d-flex justify-content-around">
+                            <button className=" btn btn-sm btn-secondary" onClick={() => sidebarService.setSelectedElem(null)}>
+                                Cancel
+                            </button>
+                            <button className=" btn btn-sm btn-primary" onClick={() => update.next(elem)}>
+                                Update
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        )
     }
     return (
         <div {...props}>
@@ -130,8 +156,8 @@ export default function ElementConfig({ ...props }) {
                                     return (
                                         <Form.Group className="my-2">
                                             <Form.Label className="my-0 d-flex " style={{ fontSize: "14px" }}>
-                                                {k} 
-                                                <Form.Check className="mx-2 " label="expression" checked={v.type==="VARIABLE"} onChange={(event)=>changeAttributeType(k,event.target.checked)}  />
+                                                {k}
+                                                <Form.Check className="mx-2 " label="expression" checked={v.type === "VARIABLE"} onChange={(event) => changeAttributeType(k, event.target.checked)} />
                                             </Form.Label>
                                             <Form.Control size="sm" value={v.value} onChange={(event) => updateLiteralAtrribute(k, event.target.value)} />
                                         </Form.Group>
@@ -169,8 +195,8 @@ export default function ElementConfig({ ...props }) {
                                 if (k.slice(0, 2) === "on") {
                                     return (
                                         <div key={k} className="my-1 px-0 d-flex">
-                                            <button className="btn mx-1 btn-close-white btn-close" onClick={()=>removeAttribute(k)}></button>
-                                            <div style={{ fontSize:"15px"}}>{k}:</div>
+                                            <button className="btn mx-1 btn-close-white btn-close" onClick={() => removeAttribute(k)}></button>
+                                            <div style={{ fontSize: "15px" }}>{k}:</div>
                                             <Form.Select className="mx-2 bg-dark-subtle" size="sm" value={v.value} onChange={(event) => { updateVariableAttribute(k, event.target.value) }}>
                                                 <option value="console.log" >console.log</option>
                                                 {
