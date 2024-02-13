@@ -22,7 +22,7 @@ export default function Html({value,selecteElement,config,reference,component,se
         // Cors issue here with iFrame
 
         const iFrame = document.getElementById("iFrame")
-        const id = value.attributes.id?.value
+        const id = value.attributes?.id?.value
 
         if (iFrame && id) {
             iFrame.contentWindow.postMessage({ id, highlight }, '*')

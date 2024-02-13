@@ -11,6 +11,8 @@ import StateVariables from "./StateVariables";
 import { router } from "../App";
 import Hooks from "./Hooks";
 import PropVariables from "./PropVariables";
+import OtherVariables from "./OtherVariables";
+import Imports from "./Imports";
 
 
 export default function DetailedComponent({ ...props }) {
@@ -83,6 +85,22 @@ export default function DetailedComponent({ ...props }) {
         })
     }
 
+    function updateOtherVars(otherVars) {
+        setComponent((component) => {
+            const comp = { ...component, otherVars }
+            configService.updateComponent(comp)
+            return comp
+        })
+    }
+
+    function updateImports(imports){
+        setComponent((component) => {
+            const comp = { ...component,imports}
+            configService.updateComponent(comp)
+            return comp
+        })
+    }
+
     function goHome() {
         router.navigate("/editor/" + projectName)
     }
@@ -98,23 +116,13 @@ export default function DetailedComponent({ ...props }) {
                 </div>
 
 
-                <div className="row mt-3 border-top py-2 fs-6 border-black border-bottom">
-                    <div className="d-flex ">
-                        <button className="btn  p-0 m-0  shadow-none" >
-                            {false ?
-                                <img src={downArrow} height={24} alt="" />
-                                :
-                                <img src={rightArrow} height={24} alt="" />
-                            }
-                        </button>
-                        Imports
-                    </div>
-                </div>
+                <Imports imports={comp.imports} updateImports={updateImports} className="row mt-3 border-top py-2 fs-6 border-black border-bottom" />
 
                 <PropVariables propVars={comp.propsVars} updatePropVars={updatePropVariables} className="row  py-2 fs-6 border-black border-bottom"/>
 
                 <StateVariables stateVars={comp.stateVars} updateStateVariables={updateStateVariables} className="row  py-2 fs-6 border-black border-bottom" />
 
+                <OtherVariables otherVars={comp.otherVars} updateOtherVars={updateOtherVars} className="row  py-2 fs-6 border-black border-bottom" />
 
                 <Functions functions={comp.functions} updateFunctions={updateFunctions} className="row py-2 fs-6 border-black border-bottom" />
 
