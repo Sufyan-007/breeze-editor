@@ -211,7 +211,7 @@ class ComponentGenerator():
             }
 
             export default %s;
-        """%(import_stats,name,state_vars_declaration,other_vars_declaration,props_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
+        """%(import_stats,name,props_vars_declaration,state_vars_declaration,other_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
 
         return react_component
 
