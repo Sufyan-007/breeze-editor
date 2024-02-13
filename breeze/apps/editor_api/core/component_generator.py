@@ -232,8 +232,8 @@ class HookCodeHelper:
         dependent_vars = []
 
         for dep_var in hook_config['dependantVars']:
-            related_var =  next(item for item in comp_config['stateVars'] if item["$id"] == dep_var)
-            dependent_vars.append(related_var['name'])
+            # related_var =  next(item for item in comp_config['stateVars'] if item["$id"] == dep_var)
+            dependent_vars.append(dep_var)
 
         hook_code = f"""
 
