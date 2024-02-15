@@ -49,7 +49,7 @@ export default function Html({value,selecteElement,config,reference,component,se
 
         setValue(value => {
             const newVal = { ...value, children }
-            changeParent(newVal, offset, importComp)
+            changeParent(newVal, 0, importComp)
             return newVal
         })
     }
