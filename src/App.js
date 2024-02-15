@@ -15,11 +15,11 @@ export const router = createBrowserRouter(
       element: <Editor />,
       children:[
         {
-          path:"/editor/:projectName/comp/:componentName",
+          path:"comp/:componentName",
           element: <DetailedComponent />
         },
         {
-          path:"/editor/:projectName",
+          path:"",
           element: <Sidebar />
         }
       ]
