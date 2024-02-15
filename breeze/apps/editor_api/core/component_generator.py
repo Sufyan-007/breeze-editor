@@ -132,7 +132,7 @@ class ComponentGenerator():
 
         wrapper_store = config.get("wrapper_store",None)
         if wrapper_store is None:
-            html_code = "<div {...props}>%s</div>"%(html_code)
+            html_code = "<Fragment>%s</Fragment>"%(html_code)
         else:
             if "store" in config["imports"]:
                 config["imports"]["store"].append(wrapper_store)
@@ -196,7 +196,7 @@ class ComponentGenerator():
 
 
         react_component = """
-            import React, { useState } from 'react';
+            import React, { useState , Fragment } from 'react';
             %s
             
             const %s = (props) => {
