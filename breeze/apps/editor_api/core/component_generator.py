@@ -125,7 +125,8 @@ class ComponentGenerator():
         other_vars = config.get('otherVars',[])
         props_vars = config['propsVars']
         html_config = config['html']
-        html_code = HTMLGenerator.generateHTML(html_config)
+        generator = HTMLGenerator(config)
+        html_code = generator.generateHTML(html_config)
 
         print(html_code)
         functions = config['functions']
