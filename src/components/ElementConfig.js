@@ -41,6 +41,23 @@ export default function ElementConfig({ ...props }) {
         updateAttribute(key, val)
     }
 
+    function updateFunctionAttribute(key, $ref) {
+        var val
+        if ($ref) {
+            val = { type: "FUNCTION", $ref }
+        }
+        else{
+            val = { type: "FUNCTION", value:{
+                
+                "parameters": { "list": ["event"] },
+                "isAnonymous": true,
+                "isAsync": false,
+                "body": "console.log(event)"
+              }}
+        }
+        updateAttribute(key, val)
+    }
+
     function addAttribute(attr) {
         if (!elem.attributes[attr]) {
             updateLiteralAtrribute(attr, "")
@@ -173,6 +190,10 @@ export default function ElementConfig({ ...props }) {
                                     <option value="className">ClassName</option>
                                     <option value="src">src</option>
                                     <option value="value">value</option>
+                                    <option value="config">config</option>
+                                    <option value="height">height</option>
+                                    <option value="component">component</option>
+                                    <option value="Val">Val</option>
                                 </Form.Select>
                             </div>
 
@@ -197,11 +218,11 @@ export default function ElementConfig({ ...props }) {
                                         <div key={k} className="my-1 px-0 d-flex">
                                             <button className="btn mx-1 btn-close-white btn-close" onClick={() => removeAttribute(k)}></button>
                                             <div style={{ fontSize: "15px" }}>{k}:</div>
-                                            <Form.Select className="mx-2 bg-dark-subtle" size="sm" value={v.value} onChange={(event) => { updateVariableAttribute(k, event.target.value) }}>
-                                                <option value="console.log" >console.log</option>
+                                            <Form.Select className="mx-2 bg-dark-subtle" size="sm" value={v.$ref} onChange={(event) => { updateFunctionAttribute(k, event.target.value) }}>
+                                                <option value="" >console.log</option>
                                                 {
                                                     component.functions.map((func) =>
-                                                        <option key={func.name} value={func.name}>{func.name}</option>
+                                                        <option key={func.name} value={func.$id}>{func.name}</option>
                                                     )
                                                 }
                                             </Form.Select>
