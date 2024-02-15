@@ -140,7 +140,7 @@ class RouteHandler:
         import React, {{useEffect}} from 'react';
         import {{ Routes, Route, Navigate, BrowserRouter, createBrowserRouter, createRoutesFromElements, RouterProvider }} from "react-router-dom";
         
-        const routes = createBrowserRouter (
+        export const router = createBrowserRouter (
           createRoutesFromElements(
           <Route>
                 {routing_code}
@@ -154,8 +154,8 @@ class RouteHandler:
                             if (event.origin === 'http://localhost:3000') {{
                             const id = event.data.id;
                             const highlight = event.data.highlight
-                            const elem = document.getElementById(event.data.id)
-                            if (elem) {{
+                            const elements = document.querySelectorAll(`[id="${{event.data.id}}"]`);
+                            for (const elem of elements) {{
                             if (highlight) {{
                                 elem.classList.add("custom-highlight")
                             }}
@@ -172,7 +172,7 @@ class RouteHandler:
             }}, []);
             return (
             <div>
-                    <RouterProvider router={{routes}} />
+                    <RouterProvider router={{router}} />
             </div>
             );
         }}
