@@ -31,6 +31,12 @@ NEW_COMP_FORMAT={
             "from": "react-bootstrap",
             "import_entity": "Table, Container, Button, Row, Col, Form, Modal",
             "import_type": "SINGLE"
+        },
+        {
+          "TYPE": "THIRD_PARTY",
+          "from": "react",
+          "import_entity": "useEffect",
+          "import_type": "SINGLE"
         }] 
     },
     "hooks": []
