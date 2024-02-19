@@ -67,7 +67,7 @@ class ImportHelper:
                 import_statement = f'import \'{imp_path}\' ; '
 
                 import_statements.append(import_statement)
-
+        import_statements = list(set(import_statements))
         return '\n'.join(import_statements)
 
     @staticmethod
