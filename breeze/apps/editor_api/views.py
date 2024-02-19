@@ -57,3 +57,15 @@ class RoutingWriter(APIView):
             return JsonResponse(res)
         except:
             return JsonResponse({}, status=500)
+
+@method_decorator(csrf_exempt,name='dispatch')
+class ReduxWriter(APIView):
+    def post(self,request,param):
+        # data= json.loads(request.body.decode("utf-8"))
+        try:
+            app_editor= AppEditor(param)
+            app_editor.write_reducers()
+            app_editor.write_redux_store()
+            return JsonResponse({},status=200)
+        except:
+            return JsonResponse({}, status=500)

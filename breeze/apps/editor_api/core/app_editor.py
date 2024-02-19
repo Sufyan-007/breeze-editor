@@ -1,4 +1,6 @@
 
+from .reducer_generator import ReducerGenerator
+from .redux_store_generator import ReduxStoreGenerator
 from common.utils.config_reader import read_config_file, read_file_json, write_file
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from .component_generator import ComponentGenerator, gen_single_import
@@ -147,7 +149,7 @@ class AppEditor:
     
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
-    def add_component(self,name):
+    def     add_component(self,name):
         name=name.replace(' ',"").title()
         comp=NEW_COMP_FORMAT.copy()
         comp['name'] = name
@@ -179,3 +181,11 @@ class AppEditor:
         write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
         self.modify_main_component()
         return self.routing_config
+    
+    def write_reducers(self):
+        reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)
+        reducer_generator.write_all_reducers()
+
+    def write_redux_store(self):
+        redux_store_generator = ReduxStoreGenerator(all_redux_store_config=self.redux_store_config,all_reducer_config=self.reducer_config, app_config=self.app_config,all_comp_config=self.comp_config)
+        redux_store_generator.write_all_store()
