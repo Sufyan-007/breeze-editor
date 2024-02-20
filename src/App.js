@@ -7,6 +7,7 @@ import configureStore from './store/Store'
 import { Provider } from 'react-redux';
 import Sidebar from './components/Sidebar';
 import DetailedComponent from './components/DetailedComponent';
+import ReduxConfig from './components/ReduxConfig';
 
 export const router = createBrowserRouter(
   [
@@ -23,6 +24,10 @@ export const router = createBrowserRouter(
           element: <Sidebar />
         }
       ]
+    },
+    {
+      path:"editor/:projectName/redux",
+      element: <ReduxConfig/>,
     },
     {
       path: "/",
