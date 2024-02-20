@@ -13,6 +13,7 @@ import Hooks from "./Hooks";
 import PropVariables from "./PropVariables";
 import OtherVariables from "./OtherVariables";
 import Imports from "./Imports";
+import Wrapper from "./Wrapper";
 
 
 export default function DetailedComponent({ ...props }) {
@@ -101,6 +102,10 @@ export default function DetailedComponent({ ...props }) {
         })
     }
 
+    function updateWrapper(wrapper){
+        console.log(wrapper)
+    }
+
     function goHome() {
         router.navigate("/editor/" + projectName)
     }
@@ -128,19 +133,8 @@ export default function DetailedComponent({ ...props }) {
 
                 <Hooks comp={comp} updateHooks={updateHooks} className="row  py-2 fs-6 border-black border-bottom" />
 
-                <div className="row py-2 fs-6 border-black border-bottom">
-                    <div className="d-flex ">
-                        <button className="btn  p-0 m-0  shadow-none" >
-                            {false ?
-                                <img src={downArrow} height={24} alt="" />
-                                :
-                                <img src={rightArrow} height={24} alt="" />
-                            }
-                        </button>
-                        Wrapper
-                    </div>
-                </div>
-
+                <Wrapper comp={comp} updateWrapper={updateWrapper} className="row py-2 fs-6 border-black border-bottom" />
+                    
 
 
                 <div className="row py-2 border-black border-bottom">
