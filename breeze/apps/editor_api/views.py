@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.views import APIView
+from .core.app_config_writer import AppConfigWriter
 
 @method_decorator(csrf_exempt,name="dispatch")
 class ConfigReader(APIView):
@@ -97,7 +98,12 @@ class StoreConfig(APIView):
             return JsonResponse({}, status=500)
 
 @method_decorator(csrf_exempt,name='dispatch')
-class ProjectReader(APIView):
+class ProjectConfig(APIView):
     def get(self,param):
         projects = GenerateProject.get_projects()
         return JsonResponse(projects,status=200)
+    def post(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        app_config_writer = AppConfigWriter()
+        app_config_writer.create_or_update_app_config(data)
+        return JsonResponse({},status=200)
