@@ -121,6 +121,13 @@ class AppEditor:
         
         return self.routing_config
     
+    # returns /configurations/<project>/reducer_config.json
+    def get_reducer_config(self):
+        return self.reducer_config
+    
+    # returns /configurations/<project>/redux_store_config.json
+    def get_redux_store_config(self):
+        return self.redux_store_config
     
     # Writes or OverWrites component 'comp' in /configurations/<project>/component_config.json 
     # Triggers re-write of the <comp>.js file in generated project
@@ -186,6 +193,20 @@ class AppEditor:
         reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)
         reducer_generator.write_all_reducers()
 
+    def write_reducers_config(self,reducer_config):
+        self.reducer_config = reducer_config
+        reducer_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['REDUCER_CONFIG']}"
+        write_file(f"{reducer_config_path}.json", json.dumps(self.reducer_config))
+        self.write_reducers()
+        return self.reducer_config
+
     def write_redux_store(self):
         redux_store_generator = ReduxStoreGenerator(all_redux_store_config=self.redux_store_config,all_reducer_config=self.reducer_config, app_config=self.app_config,all_comp_config=self.comp_config)
         redux_store_generator.write_all_store()
+        
+    def write_redux_config(self,redux_config):
+        self.redux_store_config=redux_config
+        redux_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['REDUX_STORE_CONFIG']}"
+        write_file(f"{redux_config_path}.json", json.dumps(self.redux_store_config))
+        self.write_redux_store()
+        return self.redux_store_config
