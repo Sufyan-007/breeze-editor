@@ -13,3 +13,11 @@ def format_val(val):
     if isinstance(val, bool):
         return json.dumps(val)
     return val
+
+def format_raw_val(val):
+    print("----", val, "-----")
+    if isinstance(val, str):
+        return val
+    else:
+        return json.dumps(val)
+    

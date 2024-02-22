@@ -61,7 +61,7 @@ def gen_single_import(import_name, file_path):
 
 from common.utils.file_utils import create_parent_dir_if_not_exists, get_dir_path_from_file
 from common.utils.app_consts import NEW_LINE_CHAR
-from common.utils.formatter import format_val
+from common.utils.formatter import format_val,format_raw_val
 
 
 class ComponentGenerator():
@@ -152,7 +152,7 @@ class ComponentGenerator():
             store = all_store_config[wrapper_store]
             html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
         
-        state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_val(var["defaultValue"])});' for var in state_vars])
+        state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_raw_val(var["defaultValue"])});' for var in state_vars])
         props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
         
         # other vars
