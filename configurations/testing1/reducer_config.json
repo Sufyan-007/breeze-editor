@@ -1,1 +1,1 @@
-{}
+{"reducer_uuid1": {"name": "configSlice", "containingFile": "reducer/ConfigSlice.js", "stateVarName": "value", "initialState": "{}", "reducers": [{"name": "setState", "$id": "REDUCER/UUID1", "parameters": [{"name": "action"}], "isAsync": false, "logic": "state.value = action.payload;"}], "imports": {"other": [{"TYPE": "THIRD_PARTY", "from": "@reduxjs/toolkit", "import_entity": "createSlice", "import_type": "FULL"}]}}}

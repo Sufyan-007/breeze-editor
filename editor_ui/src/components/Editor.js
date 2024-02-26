@@ -30,7 +30,7 @@ function Editor() {
         if(route.component===componentName){
           const r = route.path.substring(1)
           console.log(r)
-          setRoute(r)
+          // setRoute(r)
           routeInput.current.value=r
           break
         }

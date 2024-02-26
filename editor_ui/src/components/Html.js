@@ -22,7 +22,7 @@ export default function Html({value,selecteElement,config,reference,component,se
         // Cors issue here with iFrame
 
         const iFrame = document.getElementById("iFrame")
-        const id = value.attributes.id?.value
+        const id = value.attributes?.id?.value
 
         if (iFrame && id) {
             iFrame.contentWindow.postMessage({ id, highlight }, '*')
@@ -49,7 +49,7 @@ export default function Html({value,selecteElement,config,reference,component,se
 
         setValue(value => {
             const newVal = { ...value, children }
-            changeParent(newVal, offset, importComp)
+            changeParent(newVal, 0, importComp)
             return newVal
         })
     }

@@ -17,7 +17,7 @@ export default function ExpressionConfig({ elem, updateElem, ...props }) {
                     "type": "Element",
                     "attributes": {
                         "className": { "type": "LITERAL", "value": "" },
-                        "id": { "type": "LITERAL", "value": elem.id + "TC" },
+                        "id": { "type": "LITERAL", "value": elem.id + "-MP" },
                     },
                     "tagName": "div",
                     "children": [{"type":"text","text":"Hello"}]
@@ -31,7 +31,7 @@ export default function ExpressionConfig({ elem, updateElem, ...props }) {
                     "type": "Element",
                     "attributes": {
                         "className": { "type": "LITERAL", "value": "" },
-                        "id": { "type": "LITERAL", "value": elem.id + "TC" },
+                        "id": { "type": "LITERAL", "value": elem.id + "-TC" },
                     },
                     "tagName": "div",
                     "children": [{"type":"text","text":"True"}]
@@ -41,7 +41,7 @@ export default function ExpressionConfig({ elem, updateElem, ...props }) {
                     "type": "Element",
                     "attributes": {
                         "className": { "type": "LITERAL", "value": "" },
-                        "id": { "type": "LITERAL", "value": elem.id + "FC" },
+                        "id": { "type": "LITERAL", "value": elem.id + "-FC" },
                     },
                     "tagName": "div",
                     "children": [{"type":"text","text":"False"}]

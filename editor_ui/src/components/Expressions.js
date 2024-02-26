@@ -80,11 +80,11 @@ export default function Expression({ value, selecteElement, config, reference, c
                         <div >
                             True Case:
                         </div>
-                        <HtmlTree component={component} key={exp.trueCase.attributes.id.value} Val={exp.trueCase} className="row" changeParent={(Val, offest = 0, importComp = null) => updateChild("trueCase", Val, importComp)} />
+                        <HtmlTree component={component} key={exp.trueCase.attributes?.id.value ?? exp.trueCase.id} Val={exp.trueCase} className="row" changeParent={(Val, offest = 0, importComp = null) => updateChild("trueCase", Val, importComp)} />
                         <div >
                             False Case:
                         </div>
-                        <HtmlTree component={component} key={exp.falseCase.attributes.id.value} Val={exp.falseCase} className="row " changeParent={(Val, offest = 0, importComp = null) => updateChild("falseCase", Val, importComp)} />
+                        <HtmlTree component={component} key={exp.falseCase.attributes?.id.value} Val={exp.falseCase} className="row " changeParent={(Val, offest = 0, importComp = null) => updateChild("falseCase", Val, importComp)} />
 
                     </div> :
                     null

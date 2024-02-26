@@ -91,27 +91,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PostDetails"
-  
-  /comments:
-    get:
-      operationId: getComments
+    put:
+      operationId: editPost
       tags:
-        - Comment
-      summary: Returns a list of comments that belong to the user's post.
+        - Post
       parameters:
-        - in: query
+        - in: path
           name: postId
-          required: false
+          required: true
           schema:
             type: number
-          description: Only return comments with the given post.
+            # ideally this will be an actual ID, so this will always work from browser
+            example: 1
+          description: The ID of the post to use for this request
+      
+      summary: Returns a post that belong to the user's organization.
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListCommntsResponse"
+                $ref: "#/components/schemas/PostDetails"
+  
   
 components:
   securitySchemes:
@@ -142,13 +144,6 @@ components:
         - param
         - code
     
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          $ref: "#/components/schemas/Error"
-      required:
-        - error
     
     AppConfigDetails:
       type: object
@@ -164,27 +159,9 @@ components:
         defaultComponent:
           type: string
         dependencies:
-          type: array
-          items:
-            $ref: "#/components/schemas/DependencyObject"
-
-        generate_service
-    CommentDetails:
-      type: object
-      properties:
-        id:
-          description: id of post
-          type: number
-        userId:
-          description: id of user
-          type: number
-        title:
-          description: title of post
-          type: string
-        body:
-          description: body of post
-          type: string
-      
+          type: object
+          $ref: "#/components/schemas/DependencyObject"
+  
     PostDetails:
       type: object
       properties:
@@ -209,6 +186,10 @@ components:
     DependencyObject: 
       type: object
       properties:
+        obj:
+          type: object
+          $ref: "#/components/schemas/Error"
+
         name:
           description: name of dependency
           type: string
