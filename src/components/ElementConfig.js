@@ -194,6 +194,7 @@ export default function ElementConfig({ ...props }) {
                                     <option value="height">height</option>
                                     <option value="component">component</option>
                                     <option value="Val">Val</option>
+                                    <option value="project">project</option>
                                 </Form.Select>
                             </div>
 

@@ -8,30 +8,35 @@ import { Provider } from 'react-redux';
 import Sidebar from './components/Sidebar';
 import DetailedComponent from './components/DetailedComponent';
 import ReduxConfig from './components/ReduxConfig';
+import CreateApp from './components/CreateApp';
 
 export const router = createBrowserRouter(
   [
     {
       path: "/editor/:projectName",
       element: <Editor />,
-      children:[
+      children: [
         {
-          path:"comp/:componentName",
+          path: "comp/:componentName",
           element: <DetailedComponent />
         },
         {
-          path:"",
+          path: "",
           element: <Sidebar />
         }
       ]
     },
     {
-      path:"editor/:projectName/redux",
-      element: <ReduxConfig/>,
+      path: "editor/:projectName/redux",
+      element: <ReduxConfig />,
     },
     {
       path: "/",
       element: <Main />
+    },
+    {
+      path: "new"
+      , element: <CreateApp />
     }
   ]
 );

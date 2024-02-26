@@ -102,8 +102,12 @@ export default function DetailedComponent({ ...props }) {
         })
     }
 
-    function updateWrapper(wrapper){
-        console.log(wrapper)
+    function updateWrapper(wrapper_store){
+        setComponent((component) => {
+            const comp = { ...component,wrapper_store}
+            configService.updateComponent(comp)
+            return comp
+        })
     }
 
     function goHome() {

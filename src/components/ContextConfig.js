@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
+import { router } from '../App'
 
 export default function ContextConfig({ ...props }) {
 
@@ -23,9 +24,18 @@ export default function ContextConfig({ ...props }) {
                                 <img src={rightArrow} height={24}  alt="" />
                             }
                         </button>
-                        Context
+                        Redux
                     </div>
                 </div>
+                {showDropdown?
+                    <div className='row'><div>
+                        
+                            <button className='btn btn-sm btn-secondary m-1 text-white ' onClick={()=>router.navigate('redux')}>
+                                Open Redux Configuration
+                            </button>
+                    </div>
+                    </div>
+                :null}
             </div>
         </div>
     )
