@@ -1,10 +1,4 @@
-
-import arrowReturn from "../assets/icons/arrow-return-left.svg";
-import rightArrow from "../assets/icons/arrow_right_icon.svg"
-import downArrow from "../assets/icons/arrow_down_icon.svg"
-
-import threeDots from "../assets/icons/three_dots_icon.svg"
-import { Form } from "react-bootstrap"
+import { router } from "../App";
 import { Fragment, useEffect, useState } from "react";
 import ProjectCards from "./ProjectCards";
 
@@ -31,6 +25,11 @@ export default function Main() {
                         <div className="container-fluid">
                             <div className=" navbar-brand text-white">
                                 Breeze Studio
+                            </div>
+                            <div className="text-white">
+                                <button className=" btn btn-secondary" onClick={()=>router.navigate("/new")}>
+                                    Add new Project
+                                </button>
                             </div>
                         </div>
                     </div>
