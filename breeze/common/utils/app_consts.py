@@ -1,5 +1,8 @@
-# Path of directory where the configuration for projects are stored
-CONFIG_PATH = "/home/raj/Desktop/bridge/processor/bridge_ui_server/breezeui/configurations"
+
+
+# Path of directory where all the config of third party libraries are stored or you want to store
+THIRD_PARTY_CONFIG_PATH = "/home/raj/Desktop/bridge/processor/third_party_configs"
+
 
 CONFIG_PATH = "/home/sufyan/Documents/Projects/Breeze_editor_repo/breezeui/configurations"
 

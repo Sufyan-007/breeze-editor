@@ -132,7 +132,7 @@ class ComponentGenerator():
         functions = config['functions']
 
         wrapper_store = config.get("wrapper_store",None)
-        if wrapper_store is None:
+        if not wrapper_store :
             html_code = "<Fragment>%s</Fragment>"%(html_code)
         else:
             if "store" in config["imports"]:

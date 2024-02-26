@@ -39,7 +39,7 @@ class AppConfigWriter:
                                     "type": "Element",
                                     "tagName": "div",
                                     "attributes": {
-                                        
+                                        "id": { "type": "LITERAL", "value": app_config['defaultComponent']} 
                                     },
                                     "children": [
                                         {
@@ -101,39 +101,3 @@ class AppConfigWriter:
 
         GenerateProject.generate_project(app_current_config)
     
-    def create_or_update_component_config(self,app_name, key,data):
-        
-        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
-
-        comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
-        current_comp_config = {}
-        # Read old config
-        try:
-            current_comp_config = read_json_file(comp_config_path)
-        except FileNotFoundError as e:
-            print(e)
-            current_comp_config = {}
-
-        current_comp_config[key] = data
-        
-        # write configuration
-        write_file(f"{comp_config_path}.json", json.dumps(current_comp_config))
-
-    def update_component_html_config(self,app_name, key,html_data):
-        
-        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
-
-        comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
-        current_comp_config = {}
-        # Read old config
-        try:
-            current_comp_config = read_json_file(comp_config_path)
-        except FileNotFoundError as e:
-            print(e)
-            current_comp_config = {}
-
-        current_comp_config[key]["html"] = html_data
-        
-        # write configuration
-        write_file(f"{comp_config_path}.json", json.dumps(current_comp_config))
-
