@@ -2,7 +2,7 @@ from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.file_helper import read_json_file, write_file, create_parent_dir_if_not_exists
 import json
 from common.utils.request_code import REQUEST
-from ...code_generator.core.generate_project import GenerateProject
+from .generate_project import GenerateProject
 
 class AppConfigWriter:
     def __init__(self):
@@ -66,6 +66,8 @@ class AppConfigWriter:
         write_file(f"{comp_config}.json", json.dumps(main_comp_config))
 
     def create_or_update_app_config(self, data):
+        if data["name"]=="":
+            raise ValueError("Name must be specified")
         app_config_dir = f"{CONFIG_PATH}/{data['name']}"
 
         # Create Dir if not exists for config folder
@@ -88,7 +90,8 @@ class AppConfigWriter:
         print(app_current_config)
         app_current_config["dependencies"] = {
             "react-router-dom": "*",
-            "bootstrap": "^5.3.2"
+            "bootstrap": "^5.3.2",
+            "react-bootstrap": "*"
 
         }
         

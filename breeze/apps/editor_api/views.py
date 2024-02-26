@@ -106,4 +106,8 @@ class ProjectConfig(APIView):
         data = json.loads(request.body.decode("utf-8"))
         app_config_writer = AppConfigWriter()
         app_config_writer.create_or_update_app_config(data)
-        return JsonResponse({},status=200)
+        response={ "name":data["name"]}
+        return JsonResponse(response,status=200)
+    def put(self,request,param):
+        GenerateProject.generate_project({ "name":param})
+        return JsonResponse({"name":param},status=200)

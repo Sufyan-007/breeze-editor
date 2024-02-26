@@ -17,7 +17,8 @@ urlpatterns = [
         path('write-reducers/<str:param>/',ReducerConfig.as_view()),
         path('read-redux-store/<str:param>/',StoreConfig.as_view()),
         path('write-redux-store/<str:param>/',StoreConfig.as_view()),
-        path('all-projects',ProjectConfig.as_view()),
-        path('new-project',ProjectConfig.as_view())
+        path('all-projects/',ProjectConfig.as_view()),
+        path('new-project/',ProjectConfig.as_view()),
+        path('update-project/<str:param>/',ProjectConfig.as_view())
 ]
 

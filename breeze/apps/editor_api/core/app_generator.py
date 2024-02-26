@@ -68,7 +68,7 @@ class AppGenerator:
         self.redux_store_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['REDUX_STORE_CONFIG'])
         self.app_config['MAPPINGS'] = {}
         self.app_config['CSS_CONFIG'] = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CSS_CONFIG'])
-        self.prepare_path_mappings() 
+        # self.prepare_path_mappings() 
         # self.prepare_mapping_config()
 
         self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
@@ -111,8 +111,11 @@ class AppGenerator:
         # self.write_redux_store()
 
         # Generate API client from yaml
-        self.generate_api_client()
-
+        try:
+            self.generate_api_client()
+        except:
+            print("----------------------")
+            print("No YAML file")
 
 
 
