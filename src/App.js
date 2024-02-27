@@ -9,6 +9,7 @@ import Sidebar from './components/Sidebar';
 import DetailedComponent from './components/DetailedComponent';
 import ReduxConfig from './components/ReduxConfig';
 import CreateApp from './components/CreateApp';
+import { ServicePage } from './components/ServicePage';
 
 export const router = createBrowserRouter(
   [
@@ -37,6 +38,10 @@ export const router = createBrowserRouter(
     {
       path: "new"
       , element: <CreateApp />
+    },
+    {
+      path: "editor/:projectName/service",
+      element: <ServicePage />,
     }
   ]
 );
