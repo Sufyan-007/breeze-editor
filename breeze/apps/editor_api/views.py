@@ -111,3 +111,20 @@ class ProjectConfig(APIView):
     def put(self,request,param):
         GenerateProject.generate_project({ "name":param})
         return JsonResponse({"name":param},status=200)
+
+
+class ServiceConfig(APIView):
+    def get(self,request,param):
+        try:
+            app_editor= AppEditor(param)
+            return JsonResponse(app_editor.get_service_config(),status=200)
+        except:
+            return JsonResponse({},status=500)
+        
+    def post(self,request,param):
+        data= json.loads(request.body.decode("utf-8"))
+        try:
+            app_editor= AppEditor(param)
+            return JsonResponse(app_editor.write_service_config(data),status=200)
+        except:
+            return JsonResponse({},status=500)

@@ -65,8 +65,13 @@ class GenerateAPIClient():
             ## attached the core functionality to call an API in the react app
             folder = "api"
             reqest = "request.js"
-
-            self.write_file(folder,reqest,react_request_code.REQUEST)
+            servers=documents.get("servers",[])
+            request_code=react_request_code.REQUEST
+            if servers:
+                url=servers[0]["url"]
+                request_code=request_code.replace("https://jsonplaceholder.typicode.com",url)
+            
+            self.write_file(folder,reqest,request_code)
                 
             for path in paths:
                 print(path)

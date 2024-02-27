@@ -1,4 +1,5 @@
 
+from .api_client_generator import GenerateAPIClient
 from .reducer_generator import ReducerGenerator
 from .redux_store_generator import ReduxStoreGenerator
 from common.utils.config_reader import read_config_file, read_file_json, write_file
@@ -7,7 +8,8 @@ from .component_generator import ComponentGenerator, gen_single_import
 from .helpers.routing_handler import RouteHandler
 import json
 from common.utils.formatter import format_by_prettier,format_val
-
+import yaml
+from common.utils.file_helper import create_parent_dir_if_not_exists
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
@@ -45,9 +47,6 @@ NEW_COMP_FORMAT={
 }
 
 
-# Can be merged with app_generator
-# __init__(), modify_main_component() and read_config() carried over from app_generator
-# all other functions are newly added and should work within app_generator without changes 
 class AppEditor:
     
     app_config_dir = None
@@ -210,3 +209,24 @@ class AppEditor:
         write_file(f"{redux_config_path}.json", json.dumps(self.redux_store_config))
         self.write_redux_store()
         return self.redux_store_config
+    
+    def get_service_config(self):
+        service_config = {}
+        try:
+            with open(f"{self.app_config['APP_CONFIG_PATH']}/yaml/sample_swagger.yml") as file:
+                service_config = yaml.full_load(file)
+        except:
+            print ("Failed to load service config file")
+        return service_config
+    
+    def write_services(self):
+        api_client_generator = GenerateAPIClient(app_config=self.app_config)
+        api_client_generator.read_yaml()
+    
+    def write_service_config(self, service_config):
+        service_config_path = f"{self.app_config['APP_CONFIG_PATH']}/yaml"
+        create_parent_dir_if_not_exists(service_config_path)
+        with open(service_config_path+"/sample_swagger.yml", 'w') as file:
+            yaml.dump(service_config, file,default_flow_style=False)
+        self.write_services()
+        return service_config

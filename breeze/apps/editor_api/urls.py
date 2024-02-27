@@ -7,6 +7,7 @@ from .views import RoutingWriter
 from .views import ProjectConfig
 from .views import ReducerConfig
 from .views import StoreConfig
+from .views import ServiceConfig
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
         path('write-config/<str:param>/',ComponentWriter.as_view()),
@@ -19,6 +20,8 @@ urlpatterns = [
         path('write-redux-store/<str:param>/',StoreConfig.as_view()),
         path('all-projects/',ProjectConfig.as_view()),
         path('new-project/',ProjectConfig.as_view()),
-        path('update-project/<str:param>/',ProjectConfig.as_view())
+        path('update-project/<str:param>/',ProjectConfig.as_view()),
+        path('read-services/<str:param>/',ServiceConfig.as_view()),
+        path('write-services/<str:param>/',ServiceConfig.as_view()),
 ]
 
