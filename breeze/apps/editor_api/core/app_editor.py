@@ -211,7 +211,12 @@ class AppEditor:
         return self.redux_store_config
     
     def get_service_config(self):
-        service_config = {}
+        service_config = {
+            "servers":[],
+            "tags":[],
+            "paths":{},
+            "components":{"schemas":{}}
+        }
         try:
             with open(f"{self.app_config['APP_CONFIG_PATH']}/yaml/sample_swagger.yml") as file:
                 service_config = yaml.full_load(file)
