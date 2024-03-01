@@ -3,14 +3,14 @@ import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 
 
-export default function SchemaConfig({ schemas,setSelected, ...props }) {
+export default function SchemaConfig({ schemas,selected,setSelected,addModel, ...props }) {
     const [showDropdown, setShowDropdown] = useState(false)
-    console.log(schemas)
 
     function toggleDropdown() {
         setShowDropdown((state) => !state)
     }
 
+    const highlightStyle = { backgroundColor: "#222" }
 
     return (
         <div {...props}>
@@ -24,7 +24,7 @@ export default function SchemaConfig({ schemas,setSelected, ...props }) {
                                 <img src={rightArrow} height={24} alt="" />
                             }
                         </button>
-                        Entities
+                        Models
                     </div>
                 </div>
 
@@ -32,14 +32,14 @@ export default function SchemaConfig({ schemas,setSelected, ...props }) {
                 {showDropdown ?
                     <Fragment>
                         {Object.entries(schemas).map(([k, schema]) =>
-                            <div key={k} className="row  btn rounded-0 d-flex text-white px-3 p-0 my-1 " onClick={()=>setSelected({"type":"schema","selected":k})} >
+                            <div key={k} className="row  btn rounded-0 d-flex text-white px-3 p-0 my-1 " style={k=== selected?.selected ? highlightStyle : null} onClick={()=>setSelected({"type":"schema","selected":k})} >
                                 {k}
                             </div>
                         )}
                         <div className='row'>
                             <div>
-                                <button className='btn btn-sm btn-secondary m-2 text-white ' >
-                                    Add Entity
+                                <button className='btn btn-sm btn-secondary m-2 text-white ' onClick={addModel} >
+                                    Add Model
                                 </button>
                             </div>
                         </div>

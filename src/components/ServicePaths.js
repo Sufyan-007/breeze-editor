@@ -3,18 +3,15 @@ import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 
 
-export default function ServicePaths({ paths, tags, setSelected, ...props }) {
+export default function ServicePaths({ paths, tags, selected, setSelected, ...props }) {
     const [showDropdown, setShowDropdown] = useState(false)
 
-
-    console.log(tags)
-
-    console.log(paths)
 
     function toggleDropdown() {
         setShowDropdown((state) => !state)
     }
 
+    const highlightStyle = { backgroundColor: "#222" }
 
     return (
         <div {...props}>
@@ -28,22 +25,27 @@ export default function ServicePaths({ paths, tags, setSelected, ...props }) {
                                 <img src={rightArrow} height={24} alt="" />
                             }
                         </button>
-                        Services
+                        Paths
                     </div>
                 </div>
                 {showDropdown ?
                     <Fragment>
-                        {tags.map(tag =>
-                            <div key={tag.name} className="row  btn rounded-0 d-flex text-white px-3 p-0 my-1 " onClick={()=>setSelected({type:"tag",selected:tag.name})} >
+                        {/* {tags.map((tag) =>
+                            <div key={tag.name} className="row  btn rounded-0 d-flex text-white px-3 p-0 my-1 " style={tag.name=== selected?.selected ? highlightStyle : null} onClick={()=>setSelected({type:"tag",selected:tag.name})} >
                                 {tag.name}
                             </div>
                         )
-
+                        } */}
+                        {Object.entries(paths).map(([k,value]) =>
+                            <div key={k} className="row  btn rounded-0 d-flex text-white px-3 p-0 my-1 " style={k=== selected?.selected ? highlightStyle : null} onClick={()=>setSelected({type:"tag",selected:k})} >
+                                {k}
+                            </div>
+                        )
                         }
                         <div className='row'>
                             <div>
                                 <button className='btn btn-sm btn-secondary m-1 text-white ' >
-                                    Add Service
+                                    Add Paths
                                 </button>
                             </div>
                         </div>
