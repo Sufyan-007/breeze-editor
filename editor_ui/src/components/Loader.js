@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Loader({ loader, children }) {
     const [loading, setLoading] = useState(true)
@@ -9,7 +9,7 @@ export default function Loader({ loader, children }) {
             setLoading(false)
         }
         load()  
-    }, [])
+    }, [loader])
 
     return (
         loading ? <div>Loading...</div> : children
