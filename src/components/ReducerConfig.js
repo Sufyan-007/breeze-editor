@@ -49,7 +49,7 @@ export default function ReducerConfig({ reducerConfig, update, ...props }) {
 
     return (
         <div className="container h-100 d-flex flex-column">
-            <h2 className="my-2 mb-3 row">Store Config</h2>
+            <h2 className="my-2 mb-3 row">Reducer Config</h2>
 
             <div className="row">
                 <h5 className="p-0 ms-2">Name : </h5>
