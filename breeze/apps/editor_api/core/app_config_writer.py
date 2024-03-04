@@ -72,6 +72,7 @@ class AppConfigWriter:
 
         # Create Dir if not exists for config folder
         create_parent_dir_if_not_exists(app_config_dir)
+        create_parent_dir_if_not_exists(data["path"])
 
         app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
 

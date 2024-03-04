@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.views import APIView
 from .core.app_config_writer import AppConfigWriter
+import os
 
 @method_decorator(csrf_exempt,name="dispatch")
 class ConfigReader(APIView):
@@ -104,6 +105,12 @@ class ProjectConfig(APIView):
         return JsonResponse(projects,status=200)
     def post(self,request):
         data = json.loads(request.body.decode("utf-8"))
+        data['defaultComponent']="Main"
+        data["projectName"]=data["name"]
+        data["name"]=data['name'].lower().replace(" ","_")
+        generated_paths=os.path.join(os.path.dirname(os.getcwd()),"generated_projects")
+        # os.makedirs(generated_paths,exist_ok=True)
+        data["path"]=os.path.join(generated_paths,data["name"])
         app_config_writer = AppConfigWriter()
         app_config_writer.create_or_update_app_config(data)
         response={ "name":data["name"]}

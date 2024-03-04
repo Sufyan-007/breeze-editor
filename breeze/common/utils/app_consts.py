@@ -4,7 +4,7 @@
 THIRD_PARTY_CONFIG_PATH = "/home/raj/Desktop/bridge/processor/third_party_configs"
 
 
-CONFIG_PATH = "/home/sufyan/Documents/Projects/Breeze_editor_repo/breezeui/configurations"
+CONFIG_PATH = "configurations"
 
 CONFIG_FILES_PATH = {
     'APP_CONFIG' : 'app_basic_config',

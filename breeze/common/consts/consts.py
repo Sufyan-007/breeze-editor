@@ -10,6 +10,6 @@ CONFIG_FILES_PATH = {
 
 }
 
-APP_CONFIG_PATH = "/home/sufyan/Documents/Projects/Breeze_editor_repo/breezeui/configurations"
+APP_CONFIG_PATH = "configurations"
 
 NEW_LINE_CHAR = "\n"
