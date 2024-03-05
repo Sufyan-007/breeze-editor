@@ -1,0 +1,1 @@
+{"Main": {"name": "Main", "containingFile": "components/Main.js", "stateVars": [], "propsVars": [], "otherVars": [], "functions": [], "html": {"type": "Element", "tagName": "div", "attributes": {"id": {"type": "LITERAL", "value": "Main"}}, "children": [{"type": "text", "text": "This is main page"}]}, "wrapper_store": null, "imports": {"components": [], "other": []}, "hooks": []}}

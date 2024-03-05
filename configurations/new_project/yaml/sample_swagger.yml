@@ -33,7 +33,7 @@ components:
           type: number
       type: object
     CreatePostResponse:
-      description: Represents a chat completion response returned by the model, based
+      description: Represents a chat completion response returned by model, based
         on the provided input.
       properties:
         id:
@@ -73,9 +73,6 @@ components:
       properties:
         error:
           $ref: '#/components/schemas/Error'
-        newProperty:
-          description: new property
-          type: string
       required:
       - error
       type: object
@@ -214,7 +211,7 @@ paths:
       tags:
       - Post
 servers:
-- url: http://api.openai.com/v1
+- url: http://localhost:8080
 tags:
 - description: Sample posts.
   name: Post
