@@ -23,5 +23,6 @@ urlpatterns = [
         path('update-project/<str:param>/',ProjectConfig.as_view()),
         path('read-services/<str:param>/',ServiceConfig.as_view()),
         path('write-services/<str:param>/',ServiceConfig.as_view()),
+        path('delete-project/<str:param>/',ProjectConfig.as_view())
 ]
 

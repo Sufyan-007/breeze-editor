@@ -118,7 +118,15 @@ class ProjectConfig(APIView):
     def put(self,request,param):
         GenerateProject.generate_project({ "name":param})
         return JsonResponse({"name":param},status=200)
-
+    def delete(self,request,param):
+        print("Deleting project : " + param)
+        try:
+            GenerateProject.delete_project(param)
+            return JsonResponse({"deleted":param},status=200)
+        except FileNotFoundError:
+            return JsonResponse({"Project not found":param},status=404)
+        except:
+            return JsonResponse({},status=500)
 
 class ServiceConfig(APIView):
     def get(self,request,param):

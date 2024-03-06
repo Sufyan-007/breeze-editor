@@ -1,20 +1,37 @@
-import { reGenerateProject } from "../services/ProjectService"
+import { useState } from "react"
+import * as ProjectService from "../services/ProjectService"
+import loadingGif from "../assets/icons/loading.gif"
 
 export default function ProjectCards({ project, ...props }) {
+    const [deleting,setDeleting] = useState(false)
 
     function reGenerate(){
-        reGenerateProject(project.project_name)
+        ProjectService.reGenerateProject(project.project_name)
+    }
+
+    function deleteProject(){
+        console.log(project)
+        setDeleting(true)
+        window.confirm(`Are you sure you want to delete project : ${project.name} ?`)
+        ProjectService.deleteProject(project.name).then((response)=>{
+            if(response.status ===200){
+                alert("Project deleted successfully");
+            }else{
+                alert("Failed to delete project");
+            }
+            setDeleting(false)
+        })
     }
 
     return (
         <div {...props}>
+            {/* <div hidden={!deleting} className="" >
+                <img src={loadingGif} alt=""  height={40}/>
+            </div> */}
             <div className="card m-2">
                 <div className=" card-header">
-                    {project.name}
-                    {project.name !== project.project_name ?
-                        " (" + project.project_name + ")"
-                        : ""
-                    }
+                    {project.projectName}
+                    
                 </div>
                 <div className=" card-body">
                     {project.description}
@@ -26,6 +43,9 @@ export default function ProjectCards({ project, ...props }) {
                     </a>
                     <button onClick={reGenerate}  className="btn btn-sm btn-secondary">
                         Re-Generate
+                    </button>
+                    <button onClick={deleteProject}  className="btn btn-sm btn-danger">
+                        Delete
                     </button>
                 </div>
             </div>
