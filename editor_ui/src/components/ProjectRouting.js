@@ -1,6 +1,6 @@
 export default function ProjectRouting(){
     return (
-        <div className="container-fluid text-white h-100 ">
+        <div className="container-fluid text-white">
             Project Routing Page
         </div>
     )
