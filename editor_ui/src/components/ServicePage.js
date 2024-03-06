@@ -17,7 +17,7 @@ export function ServicePage() {
     const [showModelModal, setShowModelModal] = useState(false)
     const [newModelName, setNewModelName] = useState("")
     const [selected, setSelected] = useState({ type: "", selected: "" })
-    
+
 
     const loader = useCallback(async () => {
         const services = await getServiceConfig(projectName)
@@ -133,14 +133,13 @@ export function ServicePage() {
                 </Modal.Footer>
             </Modal>
             <div className="container-fluid d-flex flex-column vh-100">
-                <div className="navbar row " style={{ backgroundColor: "#151518" }}>
-                    <div className="navbar-brand text-white">
-                        Breeze Studio
-                    </div>
-                </div>
+
 
                 <div className="row flex-grow-1 overflow-hidden">
                     <div className="col-3   overflow-y-auto h-100 fs-6 text-white" style={{ width: "18rem", backgroundColor: "#303033" }}>
+                        <div className="d-flex m-1 fw-bold fs-5">
+                            Service Configuration
+                        </div>
                         <ServicePaths setSelected={setSelected} selected={selected} tags={serviceConfig?.tags} paths={serviceConfig?.paths} className="row my-2 border-bottom border-black" />
                         <SchemaConfig setSelected={setSelected} selected={selected} addModel={() => { setShowModelModal(true) }} schemas={serviceConfig?.components?.schemas} className="row my-2 border-bottom border-black" />
 
@@ -153,7 +152,7 @@ export function ServicePage() {
                     </div>
                     <div className="col  overflow-y-auto h-100 bg-dark-subtle">
                         {selected.type === "tag" ?
-                            <PathConfig paths={serviceConfig.paths} tags={serviceConfig.tags} selectedPath={selected.selected} /> 
+                            <PathConfig paths={serviceConfig.paths} tags={serviceConfig.tags} selectedPath={selected.selected} />
                             : null}
                         {selected.type === "schema" ?
                             <EntityConfig schema={serviceConfig.components?.schemas} selectedEntity={selected.selected} updateSchema={updateSchema} />
