@@ -22,13 +22,14 @@ export default function Main() {
         <Fragment>
             {projects ?
                 <div className="container-fluid vh-100 bg-dark-subtle">
-                    <Navbar>
+                    <Navbar rightContent={
                         <div className="text-white">
                             <button className=" btn btn-secondary" onClick={() => router.navigate("/new")}>
-                                Add new Project
+                              Add new Project
                             </button>
-                        </div>
-                    </Navbar>
+                        </div>} 
+                    />
+                        
                     <div className="row m-3 justify-content-between">
                         {
                             Object.values(projects).map((item, index) =>

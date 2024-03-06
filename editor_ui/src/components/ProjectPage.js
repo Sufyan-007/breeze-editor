@@ -1,68 +1,99 @@
-import Navbar from "./Navbar";
-import home from "../assets/icons/home.svg"
-import code from "../assets/icons/code.svg"
-import pages from "../assets/icons/pages.svg"
-import redux from "../assets/icons/redux.svg"
-import routing from "../assets/icons/routing.svg"
-import { useEffect, useState } from "react";
-import ProjectHome from "./ProjectHome";
-import ProjectComponents from "./ProjectComponents";
-import { setReducerConfig,setReduxStoreConfig } from "../reducers/ReduxConfigReducer";
+import React, { useState, useEffect } from 'react';
+import { useLoaderData } from "react-router";
+import { useParams } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { getAllConfigs } from "../services/ConfigService";
+import { setReducerConfig, setReduxStoreConfig } from "../reducers/ReduxConfigReducer";
 import { setServiceConfig } from "../reducers/ServiceConfigReducer";
-import ProjectRouting from "./ProjectRouting";
+import { setRouterConfig } from "../reducers/RouterConfigReducer";
+import { router } from '../App';
+//components
+import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
 import { ServicePage } from "./ServicePage";
-import { useLoaderData } from "react-router";
-import { getAllConfigs } from "../services/ConfigService";
-import { useDispatch } from "react-redux";
-import { setRouterConfig } from "../reducers/RouterConfigReducer";
+import ProjectComponents from "./ProjectComponents";
+import ProjectRouting from "./ProjectRouting";
+import ProjectHome from "./ProjectHome";
 
-export default function ProjectPage(){
-    const [tagSelection,setSelection] = useState(0)
-    const highlightedStyle={ backgroundColor: "#303033"}
-    const allConfig= useLoaderData()
-    const dispatch = useDispatch()
-    
+//icons
+import styles from "../assets/icons/styles.svg";
+import home from "../assets/icons/home.svg";
+import code from "../assets/icons/code.svg";
+import pages from "../assets/icons/pages.svg";
+import routing from "../assets/icons/routing.svg";
+import settings from "../assets/icons/settings.svg";
+import apps from "../assets/icons/apps.svg";
+import ProjectSidebar from './ProjectSidebar';
 
-    useEffect(() =>{
-        dispatch(setReducerConfig(allConfig.reducerConfig))
-        dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig))
-        dispatch(setServiceConfig(allConfig.serviceConfig))
-        dispatch(setRouterConfig(allConfig.reducerConfig))
-    },[allConfig,dispatch])
+export default function ProjectPage() {
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+    const [tagSelection, setSelection] = useState(0);
+    const highlightedStyle = { backgroundColor: "#303033" };
+    const allConfig = useLoaderData();
+    const dispatch = useDispatch();
+    const {projectName} = useParams();
+
+    useEffect(() => {
+        dispatch(setReducerConfig(allConfig.reducerConfig));
+        dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
+        dispatch(setServiceConfig(allConfig.serviceConfig));
+        dispatch(setRouterConfig(allConfig.reducerConfig));
+    }, [allConfig, dispatch]);
+
+    const sidebarItems = [
+        { id: 0, name: "Home", icon: home },
+        { id: 1, name: "Pages", icon: pages },
+        { id: 2, name: "Routing", icon: routing },
+        { id: 3, name: "Services", icon: settings },
+        { id: 4, name: "Constants", icon: pages }, //icon
+        { id: 5, name: "Styles", icon: styles }, 
+        { id: 6, name: "Code", icon: code },
+        { id: 7, name: "Third-party App", icon: apps },
+        { id: 8, name: "Config", icon: pages }, //icon
+
+    ];
+
+    const components = [
+        <ProjectHome />,
+        <ProjectComponents />,
+        <ProjectRouting />,
+        <ServicePage />,
+        <ReduxConfig />,
+        //rest to be added
+    ];
+
+    const toggleSidebar = () => {
+        setIsSidebarExpanded(!isSidebarExpanded);
+    };
 
     return (
-        <div className=" container-fluid vh-100 d-flex flex-column">
-            <Navbar  />
+        <div className="container-fluid vh-100 d-flex flex-column">
+            <Navbar leftContent={
+                <div className="text-white">
+                    <button className="btn btn-secondary" onClick={() => router.navigate("/")}>
+                      All Apps
+                    </button>
+                </div>} 
+            />
             <div className="row flex-grow-1">
-                <div className="col" style={{maxWidth:"3rem",backgroundColor: "#151518"}}>
-                    <div className="row   py-2" onClick={()=>setSelection(0)} style={tagSelection===0?highlightedStyle:{}}>
-                        <img src={home} alt="" height={24}/>
-                    </div>
-                    <div className="row mt-1 py-2" onClick={()=>setSelection(1)} style={tagSelection===1?highlightedStyle:{}}>
-                        <img src={pages} alt="" height={24}/>
-                    </div>
-                    <div className="row mt-1 py-2" onClick={()=>setSelection(2)} style={tagSelection===2?highlightedStyle:{}}>
-                        <img src={routing} alt="" height={24}/>
-                    </div>
-                    <div className="row mt-1 py-2" onClick={()=>setSelection(3)} style={tagSelection===3?highlightedStyle:{}}>
-                        <img src={redux} alt="" height={24}/>
-                    </div>
-                    <div className="row mt-1 py-2" onClick={()=>setSelection(4)} style={tagSelection===4?highlightedStyle:{}}>
-                        <img src={code} alt="" height={24}/>
-                    </div>
-                </div>
-                <div className="col m-0 p-0 " style={{ backgroundColor: "#303033"}}>
-                    {tagSelection===0?<ProjectHome />:null}
-                    {tagSelection===1?<ProjectComponents />:null}
-                    {tagSelection===2?<ProjectRouting />:null}
-                    {tagSelection===3?<ReduxConfig />:null}
-                    {tagSelection===4?<ServicePage/>:null}
+                <ProjectSidebar 
+                  isSidebarExpanded={isSidebarExpanded} 
+                  sidebarItems={sidebarItems} 
+                  tagSelection={tagSelection} 
+                  setSelection={setSelection} 
+                  toggleSidebar={toggleSidebar} 
+                  highlightedStyle={highlightedStyle}
+                />
+                <div className="col m-0 p-0" style={{ backgroundColor: "#303033" }}>
+                    <h4 className='text-white m-2'>{projectName}</h4>
+                    <hr className="mt-0" style={{ color: 'white'}}/>
+                    {components[tagSelection]}
                 </div>
             </div>
         </div>
-    )
+    );
 }
+
 
 export async function projectLoader({params}){
     const projectName= params.projectName
