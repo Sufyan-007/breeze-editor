@@ -1,10 +1,8 @@
-
+# Path of directory where the configuration for projects are stored
+CONFIG_PATH = "/home/yash/Documents/Projects/Breeze/breezeui/configurations"
 
 # Path of directory where all the config of third party libraries are stored or you want to store
-THIRD_PARTY_CONFIG_PATH = "/home/raj/Desktop/bridge/processor/third_party_configs"
-
-
-CONFIG_PATH = "configurations"
+THIRD_PARTY_CONFIG_PATH = "/home/yash/Documents/breezeui/configurations/third_party_configs"
 
 CONFIG_FILES_PATH = {
     'APP_CONFIG' : 'app_basic_config',
