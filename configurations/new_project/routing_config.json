@@ -1,0 +1,1 @@
+{"routes": [{"path": "/", "component": "Main"}, {"path": "/home", "component": "Home"}]}

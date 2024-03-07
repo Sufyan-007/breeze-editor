@@ -1,0 +1,62 @@
+{
+    "routes": [
+        {
+            "path": "/",
+            "redirectTo": "/home",
+            "action": {
+                "implementation": {
+                    "name": "",
+                    "$id": "FUNCTIONS/A1",
+                    "isAnonymous": true,
+                    "parameters": {
+                        "destructured": true,
+                        "list": [
+                            {
+                                "name": "event"
+                            }
+                        ]
+                    },
+                    "isAsync": false,
+                    "body": "console.log('Loader Called'); \n return null;"
+                }
+            },
+            "loader": {
+                "implementation": {
+                    "name": "",
+                    "$id": "FUNCTIONS/A1",
+                    "isAnonymous": true,
+                    "parameters": {
+                        "destructured": true,
+                        "list": [
+                            {
+                                "name": "event"
+                            }
+                        ]
+                    },
+                    "isAsync": false,
+                    "body": "console.log('Action'); \n return null;"
+                }
+            }
+        },
+        {
+            "component": "create_app_page",
+            "path": "/home"
+        },
+        {
+            "component": "react_bootstrap",
+            "path": "/bootstrap"
+        },
+        {
+            "component": "post_component",
+            "path": "/post"
+        },
+        {
+            "component": "post_component",
+            "path": "/post/:id"
+        },
+        {
+            "component": "post_list",
+            "path": "/posts"
+        }
+    ]
+}
