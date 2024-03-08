@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'apps.configuration_writer',
     'apps.configuration_reader',
     'apps.code_generator',
+    'apps.api_client_generator',
     'rest_framework_swagger',       # Swagger 
     'drf_yasg',
     "corsheaders"
@@ -50,7 +51,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1", 
     "localhost"
 ]
-
+CSRF_COOKIE_SECURE = True
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1", 
     "http://localhost"
