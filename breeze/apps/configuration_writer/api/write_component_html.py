@@ -1,12 +1,9 @@
 from django.http import JsonResponse
 import json
 from ..core.app_config_writer import AppConfigWriter
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.views import APIView
+from django.views import View
 
-@method_decorator(csrf_exempt, name='dispatch')
-class WriteComponentHtml(APIView):
+class WriteComponentHtml(View):
     
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
