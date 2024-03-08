@@ -69,11 +69,10 @@ export default function ProjectPage() {
     return (
         <div className="container-fluid vh-100 d-flex flex-column">
             <Navbar leftContent={
-                <div className="text-white">
-                    <button className="btn btn-secondary" onClick={() => router.navigate("/")}>
-                      All Apps
-                    </button>
-                </div>} 
+                <button className="btn btn-outlined" style={{ color: "white"}} onClick={() => router.navigate("/")}>
+                    All Apps
+                </button>
+            } 
             />
             <div className="row flex-grow-1">
                 <ProjectSidebar 
