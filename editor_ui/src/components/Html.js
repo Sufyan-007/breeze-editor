@@ -1,16 +1,13 @@
-import { Fragment, useRef , useState } from "react"
-
+import { Fragment,  useState } from "react"
 import HtmlTree from "./HtmlTree"
-import { Form, Modal } from "react-bootstrap"
 import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 import threeDots from "../assets/icons/three_dots_icon.svg"
+import AddChildModal from "./AddChildModal"
 export default function Html({value,selecteElement,config,reference,component,setValue,changeParent,sidebarService,selected }) {
 
 
-
     const [showChild, setShowChild] = useState(false)
-    const tagInput = useRef()
 
     const [showModal, setShowModal] = useState(false)
     const hasChildren = value.children?.length > 0
@@ -54,48 +51,49 @@ export default function Html({value,selecteElement,config,reference,component,se
         })
     }
 
-    function closeModal(add) {
-        if (add) {
-            const tagName = tagInput.current.value
-            var newDiv;
-            var imp;
+    function modalUpdate(newChild,imp) {
+        console.log(newChild)
+        if (newChild) {
+            // const tagName = tagInput.current.value
+            // var newDiv;
+            // var imp;
 
-            const id = (value.attributes.id?.value ?? "NA") + "-" + value.children.length
+            // const id = (value.attributes.id?.value ?? "NA") + "-" + value.children.length
 
-            if (tagName === "EXPRESSION") {
-                console.log("Expression")
-                newDiv = {
-                    "type": "Expression",
-                    id,
-                    "children": [{
-                            "type": "code",
-                            "code": "0"
-                        }]
-                }
-            }
-            else {
-                imp = tagName !== "div" ? tagName : null
-                newDiv = {
-                    "type": "Element",
-                    "attributes": {
-                        "className": { "type": "LITERAL", "value": "" },
-                        "id": { "type": "LITERAL", "value": id },
-                    },
-                    "tagName": tagName,
-                    "children": []
-                }
-            }
+            // if (tagName === "EXPRESSION") {
+            //     console.log("Expression")
+            //     newDiv = {
+            //         "type": "Expression",
+            //         id,
+            //         "children": [{
+            //                 "type": "code",
+            //                 "code": "0"
+            //             }]
+            //     }
+            // }
+            // else {
+            //     imp = tagName !== "div" ? tagName : null
+            //     newDiv = {
+            //         "type": "Element",
+            //         "attributes": {
+            //             "className": { "type": "LITERAL", "value": "" },
+            //             "id": { "type": "LITERAL", "value": id },
+            //         },
+            //         "tagName": tagName,
+            //         "children": []
+            //     }
+            // }
 
-            sidebarService.setSelectedElem(newDiv)
-            const children = [...value.children, newDiv]
-            setValue(value => {
-                const newVal = { ...value, children }
-                changeParent(newVal, 0, imp)
-                return newVal
-            })
+            // sidebarService.setSelectedElem(newChild)
+            // const children = [...value.children, newChild]
+            // setValue(value => {
+            //     const newVal = { ...value, children }
+            //     changeParent(newVal, 0, imp)
+            //     return newVal
+            // })
 
-            setShowChild(true)
-            setShowModal(false)
+            // setShowChild(true)
+            // setShowModal(false)
         }
         else {
             setShowModal(false)
@@ -114,33 +112,8 @@ export default function Html({value,selecteElement,config,reference,component,se
 
     return (
         <Fragment >
-            <Modal show={showModal} onHide={() => closeModal(false)}>
-                <Modal.Header>
-                    Add Child
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group>
-                            <Form.Label>Component </Form.Label>
-                            <Form.Select ref={tagInput}>
-                                <option value="div">div</option>
-                                <option value="EXPRESSION">EXPRESSION</option>
-                                {Object.keys(config).map((comp) =>
-                                    <option value={comp}>{comp}</option>
-                                )}
-                            </Form.Select>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <button className="btn btn-secondary" onClick={() => closeModal(false)}>
-                        Cancel
-                    </button>
-                    <button className="btn btn-primary" onClick={() => closeModal(true)}>
-                        Add
-                    </button>
-                </Modal.Footer>
-            </Modal>
+            {/*  */}
+            <AddChildModal show={showModal} update={modalUpdate} />
             <div ref={reference} className=" p-0 d-flex justify-content-between "  >
                 <div className="d-flex w-100 ">
                     {hasChildren ?
