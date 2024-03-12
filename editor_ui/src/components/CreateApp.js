@@ -2,162 +2,351 @@
 import React, {  useState } from "react";
 import { createNewProject } from "../services/ProjectService";
 import { router } from "../App";
-import loadingIcon from "../assets/icons/loading.gif"
+import loadingIcon from "../assets/icons/loading.gif";
+import Multiselect from "multiselect-react-dropdown";
+import { useForm } from "react-hook-form";
+import Modal from "react-bootstrap/Modal";
+import { ToastContainer, Toast } from "react-bootstrap";
 
 export default function CreateApp({ ...props }) {
-    const [projectData, setProjectData] = useState({
-        name: "",
-        description: "",
-        author: "",
-        defaultComponent: "Main",
-        framework: "",
-        buildTool: "",
-        language: "",
-        styling: "",
-        path: ""
-    });
-    const [ loading, setLoading] = useState(false)
-    const [firstForm, setFirstForm] = useState(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    setError,
+  } = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+      author: "",
+      framework: "react",
+      language: "javascript",
+      styling: [],
+      buildTool: "create-react-app",
+    },
+  });
+  const [loading, setLoading] = useState(false);
+  const [selectedValues, setSelectedValues] = React.useState([]);
+  const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState("Uploading...");
+  const [showModal, setModalShow] = useState(false);
+  const stylingComponents = [
+    { id: "bootstrap", name: "Bootstrap" },
+    { id: "react-bootstrap", name: "React-bootstrap" },
+    { id: "chakra-ui", name: "ChakraUI" },
+    { id: "material-ui", name: "Material UI" },
+  ];
+  const [toasts, setToasts] = useState([]);
 
+  const showToast = (message, variant = "success") => {
+    const newToast = { id: new Date().getTime(), message, variant };
+    setToasts((currentToasts) => [...currentToasts, newToast]);
+  };
 
-    function updateProjectData(key, value) {
-        setProjectData(state => {
-            return { ...state, [key]: value };
-        })
-    }
-    function toggleFirstForm() {
-        setFirstForm(state => {
-            state = !state
-            return state
-        });
-    }
+  const simulateUpload = () => {
+    const duration = 30000;
+    const updateInterval = 1000;
+    const increments = duration / updateInterval;
+    const incrementValue = 100 / increments;
 
+    const interval = setInterval(() => {
+      setProgress((oldProgress) => {
+        const newProgress = Math.min(
+          Math.floor(oldProgress + incrementValue),
+          95
+        );
 
-    function createNewApp() {
-        setLoading(true)
-        createNewProject(projectData).then((response) => {
-            alert("Project created successfully")
-            router.navigate("/editor/" + response.name)
-        })
-    }
+        if (newProgress >= 90) {
+          setMessage("This might take a while...");
+        } else if (newProgress >= 80) {
+          setMessage("Almost there...");
+        } else if (newProgress >= 70) {
+          setMessage("Configuring settings...");
+        } else if (newProgress >= 50) {
+          setMessage("Installing packages...");
+        } else if (newProgress >= 20) {
+          setMessage("Initializing project...");
+        } else {
+          setMessage("Creating...");
+        }
 
+        return newProgress;
+      });
+    }, updateInterval);
 
-    return (
-        <div
-            className=" container-fluid d-flex flex-column  vh-100"
-            style={{ background: 'linear-gradient(90deg, #103970 0%, #0b2850 100%)' }}
-        >
+    return () => clearInterval(interval);
+  };
 
-            <div className="row my-4"></div>
-            <div className="row flex-grow-1 ">
-                <div className="col-10 d-flex flex-column offset-1 rounded-5"
-                    style={{ background: 'rgba(0, 0, 0, 0.3)' }}
-                >
-                    <div className="row flex-grow-1">
+  React.useEffect(() => {
+    register("styling", { required: true });
+  }, [register]);
 
-                        <div className="col-5">
-                            <div className="row text-white h-100 align-items-center">
-                                <div className=" text-center fs-1">
-                                    Breeze
-                                    <br />
-                                    Studio
-                                </div>
+  const onSelect = (selectedList, selectedItem) => {
+    setSelectedValues(selectedList);
+    setValue("styling", selectedList);
+  };
 
-                            </div>
+  const onRemove = (selectedList, removedItem) => {
+    setSelectedValues(selectedList);
+    setValue("styling", selectedList);
+  };
+
+  const onSubmit = (data) => {
+    data.styling = selectedValues.map((option) => option.name);
+    const stopSimulation = simulateUpload();
+    setLoading(true);
+    setModalShow(true);
+    createNewProject(data)
+      .then((response) => {
+        if (response.error) {
+          throw new Error(response.error);
+        }
+        stopSimulation();
+
+        setModalShow(false);
+        setLoading(false);
+
+        showToast("Project created successfully", "success");
+
+        setTimeout(() => {
+          router.navigate("/editor/" + response.name);
+        }, 2000);
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (error.message) {
+          console.log("error.message::>>", error.message);
+          setError("name", {
+            message: error.message,
+          });
+          return;
+        }
+        stopSimulation();
+        alert("Please try again later!");
+      });
+  };
+
+  return (
+    <>
+      <div
+        id="Main"
+        className="p-4 vh-100"
+        style={{ backgroundColor: "#36454F" }}
+      >
+        <div className="row mt-md-4 mt-3" id="Main-0">
+          <div
+            className="card col-md-6 col-11 m-auto px-4 py-3"
+            id="Main-0-0"
+            style={{
+              backgroundColor: "#36454F",
+              borderColor: "white",
+            }}
+          >
+            <div className="card-body" id="Main-0-0-0">
+              <h3 className="card-title mb-3 text-white" id="Main-0-0-0-1">
+                Create New Project
+              </h3>
+              <div className="row" id="Main-0-0-0-0">
+                <div className="col-12" id="Main-0-0-0-0-0">
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-0">
+                      <input
+                        className="form-control"
+                        type="text"
+                        placeholder="Application Name"
+                        {...register("name", {
+                          required: "This field is required",
+                        })}
+                      />
+                      {errors.name && (
+                        <div className="text-danger mt-1">
+                          {errors.name.message}
                         </div>
-                        {firstForm ?
-                            <div className="col mt-5 px-5">
-
-                                <div className="row fs-2 text-white justify-content-around">
-                                    Create New App
-                                </div>
-                                <div className="form ">
-                                    <div className="form-floating mt-4 text-black-50">
-                                        <input value={projectData.name} onChange={(event) => updateProjectData("name", event.target.value)} className="form-control"></input>
-                                        <label>Project Name</label>
-                                    </div>
-
-                                    <div className="form-floating mt-4 text-black-50">
-                                        <input value={projectData.author} onChange={(event) => updateProjectData("author", event.target.value)} className="form-control"></input>
-                                        <label>Author</label>
-                                    </div>
-                                    <div className="form-floating mt-4 text-black-50">
-                                        <textarea value={projectData.description} onChange={(event) => updateProjectData("description", event.target.value)} className="form-control" />
-                                        <label>Description</label>
-                                    </div>
-                                    <div class="form-floating">
-                                        <select class="form-select mt-4" value={projectData.framework} onChange={(event) => updateProjectData("framework", event.target.value)}>
-                                            <option value="" hidden />
-                                            <option value="react">React</option>
-                                            {/* <option value="angular">Angular</option>
-                                            <option value="vue">Vue</option> */}
-                                        </select>
-                                        <label >Project FrameWork</label>
-                                    </div>
-                                    <div className=" mt-4 text-end">
-                                        <button className="btn btn-primary" onClick={toggleFirstForm}>
-                                            Next
-                                        </button>
-                                    </div>
-
-                                </div>
-                            </div>
-                            :
-                            <div className="col mt-5 px-5">
-                                <div className="row fs-2 text-white justify-content-around">
-                                    Project Settings
-                                </div>
-                                <div className="form ">
-
-                                    <div value={projectData.path} onChange={(event) => updateProjectData("path", event.target.value)} className="form-floating mt-4 text-black-50">
-                                        <input className="form-control"></input>
-                                        <label>Project Path</label>
-                                    </div>
-                                    <div class="form-floating">
-                                        <select class="form-select mt-4" value={projectData.buildTool} onChange={(event) => updateProjectData("buildTool", event.target.value)} >
-                                            <option value="" hidden />
-                                            <option value="cra">Create React App</option>
-                                            {/* <option value="vite">Vite</option> */}
-                                        </select>
-                                        <label >Project Build Tool</label>
-                                    </div>
-                                    <div class="form-floating">
-                                        <select class="form-select mt-4" value={projectData.language} onChange={(event) => updateProjectData("language", event.target.value)} >
-                                            <option value="" hidden />
-                                            <option value="js">JavaScript</option>
-                                            {/* <option value="ts">TypeScript</option> */}
-                                        </select>
-                                        <label >Language</label>
-                                    </div>
-                                    <div class="form-floating">
-                                        <select class="form-select mt-4" value={projectData.styling} onChange={(event) => updateProjectData("styling", event.target.value)} >
-                                            <option value="" hidden />
-                                            <option value="bootstrap">BootStrap</option>
-                                            {/* <option value="tailwind">Tailwild</option> */}
-                                        </select>
-                                        <label >Styling Tools</label>
-                                    </div>
-                                    <div className=" mt-4  ">
-                                        <button className="btn btn-primary" onClick={toggleFirstForm}>
-                                            Back
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="mt-5 text-center">
-                                    <button style={{width:'9rem'}} className=" btn btn-lg btn-success" disabled={loading} onClick={createNewApp}>
-                                        {loading?
-                                        <img height={26} src={loadingIcon} alt="loading" />
-                                        :'Create App' 
-                                        }
-                                    </button>
-                                </div>
-                            </div>
-                        }
+                      )}
                     </div>
-                </div>
-            </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-1">
+                      <input
+                        className="form-control"
+                        type="text"
+                        placeholder="Author"
+                        {...register("author")}
+                      />
+                    </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-2">
+                      <input
+                        className="form-control"
+                        type="text"
+                        placeholder="Description"
+                        {...register("description")}
+                      />
+                    </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-3">
+                      <select
+                        className="form-control"
+                        {...register("framework", { required: true })}
+                      >
+                        <option value="" selected disabled>
+                          Technology
+                        </option>
+                        <option value="react">React</option>
+                        <option value="vue" disabled>
+                          Vue
+                        </option>
+                        <option value="angular" disabled>
+                          Angular
+                        </option>
+                      </select>
+                      {errors.framework && (
+                        <div className="text-danger mt-1">
+                          This field is required.
+                        </div>
+                      )}
+                    </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
+                      <select
+                        className="form-control"
+                        {...register("language", { required: true })}
+                      >
+                        <option value="" selected disabled>
+                          Language
+                        </option>
+                        <option value="javascript">Javascript</option>
+                        <option value="typescript" disabled>
+                          TypeScript
+                        </option>
+                      </select>
+                      {errors.language && (
+                        <div className="text-danger mt-1">
+                          This field is required.
+                        </div>
+                      )}
+                    </div>
 
-            <div className="row my-4"></div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-5">
+                      <Multiselect
+                        className="form-control p-0 text-gray"
+                        options={stylingComponents}
+                        selectedValues={selectedValues}
+                        onSelect={onSelect}
+                        onRemove={onRemove}
+                        displayValue="name"
+                        showCheckbox={true}
+                        placeholder="Styling Components"
+                        style={{}}
+                      />
+                      {errors.styling && (
+                        <div className="text-danger mt-1">
+                          This field is required.
+                        </div>
+                      )}
+                    </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
+                      <select
+                        className="form-control"
+                        {...register("buildTool", { required: true })}
+                      >
+                        <option value="" selected disabled>
+                          Build Tool
+                        </option>
+                        <option value="create-react-app">
+                          Create React App
+                        </option>
+                        <option value="vite" disabled>
+                          Vite
+                        </option>
+                      </select>
+                      {errors.buildTool && (
+                        <div className="text-danger mt-1">
+                          This field is required.
+                        </div>
+                      )}
+                    </div>
+                    <div
+                      className="d-flex justify-content-center align-items-center"
+                      id="Main-0-0-0-0-0-0-6"
+                    >
+                      <button
+                        type="submit"
+                        // onClick={createNewApp}
+                        className="btn btn-primary bg-white"
+                        style={{ color: "#152733" }}
+                      >
+                        Create App
+                      </button>
+                    </div>
+                  </form>
+                  {loading && (
+                    <Modal
+                      show={showModal}
+                      size="lg"
+                      aria-labelledby="contained-modal-title-vcenter"
+                      centered
+                    >
+                      <Modal.Header>
+                        <Modal.Title id="contained-modal-title-vcenter">
+                          Creating your project
+                        </Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        <div className="text-center mt-3">
+                          <div className="progress">
+                            <div
+                              className="progress-bar"
+                              role="progressbar"
+                              aria-valuenow={{ progress }}
+                              aria-valuemin="0"
+                              aria-valuemax="100"
+                              style={{ width: `${progress}%` }}
+                            >
+                              {progress}%
+                            </div>
+                          </div>
+                          <div className="d-flex justify-content-center text center">
+                            <div
+                              className="loader-wheel"
+                              style={{ marginTop: "13px" }}
+                            >
+                              <img
+                                height={20}
+                                src={loadingIcon}
+                                alt="loading"
+                              />
+                            </div>
+                            <div
+                              className="progress-text mt-3"
+                              style={{ marginLeft: "10px" }}
+                            >
+                              {message}
+                            </div>
+                          </div>
+                        </div>
+                      </Modal.Body>
+                    </Modal>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+      <ToastContainer position="top-end" className="p-3">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            onClose={() =>
+              setToasts((toasts) => toasts.filter((t) => t.id !== toast.id))
+            }
+            delay={5000}
+            autohide
+          >
+            <Toast.Header>
+              <strong className="me-auto">Success</strong>
+            </Toast.Header>
+            <Toast.Body className="text-success">{toast.message}</Toast.Body>
+          </Toast>
+        ))}
+      </ToastContainer>
+    </>
+  );
 }

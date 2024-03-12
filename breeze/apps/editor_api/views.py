@@ -111,6 +111,8 @@ class ProjectConfig(APIView):
         generated_paths=os.path.join(os.path.dirname(os.getcwd()),"generated_projects")
         # os.makedirs(generated_paths,exist_ok=True)
         data["path"]=os.path.join(generated_paths,data["name"])
+        if(data["name"] in GenerateProject.get_projects().keys()) :
+            return JsonResponse({"error": "Application name should be unique."}, status=400)
         app_config_writer = AppConfigWriter()
         app_config_writer.create_or_update_app_config(data)
         response={ "name":data["name"]}

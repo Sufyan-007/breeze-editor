@@ -1,54 +1,58 @@
-import { useState } from "react"
-import * as ProjectService from "../services/ProjectService"
-import loadingGif from "../assets/icons/loading.gif"
+import { useState } from "react";
+import * as ProjectService from "../services/ProjectService";
+import javascript from "../assets/icons/javascript.svg";
+import react from "../assets/icons/react.svg";
+import { router } from "../App";
 
 export default function ProjectCards({ project, ...props }) {
-    const [deleting,setDeleting] = useState(false)
+  const [deleting, setDeleting] = useState(false);
 
-    function reGenerate(){
-        ProjectService.reGenerateProject(project.project_name)
-    }
+  function reGenerate() {
+    ProjectService.reGenerateProject(project.project_name);
+  }
 
-    function deleteProject(){
-        console.log(project)
-        setDeleting(true)
-        window.confirm(`Are you sure you want to delete project : ${project.name} ?`)
-        ProjectService.deleteProject(project.name).then((response)=>{
-            if(response.status ===200){
-                alert("Project deleted successfully");
-            }else{
-                alert("Failed to delete project");
-            }
-            setDeleting(false)
-        })
-    }
+  const handleCardClick = () => {
+    router.navigate("/project/" + project.projectName);
+  };
 
-    return (
-        <div {...props}>
-            {/* <div hidden={!deleting} className="" >
-                <img src={loadingGif} alt=""  height={40}/>
-            </div> */}
-            <div className="card m-2">
-                <div className=" card-header">
-                    {project.projectName}
-                    
-                </div>
-                <div className=" card-body">
-                    {project.description}
-                    
-                </div>
-                <div className=" card-footer d-flex justify-content-between">
-                    <a className=" btn btn-sm btn-primary" href={"/project/" + project.project_name} >
-                        Open
-                    </a>
-                    <button onClick={reGenerate}  className="btn btn-sm btn-secondary">
-                        Re-Generate
-                    </button>
-                    <button onClick={deleteProject}  className="btn btn-sm btn-danger">
-                        Delete
-                    </button>
-                </div>
-            </div>
+  function deleteProject() {
+    console.log(project);
+    setDeleting(true);
+    window.confirm(
+      `Are you sure you want to delete project : ${project.name} ?`
+    );
+    ProjectService.deleteProject(project.name).then((response) => {
+      if (response.status === 200) {
+        alert("Project deleted successfully");
+      } else {
+        alert("Failed to delete project");
+      }
+      setDeleting(false);
+    });
+  }
+
+  return (
+    <div {...props}>
+      <div className="card my-2 text-white bg-dark">
+        <div className="card-body">
+          <h4 className="card-title" style={{fontSize: "22px"}}>{project.projectName}</h4>
+          <p className="card-text" style={{ color: "#B7BBC8", fontSize: "14px"}}>{project.description}</p>
         </div>
-    )
+        <div className="card-footer text-muted d-flex justify-content-between border-top-0">
+          <div className="tech d-flex">
+            <div className="language">
+              <img height={22} src={javascript} alt="JS" className="mr-2" />
+            </div>
+            <div className="framework">
+              <img height={22} src={react} alt="react" className="mx-1" />
+            </div>
+          </div>
+          <div className="stats">
+          <button type="button" class="btn btn-secondary btn-sm mx-2" onClick={handleCardClick}>Config</button>
+          <button type="button" class="btn btn-danger btn-sm ml-1" onClick={deleteProject}>Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

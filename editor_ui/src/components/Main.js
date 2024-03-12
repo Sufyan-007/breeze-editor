@@ -30,10 +30,10 @@ export default function Main() {
                         </div>} 
                     />
                         
-                    <div className="row m-3 justify-content-between">
+                    <div className="row mt-3">
                         {
                             Object.values(projects).map((item, index) =>
-                                <ProjectCards project={item} className="  p-0 col-3  " />
+                                <ProjectCards project={item} className="col-12 col-sm-6 col-md-4 col-lg-3" />
                             )
                         }
                     </div>
