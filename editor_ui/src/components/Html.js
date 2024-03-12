@@ -1,10 +1,10 @@
-import { Fragment,  useState } from "react"
+import { Fragment, useState } from "react"
 import HtmlTree from "./HtmlTree"
 import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 import threeDots from "../assets/icons/three_dots_icon.svg"
 import AddChildModal from "./AddChildModal"
-export default function Html({value,selecteElement,config,reference,component,setValue,changeParent,sidebarService,selected }) {
+export default function Html({ value, selecteElement, config, reference, component, setValue, changeParent, sidebarService, selected }) {
 
 
     const [showChild, setShowChild] = useState(false)
@@ -51,14 +51,26 @@ export default function Html({value,selecteElement,config,reference,component,se
         })
     }
 
-    function modalUpdate(newChild,imp) {
-        console.log(newChild)
+    function modalUpdate(newChild, imp) {
         if (newChild) {
-            // const tagName = tagInput.current.value
-            // var newDiv;
-            // var imp;
 
-            // const id = (value.attributes.id?.value ?? "NA") + "-" + value.children.length
+            const id = (value.attributes.id?.value ?? "NA") + "-" + value.children.length
+
+            const newDiv = {
+                "type": "Element",
+                "attributes": {
+                    "className": { "type": "LITERAL", "value": "" },
+                    "id": { "type": "LITERAL", "value": id },
+                },
+                "tagName": newChild.component.name,
+                "typeId": newChild.component.id,
+                "elementType":newChild.elementType,
+                "children": []
+            }
+            if(newChild.library){
+                newDiv["libary"] = newChild.library
+            }
+            console.log(newDiv)
 
             // if (tagName === "EXPRESSION") {
             //     console.log("Expression")
@@ -84,16 +96,16 @@ export default function Html({value,selecteElement,config,reference,component,se
             //     }
             // }
 
-            // sidebarService.setSelectedElem(newChild)
-            // const children = [...value.children, newChild]
-            // setValue(value => {
-            //     const newVal = { ...value, children }
-            //     changeParent(newVal, 0, imp)
-            //     return newVal
-            // })
+            sidebarService.setSelectedElem(newDiv)
+            const children = [...value.children, newDiv]
+            setValue(value => {
+                const newVal = { ...value, children }
+                changeParent(newVal, 0, imp)
+                return newVal
+            })
 
-            // setShowChild(true)
-            // setShowModal(false)
+            setShowChild(true)
+            setShowModal(false)
         }
         else {
             setShowModal(false)

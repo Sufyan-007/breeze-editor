@@ -22,6 +22,9 @@ export default function AddChildModal({ show, update }) {
     }, [show])
 
     function updateNewChild(key, value) {
+        if(key ==="elementType"){
+            setNewChild({})
+        }
         setNewChild(state => {
             return { ...state, [key]: value }
         })
@@ -31,10 +34,12 @@ export default function AddChildModal({ show, update }) {
     function closeModal(add) {
 
         if (add) {
-            console.log(newChild)
+            update(newChild)
+            setNewChild({})
         }
         else {
             update(null)
+            setNewChild({})
         }
 
     }
@@ -75,10 +80,10 @@ export default function AddChildModal({ show, update }) {
                                             <Form.Label>
                                                 Component
                                             </Form.Label>
-                                            <Form.Select value={newChild.component}>
+                                            <Form.Select value={components[newChild.elementType][newChild.library].indexOf(newChild.component)} onChange={(event)=>updateNewChild("component",components[newChild.elementType][newChild.library][event.target.value])}>
                                                 <option value="" hidden>please select an option</option>
-                                                {components[newChild.elementType][newChild.library].map(comp =>
-                                                    <option value={comp}>{comp.name}</option>
+                                                {components[newChild.elementType][newChild.library].map((comp,index) =>
+                                                    <option value={index}>{comp.name}</option>
                                                 )}
                                             </Form.Select>
                                         </Form.Group>
@@ -89,10 +94,10 @@ export default function AddChildModal({ show, update }) {
                                     <Form.Label>
                                         Component
                                     </Form.Label>
-                                    <Form.Select value={newChild.component}>
+                                    <Form.Select value={components[newChild.elementType].indexOf(newChild.component)} onChange={(event)=>updateNewChild("component",components[newChild.elementType][event.target.value])}>
                                         <option value="" hidden>please select an option</option>
-                                        {components[newChild.elementType].map(comp =>
-                                            <option value={comp}>{comp.name}</option>
+                                        {components[newChild.elementType].map((comp,index) =>
+                                            <option value={index}>{comp.name}</option>
                                         )}
                                     </Form.Select>
                                 </Form.Group>
