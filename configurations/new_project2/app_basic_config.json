@@ -4,7 +4,7 @@
   "author": "Sufyan Gazdhar",
   "defaultComponent": "Main",
   "projectName": "New Project2",
-  "path": "/home/sufyan/Documents/Projects/Breeze_editor_repo/generated_projects/new_project2",
+  "path": "/home/anushka/Desktop/generated_react_app",
   "components_src_dir": "src",
   "dependencies": {
     "react-router-dom": "*",

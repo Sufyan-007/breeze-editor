@@ -1,7 +1,7 @@
 {
   "name": "testing1",
   "description": "test",
-  "path": "/home/sufyan/Documents/Projects/bridge_generated_projects",
+  "path": "/home/anushka/Desktop/BreezeRepo/breezeui/generated_projects",
   "author": "Sufyan",
   "defaultComponent": "Main",
   "dependencies": { "react-router-dom": "*", "bootstrap": "^5.3.2" },
