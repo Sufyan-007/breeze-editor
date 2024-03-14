@@ -26,7 +26,7 @@ import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from './ProjectSidebar';
 
 export default function ProjectPage() {
-    const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     const [tagSelection, setSelection] = useState(0);
     const highlightedStyle = { backgroundColor: "#303033" };
     const allConfig = useLoaderData();

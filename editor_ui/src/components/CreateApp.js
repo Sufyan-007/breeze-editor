@@ -2,298 +2,350 @@ import React, { useState } from "react";
 import { createNewProject } from "../services/ProjectService";
 import { router } from "../App";
 import loadingIcon from "../assets/icons/loading.gif";
+import Multiselect from "multiselect-react-dropdown";
+import { useForm } from "react-hook-form";
+import Modal from "react-bootstrap/Modal";
+import { ToastContainer, Toast } from "react-bootstrap";
 
 export default function CreateApp({ ...props }) {
-  const [projectData, setProjectData] = useState({
-    name: "",
-    description: "",
-    author: "",
-    framework: "react",
-    language: "javascript",
-    styling: [],
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    setError,
+  } = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+      author: "",
+      framework: "react",
+      language: "javascript",
+      styling: [],
+      buildTool: "create-react-app",
+    },
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [existingApps, setExistingApps] = useState({});
+  const [selectedValues, setSelectedValues] = React.useState([]);
+  const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState("Uploading...");
+  const [showModal, setModalShow] = useState(false);
+  const stylingComponents = [
+    { id: "bootstrap", name: "Bootstrap" },
+    { id: "react-bootstrap", name: "React-bootstrap" },
+    { id: "chakra-ui", name: "ChakraUI" },
+    { id: "material-ui", name: "Material UI" },
+  ];
+  const [toasts, setToasts] = useState([]);
 
-  const handleComponentChange = (e) => {
-    const values = Array.from(e.target.options)
-      .filter((option) => option.selected)
-      .map((option) => option.value);
-    setProjectData((state) => {
-      return { ...state, styling: values };
-    });
+  const showToast = (message, variant = "success") => {
+    const newToast = { id: new Date().getTime(), message, variant };
+    setToasts((currentToasts) => [...currentToasts, newToast]);
+  };
+
+  const simulateUpload = () => {
+    const duration = 30000;
+    const updateInterval = 1000;
+    const increments = duration / updateInterval;
+    const incrementValue = 100 / increments;
+
+    const interval = setInterval(() => {
+      setProgress((oldProgress) => {
+        const newProgress = Math.min(
+          Math.floor(oldProgress + incrementValue),
+          95
+        );
+
+        if (newProgress >= 90) {
+          setMessage("This might take a while...");
+        } else if (newProgress >= 80) {
+          setMessage("Almost there...");
+        } else if (newProgress >= 70) {
+          setMessage("Configuring settings...");
+        } else if (newProgress >= 50) {
+          setMessage("Installing packages...");
+        } else if (newProgress >= 20) {
+          setMessage("Initializing project...");
+        } else {
+          setMessage("Creating...");
+        }
+
+        return newProgress;
+      });
+    }, updateInterval);
+
+    return () => clearInterval(interval);
   };
 
   React.useEffect(() => {
-    fetchProjects(); 
-  }, []);
+    register("styling", { required: true });
+  }, [register]);
 
-  // TO DO : unique app name validation will be handled from backend
-  const fetchProjects = React.useCallback(() => {
-    fetch("http://localhost:8000/editor/all-projects/")
-      .then((response) => response.json())
-      .then((data) => setExistingApps(data))
-      .catch((error) =>
-        console.error("Error fetching existing projects:", error)
-      );
-  }, []);
-  
-
-  const validateAppName = (appName) => {
-    appName = appName.toLowerCase().replace(/\s/g, "_");
-    if (existingApps === null) {
-      fetchProjects(); 
-    }
-    return !existingApps.hasOwnProperty(appName);
+  const onSelect = (selectedList, selectedItem) => {
+    setSelectedValues(selectedList);
+    setValue("styling", selectedList);
   };
 
-  const updateProjectData = (key, value) => {
-    setProjectData((state) => {
-      return { ...state, [key]: value };
-    });
-  }
+  const onRemove = (selectedList, removedItem) => {
+    setSelectedValues(selectedList);
+    setValue("styling", selectedList);
+  };
 
-  const createNewApp = () => {
-    if (!projectData.name) {
-      setError("Application name is required.");
-      return;
-    }
-    const isUnique = validateAppName(projectData.name);
-    if (!isUnique) {
-      setError("Application name must be unique.");
-      return;
-    }
-    setError("");
+  const onSubmit = (data) => {
+    data.styling = selectedValues.map((option) => option.name);
+    const stopSimulation = simulateUpload();
     setLoading(true);
-    createNewProject(projectData)
+    setModalShow(true);
+    createNewProject(data)
       .then((response) => {
+        if (response.error) {
+          throw new Error(response.error);
+        }
+        stopSimulation();
+
+        setModalShow(false);
         setLoading(false);
-        alert("Project created successfully");
-        router.navigate("/editor/" + response.name);
+
+        showToast("Project created successfully", "success");
+
+        setTimeout(() => {
+          router.navigate("/editor/" + response.name);
+        }, 2000);
       })
       .catch((error) => {
         setLoading(false);
-        alert("Please Try Again.")
+        if (error.message) {
+          console.log("error.message::>>", error.message);
+          setError("name", {
+            message: error.message,
+          });
+          return;
+        }
+        stopSimulation();
+        alert("Please try again later!");
       });
-  }
+  };
 
   return (
-    <div
-      id="Main"
-      className="p-4 vh-100"
-      style={{ backgroundColor: "#152733" }}
-    >
-      <div className="row mt-md-4 mt-3" id="Main-0">
-        <div
-          className="card col-md-6 col-11 m-auto px-4 py-3"
-          id="Main-0-0"
-          style={{
-            backgroundColor: "#152733",
-            color: "white",
-            borderColor: "white",
-          }}
-        >
-          <div className="card-body" id="Main-0-0-0">
-            <h3 className="card-title mb-3" id="Main-0-0-0-1">
-              Create New Project
-            </h3>
-            <div className="row" id="Main-0-0-0-0">
-              <div className="col-12" id="Main-0-0-0-0-0">
-                <form
-                  noValidate
-                  className="requires-validation"
-                  id="Main-0-0-0-0-0-0"
-                >
-                  <div className="form-group mb-3" id="Main-0-0-0-0-0-0-0">
-                    <input
-                      required
-                      className="form-control"
-                      id="Main-0-0-0-0-0-0-0-0"
-                      type="text"
-                      placeholder="Application Name"
-                      value={projectData.name}
-                      onChange={(event) =>
-                        updateProjectData("name", event.target.value)
-                      }
-                    ></input>
-                    {error && <div className="text-danger mt-1">{error}</div>}
-                  </div>
-                  <div className="form-group mb-3" id="Main-0-0-0-0-0-0-1">
-                    <input
-                      className="form-control"
-                      id="Main-0-0-0-0-0-0-1-0"
-                      type="text"
-                      placeholder="Author"
-                      value={projectData.author}
-                      onChange={(event) =>
-                        updateProjectData("author", event.target.value)
-                      }
-                    ></input>
-                    {/* {error && <div className="text-danger mt-1">{error}</div>} */}
-                  </div>
-                  <div className="form-group mb-3" id="Main-0-0-0-0-0-0-2">
-                    <input
-                      required
-                      className="form-control"
-                      id="Main-0-0-0-0-0-0-2-0"
-                      type="text"
-                      placeholder="Project Description"
-                      value={projectData.description}
-                      onChange={(event) =>
-                        updateProjectData("description", event.target.value)
-                      }
-                    ></input>
-                    {/* {error && <div className="text-danger mt-1">{error}</div>} */}
-                  </div>
-                  <div className="form-group mb-3" id="Main-0-0-0-0-0-0-3">
-                    <select
-                      className="form-control"
-                      id="Main-0-0-0-0-0-0-3-0"
-                      // value={projectData.framework}
-                      onChange={(event) =>
-                        updateProjectData("framework", event.target.value)
-                      }
-                    >
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-3-0-0"
-                        value=""
-                        selected
-                        disabled
-                      >
-                        Technology
-                      </option>
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-3-0-1"
-                        value="react"
-                      >
-                        React
-                      </option>
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-3-0-2"
-                        value="vue"
-                        disabled
-                      >
-                        Vue
-                      </option>
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-1-1-3"
-                        value="angular"
-                        disabled
-                      >
-                        Angular
-                      </option>
-                    </select>
-                  </div>
-                  <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
-                    <select
-                      className="form-control"
-                      id="Main-0-0-0-0-0-0-4-0"
-                      // value={projectData.language}
-                      onChange={(event) =>
-                        updateProjectData("language", event.target.value)
-                      }
-                    >
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-4-1-0"
-                        value=""
-                        selected
-                        disabled
-                      >
-                        Language
-                      </option>
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-4-1-1"
-                        value="javascript"
-                      >
-                        Javascript
-                      </option>
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-4-1-2"
-                        value="typescript"
-                        disabled
-                      >
-                        TypeScript
-                      </option>
-                    </select>
-                  </div>
-                  <div className="form-group mb-4" id="Main-0-0-0-0-0-0-5">
-                    <select
-                      multiple
-                      className="form-control"
-                      id="Main-0-0-0-0-0-0-5-0"
-                      onChange={handleComponentChange}
-                    >
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-5-1-0"
-                        value=""
-                        selected
-                        disabled
-                      >
-                        Styling Components
-                      </option>
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-5-1-0"
-                        value="bootstrap"
-                      >
-                        Bootstrap
-                      </option>
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-5-1-1"
-                        value="react-bootstrap"
-                      >
-                        React Bootstrap
-                      </option>
-                      <option
-                        className=""
-                        id="Main-0-0-0-0-0-0-5-1-2"
-                        value="chakraui"
-                      >
-                        Chakra UI
-                      </option>
-                    </select>
-                  </div>
-                  {loading ? (
-                    <div className="text-center mt-3">
-                      <div className="loader-wheel mb-10">
-                        <img height={30} src={loadingIcon} alt="loading" />
-                      </div>
-                      <div className="loader-text text-white">
-                        <h5>Creating your project ...</h5>
-                      </div>
+    <>
+      <div
+        id="Main"
+        className="p-4 vh-100"
+        style={{ backgroundColor: "#36454F" }}
+      >
+        <div className="row mt-md-4 mt-3" id="Main-0">
+          <div
+            className="card col-md-6 col-11 m-auto px-4 py-3"
+            id="Main-0-0"
+            style={{
+              backgroundColor: "#36454F",
+              borderColor: "white",
+            }}
+          >
+            <div className="card-body" id="Main-0-0-0">
+              <h3 className="card-title mb-3 text-white" id="Main-0-0-0-1">
+                Create New Project
+              </h3>
+              <div className="row" id="Main-0-0-0-0">
+                <div className="col-12" id="Main-0-0-0-0-0">
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-0">
+                      <input
+                        className="form-control"
+                        type="text"
+                        placeholder="Application Name"
+                        {...register("name", {
+                          required: "This field is required",
+                        })}
+                      />
+                      {errors.name && (
+                        <div className="text-danger mt-1">
+                          {errors.name.message}
+                        </div>
+                      )}
                     </div>
-                  ) : (
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-1">
+                      <input
+                        className="form-control"
+                        type="text"
+                        placeholder="Author"
+                        {...register("author")}
+                      />
+                    </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-2">
+                      <input
+                        className="form-control"
+                        type="text"
+                        placeholder="Description"
+                        {...register("description")}
+                      />
+                    </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-3">
+                      <select
+                        className="form-control"
+                        {...register("framework", { required: true })}
+                      >
+                        <option value="" selected disabled>
+                          Technology
+                        </option>
+                        <option value="react">React</option>
+                        <option value="vue" disabled>
+                          Vue
+                        </option>
+                        <option value="angular" disabled>
+                          Angular
+                        </option>
+                      </select>
+                      {errors.framework && (
+                        <div className="text-danger mt-1">
+                          This field is required.
+                        </div>
+                      )}
+                    </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
+                      <select
+                        className="form-control"
+                        {...register("language", { required: true })}
+                      >
+                        <option value="" selected disabled>
+                          Language
+                        </option>
+                        <option value="javascript">Javascript</option>
+                        <option value="typescript" disabled>
+                          TypeScript
+                        </option>
+                      </select>
+                      {errors.language && (
+                        <div className="text-danger mt-1">
+                          This field is required.
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-5">
+                      <Multiselect
+                        className="form-control p-0 text-gray"
+                        options={stylingComponents}
+                        selectedValues={selectedValues}
+                        onSelect={onSelect}
+                        onRemove={onRemove}
+                        displayValue="name"
+                        showCheckbox={true}
+                        placeholder="Styling Components"
+                        style={{}}
+                      />
+                      {errors.styling && (
+                        <div className="text-danger mt-1">
+                          This field is required.
+                        </div>
+                      )}
+                    </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
+                      <select
+                        className="form-control"
+                        {...register("buildTool", { required: true })}
+                      >
+                        <option value="" selected disabled>
+                          Build Tool
+                        </option>
+                        <option value="create-react-app">
+                          Create React App
+                        </option>
+                        <option value="vite" disabled>
+                          Vite
+                        </option>
+                      </select>
+                      {errors.buildTool && (
+                        <div className="text-danger mt-1">
+                          This field is required.
+                        </div>
+                      )}
+                    </div>
                     <div
                       className="d-flex justify-content-center align-items-center"
                       id="Main-0-0-0-0-0-0-6"
                     >
                       <button
-                        type="button"
-                        onClick={createNewApp}
+                        type="submit"
+                        // onClick={createNewApp}
                         className="btn btn-primary bg-white"
                         style={{ color: "#152733" }}
-                        id="Main-0-0-0-0-0-0-6-0"
                       >
                         Create App
                       </button>
                     </div>
+                  </form>
+                  {loading && (
+                    <Modal
+                      show={showModal}
+                      size="lg"
+                      aria-labelledby="contained-modal-title-vcenter"
+                      centered
+                    >
+                      <Modal.Header>
+                        <Modal.Title id="contained-modal-title-vcenter">
+                          Creating your project
+                        </Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        <div className="text-center mt-3">
+                          <div className="progress">
+                            <div
+                              className="progress-bar"
+                              role="progressbar"
+                              aria-valuenow={{ progress }}
+                              aria-valuemin="0"
+                              aria-valuemax="100"
+                              style={{ width: `${progress}%` }}
+                            >
+                              {progress}%
+                            </div>
+                          </div>
+                          <div className="d-flex justify-content-center text center">
+                            <div
+                              className="loader-wheel"
+                              style={{ marginTop: "13px" }}
+                            >
+                              <img
+                                height={20}
+                                src={loadingIcon}
+                                alt="loading"
+                              />
+                            </div>
+                            <div
+                              className="progress-text mt-3"
+                              style={{ marginLeft: "10px" }}
+                            >
+                              {message}
+                            </div>
+                          </div>
+                        </div>
+                      </Modal.Body>
+                    </Modal>
                   )}
-                </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <ToastContainer position="top-end" className="p-3">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            onClose={() =>
+              setToasts((toasts) => toasts.filter((t) => t.id !== toast.id))
+            }
+            delay={5000}
+            autohide
+          >
+            <Toast.Header>
+              <strong className="me-auto">Success</strong>
+            </Toast.Header>
+            <Toast.Body className="text-success">{toast.message}</Toast.Body>
+          </Toast>
+        ))}
+      </ToastContainer>
+    </>
   );
 }
