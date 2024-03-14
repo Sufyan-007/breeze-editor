@@ -19,9 +19,12 @@ NEW_COMP_FORMAT={
     "propsVars": [],
     "otherVars": [],
     "functions": [],
+    "$id":"COMP",
     "html": {
       "type": "Element",
-      "tagName": "Container",
+      "elementType": "HTML",
+      "typeId": "DIV",
+      "tagName": "div",
       "attributes": {
         "className": { "type": "LITERAL", "value": "" },
         "id": { "type": "LITERAL", "value": "" }
@@ -115,6 +118,9 @@ class AppEditor:
     def get_comp_config(self):
         return self.comp_config
     
+    def get_basic_config(self):
+        return self.app_config
+    
     # returns /configurations/<project>/routing_config.json
     def get_router_config(self):
         
@@ -155,10 +161,11 @@ class AppEditor:
     
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
-    def     add_component(self,name):
+    def add_component(self,name):
         name=name.replace(' ',"").title()
         comp=NEW_COMP_FORMAT.copy()
         comp['name'] = name
+        comp["$id"] = name.upper()
         comp['containingFile'] = "components/"+name+".js"
         comp["html"]["attributes"]["id"]["value"]=name
         config=self.write_component(comp)
