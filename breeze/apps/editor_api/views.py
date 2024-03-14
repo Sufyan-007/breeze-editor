@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.views import APIView
 from .core.app_config_writer import AppConfigWriter
 import os
-
+from .core.app_startup_manager import start_app
 @method_decorator(csrf_exempt,name="dispatch")
 class ConfigReader(APIView):
     def get(self, request,param):
@@ -141,5 +141,14 @@ class ServiceConfig(APIView):
         try:
             app_editor= AppEditor(param)
             return JsonResponse(app_editor.write_service_config(data),status=200)
+        except:
+            return JsonResponse({},status=500)
+        
+class AppStartup(APIView):
+    def get(self,request,param):
+        try:
+            app_editor = AppEditor(param)
+            app_basic_config = app_editor.get_basic_config()
+            return JsonResponse(start_app(app_basic_config),status=200)
         except:
             return JsonResponse({},status=500)

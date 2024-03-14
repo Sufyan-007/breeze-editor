@@ -118,6 +118,9 @@ class AppEditor:
     def get_comp_config(self):
         return self.comp_config
     
+    def get_basic_config(self):
+        return self.app_config
+    
     # returns /configurations/<project>/routing_config.json
     def get_router_config(self):
         
