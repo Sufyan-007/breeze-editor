@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'apps.api_client_generator',
     'rest_framework_swagger',       # Swagger 
     'drf_yasg',
-    "corsheaders"
+    "corsheaders",
+    'channels'
                       # Yet Another Swagger generator
 ]
 CORS_ORIGIN_ALLOW_ALL = True
@@ -89,6 +90,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'breeze.wsgi.application'
+ASGI_APPLICATION = 'breeze.asgi.application'
+
 
 
 # Database
@@ -160,3 +163,9 @@ SWAGGER_SETTINGS = {
         }
     }
  }
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}

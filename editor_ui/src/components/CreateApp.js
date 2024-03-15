@@ -6,7 +6,9 @@ import Multiselect from "multiselect-react-dropdown";
 import { useForm } from "react-hook-form";
 import Modal from "react-bootstrap/Modal";
 import { ToastContainer, Toast } from "react-bootstrap";
+import { w3cwebsocket as W3CWebSocket } from 'websocket';
 
+const WS_URL = 'ws://127.0.0.1:8765/ws/yourpath/';
 export default function CreateApp({ ...props }) {
   const {
     register,
@@ -30,6 +32,31 @@ export default function CreateApp({ ...props }) {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Uploading...");
   const [showModal, setModalShow] = useState(false);
+  const [projectProgress, setProjectProcess] = useState({});
+
+  const client = new W3CWebSocket(WS_URL);
+  React.useEffect(() => {
+
+    client.onopen = () => {
+      console.log('WebSocket Client Connected');
+    };
+
+    client.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+      console.log('Received message:', data);
+      // setProjectProcess((prevMessages) => [...prevMessages, message.data]);
+    };
+
+    client.onerror = (error) => {
+      console.error('Connection Error:', error);
+    };
+
+    return () => {
+      client.close();
+      console.log('WebSocket Client Disconnected');
+    };
+  }, []);
+
   const stylingComponents = [
     { id: "bootstrap", name: "Bootstrap" },
     { id: "react-bootstrap", name: "React-bootstrap" },
@@ -96,11 +123,17 @@ export default function CreateApp({ ...props }) {
     const stopSimulation = simulateUpload();
     setLoading(true);
     setModalShow(true);
+    client.send(JSON.stringify({
+      command: 'start',
+      project_id: data.name,
+    }));
+    console.log('send::>>');
     createNewProject(data)
       .then((response) => {
         if (response.error) {
           throw new Error(response.error);
         }
+
         stopSimulation();
 
         setModalShow(false);
