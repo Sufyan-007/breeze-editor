@@ -12,7 +12,7 @@ export default function ProjectCards({ project, ...props }) {
   }
 
   const handleCardClick = () => {
-    router.navigate("/project/" + project.projectName);
+    router.navigate("/project/" + project.project_name);
   };
 
   function deleteProject() {
