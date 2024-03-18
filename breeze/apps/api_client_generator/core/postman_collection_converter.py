@@ -1,4 +1,3 @@
-from ..helper_models.base_models.api_model import ApiModel
 from ..helper_models.base_models.request import Request
 from ..helper_models.base_models.response import Response
 from ..helper_models.base_models.key_value import KeyValue
@@ -14,7 +13,7 @@ from ..helper_models.enums.mode import ModeEnum
 from ..helper_models.enums.auth_type import AuthTypeEnum
 
 
-class IntermediateConversion:
+class PostmanCollectionConverter:
     def __init__(self):
         pass
 
@@ -24,8 +23,7 @@ class IntermediateConversion:
             auth = None
             headers = []
             parameters = []
-            url = Url(baseurl=request_data, host='',
-                      protocol='', port=0, path='')
+            url = Url(baseurl=request_data, host="", protocol="", port=0, path="")
             body = None
             request_obj = Request(method, auth, headers, parameters, url, body)
             return request_obj
@@ -50,7 +48,7 @@ class IntermediateConversion:
                 headers = self._create_headers(header_data=header_data)
 
             # call to url data creation and parameters creation
-            url_data = request_data.get("url", '')
+            url_data = request_data.get("url", "")
             url = []
             parameters = []
             if url_data:
@@ -69,51 +67,54 @@ class IntermediateConversion:
     def create_response(self, response_data):
         if response_data:
             status = StatusEnum[response_data.get("status").upper()]
-            content_type = ContentEnum[response_data.get(
-                "content_type").upper()]
+            content_type = ContentEnum[response_data.get("content_type").upper()]
             response = Response(
                 status,
                 content_type,
                 response_data.get("schema_name"),
                 response_data.get("raw_content"),
-                response_data.get("file"))
+                response_data.get("file"),
+            )
         else:
             response = []
         return response
 
     def _create_auth(self, auth_data):
         auth_type = AuthTypeEnum[auth_data.get("type").upper()]
-        content_data = auth_data.get(auth_data.get("type"),auth_data.get("content"))
-        login_api = auth_data.get("login_api",None)
-        token_api = auth_data.get("token_api",None)
+        content_data = auth_data.get(auth_data.get("type"))
         auth_content = []
         if content_data:
             auth_content.append(
                 AuthContent(
                     key=content_data[0].get("key"),
                     value=content_data[0].get("value"),
-                    type=content_data[0].get("type")
+                    type=content_data[0].get("type"),
                 )
             )
-        auth = Auth(type=auth_type, content=auth_content,token_api=token_api,login_api=login_api)
+        auth = Auth(type=auth_type, content=auth_content)
         return auth
 
     def _create_parameters(self, url_data):
         query_parameters = url_data.get("query", [])
         parameters = [
-            Parameter(param_in="query", name=param.get("key"),
-                      type="string", required=True, description="")
+            Parameter(
+                param_in="query",
+                name=param.get("key"),
+                type="string",
+                required=True,
+                description="",
+            )
             for param in query_parameters
         ]
         return parameters
 
     def _create_url(self, url_data):
         url = Url(
-            baseurl=url_data.get("baseurl"),
+            baseurl=url_data.get("raw"),
             host=url_data.get("host"),
             protocol=url_data.get("protocol", ""),
             port=url_data.get("port", 0),
-            path=url_data.get("path")
+            path=url_data.get("path"),
         )
         return url
 
@@ -122,8 +123,15 @@ class IntermediateConversion:
         formdata_data = body_data.get("formdata", [])
 
         for item in formdata_data:
-            formdata_list.append(Formdata(key=item.get("key"), value=item.get(
-                "value"), description=item.get("description"), type=item.get("type"), src=item.get("src")))
+            formdata_list.append(
+                Formdata(
+                    key=item.get("key"),
+                    value=item.get("value"),
+                    description=item.get("description"),
+                    type=item.get("type"),
+                    src=item.get("src"),
+                )
+            )
 
         content_type = body_data.get("content_type")
         if content_type:
@@ -136,13 +144,12 @@ class IntermediateConversion:
             content_type=content_type,
             required=body_data.get("required"),
             schema_name=body_data.get("schema_name"),
-            file=body_data.get("file"))
+            file=body_data.get("file"),
+        )
         return body
 
     def _create_headers(self, header_data):
         headers = []
         for item in header_data:
-            headers.append(KeyValue(key=item.get(
-                "key"), value=item.get("value")))
+            headers.append(KeyValue(key=item.get("key"), value=item.get("value")))
         return headers
-

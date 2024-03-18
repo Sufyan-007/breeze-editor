@@ -1,0 +1,304 @@
+[
+  {
+    "operation_id": "getAll-products",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [],
+      "parameters": [],
+      "url": {
+        "baseurl": "http://localhost:8000/api/products",
+        "host": ["localhost"],
+        "protocol": "http",
+        "port": "8000",
+        "path": ["api", "products"]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "get-product",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [],
+      "parameters": [],
+      "url": {
+        "baseurl": "http://localhost:8000/api/products/1",
+        "host": ["localhost"],
+        "protocol": "http",
+        "port": "8000",
+        "path": ["api", "products", "1"]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "get user profile",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA1NjYzNjE3LCJpYXQiOjE3MDMwNzE2MTcsImp0aSI6IjYyZjJlMTdlZjQ3YTRjZmRiZGZmYjBmZmMwNzI1NzU2IiwidXNlcl9pZCI6MX0._GPQuTwbrbT5K1MuF6Jm6Au54pZ5WlPYJzG2jqVoK-g"
+        }
+      ],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/users/profile",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "users", "profile"]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "get users",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/users",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "users"]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "add user",
+    "tags": [],
+    "request": {
+      "method": "post",
+      "auth": null,
+      "headers": [],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/users/register/",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "users", "register", ""]
+      },
+      "body": {
+        "mode": "form-data",
+        "content_type": null,
+        "required": null,
+        "schema_name": null,
+        "raw_content": null,
+        "file": null,
+        "formdata": [
+          {
+            "key": "name",
+            "value": "john doe",
+            "description": null,
+            "type": "text",
+            "src": null
+          },
+          {
+            "key": "email",
+            "value": "jdoe@email.com",
+            "description": null,
+            "type": "text",
+            "src": null
+          },
+          {
+            "key": "password",
+            "value": "johndoe",
+            "description": null,
+            "type": "text",
+            "src": null
+          }
+        ]
+      }
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "update user",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/users/profile/update",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "users", "profile", "update"]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "get orders",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U"
+        }
+      ],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/orders/7",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "orders", "7"]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "get all orders",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U"
+        }
+      ],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/orders/myorders",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "orders", "myorders"]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "get a user",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U"
+        }
+      ],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/users/1",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "users", "1"]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "create product",
+    "tags": [],
+    "request": {
+      "method": "post",
+      "auth": null,
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA1NjYzNjE3LCJpYXQiOjE3MDMwNzE2MTcsImp0aSI6IjYyZjJlMTdlZjQ3YTRjZmRiZGZmYjBmZmMwNzI1NzU2IiwidXNlcl9pZCI6MX0._GPQuTwbrbT5K1MuF6Jm6Au54pZ5WlPYJzG2jqVoK-g"
+        }
+      ],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/products/create",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "products", "create"]
+      },
+      "body": {
+        "mode": "form-data",
+        "content_type": null,
+        "required": null,
+        "schema_name": null,
+        "raw_content": null,
+        "file": null,
+        "formdata": []
+      }
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "get all records",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U"
+        }
+      ],
+      "parameters": [],
+      "url": {
+        "baseurl": "{{url}}/api/orders/",
+        "host": ["{{url}}"],
+        "protocol": "",
+        "port": 0,
+        "path": ["api", "orders", ""]
+      },
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  },
+  {
+    "operation_id": "demo",
+    "tags": [],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [],
+      "parameters": [],
+      "url": [],
+      "body": []
+    },
+    "response": [],
+    "summary": ""
+  }
+]
