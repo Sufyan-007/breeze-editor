@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from ..enums.auth_type import AuthTypeEnum
-
+from typing import List
 @dataclass
 class AuthContent: 
     key: str
@@ -10,5 +10,7 @@ class AuthContent:
 @dataclass
 class Auth:
     type: AuthTypeEnum
-    content: list[AuthContent]
+    content: List[AuthContent]
+    login_api: str
+    token_api : str
     
