@@ -1,9 +1,9 @@
 from ...helper_models.base_models.api_model import ApiModel
-from ...core.intermediate_convertor import IntermediateConversion
+from ...core.postman_collection_converter import PostmanCollectionConverter
 
 def load_json_to_api_model(json_data):
 
-    intermediate = IntermediateConversion()
+    intermediate = PostmanCollectionConverter()
     request_data = json_data.get("request", {})
     response_data = json_data.get("response", {})
     request_obj_by_intermediate = intermediate.create_request(request_data=request_data)

@@ -5,3 +5,4 @@ class MethodsEnum(str, Enum):
     POST = "post"
     PUT = "put"
     DELETE = "delete"
+    PATCH = "patch"
