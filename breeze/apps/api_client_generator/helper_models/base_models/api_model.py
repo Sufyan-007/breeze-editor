@@ -8,6 +8,6 @@ class ApiModel:
     operation_id: str
     tags: List[str]
     request : Request
-    response : Response
+    response : List[Response]
     summary : str
     

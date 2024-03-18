@@ -6,4 +6,5 @@ class AuthTypeEnum(str, Enum):
     OAUTH = "Oauth"
     OAUTH2 = "Oauth2"
     BEARER = "Bearer"
+    APIKEY = "ApiKey"
     
