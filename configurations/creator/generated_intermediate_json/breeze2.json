@@ -1,0 +1,255 @@
+[
+    {
+        "operation_id" : "config_writer",
+			"tags" : ["config"],
+			"request": {
+            "method": "post",
+            "auth": null,
+            "headers": [],
+            "parameters": [],
+            "url": {
+                "baseurl": "http://127.0.0.1:8000/breeze/config-writer/",
+                "host": [
+                    "127",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "protocol": "http",
+                "port": "8000",
+                "path": [
+                    "breeze",
+                    "config-writer",
+                    ""
+                ]
+            },
+            "body": {
+                "mode": "raw",
+                "content_type": null,
+                "required": null,
+                "schema_name": null,
+                "raw_content": "{\n    \"name\": \"beta11\",\n    \"description\": \"A custom React app\",\n    \"author\": \"Your Name\",\n    \"defaultComponent\": \"main_comp\",\n    \"strictMode\": false,\n    \"path\": \"/home/yash/Documents/Projects/bridge_generated_projects\",\n    \"components_src_dir\": \"src\",\n    \"dependencies\": {\n        \"axios\": \"^1.5.1\",\n        \"react-router-dom\": \"*\",\n        \"react-redux\": \"^7.1.3\",\n        \"@reduxjs/toolkit\": \"^1.4.0\",\n        \"openapi-typescript\": \"3.0.1\",\n        \"openapi-typescript-codegen\": \"0.25.0\"\n    }\n}",
+                "file": null,
+                "formdata": []
+            }
+        },
+        "response": [],
+        "summary": ""
+    },
+    {
+        "operation_id" : "generate_app",
+			"tags" : ["generate"],
+			"request": {
+            "method": "post",
+            "auth": null,
+            "headers": [],
+            "parameters": [],
+            "url": {
+                "baseurl": "http://127.0.0.1:8000/code-generator/generate-app/",
+                "host": [
+                    "127",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "protocol": "http",
+                "port": "8000",
+                "path": [
+                    "code-generator",
+                    "generate-app",
+                    ""
+                ]
+            },
+            "body": {
+                "mode": "raw",
+                "content_type": null,
+                "required": null,
+                "schema_name": null,
+                "raw_content": "{\n    \"name\": \"creator\"\n    \n}",
+                "file": null,
+                "formdata": []
+            }
+        },
+        "response": [],
+        "summary": ""
+    },
+    {
+        "operation_id" : "config_writer",
+			"tags" : ["generate"],
+			"request": {
+            "method": "post",
+            "auth": null,
+            "headers": [],
+            "parameters": [],
+            "url": {
+                "baseurl": "http://127.0.0.1:8000/config-writer/write-component",
+                "host": [
+                    "127",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "protocol": "http",
+                "port": "8000",
+                "path": [
+                    "config-writer",
+                    "write-component"
+                ]
+            },
+            "body": {
+                "mode": "raw",
+                "content_type": null,
+                "required": null,
+                "schema_name": null,
+                "raw_content": "{\n    \"appName\" : \"creator\",\n    \"componentId\" : \"post_component\",\n    \"compConfig\" :\n    {\n        \"name\": \"PostCompApi\",\n        \"containingFile\": \"components/PostComp.js\",\n        \"stateVars\": [\n            {\n                \"name\": \"postData\",\n                \"type\": \"OBJECT\",\n                \"defaultValue\": {\n                    \"id\": 0,\n                    \"userId\": 0,\n                    \"title\": \"\",\n                    \"body\": \"\"\n                },\n                \"$id\": \"STATE_VARS/POST_DATA\"\n            }\n        ],\n        \"propsVars\": [],\n        \"otherVars\": [\n            {\n                \"name\" : \"{id}\",\n                \"declarationType\" : \"let\",\n                \"className\" : \"useParams\",\n                \"parameters\" : []\n            }\n        ],\n        \"functions\": [\n            {\n                \"name\": \"useEffect\",\n                \"$id\": \"FUNCTIONS/UUID2\",\n                \"isAnonymous\": true,\n                \"parameters\": {\n                    \"list\": []\n                },\n                \"isAsync\": false,\n                \"body\": \"if(id){async function fetchData() {try {const res = await getPost(id);setPostData(res)} catch (error) {}}fetchData();}\"\n            },\n            {\n                \"name\": \"handleInputChange\",\n                \"$id\": \"FUNCTIONS/UUID1\",\n                \"isAnonymous\": false,\n                \"parameters\": {\n                    \"list\": [\n                        {\n                            \"name\": \"prop\"\n                        },\n                        {\n                            \"name\": \"value\"\n                        }\n                    ]\n                },\n                \"isAsync\": false,\n                \"body\": \"console.log(prop, value); \\n setPostData({...postData, [prop] : value}); \"\n            },\n            {\n                \"name\": \"savePost\",\n                \"$id\": \"FUNCTIONS/UUID3\",\n                \"isAnonymous\": false,\n                \"parameters\": {\n                    \"list\": []\n                },\n                \"isAsync\": true,\n                \"body\": \" let res = {}; if(id){res = await editPost(id); }else{res = await createPost(postData);}setPostData(res);\"\n            },\n            {\n                \"name\": \"resetPostData\",\n                \"$id\": \"FUNCTIONS/UUID4\",\n                \"isAnonymous\": false,\n                \"parameters\": {\n                    \"list\": []\n                },\n                \"isAsync\": true,\n                \"body\": \"setPostData({'id': 0,'userId': 0,'title': '','body': ''}); \"\n            }\n        ],\n        \"html\": {\n            \"type\": \"Element\",\n            \"tagName\": \"Container\",\n            \"children\": [\n                {\n                    \"type\": \"Element\",\n                    \"tagName\": \"Row\",\n                    \"children\": [\n                        {\n                            \"tagName\": \"Col\",\n                            \"type\": \"Element\",\n                            \"children\": [\n                                {\n                                    \"type\": \"Element\",\n                                    \"tagName\": \"Form\",\n                                    \"children\": [\n                                        {\n                                            \"type\": \"Element\",\n                                            \"tagName\": \"Form.Group\",\n                                            \"attributes\": {\n                                                \"className\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"mb-3\"\n                                                },\n                                                \"controlId\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"id\"\n                                                }\n                                            },\n                                            \"children\": [\n                                                {\n                                                    \"type\": \"Element\",\n                                                    \"tagName\": \"Form.Label\",\n                                                    \"children\": [\n                                                        {\n                                                            \"type\": \"text\",\n                                                            \"text\": \"Id\"\n                                                        }\n                                                    ]\n                                                },\n                                                {\n                                                    \"type\": \"Element\",\n                                                    \"tagName\": \"Form.Control\",\n                                                    \"attributes\": {\n                                                        \"type\": {\n                                                            \"type\": \"LITERAL\",\n                                                            \"value\": \"number\"\n                                                        },\n                                                        \"placeholder\": {\n                                                            \"type\": \"LITERAL\",\n                                                            \"value\": \"Enter Id\"\n                                                        },\n                                                        \"value\": {\n                                                            \"type\": \"VARIABLE\",\n                                                            \"value\": \"postData.id\"\n                                                        },\n                                                        \"readOnly\":{\n                                                            \"type\": \"BOOLEAN\",\n                                                            \"value\": \"true\"\n                                                        },\n                                                        \"onChange\": {\n                                                            \"type\": \"FUNCTION\",\n                                                            \"value\": {\n                                                                \"name\": \"\",\n                                                                \"$id\": \"FUNCTIONS/A1\",\n                                                                \"isAnonymous\": true,\n                                                                \"parameters\": {\n                                                                    \"list\": [\n                                                                        {\n                                                                            \"name\": \"event\"\n                                                                        }\n                                                                    ]\n                                                                },\n                                                                \"isAsync\": false,\n                                                                \"body\": \"handleInputChange('id', event.target.value) ;\"\n                                                            }\n                                                        }\n                                                    },\n                                                    \"children\": []\n                                                }\n                                            ]\n                                        },\n                                        {\n                                            \"type\": \"Element\",\n                                            \"tagName\": \"Form.Group\",\n                                            \"attributes\": {\n                                                \"className\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"mb-3\"\n                                                },\n                                                \"controlId\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"userId\"\n                                                }\n                                            },\n                                            \"children\": [\n                                                {\n                                                    \"type\": \"Element\",\n                                                    \"tagName\": \"Form.Label\",\n                                                    \"children\": [\n                                                        {\n                                                            \"type\": \"text\",\n                                                            \"text\": \"User Id\"\n                                                        }\n                                                    ]\n                                                },\n                                                {\n                                                    \"type\": \"Element\",\n                                                    \"tagName\": \"Form.Control\",\n                                                    \"attributes\": {\n                                                        \"type\": {\n                                                            \"type\": \"LITERAL\",\n                                                            \"value\": \"number\"\n                                                        },\n                                                        \"placeholder\": {\n                                                            \"type\": \"LITERAL\",\n                                                            \"value\": \"Enter User Id\"\n                                                        },\n                                                        \"value\": {\n                                                            \"type\": \"VARIABLE\",\n                                                            \"value\": \"postData.userId\"\n                                                        },\n                                                        \"onChange\": {\n                                                            \"type\": \"FUNCTION\",\n                                                            \"value\": {\n                                                                \"name\": \"\",\n                                                                \"$id\": \"FUNCTIONS/A1\",\n                                                                \"isAnonymous\": true,\n                                                                \"parameters\": {\n                                                                    \"list\": [\n                                                                        {\n                                                                            \"name\": \"event\"\n                                                                        }\n                                                                    ]\n                                                                },\n                                                                \"isAsync\": false,\n                                                                \"body\": \"handleInputChange('userId', event.target.value) ;\"\n                                                            }\n                                                        }\n                                                    },\n                                                    \"children\": []\n                                                }\n                                            ]\n                                        },\n                                        {\n                                            \"type\": \"Element\",\n                                            \"tagName\": \"Form.Group\",\n                                            \"attributes\": {\n                                                \"className\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"mb-3\"\n                                                },\n                                                \"controlId\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"title\"\n                                                }\n                                            },\n                                            \"children\": [\n                                                {\n                                                    \"type\": \"Element\",\n                                                    \"tagName\": \"Form.Label\",\n                                                    \"children\": [\n                                                        {\n                                                            \"type\": \"text\",\n                                                            \"text\": \"Post Title\"\n                                                        }\n                                                    ]\n                                                },\n                                                {\n                                                    \"type\": \"Element\",\n                                                    \"tagName\": \"Form.Control\",\n                                                    \"attributes\": {\n                                                        \"type\": {\n                                                            \"type\": \"LITERAL\",\n                                                            \"value\": \"text\"\n                                                        },\n                                                        \"placeholder\": {\n                                                            \"type\": \"LITERAL\",\n                                                            \"value\": \"Enter Post Title\"\n                                                        },\n                                                        \"value\": {\n                                                            \"type\": \"VARIABLE\",\n                                                            \"value\": \"postData.title\"\n                                                        },\n                                                        \"onChange\": {\n                                                            \"type\": \"FUNCTION\",\n                                                            \"value\": {\n                                                                \"name\": \"\",\n                                                                \"$id\": \"FUNCTIONS/A1\",\n                                                                \"isAnonymous\": true,\n                                                                \"parameters\": {\n                                                                    \"list\": [\n                                                                        {\n                                                                            \"name\": \"event\"\n                                                                        }\n                                                                    ]\n                                                                },\n                                                                \"isAsync\": false,\n                                                                \"body\": \"handleInputChange('title', event.target.value) ;\"\n                                                            }\n                                                        }\n                                                    },\n                                                    \"children\": []\n                                                }\n                                            ]\n                                        },\n                                        {\n                                            \"type\": \"Element\",\n                                            \"tagName\": \"Form.Group\",\n                                            \"attributes\": {\n                                                \"className\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"mb-3\"\n                                                },\n                                                \"controlId\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"body\"\n                                                }\n                                            },\n                                            \"children\": [\n                                                {\n                                                    \"type\": \"Element\",\n                                                    \"tagName\": \"Form.Label\",\n                                                    \"children\": [\n                                                        {\n                                                            \"type\": \"text\",\n                                                            \"text\": \"Post Body\"\n                                                        }\n                                                    ]\n                                                },\n                                                {\n                                                    \"type\": \"Element\",\n                                                    \"tagName\": \"Form.Control\",\n                                                    \"attributes\": {\n                                                        \"type\": {\n                                                            \"type\": \"LITERAL\",\n                                                            \"value\": \"text\"\n                                                        },\n                                                        \"placeholder\": {\n                                                            \"type\": \"LITERAL\",\n                                                            \"value\": \"Enter Post Body\"\n                                                        },\n                                                        \"value\": {\n                                                            \"type\": \"VARIABLE\",\n                                                            \"value\": \"postData.body\"\n                                                        },\n                                                        \"onChange\": {\n                                                            \"type\": \"FUNCTION\",\n                                                            \"value\": {\n                                                                \"name\": \"\",\n                                                                \"$id\": \"FUNCTIONS/A1\",\n                                                                \"isAnonymous\": true,\n                                                                \"parameters\": {\n                                                                    \"list\": [\n                                                                        {\n                                                                            \"name\": \"event\"\n                                                                        }\n                                                                    ]\n                                                                },\n                                                                \"isAsync\": false,\n                                                                \"body\": \"handleInputChange('body', event.target.value) ;\"\n                                                            }\n                                                        }\n                                                    },\n                                                    \"children\": []\n                                                }\n                                            ]\n                                        },\n                                        {\n                                            \"type\": \"Element\",\n                                            \"tagName\": \"Button\",\n                                            \"attributes\": {\n                                                \"variant\": {\n                                                    \"type\": \"LITERAL\",\n                                                    \"value\": \"primary\"\n                                                },\n                                                \"onClick\": {\n                                                    \"type\": \"FUNCTION\",\n                                                    \"value\": {\n                                                        \"name\": \"\",\n                                                        \"$id\": \"FUNCTIONS/A3\",\n                                                        \"isAnonymous\": true,\n                                                        \"parameters\": {\n                                                            \"list\": [\n                                                               \n                                                            ]\n                                                        },\n                                                        \"isAsync\": false,\n                                                        \"body\": \"savePost() ;\"\n                                                    }\n                                                }\n                                            },\n                                            \"children\": [\n                                                {\n                                                    \"type\": \"text\",\n                                                    \"text\": \"Submit\"\n                                                }\n                                            ]\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ]\n                }\n            ]\n        },\n        \"imports\": {\n            \"components\": [],\n            \"other\": [\n                {\n                    \"TYPE\": \"THIRD_PARTY\",\n                    \"from\": \"react\",\n                    \"import_entity\": \"useEffect\",\n                    \"import_type\": \"SINGLE\"\n                  },\n                {\n                    \"TYPE\": \"THIRD_PARTY\",\n                    \"from\": \"react-bootstrap/Row\",\n                    \"import_entity\": \"Row\",\n                    \"import_type\": \"FULL\"\n                },\n                {\n                    \"TYPE\": \"THIRD_PARTY\",\n                    \"from\": \"react-bootstrap/Col\",\n                    \"import_entity\": \"Col\",\n                    \"import_type\": \"FULL\"\n                },\n                {\n                    \"TYPE\": \"THIRD_PARTY\",\n                    \"from\": \"react-bootstrap/Button\",\n                    \"import_entity\": \"Button\",\n                    \"import_type\": \"FULL\"\n                },\n                {\n                    \"TYPE\": \"THIRD_PARTY\",\n                    \"from\": \"react-bootstrap/Form\",\n                    \"import_entity\": \"Form\",\n                    \"import_type\": \"FULL\"\n                },\n                {\n                    \"TYPE\": \"THIRD_PARTY\",\n                    \"from\": \"react-bootstrap/Container\",\n                    \"import_entity\": \"Container\",\n                    \"import_type\": \"FULL\"\n                },\n                {\n                    \"TYPE\": \"SERVICE\",\n                    \"from\": \"service/PostService.js\",\n                    \"import_entity\": \"createPost\",\n                    \"import_type\": \"SINGLE\"\n                },\n                {\n                    \"TYPE\": \"SERVICE\",\n                    \"from\": \"service/PostService.js\",\n                    \"import_entity\": \"editPost\",\n                    \"import_type\": \"SINGLE\"\n                },\n                {\n                    \"TYPE\": \"SERVICE\",\n                    \"from\": \"service/PostService.js\",\n                    \"import_entity\": \"getPost\",\n                    \"import_type\": \"SINGLE\"\n                },\n                {\n                    \"TYPE\": \"THIRD_PARTY\",\n                    \"from\": \"react-router-dom\",\n                    \"import_entity\": \"useParams\",\n                    \"import_type\": \"SINGLE\"\n                }\n            ],\n            \"styles\": [\n                {\n                    \"TYPE\": \"CUSTOM\",\n                    \"from\": \"CREATED_APP_CSS\"\n                }\n            ]\n        },\n        \"hooks\": [\n            {\n                \"type\": \"USE_EFFECT\",\n                \"dependantVars\": [],\n                \"implementation\": {\n                    \"type\": \"FUNCTION\",\n                    \"$ref\": \"FUNCTIONS/UUID2\"\n                }\n            }\n        ]\n    }\n}",
+                "file": null,
+                "formdata": []
+            }
+        },
+        "response": [],
+        "summary": ""
+    },
+    {
+        "operation_id" : "get_components",
+        "tags" : ["config"],
+    "request": {
+            "method": "post",
+            "auth": null,
+            "headers": [],
+            "parameters": [],
+            "url": {
+                "baseurl": "http://127.0.0.1:8000/config-reader/get-components/",
+                "host": [
+                    "127",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "protocol": "http",
+                "port": "8000",
+                "path": [
+                    "config-reader",
+                    "get-components",
+                    ""
+                ]
+            },
+            "body": {
+                "mode": "raw",
+                "content_type": null,
+                "required": null,
+                "schema_name": null,
+                "raw_content": "{\n    \"project_id\" : \"creator\"\n}",
+                "file": null,
+                "formdata": []
+            }
+        },
+        "response": [],
+        "summary": ""
+    },
+    {
+        "operation_id" : "get_comp_config",
+			"tags" : ["config"],
+			"request": {
+            "method": "post",
+            "auth": {
+                "type": "Oauth2",
+                "content": [
+                    {
+                        "key": "addTokenTo",
+                        "value": "header",
+                        "type": "string"
+                    }
+                ],
+                "login_api" : "do_login_v2",
+                "token_api":"get_refresh_token_v2"
+            },
+            "headers": [],
+            "parameters": [],
+            "url": {
+                "baseurl": "http://127.0.0.1:8000/config-reader/get-component-config/",
+                "host": [
+                    "127",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "protocol": "http",
+                "port": "8000",
+                "path": [
+                    "config-reader",
+                    "get-component-config",
+                    ""
+                ]
+            },
+            "body": {
+                "mode": "raw",
+                "content_type": null,
+                "required": null,
+                "schema_name": null,
+                "raw_content": "{\n    \"component_type\" : \"THIRD_PARTY\",\n    \"component_id\" : \"react-bootstrap_NavbarToggle\",\n    \"third_party_id\" : \"react-bootstrap\"\n}",
+                "file": null,
+                "formdata": []
+            }
+        },
+        "response": [],
+        "summary": ""
+    },
+    {
+        "operation_id" : "get_comp_config",
+			"tags" : ["generate"],
+			"request": {
+            "method": "post",
+            "auth": {
+                "type": "Bearer",
+                "content": [
+                    {
+                        "key": "token",
+                        "value": "zxczcxzczxcxzcxzcxzc",
+                        "type": "string"
+                    }
+                ],
+                "login_api" : "do_login_v2",
+                "token_api":"get_refresh_token_v2"
+            },
+            "headers": [],
+            "parameters": [
+                {
+                    "param_in": "query",
+                    "name": "yash",
+                    "type": "string",
+                    "required": true,
+                    "description": ""
+                }
+            ],
+            "url": {
+                "baseurl": "http://127.0.0.1:8000/config-reader/get-component-config/6?yash=ui",
+                "host": [
+                    "127",
+                    "0",
+                    "0",
+                    "1"
+                ],
+                "protocol": "http",
+                "port": "8000",
+                "path": [
+                    "config-reader",
+                    "get-component-config",
+                    "6"
+                ]
+            },
+            "body": {
+                "mode": "file",
+                "content_type": null,
+                "required": null,
+                "schema_name": null,
+                "raw_content": null,
+                "file": {
+                    "src": "/home/yash/breeze.postman_collection.json"
+                },
+                "formdata": []
+            }
+        },
+        "response": [],
+        "summary": ""
+    }
+]
