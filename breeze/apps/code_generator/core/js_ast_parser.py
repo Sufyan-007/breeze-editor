@@ -199,7 +199,7 @@ def fetch_props_from_comps():
     output = ""
     lib_name = "react-bootstrap"
     # comp_files = ["/home/raj/Desktop/bridge/processor/bridge_ui_server/testing_ts.tsx"]
-    comp_files = comp_files[0:10]
+    # comp_files = comp_files[0:10]
     create_dir_if_not_exists(THIRD_PARTY_CONFIG_PATH)
     for fl in comp_files:
         f = open(fl, "r")
@@ -242,6 +242,6 @@ def fetch_props_from_comps():
         # log_file.write(output)
         # log_file.close()
 
-fetch_props_from_comps()
+# fetch_props_from_comps()
 
 
