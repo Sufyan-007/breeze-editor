@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Form, Button, Dropdown, Row, Col } from "react-bootstrap";
-import Body from "./Body.js"
-
-
+import Body from "./Body.js";
 
 function RequestBody({ onChange }) {
   const [method, setMethod] = useState("GET");
@@ -19,7 +17,6 @@ function RequestBody({ onChange }) {
     type: "No Auth",
     content: [{ key: "", value: "", type: "" }],
   });
-  const [body, setBody]= useState({});
 
   const handleMethodChange = (selectedMethod) => {
     setMethod(selectedMethod);
@@ -112,17 +109,10 @@ function RequestBody({ onChange }) {
     });
   };
 
-  const handleBodyChange = (newdata) =>{
-    setBody({...body,...newdata});
-    onChange({...body, ...newdata});
-  }
-  
-  console.log("BODYYYYYYY IN REQUEST BODY", body);
   return (
     <div>
       <div
         className="mb-3 text-dark"
-
         style={{ backgroundColor: "#e0e0e0", padding: "20px" }}
       >
         <Form>
@@ -348,7 +338,7 @@ function RequestBody({ onChange }) {
             </Button>
           </Form.Group>
 
-          <Body onChange={handleBodyChange}/>
+          <Body />
         </Form>
       </div>
     </div>

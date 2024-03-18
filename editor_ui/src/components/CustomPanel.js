@@ -1,7 +1,7 @@
-import {React, useState }from 'react'
-import {Form, Button} from 'react-bootstrap'
-import RequestBody from './RequestBody';
-import ResponseBody from './ResponseBody';
+import { React, useState } from "react";
+import { Form, Button } from "react-bootstrap";
+import RequestBody from "./RequestBody";
+import ResponseBody from "./ResponseBody";
 
 function CustomPanel() {
   const [operationId, setOperationId] = useState("");
@@ -19,7 +19,6 @@ function CustomPanel() {
   };
 
   const handleAddRequestBody = () => {
-    
     setShowRequestBodyForm(!showRequestBodyForm);
   };
 
@@ -29,12 +28,12 @@ function CustomPanel() {
 
   const handleRequestBodyChange = (newData) => {
     setRequestBody({ ...requestBody, ...newData });
-    console.log(newData,"newwwww data in custom panel");
+    console.log(newData, "newwwww data in custom panel");
   };
 
-  const handleResponseBodyChange = (newData) =>{
-    setResponseBody({ ...responseBody, ...newData});
-  }
+  const handleResponseBodyChange = (newData) => {
+    setResponseBody({ ...responseBody, ...newData });
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = {
@@ -51,7 +50,7 @@ function CustomPanel() {
   // Log the state of requestBody whenever it changes
   console.log("Request Body State:", requestBody);
   console.log("Response Body State:", responseBody);
-  
+
   return (
     <div>
       <Form onSubmit={handleSubmit}>
@@ -76,7 +75,7 @@ function CustomPanel() {
         <Form.Group className="mb-3" controlId="formRequestBody">
           <Form.Label>Request Body:</Form.Label>
           <Button
-            variant='secondary'
+            variant="secondary"
             className="ms-2"
             onClick={handleAddRequestBody}
           >
@@ -119,6 +118,4 @@ function CustomPanel() {
   );
 }
 
-export default CustomPanel
-
-
+export default CustomPanel;
