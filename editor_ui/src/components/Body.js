@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
-import { Form, Button, Dropdown, Row, Col } from "react-bootstrap";
-export default function Body() {
+import { Form, Button, Row, Col } from "react-bootstrap";
+
+export default function Body({ onChange }) {
   const [body, setBody] = useState({
     mode: "raw",
     content_type: "application/json",
@@ -18,7 +19,7 @@ export default function Body() {
       ...body,
       [name]: value,
     });
-    //  onChange({ body: { ...body, [name]: value } });
+    onChange({ body: { ...body, [name]: value } });
   };
 
   const handleFileInputChange = (e) => {
@@ -36,7 +37,7 @@ export default function Body() {
         ...body,
         file: file,
       });
-      //    onChange({ file: file });
+      onChange({ file: file });
     }
   };
 
@@ -47,12 +48,8 @@ export default function Body() {
       ...body,
       formdata: updatedFormdata,
     });
-    console.log(name,value);
-    // if (name === "type" && value === "upload_file") {
-    //   // If "Upload File" is selected, trigger the file input click event
-    //   fileInputRefBinary.current.click();
-    // }
-    //  onChange({ formData: updatedFormdata });
+    console.log(name, value);
+    onChange({ formData: updatedFormdata });
   };
 
   const removeFormData = (index) => {
@@ -62,7 +59,7 @@ export default function Body() {
       ...body,
       formdata: updatedFormdata,
     });
-    //  onChange({ formdata: updatedFormdata });
+    onChange({ formdata: updatedFormdata });
   };
 
   const addFormData = () => {
@@ -73,15 +70,15 @@ export default function Body() {
         { key: "", value: "", description: "", type: "", src: "" },
       ],
     });
-    //  onChange({
-    //    body: {
-    //      ...body,
-    //      formdata: [
-    //        ...body.formdata,
-    //        { key: "", value: "", description: "", type: "", src: "" },
-    //      ],
-    //    },
-    //  });
+    onChange({
+      body: {
+        ...body,
+        formdata: [
+          ...body.formdata,
+          { key: "", value: "", description: "", type: "", src: "" },
+        ],
+      },
+    });
   };
   const openFileInputFormData = (index) => {
     fileInputRefFormData.current.click();
@@ -95,6 +92,11 @@ export default function Body() {
       const updatedFormdata = [...body.formdata];
       updatedFormdata[index].value = file;
       setBody({
+        ...body,
+        formdata: updatedFormdata,
+      });
+
+      onChange({
         ...body,
         formdata: updatedFormdata,
       });
@@ -274,17 +276,6 @@ export default function Body() {
                     }
                   />
                 </Col>
-                {/* <Col>
-                  <Form.Control
-                    type="text"
-                    placeholder="Value"
-                    value={formData.value}
-                    onChange={(e) =>
-                      handleFormDataChange(index, "value", e.target.value)
-                    }
-
-                  />
-                </Col> */}
                 <Col>
                   {formData.type === "upload_file" ? (
                     // If type is "upload_file", render file input
@@ -343,30 +334,6 @@ export default function Body() {
                     <option value="upload_file">File</option>
                   </Form.Select>
                 </Col>
-                {/* {formData.type === "upload_file" && (
-                  <div>
-                    <Form.Control
-                      type="text"
-                      placeholder="Select File"
-                      value={formData.value ? formData.value.name : ""} // Display selected file name if available
-                      onClick={() => openFileInputFormData(index)} // Trigger file input click event
-                      style={{
-                        cursor: "pointer",
-                        backgroundColor: "#007bff",
-                        color: "white",
-                        border: "none",
-                        padding: "6px 12px",
-                        borderRadius: "4px",
-                      }}
-                    />
-                    <input
-                      type="file"
-                      ref={fileInputRefFormData}
-                      style={{ display: "none" }} // Hide the file input
-                      onChange={(e) => handleFormDataFileChange(e, index)} // Handle file change
-                    />
-                  </div> */}
-                {/* )} */}
                 <Col>
                   <Form.Control
                     type="text"

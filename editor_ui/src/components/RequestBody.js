@@ -3,6 +3,7 @@ import { Form, Button, Dropdown, Row, Col } from "react-bootstrap";
 import Body from "./Body.js"
 
 
+
 function RequestBody({ onChange }) {
   const [method, setMethod] = useState("GET");
   const [parameters, setParameters] = useState([]);
@@ -18,6 +19,7 @@ function RequestBody({ onChange }) {
     type: "No Auth",
     content: [{ key: "", value: "", type: "" }],
   });
+  const [body, setBody]= useState({});
 
   const handleMethodChange = (selectedMethod) => {
     setMethod(selectedMethod);
@@ -110,6 +112,12 @@ function RequestBody({ onChange }) {
     });
   };
 
+  const handleBodyChange = (newdata) =>{
+    setBody({...body,...newdata});
+    onChange({...body, ...newdata});
+  }
+  
+  console.log("BODYYYYYYY IN REQUEST BODY", body);
   return (
     <div>
       <div
@@ -340,7 +348,7 @@ function RequestBody({ onChange }) {
             </Button>
           </Form.Group>
 
-          <Body />
+          <Body onChange={handleBodyChange}/>
         </Form>
       </div>
     </div>

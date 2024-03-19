@@ -19,6 +19,7 @@ function CustomPanel() {
   };
 
   const handleAddRequestBody = () => {
+    
     setShowRequestBodyForm(!showRequestBodyForm);
   };
 
@@ -28,6 +29,7 @@ function CustomPanel() {
 
   const handleRequestBodyChange = (newData) => {
     setRequestBody({ ...requestBody, ...newData });
+    console.log(newData,"newwwww data in custom panel");
   };
 
   const handleResponseBodyChange = (newData) =>{
