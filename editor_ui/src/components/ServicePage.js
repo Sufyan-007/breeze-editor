@@ -1,12 +1,20 @@
-import { useRef, useState } from "react";
+import { useRef, useState , useEffect} from "react";
 import CustomPanel from "./CustomPanel";
+import ApiList from "./ApiList";
 
 export function ServicePage() {
   const fileInputYAML = useRef(null); // this is created to reference the file input element .
   const fileInputPostman = useRef(null);
   const [showCustomPanel, setShowCustomPanel] = useState(false);
   const [showApiClientButtons, setShowApiClientButtons] = useState(false);
+  const [yamlApis, setYamlApis] = useState([]); // State to store the list of YAML APIs
+  const [yamlUploaded, setYamlUploaded] = useState(false);
 
+  useEffect(()=>{
+     if (showCustomPanel) {
+       setYamlUploaded(false);
+     }
+  },[showCustomPanel]);
   //this function is defined to asynchronously read the content of a file
   const readFile = async (file) => {
     return new Promise((resolve, reject) => {
@@ -24,15 +32,32 @@ export function ServicePage() {
   async function fileUpload(file) {
     try {
       console.log("YAML file", file);
-      // const loadedFile = await readFile(file);
-      // const config = yaml.load(loadedFile);
+      const formData = new FormData();
+      formData.append("file", file); // append the file to form data
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/api-client-generator/convert-starndard-json/openapi",
+        {
+          method: "POST",
+          body: formData, //set formdata as the body of the request
+        }
+      );
+      if (response.ok) {
+        setYamlUploaded(true);
+        const responseData = await response.json();
+        setYamlApis(responseData); // Set the list of YAML APIs in state
+      } else {
+        throw new Error("Failed to upload file");
+      }
     } catch (error) {
-      alert("Failed to load file, check file syntax:");
+      alert("Failed to load file, check file syntax");
+      console.error(error);
     }
   }
   //this func programmatically triggers a click event on the file event , opening the file selection dialog
   function openFileInput() {
     fileInputYAML.current.click();
+    setYamlUploaded(!yamlUploaded);
   }
 
   function openFileInputPostman() {
@@ -40,12 +65,34 @@ export function ServicePage() {
   }
 
   async function fileUploadPostman(file) {
-    console.log("postman collections file", file);
+    try {
+      console.log("postman collections file", file);
+      const formData = new FormData();
+      formData.append("file", file); // Append the file to form data with key 'file'
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/api-client-generator/convert-starndard-json/postman",
+        {
+          method: "POST",
+          body: formData, // Set form data as the body of the request
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      // Handle response if needed
+    } catch (error) {
+      alert("Failed to load file, check file syntax");
+      console.error(error);
+    }
   }
   const handleCustomButtonClick = () => {
     setShowCustomPanel(!showCustomPanel);
   };
-
+  console.log(yamlUploaded, "YAML UPLOADED true or false");
+  console.log(yamlApis, "YAML APIS DATA");
   return (
     // <Loader loader={loader}>
     <>
@@ -112,12 +159,16 @@ export function ServicePage() {
               </div>
             )}
           </div>
-          <div className="col-9 overflow-y-auto h-100 fs-6 text-white">
+          <div className="col-9 overflow-y-auto h-100 fs-6 text-light">
             {showCustomPanel && (
-              <div
-                className="custom-panel-container"
-              >
+              <div className="custom-panel-container">
                 <CustomPanel />
+              </div>
+        
+            )}
+            {yamlUploaded && (
+              <div>
+                <ApiList apis={yamlApis} />
               </div>
             )}
           </div>
