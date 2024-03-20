@@ -6,6 +6,7 @@ import { getAllConfigs } from "../services/ConfigService";
 import { setReducerConfig, setReduxStoreConfig } from "../reducers/ReduxConfigReducer";
 import { setServiceConfig } from "../reducers/ServiceConfigReducer";
 import { setRouterConfig } from "../reducers/RouterConfigReducer";
+import { setConfig } from "../reducers/ConfigReducer";
 import { router } from '../App';
 //components
 import Navbar from "./Navbar";
@@ -31,13 +32,15 @@ export default function ProjectPage() {
     const highlightedStyle = { backgroundColor: "#303033" };
     const allConfig = useLoaderData();
     const dispatch = useDispatch();
-    const {projectName} = useParams();
+    const { projectName } = useParams();
 
     useEffect(() => {
+        console.log(allConfig)
         dispatch(setReducerConfig(allConfig.reducerConfig));
         dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
         dispatch(setServiceConfig(allConfig.serviceConfig));
-        dispatch(setRouterConfig(allConfig.reducerConfig));
+        dispatch(setRouterConfig(allConfig.routerConfig));
+        dispatch(setConfig({...allConfig.componentConfig,port:allConfig.port}));
     }, [allConfig, dispatch]);
 
     const sidebarItems = [
@@ -46,7 +49,7 @@ export default function ProjectPage() {
         { id: 2, name: "Routing", icon: routing },
         { id: 3, name: "Services", icon: settings },
         { id: 4, name: "Constants", icon: pages }, //icon
-        { id: 5, name: "Styles", icon: styles }, 
+        { id: 5, name: "Styles", icon: styles },
         { id: 6, name: "Code", icon: code },
         { id: 7, name: "Third-party App", icon: apps },
         { id: 8, name: "Config", icon: pages }, //icon
@@ -69,23 +72,28 @@ export default function ProjectPage() {
     return (
         <div className="container-fluid vh-100 d-flex flex-column">
             <Navbar leftContent={
-                <button className="btn btn-outlined" style={{ color: "white"}} onClick={() => router.navigate("/")}>
-                    All Apps
-                </button>
-            } 
+                <div className=' d-flex'>
+                    <div className=' d-flex align-items-center text-white me-3'>
+                        {projectName}
+                    </div>
+                    <button className="btn btn-outlined text-white-50" style={{ color: "white" }} onClick={() => router.navigate("/")}>
+                        All Apps
+                    </button>
+                </div>
+            }
             />
             <div className="row flex-grow-1">
-                <ProjectSidebar 
-                  isSidebarExpanded={isSidebarExpanded} 
-                  sidebarItems={sidebarItems} 
-                  tagSelection={tagSelection} 
-                  setSelection={setSelection} 
-                  toggleSidebar={toggleSidebar} 
-                  highlightedStyle={highlightedStyle}
+                <ProjectSidebar
+                    isSidebarExpanded={isSidebarExpanded}
+                    sidebarItems={sidebarItems}
+                    tagSelection={tagSelection}
+                    setSelection={setSelection}
+                    toggleSidebar={toggleSidebar}
+                    highlightedStyle={highlightedStyle}
                 />
                 <div className="col m-0 p-0" style={{ backgroundColor: "#303033" }}>
-                    <h4 className='text-white m-2'>{projectName}</h4>
-                    <hr className="mt-0" style={{ color: 'white'}}/>
+                    {/* <h4 className='text-white m-2'>{projectName}</h4>
+                        <hr className="mt-0" style={{ color: 'white'}}/> */}
                     {components[tagSelection]}
                 </div>
             </div>
@@ -94,10 +102,10 @@ export default function ProjectPage() {
 }
 
 
-export async function projectLoader({params}){
-    const projectName= params.projectName
+export async function projectLoader({ params }) {
+    const projectName = params.projectName
 
     console.log("Loading project ", projectName)
-    const config=await getAllConfigs(projectName)
+    const config = await getAllConfigs(projectName)
     return config
 }

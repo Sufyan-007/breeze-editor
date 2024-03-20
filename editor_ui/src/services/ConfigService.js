@@ -1,9 +1,10 @@
 const HOST="http://localhost:8000"
 
 export async function getComponentConfig(projectName) {
-    const config = await (await fetch(HOST+"/editor/read-config/" + projectName)).json()
+    const config = await (await fetch(HOST+"/editor/get-components/" + projectName)).json()
     return config
 }
+
 
 export async function getRouterConfig(projectName) {
     const config = await (await fetch(HOST+"/editor/read-router-config/" + projectName)).json()
@@ -26,12 +27,18 @@ export async function getReducerConfig(projectName) {
 
 }
 
+export async function getRunningPort(projectName) {
+    const port = await (await fetch(HOST+"/editor/run-project/"+projectName)).json()
+    return port.port
+}
+
 export async function getAllConfigs(projectName) {
     return {
         componentConfig: await getComponentConfig(projectName),
         routerConfig : await getRouterConfig(projectName),
         serviceConfig : await getServiceConfig(projectName),
         reduxStoreConfig : await getReduxStoreConfig(projectName),
-        reducerConfig : await getReducerConfig(projectName) 
+        reducerConfig : await getReducerConfig(projectName),
+        port:await getRunningPort(projectName)
     }
 }

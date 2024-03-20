@@ -132,7 +132,7 @@ export function ServicePage() {
                     </button>
                 </Modal.Footer>
             </Modal>
-            <div className="container-fluid d-flex flex-column vh-100">
+            <div className="container-fluid d-flex flex-column h-100">
 
 
                 <div className="row flex-grow-1 overflow-hidden">

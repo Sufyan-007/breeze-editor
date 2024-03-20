@@ -2,6 +2,7 @@
 from django.http import JsonResponse
 import json
 from .core.app_editor import AppEditor
+from .core.config_service import ConfigService
 from .core.generate_project import GenerateProject
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -154,3 +155,11 @@ class AppStartup(APIView):
             return JsonResponse(start_app(app_basic_config),status=200)
         except:
             return JsonResponse({},status=500)
+        
+class ComponentReader(APIView):
+    def get(self, request,param):
+        try:
+            config_reader = ConfigService(param)
+            return JsonResponse(config_reader.get_component_configs(),status=200)
+        except:
+            return JsonResponse({},status=404)
