@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { createNewProject } from "../services/ProjectService";
 import { router } from "../App";
 import loadingIcon from "../assets/icons/loading.gif";
@@ -30,6 +30,67 @@ export default function CreateApp({ ...props }) {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Uploading...");
   const [showModal, setModalShow] = useState(false);
+  const ws = useRef(null);
+  let intervalId = useRef(null);
+  
+  const progressMessages = {
+    5: "Initializing your project",
+    20: "Installing Packages",
+    50: "Configuring Services",
+    60: "Setting up your project",
+    80: "This might take a while",
+    90: "Almost there.."
+  };
+
+  React.useEffect(() => {
+    ws.current = new WebSocket("ws://127.0.0.1:8000/ws/project-progress/");
+    ws.current.onopen = () => {
+      console.log("Connected to the WebSocket");
+    };
+
+    ws.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      const progress = message?.progress;
+      
+      if (progress === 20 && intervalId.current === null) {
+        incrementProgress();
+      } else if (progress === 50) {
+        clearInterval(intervalId.current);
+        intervalId.current = null;
+        setProgress(progress);
+      } else {
+        setProgress(progress);
+      }
+
+      const relatedMessage = progressMessages[progress];
+      if (relatedMessage) {
+        setMessage(relatedMessage);
+      }
+    };
+
+    ws.current.onclose = () => {
+      console.log("Disconnected from the WebSocket");
+    };
+
+    return () => {
+      ws.current.close();
+      console.log("WebSocket connection closed");
+    };
+  }, []);
+
+  const incrementProgress = () => {
+    intervalId.current = setInterval(() => {
+      setProgress((prevProgress) => {
+        if (prevProgress >= 45) {
+          clearInterval(intervalId.current);
+          intervalId.current = null;
+          return prevProgress;
+        }
+        return prevProgress + 1;
+      });
+    }, 1000);
+  };
+
   const stylingComponents = [
     { id: "bootstrap", name: "Bootstrap" },
     { id: "react-bootstrap", name: "React-bootstrap" },
@@ -41,40 +102,6 @@ export default function CreateApp({ ...props }) {
   const showToast = (message, variant = "success") => {
     const newToast = { id: new Date().getTime(), message, variant };
     setToasts((currentToasts) => [...currentToasts, newToast]);
-  };
-
-  const simulateUpload = () => {
-    const duration = 30000;
-    const updateInterval = 1000;
-    const increments = duration / updateInterval;
-    const incrementValue = 100 / increments;
-
-    const interval = setInterval(() => {
-      setProgress((oldProgress) => {
-        const newProgress = Math.min(
-          Math.floor(oldProgress + incrementValue),
-          95
-        );
-
-        if (newProgress >= 90) {
-          setMessage("This might take a while...");
-        } else if (newProgress >= 80) {
-          setMessage("Almost there...");
-        } else if (newProgress >= 70) {
-          setMessage("Configuring settings...");
-        } else if (newProgress >= 50) {
-          setMessage("Installing packages...");
-        } else if (newProgress >= 20) {
-          setMessage("Initializing project...");
-        } else {
-          setMessage("Creating...");
-        }
-
-        return newProgress;
-      });
-    }, updateInterval);
-
-    return () => clearInterval(interval);
   };
 
   React.useEffect(() => {
@@ -93,21 +120,19 @@ export default function CreateApp({ ...props }) {
 
   const onSubmit = (data) => {
     data.styling = selectedValues.map((option) => option.name);
-    const stopSimulation = simulateUpload();
     setLoading(true);
     setModalShow(true);
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ command: "start", project_id: data.name.toLowerCase().replace(/ /g, "_") }));
+    }
     createNewProject(data)
       .then((response) => {
         if (response.error) {
           throw new Error(response.error);
         }
-        stopSimulation();
-
         setModalShow(false);
         setLoading(false);
-
         showToast("Project created successfully", "success");
-
         setTimeout(() => {
           router.navigate("/editor/" + response.name);
         }, 2000);
@@ -121,7 +146,6 @@ export default function CreateApp({ ...props }) {
           });
           return;
         }
-        stopSimulation();
         alert("Please try again later!");
       });
   };
