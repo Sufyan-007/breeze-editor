@@ -56,7 +56,7 @@ export default function ReduxConfig() {
 
 
     return (
-        <div className=" container-fluid d-flex flex-column vh-100">
+        <div className=" container-fluid d-flex flex-column h-100">
 
             {/* <div className="navbar row " style={{ backgroundColor: "#151518" }}>
                     <div className="navbar-brand text-white">
