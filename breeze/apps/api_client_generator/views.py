@@ -33,7 +33,9 @@ class ApiClientGenerator(View):
             full_file_path = os.path.join(folder_path, filename)
             with open(full_file_path, "w") as file:
                 json.dump(api_models, file, cls=EnhancedJSONEncoder)
-            return JsonResponse({}, status=201)
+            
+            serialized_data = json.loads(json.dumps(api_models, cls=EnhancedJSONEncoder))
+            return JsonResponse(serialized_data,safe=False, status=201)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)

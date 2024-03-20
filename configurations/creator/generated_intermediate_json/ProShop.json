@@ -4,7 +4,18 @@
     "tags": [],
     "request": {
       "method": "get",
-      "auth": null,
+      "auth": {
+        "type": "Bearer",
+        "content": [
+          {
+            "key": "token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFudXNoa2FAdGVzdC5jb20iLCJ1c2VyX2lkIjoiMTAiLCJyb2xlIjoidXNlciIsImlhdCI6MTY5NDE0OTc1NSwiZXhwIjoxNjk0MTU2OTU1fQ.Td_kX3udwp0YV51_8fKLwrzrEmJ68u8BsR0NHJITUYc",
+            "type": "string"
+          }
+        ],
+        "login_api": "login_a_user",
+        "token_api": "generate_refresh_token"
+      },
       "headers": [],
       "parameters": [],
       "url": {
@@ -17,14 +28,26 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get-product",
     "tags": [],
     "request": {
       "method": "get",
-      "auth": null,
+      "auth": {
+        "type": "Bearer",
+        "content": [
+          {
+            "key": "token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFudXNoa2FAdGVzdC5jb20iLCJ1c2VyX2lkIjoiMTAiLCJyb2xlIjoidXNlciIsImlhdCI6MTY5NDE0OTc1NSwiZXhwIjoxNjk0MTU2OTU1fQ.Td_kX3udwp0YV51_8fKLwrzrEmJ68u8BsR0NHJITUYc",
+            "type": "string"
+          }
+        ],
+        "login_api": "login_a_user",
+        "token_api": "generate_refresh_token"
+      },
       "headers": [],
       "parameters": [],
       "url": {
@@ -37,7 +60,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get user profile",
@@ -53,8 +77,8 @@
       ],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/users/profile",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/users/profile",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "users", "profile"]
@@ -62,7 +86,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get users",
@@ -73,8 +98,8 @@
       "headers": [],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/users",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/users",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "users"]
@@ -82,7 +107,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "add user",
@@ -93,8 +119,8 @@
       "headers": [],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/users/register/",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/users/register/",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "users", "register", ""]
@@ -132,7 +158,8 @@
       }
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "update user",
@@ -143,8 +170,8 @@
       "headers": [],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/users/profile/update",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/users/profile/update",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "users", "profile", "update"]
@@ -152,7 +179,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get orders",
@@ -168,8 +196,8 @@
       ],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/orders/7",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/orders/7",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "orders", "7"]
@@ -177,7 +205,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get all orders",
@@ -193,8 +222,8 @@
       ],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/orders/myorders",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/orders/myorders",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "orders", "myorders"]
@@ -202,7 +231,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get a user",
@@ -218,8 +248,8 @@
       ],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/users/1",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/users/1",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "users", "1"]
@@ -227,7 +257,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "create product",
@@ -243,8 +274,8 @@
       ],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/products/create",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/products/create",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "products", "create"]
@@ -260,7 +291,8 @@
       }
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get all records",
@@ -276,8 +308,8 @@
       ],
       "parameters": [],
       "url": {
-        "baseurl": "{{url}}/api/orders/",
-        "host": ["{{url}}"],
+        "baseurl": "http://localhost:8000/api/orders/",
+        "host": ["http://localhost:8000"],
         "protocol": "",
         "port": 0,
         "path": ["api", "orders", ""]
@@ -285,7 +317,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "demo",
@@ -299,6 +332,7 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   }
 ]

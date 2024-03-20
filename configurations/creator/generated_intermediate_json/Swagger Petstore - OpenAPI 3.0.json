@@ -6,7 +6,9 @@
       "method": "put",
       "auth": {
         "type": "Oauth2",
-        "content": [{ "key": null, "value": null, "type": "oauth2" }]
+        "content": [{ "key": null, "value": null, "type": "oauth2" }],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "plain", "value": "text/plain" },
       "parameters": [],
@@ -57,7 +59,8 @@
         "file": ""
       }
     ],
-    "summary": "Update an existing pet"
+    "summary": "Update an existing pet",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "addPet",
@@ -66,7 +69,9 @@
       "method": "post",
       "auth": {
         "type": "Oauth2",
-        "content": [{ "key": null, "value": null, "type": "oauth2" }]
+        "content": [{ "key": null, "value": null, "type": "oauth2" }],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "plain", "value": "text/plain" },
       "parameters": [],
@@ -110,7 +115,8 @@
         "file": ""
       }
     ],
-    "summary": "Add a new pet to the store"
+    "summary": "Add a new pet to the store",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "findPetsByStatus",
@@ -119,7 +125,9 @@
       "method": "get",
       "auth": {
         "type": "Oauth2",
-        "content": [{ "key": null, "value": null, "type": "oauth2" }]
+        "content": [{ "key": null, "value": null, "type": "oauth2" }],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "", "value": "" },
       "parameters": [
@@ -156,7 +164,8 @@
         "file": ""
       }
     ],
-    "summary": "Finds Pets by status"
+    "summary": "Finds Pets by status",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "findPetsByTags",
@@ -165,7 +174,9 @@
       "method": "get",
       "auth": {
         "type": "Oauth2",
-        "content": [{ "key": null, "value": null, "type": "oauth2" }]
+        "content": [{ "key": null, "value": null, "type": "oauth2" }],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "", "value": "" },
       "parameters": [
@@ -202,7 +213,8 @@
         "file": ""
       }
     ],
-    "summary": "Finds Pets by tags"
+    "summary": "Finds Pets by tags",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "getPetById",
@@ -214,7 +226,9 @@
         "content": [
           { "key": "api_key", "value": "header", "type": "apiKey" },
           { "key": null, "value": null, "type": "oauth2" }
-        ]
+        ],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "", "value": "" },
       "parameters": [
@@ -258,7 +272,8 @@
         "file": ""
       }
     ],
-    "summary": "Find pet by ID"
+    "summary": "Find pet by ID",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "updatePetWithForm",
@@ -267,7 +282,9 @@
       "method": "post",
       "auth": {
         "type": "Oauth2",
-        "content": [{ "key": null, "value": null, "type": "oauth2" }]
+        "content": [{ "key": null, "value": null, "type": "oauth2" }],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "", "value": "" },
       "parameters": [
@@ -311,7 +328,8 @@
         "file": ""
       }
     ],
-    "summary": "Updates a pet in the store with form data"
+    "summary": "Updates a pet in the store with form data",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "deletePet",
@@ -320,7 +338,9 @@
       "method": "delete",
       "auth": {
         "type": "Oauth2",
-        "content": [{ "key": null, "value": null, "type": "oauth2" }]
+        "content": [{ "key": null, "value": null, "type": "oauth2" }],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "", "value": "" },
       "parameters": [
@@ -357,7 +377,8 @@
         "file": ""
       }
     ],
-    "summary": "Deletes a pet"
+    "summary": "Deletes a pet",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "uploadFile",
@@ -366,7 +387,9 @@
       "method": "post",
       "auth": {
         "type": "Oauth2",
-        "content": [{ "key": null, "value": null, "type": "oauth2" }]
+        "content": [{ "key": null, "value": null, "type": "oauth2" }],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "plain", "value": "text/plain" },
       "parameters": [
@@ -411,7 +434,8 @@
         "file": ""
       }
     ],
-    "summary": "uploads an image"
+    "summary": "uploads an image",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "getInventory",
@@ -420,7 +444,9 @@
       "method": "get",
       "auth": {
         "type": "ApiKey",
-        "content": [{ "key": "api_key", "value": "header", "type": "apiKey" }]
+        "content": [{ "key": "api_key", "value": "header", "type": "apiKey" }],
+        "login_api": "loginUser",
+        "token_api": null
       },
       "headers": { "key": "", "value": "" },
       "parameters": [],
@@ -442,14 +468,15 @@
         "file": ""
       }
     ],
-    "summary": "Returns pet inventories by status"
+    "summary": "Returns pet inventories by status",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "placeOrder",
     "tags": ["store"],
     "request": {
       "method": "post",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "plain", "value": "text/plain" },
       "parameters": [],
       "url": {
@@ -492,14 +519,15 @@
         "file": ""
       }
     ],
-    "summary": "Place an order for a pet"
+    "summary": "Place an order for a pet",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "getOrderById",
     "tags": ["store"],
     "request": {
       "method": "get",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "", "value": "" },
       "parameters": [
         {
@@ -542,14 +570,15 @@
         "file": ""
       }
     ],
-    "summary": "Find purchase order by ID"
+    "summary": "Find purchase order by ID",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "deleteOrder",
     "tags": ["store"],
     "request": {
       "method": "delete",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "", "value": "" },
       "parameters": [
         {
@@ -585,14 +614,15 @@
         "file": ""
       }
     ],
-    "summary": "Delete purchase order by ID"
+    "summary": "Delete purchase order by ID",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "createUser",
     "tags": ["user"],
     "request": {
       "method": "post",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "plain", "value": "text/plain" },
       "parameters": [],
       "url": {
@@ -621,14 +651,15 @@
         "file": ""
       }
     ],
-    "summary": "Create user"
+    "summary": "Create user",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "createUsersWithListInput",
     "tags": ["user"],
     "request": {
       "method": "post",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "json", "value": "application/json" },
       "parameters": [],
       "url": {
@@ -664,64 +695,15 @@
         "file": ""
       }
     ],
-    "summary": "Creates list of users with given input array"
-  },
-  {
-    "operation_id": "loginUser",
-    "tags": ["user"],
-    "request": {
-      "method": "get",
-      "auth": [],
-      "headers": { "key": "", "value": "" },
-      "parameters": [
-        {
-          "param_in": "query",
-          "name": "username",
-          "type": "string",
-          "required": false,
-          "description": "The user name for login"
-        },
-        {
-          "param_in": "query",
-          "name": "password",
-          "type": "string",
-          "required": false,
-          "description": "The password for login in clear text"
-        }
-      ],
-      "url": {
-        "baseurl": "https://petstore3.swagger.io/api/v3",
-        "host": "",
-        "protocol": "",
-        "port": null,
-        "path": ""
-      },
-      "body": null
-    },
-    "response": [
-      {
-        "status": "200",
-        "content_type": "application/xml",
-        "schema_name": "",
-        "raw_content": "",
-        "file": ""
-      },
-      {
-        "status": "400",
-        "content_type": "application/json",
-        "schema_name": null,
-        "raw_content": "",
-        "file": ""
-      }
-    ],
-    "summary": "Logs user into the system"
+    "summary": "Creates list of users with given input array",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "logoutUser",
     "tags": ["user"],
     "request": {
       "method": "get",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "", "value": "" },
       "parameters": [],
       "url": {
@@ -742,14 +724,15 @@
         "file": ""
       }
     ],
-    "summary": "Logs out current logged in user session"
+    "summary": "Logs out current logged in user session",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "getUserByName",
     "tags": ["user"],
     "request": {
       "method": "get",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "", "value": "" },
       "parameters": [
         {
@@ -792,14 +775,15 @@
         "file": ""
       }
     ],
-    "summary": "Get user by user name"
+    "summary": "Get user by user name",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "updateUser",
     "tags": ["user"],
     "request": {
       "method": "put",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "plain", "value": "text/plain" },
       "parameters": [
         {
@@ -836,14 +820,15 @@
         "file": ""
       }
     ],
-    "summary": "Update user"
+    "summary": "Update user",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "deleteUser",
     "tags": ["user"],
     "request": {
       "method": "delete",
-      "auth": [],
+      "auth": null,
       "headers": { "key": "", "value": "" },
       "parameters": [
         {
@@ -879,6 +864,7 @@
         "file": ""
       }
     ],
-    "summary": "Delete user"
+    "summary": "Delete user",
+    "isAuthenticationApi": false
   }
 ]
