@@ -29,7 +29,7 @@ urlpatterns = [
         path('write-services/<str:param>/',ServiceConfig.as_view()),
         path('delete-project/<str:param>/',ProjectConfig.as_view()),
         path('run-project/<str:param>/',AppStartup.as_view()),
-        path('get-components/<str:param>/',ComponentReader.as_view())
+        path('get-components/<str:param>/',ComponentReader.as_view()),
         path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
 ]
 
