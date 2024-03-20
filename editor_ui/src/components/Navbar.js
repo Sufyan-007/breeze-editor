@@ -5,12 +5,10 @@ export default function Navbar({ leftContent, rightContent, ...props }) {
         <div className="container-fluid">
           <div className="d-flex justify-content-between w-100">
             <div className="d-flex align-items-center">
-              <a href="/" className="btn px-0 navbar-brand text-white">
+              <a href="/" className="btn px-0 navbar-brand fw-bold text-white">
                 Breeze Studio
               </a>
-              <div className="mx-4">
-                {leftContent}
-              </div>
+              {leftContent}
             </div>
             <div className="navbar-right d-flex align-items-center">
               {rightContent}
