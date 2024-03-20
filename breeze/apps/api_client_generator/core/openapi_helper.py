@@ -23,7 +23,7 @@ class OpenApiHelper:
                 operations = list(path_data.keys())
                 for operation in operations:
                     request_obj = openApiConverter.create_request(
-                        path_data=path_data,
+                        path_data=path_data,   
                         operation=operation,
                         security_schemes=openapi_data.get("components").get("securitySchemes"),
                         servers=openapi_data.get("servers"))

@@ -38,9 +38,11 @@ class OpenapiConverter:
     
 
     def _create_auth(self, auth_data, security_schemes):
-        auth= []
+        auth= None
         auth_content = []
         auth_type = ''
+        login_api = None
+        token_api = None
         if auth_data:
             for security_definition in auth_data:
                 scheme_name = list(security_definition.keys())[0]
@@ -60,7 +62,8 @@ class OpenapiConverter:
             
             auth_type_enum = AuthTypeEnum[auth_type.upper()]
             
-            auth = Auth(type=auth_type_enum, content=auth_content)
+        
+            auth = Auth(type=auth_type_enum, content=auth_content,login_api=login_api,token_api=token_api)
             
         return auth
 
