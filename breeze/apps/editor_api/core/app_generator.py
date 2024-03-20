@@ -186,7 +186,7 @@ class AppGenerator:
             universal_newlines=True,
             text=True,
         )
-        ProjectGenerationProgress.store_process(project_name, process)
+        ProjectGenerationProgress.store_process(project_name, process, "create_react_app")
         process.wait()
 
     def modify_main_component(self):
@@ -231,6 +231,7 @@ class AppGenerator:
         api_client_generator.read_yaml()
         
     def install_dependencies(self):
+        project_name = self.app_config['name']
         app_dependencies = self.app_config['dependencies']
         package_json = read_file_json(f"{self.app_config['path']}/{self.app_config['name']}/package.json")
 
@@ -243,8 +244,17 @@ class AppGenerator:
 
         write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
 
-        subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
-
+        # subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
+        process = subprocess.Popen(
+            ["npm", "install"],
+            cwd=f"{self.app_config['path']}/{self.app_config['name']}",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            text=True, 
+        )
+        ProjectGenerationProgress.store_process(project_name, process, "installing_dependencies")
+        process.wait()
         if package_json['dependencies'].get('bootstrap') is not None:
             DependencyManager().handle_bootstrap(app_config=self.app_config)
 

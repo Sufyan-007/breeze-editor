@@ -30,6 +30,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,7 +45,6 @@ INSTALLED_APPS = [
     'rest_framework_swagger',       # Swagger 
     'drf_yasg',
     "corsheaders",
-    'channels'
                       # Yet Another Swagger generator
 ]
 CORS_ORIGIN_ALLOW_ALL = True
