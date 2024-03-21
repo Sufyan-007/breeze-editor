@@ -33,3 +33,29 @@ class RetriveAppConfig:
                 resp["message"] ="Invalid entity name"
         return resp        
     
+    def get_components(self, app_name,):
+        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
+        comp_config = {}
+        components = []
+        comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
+        resp = {
+            "error" : False,
+            "data" : {}
+        }
+        # Read old config
+        try:
+            comp_config = read_json_file(comp_config_path)
+        except FileNotFoundError as e:
+            resp["error"] = True
+            resp["message"] ="File not found"
+            print(e)
+            comp_config = {}
+        for com_key,config in comp_config.items():
+            components.append({
+                "name" : com_key,
+                "id" : config.get("id","")
+
+            })
+        resp["data"] = components
+        return resp        
+    

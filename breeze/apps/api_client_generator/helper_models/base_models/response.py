@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from .status import StatusEnum
-from .content import ContentEnum
+from ..enums.status import StatusEnum
+from ..enums.content import ContentEnum
 
 @dataclass
 class Response:

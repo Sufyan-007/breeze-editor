@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 @dataclass
 class Url:
@@ -6,4 +7,5 @@ class Url:
     host: str
     protocol : str
     port : int
-    path : list(str)
+    path: List[str]
+    

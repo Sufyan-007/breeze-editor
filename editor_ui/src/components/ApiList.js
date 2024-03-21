@@ -20,7 +20,7 @@ const ApiList = ({ apis }) => {
       }))
     );
     
-  }, [apiData]);
+  }, []);
 
 
   const handleSubmit = (index) => (e) => {

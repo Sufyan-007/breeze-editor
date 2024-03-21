@@ -82,6 +82,9 @@ class PostmanCollectionConverter:
     def _create_auth(self, auth_data):
         auth_type = AuthTypeEnum[auth_data.get("type").upper()]
         content_data = auth_data.get(auth_data.get("type"))
+        login_api = auth_data.get("login_api",None)
+        token_api = auth_data.get("token_api",None)
+        
         auth_content = []
         if content_data:
             auth_content.append(
@@ -91,7 +94,7 @@ class PostmanCollectionConverter:
                     type=content_data[0].get("type"),
                 )
             )
-        auth = Auth(type=auth_type, content=auth_content)
+        auth = Auth(type=auth_type, content=auth_content,login_api=login_api,token_api=token_api)
         return auth
 
     def _create_parameters(self, url_data):

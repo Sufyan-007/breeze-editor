@@ -2,7 +2,7 @@ from django.urls import path
 from .views import ConfigWriter
 from .api.write_component import WriteComponent
 from .api.write_component_html import WriteComponentHtml
-from .api.retrive_component import ReriveComponent
+from ..configuration_reader.api.retrive_component import ReriveComponent
 from django.views.decorators.csrf import csrf_exempt
 from .api.write_service import WriteService
 
