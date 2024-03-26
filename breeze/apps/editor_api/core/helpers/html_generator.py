@@ -8,15 +8,18 @@ class HTMLGenerator:
 
         # print("----")
         # print(value)
+        val=""
+        if value.get('type') == "DESTRUCTURABLE":
+            return f"{{...{value.get('value')} }}"
         if value.get('type') == 'LITERAL':
-             return f'"{value.get("value")}"'
+            val= f'"{value.get("value")}"'
         elif value.get('type') == 'OBJECT':
-             return f"{{{value.get('value')}}}"
+            val= f"{{{value.get('value')}}}"
         elif value.get('type') == 'BOOLEAN':
-             return f"{{{value.get('value')}}}"
+            val= f"{{{value.get('value')}}}"
         
         elif value.get('type') == 'VARIABLE':
-             return f"{{{value.get('value')}}}"
+            val= f"{{{value.get('value')}}}"
         elif value.get('type') == "FUNCTION":
             print("------------FUNCTION------------")
             #  print(FunctionCodeGenerator.generate_function(value.get('value'), {}))
@@ -37,8 +40,8 @@ class HTMLGenerator:
                 related_func_config = value.get('value')
             related_func_config = copy.deepcopy(related_func_config)
             related_func_config["isAnonymous"]=True
-            return f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
-        return ""
+            val= f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
+        return f"{attr}={val}"
 
     def generateHTML(self,config):
         # print("---", config)
@@ -69,7 +72,7 @@ class HTMLGenerator:
             attributes = config.get('attributes', {})
             children = config.get('children', [])
 
-            attribute_str = ' '.join([f'{attr}={self.generateAttributeCode(attr, value)}' for attr, value in attributes.items()])
+            attribute_str = ' '.join([f'{self.generateAttributeCode(attr, value)}' for attr, value in attributes.items()])
             open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
             close_tag = f'</{tag_name}>'
 
