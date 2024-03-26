@@ -33,7 +33,7 @@ export default function Main() {
                     <div className="row mt-3">
                         {
                             Object.values(projects).map((item, index) =>
-                                <ProjectCards project={item} className="col-12 col-sm-6 col-md-4 col-lg-3" />
+                                <ProjectCards key={index} project={item} className="col-12 col-sm-6 col-md-4 col-lg-3" />
                             )
                         }
                     </div>

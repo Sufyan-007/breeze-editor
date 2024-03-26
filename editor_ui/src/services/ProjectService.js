@@ -21,3 +21,12 @@ export async function deleteProject(projectName){
     await new Promise(r => setTimeout(r, 2000));
     return {status,body}
 }
+
+export async function updateProject(projectDetails){
+    const response = await fetch("http://localhost:8000/editor/update-project-details/",
+        {method:"PUT",headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(projectDetails)}
+    )
+    const status = response.status
+    const body = await response.json()
+    return {status,body}
+}

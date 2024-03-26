@@ -48,8 +48,8 @@ export default function ProjectCards({ project, ...props }) {
             </div>
           </div>
           <div className="stats">
-          <button type="button" class="btn btn-secondary btn-sm mx-2" onClick={handleCardClick}>Config</button>
-          <button type="button" class="btn btn-danger btn-sm ml-1" onClick={deleteProject}>Delete</button>
+          <button type="button" className="btn btn-secondary btn-sm mx-2" onClick={handleCardClick}>Config</button>
+          <button type="button" className="btn btn-danger btn-sm ml-1" onClick={deleteProject}>Delete</button>
           </div>
         </div>
       </div>

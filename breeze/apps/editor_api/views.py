@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.views import APIView
 from .core.app_config_writer import AppConfigWriter
+from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 import os
 
 @method_decorator(csrf_exempt,name="dispatch")
@@ -19,6 +20,14 @@ class ConfigReader(APIView):
         except:
             return JsonResponse({},status=404)
 
+@method_decorator(csrf_exempt,name="dispatch")
+class AppBasicConfigReader(APIView):
+    def get(self, request,param):
+        try:
+            app_editor= AppEditor(param)
+            return JsonResponse(app_editor.app_config,status=200)
+        except:
+            return JsonResponse({},status=404)
         
 @method_decorator(csrf_exempt, name="dispatch")
 class ComponentWriter(APIView):
@@ -130,6 +139,72 @@ class ProjectConfig(APIView):
         except:
             return JsonResponse({},status=500)
 
+@method_decorator(csrf_exempt,name='dispatch')
+class ProjectDetailsConfig(APIView):
+    def put(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            # rename the project folder name, rename the name and the projectName field in
+            #  app_basic_config file
+            file_name = f"{CONFIG_PATH}/{data['oldConfig']['name']}/app_basic_config.json"
+            with open(file_name, 'r') as file:
+                app_basic_config = json.load(file)
+                app_basic_config['name'] = data['newProjectName'].replace(" ", "_")
+                app_basic_config['author'] = data['newAuthor']
+                app_basic_config['description'] = data['newDescription']
+                app_basic_config['projectName'] = data['newProjectName']
+
+                # generation path for new app_basic_config
+                generated_paths = os.path.split(app_basic_config['path'])
+                app_basic_config['path'] = os.path.join(generated_paths[0], app_basic_config['name'])
+                
+                # renaming all the affected folders
+                try:
+                    os.rename(
+                        f"{data['oldConfig']['path']}/{data['oldConfig']['name']}", 
+                        f"{data['oldConfig']['path']}/{app_basic_config['name']}"
+                    )
+                    os.rename(data['oldConfig']['path'], app_basic_config['path'])
+                    os.rename(f"{CONFIG_PATH}/{data['oldConfig']['name']}", f"{CONFIG_PATH}/{app_basic_config['name']}")
+
+                    # renaming the project's name in its package.json & package-lock.json files                    
+                    package_json_path = os.path.join(
+                        f"{app_basic_config['path']}/{app_basic_config['name']}", 'package.json'
+                    )
+                    package_lock_json_path = os.path.join(
+                        f"{app_basic_config['path']}/{app_basic_config['name']}", 'package-lock.json'
+                    )
+                    
+                    with open(package_json_path, 'r') as package_json_file:
+                        package_json_data = json.load(package_json_file)
+                        package_json_data['name'] = app_basic_config['name']
+
+                    with open(package_json_path, 'w') as package_json_file:
+                        json.dump(package_json_data, package_json_file, indent=4)
+
+                    with open(package_lock_json_path, 'r') as package_lock_file:
+                        package_lock_data = json.load(package_lock_file)
+                        package_lock_data['name'] = app_basic_config['name']
+                        package_lock_data['packages']['']['name'] = app_basic_config['name']
+
+                    with open(package_lock_json_path, 'w') as package_lock_file:
+                        json.dump(package_lock_data, package_lock_file, indent=4)
+                        
+                except (FileNotFoundError, OSError) as error:
+                     print('Error while renaming folders: ', error)
+                     
+                newData = json.dumps(app_basic_config, indent=4)
+                
+            file_name = f"{CONFIG_PATH}/{app_basic_config['name']}/app_basic_config.json"
+            with open(file_name, 'w') as file:
+                file.write(newData)
+                
+            print('--------------- ALL APPLICATION NAME CHANGES CONDUCTED SUCCESSFULLY -----------')
+            return JsonResponse({}, status=200)
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({e},status=500)
+    
 class ServiceConfig(APIView):
     def get(self,request,param):
         try:
