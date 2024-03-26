@@ -10,6 +10,7 @@ import json
 from common.utils.formatter import format_by_prettier,format_val
 import yaml
 from common.utils.file_helper import create_parent_dir_if_not_exists
+import copy
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
@@ -19,9 +20,12 @@ NEW_COMP_FORMAT={
     "propsVars": [],
     "otherVars": [],
     "functions": [],
+    "$id":"COMP",
     "html": {
       "type": "Element",
-      "tagName": "Container",
+      "elementType": "HTML",
+      "typeId": "DIV",
+      "tagName": "div",
       "attributes": {
         "className": { "type": "LITERAL", "value": "" },
         "id": { "type": "LITERAL", "value": "" }
@@ -33,7 +37,7 @@ NEW_COMP_FORMAT={
         {
             "TYPE": "THIRD_PARTY",
             "from": "react-bootstrap",
-            "import_entity": "Table, Container, Button, Row, Col, Form, Modal",
+            "import_entity": "Container",
             "import_type": "SINGLE"
         },
         {
@@ -115,6 +119,9 @@ class AppEditor:
     def get_comp_config(self):
         return self.comp_config
     
+    def get_basic_config(self):
+        return self.app_config
+    
     # returns /configurations/<project>/routing_config.json
     def get_router_config(self):
         
@@ -138,8 +145,7 @@ class AppEditor:
         self.comp_config[comp['name']] = comp
         comp_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
         write_file(f"{comp_config_path}.json", json.dumps(self.comp_config))
-        
-        
+        conf=copy.deepcopy(self.comp_config)
         # Writing target component in generated project 
         comp_generator = ComponentGenerator(
             all_comp_config=self.comp_config, 
@@ -150,8 +156,7 @@ class AppEditor:
             # mapping_config=self.mapping_config
             )
         comp_generator.write_component(comp)
-        
-        return self.comp_config
+        return conf
     
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
@@ -159,6 +164,7 @@ class AppEditor:
         name=name.replace(' ',"").title()
         comp=NEW_COMP_FORMAT.copy()
         comp['name'] = name
+        comp["$id"] = name.upper()
         comp['containingFile'] = "components/"+name+".js"
         comp["html"]["attributes"]["id"]["value"]=name
         config=self.write_component(comp)

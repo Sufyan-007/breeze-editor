@@ -9,6 +9,10 @@ from .views import ReducerConfig
 from .views import StoreConfig
 from .views import ServiceConfig
 from .views import ProjectDetailsConfig
+from .views import AppStartup
+from .core import consumers
+
+from .views import ComponentReader
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
         path('read-app-basic-config/<str:param>/',AppBasicConfigReader.as_view()),
@@ -26,6 +30,9 @@ urlpatterns = [
         path('read-services/<str:param>/',ServiceConfig.as_view()),
         path('write-services/<str:param>/',ServiceConfig.as_view()),
         path('delete-project/<str:param>/',ProjectConfig.as_view()),
-        path('update-project-details/',ProjectDetailsConfig.as_view())
+        path('update-project-details/',ProjectDetailsConfig.as_view()),
+        path('run-project/<str:param>/',AppStartup.as_view()),
+        path('get-components/<str:param>/',ComponentReader.as_view()),
+        path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
 ]
 

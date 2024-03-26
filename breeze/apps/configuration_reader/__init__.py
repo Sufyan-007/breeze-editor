@@ -53,7 +53,8 @@ def prepare_config_map():
             for single_comp_config in comp_config:
                 COMPONENTS_LIST["CUSTOM"][project_config['name']].append({
                     "name" : comp_config[single_comp_config]['name'],
-                    "id" : comp_config[single_comp_config]['$id']
+                    #Certain config files don't contain $ID field, will remove later
+                    "id" : comp_config[single_comp_config].get("$id",comp_config[single_comp_config]['name'])
                 })
             
 
@@ -92,6 +93,7 @@ def prepare_html_comp_config():
 
     html_elements = [
         "DOCTYPE html",
+        "div",
         "html",
         "head",
         "title",
@@ -167,4 +169,4 @@ def prepare_comp_config(project_config_path):
 
     return comp_config
 
-# prepare_config_map()
+prepare_config_map()

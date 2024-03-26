@@ -30,6 +30,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,9 +41,10 @@ INSTALLED_APPS = [
     'apps.configuration_writer',
     'apps.configuration_reader',
     'apps.code_generator',
+    'apps.api_client_generator',
     'rest_framework_swagger',       # Swagger 
     'drf_yasg',
-    "corsheaders"
+    "corsheaders",
                       # Yet Another Swagger generator
 ]
 CORS_ORIGIN_ALLOW_ALL = True
@@ -50,7 +52,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1", 
     "localhost"
 ]
-
+CSRF_COOKIE_SECURE = True
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1", 
     "http://localhost"
@@ -88,6 +90,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'breeze.wsgi.application'
+ASGI_APPLICATION = 'breeze.asgi.application'
+
 
 
 # Database
@@ -159,3 +163,9 @@ SWAGGER_SETTINGS = {
         }
     }
  }
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}

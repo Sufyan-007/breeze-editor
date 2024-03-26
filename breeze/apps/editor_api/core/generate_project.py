@@ -38,5 +38,8 @@ class GenerateProject:
             raise FileNotFoundError("Could not find project '{project_name}")
         print(app_config_dir)
         print(generated_project_path)
-        shutil.rmtree(generated_project_path)
         shutil.rmtree(app_config_dir)
+        try:
+            shutil.rmtree(generated_project_path)
+        except:
+            pass

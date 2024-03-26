@@ -44,6 +44,27 @@ class HTMLGenerator:
         # print("---", config)
         if config.get('type') == 'Element':
             # print(config)
+            if config.get('elementType',"") == 'CUSTOM':
+                tag =config.get("tagName") 
+                if tag!=self.config.get('name'):
+                    if tag not in self.config['imports']['components']:
+                        self.config['imports']['components'].append(tag)
+            elif config.get('elementType',"") == 'THIRD_PARTY':
+                tag = config.get("tagName")
+                typeId = config.get("typeId")
+                for imports in self.config['imports']['other']:
+                    if imports.get('typeId',"") == typeId:
+                        break
+                else:
+                    imports = {
+                        "TYPE": "THIRD_PARTY",
+                        "from": config.get("libary"),
+                        "import_entity": tag,
+                        "import_type": "SINGLE"
+                    }
+                    self.config['imports']['other'].append(imports)
+
+                                    
             tag_name = config['tagName']
             attributes = config.get('attributes', {})
             children = config.get('children', [])

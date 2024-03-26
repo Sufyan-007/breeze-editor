@@ -1,11 +1,11 @@
 {
-    "name": "creator_app",
+    "name": "creator",
     "description": "A custom React app",
     "author": "Your Name",
     "type" : "V_0",
     "defaultComponent": "main_comp",
     "strictMode" : false,
-    "path" : "/home/sufyan/Documents/Projects/bridge_generated_projects",
+    "path" : "/home/yash/Documents/Projects/bridge_generated_projects",
     "components_src_dir" : "src",
     "dependencies" : {
         "axios" : "^1.5.1",

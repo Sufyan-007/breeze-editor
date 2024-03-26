@@ -1,0 +1,57 @@
+{
+    "type": "COMPONENT",
+    "name": "AccordionBody",
+    "$id": "react-bootstrap_AccordionBody",
+    "version": "V_0",
+    "containingFile": "/home/raj/Desktop/bridge/npm_libraries/react_bootstrap/react-bootstrap/src/AccordionBody.tsx",
+    "stateVars": [],
+    "propsVars": [
+        {
+            "name": "as",
+            "type": "elementType"
+        },
+        {
+            "name": "bsPrefix",
+            "type": "string"
+        },
+        {
+            "name": "onEnter",
+            "type": "func"
+        },
+        {
+            "name": "onEntering",
+            "type": "func"
+        },
+        {
+            "name": "onEntered",
+            "type": "func"
+        },
+        {
+            "name": "onExit",
+            "type": "func"
+        },
+        {
+            "name": "onExiting",
+            "type": "func"
+        },
+        {
+            "name": "onExited",
+            "type": "func"
+        }
+    ],
+    "otherVars": [],
+    "functions": [],
+    "html": {},
+    "wrapper_store": null,
+    "imports": {
+        "components": [],
+        "other": []
+    },
+    "hooks": [],
+    "exports": [
+        {
+            "name": "AccordionBody",
+            "type": "ExportDefaultDeclaration"
+        }
+    ]
+}

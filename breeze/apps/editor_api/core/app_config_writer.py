@@ -30,6 +30,7 @@ class AppConfigWriter:
         main_comp_config = {
             app_config['defaultComponent'] : {
                 "name": app_config['defaultComponent'],
+                "id":app_config['defaultComponent'].upper(),
                 "containingFile": f"components/{app_config['defaultComponent']}.js",
                 "stateVars": [],
                 "propsVars": [],
@@ -37,6 +38,8 @@ class AppConfigWriter:
                 "functions": [],
                 "html": {
                                     "type": "Element",
+                                    "elementType":"HTML",
+                                    "typeId":"DIV",
                                     "tagName": "div",
                                     "attributes": {
                                         "id": { "type": "LITERAL", "value": app_config['defaultComponent']} 
