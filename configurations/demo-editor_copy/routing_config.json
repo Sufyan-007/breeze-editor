@@ -1,9 +1,0 @@
-{
-  "routes": [
-    { "path": "/", "component": "Main" },
-    { "path": "/demo", "component": "Demo" },
-    { "path": "/editor/:project", "component": "Loaderpage" },
-    { "path": "/editor/:project/:componentName", "component": "Detailedcomp" },
-    { "path": "/editor/:project/", "component": "Sidebar" }
-  ]
-}

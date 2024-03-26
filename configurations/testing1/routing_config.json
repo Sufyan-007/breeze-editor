@@ -1,9 +1,0 @@
-{
-  "routes": [
-    { "path": "/", "redirectTo": "/login" },
-    { "path": "/main", "component": "Main" },
-    { "path": "/login", "component": "Login" },
-    { "path": "/test", "component": "Test" },
-    { "path": "/test5", "component": "Test5" }
-  ]
-}
