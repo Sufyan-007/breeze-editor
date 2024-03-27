@@ -198,7 +198,7 @@ export default function Body({ onChange }) {
             type="radio"
             label="HTML"
             name="content_type"
-            value="text/plain"
+            value="text/html"
             checked={body.content_type === "text/plain"}
             onChange={(e) => handleBodyChange("content_type", e.target.value)}
             disabled={body.mode === "binary"}
@@ -208,7 +208,7 @@ export default function Body({ onChange }) {
             type="radio"
             label="XML"
             name="content_type"
-            value="text/plain"
+            value="application/xml"
             checked={body.content_type === "text/plain"}
             onChange={(e) => handleBodyChange("content_type", e.target.value)}
             disabled={body.mode === "binary"}
@@ -218,7 +218,7 @@ export default function Body({ onChange }) {
             type="radio"
             label="Javascript"
             name="content_type"
-            value="text/plain"
+            value="application/javascript"
             checked={body.content_type === "text/plain"}
             onChange={(e) => handleBodyChange("content_type", e.target.value)}
             disabled={body.mode === "binary"}

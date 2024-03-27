@@ -1,42 +1,50 @@
-import React, { useState } from "react";
-import { Form, Button, Dropdown, Row, Col } from "react-bootstrap";
+import React, { useState , useEffect} from "react";
+import { Form, Button, Dropdown} from "react-bootstrap";
 import Body from "./Body.js";
 
-function RequestBody({ onChange }) {
-  const [method, setMethod] = useState("GET");
-  const [parameters, setParameters] = useState([]);
+function RequestBody({ onChange, requestBody}) {
+  const [method, setMethod] = useState(requestBody.method || "GET");
+  const [parameters, setParameters] = useState(requestBody.parameters || []);
   const [url, setUrl] = useState({
-    baseurl: "",
-    host: "",
-    protocol: "",
-    port: 443,
-    path: [],
+    baseurl: requestBody.url?.baseurl || "",
+    host: requestBody.url?.host || "",
+    protocol: requestBody.url?.protocol || "",
+    port: requestBody.url?.port || 443,
+    path: requestBody.url?.path || [],
   });
-  const [headers, setHeaders] = useState([]);
+  const [headers, setHeaders] = useState(requestBody.headers || []);
   const [auth, setAuth] = useState({
-    type: "No Auth",
-    content: [{ key: "", value: "", type: "" }],
+    type: requestBody.auth?.type || "No Auth",
+    content: requestBody.auth?.content || [{ key: "", value: "", type: "" }],
   });
+
 
   const handleMethodChange = (selectedMethod) => {
     setMethod(selectedMethod);
-    onChange({ method: selectedMethod });
+    onChange({ ...requestBody, method: selectedMethod });
   };
 
-  const handleAddParameter = () => {
-    // Add an empty parameter to the parameters state
-    setParameters([
-      ...parameters,
-      { param_in: "", name: "", type: "", required: false, description: "" },
-    ]);
-  };
+
+
+ const handleAddParameter = () => {
+   const newParameter = {
+     param_in: "",
+     name: "",
+     type: "",
+     required: false,
+     description: "",
+   };
+   const updatedParameters = [...parameters, newParameter];
+   setParameters(updatedParameters);
+   onChange({ ...requestBody, parameters: updatedParameters });
+ };
 
   const handleParameterChange = (index, name, value) => {
     // Update the value of a specific parameter in the parameters state
     const updatedParameters = [...parameters];
     updatedParameters[index][name] = value;
     setParameters(updatedParameters);
-    onChange({ parameters: updatedParameters });
+    onChange({ ...requestBody, parameters: updatedParameters });
   };
 
   const handleUrlChange = (name, value) => {
@@ -45,21 +53,21 @@ function RequestBody({ onChange }) {
       ...url,
       [name]: value,
     });
-    onChange({ url: { ...url, [name]: value } }); //pass the updated state of the url
+    onChange({ ...requestBody, url: { ...url, [name]: value } }); //pass the updated state of the url
   };
 
   const handleHeaderChange = (index, name, value) => {
     const updatedHeaders = [...headers];
     updatedHeaders[index][name] = value;
     setHeaders(updatedHeaders);
-    onChange({ headers: updatedHeaders });
+    onChange({ ...requestBody, headers: updatedHeaders });
   };
 
   const addHeader = () => {
     const updatedHeaders = [...headers];
     updatedHeaders.push({ key: "", value: "" });
     setHeaders(updatedHeaders);
-    onChange({ headers: updatedHeaders });
+    onChange({ ...requestBody, headers: updatedHeaders });
   };
 
   // Handle change for AuthTypeEnum dropdown
@@ -68,7 +76,7 @@ function RequestBody({ onChange }) {
       ...auth,
       [property]: value,
     });
-    onChange({ auth: { ...auth, [property]: value } });
+    onChange({ ...requestBody,  auth: { ...auth, [property]: value } });
   };
 
   // Handle change for individual AuthContent in the list
@@ -80,7 +88,7 @@ function RequestBody({ onChange }) {
       ...auth,
       content: updatedAuthContent,
     });
-    onChange({ auth: updatedAuthContent });
+    onChange({ ...requestBody, auth: updatedAuthContent });
   };
 
   // Remove AuthContent from the list
@@ -91,7 +99,7 @@ function RequestBody({ onChange }) {
       ...auth,
       content: updatedAuthContent,
     });
-    onChange({ auth: updatedAuthContent });
+    onChange({...requestBody, auth: updatedAuthContent });
   };
 
   // Add a new AuthContent to the list
@@ -102,12 +110,14 @@ function RequestBody({ onChange }) {
     });
     // Notify the parent component about the change in the auth state
     onChange({
+      ...requestBody,
       auth: {
         ...auth,
         content: [...auth.content, { key: "", value: "", type: "" }],
       },
     });
   };
+
 
   return (
     <div>

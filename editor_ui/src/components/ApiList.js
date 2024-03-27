@@ -3,15 +3,15 @@ import { Accordion, Form , Button } from "react-bootstrap";
 
 const ApiList = ({ apis }) => {
   // Extract the array of API objects from the 'data' key
-  const apiData = apis.data || [];
-
+  // const apiData = apis.data || [] ;
+//  console.log(apis,"apidata in apilist")
   //state variables to track form values for each Api
   const [formData, setFormData] = useState([]);
-
+  console.log(typeof(apis),"TYPE of Apis")
   useEffect(() => {
     // Initialize formData state when apiData changes
     setFormData(
-      apiData.map((api) => ({
+      apis.data.map((api) => ({
         operationId: api.operation_id,
         tags: api.tags.join(", "),
         requestBody: "",
@@ -19,8 +19,8 @@ const ApiList = ({ apis }) => {
         summary: api.summary,
       }))
     );
-    
-  }, []);
+     console.log(apis.data, "apidata in apilist");
+  }, [apis]);
 
 
   const handleSubmit = (index) => (e) => {
@@ -43,7 +43,7 @@ const ApiList = ({ apis }) => {
       <h2>List of APIs</h2>
       <Accordion defaultActiveKey="0">
         {formData.length > 0 &&
-          apiData.map((api, index) => (
+          apis.data.map((api, index) => (
             <Accordion.Item eventKey={index}>
               <Accordion.Header>{api.operation_id}</Accordion.Header>
               <Accordion.Body>
