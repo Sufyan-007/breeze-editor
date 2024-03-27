@@ -6,3 +6,4 @@ class ContentEnum(str, Enum):
     HTML = "text/html"
     XML = "application/xml"
     JAVASCRIPT = "application/javascript"
+    FORMDATA = "multipart/form-data"

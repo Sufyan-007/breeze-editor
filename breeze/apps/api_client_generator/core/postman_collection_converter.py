@@ -113,7 +113,7 @@ class PostmanCollectionConverter:
 
     def _create_url(self, url_data):
         url = Url(
-            baseurl=url_data.get("raw"),
+            baseurl=url_data.get("baseurl"),
             host=url_data.get("host"),
             protocol=url_data.get("protocol", ""),
             port=url_data.get("port", 0),

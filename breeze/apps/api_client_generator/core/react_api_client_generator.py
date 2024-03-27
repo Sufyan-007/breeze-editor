@@ -11,12 +11,18 @@ from ..helper_models.enums.methods import MethodsEnum
 from ..helper_models.enums.status import StatusEnum
 from ..helper_models.enums.content import ContentEnum
 from ..helper_models.enums.mode import ModeEnum
+from ..helper_models.enums.params_in import ParamsInEnum
+
 from ..helper_models.enums.auth_type import AuthTypeEnum
-from .helpers.api_model_loader import load_json_to_api_model
+from .helpers.api_model_loader import ApiModelLoader
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import read_config_file, read_file_json, write_file
+import json
+from ..helper_models.encoder import EnhancedJSONEncoder
+
 
 RESPONSE_INTERCEPTOR = """
+    // Add a response interceptor
     api.interceptors.response.use((response) => { 
         // block to handle success case
         return response
@@ -98,13 +104,14 @@ class ReactApiClientGenerator:
         service_config = read_file_json(service_path)
         map_services = {}
         for config in service_config:
-            model = load_json_to_api_model(config)
-            react_function = self.generate_service_function(model,False,app_name)
+            model = ApiModelLoader.load_api_model(config)
+            react_function = self.generate_service_function(
+                model, False, app_name)
             map_services = self._manage_service_tags(
                 model.tags, react_function, map_services)
         self.create_serice_files(map_services)
 
-    def generate_api_interceptor(self, auth,app_name):
+    def generate_api_interceptor(self, auth, app_name):
         type = auth.type
         auth_code = ""
         interceptor_code = REQUEST_INTERCEPTOR
@@ -134,59 +141,188 @@ class ReactApiClientGenerator:
         interceptor_code = interceptor_code.replace('{AUTH_CODE}', auth_code)
         return interceptor_code
 
-    def set_response_interceptor(self, auth,app_name):
+    def set_response_interceptor(self, auth, app_name):
         interceptor_code = RESPONSE_INTERCEPTOR
         auth_api_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/auth.json"
         auth_api_config = read_file_json(auth_api_path)
         token_api_config = auth_api_config.get(auth.token_api)
-        token_api_model = load_json_to_api_model(token_api_config)
-        token_api_code = self.generate_service_function(token_api_model,True,app_name)
-        
+        token_api_model = ApiModelLoader.load_api_model(token_api_config)
+        token_api_code = self.generate_service_function(token_api_model, True, app_name)
+
         interceptor_code = interceptor_code.replace('{REFRESH_TOKEN_URL}', token_api_model.request.url.baseurl)
-        interceptor_code = interceptor_code.replace('{GET_REFRESHED_TOKEN_CODE}', token_api_code)
+        interceptor_code = interceptor_code.replace(
+            '{GET_REFRESHED_TOKEN_CODE}', token_api_code)
         return interceptor_code
 
+    def set_request_headers(self, model, app_name):
+        headers = {}
+        if model.request.headers:
+            for header in model.request.headers:
+                headers[header.key] = header.value
+            
+            return headers
+        else:
+            return {}
     
-    def generate_service_function(self, model,anonymous,app_name):
+    def set_request_body(self,model,app_name):
+        body = model.request.body
+        raw_data = None
+        headers = []
+        params = []
+        mode = body.mode
+        if mode == ModeEnum.FILE:
+            pass
+
+        elif mode == ModeEnum.RAW:
+            content_type = body.content_type
+            if content_type == ContentEnum.JSON:
+                headers.append({"key" : "content-type","value" : ContentEnum.JSON.value})
+                params.append(model.operation_id)
+                value = model.operation_id
+                if body.schema_name is None:
+                    raw_data = value
+                else:
+                    schema_name = body.schema_name
+                    schema = body.schema
+                    ## generate request body schema
+                    model_data = {}
+                    raw_data = "`${model_data}`"
+                    raw_data = value
+
+
+            elif content_type == ContentEnum.TEXT:
+                headers.append({"key" : "content-type","value" : ContentEnum.TEXT.value})
+                params.append("text_body")
+                raw_data = "`${text_body}`"
+
+
+
+        elif mode == ModeEnum.FORMDATA:
+            headers.append({"key" : "content-type","value" : ContentEnum.FORMDATA.value})
+        
+        return {
+            "raw_data" : raw_data,
+            "headers" : headers,
+            "params" : params
+        }
+
+    def set_request_url(self,model,app_name):
+        function_args = []
+        query_params = []
+        path_params = []
+        query = ""
+        path = ""
+        
+        url =  model.request.url.baseurl
+        for params in model.request.parameters:
+            if params.param_in == ParamsInEnum.QUERY:
+                query_params.append("%s=${%s}"%(params.name,params.name))
+                function_args.append(params.name)
+            elif params.param_in == ParamsInEnum.PATH:
+                path_params.append("${%s}"%(params.name))
+                function_args.append(params.name)
+
+        if len(path_params) > 0:
+            path = '/'.join(path_params)
+            path = "/"+path
+            url = url + path
+
+        if len(query_params) > 0:
+            query = '&'.join(query_params)
+            query = "?"+query
+            url = url + query
+        
+        axios_url = "`%s`"%(url)
+        return {
+            "axios_url" : axios_url,
+            "function_args" : function_args
+        }
+
+    def generate_service_function(self, model, anonymous, app_name):
         func_name = model.operation_id
         interceptor_code = ""
         response_interceptor_code = ""
         if model.request.auth is not None:
             interceptor_code = self.generate_api_interceptor(
-                model.request.auth,app_name)
-        
+                model.request.auth, app_name)
+
             if model.request.auth.token_api is not None:
                 response_interceptor_code = self.set_response_interceptor(
-                    model.request.auth,app_name)
-        
+                    model.request.auth, app_name)
+
         react_code = ""
         if anonymous is True:
             react_code = """
-                const api = axios.create({
-                        baseURL: '%s',
-                    });
-                
+                {AXIOS_OBJECT_DECLARATION}
                 {INTERCEPTOR_CODE}
                 {RESPONSE_INTERCEPTOR_CODE}
-                return api.%s(%s)
+                return api({URL})
                 
-            """ % (model.request.url.baseurl, model.request.method.value, '')
-        
+            """ 
+
         else:
             react_code = """
                 export const %s = async ({FUNC_ARGS}) => {
-                    const api = axios.create({
-                        baseURL: '%s',
-                    });
-
+                    {AXIOS_OBJECT_DECLARATION}
                     {INTERCEPTOR_CODE}
                     {RESPONSE_INTERCEPTOR_CODE}
-                    let resp = await api.%s(%s)
+                    let resp = await api({URL})
                     return resp
                 };
-                """ % (func_name, model.request.url.baseurl, model.request.method.value, '')
+                """ % (func_name)
+
+        axis_object_declation = """
+            const api = axios.create({
+                {METHOD},
+                {HEADERS},
+                {BODY}
+            });
+        """
+        # set request url
+        url_obj = self.set_request_url(model,app_name)
+        function_args = url_obj.get("function_args",[])
+
         
+        ## set api method
+        axis_object_declation = axis_object_declation.replace('{METHOD}',"method : '"+model.request.method.value+"'")
+        
+        # set request headers
+        headers = self.set_request_headers(model,app_name)
+        
+        # set request body if given
+        body = self.set_request_body(model,app_name)
+        request_body = body.get("raw_data",None)
+        extra_headers = body.get("headers",[])
+        extra_params = body.get("params",[])
+        
+        ## merge headers
+        for head in extra_headers:
+            headers[head.get("key")] = head.get("value")
+        
+        ## merge params
+        function_args = function_args + extra_params
+
+        if request_body is not None:
+            axis_object_declation = axis_object_declation.replace('{BODY}',"data : %s"%(request_body))
+        else:
+            axis_object_declation = axis_object_declation.replace('{BODY}','')
+
+
+        if bool(headers) is True:
+            headers =  ' headers : %s'%(json.dumps(headers))
+            axis_object_declation = axis_object_declation.replace('{HEADERS}',headers)
+        else:
+            axis_object_declation = axis_object_declation.replace('{HEADERS},',"")
+
+        ## set function args comma seperated
+        function_args = ",".join(function_args)
+        
+
+        react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
+        react_code = react_code.replace('{FUNC_ARGS}',function_args)
+        react_code = react_code.replace('{AXIOS_OBJECT_DECLARATION}', axis_object_declation)
         react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
-        react_code = react_code.replace('{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
+        react_code = react_code.replace(
+            '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
 
         return react_code
