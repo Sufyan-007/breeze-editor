@@ -1,3 +1,9 @@
 *.pyc
 */node_modules/*
+configurations/*
+generated_projects/*
+.vscode/launch.json
+breeze/common/consts/consts.py
+breeze/common/utils/app_consts.py
+configurations/creator/app_basic_config.json
 /configurations

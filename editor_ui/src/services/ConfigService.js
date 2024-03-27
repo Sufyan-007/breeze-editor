@@ -1,5 +1,10 @@
 const HOST="http://localhost:8000"
 
+export async function getAppBasicConfig(projectName) {
+    const config = await (await fetch(HOST+"/editor/read-app-basic-config/" + projectName)).json()
+    return config
+}
+
 export async function getComponentConfig(projectName) {
     const config = await (await fetch(HOST+"/editor/get-components/" + projectName)).json()
     return config
@@ -34,6 +39,7 @@ export async function getRunningPort(projectName) {
 
 export async function getAllConfigs(projectName) {
     return {
+        appBasicConfig: await getAppBasicConfig(projectName),
         componentConfig: await getComponentConfig(projectName),
         routerConfig : await getRouterConfig(projectName),
         serviceConfig : await getServiceConfig(projectName),

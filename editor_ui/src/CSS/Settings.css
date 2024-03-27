@@ -1,0 +1,47 @@
+body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .settings {
+    display: flex;
+  }
+  
+  .sidebar {
+    height: 80vh;
+    width: 350px; 
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .sidebar-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar-suboptions {
+    margin-bottom: 20px;
+  }
+  
+  .sidebar-item {
+    margin-bottom: 10px;
+  }
+  
+  .sidebar-item.active {
+    background-color: #555; /* Highlight color */
+  }
+
+  .content {
+    margin-left: 20px; 
+    padding: 20px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  
+  .integration-image {
+    width: 300px;
+    height: 80px;
+  }

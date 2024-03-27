@@ -23,8 +23,15 @@ import code from "../assets/icons/code.svg";
 import pages from "../assets/icons/pages.svg";
 import routing from "../assets/icons/routing.svg";
 import settings from "../assets/icons/settings.svg";
+import services from "../assets/icons/services.svg";
+import config from "../assets/icons/config.svg";
+import constants from "../assets/icons/constants.svg";
 import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from './ProjectSidebar';
+import Settings from './Settings';
+import Styles from './Styles';
+import Code from './Code';
+import ThirdPartyApp from './ThirdPartyApp';
 
 export default function ProjectPage() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -32,7 +39,8 @@ export default function ProjectPage() {
     const highlightedStyle = { backgroundColor: "#303033" };
     const allConfig = useLoaderData();
     const dispatch = useDispatch();
-    const { projectName } = useParams();
+    const {projectName} = useParams();
+    const [projectNameFromParams, setProjectName] = useState(projectName);
 
     useEffect(() => {
         console.log(allConfig)
@@ -47,12 +55,13 @@ export default function ProjectPage() {
         { id: 0, name: "Home", icon: home },
         { id: 1, name: "Pages", icon: pages },
         { id: 2, name: "Routing", icon: routing },
-        { id: 3, name: "Services", icon: settings },
-        { id: 4, name: "Constants", icon: pages }, //icon
-        { id: 5, name: "Styles", icon: styles },
+        { id: 3, name: "Services", icon: services },
+        { id: 4, name: "Constants", icon: constants }, 
+        { id: 5, name: "Styles", icon: styles }, 
         { id: 6, name: "Code", icon: code },
         { id: 7, name: "Third-party App", icon: apps },
-        { id: 8, name: "Config", icon: pages }, //icon
+        { id: 8, name: "Config", icon: config }, 
+        { id: 9, name: "Settings", icon: settings }, 
 
     ];
 
@@ -62,7 +71,11 @@ export default function ProjectPage() {
         <ProjectRouting />,
         <ServicePage />,
         <ReduxConfig />,
-        //rest to be added
+        <Styles />,
+        <Code />,
+        <ThirdPartyApp />,
+        <Settings projectName = {projectNameFromParams} changeProjectName = {setProjectName} />,
+        <Settings projectName = {projectNameFromParams} changeProjectName = {setProjectName} />
     ];
 
     const toggleSidebar = () => {
@@ -92,6 +105,8 @@ export default function ProjectPage() {
                     highlightedStyle={highlightedStyle}
                 />
                 <div className="col m-0 p-0" style={{ backgroundColor: "#303033" }}>
+                    <h4 className='text-white m-2'>{projectNameFromParams}</h4>
+                    <hr className="mt-0" style={{ color: 'white'}}/>
                     {/* <h4 className='text-white m-2'>{projectName}</h4>
                         <hr className="mt-0" style={{ color: 'white'}}/> */}
                     {components[tagSelection]}
