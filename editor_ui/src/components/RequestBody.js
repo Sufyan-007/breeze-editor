@@ -17,7 +17,13 @@ function RequestBody({ onChange, requestBody}) {
     type: requestBody.auth?.type || "No Auth",
     content: requestBody.auth?.content || [{ key: "", value: "", type: "" }],
   });
+  const [body, setBody]=useState({})
 
+  const handleBodyChange = (updatedBody) => {
+   const newBody = { ...body, ...updatedBody };
+   setBody(newBody);
+   onChange({ ...requestBody, body: newBody });
+  };
 
   const handleMethodChange = (selectedMethod) => {
     setMethod(selectedMethod);
@@ -348,7 +354,8 @@ function RequestBody({ onChange, requestBody}) {
             </Button>
           </Form.Group>
 
-          <Body />
+          <Body onChange = {handleBodyChange}
+          body={requestBody.body}/>
         </Form>
       </div>
     </div>

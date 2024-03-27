@@ -1,26 +1,60 @@
 import React, { useState, useRef } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 
-export default function Body({ onChange }) {
-  const [body, setBody] = useState({
-    mode: "raw",
-    content_type: "application/json",
-    required: false,
-    schema_name: "",
-    raw_content: "",
-    file: "",
-    formdata: [],
-  });
+export default function Body({ onChange, body }) {
+   const [mode, setMode] = useState(body.mode || "raw");
+   const [contentType, setContentType] = useState(
+     body.content_type || "application/json"
+   );
+   const [required, setRequired] = useState(body.required || false);
+   const [schemaName, setSchemaName] = useState(body.schema_name || "");
+   const [rawContent, setRawContent] = useState(body.raw_content || "");
+   const [file, setFile] = useState(body.file || "");
+   const [formdata, setFormData] = useState(body.formdata || []);
   const fileInputRefBinary = useRef(null);
   const fileInputRefFormData = useRef(null);
 
-  const handleBodyChange = (name, value) => {
-    setBody({
-      ...body,
-      [name]: value,
-    });
-    onChange({ body: { ...body, [name]: value } });
+  const handleModeChange = (value) => {
+    setMode(value);
+    onChange({ ...body, mode: value });
   };
+
+   const handleContentTypeChange = (value) => {
+    
+     setContentType(value);
+     onChange({ ...body, content_type: value });
+   };
+
+   const handleRequiredChange = (value) => {
+    
+     setRequired(value);
+     onChange({ ...body, required: value });
+   };
+
+   const handleSchemaNameChange = (value) => {
+     
+     setSchemaName(value);
+     onChange({ ...body, schema_name: value });
+   };
+
+   const handleRawContentChange = (value) => {
+     
+     setRawContent(value);
+     onChange({ ...body, raw_content: value });
+   };
+
+   const handleFileChange = (value) => {
+     setFile(value);
+     onChange({ ...body, file: value });
+   };
+
+   const handleFormDataChange = (index, name, value) => {
+     const updatedFormData = [...formdata];
+     updatedFormData[index][name] = value;
+     setFormData(updatedFormData);
+     onChange({ ...body, formdata: updatedFormData });
+   };
+
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
@@ -33,75 +67,44 @@ export default function Body({ onChange }) {
         e.target.value = null;
         return;
       }
-      setBody({
-        ...body,
-        file: file,
-      });
-      onChange({ file: file });
+    setFile(file);
+      onChange({ ...body, file: file });
     }
   };
 
-  const handleFormDataChange = (index, name, value) => {
-    const updatedFormdata = [...body.formdata];
-    updatedFormdata[index][name] = value;
-    setBody({
-      ...body,
-      formdata: updatedFormdata,
-    });
-    console.log(name, value);
-    onChange({ formData: updatedFormdata });
-  };
+   const removeFormData = (index) => {
+     const updatedFormdata = [...formdata];
+     updatedFormdata.splice(index, 1);
+     setFormData(updatedFormdata);
+     onChange({ ...body, formdata: updatedFormdata });
+   };
 
-  const removeFormData = (index) => {
-    const updatedFormdata = [...body.formdata];
-    updatedFormdata.splice(index, 1);
-    setBody({
-      ...body,
-      formdata: updatedFormdata,
-    });
-    onChange({ formdata: updatedFormdata });
-  };
 
   const addFormData = () => {
-    setBody({
-      ...body,
-      formdata: [
-        ...body.formdata,
-        { key: "", value: "", description: "", type: "", src: "" },
-      ],
-    });
-    onChange({
-      body: {
-        ...body,
-        formdata: [
-          ...body.formdata,
-          { key: "", value: "", description: "", type: "", src: "" },
-        ],
-      },
-    });
+    const updatedFormData = [
+      ...formdata,
+      { key: "", value: "", description: "", type: "", src: "" },
+    ];
+    setFormData(updatedFormData);
+    onChange({ ...body, formdata: updatedFormData }); // Pass the updated formdata state to onChange
   };
+
   const openFileInputFormData = (index) => {
     fileInputRefFormData.current.click();
   };
 
   // Define a function to handle the file selection in the form data
-  const handleFormDataFileChange = (e, index) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Set the selected file to the corresponding formdata's value
-      const updatedFormdata = [...body.formdata];
-      updatedFormdata[index].value = file;
-      setBody({
-        ...body,
-        formdata: updatedFormdata,
-      });
+    const handleFormDataFileChange = (e, index) => {
+      const file = e.target.files[0];
+      if (file) {
+        const updatedFormData = [...formdata];
+        updatedFormData[index].value = file;
+        setFormData(updatedFormData);
+        onChange({ ...body, formdata: updatedFormData });
+      }
+    };
 
-      onChange({
-        ...body,
-        formdata: updatedFormdata,
-      });
-    }
-  };
+    console.log(mode, contentType,required,schemaName, rawContent, file ,formdata,"body changes inside BOdy comp");
   return (
     <div>
       <Form.Group controlId="formBody">
@@ -119,8 +122,8 @@ export default function Body({ onChange }) {
             label="Raw"
             name="mode"
             value="raw"
-            checked={body.mode === "raw"}
-            onChange={(e) => handleBodyChange("mode", e.target.value)}
+            checked={mode === "raw"}
+            onChange={() => handleModeChange("raw")}
             inline
             disabled={body.mode === "binary"}
           />
@@ -130,8 +133,8 @@ export default function Body({ onChange }) {
             label="None"
             name="mode"
             value="none"
-            checked={body.mode === "none"}
-            onChange={(e) => handleBodyChange("mode", e.target.value)}
+            checked={mode === "none"}
+            onChange={() => handleModeChange("none")}
             disabled={body.mode === "binary"}
           />
           <Form.Check
@@ -140,8 +143,8 @@ export default function Body({ onChange }) {
             label="Form Data"
             name="mode"
             value="form-data"
-            checked={body.mode === "form-data"}
-            onChange={(e) => handleBodyChange("mode", e.target.value)}
+            checked={mode === "form-data"}
+            onChange={() => handleModeChange("form-data")}
             disabled={body.mode === "binary"}
           />
           <Form.Check
@@ -150,8 +153,8 @@ export default function Body({ onChange }) {
             label="Binary"
             name="mode"
             value="binary"
-            checked={body.mode === "binary"}
-            onChange={(e) => handleBodyChange("mode", e.target.value)}
+            checked={mode === "binary"}
+            onChange={() => handleModeChange("binary")}
           />
         </div>
         {/* Conditional rendering of file input field */}
@@ -164,7 +167,7 @@ export default function Body({ onChange }) {
               type="file"
               accept=".bin"
               ref={fileInputRefBinary}
-              onChange={handleFileInputChange}
+              onChange={() => handleFileInputChange}
             />
           </div>
         )}
@@ -179,9 +182,9 @@ export default function Body({ onChange }) {
             label="JSON"
             name="content_type"
             value="application/json"
-            checked={body.content_type === "application/json"}
-            onChange={(e) => handleBodyChange("content_type", e.target.value)}
-            disabled={body.mode === "binary"}
+            checked={contentType === "application/json"}
+            onChange={() => handleContentTypeChange("application/json")}
+            disabled={mode === "binary"}
           />
           <Form.Check
             inline
@@ -189,9 +192,9 @@ export default function Body({ onChange }) {
             label="TEXT"
             name="content_type"
             value="text/plain"
-            checked={body.content_type === "text/plain"}
-            onChange={(e) => handleBodyChange("content_type", e.target.value)}
-            disabled={body.mode === "binary"}
+            checked={contentType === "text/plain"}
+            onChange={() => handleContentTypeChange("text/plain")}
+            disabled={mode === "binary"}
           />
           <Form.Check
             inline
@@ -199,9 +202,9 @@ export default function Body({ onChange }) {
             label="HTML"
             name="content_type"
             value="text/html"
-            checked={body.content_type === "text/plain"}
-            onChange={(e) => handleBodyChange("content_type", e.target.value)}
-            disabled={body.mode === "binary"}
+            checked={contentType === "text/html"}
+            onChange={() => handleContentTypeChange("text/html")}
+            disabled={mode === "binary"}
           />
           <Form.Check
             inline
@@ -209,9 +212,9 @@ export default function Body({ onChange }) {
             label="XML"
             name="content_type"
             value="application/xml"
-            checked={body.content_type === "text/plain"}
-            onChange={(e) => handleBodyChange("content_type", e.target.value)}
-            disabled={body.mode === "binary"}
+            checked={contentType === "application/xml"}
+            onChange={() => handleContentTypeChange("application/xml")}
+            disabled={mode === "binary"}
           />
           <Form.Check
             inline
@@ -219,9 +222,9 @@ export default function Body({ onChange }) {
             label="Javascript"
             name="content_type"
             value="application/javascript"
-            checked={body.content_type === "text/plain"}
-            onChange={(e) => handleBodyChange("content_type", e.target.value)}
-            disabled={body.mode === "binary"}
+            checked={contentType === "application/javascript"}
+            onChange={() => handleContentTypeChange("application/javascript")}
+            disabled={mode === "binary"}
           />
         </div>
         <div>
@@ -231,9 +234,9 @@ export default function Body({ onChange }) {
             type="checkbox"
             label="Required"
             id="body-required"
-            checked={body.required}
-            onChange={(e) => handleBodyChange("required", e.target.checked)}
-            disabled={body.mode === "binary"}
+            checked={required}
+            onChange={(e) => handleRequiredChange(e.target.checked)}
+            disabled={mode === "binary"}
           />
         </div>
 
@@ -243,9 +246,9 @@ export default function Body({ onChange }) {
           </Form.Label>
           <Form.Control
             type="text"
-            value={body.schema_name}
-            onChange={(e) => handleBodyChange("schema_name", e.target.value)}
-            disabled={body.mode === "binary"}
+            value={schemaName}
+            onChange={(e) => handleSchemaNameChange(e.target.value)}
+            disabled={mode === "binary"}
           />
         </div>
         <div>
@@ -254,16 +257,16 @@ export default function Body({ onChange }) {
           </Form.Label>
           <Form.Control
             type="text"
-            value={body.raw_content}
-            onChange={(e) => handleBodyChange("raw_content", e.target.value)}
-            disabled={body.mode === "binary"}
+            value={rawContent}
+            onChange={(e) => handleRawContentChange(e.target.value)}
+            disabled={mode === "binary"}
           />
         </div>
         <div>
           <Form.Label style={{ fontWeight: "bold" }} className="m-3">
             FormData:
           </Form.Label>
-          {body.formdata.map((formData, index) => (
+          {formdata.map((formData, index) => (
             <div key={index} className="mb-2">
               <Row>
                 <Col>
@@ -361,7 +364,7 @@ export default function Body({ onChange }) {
             <Button
               variant="secondary"
               onClick={addFormData}
-              disabled={body.mode === "binary"}
+              disabled={mode === "binary"}
             >
               Add Formdata
             </Button>
