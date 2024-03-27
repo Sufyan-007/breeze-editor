@@ -36,8 +36,33 @@ class ApiClientGenerator(View):
             
             serialized_data = json.loads(json.dumps(api_models, cls=EnhancedJSONEncoder))
             return JsonResponse({"data":serialized_data,"filename":filename},safe=False, status=201)
-            
-            return JsonResponse({"data": serialized_data, "filename": filename},safe=False, status=201)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+        
+    
+    def get(self, request, projectName):
+        folder_path = f"{CONFIG_PATH}/{projectName}/generated_intermediate_json"
+        files_with_apis = []
+
+        try:
+            # Get list of files in the folder
+            files = os.listdir(folder_path)
+
+            for filename in files:
+                full_file_path = os.path.join(folder_path, filename)
+
+                # Read the file
+                with open(full_file_path, "r") as file:
+                    api_models = json.load(file)
+
+                # Append file name and APIs to the list
+                files_with_apis.append({
+                    "filename": filename,
+                    "apis": api_models
+                })
+
+            return JsonResponse({"files_with_apis": files_with_apis}, status=200)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)

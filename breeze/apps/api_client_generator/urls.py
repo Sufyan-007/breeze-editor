@@ -7,5 +7,6 @@ urlpatterns = [
         path('generate-react-api-client/', csrf_exempt(GenerateReactApiClient.as_view())),
         path('convert-starndard-json/<str:collectionType>', csrf_exempt(ApiClientGenerator.as_view())),
         path('modified-intermediate-json/', csrf_exempt(ModifyIntermediateJson.as_view())),
+        path('fetch-all-intermediates/<str:projectName>', csrf_exempt(ApiClientGenerator.as_view())),
 ]
 
