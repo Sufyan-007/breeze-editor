@@ -1,12 +1,8 @@
 from dataclasses import dataclass
-from ..enums.methods import MethodsEnum
-from .key_value import KeyValue
-from .url import Url
-from .body import Body
-
+from ..enums.params_in import ParamsInEnum
 @dataclass
 class Parameter:
-    param_in : str
+    param_in : ParamsInEnum
     name: str
     type: str
     required: bool

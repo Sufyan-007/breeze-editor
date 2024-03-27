@@ -9,7 +9,6 @@ from .api.write_service import WriteService
 urlpatterns = [
         path('app-config', csrf_exempt(ConfigWriter.as_view())),
         path('write-component', csrf_exempt(WriteComponent.as_view())),
-        path('retrive-component-config/<str:app>/<str:compId>', csrf_exempt(ReriveComponent.as_view())),        
         path('write-service', csrf_exempt(WriteService.as_view())),
         path('write-component-html', csrf_exempt(WriteComponentHtml.as_view()))
 ]

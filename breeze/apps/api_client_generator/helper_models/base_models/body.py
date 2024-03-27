@@ -11,4 +11,5 @@ class Body:
     schema_name : str
     raw_content : str
     file : str
+    schema : dict
     formdata: List[Formdata]

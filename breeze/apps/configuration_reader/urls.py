@@ -10,8 +10,8 @@ urlpatterns = [
         path('get-global-component-config/', csrf_exempt(GetComponentConfig.as_view())),
 
         ## this APIs are for project corrosponding custom components 
-        path('get-components/', csrf_exempt(ReriveComponents.as_view())),
-        path('get-component-config/', csrf_exempt(ReriveComponent.as_view()))
+        path('get-components/<str:app>', csrf_exempt(ReriveComponents.as_view())),
+        path('get-component-config/<str:app>/<str:comp_id>', csrf_exempt(ReriveComponent.as_view()))
 
 ]
 
