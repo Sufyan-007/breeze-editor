@@ -150,7 +150,7 @@ class ProjectDetailsConfig(APIView):
             file_name = f"{CONFIG_PATH}/{data['oldConfig']['name']}/app_basic_config.json"
             with open(file_name, 'r') as file:
                 app_basic_config = json.load(file)
-                app_basic_config['name'] = data['newProjectName'].replace(" ", "_")
+                app_basic_config['name'] = data['newProjectName'].lower().replace(" ", "_")
                 app_basic_config['author'] = data['newAuthor']
                 app_basic_config['description'] = data['newDescription']
                 app_basic_config['projectName'] = data['newProjectName']

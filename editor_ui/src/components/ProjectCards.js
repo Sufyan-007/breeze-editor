@@ -19,7 +19,7 @@ export default function ProjectCards({ project, ...props }) {
     console.log(project);
     setDeleting(true);
     window.confirm(
-      `Are you sure you want to delete project : ${project.name} ?`
+      `Are you sure you want to delete project : ${project.projectName} ?`
     );
     ProjectService.deleteProject(project.name).then((response) => {
       if (response.status === 200) {
