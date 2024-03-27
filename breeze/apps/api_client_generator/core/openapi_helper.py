@@ -34,6 +34,9 @@ class OpenApiHelper:
                         request_obj,
                         response_obj,
                         path_data.get(operation).get("summary"),
+                        isAuthenticationApi= False,
+                        isLogin=False,
+                        isToken=False
                     )
                     api_models.append(api_model)
                     

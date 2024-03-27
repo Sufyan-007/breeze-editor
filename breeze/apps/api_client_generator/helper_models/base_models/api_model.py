@@ -10,4 +10,7 @@ class ApiModel:
     request : Request
     response : List[Response]
     summary : str
+    isAuthenticationApi: bool
+    isLogin: bool
+    isToken: bool
     

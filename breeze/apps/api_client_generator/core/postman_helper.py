@@ -22,6 +22,9 @@ class PostmanHelper:
                 request_obj_by_postmanConverter,
                 response_obj_by_postmanConverter,
                 "",  # Summary later
+                isAuthenticationApi= False,
+                isLogin=False,
+                isToken=False
             )
             api_models.append(api_model)
         result = {"filename":filename, "api_models":api_models}
