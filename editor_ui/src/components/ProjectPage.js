@@ -10,7 +10,7 @@ import { router } from '../App';
 //components
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
-import { ServicePage } from "./ServicePage";
+import ServicePage from './ServicePage';
 import ProjectComponents from "./ProjectComponents";
 import ProjectRouting from "./ProjectRouting";
 import ProjectHome from "./ProjectHome";
@@ -24,6 +24,7 @@ import routing from "../assets/icons/routing.svg";
 import settings from "../assets/icons/settings.svg";
 import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from './ProjectSidebar';
+
 
 export default function ProjectPage() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);

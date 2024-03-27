@@ -35,6 +35,8 @@ class ApiClientGenerator(View):
                 json.dump(api_models, file, cls=EnhancedJSONEncoder)
             
             serialized_data = json.loads(json.dumps(api_models, cls=EnhancedJSONEncoder))
+            return JsonResponse({"data":serialized_data,"filename":filename},safe=False, status=201)
+            
             return JsonResponse({"data": serialized_data, "filename": filename},safe=False, status=201)
 
         except Exception as e:
