@@ -2,12 +2,17 @@ import { useState } from "react"
 import { useSelector } from "react-redux"
 import page_ss from "../assets/icons/page_ss.png"
 import custom_ss from "../assets/icons/custom-component.png"
-export default function ProjectComponents() {
+import {router} from "../App";
+export default function ProjectComponents(props) {
 
     const config = useSelector((state) => state.config)
     console.log(config)
 
     const [selected, setSelected] = useState(0)
+    const handlePageClick = () => {
+        router.navigate("/editor/" + props.project);
+      };
+    
     return (
         <div className=" d-flex container-fluid flex-column h-100 text-white">
             <div className="row">
@@ -23,7 +28,7 @@ export default function ProjectComponents() {
             <div className="row p-2 my-3 flex-grow-1">
                 {selected === 0 ?
                     Object.entries(config.pages).map(([key, value]) =>
-                        <div className=" col-sm-6 col-lg-4 col-xl-3 my-3">
+                        <div className="col-sm-6 col-md-3 my-2" onClick={handlePageClick}>
                             <div className="card  p-0 bg-black text-white position-relative border-0" >
                                 <img src={page_ss} className="card-img border-0" alt="No Screenshot" style={{ minHeight: 100 }} />
                                 <div className="card-overlay " >
