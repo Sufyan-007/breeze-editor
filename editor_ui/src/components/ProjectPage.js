@@ -67,7 +67,7 @@ export default function ProjectPage() {
 
     const components = [
         <ProjectHome />,
-        <ProjectComponents />,
+        <ProjectComponents project = {projectName} />,
         <ProjectRouting />,
         <ServicePage />,
         <ReduxConfig />,

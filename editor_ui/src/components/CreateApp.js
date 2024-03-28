@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { createNewProject } from "../services/ProjectService";
 import { router } from "../App";
 import loadingIcon from "../assets/icons/loading.gif";
@@ -31,16 +31,18 @@ export default function CreateApp({ ...props }) {
   const [message, setMessage] = useState("Uploading...");
   const [showModal, setModalShow] = useState(false);
   const ws = useRef(null);
-  let intervalId = useRef(null);
+  const intervalId = useRef(null);
   
-  const progressMessages = {
-    5: "Initializing your project",
-    20: "Installing Packages",
-    50: "Configuring Services",
-    60: "Setting up your project",
-    80: "This might take a while",
-    90: "Almost there.."
-  };
+  const progressMessages = useMemo(() => {
+    return {
+      5: "Initializing your project",
+      20: "Installing Packages",
+      50: "Configuring Services",
+      60: "Setting up your project",
+      80: "This might take a while",
+      90: "Almost there.."
+    };
+  }, [])
 
   React.useEffect(() => {
     ws.current = new WebSocket("ws://127.0.0.1:8000/ws/project-progress/");
@@ -76,7 +78,7 @@ export default function CreateApp({ ...props }) {
       ws.current.close();
       console.log("WebSocket connection closed");
     };
-  }, []);
+  }, [progressMessages]);
 
   const incrementProgress = () => {
     intervalId.current = setInterval(() => {
