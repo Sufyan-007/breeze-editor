@@ -24,10 +24,14 @@ class OpenapiConverter:
             url_data = self._create_url(servers)
             parameters = self._create_parameters(operation_data.get("parameters"))
             body_data = self._create_body(operation_data.get("requestBody", {}))
+            #headers is an array of objects
+            header_data = []
             if body_data:
-                header_data = KeyValue(key= body_data.content_type.split('/')[-1], value=body_data.content_type)
+                header_data.append(KeyValue(key=body_data.content_type.split('/')[-1], value=body_data.content_type))
+                # header_data = KeyValue(key= body_data.content_type.split('/')[-1], value=body_data.content_type)
             else:
-                header_data = KeyValue(key= '',value='')
+                # header_data = KeyValue(key= '',value='')
+                header_data.append(KeyValue(key="", value=""))
             request_obj = Request(method=method, auth=auth_data, headers=header_data, parameters=parameters, url=url_data, body=body_data)
             
             return request_obj

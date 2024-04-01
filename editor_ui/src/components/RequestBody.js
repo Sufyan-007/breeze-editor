@@ -123,8 +123,8 @@ function RequestBody({ onChange, requestBody}) {
       },
     });
   };
-
-
+console.log(typeof(headers));
+console.log(headers,"headers array or not ");
   return (
     <div>
       <div

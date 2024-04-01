@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Accordion, Form , Button } from "react-bootstrap";
+import { Accordion,  } from "react-bootstrap";
+import CustomPanel from "./CustomPanel";
 
 const ApiList = ({ apis }) => {
   // Extract the array of API objects from the 'data' key
-  // const apiData = apis.data || [] ;
+//   const apiData = apis.data || [] ;
 //  console.log(apis,"apidata in apilist")
   //state variables to track form values for each Api
   const [formData, setFormData] = useState([]);
@@ -30,12 +31,7 @@ const ApiList = ({ apis }) => {
     console.log("Updated data:", formData[index]);
   };
 
-  // Function to handle form input changes
-  const handleInputChange = (index, field) => (e) => {
-    const newFormData = [...formData];
-    newFormData[index][field] = e.target.value;
-    setFormData(newFormData);
-  };
+ 
 
   console.log("FORM DATA ", formData)
   return (
@@ -47,66 +43,8 @@ const ApiList = ({ apis }) => {
             <Accordion.Item eventKey={index}>
               <Accordion.Header>{api.operation_id}</Accordion.Header>
               <Accordion.Body>
-                {/* {formData[index].operationId} */}
-                <Form onSubmit={handleSubmit(index)}>
-                  <Form.Group
-                    className="mb-3"
-                    controlId={`formOperationId_${index}`}
-                  >
-                    <Form.Label>Operation ID:</Form.Label>
-
-                    <Form.Control
-                      type="text"
-                      value={formData[index]["operationId"]}
-                      onChange={handleInputChange(index, "operationId")}
-                    />
-                  </Form.Group>
-
-                  <Form.Group className="mb-3" controlId={`formTags_${index}`}>
-                    <Form.Label>Tags (comma-separated):</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={formData[index]["tags"]}
-                      onChange={handleInputChange(index, "tags")}
-                    />
-                  </Form.Group>
-
-                  <Form.Group
-                    className="mb-3"
-                    controlId={`formRequestBody_${index}`}
-                  >
-                    <Form.Label>Request Body:</Form.Label>
-                    <Button>
-                        Add Request Body
-                    </Button>
-                  </Form.Group>
-
-                  <Form.Group
-                    className="mb-3"
-                    controlId={`formResponseBody_${index}`}
-                  >
-                    <Form.Label>Response Body:</Form.Label>
-                    <Button>
-                        Add Response Body 
-                    </Button>
-                  </Form.Group>
-
-                  <Form.Group
-                    className="mb-3"
-                    controlId={`formSummary_${index}`}
-                  >
-                    <Form.Label>Summary:</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={formData[index].summary}
-                      onChange={handleInputChange(index, "summary")}
-                    />
-                  </Form.Group>
-
-                  <Button variant="secondary" type="submit">
-                    Update
-                  </Button>
-                </Form>
+                <CustomPanel dummyData={api}
+                />
               </Accordion.Body>
             </Accordion.Item>
           ))}

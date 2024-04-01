@@ -53,7 +53,7 @@ function CustomPanel({ dummyData }) {
       responseBody,
     });
   };
-
+console.log(dummyData,"data coming from yaml file upload");
   return (
     <div>
       <Form onSubmit={handleSubmit}>
