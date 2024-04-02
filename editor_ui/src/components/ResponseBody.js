@@ -1,22 +1,39 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import {Form} from 'react-bootstrap';
 
-function ResponseBody({onChange}) {
-  const [response, setResponse] = useState({
-    status: "",
-    content_type: "",
-    schema_name: "",
-    raw_content: "",
-    file: "",
-  });
+function ResponseBody({onChange, responseBody}) {
+   const [status, setStatus] = useState(responseBody.status || "");
+   const [contentType, setContentType] = useState(
+     responseBody.content_type || ""
+   );
+   const [schemaName, setSchemaName] = useState(responseBody.schema_name || "");
+   const [rawContent, setRawContent] = useState(responseBody.raw_content || "");
+   const [file, setFile] = useState(responseBody.file || "");
 
-  const handleResponseChange=(name, value)=>{
-   setResponse({
-    ...response,
-    [name]:value,
-   })
-   onChange({ response: { ...response, [name]: value } });
-  }
+ const handleStatusChange = (value) => {
+   setStatus(value);
+   onChange({ ...responseBody, status: value });
+ };
+
+ const handleContentTypeChange = (value) => {
+   setContentType(value);
+   onChange({ ...responseBody, content_type: value });
+ };
+
+ const handleSchemaNameChange = (value) => {
+   setSchemaName(value);
+   onChange({ ...responseBody, schema_name: value });
+ };
+
+ const handleRawContentChange = (value) => {
+   setRawContent(value);
+   onChange({ ...responseBody, raw_content: value });
+ };
+
+ const handleFileChange = (value) => {
+   setFile(value);
+   onChange({ ...responseBody, file: value });
+ };
 
   return (
     <div
@@ -33,31 +50,35 @@ function ResponseBody({onChange}) {
             label="200"
             name="status"
             value="200"
-            onChange={(e) => handleResponseChange("status", e.target.value)}
+            checked={status === "200"}
+            onChange={() => handleStatusChange("200")}
             inline
           />
           <Form.Check
             type="radio"
             label="201"
             name="status"
-            value="200"
-            onChange={(e) => handleResponseChange("status", e.target.value)}
+            value="201"
+            checked={status === "201"}
+            onChange={() => handleStatusChange("201")}
             inline
           />
           <Form.Check
             type="radio"
             label="403"
             name="status"
-            value="200"
-            onChange={(e) => handleResponseChange("status", e.target.value)}
+            value="403"
+            checked={status === "403"}
+            onChange={() => handleStatusChange("403")}
             inline
           />
           <Form.Check
             type="radio"
-            label="403"
+            label="500"
             name="status"
-            value="200"
-            onChange={(e) => handleResponseChange("status", e.target.value)}
+            value="500"
+            checked={status === "500"}
+            onChange={() => handleStatusChange("500")}
             inline
           />
         </Form.Group>
@@ -70,10 +91,8 @@ function ResponseBody({onChange}) {
             label="JSON"
             name="content_type"
             value="application/json"
-            checked={response.content_type === "application/json"}
-            onChange={(e) =>
-              handleResponseChange("content_type", e.target.value)
-            }
+            checked={contentType === "application/json"}
+            onChange={() => handleContentTypeChange("application/json")}
             inline
           />
           <Form.Check
@@ -81,32 +100,26 @@ function ResponseBody({onChange}) {
             label="TEXT"
             name="content_type"
             value="text/plain"
-            checked={response.content_type === "text/plain"}
-            onChange={(e) =>
-              handleResponseChange("content_type", e.target.value)
-            }
+            checked={contentType === "text/plain"}
+            onChange={() => handleContentTypeChange("text/plain")}
             inline
           />
           <Form.Check
             type="radio"
             label="HTML"
             name="content_type"
-            value="text/plain"
-            checked={response.content_type === "text/plain"}
-            onChange={(e) =>
-              handleResponseChange("content_type", e.target.value)
-            }
+            value="text/html"
+            checked={contentType === "text/html"}
+            onChange={() => handleContentTypeChange("text/html")}
             inline
           />
           <Form.Check
             type="radio"
             label="XML"
             name="content_type"
-            value="text/plain"
-            checked={response.content_type === "text/plain"}
-            onChange={(e) =>
-              handleResponseChange("content_type", e.target.value)
-            }
+            value="application/xml"
+            checked={contentType === "application/xml"}
+            onChange={() => handleContentTypeChange("application/xml")}
             inline
           />
           <Form.Check
@@ -114,11 +127,9 @@ function ResponseBody({onChange}) {
             type="radio"
             label="Javascript"
             name="content_type"
-            value="text/plain"
-            checked={response.content_type === "text/plain"}
-            onChange={(e) =>
-              handleResponseChange("content_type", e.target.value)
-            }
+            value="application/javascript"
+            checked={contentType === "application/javascript"}
+            onChange={() => handleContentTypeChange("application/javascript")}
           />
         </Form.Group>
         <Form.Group>
@@ -127,10 +138,8 @@ function ResponseBody({onChange}) {
           </Form.Label>
           <Form.Control
             type="text"
-            value={response.schema_name}
-            onChange={(e) =>
-              handleResponseChange("schema_name", e.target.value)
-            }
+            value={responseBody.schema_name}
+            onChange={(e) => handleSchemaNameChange(e.target.value)}
           />
         </Form.Group>
         <Form.Group>
@@ -139,10 +148,8 @@ function ResponseBody({onChange}) {
           </Form.Label>
           <Form.Control
             type="text"
-            value={response.raw_content}
-            onChange={(e) =>
-              handleResponseChange("raw_content", e.target.value)
-            }
+            value={responseBody.raw_content}
+            onChange={(e) => handleRawContentChange(e.target.value)}
           />
         </Form.Group>
         <Form.Group>
@@ -151,8 +158,8 @@ function ResponseBody({onChange}) {
           </Form.Label>
           <Form.Control
             type="text"
-            value={response.file}
-            onChange={(e) => handleResponseChange("file", e.target.value)}
+            value={responseBody.file}
+            onChange={(e) => handleFileChange(e.target.value)}
           />
         </Form.Group>
       </Form>
