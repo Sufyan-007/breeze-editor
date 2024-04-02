@@ -1,8 +1,7 @@
 import yaml
-import json
-from .openapi_swagger_converter import OpenapiConverter
-from ..helper_models.base_models.api_model import ApiModel
 
+from ..helper_models.base_models.api_model import ApiModel
+from .openapi_swagger_converter import OpenapiConverter
 
 class OpenApiHelper:
     @staticmethod
@@ -12,36 +11,48 @@ class OpenApiHelper:
                 raise ValueError("Empty JSON data")
 
             openapi_data = yaml.safe_load(json_data) if json_data.endswith('.yml') else yaml.safe_load(json_data)
-            
-            filename = f"{openapi_data.get('info').get('title')}.json"
+
             result = {}
             paths = openapi_data.get('paths', {})
-            operations = []
-            openApiConverter = OpenapiConverter()
-            api_models = []
+            tags_map = {}
             for path, path_data in paths.items():
-                operations = list(path_data.keys())
-                for operation in operations:
+                for operation, operation_data in path_data.items():
+                    tags = operation_data.get("tags", [])
+                    for tag in tags:
+                        if tag not in tags_map:
+                            tags_map[tag] = []
+                        tags_map[tag].append((path, operation, operation_data))
+
+            for tag, tag_operations in tags_map.items():
+                api_models = []
+                for path, operation, operation_data in tag_operations:
+                    openApiConverter = OpenapiConverter()
                     request_obj = openApiConverter.create_request(
-                        path_data=path_data,   
+                        path_data=operation_data,
                         operation=operation,
                         security_schemes=openapi_data.get("components").get("securitySchemes"),
-                        servers=openapi_data.get("servers"))
-                    response_obj = openApiConverter.create_response(path_data=path_data, operation=operation)
+                        servers=openapi_data.get("servers"),
+                        schemas=openapi_data.get("components").get("schemas"))
+                    response_obj = openApiConverter.create_response(
+                        path_data=operation_data,
+                        operation=operation)
                     api_model = ApiModel(
-                        path_data.get(operation).get("operationId"),
-                        path_data.get(operation).get("tags"),
+                        operation_data.get("operationId"),
+                        operation_data.get("tags"),
                         request_obj,
                         response_obj,
-                        path_data.get(operation).get("summary"),
-                        isAuthenticationApi= False,
+                        operation_data.get("summary"),
+                        isAuthenticationApi=False,
                         isLogin=False,
                         isToken=False
                     )
                     api_models.append(api_model)
-                    
-            result = {"filename": filename, "api_models": api_models}
+
+                filename = f"{tag}Service.json"
+                result[filename] = api_models
+
             return result
-        
+
         except Exception as e:
             return {"error": str(e)}
+
