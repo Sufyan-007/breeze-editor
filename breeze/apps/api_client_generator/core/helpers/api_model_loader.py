@@ -73,7 +73,8 @@ class ApiModelLoader:
     
     @staticmethod
     def load_auth(auth_data):
-        auth_type = AuthTypeEnum[auth_data.get("type").upper()]
+        
+        auth_type = AuthTypeEnum(auth_data.get("type")).name
         login_api = auth_data.get("login_api",None)
         token_api = auth_data.get("token_api",None)
         content_data = auth_data.get("content",[])
@@ -138,11 +139,11 @@ class ApiModelLoader:
 
 
         body = Body(
-            mode=ModeEnum[body_data.get("mode").upper()],
+            mode=ModeEnum(body_data.get("mode")),
             raw_content=body_data.get("raw"),
             formdata=formdata_list,
             content_type=content_type,
-            schema={},
+            schema=body_data.get("schema",{}),
             required=body_data.get("required"),
             schema_name=body_data.get("schema_name"),
             file=body_data.get("file"),

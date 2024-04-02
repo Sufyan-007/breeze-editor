@@ -164,43 +164,87 @@ class ReactApiClientGenerator:
         else:
             return {}
     
+    def generate_request_body_schema(self,parent_key,schema_name,schema):
+        body = {}
+        if "type" in schema:
+            if schema.get("type") == "object":
+                if parent_key is not None:
+                    schema_name = parent_key+"."+schema_name
+                for key,value in schema.get("properties",[]).items():
+                    if "type" in value and value.get("type") == "object":
+                        body[key] = self.generate_request_body_schema(schema_name,key,value)
+                    else:
+                        s = '`${%s.%s}`'%(schema_name,key)
+                        body[key] = s.replace("'","")
+            else:
+                body[parent_key] = parent_key
+        else:
+            pass    
+        return body
+
     def set_request_body(self,model,app_name):
         body = model.request.body
         raw_data = None
+        variable_declaration = ""
         headers = []
         params = []
         mode = body.mode
         if mode == ModeEnum.FILE:
-            pass
+            params.append("file")
+            variable_declaration = "let fileData = Buffer.from(await file.arrayBuffer())"
+            raw_data = "fileData"            
 
         elif mode == ModeEnum.RAW:
             content_type = body.content_type
             if content_type == ContentEnum.JSON:
                 headers.append({"key" : "content-type","value" : ContentEnum.JSON.value})
-                params.append(model.operation_id)
-                value = model.operation_id
                 if body.schema_name is None:
+                    params.append(model.operation_id)
+                    value = model.operation_id
                     raw_data = value
                 else:
+                
                     schema_name = body.schema_name
+                    params.append(schema_name)
                     schema = body.schema
                     ## generate request body schema
                     model_data = {}
-                    raw_data = "`${model_data}`"
-                    raw_data = value
+                    model_data = self.generate_request_body_schema(None,schema_name,schema)  
+                    variable_declaration = "let reqBody = %s"%(model_data)
+                    raw_data = "reqBody";
 
 
             elif content_type == ContentEnum.TEXT:
                 headers.append({"key" : "content-type","value" : ContentEnum.TEXT.value})
                 params.append("text_body")
-                raw_data = "`${text_body}`"
+                raw_data = "text_body"
 
 
 
-        elif mode == ModeEnum.FORMDATA:
+        elif mode == ModeEnum.FORMDATA:                
             headers.append({"key" : "content-type","value" : ContentEnum.FORMDATA.value})
+            variable_declaration = "let bodyFormData = new FormData();"
+            form_data = body.formdata
+            for item in form_data:
+                params.append(item.key)
+                if item.type == "file":
+                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s}`);"%(item.key,item.key)
+                else:
+                    variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s}`);"%(item.key,item.key)
+                raw_data = "bodyFormData"
         
+        elif mode == ModeEnum.URLENCODED:
+            headers.append({"key" : "content-type","value" : ContentEnum.URLENCODED.value})
+            variable_declaration = "let formBody = [];"
+            form_data = body.formdata
+            for item in form_data:
+                params.append(item.key)
+                variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")}` + "=" + `${encodeURIComponent(%s)}`);'%(item.key,item.key)
+                raw_data = "formBody"
+            variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
+
         return {
+            "code" : variable_declaration,
             "raw_data" : raw_data,
             "headers" : headers,
             "params" : params
@@ -291,6 +335,12 @@ class ReactApiClientGenerator:
         
         # set request body if given
         body = self.set_request_body(model,app_name)
+        variable_declaration = body.get("code","")
+        
+        if len(variable_declaration) > 0:
+            ## declare any formdata or file variable befor passing it to axios
+            axis_object_declation = variable_declaration + axis_object_declation
+
         request_body = body.get("raw_data",None)
         extra_headers = body.get("headers",[])
         extra_params = body.get("params",[])

@@ -7,3 +7,4 @@ class ContentEnum(str, Enum):
     XML = "application/xml"
     JAVASCRIPT = "application/javascript"
     FORMDATA = "multipart/form-data"
+    URLENCODED = "application/x-www-form-urlencoded;charset=UTF-8"

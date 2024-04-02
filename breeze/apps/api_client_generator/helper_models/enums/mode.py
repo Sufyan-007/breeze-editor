@@ -6,3 +6,4 @@ class ModeEnum(str, Enum):
     FORMDATA = "form-data"
     FILE = "file"
     BINARY = "binary"
+    URLENCODED = "urlencoded"

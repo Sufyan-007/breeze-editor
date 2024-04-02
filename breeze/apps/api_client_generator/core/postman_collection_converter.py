@@ -113,7 +113,7 @@ class PostmanCollectionConverter:
 
     def _create_url(self, url_data):
         url = Url(
-            baseurl=url_data.get("baseurl"),
+            baseurl=url_data.get("raw",url_data.get("baseurl")),
             host=url_data.get("host"),
             protocol=url_data.get("protocol", ""),
             port=url_data.get("port", 0),
@@ -123,18 +123,32 @@ class PostmanCollectionConverter:
 
     def _create_body(self, body_data):
         formdata_list = []
-        formdata_data = body_data.get("formdata", [])
-
-        for item in formdata_data:
-            formdata_list.append(
-                Formdata(
-                    key=item.get("key"),
-                    value=item.get("value"),
-                    description=item.get("description"),
-                    type=item.get("type"),
-                    src=item.get("src"),
+        mode=ModeEnum[body_data.get("mode").upper()]
+        if mode == ModeEnum.URLENCODED :
+            formdata_data = body_data.get("urlencoded", [])
+            for item in formdata_data:
+                formdata_list.append(
+                    Formdata(
+                        key=item.get("key"),
+                        value=item.get("value"),
+                        description=item.get("description",""),
+                        type=item.get("type"),
+                        src=item.get("src",""),
+                    )
                 )
-            )
+
+        elif mode == ModeEnum.FORMDATA:
+            formdata_data = body_data.get("formdata", [])
+            for item in formdata_data:
+                formdata_list.append(
+                    Formdata(
+                        key=item.get("key"),
+                        value=item.get("value"),
+                        description=item.get("description"),
+                        type=item.get("type"),
+                        src=item.get("src"),
+                    )
+                )
 
         content_type = body_data.get("content_type")
         if content_type:
@@ -144,6 +158,7 @@ class PostmanCollectionConverter:
             mode=ModeEnum[body_data.get("mode").upper()],
             raw_content=body_data.get("raw"),
             formdata=formdata_list,
+            schema={},
             content_type=content_type,
             required=body_data.get("required"),
             schema_name=body_data.get("schema_name"),

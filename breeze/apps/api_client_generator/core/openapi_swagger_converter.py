@@ -112,8 +112,9 @@ class OpenapiConverter:
                 mode = 'RAW'
                 content_type = 'JAVASCRIPT'
             elif content_type_str == "application/x-www-form-urlencoded":
-                mode = 'FORMDATA'
-                content_type = 'TEXT'
+                mode = 'URLENCODED'
+                content_type = 'URLENCODED'
+                formdata = body_data.get("urluncoded")
             elif content_type_str == "application/octet-stream":
                 mode = 'BINARY'
                 content_type = 'TEXT'
