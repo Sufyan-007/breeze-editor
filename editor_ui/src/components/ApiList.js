@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Accordion,  } from "react-bootstrap";
 import CustomPanel from "./CustomPanel";
 
-const ApiList = ({ apis }) => {
+const ApiList = ({ apis}) => {
   // Extract the array of API objects from the 'data' key
 //   const apiData = apis.data || [] ;
 //  console.log(apis,"apidata in apilist")

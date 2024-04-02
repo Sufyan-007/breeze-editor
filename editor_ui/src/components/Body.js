@@ -104,7 +104,6 @@ export default function Body({ onChange, body }) {
       }
     };
 
-    console.log(mode, contentType,required,schemaName, rawContent, file ,formdata,"body changes inside BOdy comp");
   return (
     <div>
       <Form.Group controlId="formBody">

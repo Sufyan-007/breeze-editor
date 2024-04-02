@@ -3,6 +3,7 @@ import { Form, Button, Dropdown} from "react-bootstrap";
 import Body from "./Body.js";
 
 function RequestBody({ onChange, requestBody}) {
+  console.log(requestBody, 'requestBody');
   const [method, setMethod] = useState(requestBody.method || "GET");
   const [parameters, setParameters] = useState(requestBody.parameters || []);
   const [url, setUrl] = useState({
@@ -17,7 +18,8 @@ function RequestBody({ onChange, requestBody}) {
     type: requestBody.auth?.type || "No Auth",
     content: requestBody.auth?.content || [{ key: "", value: "", type: "" }],
   });
-  const [body, setBody]=useState({})
+  const [body, setBody]=useState(requestBody.body)
+
 
   const handleBodyChange = (updatedBody) => {
    const newBody = { ...body, ...updatedBody };
@@ -123,8 +125,6 @@ function RequestBody({ onChange, requestBody}) {
       },
     });
   };
-console.log(typeof(headers));
-console.log(headers,"headers array or not ");
   return (
     <div>
       <div
@@ -355,7 +355,7 @@ console.log(headers,"headers array or not ");
           </Form.Group>
 
           <Body onChange = {handleBodyChange}
-          body={requestBody.body}/>
+          body={body}/>
         </Form>
       </div>
     </div>

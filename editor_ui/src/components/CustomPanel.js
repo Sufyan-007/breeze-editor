@@ -5,13 +5,14 @@ import ResponseBody from "./ResponseBody";
 import CustomPanelCss from "../css/CustomPanel.css";
 
 function CustomPanel({ dummyData }) {
+  console.log(dummyData);
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
   const [tags, setTags] = useState(dummyData.tags || []);
   const [summary, setSummary] = useState(dummyData.summary || "");
   const [showRequestBodyForm, setShowRequestBodyForm] = useState(false);
   const [showResponseBodyForm, setShowResponseBodyForm] = useState(false);
-  const [requestBody, setRequestBody] = useState({});
-  const [responseBody, setResponseBody] = useState({});
+  const [requestBody, setRequestBody] = useState(dummyData.request);
+  const [responseBody, setResponseBody] = useState(dummyData.response);
 
   const handleOperationIdChange = (e) => {
     setOperationId(e.target.value);
@@ -35,12 +36,21 @@ function CustomPanel({ dummyData }) {
   };
 
   const handleRequestBodyChange = (newData) => {
-    setRequestBody({ ...requestBody, ...newData });
+    setRequestBody((prevState) => {
+      console.log(prevState, "previous state");
+      return {
+        ...prevState,
+        ...newData,
+      };
+    });
   };
+  console.log(requestBody, "request body in custom panel");
 
   const handleResponseBodyChange = (newData) => {
-    setResponseBody({ ...responseBody, ...newData });
-    
+    setResponseBody((prevState) => ({
+      ...prevState,
+      ...newData,
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -53,7 +63,7 @@ function CustomPanel({ dummyData }) {
       responseBody,
     });
   };
-console.log(dummyData,"data coming from yaml file upload");
+
   return (
     <div>
       <Form onSubmit={handleSubmit}>
@@ -107,7 +117,7 @@ console.log(dummyData,"data coming from yaml file upload");
         {showRequestBodyForm && (
           <RequestBody
             onChange={handleRequestBodyChange}
-            requestBody={dummyData.request}
+            requestBody={requestBody}
           />
         )}
 
@@ -127,7 +137,7 @@ console.log(dummyData,"data coming from yaml file upload");
         {showResponseBodyForm && (
           <ResponseBody
             onChange={handleResponseBodyChange}
-            responseBody={dummyData.response}
+            responseBody={responseBody}
           />
         )}
 
