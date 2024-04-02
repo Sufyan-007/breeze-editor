@@ -39,13 +39,6 @@ export function ServicePage() {
     summary: "",
   };
 
-  useEffect(() => {
-    if (showCustomPanel) {
-      setYamlUploaded(false);
-      setPostmanUploaded(false);
-    }
-  }, [showCustomPanel]);
-
   async function fileUpload(file, fileType) {
     try {
       const formData = new FormData();
@@ -87,14 +80,21 @@ export function ServicePage() {
   function openFileInput(fileType) {
     if (fileType === "yaml") {
       fileInputYAML.current.click();
+       setShowCustomPanel(false);
+       setPostmanUploaded(false);
     } else if (fileType === "postman") {
       fileInputPostman.current.click();
+           setShowCustomPanel(false);
+           setYamlUploaded(false);
     }
   }
 
   const handleCustomButtonClick = () => {
     setShowCustomPanel(!showCustomPanel);
+     setYamlUploaded(false);
+     setPostmanUploaded(false);
   };
+
   // console.log(yamlUploaded, "YAML UPLOADED true or false");
   // console.log(yamlApis, "YAML APIS DATA IN service page ");
 
@@ -113,7 +113,7 @@ export function ServicePage() {
             fileUpload={fileUpload}
             yamlUploaded={yamlUploaded}
             handleCustomButtonClick={handleCustomButtonClick}
-            // yamlApis={yamlApis}
+          
           />
 
           <div className="col-9 overflow-y-auto h-100 fs-6 text-light">
