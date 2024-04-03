@@ -141,7 +141,7 @@ function CustomPanel({ dummyData }) {
           />
         )}
 
-        <Button className="custom-btn" variant="secondary" type="submit">
+        <Button className="custom-btn m-3" variant="secondary" type="submit">
           Submit
         </Button>
       </Form>
