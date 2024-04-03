@@ -162,8 +162,7 @@ class PostmanCollectionConverter:
             content_type=content_type,
             required=body_data.get("required"),
             schema_name=body_data.get("schema_name"),
-            file=body_data.get("file"),
-            schema= {}
+            file=body_data.get("file")
         )
         return body
 
