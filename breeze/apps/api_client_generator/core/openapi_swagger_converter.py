@@ -25,7 +25,7 @@ class OpenapiConverter:
             body_data = self._create_body(path_data.get("requestBody", {}), components_schemas= schemas)
             header_data = []
             if body_data:
-                header_data.append(KeyValue(key= body_data.content_type.split('/')[-1], value=body_data.content_type))
+                header_data.append(KeyValue(key= body_data.content_type.split('/')[-1] if body_data.content_type else None, value=body_data.content_type))
             else:
                 header_data.append(KeyValue(key= '',value=''))
             request_obj = Request(method=method, auth=auth_data, headers=header_data, parameters=parameters, url=url_data, body=body_data)
@@ -96,10 +96,11 @@ class OpenapiConverter:
         schema_name = ''
         schema = {}
         required = body_data.get("required", False)
+        file = ''
         if body_data:
             for content_type_str, content in body_data.get("content", {}).items():
                 schema_name = content.get("schema").get("$ref")
-                if schema_name:
+                if schema_name is not None:
                     schema_name = schema_name.split('/')[-1]
                     schema = self._create_schema(schema_name, components_schemas)
                     
@@ -121,19 +122,23 @@ class OpenapiConverter:
                 elif content_type_str == "application/x-www-form-urlencoded":
                     mode = 'URLENCODED'
                     content_type = 'URLENCODED'
-                    formdata = body_data.get("urluncoded")
-            
+                    formdata = body_data.get("urlencoded")
+                elif content_type_str == 'multipart/form-data':
+                    mode = 'FORMDATA'
+                    content_type = 'FORMDATA'
+                    formdata = body_data.get("content").get("multipart/form-data").get("schema").get("properties").get("file")
                 elif content_type_str == "application/octet-stream":
                     mode = 'BINARY'
-                    content_type = 'TEXT'
-
+                    content_type = None
+                    file = body_data.get("content").get("application/octet-stream").get("schema")
+                    
         body = Body(
             mode=ModeEnum[mode],
-            content_type=ContentEnum[content_type],
+            content_type = ContentEnum[content_type] if content_type else None,
             required=required,
             schema_name=schema_name,
             raw_content='',
-            file='',
+            file=file,
             schema=schema,
             formdata=formdata
         )
