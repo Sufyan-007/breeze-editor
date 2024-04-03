@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import { Accordion, Button } from "react-bootstrap";
 import ServicePageSidebarCss from "../css/ServicePageSidebar.css";
 import CustomPanel from "./CustomPanel";
+import { fetchIntermediate } from "../services/IntermediatesService";
 
 export default function ServicePageSidebar(props) {
   const [tagSelection, setSelection] = useState(0);
   const [uploadDropdownOpen, setUploadDropdownOpen] = useState(false);
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [fetchedIntermediates, setFetchedIntermediates] = useState([]);
   const sidebarItems = [
     { id: 0, name: "Services" },
     { id: 1, name: "Upload" },
@@ -15,6 +18,18 @@ export default function ServicePageSidebar(props) {
 
   const toggleUploadDropdown = () => {
     setUploadDropdownOpen(!uploadDropdownOpen);
+  };
+  const toggleServicesDropdown = async () => {
+    setServicesDropdownOpen(!servicesDropdownOpen);
+    if (!servicesDropdownOpen) {
+      try {
+        const result = await fetchIntermediate("creator");
+        setFetchedIntermediates(result.files_with_apis);
+      } catch (error) {
+        console.error("Error fetching intermediates:", error);
+      }
+    }
+    console.log(fetchedIntermediates, "fetchedIntermediates");
   };
 
   return (
@@ -26,8 +41,7 @@ export default function ServicePageSidebar(props) {
         flexDirection: "column",
         overflowY: "auto",
         height: "100%", // Set height to 100% to match parent container's height
-      }}
-    >
+      }}>
       <div className="service-sidebar">
         {sidebarItems.map((item) => (
           <div
@@ -42,9 +56,10 @@ export default function ServicePageSidebar(props) {
               setSelection(item.id);
               if (item.name === "Upload") {
                 toggleUploadDropdown();
+              } else if (item.name === "Services") {
+                toggleServicesDropdown();
               }
-            }}
-          >
+            }}>
             {item.name === "Upload" ? (
               <Accordion className="upload-accordion">
                 <Accordion.Item eventKey="0">
@@ -54,8 +69,7 @@ export default function ServicePageSidebar(props) {
                       <Button
                         variant="secondary"
                         className="m-2"
-                        onClick={() => props.openFileInput("yaml")}
-                      >
+                        onClick={() => props.openFileInput("yaml")}>
                         Upload Yaml
                       </Button>
                       <input
@@ -72,8 +86,7 @@ export default function ServicePageSidebar(props) {
                       <Button
                         variant="secondary"
                         className="m-2"
-                        onClick={() => props.openFileInput("postman")}
-                      >
+                        onClick={() => props.openFileInput("postman")}>
                         Upload Postman Collection
                       </Button>
                       <input
@@ -90,11 +103,47 @@ export default function ServicePageSidebar(props) {
                       <Button
                         variant="secondary"
                         className="m-2"
-                        onClick={() => props.handleCustomButtonClick()}
-                      >
+                        onClick={() => props.handleCustomButtonClick()}>
                         Custom
                       </Button>
                     </div>
+                  </Accordion.Body>
+                </Accordion.Item>
+              </Accordion>
+            ) 
+            : item.name === "Services" ? 
+            (
+              <Accordion className="upload-accordion">
+                <Accordion.Item eventKey="services">
+                  <Accordion.Header style={{ background: "#343a40" }}>
+                    Services
+                  </Accordion.Header>
+                  <Accordion.Body style={{ justifyContent: "center" }}>
+                    {fetchedIntermediates.map((service) => (
+                      <Accordion key={service.filename}>
+                        <Accordion.Item eventKey={service.filename}>
+                          <Accordion.Header style={{ background: "#343a40" }}>
+                            {service.filename}
+                          </Accordion.Header>
+                          <Accordion.Body>
+                            <ul>
+                              {Array.isArray(service.apis)
+                                ? service.apis.map((api) => (
+                                    <li key={api.operation_id}>
+                                      {api.operation_id}
+                                    </li>
+                                  ))
+                                : //auth.json's api is object
+                                  Object.values(service.apis).map((api) => (
+                                    <li key={api.operation_id}>
+                                      {api.operation_id}
+                                    </li>
+                                  ))}
+                            </ul>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      </Accordion>
+                    ))}
                   </Accordion.Body>
                 </Accordion.Item>
               </Accordion>

@@ -1,0 +1,320 @@
+[
+  {
+    "operation_id": "createUser",
+    "tags": ["user"],
+    "request": {
+      "method": "post",
+      "auth": null,
+      "headers": { "key": "plain", "value": "text/plain" },
+      "parameters": [],
+      "url": {
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "form-data",
+        "content_type": "text/plain",
+        "required": false,
+        "schema_name": "User",
+        "raw_content": "",
+        "file": "",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "integer", "example": 10 },
+            "username": { "type": "string", "example": "theUser" },
+            "firstName": { "type": "string", "example": "John" },
+            "lastName": { "type": "string", "example": "James" },
+            "email": { "type": "string", "example": "john@email.com" },
+            "password": { "type": "string", "example": "12345" },
+            "phone": { "type": "string", "example": "12345" },
+            "userStatus": { "type": "integer", "example": 1 }
+          },
+          "required": []
+        },
+        "formdata": []
+      }
+    },
+    "response": [
+      {
+        "status": "default",
+        "content_type": "application/json",
+        "schema_name": "User",
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Create user",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  },
+  {
+    "operation_id": "createUsersWithListInput",
+    "tags": ["user"],
+    "request": {
+      "method": "post",
+      "auth": null,
+      "headers": { "key": "json", "value": "application/json" },
+      "parameters": [],
+      "url": {
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "raw",
+        "content_type": "application/json",
+        "required": false,
+        "schema_name": null,
+        "raw_content": "",
+        "file": "",
+        "schema": {},
+        "formdata": []
+      }
+    },
+    "response": [
+      {
+        "status": "200",
+        "content_type": "application/json",
+        "schema_name": "User",
+        "raw_content": "",
+        "file": ""
+      },
+      {
+        "status": "default",
+        "content_type": "application/json",
+        "schema_name": null,
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Creates list of users with given input array",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  },
+  {
+    "operation_id": "logoutUser",
+    "tags": ["user"],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": { "key": "plain", "value": "text/plain" },
+      "parameters": [],
+      "url": {
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "raw",
+        "content_type": "text/plain",
+        "required": false,
+        "schema_name": "",
+        "raw_content": "",
+        "file": "",
+        "schema": {},
+        "formdata": []
+      }
+    },
+    "response": [
+      {
+        "status": "default",
+        "content_type": "application/json",
+        "schema_name": null,
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Logs out current logged in user session",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  },
+  {
+    "operation_id": "getUserByName",
+    "tags": ["user"],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": { "key": "plain", "value": "text/plain" },
+      "parameters": [
+        {
+          "param_in": "query",
+          "name": "username",
+          "type": "string",
+          "required": true,
+          "description": "The name that needs to be fetched. Use user1 for testing. "
+        }
+      ],
+      "url": {
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "raw",
+        "content_type": "text/plain",
+        "required": false,
+        "schema_name": "",
+        "raw_content": "",
+        "file": "",
+        "schema": {},
+        "formdata": []
+      }
+    },
+    "response": [
+      {
+        "status": "200",
+        "content_type": "application/json",
+        "schema_name": "User",
+        "raw_content": "",
+        "file": ""
+      },
+      {
+        "status": "400",
+        "content_type": "application/json",
+        "schema_name": null,
+        "raw_content": "",
+        "file": ""
+      },
+      {
+        "status": "404",
+        "content_type": "application/json",
+        "schema_name": null,
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Get user by user name",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  },
+  {
+    "operation_id": "updateUser",
+    "tags": ["user"],
+    "request": {
+      "method": "put",
+      "auth": null,
+      "headers": { "key": "plain", "value": "text/plain" },
+      "parameters": [
+        {
+          "param_in": "query",
+          "name": "username",
+          "type": "string",
+          "required": true,
+          "description": "name that need to be deleted"
+        }
+      ],
+      "url": {
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "form-data",
+        "content_type": "text/plain",
+        "required": false,
+        "schema_name": "User",
+        "raw_content": "",
+        "file": "",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "integer", "example": 10 },
+            "username": { "type": "string", "example": "theUser" },
+            "firstName": { "type": "string", "example": "John" },
+            "lastName": { "type": "string", "example": "James" },
+            "email": { "type": "string", "example": "john@email.com" },
+            "password": { "type": "string", "example": "12345" },
+            "phone": { "type": "string", "example": "12345" },
+            "userStatus": { "type": "integer", "example": 1 }
+          },
+          "required": []
+        },
+        "formdata": []
+      }
+    },
+    "response": [
+      {
+        "status": "default",
+        "content_type": "application/json",
+        "schema_name": null,
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Update user",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  },
+  {
+    "operation_id": "deleteUser",
+    "tags": ["user"],
+    "request": {
+      "method": "delete",
+      "auth": null,
+      "headers": { "key": "plain", "value": "text/plain" },
+      "parameters": [
+        {
+          "param_in": "query",
+          "name": "username",
+          "type": "string",
+          "required": true,
+          "description": "The name that needs to be deleted"
+        }
+      ],
+      "url": {
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "raw",
+        "content_type": "text/plain",
+        "required": false,
+        "schema_name": "",
+        "raw_content": "",
+        "file": "",
+        "schema": {},
+        "formdata": []
+      }
+    },
+    "response": [
+      {
+        "status": "400",
+        "content_type": "application/json",
+        "schema_name": null,
+        "raw_content": "",
+        "file": ""
+      },
+      {
+        "status": "404",
+        "content_type": "application/json",
+        "schema_name": null,
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Delete user",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  }
+]

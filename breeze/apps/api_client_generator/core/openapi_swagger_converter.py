@@ -17,21 +17,17 @@ class OpenapiConverter:
     def __init__(self):
         pass
 
-    def create_request(self, path_data, operation, security_schemes, servers):
-            operation_data = path_data.get(operation, {})
+    def create_request(self, path_data, operation, security_schemes, servers, schemas):
             method = MethodsEnum[operation.upper()]
-            auth_data = self._create_auth( operation_data.get("security"), security_schemes=security_schemes)
+            auth_data = self._create_auth( path_data.get("security"), security_schemes=security_schemes)
             url_data = self._create_url(servers)
-            parameters = self._create_parameters(operation_data.get("parameters"))
-            body_data = self._create_body(operation_data.get("requestBody", {}))
-            #headers is an array of objects
+            parameters = self._create_parameters(path_data.get("parameters"))
+            body_data = self._create_body(path_data.get("requestBody", {}), components_schemas= schemas)
             header_data = []
             if body_data:
-                header_data.append(KeyValue(key=body_data.content_type.split('/')[-1], value=body_data.content_type))
-                # header_data = KeyValue(key= body_data.content_type.split('/')[-1], value=body_data.content_type)
+                header_data.append(KeyValue(key= body_data.content_type.split('/')[-1], value=body_data.content_type))
             else:
-                # header_data = KeyValue(key= '',value='')
-                header_data.append(KeyValue(key="", value=""))
+                header_data.append(KeyValue(key= '',value=''))
             request_obj = Request(method=method, auth=auth_data, headers=header_data, parameters=parameters, url=url_data, body=body_data)
             
             return request_obj
@@ -90,51 +86,106 @@ class OpenapiConverter:
        url = Url(baseurl= url_data[0].get("url"), host= '',protocol= '', port= url_data[0].get("port"),path= '')
        return url
 
-    def _create_body(self, body_data):
-       body = []
-       formdata = []
-       content_type = ''
-       mode = ''
-       schema_name = ''
-       if body_data:
-        for content_type_str, content in body_data.get("content", {}).items():
-            schema_name = content.get("schema").get("$ref")
-            if schema_name:
-                schema_name = schema_name.split('/')[-1]
-            if content_type_str == "application/json":
-                mode = 'RAW'
-                content_type = 'JSON'
-            elif content_type_str == "application/xml":
-                mode = 'RAW'
-                content_type = 'XML'
-            elif content_type_str == "text/plain":
-                mode = 'RAW'
-                content_type = 'TEXT'
-            elif content_type_str == "text/html":
-                mode = 'RAW'
-                content_type = 'HTML'
-            elif content_type_str == "application/javascript":
-                mode = 'RAW'
-                content_type = 'JAVASCRIPT'
-            elif content_type_str == "application/x-www-form-urlencoded":
-                mode = 'URLENCODED'
-                content_type = 'URLENCODED'
-                formdata = body_data.get("urluncoded")
-            elif content_type_str == "application/octet-stream":
-                mode = 'BINARY'
-                content_type = 'TEXT'
-           
-        body = Body(mode=ModeEnum[mode],
-                       content_type=ContentEnum[content_type], 
-                       required=body_data.get("required"),
-                       schema_name= schema_name, 
-                       raw_content= '',
-                       file= '',
-                       formdata=formdata
-                       )
+    
+
+    def _create_body(self, body_data, components_schemas):
+        body = []
+        formdata = []
+        content_type = 'TEXT'
+        mode = 'RAW'
+        schema_name = ''
+        schema = {}
+        required = body_data.get("required", False)
+        if body_data:
+            for content_type_str, content in body_data.get("content", {}).items():
+                schema_name = content.get("schema").get("$ref")
+                if schema_name:
+                    schema_name = schema_name.split('/')[-1]
+                    schema = self._create_schema(schema_name, components_schemas)
+                    
+                if content_type_str == "application/json":
+                    mode = 'RAW'
+                    content_type = 'JSON'
+                elif content_type_str == "application/xml":
+                    mode = 'RAW'
+                    content_type = 'XML'
+                elif content_type_str == "text/plain":
+                    mode = 'RAW'
+                    content_type = 'TEXT'
+                elif content_type_str == "text/html":
+                    mode = 'RAW'
+                    content_type = 'HTML'
+                elif content_type_str == "application/javascript":
+                    mode = 'RAW'
+                    content_type = 'JAVASCRIPT'
+                elif content_type_str == "application/x-www-form-urlencoded":
+                    mode = 'URLENCODED'
+                    content_type = 'URLENCODED'
+                    formdata = body_data.get("urluncoded")
+            
+                elif content_type_str == "application/octet-stream":
+                    mode = 'BINARY'
+                    content_type = 'TEXT'
+
+        body = Body(
+            mode=ModeEnum[mode],
+            content_type=ContentEnum[content_type],
+            required=required,
+            schema_name=schema_name,
+            raw_content='',
+            file='',
+            schema=schema,
+            formdata=formdata
+        )
+
         return body
 
-    
+    def _create_schema(self, schema_name, components_schemas, seen=None):
+        if seen is None:
+            seen = set()
+        if schema_name in seen:
+            return {}
+        
+        seen.add(schema_name)
+        schema_data = components_schemas.get(schema_name, {})
+        schema_type = schema_data.get('type', '')
+        properties = schema_data.get('properties', {})
+        required = schema_data.get('required', [])
+
+        schema = {
+            'type': schema_type,
+            'properties': {},
+            'required': required
+        }
+
+        for prop_name, prop_data in properties.items():
+            prop_ref = prop_data.get('$ref', '')
+            if prop_ref:
+                prop_name = prop_ref.split('/')[-1]
+                prop_schema = self._create_schema(prop_name, components_schemas, seen=seen)
+            else:
+                prop_type = prop_data.get('type', '')
+                prop_schema = {'type': prop_type}
+                if 'example' in prop_data:
+                    prop_schema['example'] = prop_data['example']
+
+            if prop_data.get('type') == 'array' and 'items' in prop_data:
+                items_ref = prop_data['items'].get('$ref', '')
+                if items_ref:
+                    items_name = items_ref.split('/')[-1]
+                    items_schema = self._create_schema(items_name, components_schemas, seen=seen)
+                    prop_schema['items'] = items_schema
+                else:
+                    prop_schema['items'] = prop_data['items']
+
+            schema['properties'][prop_name] = prop_schema
+
+        return schema
+
+
+
+
+
     
     def _create_headers(self, header_data):
         pass
@@ -142,8 +193,7 @@ class OpenapiConverter:
     
     
     def create_response(self, path_data, operation):
-        operation_data = path_data.get(operation, {})
-        operation_responses = operation_data.get("responses", {})
+        operation_responses = path_data.get("responses", {})
         responses = []
         for status, data in operation_responses.items():
             content_type = None
