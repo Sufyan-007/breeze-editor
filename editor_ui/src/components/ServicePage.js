@@ -1,165 +1,141 @@
-import { useCallback, useRef, useState } from "react"
-import { useParams } from "react-router"
-import Loader from "./Loader"
-import { getServiceConfig, updateServiceConfig } from "../services/ServiceConfigService"
-import yaml from "js-yaml"
-import ServicePaths from "./ServicePaths"
-import SchemaConfig from "./SchemaConfig"
-import EntityConfig from "./EntityConfig"
-import { Form, Modal } from "react-bootstrap"
-import PathConfig from "./PathConfig"
-
+import { useRef, useState, useEffect } from "react";
+import CustomPanel from "./CustomPanel";
+import ApiList from "./ApiList";
+import ServicePageSidebar from "./ServicePageSidebar";
 
 export function ServicePage() {
-    const { projectName } = useParams()
-    const [serviceConfig, setServiceConfig] = useState()
-    const fileInput = useRef()
-    const [showModelModal, setShowModelModal] = useState(false)
-    const [newModelName, setNewModelName] = useState("")
-    const [selected, setSelected] = useState({ type: "", selected: "" })
+  const fileInputYAML = useRef(null); // this is created to reference the file input element .
+  const fileInputPostman = useRef(null);
+  const [showCustomPanel, setShowCustomPanel] = useState(false);
+  const [yamlApis, setYamlApis] = useState({}); // State to store the list of YAML APIs
+  const [yamlUploaded, setYamlUploaded] = useState(false);
+  const [postmanApis, setPostmanApis] = useState({}); //state to store the list of postman collection APis
+  const [postmanUploaded, setPostmanUploaded] = useState(false);
 
+  const dummyData = {
+    operation_id: "get orders",
+    tags: [],
+    request: {
+      method: "get",
+      auth: null,
+      headers: [
+        {
+          key: "Authorization",
+          value:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U",
+        },
+      ],
+      parameters: [],
+      url: {
+        baseurl: "{{url}}/api/orders/7",
+        host: ["{{url}}"],
+        protocol: "",
+        port: 0,
+        path: ["api", "orders", "7"],
+      },
+      body: [],
+    },
+    response: [],
+    summary: "",
+  };
 
-    const loader = useCallback(async () => {
-        const services = await getServiceConfig(projectName)
-        setServiceConfig(services)
-    }, [projectName])
+  async function fileUpload(file, fileType) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const readFile = async (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                resolve(event.target.result);
-            };
-            reader.onerror = (error) => {
-                reject(error);
-            };
-            reader.readAsText(file);
-        });
-    };
+      let apiUrl = "";
+      if (fileType === "yaml") {
+        apiUrl =
+          "http://127.0.0.1:8000/api-client-generator/convert-starndard-json/openapi";
+      } else if (fileType === "postman") {
+        apiUrl =
+          "http://127.0.0.1:8000/api-client-generator/convert-starndard-json/postman";
+      }
 
-    async function fileUpload(file) {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        body: formData,
+      });
 
-        try {
-            const loadedFile = await readFile(file)
-            const config = yaml.load(loadedFile);
-            const resp = window.confirm("Update Services? This will overwrite existing config!")
-            if (resp) {
-                updateService(config)
-            }
-        } catch (error) {
-            alert("Failed to load file, check file syntax: ")
+      if (response.ok) {
+        const responseData = await response.json();
+
+        if (fileType === "yaml") {
+          setYamlApis(responseData);
+          setYamlUploaded(true);
+        } else if (fileType === "postman") {
+          setPostmanApis(responseData);
+          setPostmanUploaded(true);
         }
+      } else {
+        throw new Error("Failed to upload file");
+      }
+    } catch (error) {
+      alert("Failed to load file, check file syntax");
+      console.error(error);
     }
+  }
 
-    async function updateService(config) {
-        const response = await updateServiceConfig(projectName, config)
-        setServiceConfig(response)
+  function openFileInput(fileType) {
+    if (fileType === "yaml") {
+      fileInputYAML.current.click();
+       setShowCustomPanel(false);
+       setPostmanUploaded(false);
+    } else if (fileType === "postman") {
+      fileInputPostman.current.click();
+           setShowCustomPanel(false);
+           setYamlUploaded(false);
     }
+  }
 
-    function openFileInput() {
-        fileInput.current.click()
-    }
+  const handleCustomButtonClick = () => {
+    setShowCustomPanel(!showCustomPanel);
+     setYamlUploaded(false);
+     setPostmanUploaded(false);
+  };
 
-    function updateServiceConf(key, value) {
-        setServiceConfig((state) => {
-            updateService({ ...state, [key]: value })
-            return { ...state, [key]: value }
-        })
-    }
+  // console.log(yamlUploaded, "YAML UPLOADED true or false");
+  // console.log(yamlApis, "YAML APIS DATA IN service page ");
 
-    function updateComponents(key, value) {
-        const components = { ...serviceConfig.components, [key]: value }
-        updateServiceConf("components", components)
-    }
+  return (
+    // <Loader loader={loader}>
+    <>
+      <div className="container-fluid d-flex flex-column vh-100 bg-dark ">
+        <div
+          className="row flex-grow-1 overflow-hidden  "
+          style={{ backgroundColor: "#303033" }}
+        >
+          <ServicePageSidebar
+            openFileInput={openFileInput}
+            fileInputYAML={fileInputYAML}
+            fileInputPostman={fileInputPostman}
+            fileUpload={fileUpload}
+            yamlUploaded={yamlUploaded}
+            handleCustomButtonClick={handleCustomButtonClick}
+          
+          />
 
-    function closeModal(added) {
-        if (added) {
-            const newModel = {
-                type: "object",
-                properties: {},
-                required: []
-            }
-            const name = newModelName.replace(" ", "")
-            const schemas = { ...serviceConfig.components.schemas }
-            if (name !== "") {
-                if (schemas[name]) {
-                    alert("Model already exists")
-                } else {
-                    schemas[name] = newModel
-                    updateComponents("schemas", schemas)
-                    setNewModelName("")
-                    setShowModelModal(false)
-                }
-            } else {
-                alert("Enter a name")
-            }
-
-
-        } else {
-            setShowModelModal(false)
-        }
-    }
-
-    function updateSchema(entityName, newEntity) {
-        const schemas = serviceConfig.components.schemas
-        schemas[entityName] = newEntity
-        updateComponents("schemas", schemas)
-
-
-    }
-
-    return (
-        <Loader loader={loader}>
-            <Modal show={showModelModal} onHide={() => closeModal(false)}>
-                <Modal.Header>
-                    <h4 className="m-0">Add Model</h4>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Label>
-                            Name
-                        </Form.Label>
-                        <Form.Control value={newModelName} onChange={(event) => setNewModelName(event.target.value)} />
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <button className="btn btn-secondary" onClick={() => closeModal(false)}>
-                        Close
-                    </button>
-
-                    <button className="btn btn-primary" onClick={() => closeModal(true)}>
-                        Add
-                    </button>
-                </Modal.Footer>
-            </Modal>
-            <div className="container-fluid d-flex flex-column vh-100">
-
-
-                <div className="row flex-grow-1 overflow-hidden">
-                    <div className="col-3   overflow-y-auto h-100 fs-6 text-white" style={{ width: "18rem", backgroundColor: "#303033" }}>
-                        <div className="d-flex m-1 fw-bold fs-5">
-                            Service Configuration
-                        </div>
-                        <ServicePaths setSelected={setSelected} selected={selected} tags={serviceConfig?.tags} paths={serviceConfig?.paths} className="row my-2 border-bottom border-black" />
-                        <SchemaConfig setSelected={setSelected} selected={selected} addModel={() => { setShowModelModal(true) }} schemas={serviceConfig?.components?.schemas} className="row my-2 border-bottom border-black" />
-
-                        <div className="row p-2">
-                            <button className="btn btn-secondary" onClick={openFileInput}>
-                                Upload YAML Config
-                            </button>
-                            <input ref={fileInput} type="file" accept=".yaml, .yml , .json" hidden onChange={(event) => fileUpload(event.target.files[0])} />
-                        </div>
-                    </div>
-                    <div className="col  overflow-y-auto h-100 bg-dark-subtle">
-                        {selected.type === "tag" ?
-                            <PathConfig paths={serviceConfig.paths} tags={serviceConfig.tags} selectedPath={selected.selected} />
-                            : null}
-                        {selected.type === "schema" ?
-                            <EntityConfig schema={serviceConfig.components?.schemas} selectedEntity={selected.selected} updateSchema={updateSchema} />
-                            : null}
-                    </div>
-                </div>
-            </div>
-        </Loader>
-    )
+          <div className="col-9 overflow-y-auto h-100 fs-6 text-light">
+            {showCustomPanel && (
+              <div className="custom-panel-container">
+                <CustomPanel dummyData={dummyData} />
+              </div>
+            )}
+            {yamlUploaded && (
+              <div>
+                <ApiList apis={yamlApis} />
+              </div>
+            )}
+            {postmanUploaded && (
+              <div>
+                <ApiList apis={postmanApis} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
+export default ServicePage;

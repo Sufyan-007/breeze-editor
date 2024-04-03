@@ -150,6 +150,10 @@ class RouteHandler:
         function App() {{
                 
             useEffect(() => {{
+                        const style = document.createElement('style');
+                        const cssClass = '.custom-highlight {{background-color: yellow;outline: red solid 3px ;}}';
+                        style.appendChild(document.createTextNode(cssClass));
+                        document.head.appendChild(style);
                         const handleMessage = (event) => {{
                             if (event.origin === 'http://localhost:3000') {{
                             const id = event.data.id;

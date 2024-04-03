@@ -24,10 +24,14 @@ class OpenapiConverter:
             url_data = self._create_url(servers)
             parameters = self._create_parameters(operation_data.get("parameters"))
             body_data = self._create_body(operation_data.get("requestBody", {}))
+            #headers is an array of objects
+            header_data = []
             if body_data:
-                header_data = KeyValue(key= body_data.content_type.split('/')[-1], value=body_data.content_type)
+                header_data.append(KeyValue(key=body_data.content_type.split('/')[-1], value=body_data.content_type))
+                # header_data = KeyValue(key= body_data.content_type.split('/')[-1], value=body_data.content_type)
             else:
-                header_data = KeyValue(key= '',value='')
+                # header_data = KeyValue(key= '',value='')
+                header_data.append(KeyValue(key="", value=""))
             request_obj = Request(method=method, auth=auth_data, headers=header_data, parameters=parameters, url=url_data, body=body_data)
             
             return request_obj
@@ -38,9 +42,11 @@ class OpenapiConverter:
     
 
     def _create_auth(self, auth_data, security_schemes):
-        auth= []
+        auth= None
         auth_content = []
         auth_type = ''
+        login_api = None
+        token_api = None
         if auth_data:
             for security_definition in auth_data:
                 scheme_name = list(security_definition.keys())[0]
@@ -59,8 +65,7 @@ class OpenapiConverter:
                 )
             
             auth_type_enum = AuthTypeEnum[auth_type.upper()]
-            login_api = auth_data.get("login_api",None)
-            token_api = auth_data.get("token_api",None)
+            
         
             auth = Auth(type=auth_type_enum, content=auth_content,login_api=login_api,token_api=token_api)
             

@@ -1,33 +1,5 @@
 [
   {
-    "operation_id": "login",
-    "tags": [],
-    "request": {
-      "method": "post",
-      "auth": null,
-      "headers": [{ "key": "Content-Type", "value": "text/plain" }],
-      "parameters": [],
-      "url": {
-        "baseurl": "http://localhost:3000/auth/login",
-        "host": ["localhost"],
-        "protocol": "http",
-        "port": "3000",
-        "path": ["auth", "login"]
-      },
-      "body": {
-        "mode": "raw",
-        "content_type": null,
-        "required": null,
-        "schema_name": null,
-        "raw_content": "{\n    \"useremail\" : \"newuser@test.com\",\n    \"password\" :  \"newuser\"\n}",
-        "file": null,
-        "formdata": []
-      }
-    },
-    "response": [],
-    "summary": ""
-  },
-  {
     "operation_id": "signup",
     "tags": [],
     "request": {
@@ -53,7 +25,8 @@
       }
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "adding a form",
@@ -68,7 +41,9 @@
             "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5ld3VzZXIyQHRlc3QuY29tIiwidXNlcl9pZCI6IjUiLCJyb2xlIjoidXNlciIsImlhdCI6MTY5NDA2MTM5NywiZXhwIjoxNjk0MDY4NTk3fQ.VKK0poB3uIeF6RZ8VGmwSuzt4I6UklvpTgA-uS7PBI8",
             "type": "string"
           }
-        ]
+        ],
+        "login_api": "login",
+        "token_api": null
       },
       "headers": [],
       "parameters": [],
@@ -90,7 +65,8 @@
       }
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "fetching form",
@@ -105,7 +81,9 @@
             "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5ld3VzZXJAdGVzdC5jb20iLCJ1c2VyX2lkIjoiMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTY5NDA3MzcwOCwiZXhwIjoxNjk0MDgwOTA4fQ.nMrT-Txb1mbzPNfy-7M7c8xL6hFz2QgKBl-qUOoX8qI",
             "type": "string"
           }
-        ]
+        ],
+        "login_api": "login",
+        "token_api": null
       },
       "headers": [],
       "parameters": [],
@@ -119,7 +97,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "delete form",
@@ -134,7 +113,9 @@
             "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5ld3VzZXJAdGVzdC5jb20iLCJ1c2VyX2lkIjoiMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTY5NDA3ODcxOCwiZXhwIjoxNjk0MDg1OTE4fQ.Vey7yvtp6PesMIu9TpjSkRNTzohgl_woGYvzwPINjSI",
             "type": "string"
           }
-        ]
+        ],
+        "login_api": "login",
+        "token_api": null
       },
       "headers": [],
       "parameters": [],
@@ -148,7 +129,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get user",
@@ -163,7 +145,9 @@
             "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5ld3VzZXIzQHRlc3QuY29tIiwidXNlcl9pZCI6IjYiLCJyb2xlIjoidXNlciIsImlhdCI6MTY5NDA4MTI5NSwiZXhwIjoxNjk0MDg4NDk1fQ.nrz8Ab837Lg0ciyiuKY5rMV50paig7YAUw7I6iXbOgw",
             "type": "string"
           }
-        ]
+        ],
+        "login_api": "login",
+        "token_api": null
       },
       "headers": [],
       "parameters": [],
@@ -177,7 +161,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "update user",
@@ -192,7 +177,9 @@
             "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFudXNoa2FAdGVzdC5jb20iLCJ1c2VyX2lkIjoiMTAiLCJyb2xlIjoidXNlciIsImlhdCI6MTY5NDE0OTc1NSwiZXhwIjoxNjk0MTU2OTU1fQ.Td_kX3udwp0YV51_8fKLwrzrEmJ68u8BsR0NHJITUYc",
             "type": "string"
           }
-        ]
+        ],
+        "login_api": "login",
+        "token_api": null
       },
       "headers": [],
       "parameters": [],
@@ -214,7 +201,8 @@
       }
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "delete user",
@@ -229,7 +217,9 @@
             "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFudXNoa2FAdGVzdC5jb20iLCJ1c2VyX2lkIjoiOSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNjk0MTQxNjQ1LCJleHAiOjE2OTQxNDg4NDV9.JXca8PjDmRxZXIPehjRIOS7Dkye-1cN9cuWBx2ZzEDI",
             "type": "string"
           }
-        ]
+        ],
+        "login_api": "login",
+        "token_api": null
       },
       "headers": [],
       "parameters": [],
@@ -243,7 +233,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "getall users",
@@ -258,7 +249,9 @@
             "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5ld3VzZXJAdGVzdC5jb20iLCJ1c2VyX2lkIjoiMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTY5NDE0NjkyOCwiZXhwIjoxNjk0MTU0MTI4fQ._RCZyklWhXKQB99Fn4nmIq0ozIgGbxAlnh7a3MUBXT0",
             "type": "string"
           }
-        ]
+        ],
+        "login_api": "login",
+        "token_api": null
       },
       "headers": [],
       "parameters": [
@@ -294,7 +287,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "update form",
@@ -309,7 +303,9 @@
             "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFudXNoa2FAdGVzdC5jb20iLCJ1c2VyX2lkIjoiMTAiLCJyb2xlIjoidXNlciIsImlhdCI6MTY5NDE0OTc1NSwiZXhwIjoxNjk0MTU2OTU1fQ.Td_kX3udwp0YV51_8fKLwrzrEmJ68u8BsR0NHJITUYc",
             "type": "string"
           }
-        ]
+        ],
+        "login_api": "login",
+        "token_api": null
       },
       "headers": [],
       "parameters": [],
@@ -331,7 +327,8 @@
       }
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "submit a form",
@@ -345,7 +342,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "getting submitted forms of a user",
@@ -359,7 +357,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "getting a form control response",
@@ -373,7 +372,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get other form response",
@@ -387,7 +387,8 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   },
   {
     "operation_id": "get validity",
@@ -401,6 +402,7 @@
       "body": []
     },
     "response": [],
-    "summary": ""
+    "summary": "",
+    "isAuthenticationApi": false
   }
 ]
