@@ -122,11 +122,11 @@ class OpenapiConverter:
                 elif content_type_str == "application/x-www-form-urlencoded":
                     mode = 'URLENCODED'
                     content_type = 'URLENCODED'
-                    formdata = body_data.get("urlencoded")
+                    formdata.append(body_data.get("urlencoded"))
                 elif content_type_str == 'multipart/form-data':
                     mode = 'FORMDATA'
                     content_type = 'FORMDATA'
-                    formdata = body_data.get("content").get("multipart/form-data").get("schema").get("properties").get("file")
+                    formdata.append(body_data.get("content").get("multipart/form-data").get("schema").get("properties").get("file"))
                 elif content_type_str == "application/octet-stream":
                     mode = 'BINARY'
                     content_type = None
