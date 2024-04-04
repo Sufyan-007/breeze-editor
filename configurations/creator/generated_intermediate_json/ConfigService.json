@@ -1,0 +1,62 @@
+[
+  {
+    "operation_id": "saveAppConfiguration",
+    "tags": ["Config"],
+    "request": {
+      "method": "post",
+      "auth": null,
+      "headers": [{ "key": "json", "value": "application/json" }],
+      "parameters": [],
+      "url": {
+        "baseurl": "http://api.openai.com/v1",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "raw",
+        "content_type": "application/json",
+        "required": true,
+        "schema_name": "AppConfigDetails",
+        "raw_content": "",
+        "file": "",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "path": { "type": "string" },
+            "author": { "type": "string" },
+            "defaultComponent": { "type": "string" },
+            "DependencyObject": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "string" },
+                    "message": { "type": "string" },
+                    "param": { "type": "string" },
+                    "type": { "type": "string" }
+                  },
+                  "required": ["type", "message", "param", "code"]
+                },
+                "name": { "type": "string" },
+                "value": { "type": "string" }
+              },
+              "required": []
+            }
+          },
+          "required": []
+        },
+        "formdata": []
+      }
+    },
+    "response": [],
+    "summary": "Crete basic app config.",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  }
+]

@@ -21,13 +21,11 @@ tags:
     description: Comments from posts.
   
 paths:
-  # Note: When adding an endpoint, make sure you also add it in the `groups` section, in the end of this file,
-  # under the appropriate group
   /breeze/config-writer/:
     post:
       operationId: saveAppConfiguration
       summary: Crete basic app config.
-      tags : 
+      tags :
         - Config
       requestBody:
         required: true
@@ -35,7 +33,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/AppConfigDetails"
-          
   /posts:
     post:
       operationId: createPost
@@ -71,12 +68,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListPostsResponse"
-  
   /test-binary:
     put:
         operationId: test-binary
         tags:
-            -Put
+          - Put
         requestBody:
             content:
                 application/octet-stream:
@@ -89,9 +85,9 @@ paths:
       tags:
         - Post
       requestBody:
-  	    content:
-    	    multipart/form-data:
-      	        schema:
+        content:
+            multipart/form-data:
+                schema:
                     type: object
                     properties:
                         # The property name 'file' will be used for all files.
@@ -100,7 +96,6 @@ paths:
                             items:
                                 type: string
                                 format: binary
-      
       summary: Returns a post that belong to the user's organization.
       responses:
         "200":
@@ -121,7 +116,6 @@ paths:
              # a binary file of any type
              type: string
              format: binary
-      
       summary: Returns a post that belong to the user's organization.
       responses:
         "200":
@@ -130,10 +124,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PostDetails"
-  
 
-
-  
 components:
   securitySchemes:
     ApiKeyAuth:
