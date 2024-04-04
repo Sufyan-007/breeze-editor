@@ -96,7 +96,7 @@ export function ServicePage() {
   };
 
   // console.log(yamlUploaded, "YAML UPLOADED true or false");
-  // console.log(yamlApis, "YAML APIS DATA IN service page ");
+  console.log(yamlApis, "YAML APIS DATA IN service page ");
 
   return (
     // <Loader loader={loader}>
