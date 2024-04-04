@@ -8,10 +8,8 @@ class ModifyIntermediateJson(View):
         try:
             data = json.loads(request.body.decode("utf-8"))
             filename = data.get("filename")
-            auth_apis, folder_path = IntermediateModificationHelper.process_api_data(data, filename)
-            IntermediateModificationHelper.update_auth_data(auth_apis, folder_path, "auth.json")
-            
-            return JsonResponse({"message": "Intermediate JSON and auth APIs updated successfully."}, status=201)
+            result = IntermediateModificationHelper.process_api_data(data, filename)
+            return JsonResponse({"message": result}, status=201)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)

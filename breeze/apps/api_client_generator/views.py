@@ -25,7 +25,7 @@ class ApiClientGenerator(View):
                 with open(full_file_path, "w") as file:
                     json.dump(api_models,file, cls=EnhancedJSONEncoder)
                 serialized_data = json.loads(json.dumps(api_models, cls=EnhancedJSONEncoder))
-                return JsonResponse({"data": serialized_data, "filename": filename}, status=201)
+                return JsonResponse({"data": [serialized_data], "filename": [filename]}, status=201)
 
             elif collectionType.lower() == 'openapi' and (json_file.name.endswith('.yml') or json_file.name.endswith('.json')):
                 converted_data = OpenApiHelper.open_api_helper(json_data)
