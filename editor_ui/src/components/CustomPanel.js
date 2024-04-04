@@ -4,8 +4,9 @@ import RequestBody from "./RequestBody";
 import ResponseBody from "./ResponseBody";
 import CustomPanelCss from "../css/CustomPanel.css";
 
-function CustomPanel({ dummyData }) {
-  console.log(dummyData,"dummy data ");
+function CustomPanel({ dummyData , tagsList}) {
+  // console.log(dummyData,"dummy data ");
+  console.log(tagsList,"tagsLIst in custom Panel");
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
   const [tags, setTags] = useState(dummyData.tags || []);
   const [summary, setSummary] = useState(dummyData.summary || "");
@@ -43,7 +44,10 @@ function CustomPanel({ dummyData }) {
       ...newData,
     }));
   };
-  console.log(dummyData, "dummy data");
+
+  const handleTagSelect = (tag) => {
+    setTags([tag]);
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -62,7 +66,7 @@ function CustomPanel({ dummyData }) {
           isAuthenticationApi: dummyData.isAuthenticationApi,
           isLogin: dummyData.isLogin,
           isToken: dummyData.isToken,
-          operationId: operationId,
+          operation_id: operationId,
           tags: tags,
           summary: summary,
           request: requestBody,
@@ -118,11 +122,12 @@ function CustomPanel({ dummyData }) {
               <DropdownButton
                 id="dropdown-basic-button"
                 title="Select Service "
+                style={{ textAlign: "center", width: "100%" }}
               >
-                {tags.map((tag, index) => (
+                {tagsList.map((tag, index) => (
                   <Dropdown.Item
                     key={index}
-                    // onClick={() => handleTagSelect(tag)}
+                    onClick={() => handleTagSelect(tag)}
                   >
                     {tag}
                   </Dropdown.Item>

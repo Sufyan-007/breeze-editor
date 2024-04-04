@@ -11,6 +11,43 @@ export function ServicePage() {
   const [yamlUploaded, setYamlUploaded] = useState(false);
   const [postmanApis, setPostmanApis] = useState({}); //state to store the list of postman collection APis
   const [postmanUploaded, setPostmanUploaded] = useState(false);
+  const [tagsList, setTagsList] = useState([]);
+
+  useEffect(() => {
+    if (yamlUploaded && yamlApis) {
+      const tags = getAllTagsFromYamlApis(yamlApis);
+      setTagsList(tags);
+      console.log(tags,"tags in use effect");
+    }
+  }, [yamlUploaded, yamlApis]);
+
+  function getAllTagsFromYamlApis(yamlApis) {
+    // Check if yamlApis is not empty and has the 'data' key
+    if (yamlApis && yamlApis.data) {
+      const data = yamlApis.data;
+      const tagsList = [];
+
+      // Iterate over each item in the data array
+      for (const dataArray of data) {
+        // Check if dataArray is an array and not empty
+        if (Array.isArray(dataArray) && dataArray.length > 0) {
+          const item = dataArray[0]; // Access the object at the 0 index
+
+          // Check if the item has the 'tags' property and it's an array
+          if (item.tags && Array.isArray(item.tags) && item.tags.length > 0) {
+            for (const tag of item.tags) {
+              tagsList.push(tag);
+            }
+          }
+        }
+      }
+      console.log(tagsList, "tagsList"); // Add each tag to the tagsList
+      return tagsList;
+    }
+  }
+
+  const allTags = getAllTagsFromYamlApis(yamlApis);
+  console.log(allTags, "Tags in yaml ");
 
   const dummyData = {
     operation_id: "get orders",
@@ -80,19 +117,19 @@ export function ServicePage() {
   function openFileInput(fileType) {
     if (fileType === "yaml") {
       fileInputYAML.current.click();
-       setShowCustomPanel(false);
-       setPostmanUploaded(false);
+      setShowCustomPanel(false);
+      setPostmanUploaded(false);
     } else if (fileType === "postman") {
       fileInputPostman.current.click();
-           setShowCustomPanel(false);
-           setYamlUploaded(false);
+      setShowCustomPanel(false);
+      setYamlUploaded(false);
     }
   }
 
   const handleCustomButtonClick = () => {
     setShowCustomPanel(!showCustomPanel);
-     setYamlUploaded(false);
-     setPostmanUploaded(false);
+    setYamlUploaded(false);
+    setPostmanUploaded(false);
   };
 
   // console.log(yamlUploaded, "YAML UPLOADED true or false");
@@ -113,7 +150,6 @@ export function ServicePage() {
             fileUpload={fileUpload}
             yamlUploaded={yamlUploaded}
             handleCustomButtonClick={handleCustomButtonClick}
-          
           />
 
           <div className="col-9 overflow-y-auto h-100 fs-6 text-light">
@@ -124,7 +160,7 @@ export function ServicePage() {
             )}
             {yamlUploaded && (
               <div>
-                <ApiList apis={yamlApis} />
+                <ApiList apis={yamlApis} tagsList={tagsList} />
               </div>
             )}
             {postmanUploaded && (
@@ -138,4 +174,5 @@ export function ServicePage() {
     </>
   );
 }
+
 export default ServicePage;

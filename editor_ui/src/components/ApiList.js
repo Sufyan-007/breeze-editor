@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Accordion,  } from "react-bootstrap";
 import CustomPanel from "./CustomPanel";
 
-const ApiList = ({ apis}) => {
+const ApiList = ({ apis , tagsList }) => {
   // Extracting data and filenames from props
   const { data, filename } = apis;
+  console.log(tagsList,"tagslist ");
   console.log(apis, "apidata in apilist");
   //state variables to track form values for each Api
   const [formData, setFormData] = useState([]);
@@ -37,10 +38,10 @@ const ApiList = ({ apis}) => {
               <Accordion.Item key={apiIndex} eventKey={`${index}-${apiIndex}`}>
                 <Accordion.Header>{api.operation_id}</Accordion.Header>
                 <Accordion.Body>
-                  <CustomPanel dummyData={api} />
+                  <CustomPanel dummyData={api} tagsList={tagsList}  />
                 </Accordion.Body>
               </Accordion.Item>
-            ))}
+            ))} 
           </Accordion>
         </div>
       ))}

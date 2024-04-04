@@ -52,7 +52,7 @@ class IntermediateModificationHelper:
                 with open(file_path, "w") as file:
                     json.dump(existing_data, file, cls=EnhancedJSONEncoder)
                 print(f"API {modified_api['operation_id']} removed from {filename}")
-            return (f"API with operation ID {modified_api['operation_id']} already exists in {new_file_path}")
+            return (f"API {modified_api['operation_id']} moved to {new_file_path} and API {modified_api['operation_id']} removed from {filename}")
 
         existing_data = []
 
