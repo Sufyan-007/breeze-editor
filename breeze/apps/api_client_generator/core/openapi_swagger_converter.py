@@ -11,6 +11,7 @@ from ..helper_models.enums.status import StatusEnum
 from ..helper_models.enums.content import ContentEnum
 from ..helper_models.enums.mode import ModeEnum
 from ..helper_models.enums.auth_type import AuthTypeEnum
+from ..helper_models.enums.params_in import ParamsInEnum
 
 
 class OpenapiConverter:
@@ -72,7 +73,7 @@ class OpenapiConverter:
         if parameter_data:
             parameters = [
                     Parameter(
-                        param_in="query",
+                        param_in= ParamsInEnum[parameter_data.get("in").upper()],
                         name=param.get("name"),
                         type=param.get("schema").get("type"),
                         required=param.get("required"),
@@ -83,7 +84,10 @@ class OpenapiConverter:
         return parameters
 
     def _create_url(self, url_data):
-       url = Url(baseurl= url_data[0].get("url"), host= '',protocol= '', port= url_data[0].get("port"),path= '')
+       if url_data:
+        url = Url(baseurl= url_data[0].get("url"), host= '',protocol= '', port= url_data[0].get("port"),path= '')
+       else:
+           url ={}
        return url
 
     

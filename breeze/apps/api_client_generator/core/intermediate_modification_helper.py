@@ -15,10 +15,10 @@ class IntermediateModificationHelper:
         if os.path.exists(file_path):
             with open(file_path, "r") as file:
                 existing_data = json.load(file)
-            operation_ids = {api['operation_id'] for api in existing_data}
-            if modified_api['operation_id'] not in operation_ids:
-                print(f"Operation ID {modified_api['operation_id']} does not exist in {filename}.")
-                return (f"Operation ID {modified_api['operation_id']} does not exist in {filename}.")
+            uuids = {api['uuid'] for api in existing_data}
+            if modified_api['uuid'] not in uuids:
+                print(f"UUID {modified_api['uuid']} does not exist in {filename}.")
+                return (f"UUID {modified_api['uuid']} does not exist in {filename}.")
             
         if tag != modified_api.get('tags')[0]:
             # Move the modified API to a new file
@@ -31,14 +31,14 @@ class IntermediateModificationHelper:
                 
             # Check if the operation ID already exists in the new file
             for api in existing_data:
-                if api['operation_id'] == modified_api['operation_id']:
-                    print(f"API with operation ID {modified_api['operation_id']} already exists in {new_file_path}")
-                    return (f"API with operation ID {modified_api['operation_id']} already exists in {new_file_path}")
+                if api['uuid'] == modified_api['uuid']:
+                    print(f"API with UUID {modified_api['uuid']} already exists in {new_file_path}")
+                    return (f"API with UUID {modified_api['uuid']} already exists in {new_file_path}")
                 
             existing_data.append(modified_api)
             with open(new_file_path, "w") as file:
                 json.dump(existing_data, file, cls=EnhancedJSONEncoder)
-            print(f"API {modified_api['operation_id']} moved to {new_file_path}")
+            print(f"API {modified_api['uuid']} moved to {new_file_path}")
 
             # Remove the modified API from the current file
             file_path = os.path.join(folder_path, filename)
@@ -46,13 +46,13 @@ class IntermediateModificationHelper:
                 with open(file_path, "r") as file:
                     existing_data = json.load(file)
                 for index, api in enumerate(existing_data):
-                    if api['operation_id'] == modified_api['operation_id']:
+                    if api['uuid'] == modified_api['uuid']:
                         del existing_data[index]
                         break
                 with open(file_path, "w") as file:
                     json.dump(existing_data, file, cls=EnhancedJSONEncoder)
-                print(f"API {modified_api['operation_id']} removed from {filename}")
-            return (f"API with operation ID {modified_api['operation_id']} already exists in {new_file_path}")
+                print(f"API {modified_api['uuid']} removed from {filename}")
+            return (f"API {modified_api['uuid']} moved to {new_file_path} and API {modified_api['uuid']} removed from {filename}")
 
         existing_data = []
 
@@ -63,7 +63,7 @@ class IntermediateModificationHelper:
                 existing_data = json.load(file)
 
         # Remove the existing API with the same operation ID, if any
-        existing_data = [api for api in existing_data if api['operation_id'] != modified_api['operation_id']]
+        existing_data = [api for api in existing_data if api['uuid'] != modified_api['uuid']]
 
         # Add the modified API to the existing data
         existing_data.append(modified_api)
@@ -72,7 +72,7 @@ class IntermediateModificationHelper:
         with open(file_path, "w") as file:
             json.dump(existing_data, file, cls=EnhancedJSONEncoder)
 
-        return (f"Modified API {modified_api['operation_id']} written to {file_path}")
+        return (f"Modified API {modified_api['uuid']} written to {file_path}")
         
         
         
