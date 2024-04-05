@@ -1,4 +1,4 @@
-import yaml
+import yaml, uuid
 
 from ..helper_models.base_models.api_model import ApiModel
 from .openapi_swagger_converter import OpenapiConverter
@@ -36,6 +36,8 @@ class OpenApiHelper:
                     response_obj = openApiConverter.create_response(
                         path_data=operation_data,
                         operation=operation)
+                    
+                    api_uuid = str(uuid.uuid4())
                     api_model = ApiModel(
                         operation_data.get("operationId"),
                         operation_data.get("tags"),
@@ -44,7 +46,8 @@ class OpenApiHelper:
                         operation_data.get("summary"),
                         isAuthenticationApi=False,
                         isLogin=False,
-                        isToken=False
+                        isToken=False,
+                        uuid= api_uuid
                     )
                     api_models.append(api_model)
 
