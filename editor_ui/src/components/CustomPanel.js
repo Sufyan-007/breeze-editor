@@ -1,16 +1,17 @@
 import { React, useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Row , Col, Dropdown, DropdownButton } from "react-bootstrap";
 import RequestBody from "./RequestBody";
 import ResponseBody from "./ResponseBody";
 import CustomPanelCss from "../css/CustomPanel.css";
 
-function CustomPanel({ dummyData }) {
-  console.log(dummyData);
+function CustomPanel({ dummyData , tagsList}) {
+  // console.log(dummyData,"dummy data ");
+  console.log(tagsList,"tagsLIst in custom Panel");
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
   const [tags, setTags] = useState(dummyData.tags || []);
   const [summary, setSummary] = useState(dummyData.summary || "");
-  const [showRequestBodyForm, setShowRequestBodyForm] = useState(false);
-  const [showResponseBodyForm, setShowResponseBodyForm] = useState(false);
+  // const [showRequestBodyForm, setShowRequestBodyForm] = useState(false);
+  // const [showResponseBodyForm, setShowResponseBodyForm] = useState(false);
   const [requestBody, setRequestBody] = useState(dummyData.request);
   const [responseBody, setResponseBody] = useState(dummyData.response);
 
@@ -27,24 +28,14 @@ function CustomPanel({ dummyData }) {
     setSummary(e.target.value);
   };
 
-  const handleAddRequestBody = () => {
-    setShowRequestBodyForm(!showRequestBodyForm);
-  };
-
-  const handleAddResponseBody = () => {
-    setShowResponseBodyForm(!showResponseBodyForm);
-  };
-
   const handleRequestBodyChange = (newData) => {
     setRequestBody((prevState) => {
-      console.log(prevState, "previous state");
       return {
         ...prevState,
         ...newData,
       };
     });
   };
-  console.log(requestBody, "request body in custom panel");
 
   const handleResponseBodyChange = (newData) => {
     setResponseBody((prevState) => ({
@@ -53,7 +44,11 @@ function CustomPanel({ dummyData }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleTagSelect = (tag) => {
+    setTags([tag]);
+  };
+
+  async function handleSubmit(e) {
     e.preventDefault();
     console.log("Form submitted with data:", {
       operationId,
@@ -62,7 +57,39 @@ function CustomPanel({ dummyData }) {
       requestBody,
       responseBody,
     });
-  };
+
+    const data = {
+      filename: dummyData.tags[0] + "Service.json",
+      modified_api: 
+        {
+          isAuthenticationApi: dummyData.isAuthenticationApi,
+          isLogin: dummyData.isLogin,
+          isToken: dummyData.isToken,
+          operation_id: operationId,
+          tags: tags,
+          summary: summary,
+          request: requestBody,
+          response: responseBody,
+        },
+    };
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+      const responseData = await response.json(); // Await the response data
+      console.log(responseData);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
 
   return (
     <div>
@@ -71,7 +98,7 @@ function CustomPanel({ dummyData }) {
           className="mb-3 custom-form-group"
           controlId="formOperationId"
         >
-          <Form.Label>Operation ID:</Form.Label>
+          <Form.Label>Function Name</Form.Label>
           <Form.Control
             className="custom-form-control"
             type="text"
@@ -81,12 +108,32 @@ function CustomPanel({ dummyData }) {
         </Form.Group>
 
         <Form.Group className="mb-3 custom-form-group" controlId="formTags">
-          <Form.Label>Tags:</Form.Label>
-          <Form.Control
-            type="text"
-            value={tags.join(", ")}
-            onChange={handleTagsChange}
-          />
+          <Form.Label>Service Name</Form.Label>
+          <Row>
+            <Col sm="4">
+              <Form.Control
+                type="text"
+                value={tags.join(", ")}
+                onChange={handleTagsChange}
+              />
+            </Col>
+            <Col sm="3">
+              <DropdownButton
+                id="dropdown-basic-button"
+                title="Select Service "
+              >
+                {tagsList.map((tag, index) => (
+                  <Dropdown.Item
+                    style={{ textAlign: "center", width: "100%" }}
+                    key={index}
+                    onClick={() => handleTagSelect(tag)}
+                  >
+                    {tag}
+                  </Dropdown.Item>
+                ))}
+              </DropdownButton>
+            </Col>
+          </Row>
         </Form.Group>
 
         <Form.Group className="mb-3 custom-form-group" controlId="formSummary">
@@ -105,43 +152,26 @@ function CustomPanel({ dummyData }) {
           controlId="formRequestBody"
         >
           <Form.Label>Request Body:</Form.Label>
-          <Button
-            variant="secondary"
-            className="ms-2 custom-btn"
-            onClick={handleAddRequestBody}
-          >
-            Add Request Body
-          </Button>
         </Form.Group>
 
-        {showRequestBodyForm && (
-          <RequestBody
-            onChange={handleRequestBodyChange}
-            requestBody={requestBody}
-          />
-        )}
+        <RequestBody
+          onChange={handleRequestBodyChange}
+          requestBody={requestBody}
+        />
 
         <Form.Group
           className="mb-3 custom-form-group"
           controlId="formResponseBody"
         >
           <Form.Label>Response Body:</Form.Label>
-          <Button
-            variant="secondary"
-            className="ms-2 custom-btn"
-            onClick={handleAddResponseBody}
-          >
-            Add Response Body
-          </Button>
         </Form.Group>
-        {showResponseBodyForm && (
-          <ResponseBody
-            onChange={handleResponseBodyChange}
-            responseBody={responseBody}
-          />
-        )}
 
-        <Button className="custom-btn" variant="secondary" type="submit">
+        <ResponseBody
+          onChange={handleResponseBodyChange}
+          responseBody={responseBody}
+        />
+
+        <Button className="custom-btn m-3" variant="secondary" type="submit">
           Submit
         </Button>
       </Form>

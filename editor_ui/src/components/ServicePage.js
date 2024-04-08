@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import CustomPanel from "./CustomPanel";
 import ApiList from "./ApiList";
-import ServicePageSidebar from "./ServicePageSidebar";
+import ServicePageNavbar from "./ServicePageNavbar";
 
 export function ServicePage() {
   const fileInputYAML = useRef(null); // this is created to reference the file input element .
@@ -11,6 +11,39 @@ export function ServicePage() {
   const [yamlUploaded, setYamlUploaded] = useState(false);
   const [postmanApis, setPostmanApis] = useState({}); //state to store the list of postman collection APis
   const [postmanUploaded, setPostmanUploaded] = useState(false);
+  const [tagsList, setTagsList] = useState([]);
+
+  useEffect(() => {
+    if (yamlUploaded && yamlApis) {
+      const tags = getAllTagsFromYamlApis(yamlApis);
+      setTagsList(tags);
+      // console.log(tags, "tags in use effect");
+    }
+  }, [yamlUploaded, yamlApis]);
+
+  function getAllTagsFromYamlApis(yamlApis) {
+    if (yamlApis && yamlApis.data) {
+      const data = yamlApis.data;
+      const tagsList = [];
+
+      for (const dataArray of data) {
+        if (Array.isArray(dataArray) && dataArray.length > 0) {
+          const item = dataArray[0];
+
+          if (item.tags && Array.isArray(item.tags) && item.tags.length > 0) {
+            for (const tag of item.tags) {
+              tagsList.push(tag);
+            }
+          }
+        }
+      }
+      // console.log(tagsList, "tagsList");
+      return tagsList;
+    }
+  }
+
+  const allTags = getAllTagsFromYamlApis(yamlApis);
+  // console.log(allTags, "Tags in yaml ");
 
   const dummyData = {
     operation_id: "get orders",
@@ -80,19 +113,19 @@ export function ServicePage() {
   function openFileInput(fileType) {
     if (fileType === "yaml") {
       fileInputYAML.current.click();
-       setShowCustomPanel(false);
-       setPostmanUploaded(false);
+      setShowCustomPanel(false);
+      setPostmanUploaded(false);
     } else if (fileType === "postman") {
       fileInputPostman.current.click();
-           setShowCustomPanel(false);
-           setYamlUploaded(false);
+      setShowCustomPanel(false);
+      setYamlUploaded(false);
     }
   }
 
   const handleCustomButtonClick = () => {
     setShowCustomPanel(!showCustomPanel);
-     setYamlUploaded(false);
-     setPostmanUploaded(false);
+    setYamlUploaded(false);
+    setPostmanUploaded(false);
   };
 
   // console.log(yamlUploaded, "YAML UPLOADED true or false");
@@ -101,21 +134,19 @@ export function ServicePage() {
   return (
     // <Loader loader={loader}>
     <>
-      <div className="container-fluid d-flex flex-column vh-100 bg-dark ">
+      <div className="container-fluid d-flex flex-column vh-100  ">
+        <ServicePageNavbar
+          openFileInput={openFileInput}
+          fileInputYAML={fileInputYAML}
+          fileInputPostman={fileInputPostman}
+          fileUpload={fileUpload}
+          yamlUploaded={yamlUploaded}
+          handleCustomButtonClick={handleCustomButtonClick}
+        />
         <div
           className="row flex-grow-1 overflow-hidden  "
           style={{ backgroundColor: "#303033" }}
         >
-          <ServicePageSidebar
-            openFileInput={openFileInput}
-            fileInputYAML={fileInputYAML}
-            fileInputPostman={fileInputPostman}
-            fileUpload={fileUpload}
-            yamlUploaded={yamlUploaded}
-            handleCustomButtonClick={handleCustomButtonClick}
-          
-          />
-
           <div className="col-9 overflow-y-auto h-100 fs-6 text-light">
             {showCustomPanel && (
               <div className="custom-panel-container">
@@ -124,7 +155,7 @@ export function ServicePage() {
             )}
             {yamlUploaded && (
               <div>
-                <ApiList apis={yamlApis} />
+                <ApiList apis={yamlApis} tagsList={tagsList} />
               </div>
             )}
             {postmanUploaded && (
@@ -138,4 +169,5 @@ export function ServicePage() {
     </>
   );
 }
+
 export default ServicePage;
