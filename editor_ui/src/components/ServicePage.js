@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import CustomPanel from "./CustomPanel";
 import ApiList from "./ApiList";
-import ServicePageSidebar from "./ServicePageSidebar";
+import ServicePageNavbar from "./ServicePageNavbar";
 
 export function ServicePage() {
   const fileInputYAML = useRef(null); // this is created to reference the file input element .
@@ -17,23 +17,19 @@ export function ServicePage() {
     if (yamlUploaded && yamlApis) {
       const tags = getAllTagsFromYamlApis(yamlApis);
       setTagsList(tags);
-      console.log(tags,"tags in use effect");
+      // console.log(tags, "tags in use effect");
     }
   }, [yamlUploaded, yamlApis]);
 
   function getAllTagsFromYamlApis(yamlApis) {
-    // Check if yamlApis is not empty and has the 'data' key
     if (yamlApis && yamlApis.data) {
       const data = yamlApis.data;
       const tagsList = [];
 
-      // Iterate over each item in the data array
       for (const dataArray of data) {
-        // Check if dataArray is an array and not empty
         if (Array.isArray(dataArray) && dataArray.length > 0) {
-          const item = dataArray[0]; // Access the object at the 0 index
+          const item = dataArray[0];
 
-          // Check if the item has the 'tags' property and it's an array
           if (item.tags && Array.isArray(item.tags) && item.tags.length > 0) {
             for (const tag of item.tags) {
               tagsList.push(tag);
@@ -41,13 +37,13 @@ export function ServicePage() {
           }
         }
       }
-      console.log(tagsList, "tagsList"); // Add each tag to the tagsList
+      // console.log(tagsList, "tagsList");
       return tagsList;
     }
   }
 
   const allTags = getAllTagsFromYamlApis(yamlApis);
-  console.log(allTags, "Tags in yaml ");
+  // console.log(allTags, "Tags in yaml ");
 
   const dummyData = {
     operation_id: "get orders",
@@ -133,25 +129,24 @@ export function ServicePage() {
   };
 
   // console.log(yamlUploaded, "YAML UPLOADED true or false");
-  console.log(yamlApis, "YAML APIS DATA IN service page ");
+  // console.log(yamlApis, "YAML APIS DATA IN service page ");
 
   return (
     // <Loader loader={loader}>
     <>
-      <div className="container-fluid d-flex flex-column vh-100 bg-dark ">
+      <div className="container-fluid d-flex flex-column vh-100  ">
+        <ServicePageNavbar
+          openFileInput={openFileInput}
+          fileInputYAML={fileInputYAML}
+          fileInputPostman={fileInputPostman}
+          fileUpload={fileUpload}
+          yamlUploaded={yamlUploaded}
+          handleCustomButtonClick={handleCustomButtonClick}
+        />
         <div
           className="row flex-grow-1 overflow-hidden  "
           style={{ backgroundColor: "#303033" }}
         >
-          <ServicePageSidebar
-            openFileInput={openFileInput}
-            fileInputYAML={fileInputYAML}
-            fileInputPostman={fileInputPostman}
-            fileUpload={fileUpload}
-            yamlUploaded={yamlUploaded}
-            handleCustomButtonClick={handleCustomButtonClick}
-          />
-
           <div className="col-9 overflow-y-auto h-100 fs-6 text-light">
             {showCustomPanel && (
               <div className="custom-panel-container">

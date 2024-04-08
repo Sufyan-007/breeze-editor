@@ -30,7 +30,6 @@ function CustomPanel({ dummyData , tagsList}) {
 
   const handleRequestBodyChange = (newData) => {
     setRequestBody((prevState) => {
-      console.log(prevState, "previous state");
       return {
         ...prevState,
         ...newData,
@@ -73,7 +72,7 @@ function CustomPanel({ dummyData , tagsList}) {
           response: responseBody,
         },
     };
-    console.log(data, "data to send ");
+
     try {
       const response = await fetch(
         "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/",
@@ -122,10 +121,10 @@ function CustomPanel({ dummyData , tagsList}) {
               <DropdownButton
                 id="dropdown-basic-button"
                 title="Select Service "
-                style={{ textAlign: "center", width: "100%" }}
               >
                 {tagsList.map((tag, index) => (
                   <Dropdown.Item
+                    style={{ textAlign: "center", width: "100%" }}
                     key={index}
                     onClick={() => handleTagSelect(tag)}
                   >

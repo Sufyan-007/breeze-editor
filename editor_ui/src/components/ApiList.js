@@ -23,8 +23,8 @@ const ApiList = ({ apis , tagsList }) => {
   const handleSubmit = (index) => (e) => {
     e.preventDefault();
     // Implement your logic to handle form submission here
-    console.log("Form submitted for API at index:", index);
-    console.log("Updated data:", formData[index]);
+    // console.log("Form submitted for API at index:", index);
+    // console.log("Updated data:", formData[index]);
   };
 
   // console.log("FORM DATA ", formData);

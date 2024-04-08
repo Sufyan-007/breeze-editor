@@ -3,7 +3,6 @@ import { Form, Button, Dropdown} from "react-bootstrap";
 import Body from "./Body.js";
 
 function RequestBody({ onChange, requestBody}) {
-  console.log(requestBody, 'requestBody');
   const [method, setMethod] = useState(requestBody.method || "GET");
   const [parameters, setParameters] = useState(requestBody.parameters || []);
   const [url, setUrl] = useState({
