@@ -89,9 +89,9 @@ export default function ProjectPage() {
                     <div className=' d-flex align-items-center text-white me-3'>
                         {projectName}
                     </div>
-                    <button className="btn btn-outlined text-white-50" style={{ color: "white" }} onClick={() => router.navigate("/")}>
+                    {/* <button className="btn btn-outlined text-white-50" style={{ color: "white" }} onClick={() => router.navigate("/")}>
                         All Apps
-                    </button>
+                    </button> */}
                 </div>
             }
             />

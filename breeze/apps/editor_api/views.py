@@ -1,5 +1,5 @@
 
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404, HttpResponse
 import json
 from .core.app_editor import AppEditor
 from .core.config_service import ConfigService
@@ -11,7 +11,12 @@ from rest_framework.views import APIView
 from .core.app_config_writer import AppConfigWriter
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 import os
+import tinycss2
+from .core.ccs_parser import extract_class_names
 from .core.app_startup_manager import start_app
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
 @method_decorator(csrf_exempt,name="dispatch")
 class ConfigReader(APIView):
     def get(self, request,param):
@@ -238,3 +243,89 @@ class ComponentReader(APIView):
             return JsonResponse(config_reader.get_component_configs(),status=200)
         except:
             return JsonResponse({},status=404)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class CSSConfig(APIView):
+    def post(self, request):
+        try:
+            css_file = request.FILES.get('css_file')
+            if not css_file:
+                return JsonResponse({'error': 'No CSS file provided.'}, status=400)
+
+            file_path = f"uploaded_css/{css_file.name}"
+            file_name = default_storage.save(file_path, ContentFile(css_file.read()))
+
+            with default_storage.open(file_name, 'r') as f:
+                css_text = f.read()
+
+            rules = tinycss2.parse_stylesheet(css_text, skip_whitespace=True)
+            class_names = extract_class_names(rules)
+            print(len(class_names))
+            return JsonResponse({
+                'message': 'CSS file uploaded successfully',
+                'file_path': file_name,
+                'class_names': list(class_names)
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    def get(self, request, filename=None):
+        try:
+            files = default_storage.listdir("uploaded_css")[1]
+            files_list = [{'file_name': file} for file in files]
+            return JsonResponse({'files': files_list}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    def put(self, request, file_name):
+        try:
+            css_file = request.FILES.get('css_file')
+            print(css_file)
+            if not css_file:
+                return JsonResponse({'error': 'No CSS file provided.'}, status=400)
+
+            file_path = f"uploaded_css/{file_name}"
+            default_storage.delete(file_path)
+            default_storage.save(file_path, ContentFile(css_file.read()))
+
+            return JsonResponse({'message': 'CSS file updated successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    def delete(self, request, filename):
+        try:
+            file_path = f"uploaded_css/{filename}"
+            if default_storage.exists(file_path):
+                default_storage.delete(file_path)
+                return JsonResponse({'message': 'File deleted successfully.'}, status=200)
+            else:
+                return JsonResponse({'error': 'File not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CSSConfigReader(APIView):
+    def get(self, request, filename):
+        try:
+            if default_storage.exists(f"uploaded_css/{filename}"):
+                file_path = f"uploaded_css/{filename}"
+                with default_storage.open(file_path, "r") as f:
+                    file_content = f.read()
+                return JsonResponse({'file_name': filename, 'content': file_content})
+            else:
+                raise Http404
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class CSSFileDownloadView(APIView):
+    def get(self, request, filename):
+        file_path = f"uploaded_css/{filename}"
+        if default_storage.exists(file_path):
+            file = default_storage.open(file_path, 'rb')
+            response = HttpResponse(file, content_type='text/css')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            raise Http404(f"The file {filename} does not exist.")

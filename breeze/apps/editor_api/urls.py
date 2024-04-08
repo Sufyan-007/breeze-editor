@@ -11,8 +11,11 @@ from .views import ServiceConfig
 from .views import ProjectDetailsConfig
 from .views import AppStartup
 from .core import consumers
-
 from .views import ComponentReader
+from .views import CSSConfig
+from .views import CSSConfigReader
+from .views import CSSFileDownloadView
+
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
         path('read-app-basic-config/<str:param>/',AppBasicConfigReader.as_view()),
@@ -34,5 +37,11 @@ urlpatterns = [
         path('run-project/<str:param>/',AppStartup.as_view()),
         path('get-components/<str:param>/',ComponentReader.as_view()),
         path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
+        path('upload-css-file/', CSSConfig.as_view()),
+        path('all-css-files/', CSSConfig.as_view()),
+        path('update-css-file/<str:file_name>', CSSConfig.as_view()),
+        path('delete-css-file/<str:filename>/', CSSConfig.as_view()),
+        path('get-css-file/<str:filename>/', CSSConfigReader.as_view()),
+        path('css-file-download/<str:filename>/', CSSFileDownloadView.as_view()),
 ]
 

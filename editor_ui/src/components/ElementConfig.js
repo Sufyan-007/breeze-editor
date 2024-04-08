@@ -143,11 +143,12 @@ export default function ElementConfig({ ...props }) {
     return (
         <div {...props}>
             <div className="container-fluid text-white h-100 p-0 d-flex flex-column">
-                <div className="row  p-1 border-bottom border-white">
+                <div className="row p-1 border-bottom border-white">
                     <button className=" btn-close btn-close-white" onClick={() => sidebarService.setSelectedElem(null)}>
                     </button>
                     {elem.attributes?.id?.value}
                 </div>
+            <div className="config hide-scrollbar" style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 140px)', overflowX: 'hidden' }}>
                 <div className="row flex-grow-1">
                     <div className="col">
                         <Form className="text-white">
@@ -235,7 +236,7 @@ export default function ElementConfig({ ...props }) {
                                 } else return null
                             })}
                         </div>
-                        <div className="row">
+                        <div className="row mb-3">
                             <div className="px-3">
                                 <Form.Select className=" bg-dark-subtle" size="sm" onChange={(event) => { addVariableAttribute(event.target.value, "console.log"); event.target.selectedIndex = 0; }}>
                                     <option selected disabled hidden>Add Listener</option>
@@ -247,7 +248,8 @@ export default function ElementConfig({ ...props }) {
                         </div>
                     </div>
                 </div>
-                <div className="row  py-2 border-top border-black">
+            </div>
+                <div className="row py-2 border-top border-black">
                     <div className="d-flex justify-content-around">
                         <button className=" btn btn-sm btn-secondary" onClick={() => sidebarService.setSelectedElem(null)}>
                             Cancel
