@@ -3,10 +3,12 @@ from django.views.decorators.csrf import csrf_exempt
 from .views import ApiClientGenerator
 from .api.generate_react_api_client import GenerateReactApiClient
 from .api.modify_intermediate_json import ModifyIntermediateJson 
+from .api.retrieve_auth_file import RetrieveAuthFile
 urlpatterns = [
         path('generate-react-api-client/', csrf_exempt(GenerateReactApiClient.as_view())),
         path('convert-starndard-json/<str:collectionType>', csrf_exempt(ApiClientGenerator.as_view())),
         path('modified-intermediate-json/', csrf_exempt(ModifyIntermediateJson.as_view())),
         path('fetch-all-intermediates/<str:projectName>', csrf_exempt(ApiClientGenerator.as_view())),
+        path('fetch-auth-file/<str:projectName>', csrf_exempt(RetrieveAuthFile.as_view())),
 ]
 

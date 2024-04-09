@@ -29,7 +29,7 @@ export default function ServiceLists() {
             </tr>
           </thead>
           <tbody>
-            {fetchedIntermediates.map((service) => (
+            {fetchedIntermediates && fetchedIntermediates.map((service) => (
               <tr key={service.filename}>
                 <td>{service.filename}</td>
                 <td>

@@ -3,14 +3,21 @@ import { Button, Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
 import ServicePageSidebarCss from "../css/ServicePageSidebar.css";
 import CustomPanel from "./CustomPanel";
 import ServiceList from "./ServiceList";
+import AuthenticationConfig from "./AuthenticationConfig";
 // import { fetchIntermediate } from "../services/IntermediatesService";
 
 export default function ServicePageNavbar(props) {
-  const [showServicesList, setShowServicesList] = useState(true);
+  const [showServicesList, setShowServicesList] = useState(false);
+  const [showAuthenticationConfig, SetShowAuthenticationConfig] = useState(false);
 
   const toggleServicesList = () => {
     setShowServicesList(!showServicesList);
+    SetShowAuthenticationConfig(false)
   };
+  const toggleAuthenticationConfig = () =>{
+    SetShowAuthenticationConfig(!showAuthenticationConfig)
+    setShowServicesList(false)
+  }
 
   return (
     <>
@@ -36,12 +43,13 @@ export default function ServicePageNavbar(props) {
                   Custom
                 </NavDropdown.Item>
               </NavDropdown>
-              <Nav.Link href="#auth">Authentication Config</Nav.Link>
+              <Nav.Link onClick={toggleAuthenticationConfig}>Authentication Config</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
       </Navbar>
       {showServicesList && <ServiceList />}
+      {showAuthenticationConfig &&  <AuthenticationConfig />}
     </>
   );
 }

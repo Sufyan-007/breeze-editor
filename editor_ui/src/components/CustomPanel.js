@@ -1,12 +1,19 @@
 import { React, useState } from "react";
-import { Form, Button, Row , Col, Dropdown, DropdownButton } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Row,
+  Col,
+  Dropdown,
+  DropdownButton,
+} from "react-bootstrap";
 import RequestBody from "./RequestBody";
 import ResponseBody from "./ResponseBody";
 import CustomPanelCss from "../css/CustomPanel.css";
 
-function CustomPanel({ dummyData , tagsList}) {
+function CustomPanel({ dummyData, tagsList }) {
   // console.log(dummyData,"dummy data ");
-  console.log(tagsList,"tagsLIst in custom Panel");
+  console.log(tagsList, "tagsLIst in custom Panel");
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
   const [tags, setTags] = useState(dummyData.tags || []);
   const [summary, setSummary] = useState(dummyData.summary || "");
@@ -14,6 +21,9 @@ function CustomPanel({ dummyData , tagsList}) {
   // const [showResponseBodyForm, setShowResponseBodyForm] = useState(false);
   const [requestBody, setRequestBody] = useState(dummyData.request);
   const [responseBody, setResponseBody] = useState(dummyData.response);
+  const [isAuthenticationApi, setIsAuthenticationApi] = useState(dummyData.isAuthenticationApi || false);
+  const [isToken, setIsToken] = useState(dummyData.isToken || false);
+  const [isLogin, setIsLogin] = useState(dummyData.isLogin || false);
 
   const handleOperationIdChange = (e) => {
     setOperationId(e.target.value);
@@ -60,17 +70,17 @@ function CustomPanel({ dummyData , tagsList}) {
 
     const data = {
       filename: dummyData.tags[0] + "Service.json",
-      modified_api: 
-        {
-          isAuthenticationApi: dummyData.isAuthenticationApi,
-          isLogin: dummyData.isLogin,
-          isToken: dummyData.isToken,
-          operation_id: operationId,
-          tags: tags,
-          summary: summary,
-          request: requestBody,
-          response: responseBody,
-        },
+      modified_api: {
+        isAuthenticationApi:isAuthenticationApi,
+        isLogin: isLogin,
+        isToken: isToken,
+        operation_id: operationId,
+        tags: tags,
+        summary: summary,
+        request: requestBody,
+        response: responseBody,
+        uuid: dummyData.uuid
+      },
     };
 
     try {
@@ -96,9 +106,8 @@ function CustomPanel({ dummyData , tagsList}) {
       <Form onSubmit={handleSubmit}>
         <Form.Group
           className="mb-3 custom-form-group"
-          controlId="formOperationId"
-        >
-          <Form.Label>Function Name</Form.Label>
+          controlId="formOperationId">
+          <Form.Label style={{ color: "white" }}>Function Name</Form.Label>
           <Form.Control
             className="custom-form-control"
             type="text"
@@ -108,7 +117,7 @@ function CustomPanel({ dummyData , tagsList}) {
         </Form.Group>
 
         <Form.Group className="mb-3 custom-form-group" controlId="formTags">
-          <Form.Label>Service Name</Form.Label>
+          <Form.Label style={{ color: "white" }}>Service Name</Form.Label>
           <Row>
             <Col sm="4">
               <Form.Control
@@ -120,14 +129,12 @@ function CustomPanel({ dummyData , tagsList}) {
             <Col sm="3">
               <DropdownButton
                 id="dropdown-basic-button"
-                title="Select Service "
-              >
+                title="Select Service ">
                 {tagsList.map((tag, index) => (
                   <Dropdown.Item
                     style={{ textAlign: "center", width: "100%" }}
                     key={index}
-                    onClick={() => handleTagSelect(tag)}
-                  >
+                    onClick={() => handleTagSelect(tag)}>
                     {tag}
                   </Dropdown.Item>
                 ))}
@@ -137,7 +144,7 @@ function CustomPanel({ dummyData , tagsList}) {
         </Form.Group>
 
         <Form.Group className="mb-3 custom-form-group" controlId="formSummary">
-          <Form.Label>Summary:</Form.Label>
+          <Form.Label style={{ color: "white" }}>Summary:</Form.Label>
           <Form.Control
             className="custom-form-control"
             as="textarea"
@@ -146,12 +153,47 @@ function CustomPanel({ dummyData , tagsList}) {
             onChange={handleSummaryChange}
           />
         </Form.Group>
-
         <Form.Group
           className="mb-3 custom-form-group"
-          controlId="formRequestBody"
-        >
-          <Form.Label>Request Body:</Form.Label>
+          controlId="formAuthenticationDetails">
+          <Form.Label style={{ color: "white" }}>
+            Authentication Details:
+          </Form.Label>
+          <Form.Check
+            inline
+            label="isAuthenticationApi"
+            type="checkbox"
+            id="isAuthenticationApi"
+            checked={isAuthenticationApi}
+            onChange={(e) => setIsAuthenticationApi(e.target.checked)}
+            style={{ color: "white" }}
+            className="mx-4"
+          />
+          <Form.Check
+            inline
+            label="isToken"
+            type="checkbox"
+            id="isToken"
+            checked={isToken}
+            onChange={(e) => setIsToken(e.target.checked)}
+            style={{ color: "white" }}
+            className="mx-4"
+          />
+          <Form.Check
+            inline
+            label="isLogin"
+            type="checkbox"
+            id="isLogin"
+            checked={isLogin}
+            onChange={(e) => setIsLogin(e.target.checked)}
+            style={{ color: "white" }}
+            className="mx-4"
+          />
+        </Form.Group>
+        <Form.Group
+          className="mb-3 custom-form-group"
+          controlId="formRequestBody">
+          <Form.Label style={{ color: "white" }}>Request Body:</Form.Label>
         </Form.Group>
 
         <RequestBody
@@ -161,9 +203,8 @@ function CustomPanel({ dummyData , tagsList}) {
 
         <Form.Group
           className="mb-3 custom-form-group"
-          controlId="formResponseBody"
-        >
-          <Form.Label>Response Body:</Form.Label>
+          controlId="formResponseBody">
+          <Form.Label style={{ color: "white" }}>Response Body:</Form.Label>
         </Form.Group>
 
         <ResponseBody
