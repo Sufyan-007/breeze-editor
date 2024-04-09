@@ -118,6 +118,7 @@ class PostmanCollectionConverter:
             protocol=url_data.get("protocol", ""),
             port=url_data.get("port", 0),
             path=url_data.get("path"),
+            url_env=None
         )
         return url
 

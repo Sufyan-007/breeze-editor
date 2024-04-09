@@ -17,10 +17,10 @@ class OpenapiConverter:
     def __init__(self):
         pass
 
-    def create_request(self, path_data, operation, security_schemes, servers, schemas):
+    def create_request(self,path, path_data, operation, security_schemes, servers, schemas):
             method = MethodsEnum[operation.upper()]
             auth_data = self._create_auth( path_data.get("security"), security_schemes=security_schemes)
-            url_data = self._create_url(servers)
+            url_data = self._create_url(path,servers)
             parameters = self._create_parameters(path_data.get("parameters"))
             body_data = self._create_body(path_data.get("requestBody", {}), components_schemas= schemas)
             header_data = []
@@ -82,9 +82,17 @@ class OpenapiConverter:
                 ]
         return parameters
 
-    def _create_url(self, url_data):
-       url = Url(baseurl= url_data[0].get("url"), host= '',protocol= '', port= url_data[0].get("port"),path= '')
-       return url
+    def _create_url(self,path, url_data):
+        paths = path.split("/")
+        url = Url(
+                baseurl= url_data[0].get("url"), 
+                host= '',
+                protocol= '', 
+                port= url_data[0].get("port"),
+                path= paths,
+                url_env=""
+            )
+        return url
 
     
 

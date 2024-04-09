@@ -8,4 +8,5 @@ class Url:
     protocol : str
     port : int
     path: List[str]
+    url_env : str
     
