@@ -179,8 +179,14 @@ class ReactApiClientGenerator:
             else:
                 body[parent_key] = parent_key
         else:
-            pass    
-        return body
+            pass  
+        body_str = ""
+        pairs = []
+        for key,value in body.items():
+            pairs.append("'%s' : %s"%(key,value))
+        body_str = ','.join(pairs)
+        body_str = "{" + body_str + "}"
+        return body_str
 
     def set_request_body(self,model,app_name):
         body = model.request.body
@@ -257,7 +263,18 @@ class ReactApiClientGenerator:
         query = ""
         path = ""
         
-        url =  model.request.url.baseurl
+        url_obj =  model.request.url
+        baseurl = url_obj.baseurl
+        path = "/".join(url_obj.path)
+        url = ""
+        
+        ## check if user has provided enviornment for baseURL
+        url_env = url_obj.url_env
+        if url_env is None or url_env == "":
+            url = baseurl+path
+        else:
+            url = url_env+path
+
         for params in model.request.parameters:
             if params.param_in == ParamsInEnum.QUERY:
                 query_params.append("%s=${%s}"%(params.name,params.name))
