@@ -1,5 +1,4 @@
 import yaml
-
 from ..helper_models.base_models.api_model import ApiModel
 from ..helper_models.base_models.auth_api_model import AuthApiModel
 from ..helper_models.base_models.request import Request
@@ -12,7 +11,7 @@ from ..helper_models.base_models.auth import Auth
 from ..helper_models.base_models.url import Url
 import os
 from ..helper_models.encoder import EnhancedJSONEncoder
-
+from .helpers.uuid_as_key import generate_uuid_as_key
 from .openapi_swagger_converter import OpenapiConverter
 from common.utils.app_consts import CONFIG_PATH
 import json
@@ -20,7 +19,7 @@ class OpenApiHelper:
     
     @staticmethod
     def generate_model_for_security_schema(schema_name,schema_data):
-        openApiConverter = OpenapiConverter()
+        id=generate_uuid_as_key()
         auth = Auth(None,[],None,None)
         url = Url(None,None,None,None,[],None)
         body = Body(None,None,None,None,None,None,None,None)
@@ -37,6 +36,7 @@ class OpenApiHelper:
                 response_obj,
                 "summary",
                 auth_api_type= "",
+                id=id,
                 authentication_type= "BASIC",
                 is_authorization_url=False,
                 flow= {},
@@ -53,6 +53,7 @@ class OpenApiHelper:
                 response_obj,
                 "summary",
                 auth_api_type= "LOGIN",
+                id=id,
                 authentication_type= "BEARER",
                 is_authorization_url = False,
                 flow= {},
@@ -69,6 +70,7 @@ class OpenApiHelper:
                 auth_api_type= "REFRESH",
                 authentication_type= "BEARER",
                 is_authorization_url = False,
+                id=id,
                 flow= {},
                 token_store = {}
             )
@@ -101,6 +103,7 @@ class OpenApiHelper:
                                 authentication_type= "OAUTH2",
                                 is_authorization_url = True,
                                 flow = obj,
+                                id=id,
                                 token_store = {}
                             )
                             auth_api_models.append(api_model)
@@ -126,6 +129,7 @@ class OpenApiHelper:
                                 auth_api_type= "LOGIN",
                                 authentication_type= "OAUTH2",
                                 flow = obj,
+                                id=id,
                                 token_store = {}
                             )
                             auth_api_models.append(api_model)
@@ -149,12 +153,45 @@ class OpenApiHelper:
                                 auth_api_type= "REFRESH",
                                 authentication_type= "OAUTH2",
                                 flows = [],
+                                id=id,
                                 token_store = {}
                             )
                             auth_api_models.append(api_model)
                     
                     
         return auth_api_models        
+
+    @staticmethod
+    def load_auth_model(json_data,is_new=False):
+        id=json_data.get("id") 
+        if is_new:
+            id=generate_uuid_as_key()
+        
+        auth = Auth(**json_data.get("request").get("auth",{}))
+        url = Url(**json_data.get("request").get("url",{}))
+        body = Body(**json_data.get("request").get("body",{}))
+        request_obj = Request(json_data.get("request").get("mothod"),
+                              auth,
+                              json_data.get("request").get("headers"),
+                              json_data.get("request").get("parameters"),
+                              url,
+                              body
+                              ),
+        response_obj = Response(**json_data.get("response"))
+        operation_id = json_data.get("operation_id","")
+        tags =  json_data.get("tags",[])
+        summary =  json_data.get("summary","")
+        auth_api_type  =  json_data.get("auth_api_type","")
+        authentication_type =  json_data.get("authentication_type","")
+        is_authorization_url =  json_data.get("is_authorization_url",False)
+        flow =  json_data.get("flow",{})
+        token_store =  json_data.get("token_store",{})
+        return AuthApiModel(id=id,operation_id=operation_id,tags=tags,auth_api_type=auth_api_type,
+                            authentication_type=authentication_type,
+                            is_authorization_url=is_authorization_url,flow=flow,
+                            request=request_obj,response=response_obj,summary=summary,
+                            token_store=token_store)
+    
         
             
     @staticmethod
@@ -170,7 +207,8 @@ class OpenApiHelper:
             json_data = json.load(fp)
             ## append to existing json data 
             for model in auth_models:
-                json_data[model.operation_id] = model
+                key = model.id
+                json_data[key] = model
             
             ## write all data back to file
             with open(full_file_path, "w") as file:
