@@ -5,8 +5,8 @@ import CustomPanel from "./CustomPanel";
 const ApiList = ({ apis , tagsList }) => {
   // Extracting data and filenames from props
   const { data, filename } = apis;
-  console.log(tagsList,"tagslist ");
-  console.log(apis, "apidata in apilist");
+  // console.log(tagsList,"tagslist ");
+  // console.log(apis, "apidata in apilist");
   //state variables to track form values for each Api
   const [formData, setFormData] = useState([]);
 

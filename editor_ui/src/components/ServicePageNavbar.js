@@ -14,7 +14,7 @@ export default function ServicePageNavbar(props) {
 
   return (
     <>
-      <Navbar className=" p-2 bg-body-tertiary" expand="lg">
+      <Navbar className="  bg-body-tertiary" expand="lg">
         <Container>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">

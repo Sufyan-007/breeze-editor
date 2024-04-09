@@ -84,7 +84,7 @@ export default function ProjectPage() {
                   toggleSidebar={toggleSidebar} 
                   highlightedStyle={highlightedStyle}
                 />
-                <div className="col m-0 p-0" style={{ backgroundColor: "#303033" }}>
+                <div className="col m-0 p-0" style={{ backgroundColor: "#303033"  ,minHeight: "200px" }}>
                     <h4 className='text-white m-2'>{projectName}</h4>
                     <hr className="mt-0" style={{ color: 'white'}}/>
                     {components[tagSelection]}

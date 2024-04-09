@@ -4,9 +4,9 @@ import RequestBody from "./RequestBody";
 import ResponseBody from "./ResponseBody";
 import CustomPanelCss from "../css/CustomPanel.css";
 
-function CustomPanel({ dummyData , tagsList}) {
+function CustomPanel({ dummyData , tagsList }) {
   // console.log(dummyData,"dummy data ");
-  console.log(tagsList,"tagsLIst in custom Panel");
+  // console.log(tagsList,"tagsLIst in custom Panel");
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
   const [tags, setTags] = useState(dummyData.tags || []);
   const [summary, setSummary] = useState(dummyData.summary || "");
