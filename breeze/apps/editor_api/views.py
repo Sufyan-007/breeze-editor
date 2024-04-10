@@ -12,6 +12,7 @@ from .core.app_config_writer import AppConfigWriter
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 import os
 import tinycss2
+import shutil 
 from .core.ccs_parser import extract_class_names
 from .core.app_startup_manager import start_app
 from django.core.files.storage import default_storage
@@ -248,84 +249,138 @@ class ComponentReader(APIView):
 class CSSConfig(APIView):
     def post(self, request):
         try:
-            css_file = request.FILES.get('css_file')
-            if not css_file:
-                return JsonResponse({'error': 'No CSS file provided.'}, status=400)
+            css_name = request.POST.get('css_name')
+            css_content = request.POST.get('css_content', '')
 
-            file_path = f"uploaded_css/{css_file.name}"
-            file_name = default_storage.save(file_path, ContentFile(css_file.read()))
+            css_file = request.FILES.get('css_file') if 'css_file' in request.FILES else None
 
+            if not css_name:
+                return JsonResponse({'error': 'CSS Name is required.'}, status=400)
+
+            base_dir = os.path.join('uploaded_css')
+            folder_path = os.path.join(base_dir, css_name)
+
+            if os.path.exists(folder_path):
+                return JsonResponse({'error': f'A folder with the name "{css_name}" already exists.'}, status=400)
+
+            if css_content:
+                css_file_name = css_name.lower().replace(" ","_")
+                file_path = f"{folder_path}/{css_file_name}.css"
+                file_name = default_storage.save(file_path, ContentFile(css_content))
+            elif css_file:
+                file_path = f"{folder_path}/{css_file.name}"
+                file_name = default_storage.save(file_path, ContentFile(css_file.read()))
+            else:
+                return JsonResponse({'error': 'No CSS content or file provided.'}, status=400)
+            
             with default_storage.open(file_name, 'r') as f:
                 css_text = f.read()
 
             rules = tinycss2.parse_stylesheet(css_text, skip_whitespace=True)
             class_names = extract_class_names(rules)
-            print(len(class_names))
+
             return JsonResponse({
-                'message': 'CSS file uploaded successfully',
-                'file_path': file_name,
+                'message': 'CSS data processed successfully',
+                'css_file': css_name,
                 'class_names': list(class_names)
             }, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     
-    def get(self, request, filename=None):
+    def get(self, request):
         try:
-            files = default_storage.listdir("uploaded_css")[1]
-            files_list = [{'file_name': file} for file in files]
+            files = default_storage.listdir("uploaded_css")[0]
+            files_list = [{'css_file': file} for file in files]
             return JsonResponse({'files': files_list}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     
-    def put(self, request, file_name):
+    def put(self, request):
         try:
-            css_file = request.FILES.get('css_file')
-            print(css_file)
-            if not css_file:
-                return JsonResponse({'error': 'No CSS file provided.'}, status=400)
+            css_name = request.POST.get('css_name')
+            css_content = request.POST.get('css_content', None)
 
-            file_path = f"uploaded_css/{file_name}"
-            default_storage.delete(file_path)
-            default_storage.save(file_path, ContentFile(css_file.read()))
+            css_file = request.FILES.get('css_file', None)
 
-            return JsonResponse({'message': 'CSS file updated successfully'}, status=200)
+            if not css_name:
+                return JsonResponse({'error': 'CSS name is required.'}, status=400)
+            
+            folder_path = f"uploaded_css/{css_name}/"
+            
+            if default_storage.exists(folder_path):
+                shutil.rmtree(default_storage.path(folder_path))
+            
+            os.makedirs(folder_path, exist_ok=True)
+            
+            if css_content is not None:
+                file_name = css_name.lower().replace(" ", "_")
+                file_path = f"{folder_path}{file_name}.css"
+                with default_storage.open(file_path, 'w') as f:
+                    f.write(css_content)
+            elif css_file:
+                file_path = f"{folder_path}{css_file.name}"
+                default_storage.save(file_path, css_file)
+
+            return JsonResponse({'message': 'CSS configuration updated successfully', 'css_name': css_name}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     
-    def delete(self, request, filename):
+    def delete(self, request, css_name):
         try:
-            file_path = f"uploaded_css/{filename}"
-            if default_storage.exists(file_path):
-                default_storage.delete(file_path)
-                return JsonResponse({'message': 'File deleted successfully.'}, status=200)
+            folder_path = f"uploaded_css/{css_name}/"
+            full_path = default_storage.path(folder_path)
+
+            if default_storage.exists(folder_path):
+                shutil.rmtree(full_path)
+                return JsonResponse({'message': 'CSS file deleted successfully.'}, status=200)
             else:
-                return JsonResponse({'error': 'File not found.'}, status=404)
+                return JsonResponse({'error': 'CSS file not found.'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class CSSConfigReader(APIView):
-    def get(self, request, filename):
+    def get(self, request, css_name):
         try:
-            if default_storage.exists(f"uploaded_css/{filename}"):
-                file_path = f"uploaded_css/{filename}"
-                with default_storage.open(file_path, "r") as f:
-                    file_content = f.read()
-                return JsonResponse({'file_name': filename, 'content': file_content})
-            else:
+            dir_path = f"uploaded_css/{css_name}/"
+            if not default_storage.exists(dir_path):
                 raise Http404
+
+            _, files = default_storage.listdir(dir_path)
+            if not files:
+                return JsonResponse({'error': 'No CSS file found in the specified folder.'}, status=404)
+
+            file_name = files[0]
+            file_path = f"{dir_path}{file_name}"
+
+            with default_storage.open(file_path, "r") as f:
+                file_content = f.read()
+
+            return JsonResponse({
+                'css_name': css_name,
+                'file_name': file_name,
+                'content': file_content
+            })
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
         
 @method_decorator(csrf_exempt, name='dispatch')
 class CSSFileDownloadView(APIView):
-    def get(self, request, filename):
-        file_path = f"uploaded_css/{filename}"
+    def get(self, request, css_name):
+        folder_path = f"uploaded_css/{css_name}/"
+        full_folder_path = default_storage.path(folder_path)
+
+        if not default_storage.exists(full_folder_path) or not os.listdir(full_folder_path):
+            raise Http404(f"No files found in the folder {css_name}.")
+
+        # Assuming there is only one file per css_name folder or downloading the first file found
+        filename = os.listdir(full_folder_path)[0]
+        file_path = os.path.join(folder_path, filename)
+
         if default_storage.exists(file_path):
             file = default_storage.open(file_path, 'rb')
             response = HttpResponse(file, content_type='text/css')
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
             return response
         else:
-            raise Http404(f"The file {filename} does not exist.")
+            raise Http404(f"The file does not exist in the folder {css_name}.")

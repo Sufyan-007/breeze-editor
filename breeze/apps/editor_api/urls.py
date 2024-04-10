@@ -37,11 +37,11 @@ urlpatterns = [
         path('run-project/<str:param>/',AppStartup.as_view()),
         path('get-components/<str:param>/',ComponentReader.as_view()),
         path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
-        path('upload-css-file/', CSSConfig.as_view()),
+        path('add-css-file/', CSSConfig.as_view()),
         path('all-css-files/', CSSConfig.as_view()),
-        path('update-css-file/<str:file_name>', CSSConfig.as_view()),
-        path('delete-css-file/<str:filename>/', CSSConfig.as_view()),
-        path('get-css-file/<str:filename>/', CSSConfigReader.as_view()),
-        path('css-file-download/<str:filename>/', CSSFileDownloadView.as_view()),
+        path('update-css-file/', CSSConfig.as_view()),
+        path('delete-css-file/<str:css_name>/', CSSConfig.as_view()),
+        path('get-css-file/<str:css_name>/', CSSConfigReader.as_view()),
+        path('css-file-download/<str:css_name>/', CSSFileDownloadView.as_view()),
 ]
 
