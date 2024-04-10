@@ -30,11 +30,11 @@ class OpenApiHelper:
         if schema_name == "basicAuth":
             
             api_model = AuthApiModel(
-                schema_name,
-                ["authorization"],
-                request_obj,
-                response_obj,
-                "summary",
+                operation_id=schema_name,
+                tags=["authorization"],
+                request=request_obj,
+                response=response_obj,
+                summary="summary",
                 auth_api_type= "",
                 id=id,
                 authentication_type= "BASIC",
@@ -47,11 +47,11 @@ class OpenApiHelper:
 
         elif schema_name == "bearerAuth":
             api_model_login = AuthApiModel(
-                schema_name+"_login",
-                ["authorization"],
-                request_obj,
-                response_obj,
-                "summary",
+                operation_id=schema_name+"_login",
+                tags=["authorization"],
+                request=request_obj,
+                response=response_obj,
+                summary="summary",
                 auth_api_type= "LOGIN",
                 id=id,
                 authentication_type= "BEARER",
@@ -62,11 +62,11 @@ class OpenApiHelper:
             auth_api_models.append(api_model_login)
 
             api_model_refresh = AuthApiModel(
-                schema_name+"_refresh",
-                ["authorization"],
-                request_obj,
-                response_obj,
-                "summary",
+                operation_id=schema_name+"_refresh",
+                tags=["authorization"],
+                request=request_obj,
+                response=response_obj,
+                summary="summary",
                 auth_api_type= "REFRESH",
                 authentication_type= "BEARER",
                 is_authorization_url = False,
@@ -94,11 +94,11 @@ class OpenApiHelper:
                             )
                             request_obj.url = url
                             api_model = AuthApiModel(
-                                schema_name+"_implicit",
-                                ["authorization"],
-                                request_obj,
-                                response_obj,
-                                "summary",
+                                operation_id=schema_name+"_implicit",
+                                tags=["authorization"],
+                                request=request_obj,
+                                response=response_obj,
+                                summary="summary",
                                 auth_api_type= "LOGIN",
                                 authentication_type= "OAUTH2",
                                 is_authorization_url = True,
@@ -121,11 +121,11 @@ class OpenApiHelper:
                             )
                             request_obj.url = url
                             api_model = AuthApiModel(
-                                schema_name+"_password",
-                                ["authorization"],
-                                request_obj,
-                                response_obj,
-                                "summary",
+                                operation_id=schema_name+"_password",
+                                tags=["authorization"],
+                                request=request_obj,
+                                response=response_obj,
+                                summary="summary",
                                 auth_api_type= "LOGIN",
                                 authentication_type= "OAUTH2",
                                 flow = obj,
@@ -145,11 +145,11 @@ class OpenApiHelper:
                             )
                             request_obj.url = url
                             api_model = AuthApiModel(
-                                schema_name+"_password",
-                                ["authorization"],
-                                request_obj,
-                                response_obj,
-                                "summary",
+                                operation_id=schema_name+"_password",
+                                tags=["authorization"],
+                                request=request_obj,
+                                response=response_obj,
+                                summary="summary",
                                 auth_api_type= "REFRESH",
                                 authentication_type= "OAUTH2",
                                 flows = [],
@@ -239,10 +239,16 @@ class OpenApiHelper:
             for path, path_data in paths.items():
                 for operation, operation_data in path_data.items():
                     tags = operation_data.get("tags", [])
-                    for tag in tags:
-                        if tag not in tags_map:
-                            tags_map[tag] = []
-                        tags_map[tag].append((path, operation, operation_data))
+                    if isinstance(tags,list):
+                        for tag in tags:
+                            if tag not in tags_map:
+                                tags_map[tag] = []
+                            tags_map[tag].append((path, operation, operation_data))
+                    
+                    elif isinstance(tags,str):
+                        if tags not in tags_map:
+                            tags_map[tags] = []
+                        tags_map[tags].append((path, operation, operation_data))
 
             for tag, tag_operations in tags_map.items():
                 api_models = []
@@ -258,12 +264,14 @@ class OpenApiHelper:
                     response_obj = openApiConverter.create_response(
                         path_data=operation_data,
                         operation=operation)
+                    id = generate_uuid_as_key()
                     api_model = ApiModel(
-                        operation_data.get("operationId"),
-                        operation_data.get("tags"),
-                        request_obj,
-                        response_obj,
-                        operation_data.get("summary"),
+                        id = id,
+                        operation_id=operation_data.get("operationId"),
+                        tags =operation_data.get("tags"),
+                        request=request_obj,
+                        response=response_obj,
+                        summary=operation_data.get("summary"),
                         is_authentication_api=False
                     )
                     api_models.append(api_model)

@@ -168,11 +168,12 @@ class ApiModelLoader:
         response_obj = ApiModelLoader.load_response(
             response_data=response_data)
         api_model = ApiModel(
-            model_json.get("operation_id"),
-            model_json.get("tags"),  # Tags remaining
-            request_obj,
-            response_obj,
-            model_json.get("summary"),  # Summary later,
+            id=model_json.get("id"),
+            operation_id=model_json.get("operation_id"),
+            tags=model_json.get("tags"),  # Tags remaining
+            request=request_obj,
+            response=response_obj,
+            summary=model_json.get("summary"),  # Summary later,
             is_authentication_api=False
         )
         return api_model

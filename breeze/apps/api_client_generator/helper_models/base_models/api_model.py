@@ -5,6 +5,7 @@ from typing import List
 
 @dataclass
 class ApiModel:
+    id : str
     operation_id: str
     tags: List[str]
     request : Request
