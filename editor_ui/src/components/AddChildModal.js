@@ -56,7 +56,7 @@ export default function AddChildModal({ show, update }) {
                         <Form.Select value={newChild.elementType} onChange={(event) => updateNewChild("elementType", event.target.value)}>
                             <option value="" hidden >please select an option</option>
                             {Object.keys(components).map(component =>
-                                <option value={component}>{component}</option>
+                                <option key={component} value={component}>{component}</option>
                             )}
                         </Form.Select>
                     </Form.Group>
@@ -71,7 +71,7 @@ export default function AddChildModal({ show, update }) {
                                         <Form.Select value={newChild.library} onChange={(event) => updateNewChild("library", event.target.value)}>
                                             <option value="" hidden>please select an option</option>
                                             {Object.keys(components[newChild.elementType]).map(library =>
-                                                <option value={library}>{library}</option>
+                                                <option key={library} value={library}>{library}</option>
                                             )}
                                         </Form.Select>
                                     </Form.Group>
@@ -83,7 +83,7 @@ export default function AddChildModal({ show, update }) {
                                             <Form.Select value={components[newChild.elementType][newChild.library].indexOf(newChild.component)} onChange={(event)=>updateNewChild("component",components[newChild.elementType][newChild.library][event.target.value])}>
                                                 <option value="" hidden>please select an option</option>
                                                 {components[newChild.elementType][newChild.library].map((comp,index) =>
-                                                    <option value={index}>{comp.name}</option>
+                                                    <option key={comp.name} value={index}>{comp.name}</option>
                                                 )}
                                             </Form.Select>
                                         </Form.Group>

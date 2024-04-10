@@ -161,7 +161,7 @@ class AppEditor:
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
     def add_component(self,name):
-        name=name.replace(' ',"").title()
+        name=name.replace(' ',"")
         comp=NEW_COMP_FORMAT.copy()
         comp['name'] = name
         comp["$id"] = name.upper()
