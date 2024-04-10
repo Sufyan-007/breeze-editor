@@ -1,7 +1,7 @@
 import json, uuid
 from .postman_collection_converter import PostmanCollectionConverter
 from ..helper_models.base_models.api_model import ApiModel 
-
+from .helpers.uuid_as_key import generate_uuid_as_key
 
 class PostmanHelper:
     @staticmethod
@@ -18,15 +18,16 @@ class PostmanHelper:
             response_obj_by_postmanConverter = postmanConverter.create_response(response_data=response_data)
             api_uuid = str(uuid.uuid4())
             api_model = ApiModel(
-                item.get("name"),
-                ["DummyTag"],  
-                request_obj_by_postmanConverter,
-                response_obj_by_postmanConverter,
-                "",  
+                operation_id=item.get("name"),
+                tags=["DummyTag"],  
+                request=request_obj_by_postmanConverter,
+                response=response_obj_by_postmanConverter,
+                summary="",  
                 isAuthenticationApi=False,
                 isLogin=False,
                 isToken=False,
-                uuid=api_uuid
+                uuid=api_uuid,
+                id = generate_uuid_as_key()
             )
             api_models.append(api_model)
         result = {"filename":"DummyTag.json", "api_models":api_models}
