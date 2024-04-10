@@ -95,11 +95,11 @@ class OpenApiHelper:
                             )
                             request_obj.url = url
                             api_model = AuthApiModel(
-                                schema_name+"_implicit",
-                                ["authorization"],
-                                request_obj,
-                                response_obj,
-                                "summary",
+                                operation_id =schema_name+"_implicit",
+                                tags=["authorization"],
+                                request=request_obj,
+                                response=response_obj,
+                                summary="summary",
                                 auth_api_type= "LOGIN",
                                 authentication_type= "OAUTH2",
                                 is_authorization_url = True,
@@ -164,14 +164,14 @@ class OpenApiHelper:
 
     @staticmethod
     def load_auth_model(json_data,is_new=False):
-        id=json_data.get("id") 
+        id=json_data.get("id", "") 
         if is_new:
             id=generate_uuid_as_key()
         
         auth = Auth(**json_data.get("request").get("auth",{}))
         url = Url(**json_data.get("request").get("url",{}))
         body = Body(**json_data.get("request").get("body",{}))
-        request_obj = Request(json_data.get("request").get("mothod"),
+        request_obj = Request(json_data.get("request").get("method"),
                               auth,
                               json_data.get("request").get("headers"),
                               json_data.get("request").get("parameters"),
@@ -208,7 +208,7 @@ class OpenApiHelper:
             json_data = json.load(fp)
             ## append to existing json data 
             for model in auth_models:
-                key = model.id
+                key = model.operation_id # was model.id
                 json_data[key] = model
             
             ## write all data back to file
@@ -267,7 +267,9 @@ class OpenApiHelper:
                         request_obj,
                         response_obj,
                         operation_data.get("summary"),
-                        is_authentication_api=False,
+                        isAuthenticationApi=False,
+                        isLogin=False,
+                        isToken=False,
                         uuid= api_uuid
                     )
                     api_models.append(api_model)

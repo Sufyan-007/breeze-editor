@@ -11,7 +11,6 @@ urlpatterns = [
         path('modified-intermediate-json/', csrf_exempt(ModifyIntermediateJson.as_view())),
         path('fetch-all-intermediates/<str:projectName>', csrf_exempt(ApiClientGenerator.as_view())),
         path('append-to-auth-api/<str:operation>', csrf_exempt(AppendAuthApi.as_view())),
-
         path('fetch-auth-file/<str:projectName>', csrf_exempt(RetrieveAuthFile.as_view())),
 ]
 

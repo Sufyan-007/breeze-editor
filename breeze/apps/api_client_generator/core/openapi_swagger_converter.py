@@ -73,7 +73,7 @@ class OpenapiConverter:
         if parameter_data:
             parameters = [
                     Parameter(
-                        param_in= ParamsInEnum[parameter_data.get("in").upper()],
+                        param_in= ParamsInEnum[param.get("in").upper()],
                         name=param.get("name"),
                         type=param.get("schema").get("type"),
                         required=param.get("required"),

@@ -23,7 +23,9 @@ class PostmanHelper:
                 request_obj_by_postmanConverter,
                 response_obj_by_postmanConverter,
                 "",  
-                is_authentication_api= False,
+                isAuthenticationApi=False,
+                isLogin=False,
+                isToken=False,
                 uuid=api_uuid
             )
             api_models.append(api_model)
