@@ -5,8 +5,8 @@ import CustomPanel from "./CustomPanel";
 const ApiList = ({ apis , tagsList }) => {
   // Extracting data and filenames from props
   const { data, filename } = apis;
-  console.log(tagsList,"tagslist ");
-  console.log(apis, "apidata in apilist");
+  // console.log(tagsList,"tagslist ");
+  // console.log(apis, "apidata in apilist");
   //state variables to track form values for each Api
   const [formData, setFormData] = useState([]);
 
@@ -29,22 +29,25 @@ const ApiList = ({ apis , tagsList }) => {
 
   // console.log("FORM DATA ", formData);
   return (
-    <div className="text-light m-3">
-      {formData.map((apiGroup, index) => (
-        <div key={index}>
-          <h3 className="m-3">{apiGroup.filename.replace(".json","")}</h3>
-          <Accordion defaultActiveKey="0">
-            {apiGroup.apis.map((api, apiIndex) => (
-              <Accordion.Item key={apiIndex} eventKey={`${index}-${apiIndex}`}>
-                <Accordion.Header>{api.operation_id}</Accordion.Header>
-                <Accordion.Body>
-                  <CustomPanel dummyData={api} tagsList={tagsList}  />
-                </Accordion.Body>
-              </Accordion.Item>
-            ))} 
-          </Accordion>
-        </div>
-      ))}
+    // <div className="text-light m-3">
+    //   {formData.map((apiGroup, index) => (
+    //     <div key={index}>
+    //       <h3 className="m-3">{apiGroup.filename.replace(".json","")}</h3>
+    //       <Accordion defaultActiveKey="0">
+    //         {apiGroup.apis.map((api, apiIndex) => (
+    //           <Accordion.Item key={apiIndex} eventKey={`${index}-${apiIndex}`}>
+    //             <Accordion.Header>{api.operation_id}</Accordion.Header>
+    //             <Accordion.Body>
+    //               <CustomPanel dummyData={api} tagsList={tagsList}  />
+    //             </Accordion.Body>
+    //           </Accordion.Item>
+    //         ))} 
+    //       </Accordion>
+    //     </div>
+    //   ))}
+    // </div>
+    <div>
+      yaml/postman file uploaded
     </div>
   );
 };

@@ -12,6 +12,7 @@ from ..helper_models.enums.content import ContentEnum
 from ..helper_models.enums.mode import ModeEnum
 from ..helper_models.enums.auth_type import AuthTypeEnum
 from ..helper_models.enums.params_in import ParamsInEnum
+from ..helper_models.enums.params_in import ParamsInEnum
 
 
 class OpenapiConverter:
