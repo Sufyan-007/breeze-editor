@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
-import { Form, Button, Row, Col } from "react-bootstrap";
+import { Form, Button, Row, Col, ButtonGroup } from "react-bootstrap";
 
 export default function Body({ onChange, body }) {
-  console.log(body,"body in body");
+  console.log(body, "body in body");
   const [mode, setMode] = useState(body.mode);
   const [contentType, setContentType] = useState(
     body.content_type || "application/json"
@@ -102,307 +102,373 @@ export default function Body({ onChange, body }) {
   return (
     <div>
       <Form.Group controlId="formBody">
-        <Form.Label className="mt-3" style={{ fontWeight: "bold" }}>
-          Body:
-        </Form.Label>
-
-        {/* Radio buttons for ModeEnum */}
-        <div>
-          <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-            Mode:
-          </Form.Label>
-          <Form.Check
-            type="radio"
-            label="Raw"
-            name="mode"
-            value="raw"
-            checked={mode === "raw"}
-            onChange={() => handleModeChange("raw")}
-            inline
-          />
-          <Form.Check
-            type="radio"
-            label="x-www-form-urlencoded"
-            name="mode"
-            value="urlencoded"
-            checked={mode === "urlencoded"}
-            onChange={() => handleModeChange("urlencoded")}
-            inline
-          />
-          <Form.Check
-            inline
-            type="radio"
-            label="None"
-            name="mode"
-            value="none"
-            checked={mode === "none"}
-            onChange={() => handleModeChange("none")}
-          />
-          <Form.Check
-            inline
-            type="radio"
-            label="Form Data"
-            name="mode"
-            value="form-data"
-            checked={mode === "form-data"}
-            onChange={() => handleModeChange("form-data")}
-          />
-          <Form.Check
-            inline
-            type="radio"
-            label="File"
-            name="mode"
-            value="binary"
-            checked={mode === "binary"}
-            onChange={() => handleModeChange("binary")}
-          />
-        </div>
-        {/* Conditional rendering of file input field */}
-        {/* {body.mode === "binary" && (
-          <div>
-            <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-              Upload Binary File (.bin):
+        <Row>
+          <Col sm={3}>
+            <Form.Label className="mt-3" style={{ fontWeight: "bold" }}>
+              Body:
             </Form.Label>
-            <Form.Control
-              type="file"
-              accept=".bin"
-              ref={fileInputRefBinary}
-              onChange={() => handleFileInputChange}
-            />
-          </div>
-        )} */}
-        {body.mode === "raw" && (
-          <>
+          </Col>
+          {/* Radio buttons for ModeEnum */}
+          <Col sm={9}>
             <div>
-              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-                Content Type:
-              </Form.Label>
-
-              <Form.Check
-                inline
-                type="radio"
-                label="JSON"
-                name="content_type"
-                value="application/json"
-                checked={contentType === "application/json"}
-                onChange={() => handleContentTypeChange("application/json")}
-              />
-              <Form.Check
-                inline
-                type="radio"
-                label="TEXT"
-                name="content_type"
-                value="text/plain"
-                checked={contentType === "text/plain"}
-                onChange={() => handleContentTypeChange("text/plain")}
-              />
-              <Form.Check
-                inline
-                type="radio"
-                label="HTML"
-                name="content_type"
-                value="text/html"
-                checked={contentType === "text/html"}
-                onChange={() => handleContentTypeChange("text/html")}
-              />
-              <Form.Check
-                inline
-                type="radio"
-                label="XML"
-                name="content_type"
-                value="application/xml"
-                checked={contentType === "application/xml"}
-                onChange={() => handleContentTypeChange("application/xml")}
-              />
-              <Form.Check
-                inline
-                type="radio"
-                label="Javascript"
-                name="content_type"
-                value="application/javascript"
-                checked={contentType === "application/javascript"}
-                onChange={() =>
-                  handleContentTypeChange("application/javascript")
-                }
-              />
-              <Form.Check
-                inline
-                type="radio"
-                label="Form Data"
-                name="content_type"
-                value="multipart/form-data"
-                checked={contentType === "multipart/form-data"}
-                onChange={() => handleContentTypeChange("multipart/form-data")}
-              />
-              <Form.Check
-                inline
-                type="radio"
-                label="Url Encoded"
-                name="content_type"
-                value="application/x-www-form-urlencoded;charset=UTF-8"
-                checked={
-                  contentType ===
-                  "application/x-www-form-urlencoded;charset=UTF-8"
-                }
-                onChange={() =>
-                  handleContentTypeChange(
-                    "application/x-www-form-urlencoded;charset=UTF-8"
-                  )
-                }
-              />
-            </div>
-            <div>
-              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-                Raw Content:
-              </Form.Label>
-              <Form.Control
-                type="text"
-                value={rawContent}
-                onChange={(e) => handleRawContentChange(e.target.value)}
-              />
-            </div>
-          </>
-        )}
-        {(body.mode === "urlencoded" || body.mode === "form-data") && (
-          <div>
-            <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-              FormData:
-            </Form.Label>
-            {formdata.map((formData, index) => (
-              <div key={index} className="mb-2">
-                <Row>
-                  <Col>
-                    <Form.Control
-                      type="text"
-                      placeholder="Key"
-                      value={formData.key}
-                      onChange={(e) =>
-                        handleFormDataChange(index, "key", e.target.value)
-                      }
-                    />
-                  </Col>
-                  <Col>
-                    {formData.type === "upload_file" ? (
-                      // If type is "upload_file", render file input
-                      <div>
-                        <Form.Control
-                          type="file"
-                          style={{ display: "none" }} // Hide the file input
-                          ref={fileInputRefFormData}
-                          onChange={(e) => handleFormDataFileChange(e, index)}
-                        />
-                        <Form.Control
-                          type="text"
-                          placeholder="Select File"
-                          value={formData.value ? formData.value.name : ""}
-                          onClick={() => openFileInputFormData(index)}
-                          style={{
-                            cursor: "pointer",
-                            color: "white",
-                            border: "none",
-                            padding: "6px 12px",
-                            borderRadius: "4px",
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      // If type is not "upload_file", render regular text input
-                      <Form.Control
-                        type="text"
-                        placeholder="Value"
-                        value={formData.value}
-                        onChange={(e) =>
-                          handleFormDataChange(index, "value", e.target.value)
-                        }
-                      />
-                    )}
-                  </Col>
-                  <Col>
-                    <Form.Control
-                      type="text"
-                      placeholder="Description"
-                      value={formData.description}
-                      onChange={(e) =>
-                        handleFormDataChange(
-                          index,
-                          "description",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </Col>
-                  <Col>
-                    <Form.Select
-                      value={formData.type}
-                      onChange={(e) =>
-                        handleFormDataChange(index, "type", e.target.value)
-                      }
-                    >
-                      <option value="">Select Type</option>
-                      <option value="text">Text</option>
-                      <option value="upload_file">File</option>
-                    </Form.Select>
-                  </Col>
-                  <Col>
-                    <Form.Control
-                      type="text"
-                      placeholder="Source"
-                      value={formData.src}
-                      onChange={(e) =>
-                        handleFormDataChange(index, "src", e.target.value)
-                      }
-                    />
-                  </Col>
-                  <Col>
+              <Row>
+                <Col sm={2}>
+                  <Form.Label
+                    style={{ fontWeight: "bold" }}
+                    className="mt-3 p-1"
+                  >
+                    Mode:
+                  </Form.Label>
+                </Col>
+                <Col sm={7}>
+                  <ButtonGroup className="">
                     <Button
                       variant="secondary"
-                      onClick={() => removeFormData(index)}
+                      onClick={() => handleModeChange("raw")}
+                      active={mode === "raw"}
                     >
-                      Remove
+                      Raw
                     </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => handleModeChange("urlencoded")}
+                      active={mode === "urlencoded"}
+                    >
+                      x-www-form-urlencoded
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => handleModeChange("none")}
+                      active={mode === "none"}
+                    >
+                      None
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => handleModeChange("form-data")}
+                      active={mode === "form-data"}
+                    >
+                      FormData
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => handleModeChange("binary")}
+                      active={mode === "binary"}
+                    >
+                      File
+                    </Button>
+                  </ButtonGroup>
+                </Col>
+              </Row>
+            </div>
+
+            {body.mode === "raw" && (
+              <>
+                <div>
+                  <Row>
+                    <Col sm={2}>
+                      <Form.Label
+                        style={{ fontWeight: "bold" }}
+                        className="mt-3 p-1"
+                      >
+                        Content Type:
+                      </Form.Label>
+                    </Col>
+                    <Col sm={10}>
+                      <ButtonGroup className="">
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            handleContentTypeChange("application/json")
+                          }
+                          active={contentType === "application/json"}
+                        >
+                          JSON
+                        </Button>
+
+                        <Button
+                          variant="secondary"
+                          onClick={() => handleContentTypeChange("text/plain")}
+                          active={contentType === "text/plain"}
+                        >
+                          TEXT
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() => handleContentTypeChange("text/html")}
+                          active={contentType === "text/html"}
+                        >
+                          HTML
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            handleContentTypeChange("application/xml")
+                          }
+                          active={contentType === "application/xml"}
+                        >
+                          XML
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            handleContentTypeChange("application/javascript")
+                          }
+                          active={contentType === "application/javascript"}
+                        >
+                          Javascript
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            handleContentTypeChange("multipart/form-data")
+                          }
+                          active={contentType === "multipart/form-data"}
+                        >
+                          Form Data
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            handleContentTypeChange(
+                              "application/x-www-form-urlencoded;charset=UTF-8"
+                            )
+                          }
+                          active={
+                            contentType ===
+                            "application/x-www-form-urlencoded;charset=UTF-8"
+                          }
+                        >
+                          Url Encoded
+                        </Button>
+                      </ButtonGroup>
+                    </Col>
+                  </Row>
+                </div>
+
+                <div>
+                  <Row>
+                    <Col sm={2}>
+                      <Form.Label
+                        style={{ fontWeight: "bold" }}
+                        className="mt-3"
+                      >
+                        Raw Content:
+                      </Form.Label>
+                    </Col>
+                    <Col sm={7} className="">
+                      <Form.Control
+                        style={{
+                          maxWidth: "30vw",
+                          border: "none",
+                          backgroundColor: " #6C757D",
+                        }}
+                        type="text"
+                        value={rawContent}
+                        onChange={(e) => handleRawContentChange(e.target.value)}
+                      />
+                    </Col>
+                  </Row>
+                </div>
+              </>
+            )}
+
+            {(body.mode === "urlencoded" || body.mode === "form-data") && (
+              <Form.Group controlId="formData">
+                <Row>
+                  <Col sm={2}>
+                    <Form.Label
+                      style={{ fontWeight: "bold" }}
+                      className="mt-3 p-1"
+                    >
+                      FormData:
+                    </Form.Label>
+                  </Col>
+                  <Col sm={10}>
+                    {formdata.map((formData, index) => (
+                      <div key={index} className="mb-2">
+                        <Row>
+                          <Col>
+                            <Form.Control
+                              type="text"
+                              placeholder="Key"
+                              value={formData.key}
+                              onChange={(e) =>
+                                handleFormDataChange(
+                                  index,
+                                  "key",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </Col>
+                          <Col>
+                            {formData.type === "upload_file" ? (
+                              // If type is "upload_file", render file input
+                              <div>
+                                <Form.Control
+                                  type="file"
+                                  style={{ display: "none" }} // Hide the file input
+                                  ref={fileInputRefFormData}
+                                  onChange={(e) =>
+                                    handleFormDataFileChange(e, index)
+                                  }
+                                />
+                                <Form.Control
+                                  type="text"
+                                  placeholder="Select File"
+                                  value={
+                                    formData.value ? formData.value.name : ""
+                                  }
+                                  onClick={() => openFileInputFormData(index)}
+                                  style={{
+                                    cursor: "pointer",
+
+                                    border: "none",
+                                    padding: "6px 12px",
+                                    borderRadius: "4px",
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              // If type is not "upload_file", render regular text input
+                              <Form.Control
+                                type="text"
+                                placeholder="Value"
+                                value={formData.value}
+                                onChange={(e) =>
+                                  handleFormDataChange(
+                                    index,
+                                    "value",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            )}
+                          </Col>
+                          <Col>
+                            <Form.Control
+                              type="text"
+                              placeholder="Description"
+                              value={formData.description}
+                              onChange={(e) =>
+                                handleFormDataChange(
+                                  index,
+                                  "description",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </Col>
+                          <Col>
+                            <Form.Select
+                              value={formData.type}
+                              onChange={(e) =>
+                                handleFormDataChange(
+                                  index,
+                                  "type",
+                                  e.target.value
+                                )
+                              }
+                              style={{ color: "#636363" }}
+                            >
+                              <option value="" style={{ color: "black" }}>
+                                Select Type
+                              </option>
+                              <option value="text" style={{ color: "black" }}>
+                                Text
+                              </option>
+                              <option
+                                value="upload_file"
+                                style={{ color: "black" }}
+                              >
+                                File
+                              </option>
+                            </Form.Select>
+                          </Col>
+                          <Col>
+                            <Form.Control
+                              type="text"
+                              placeholder="Source"
+                              value={formData.src}
+                              onChange={(e) =>
+                                handleFormDataChange(
+                                  index,
+                                  "src",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </Col>
+                          <Col>
+                            <Button
+                              variant="secondary"
+                              onClick={() => removeFormData(index)}
+                            >
+                              Remove
+                            </Button>
+                          </Col>
+                        </Row>
+                      </div>
+                    ))}
+
+                    {/* Button to add more Formdata */}
+                    <div className="mt-3">
+                      <Button
+                        variant="secondary"
+                        onClick={addFormData}
+                        disabled={mode === "binary"}
+                      >
+                        Add Formdata
+                      </Button>
+                    </div>
                   </Col>
                 </Row>
-              </div>
-            ))}
-
-            {/* Button to add more Formdata */}
-            <div className="m-3">
-              <Button
-                variant="secondary"
-                onClick={addFormData}
-                disabled={mode === "binary"}
-              >
-                Add Formdata
-              </Button>
-            </div>
+              </Form.Group>
+            )}
+          </Col>
+        </Row>
+      </Form.Group>
+      {body.mode !== "binary" && (
+        <>
+          <div>
+            <Row>
+              <Col sm={3}></Col>
+              <Col sm={9}>
+                <Form.Check
+                  style={{ fontWeight: "bold" }}
+                  className="mt-3"
+                  type="checkbox"
+                  label="Required"
+                  id="body-required"
+                  checked={required}
+                  onChange={(e) => handleRequiredChange(e.target.checked)}
+                />
+              </Col>
+            </Row>
           </div>
-        )}
-        {body.mode !== "binary" && (
-          <>
-            <div>
-              <Form.Check
-                style={{ fontWeight: "bold" }}
-                className="m-3"
-                type="checkbox"
-                label="Required"
-                id="body-required"
-                checked={required}
-                onChange={(e) => handleRequiredChange(e.target.checked)}
-              />
-            </div>
-            <div>
-              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+
+          <Row className="mt-3">
+            <Col sm={3}>
+              <Form.Label style={{ fontWeight: "bold" }}>
                 Schema Name:
               </Form.Label>
+            </Col>
+            <Col sm={9}>
               <Form.Control
+                style={{
+                  maxWidth: "30vw",
+                  backgroundColor: " #6C757D",
+                  border: "none"
+                }}
                 type="text"
                 value={schemaName}
                 onChange={(e) => handleSchemaNameChange(e.target.value)}
               />
-            </div>
-          </>
-        )}
-      </Form.Group>
+            </Col>
+          </Row>
+        </>
+      )}
     </div>
   );
 }

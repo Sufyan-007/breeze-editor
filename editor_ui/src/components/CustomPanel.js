@@ -1,10 +1,18 @@
 import { React, useState } from "react";
-import { Form, Button, Row , Col, Dropdown, DropdownButton } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Row,
+  Col,
+  Dropdown,
+  DropdownButton,
+  Container,
+} from "react-bootstrap";
 import RequestBody from "./RequestBody";
 import ResponseBody from "./ResponseBody";
 import CustomPanelCss from "../css/CustomPanel.css";
 
-function CustomPanel({ dummyData , tagsList }) {
+function CustomPanel({ dummyData, tagsList = [] }) {
   // console.log(dummyData,"dummy data ");
   // console.log(tagsList,"tagsLIst in custom Panel");
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
@@ -60,17 +68,16 @@ function CustomPanel({ dummyData , tagsList }) {
 
     const data = {
       filename: dummyData.tags[0] + "Service.json",
-      modified_api: 
-        {
-          isAuthenticationApi: dummyData.isAuthenticationApi,
-          isLogin: dummyData.isLogin,
-          isToken: dummyData.isToken,
-          operation_id: operationId,
-          tags: tags,
-          summary: summary,
-          request: requestBody,
-          response: responseBody,
-        },
+      modified_api: {
+        isAuthenticationApi: dummyData.isAuthenticationApi,
+        isLogin: dummyData.isLogin,
+        isToken: dummyData.isToken,
+        operation_id: operationId,
+        tags: tags,
+        summary: summary,
+        request: requestBody,
+        response: responseBody,
+      },
     };
 
     try {
@@ -94,18 +101,25 @@ function CustomPanel({ dummyData , tagsList }) {
   return (
     <div>
       <Form onSubmit={handleSubmit}>
-        <Form.Group
-          className="mb-3 custom-form-group"
-          controlId="formOperationId"
-        >
-          <Form.Label>Function Name</Form.Label>
-          <Form.Control
-            className="custom-form-control"
-            type="text"
-            value={operationId}
-            onChange={handleOperationIdChange}
-          />
-        </Form.Group>
+        <Row>
+          <Form.Group
+            className="mb-3 custom-form-group"
+            controlId="formOperationId"
+          >
+            <Col sm={3}>
+              <Form.Label>Function Name</Form.Label>
+            </Col>
+            <Col sm={9}>
+              <Form.Control
+                style={{ maxWidth: "50vw" }}
+                className="custom-form-control"
+                type="text"
+                value={operationId}
+                onChange={handleOperationIdChange}
+              />
+            </Col>
+          </Form.Group>
+        </Row>
 
         <Form.Group className="mb-3 custom-form-group" controlId="formTags">
           <Form.Label>Service Name</Form.Label>

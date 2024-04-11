@@ -76,7 +76,7 @@ export default function ServiceLists() {
 
   return (
     <div className="m-3">
-      <Table striped bordered hover>
+      <Table striped bordered hover variant="dark">
         <thead>
           <tr>
             <th>Function Name</th>
@@ -98,7 +98,7 @@ export default function ServiceLists() {
                   <td>{service?.filename}</td>
                   <td>
                     <img
-                      className="m-3"
+                      className="m-1"
                       src={EditIcon}
                       alt="Edit"
                       style={{
