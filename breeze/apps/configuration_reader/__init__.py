@@ -135,8 +135,11 @@ def prepare_html_comp_config():
         "label",
         "fieldset",
         "legend",
-        "body"
+        "body",
+        "img"
     ]
+    
+    html_elements = sorted(html_elements)
     
     # common_config = read_file_json("/home/raj/Desktop/bridge/processor/bridge_ui_server/html_attributes.json")
     common_config = COMMON_HTML_ATTRIBUTES    

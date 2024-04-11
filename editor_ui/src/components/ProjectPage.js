@@ -60,8 +60,7 @@ export default function ProjectPage() {
         { id: 5, name: "Styles", icon: styles }, 
         { id: 6, name: "Code", icon: code },
         { id: 7, name: "Third-party App", icon: apps },
-        { id: 8, name: "Config", icon: config }, 
-        { id: 9, name: "Settings", icon: settings }, 
+        { id: 8, name: "Settings", icon: settings }, 
 
     ];
 
@@ -74,7 +73,6 @@ export default function ProjectPage() {
         <Styles />,
         <Code />,
         <ThirdPartyApp />,
-        <Settings projectName = {projectNameFromParams} changeProjectName = {setProjectName} />,
         <Settings projectName = {projectNameFromParams} changeProjectName = {setProjectName} />
     ];
 

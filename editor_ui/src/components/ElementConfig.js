@@ -199,6 +199,7 @@ export default function ElementConfig({ ...props }) {
                                     <option value="for">for</option>
                                     <option value="type">type</option>     
                                     <option value="placeholder">placeholder</option>     
+                                    <option value="alt">alt</option>     
                                 </Form.Select>
                             </div>
 
