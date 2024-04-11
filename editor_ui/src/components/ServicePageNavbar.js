@@ -21,14 +21,15 @@ export default function ServicePageNavbar(props) {
 
   return (
     <>
-      <Navbar className=" p-2 bg-body-tertiary" expand="lg">
-        <Container>
+      <Navbar variant="dark" style={{ backgroundColor : "#212529"
+      }}  >
+        <Container className="mx-0" >
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link onClick={toggleServicesList}>Services</Nav.Link>
+            <Nav className="me-auto" >
+              <Nav.Link onClick={toggleServicesList} className="mx-3" >Services</Nav.Link>
 
-              <NavDropdown title="Upload">
+              <NavDropdown title="Upload" className="mx-3" style={{color: "white"}}>
                 <NavDropdown.Item onClick={() => props.openFileInput("yaml")}>
                   Upload Yaml
                 </NavDropdown.Item>
@@ -43,7 +44,7 @@ export default function ServicePageNavbar(props) {
                   Custom
                 </NavDropdown.Item>
               </NavDropdown>
-              <Nav.Link onClick={toggleAuthenticationConfig}>Authentication Config</Nav.Link>
+              <Nav.Link onClick={toggleAuthenticationConfig} className="mx-3" >Authentication Config</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

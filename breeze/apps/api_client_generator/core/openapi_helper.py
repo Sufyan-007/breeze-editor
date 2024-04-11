@@ -178,7 +178,9 @@ class OpenApiHelper:
                               url,
                               body
                               ),
-        response_obj = Response(**json_data.get("response"))
+        response_objs = []
+        for response_data in json_data.get("response", []):
+            response_objs.append(Response(**response_data))
         operation_id = json_data.get("operation_id","")
         tags =  json_data.get("tags",[])
         summary =  json_data.get("summary","")
@@ -190,7 +192,7 @@ class OpenApiHelper:
         return AuthApiModel(id=id,operation_id=operation_id,tags=tags,auth_api_type=auth_api_type,
                             authentication_type=authentication_type,
                             is_authorization_url=is_authorization_url,flow=flow,
-                            request=request_obj,response=response_obj,summary=summary,
+                            request=request_obj,response=response_objs,summary=summary,
                             token_store=token_store)
     
         
@@ -276,7 +278,6 @@ class OpenApiHelper:
                         isAuthenticationApi=False,
                         isLogin=False,
                         isToken=False,
-                        uuid= api_uuid
                     )
                     api_models.append(api_model)
 

@@ -8,7 +8,7 @@ class IntermediateValidationHelper:
     @staticmethod
     def validate_intermediate_structure(data):
         expected_keys = ["modified_api"]
-        expected_keys_modified_api = ["operation_id", "tags", "request", "response", "summary", "isAuthenticationApi", "isLogin", "isToken", "uuid"]
+        expected_keys_modified_api = ["operation_id", "tags", "request", "response", "summary", "isAuthenticationApi", "isLogin", "isToken", "id"]
         expected_keys_request = ["method", "auth", "headers", "parameters", "url", "body"]
         expected_keys_auth_content = ["key", "value", "type"]
         expected_keys_key_value = ["key", "value"]

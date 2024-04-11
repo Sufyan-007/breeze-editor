@@ -26,7 +26,6 @@ class PostmanHelper:
                 isAuthenticationApi=False,
                 isLogin=False,
                 isToken=False,
-                uuid=api_uuid,
                 id = generate_uuid_as_key()
             )
             api_models.append(api_model)

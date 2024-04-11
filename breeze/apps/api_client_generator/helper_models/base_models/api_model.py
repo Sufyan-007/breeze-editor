@@ -14,5 +14,4 @@ class ApiModel:
     isAuthenticationApi: bool
     isLogin: bool
     isToken: bool
-    uuid: str
     

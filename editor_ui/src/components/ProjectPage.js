@@ -24,16 +24,18 @@ import routing from "../assets/icons/routing.svg";
 import settings from "../assets/icons/settings.svg";
 import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from './ProjectSidebar';
+import { Col, Row } from 'react-bootstrap';
+import ServicePageNavbar from './ServicePageNavbar';
 
 
 export default function ProjectPage() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
     const [tagSelection, setSelection] = useState(0);
+    // const [displayNav, setDisplayNav] = useState(false);
     const highlightedStyle = { backgroundColor: "#303033" };
     const allConfig = useLoaderData();
     const dispatch = useDispatch();
     const {projectName} = useParams();
-
     useEffect(() => {
         dispatch(setReducerConfig(allConfig.reducerConfig));
         dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
@@ -85,8 +87,12 @@ export default function ProjectPage() {
                   highlightedStyle={highlightedStyle}
                 />
                 <div className="col m-0 p-0" style={{ backgroundColor: "#303033" }}>
-                    <h4 className='text-white m-2'>{projectName}</h4>
-                    <hr className="mt-0" style={{ color: 'white'}}/>
+                    <Row>
+                        <Col sm={1}> <h4 className='text-white m-2'>{projectName}</h4></Col>
+                        {tagSelection === 3 && <Col sm={11}><ServicePageNavbar /></Col>}
+                    </Row>
+                   
+                   { tagSelection !== 3 && <hr className="mt-0" style={{ color: 'white'}}/>}
                     {components[tagSelection]}
                 </div>
             </div>

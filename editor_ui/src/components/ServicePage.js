@@ -134,15 +134,15 @@ export function ServicePage() {
   return (
     // <Loader loader={loader}>
     <>
-      <div className="container-fluid d-flex flex-column vh-100  ">
-        <ServicePageNavbar
+      <div className="container-fluid d-flex flex-column vh-100  " >
+        {/* <ServicePageNavbar
           openFileInput={openFileInput}
           fileInputYAML={fileInputYAML}
           fileInputPostman={fileInputPostman}
           fileUpload={fileUpload}
           yamlUploaded={yamlUploaded}
           handleCustomButtonClick={handleCustomButtonClick}
-        />
+        /> */}
         <div
           className="row flex-grow-1 overflow-hidden  "
           style={{ backgroundColor: "#303033" }}

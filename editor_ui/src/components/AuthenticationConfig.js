@@ -53,7 +53,7 @@ function AuthenticationConfig() {
     <>  
       {
         showAuthConfig && 
-        <div className='p-5'>  
+        <div className='mt-5 p-2' style={{maxWidth:"100%"}}>  
           { auth_apis ? 
           ( <>
             <div className='d-grid gap-2'>
@@ -61,7 +61,7 @@ function AuthenticationConfig() {
                 <img src={Add} alt="" height={24} className="mx-4" /> <span style={{ fontSize: 18 }}>Add a New API</span>
               </Button>
             </div>
-            <Table striped bordered hover size='sm' className='mt-4'>  
+            <Table striped bordered hover size='lg' className='mt-4' variant='dark'>  
               <thead>  
                 <tr>   
                   <th rowSpan={2}>S.No</th>  
