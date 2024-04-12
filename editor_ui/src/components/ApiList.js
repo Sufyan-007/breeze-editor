@@ -47,7 +47,7 @@ const ApiList = ({ apis , tagsList, onClose}) => {
   console.log("FORM DATA ", formData);
   return (
     <div>
-    <h2 className="mt-5" style={{color: "white"}}>Form Data Table</h2>
+    {/* <h2 className="mt-5" style={{color: "white"}}>Form Data Table</h2>
     {showTable && <Table striped bordered hover variant="dark" className="mt-3">
       <thead>
         <tr>
@@ -93,7 +93,7 @@ const ApiList = ({ apis , tagsList, onClose}) => {
             tagsList={["tag1", "tag2", "tag3"]}
             onClose={handleClose}
             
-          />}
+          />} */}
     
   </div>
   );

@@ -220,7 +220,7 @@ class OpenApiHelper:
             json_data = json.load(fp)
             ## append to existing json data 
             for model in auth_models:
-                key = model.operation_id # was model.id
+                key = model.id # was model.id
                 json_data[key] = model
             
             ## write all data back to file

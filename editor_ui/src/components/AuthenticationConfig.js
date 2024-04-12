@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, Table } from 'react-bootstrap';
-import { getAuthFileConfig } from '../services/AuthConfigService';
+import { getAuthFileConfig } from '../services/IntermediatesService';
 import edit from "../assets/icons/edit.svg";
 import Delete from "../assets/icons/delete.svg";
 import Add from "../assets/icons/add.svg";
@@ -37,7 +37,7 @@ function AuthenticationConfig() {
     setSelectedUuid(uuid)
     setMode("Edit")
     setShowAddOrEditModal(true);
-    setShowAuthConfig(false)
+    // setShowAuthConfig(false)
   };
 
   const handleDeleteApi = ()=>{
@@ -78,7 +78,7 @@ function AuthenticationConfig() {
                       <td>{index + 1}</td>  
                       <td>{api.operation_id}</td>
                       <td>
-                        <img src={edit} alt="" height={24} className="mx-2" onClick={() => handleEditApi(api.uuid)} style={{cursor: "pointer"}} />
+                        <img src={edit} alt="" height={24} className="mx-2" onClick={() => handleEditApi(api.id)} style={{cursor: "pointer"}} />
                         <img src={Delete} alt="" height={24} className="mx-2" onClick={() => setShowDeleteModal(true)} style={{cursor: "pointer"}} />
                       </td>
                     </tr>
@@ -125,7 +125,6 @@ function AuthenticationConfig() {
         <AddOrEditAuthConfig 
         availableApis={available_apis} 
         onClose={handleClose} 
-        authApis={auth_apis} 
         selectedUuid = {selectedUuid} 
         mode={mode} />
       </div>}

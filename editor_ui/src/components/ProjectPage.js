@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { getAllConfigs } from "../services/ConfigService";
@@ -30,7 +30,7 @@ import ProjectSidebar from "./ProjectSidebar";
 import { Col, Row } from "react-bootstrap";
 import ServicePageNavbar from "./ServicePageNavbar";
 import Custom from "./ Custom";
-import ApiList from "./ApiList";
+import ServiceLists from "./ServiceList";
 
 export default function ProjectPage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
@@ -42,6 +42,7 @@ export default function ProjectPage() {
   const [yamlUploaded, setYamlUploaded] = useState(false);
   const [postmanApis, setPostmanApis] = useState({}); //state to store the list of postman collection APis
   const [postmanUploaded, setPostmanUploaded] = useState(false);
+  const [serviceListMode, setServiceListMode] = useState("Navbar");
   const [tagsList, setTagsList] = useState([]);
   // const [displayNav, setDisplayNav] = useState(false);
   const highlightedStyle = { backgroundColor: "#303033" };
@@ -54,7 +55,7 @@ export default function ProjectPage() {
     dispatch(setServiceConfig(allConfig.serviceConfig));
     dispatch(setRouterConfig(allConfig.reducerConfig));
   }, [allConfig, dispatch]);
-
+ const navigate = useNavigate();
   const sidebarItems = [
     { id: 0, name: "Home", icon: home },
     { id: 1, name: "Pages", icon: pages },
@@ -127,6 +128,8 @@ export default function ProjectPage() {
         if (fileType === "yaml") {
           setYamlApis(responseData);
           setYamlUploaded(true);
+          
+          navigate("/service-list")
         } else if (fileType === "postman") {
           setPostmanApis(responseData);
           setPostmanUploaded(true);
@@ -198,6 +201,7 @@ export default function ProjectPage() {
                   fileUpload={fileUpload}
                   yamlUploaded={yamlUploaded}
                   handleCustomButtonClick={handleCustomButtonClick}
+                  serviceMode = {"Navbar"}
                 />
               </Col>
             )}
@@ -209,14 +213,14 @@ export default function ProjectPage() {
                 <Custom dummyData={dummyData} />
               </div>
             )}
-            {yamlUploaded && (
+            {/* {yamlUploaded && (
               <div>
-                <ApiList apis={yamlApis} tagsList={tagsList} />
+                <ServiceLists apis={yamlApis} tagsList={["tag1","tag2"]} />
               </div>
-            )}
+            )} */}
             {postmanUploaded && (
               <div>
-                <ApiList apis={postmanApis}  />
+                <ServiceLists apis={postmanApis} serviceMode={"Upload"} />
               </div>
             )}
           </div>

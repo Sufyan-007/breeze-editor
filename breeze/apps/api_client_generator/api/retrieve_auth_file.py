@@ -6,7 +6,8 @@ class RetrieveAuthFile(View):
     def get(self, request, projectName):
         try:
             file_path = f"{CONFIG_PATH}/{projectName}/generated_intermediate_json/auth.json"
-            
+            api_id = request.GET.get('api_id', None)
+        
             if not os.path.exists(file_path):
                 return JsonResponse({"error": "File not found"}, status=404)
 
@@ -16,7 +17,11 @@ class RetrieveAuthFile(View):
                 if not file_content.strip():
                     return JsonResponse({"data": []}, status=200)
                 auth_apis = json.loads(file_content)
-                result = auth_apis
+                result = None
+                if api_id is not None:
+                    result = auth_apis.get(api_id)
+                else:
+                    result = auth_apis
             return JsonResponse({"data": result}, status=200)
 
         except Exception as e:

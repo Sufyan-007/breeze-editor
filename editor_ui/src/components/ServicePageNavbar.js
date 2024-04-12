@@ -87,7 +87,7 @@ export default function ServicePageNavbar(props) {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      {showServicesList && <ServiceList />}
+      {showServicesList && <ServiceList apis={""} tagsList={["tag1", "tag2"]} />}
       {showAuthenticationConfig &&  <AuthenticationConfig />}
       {showIntermediateFiles &&  <IntermediateFiles />}
 

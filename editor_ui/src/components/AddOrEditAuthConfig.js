@@ -10,7 +10,11 @@ import AuthorizationUrls from "./AddOrEditAuthConfigSubComponents/AuthorizationU
 import SelectAuthentication from "./AddOrEditAuthConfigSubComponents/SelectAuthentication";
 import SelectTokenStorage from "./AddOrEditAuthConfigSubComponents/SelectTokenStorage";
 import SelectKey from "./AddOrEditAuthConfigSubComponents/SelectKey";
-import Custom from "./ Custom";
+import {getAuthApiConfig} from '../services/IntermediatesService.js'
+
+import { appendToAuthApi } from "../services/IntermediatesService";
+import  CustomButtonGroup from "./CustomButtonGroup.js";
+
 function AddOrEditAuthConfig({
   availableApis,
   onClose,
@@ -19,6 +23,8 @@ function AddOrEditAuthConfig({
   mode,
 }) {
   const [selectedApi, setSelectedApi] = useState("");
+  const [selectedApiInfo, setSelectedApiInfo] = useState({});
+  
   const [selectedType, setSelectedType] = useState("");
   const [selectedAuthentication, setSelectedAuthentication] = useState("");
   const [selectedFlow, setSelectedFlow] = useState("");
@@ -32,10 +38,64 @@ function AddOrEditAuthConfig({
   const [selectedRefreshKey, setSelectedRefreshKey] = useState("");
 
   const isEditMode = mode === "Edit" ? true : false;
-  const selectedAuthApi = Object.values(authApis).find(
-    (api) => api.uuid === selectedUuid
-  );
-  const handleSave = () => {
+  let selectTypes = [
+    {
+      name : "LOGOUT",
+      label : "Logout",
+      variant : "secondary",
+    },
+    {
+      name : "REFRESH",
+      label : "Refresh",
+      variant : "secondary",
+    },
+    {
+      name : "LOGIN",
+      label : "Login",
+      variant : "secondary",
+    }
+  ]
+  let authenticationTypes = [
+    {
+      name : "BASIC",
+      label : "Basic",
+      variant : "secondary",
+    },
+    {
+      name : "OAUTH2",
+      label : "OAUTH2",
+      variant : "secondary",
+    },
+    {
+      name : "BEARER",
+      label : "Bearer",
+      variant : "secondary",
+    }
+  ] 
+
+  const onValueChanges = ( name, value) => {
+    let obj = {
+      ...selectedApiInfo
+    }
+    obj[name] = value;
+    setSelectedApiInfo({
+      ...obj
+    }) 
+  } 
+
+  useEffect( () => {
+    const fetchAuthApi = async () => {
+      if(selectedUuid){
+        let rs = await getAuthApiConfig("creator",selectedUuid)
+        setSelectedApiInfo({...rs.data});
+      }
+    };
+    fetchAuthApi()
+    console.log("selce");
+    console.log(selectedUuid);
+    
+  },[])
+  const handleSave = async() => {
     let token_store = {
       store_in: selectedTokenStorageMethod,
       access_token_key: selectedAccessKey,
@@ -55,8 +115,8 @@ function AddOrEditAuthConfig({
     const resultantApi = {
       request: authApis[selectedApi].request,
       response: authApis[selectedApi].response,
-      // operation_id: authApis[selectedApi].operation_id,
-      operation_id: "new_auth_api",
+      operation_id: authApis[selectedApi].operation_id,
+      // operation_id: "new_auth_api",
       tags: authApis[selectedApi].tags,
       summary: authApis[selectedApi].summary,
       auth_api_type: selectedType,
@@ -65,7 +125,7 @@ function AddOrEditAuthConfig({
       flow: flow,
       token_store: token_store,
     };
-
+    await appendToAuthApi(resultantApi,"add")
   };
 
   return (
@@ -89,59 +149,62 @@ function AddOrEditAuthConfig({
           <img src={close} alt="" height={24} className="mx-2" />
         </Button>
       </div>
-      {authApis && !isEditMode ? (
+      {selectedApiInfo  ? 
         // {it should be available api instead of authapi }
         <div>
           <Form>
-            <SelectApi
-              availableApis={authApis}
-              selectedApi={selectedApi}
-              onSelectApi={setSelectedApi}
+            <Form.Control
+              type="text"
+              value={selectedApiInfo.operation_id}
+              name="operation_id"
+              onChange={(e) => onValueChanges("operation_id",e.target.value)}
             />
-            {selectedApi && (
-              <div>
-                <SelectType
-                  selectedType={selectedType}
-                  onSelectType={setSelectedType}
-                />
-                <SelectAuthentication
-                  selectedAuthentication={selectedAuthentication}
-                  onSelectAuthentication={setSelectedAuthentication}
-                />
-                {selectedAuthentication === "oauth2" && (
-                  <>
-                    <SelectFlow
-                      selectedFlow={selectedFlow}
-                      onSelectFlow={setSelectedFlow}
-                      selectedAuthentication={selectedAuthentication}
-                    />
-                    <AuthorizationUrls
-                      authorizationUrl={authorizationUrl}
-                      tokenUrl={tokenUrl}
-                      refreshUrl={refreshUrl}
-                      onSetAuthorizationUrl={setAuthorizationUrl}
-                      onSetTokenUrl={setTokenUrl}
-                      onSetRefreshTokenUrl={setRefreshUrl}
-                      selectedFlow={selectedFlow}
-                      selectedAuthentication={selectedAuthentication}
-                    />
-                  </>
-                )}
-                <SelectTokenStorage
-                  selectedTokenStorageMethod={selectedTokenStorageMethod}
-                  onSelectTokenStorage={setSelectedTokenStorageMethod}
-                />
-                {selectedTokenStorageMethod && (
-                  <SelectKey
-                    selectedAccessKey={selectedAccessKey}
-                    onSetAccessKey={setSelectedAccessKey}
-                    selectedRefreshKey={selectedRefreshKey}
-                    onSetRefreshKey={setSelectedRefreshKey}
-                    tokenStorageMethod={selectedTokenStorageMethod}
+            <CustomButtonGroup options={selectTypes}  selectedButton = {selectedApiInfo.auth_api_type} onButtonClick={onValueChanges} formId = "auth_api_type" title= "Select Type:">
+
+            </CustomButtonGroup>
+            {/* <SelectType
+              value={}
+              selectedType={selectedType}
+              onSelectType={setSelectedType}
+            /> */}
+            <CustomButtonGroup options={authenticationTypes}  selectedButton = {selectedApiInfo.authentication_type} onButtonClick={onValueChanges} formId = "authentication_type" title= "Authentication Scheme:">
+
+            </CustomButtonGroup>
+
+             
+              {selectedAuthentication === "oauth2" && (
+                <>
+                  <SelectFlow
+                    selectedFlow={selectedFlow}
+                    onSelectFlow={setSelectedFlow}
+                    selectedAuthentication={selectedAuthentication}
                   />
-                )}
-              </div>
-            )}
+                  <AuthorizationUrls
+                    authorizationUrl={authorizationUrl}
+                    tokenUrl={tokenUrl}
+                    refreshUrl={refreshUrl}
+                    onSetAuthorizationUrl={setAuthorizationUrl}
+                    onSetTokenUrl={setTokenUrl}
+                    onSetRefreshTokenUrl={setRefreshUrl}
+                    selectedFlow={selectedFlow}
+                    selectedAuthentication={selectedAuthentication}
+                  />
+                </>
+              )}
+              <SelectTokenStorage
+                selectedTokenStorageMethod={selectedTokenStorageMethod}
+                onSelectTokenStorage={setSelectedTokenStorageMethod}
+              />
+              {selectedTokenStorageMethod && (
+                <SelectKey
+                  selectedAccessKey={selectedAccessKey}
+                  onSetAccessKey={setSelectedAccessKey}
+                  selectedRefreshKey={selectedRefreshKey}
+                  onSetRefreshKey={setSelectedRefreshKey}
+                  tokenStorageMethod={selectedTokenStorageMethod}
+                />
+              )}
+            
             <Button
               className="mt-5"
               variant="secondary"
@@ -151,15 +214,7 @@ function AddOrEditAuthConfig({
             </Button>
           </Form>
         </div>
-      ) : isEditMode ? (
-        <div style={{ overflow: "auto", maxHeight: "80vh" }}>
-          <Custom
-            dummyData={selectedAuthApi}
-            tagsList={["tag1", "tag2", "tag3"]}
-            onClose={onClose}
-          />
-        </div>
-      ) : (
+       : (
         <p>
           No authentication APIs available. Please create APIs in the backend.
         </p>

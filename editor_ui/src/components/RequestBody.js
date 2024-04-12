@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Dropdown, Row, Col } from "react-bootstrap";
 import Body from "./Body.js";
 import RequestBodycss from "../css/RequestBody.css";
-
+import {getAuthFileConfig} from '../services/IntermediatesService.js'
 function RequestBody({ onChange, requestBody }) {
   const [method, setMethod] = useState(requestBody.method);
   const [parameters, setParameters] = useState(requestBody.parameters || []);
@@ -20,6 +20,9 @@ function RequestBody({ onChange, requestBody }) {
   });
   const [body, setBody] = useState(requestBody.body);
 const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
+const [apis, setApis] = useState("");
+const [loginApis, setLoginApis] = useState([]);
+  const [tokenApis, setTokenApis] = useState([]);
 
   const handleBodyChange = (updatedBody) => {
     const newBody = { ...body, ...updatedBody };
@@ -82,6 +85,7 @@ const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
       ...auth,
       [property]: value,
     });
+    setShowAuthDropdowns(true);
     onChange({ ...requestBody, auth: { ...auth, [property]: value } });
   };
 
@@ -127,6 +131,36 @@ const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
       },
     });
   };
+ const handleAuthApiSelect = ()=>{
+  
+ }
+
+  useEffect(()=>{
+    const fetchAuthApis = async () => {
+      try {
+        const data = await getAuthFileConfig("creator");
+        setApis(data.data);
+      } catch (error) {
+        console.error('Error fetching auth APIs:', error);
+      }
+    };
+
+    fetchAuthApis();
+  }, [])
+
+  useEffect(() => {
+    // Filter APIs based on auth_api_type
+    const loginApisFiltered = Object.values(apis).filter(
+      (api) => api.auth_api_type === "LOGIN"
+    );
+    const tokenApisFiltered = Object.values(apis).filter(
+      (api) => api.auth_api_type === "TOKEN"
+    );
+
+    setLoginApis(loginApisFiltered);
+    setTokenApis(tokenApisFiltered);
+  }, [apis]);
+
   return (
     <div>
       <div className="mb-3 text-dark requestbody">
@@ -427,18 +461,57 @@ const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
 
  {showAuthDropdowns && (
   <>
-          <Form.Label style={{ fontWeight: "bold" }} className="mt-3">
-            {auth.type === "Basic" ? "Login API:" : "Token API:"}
+          <Row>
+        <Col sm={3}>
+          <Form.Label style={{ fontWeight: "bold" }} className="mt-2">
+            Login API:
           </Form.Label>
-          <Dropdown onSelect={handleAuthDropdownSelect}>
-            <Dropdown.Toggle variant="secondary" id="apiDropdown">
+        </Col>
+        <Col sm={9}>
+          <Dropdown onSelect={handleAuthApiSelect} className="mt-2">
+            <Dropdown.Toggle variant="secondary" id="loginApiDropdown">
               Select API
             </Dropdown.Toggle>
             <Dropdown.Menu style={{ textAlign: "center" }}>
-              <Dropdown.Item eventKey="Login API" className="dropdownitem">Login API</Dropdown.Item>
-              <Dropdown.Item eventKey="Token API" className="dropdownitem">Token API</Dropdown.Item>
+              {loginApis.map((api) => (
+                <Dropdown.Item
+                  key={api.id}
+                  eventKey={api.id}
+                  className="dropdownitem"
+                >
+                  {api.operation_id}
+                </Dropdown.Item>
+              ))}
             </Dropdown.Menu>
           </Dropdown>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col sm={3}>
+          <Form.Label style={{ fontWeight: "bold" }} className="mt-2">
+            Token API:
+          </Form.Label>
+        </Col>
+        <Col sm={9}>
+          <Dropdown onSelect={handleAuthApiSelect} className="mt-2">
+            <Dropdown.Toggle variant="secondary" id="tokenApiDropdown">
+              Select API
+            </Dropdown.Toggle>
+            <Dropdown.Menu style={{ textAlign: "center" }}>
+              {tokenApis.map((api) => (
+                <Dropdown.Item
+                  key={api.id}
+                  eventKey={api.id}
+                  className="dropdownitem"
+                >
+                  {api.operation_id}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        </Col>
+      </Row>
         </>
       )}
     

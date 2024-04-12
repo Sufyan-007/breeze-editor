@@ -11,34 +11,28 @@ import {
 import RequestBody from "./RequestBody";
 import ResponseBody from "./ResponseBody";
 import Customcss from "../css/Custom.css";
-
-function Custom({ dummyData, tagsList = [] }) {
+function Custom({ dummyData, tagsList = [], onClose, isVisible }) {
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
   const [tags, setTags] = useState(dummyData.tags || []);
   const [summary, setSummary] = useState(dummyData.summary || "");
   const [requestBody, setRequestBody] = useState(dummyData.request);
   const [responseBody, setResponseBody] = useState(dummyData.response);
-  const [show, setShow] = useState(false);
   const [showRequestBodyForm, setShowRequestBodyForm] = useState(false);
   const [showResponseBodyForm, setShowResponseBodyForm] = useState(false);
-
+  const [show, setShow] = useState(true);
   const handleOperationIdChange = (e) => {
     setOperationId(e.target.value);
   };
-
   const handleTagsChange = (e) => {
     const newTags = e.target.value.split(",").map((tag) => tag.trim());
     setTags(newTags);
   };
-
   const handleSummaryChange = (e) => {
     setSummary(e.target.value);
   };
-
   const handleTagSelect = (tag) => {
     setTags([tag]);
   };
-
   const handleRequestBodyChange = (newData) => {
     setRequestBody((prevState) => {
       return {
@@ -47,17 +41,19 @@ function Custom({ dummyData, tagsList = [] }) {
       };
     });
   };
-
   const handleResponseBodyChange = (newData) => {
     setResponseBody((prevState) => ({
       ...prevState,
       ...newData,
     }));
   };
-
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    if (onClose) {
+      onClose();
+    }
+  };
   const handleShow = () => setShow(true);
-
   const toggleRequestBodyForm = () => {
     setShowRequestBodyForm(!showRequestBodyForm);
     setShowResponseBodyForm(false);
@@ -65,7 +61,6 @@ function Custom({ dummyData, tagsList = [] }) {
       setRequestBody(dummyData.request);
     }
   };
-
   const toggleResponseBodyForm = () => {
     setShowResponseBodyForm(!showResponseBodyForm);
     setShowRequestBodyForm(false);
@@ -73,7 +68,6 @@ function Custom({ dummyData, tagsList = [] }) {
       setResponseBody(dummyData.response);
     }
   };
-
   async function handleSubmit(e) {
     e.preventDefault();
     console.log("Form submitted with data:", {
@@ -83,11 +77,10 @@ function Custom({ dummyData, tagsList = [] }) {
       requestBody,
       responseBody,
     });
-
     const data = {
       filename: dummyData.tags[0] + "Service.json",
       modified_api: {
-        is_authentication_api: dummyData.is_authentication_api,
+        isAuthenticationApi: dummyData.isAuthenticationApi,
         isLogin: dummyData.isLogin,
         isToken: dummyData.isToken,
         operation_id: operationId,
@@ -97,7 +90,6 @@ function Custom({ dummyData, tagsList = [] }) {
         response: responseBody,
       },
     };
-
     try {
       const response = await fetch(
         "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/",
@@ -115,13 +107,9 @@ function Custom({ dummyData, tagsList = [] }) {
       console.error("Error:", error);
     }
   }
-
+  console.log("show before rendere", show);
   return (
     <div>
-      <Button variant="primary" onClick={handleShow}>
-        Launch
-      </Button>
-
       <Offcanvas
         show={show}
         onHide={handleClose}
@@ -147,7 +135,6 @@ function Custom({ dummyData, tagsList = [] }) {
             </Col>
           </Row>
         </Offcanvas.Header>
-
         <Offcanvas.Body>
           <Row className="d-flex">
             <Col className="sidebar-offcanvas col-1">
@@ -176,7 +163,6 @@ function Custom({ dummyData, tagsList = [] }) {
                         </Col>
                       </Row>
                     </Form.Group>
-
                     <Form.Group
                       className="mt-3 mb-3 custom-form-group"
                       controlId="formTags"
@@ -219,7 +205,6 @@ function Custom({ dummyData, tagsList = [] }) {
                         </Col>
                       </Row>
                     </Form.Group>
-
                     <Form.Group
                       className="mb-3 mt-3 custom-form-group"
                       controlId="formSummary"
@@ -245,7 +230,6 @@ function Custom({ dummyData, tagsList = [] }) {
                     </Form.Group>
                   </>
                 )}
-
                 {showRequestBodyForm && (
                   <Form.Group
                     className="mb-3 custom-form-group"
@@ -257,7 +241,6 @@ function Custom({ dummyData, tagsList = [] }) {
                     />
                   </Form.Group>
                 )}
-
                 {showResponseBodyForm && (
                   <Form.Group
                     className="mb-3 custom-form-group"
