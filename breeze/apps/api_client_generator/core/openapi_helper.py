@@ -1,4 +1,6 @@
-import yaml
+import yaml, uuid
+import yaml, uuid
+
 from ..helper_models.base_models.api_model import ApiModel
 from ..helper_models.base_models.auth_api_model import AuthApiModel
 from ..helper_models.base_models.request import Request
@@ -99,7 +101,7 @@ class OpenApiHelper:
                             )
                             request_obj.url = url
                             api_model = AuthApiModel(
-                                operation_id=schema_name+"_implicit",
+                                operation_id =schema_name+"_implicit",
                                 tags=["authorization"],
                                 request=request_obj,
                                 response=response_obj,
@@ -168,21 +170,23 @@ class OpenApiHelper:
 
     @staticmethod
     def load_auth_model(json_data,is_new=False):
-        id=json_data.get("id") 
+        id=json_data.get("id", "") 
         if is_new:
             id=generate_uuid_as_key()
         
         auth = Auth(**json_data.get("request").get("auth",{}))
         url = Url(**json_data.get("request").get("url",{}))
         body = Body(**json_data.get("request").get("body",{}))
-        request_obj = Request(json_data.get("request").get("mothod"),
+        request_obj = Request(json_data.get("request").get("method"),
                               auth,
                               json_data.get("request").get("headers"),
                               json_data.get("request").get("parameters"),
                               url,
                               body
                               ),
-        response_obj = Response(**json_data.get("response"))
+        response_objs = []
+        for response_data in json_data.get("response", []):
+            response_objs.append(Response(**response_data))
         operation_id = json_data.get("operation_id","")
         tags =  json_data.get("tags",[])
         summary =  json_data.get("summary","")
@@ -198,7 +202,7 @@ class OpenApiHelper:
         return AuthApiModel(id=id,operation_id=operation_id,tags=tags,auth_api_type=auth_api_type,
                             authentication_type=authentication_type,
                             is_authorization_url=is_authorization_url,flow=flow,
-                            request=request_obj,response=response_obj,summary=summary,
+                            request=request_obj,response=response_objs,summary=summary,
                             token_store=token_store)
     
         
@@ -216,7 +220,7 @@ class OpenApiHelper:
             json_data = json.load(fp)
             ## append to existing json data 
             for model in auth_models:
-                key = model.id
+                key = model.operation_id # was model.id
                 json_data[key] = model
             
             ## write all data back to file

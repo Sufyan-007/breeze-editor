@@ -1,0 +1,8 @@
+element.style {
+    padding: 20px;
+    background-color: currentcolor;
+    text-decoration-color: white;
+}
+a.dropdownitem.dropdown-item{
+    color:black;
+}

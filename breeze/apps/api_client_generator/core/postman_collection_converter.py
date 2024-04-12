@@ -49,14 +49,14 @@ class PostmanCollectionConverter:
 
             # call to url data creation and parameters creation
             url_data = request_data.get("url", "")
-            url = []
+            url = {}
             parameters = []
             if url_data:
                 url = self._create_url(url_data=url_data)
                 parameters = self._create_parameters(url_data=url_data)
 
             # call to body creation
-            body = []
+            body = {}
             if request_data.get("body"):
                 body_data = request_data.get("body")
                 body = self._create_body(body_data=body_data)

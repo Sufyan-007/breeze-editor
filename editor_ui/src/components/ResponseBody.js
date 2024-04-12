@@ -1,5 +1,6 @@
 import React, { useState , useEffect} from "react";
-import {Form} from 'react-bootstrap';
+import {Form, Button, ButtonGroup, Row , Col} from 'react-bootstrap';
+import responsebodycss from '../css/ResponseBody.css'
 
 function ResponseBody({onChange, responseBody}) {
    const [status, setStatus] = useState(responseBody.status || "");
@@ -36,131 +37,153 @@ function ResponseBody({onChange, responseBody}) {
  };
 
   return (
-    <div
-      className="mb-3 text-dark"
-      style={{ backgroundColor: "#e0e0e0", padding: "20px" }}
-    >
+    <div className="mb-3 text-dark" style={{ backgroundColor: "#212529" }}>
       <Form>
         <Form.Group>
-          <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-            Status
-          </Form.Label>
-          <Form.Check
-            type="radio"
-            label="200"
-            name="status"
-            value="200"
-            checked={status === "200"}
-            onChange={() => handleStatusChange("200")}
-            inline
-          />
-          <Form.Check
-            type="radio"
-            label="201"
-            name="status"
-            value="201"
-            checked={status === "201"}
-            onChange={() => handleStatusChange("201")}
-            inline
-          />
-          <Form.Check
-            type="radio"
-            label="403"
-            name="status"
-            value="403"
-            checked={status === "403"}
-            onChange={() => handleStatusChange("403")}
-            inline
-          />
-          <Form.Check
-            type="radio"
-            label="500"
-            name="status"
-            value="500"
-            checked={status === "500"}
-            onChange={() => handleStatusChange("500")}
-            inline
-          />
+          <Row>
+            <Col sm={3}>
+              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+                Status
+              </Form.Label>
+            </Col>
+            <Col sm={9}>
+              <ButtonGroup>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleStatusChange("200")}
+                  active={status === "200"}
+                >
+                  200
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleStatusChange("201")}
+                  active={status === "201"}
+                >
+                  201
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleStatusChange("403")}
+                  active={status === "403"}
+                >
+                  403
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleStatusChange("500")}
+                  active={status === "500"}
+                >
+                  500
+                </Button>
+              </ButtonGroup>
+            </Col>
+          </Row>
         </Form.Group>
+
         <Form.Group>
-          <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-            Content Type
-          </Form.Label>
-          <Form.Check
-            type="radio"
-            label="JSON"
-            name="content_type"
-            value="application/json"
-            checked={contentType === "application/json"}
-            onChange={() => handleContentTypeChange("application/json")}
-            inline
-          />
-          <Form.Check
-            type="radio"
-            label="TEXT"
-            name="content_type"
-            value="text/plain"
-            checked={contentType === "text/plain"}
-            onChange={() => handleContentTypeChange("text/plain")}
-            inline
-          />
-          <Form.Check
-            type="radio"
-            label="HTML"
-            name="content_type"
-            value="text/html"
-            checked={contentType === "text/html"}
-            onChange={() => handleContentTypeChange("text/html")}
-            inline
-          />
-          <Form.Check
-            type="radio"
-            label="XML"
-            name="content_type"
-            value="application/xml"
-            checked={contentType === "application/xml"}
-            onChange={() => handleContentTypeChange("application/xml")}
-            inline
-          />
-          <Form.Check
-            inline
-            type="radio"
-            label="Javascript"
-            name="content_type"
-            value="application/javascript"
-            checked={contentType === "application/javascript"}
-            onChange={() => handleContentTypeChange("application/javascript")}
-          />
+          <Row>
+            <Col sm={3}>
+              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+                Content Type
+              </Form.Label>
+            </Col>
+            <Col sm={9}>
+              <ButtonGroup>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleContentTypeChange("application/json")}
+                  active={contentType === "application/json"}
+                >
+                  JSON
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleContentTypeChange("text/plain")}
+                  active={contentType === "text/plain"}
+                >
+                  TEXT
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleContentTypeChange("text/html")}
+                  active={contentType === "text/html"}
+                >
+                  HTML
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleContentTypeChange("application/xml")}
+                  active={contentType === "application/xml"}
+                >
+                  XML
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    handleContentTypeChange("application/javascript")
+                  }
+                  active={contentType === "application/javascript"}
+                >
+                  Javascript
+                </Button>
+              </ButtonGroup>
+            </Col>
+          </Row>
         </Form.Group>
+
         <Form.Group>
-          <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-            Schema Name:
-          </Form.Label>
-          <Form.Control
-            type="text"
-            value={responseBody.schema_name}
-            onChange={(e) => handleSchemaNameChange(e.target.value)}
-          />
+          <Row>
+            <Col sm={3}>
+              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+                Schema Name:
+              </Form.Label>
+            </Col>
+            <Col sm={9}>
+              <Form.Control
+                className="form-control"
+                type="text"
+                value={responseBody.schema_name}
+                onChange={(e) => handleSchemaNameChange(e.target.value)}
+              />
+            </Col>
+          </Row>
         </Form.Group>
+
         <Form.Group>
-          <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-            Raw Content:
-          </Form.Label>
-          <Form.Control
-            type="text"
-            value={responseBody.raw_content}
-            onChange={(e) => handleRawContentChange(e.target.value)}
-          />
+          <Row>
+            <Col sm={3}>
+              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+                Raw Content:
+              </Form.Label>
+            </Col>
+            <Col sm={9}>
+              <Form.Control
+                className="form-control"
+                type="text"
+                value={responseBody.raw_content}
+                onChange={(e) => handleRawContentChange(e.target.value)}
+              />
+            </Col>
+          </Row>
         </Form.Group>
+
         <Form.Group>
-          <Form.Label style={{ fontWeight: "bold" }} className="m-3">
-            File:
-          </Form.Label>
-          <Form.Control
-            type="text"
-            value={responseBody.file}
-            onChange={(e) => handleFileChange(e.target.value)}
-          />
+          <Row>
+            <Col sm={3}>
+              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+                File:
+              </Form.Label>
+            </Col>
+            <Col sm={9}>
+              <Form.Control
+                className="form-control"
+                type="text"
+                value={responseBody.file}
+                onChange={(e) => handleFileChange(e.target.value)}
+              />
+            </Col>
+          </Row>
         </Form.Group>
       </Form>
     </div>

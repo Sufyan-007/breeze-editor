@@ -49,18 +49,22 @@ class ApiClientGenerator(View):
                 return JsonResponse({"error": "Invalid collection type or file format."}, status=400)
 
         except Exception as e:
+            import traceback
+            print(traceback.format_exc())
             return JsonResponse({"error": str(e)}, status=400)
         
         
     
-    def get(self, request, projectName):
+    def get(self, request, projectName,files_only):
         folder_path = f"{CONFIG_PATH}/{projectName}/generated_intermediate_json"
         files_with_apis = []
 
         try:
             # Get list of files in the folder
             files = os.listdir(folder_path)
-
+            if files_only and files_only == 'true':
+                return JsonResponse({"files":  files}, status=200)
+            
             for filename in files:
                 full_file_path = os.path.join(folder_path, filename)
 
