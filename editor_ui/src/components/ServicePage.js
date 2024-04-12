@@ -148,7 +148,7 @@ export function ServicePage() {
           className="row flex-grow-1 overflow-hidden  "
           style={{ backgroundColor: "#303033" }}
         >
-          <Custom dummyData={dummyData} />
+          {/* <Custom dummyData={dummyData} /> */}
           <div className="col-9 overflow-y-auto h-100 fs-6 text-light">
             {showCustomPanel && (
               <div className="custom-panel-container">

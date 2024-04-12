@@ -40,33 +40,12 @@ export default function Body({ onChange, body }) {
     onChange({ ...body, raw_content: value });
   };
 
-  // const handleFileChange = (value) => {
-  //   setFile(value);
-  //   onChange({ ...body, file: value });
-  // };
-
   const handleFormDataChange = (index, name, value) => {
     const updatedFormData = [...formdata];
     updatedFormData[index][name] = value;
     setFormData(updatedFormData);
     onChange({ ...body, formdata: updatedFormData });
   };
-
-  // const handleFileInputChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     // Check if the file extension is not .bin
-  //     if (!file.name.toLowerCase().endsWith(".bin")) {
-  //       // Display an alert to the user
-  //       alert("Wrong file selected. Please select a .bin file.");
-  //       // Clear the file input field
-  //       e.target.value = null;
-  //       return;
-  //     }
-  //     setFile(file);
-  //     onChange({ ...body, file: file });
-  //   }
-  // };
 
   const removeFormData = (index) => {
     const updatedFormdata = [...formdata];
@@ -108,20 +87,19 @@ export default function Body({ onChange, body }) {
               Body:
             </Form.Label>
           </Col>
-          {/* Radio buttons for ModeEnum */}
           <Col sm={9}>
             <div>
               <Row>
                 <Col sm={2}>
                   <Form.Label
                     style={{ fontWeight: "bold" }}
-                    className="mt-3 p-1"
+                    className="mt-3"
                   >
                     Mode:
                   </Form.Label>
                 </Col>
                 <Col sm={7}>
-                  <ButtonGroup className="">
+                  <ButtonGroup className="mt-1">
                     <Button
                       variant="secondary"
                       onClick={() => handleModeChange("raw")}
@@ -169,13 +147,13 @@ export default function Body({ onChange, body }) {
                     <Col sm={2}>
                       <Form.Label
                         style={{ fontWeight: "bold" }}
-                        className="mt-3 p-1"
+                        className="mt-3"
                       >
                         Content Type:
                       </Form.Label>
                     </Col>
                     <Col sm={10}>
-                      <ButtonGroup className="">
+                      <ButtonGroup className="mt-1">
                         <Button
                           variant="secondary"
                           onClick={() =>
@@ -256,7 +234,7 @@ export default function Body({ onChange, body }) {
                         Raw Content:
                       </Form.Label>
                     </Col>
-                    <Col sm={7} className="">
+                    <Col sm={7} className="mt-1">
                       <Form.Control
                         style={{
                           maxWidth: "30vw",

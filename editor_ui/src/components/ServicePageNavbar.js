@@ -9,7 +9,8 @@ import AuthenticationConfig from "./AuthenticationConfig";
 export default function ServicePageNavbar(props) {
   const [showServicesList, setShowServicesList] = useState(false);
   const [showAuthenticationConfig, SetShowAuthenticationConfig] = useState(false);
-
+  const [showApiList, setShowApiList]=useState(false);
+  
   const toggleServicesList = () => {
     setShowServicesList(!showServicesList);
     SetShowAuthenticationConfig(false)
@@ -17,6 +18,7 @@ export default function ServicePageNavbar(props) {
   const toggleAuthenticationConfig = () =>{
     SetShowAuthenticationConfig(!showAuthenticationConfig)
     setShowServicesList(false)
+    setShowApiList(false);
   }
 
   return (

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { fetchIntermediate } from "../services/IntermediatesService";
 import { Table, Pagination } from "react-bootstrap";
-import DeleteIcon from "../assets/icons/deleteicon.svg";
+import DeleteIcon from "../assets/icons/delete.svg";
 import EditIcon from "../assets/icons/edit.svg";
 import { current } from "@reduxjs/toolkit";
-import CustomPanel from "./CustomPanel";
+import Custom from "./ Custom";
+
 
 export default function ServiceLists() {
   const [fetchedIntermediates, setFetchedIntermediates] = useState([]);
@@ -28,52 +29,27 @@ export default function ServiceLists() {
   // Calculate total count of APIs
   const totalCount = fetchedIntermediates.reduce(
     (total, current) => total + current.apis.length,
-    0 // inital value of 0 for total count 
+    0 // inital value of 0 for total count
   );
-
 
   // Logic to get current items based on pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = fetchedIntermediates && fetchedIntermediates
-    .flatMap((service) => service.apis)
-    .slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems =
+    fetchedIntermediates &&
+    fetchedIntermediates
+      .flatMap((service) => service.apis)
+      .slice(indexOfFirstItem, indexOfLastItem);
 
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  console.log(fetchedIntermediates,"fetchedIntermediate");
+  console.log(fetchedIntermediates, "fetchedIntermediate");
 
-  const handleEditClick = (api) =>{
+  const handleEditClick = (api) => {
     setSelectedApi(api); //set the selected API in the state
-  }
+  };
 
-   const dummyData = {
-     operation_id: "get orders",
-     tags: [],
-     request: {
-       method: "get",
-       auth: null,
-       headers: [
-         {
-           key: "Authorization",
-           value:
-             "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U",
-         },
-       ],
-       parameters: [],
-       url: {
-         baseurl: "{{url}}/api/orders/7",
-         host: ["{{url}}"],
-         protocol: "",
-         port: 0,
-         path: ["api", "orders", "7"],
-       },
-       body: [],
-     },
-     response: [],
-     summary: "",
-   };
-
+ 
   return (
     <div className="m-3">
       <Table striped bordered hover variant="dark">
@@ -122,22 +98,33 @@ export default function ServiceLists() {
               );
             })}
         </tbody>
+        
+              <Pagination
+                className=""
+                style={{
+                  // maxWidth: "100%",
+                  backgroundColor: "#212529",
+                  marginTop: "10px",
+                }}
+                >
+                {Array.from(
+                  { length: Math.ceil(totalCount / itemsPerPage) },
+                  (_, i) => (
+                    <Pagination.Item
+                      // style={{ backgroundColor: "#212529", color: "#fff" }}
+                      key={i}
+                      active={i + 1 === currentPage}
+                      onClick={() => paginate(i + 1)}>
+                      {i + 1}
+                    </Pagination.Item>
+                  )
+                )}
+              </Pagination>
+          
       </Table>
-      {selectedApi && <CustomPanel dummyData={dummyData} tagsList={["tag1", "tag2" ]}/>}
-      <Pagination>
-        {Array.from(
-          { length: Math.ceil(totalCount / itemsPerPage) },
-          (_, i) => (
-            <Pagination.Item
-              key={i}
-              active={i + 1 === currentPage}
-              onClick={() => paginate(i + 1)}
-            >
-              {i + 1}
-            </Pagination.Item>
-          )
-        )}
-      </Pagination>
+      {/* {selectedApi && (
+        <Custom dummyData={dummyData} tagsList={["tag1", "tag2"]} />
+      )} */}
     </div>
   );
 }

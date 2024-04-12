@@ -43,6 +43,7 @@ function AuthenticationConfig() {
   const handleDeleteApi = ()=>{
     setShowDeleteModal(false);
   }
+  
 
   const handleClose = ()=>{
     setShowAddOrEditModal(false)
@@ -121,7 +122,12 @@ function AuthenticationConfig() {
       </Modal>
 
       {showAddOrEditModal && <div className='p-5'>
-        <AddOrEditAuthConfig availableApis={available_apis} onClose={handleClose} authApis={auth_apis} selectedUuid = {selectedUuid} mode={mode} />
+        <AddOrEditAuthConfig 
+        availableApis={available_apis} 
+        onClose={handleClose} 
+        authApis={auth_apis} 
+        selectedUuid = {selectedUuid} 
+        mode={mode} />
       </div>}
     </>  
   );

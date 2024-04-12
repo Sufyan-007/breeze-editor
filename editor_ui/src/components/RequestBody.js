@@ -19,6 +19,7 @@ function RequestBody({ onChange, requestBody }) {
     content: requestBody.auth?.content || [{ key: "", value: "", type: "" }],
   });
   const [body, setBody] = useState(requestBody.body);
+const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
 
   const handleBodyChange = (updatedBody) => {
     const newBody = { ...body, ...updatedBody };
@@ -82,6 +83,10 @@ function RequestBody({ onChange, requestBody }) {
       [property]: value,
     });
     onChange({ ...requestBody, auth: { ...auth, [property]: value } });
+  };
+
+  const handleAuthDropdownSelect = (value) => {
+    handleAuthChange("api", value); // Update auth API
   };
 
   // Handle change for individual AuthContent in the list
@@ -404,13 +409,39 @@ function RequestBody({ onChange, requestBody }) {
                     {auth.type}
                   </Dropdown.Toggle>
 
-                  <Dropdown.Menu>
-                    <Dropdown.Item eventKey="No Auth">No Auth</Dropdown.Item>
-                    <Dropdown.Item eventKey="Basic">Basic</Dropdown.Item>
-                    <Dropdown.Item eventKey="Oauth">Oauth</Dropdown.Item>
-                    <Dropdown.Item eventKey="Oauth2">Oauth2</Dropdown.Item>
+                  <Dropdown.Menu style={{ textAlign: "center" }}>
+                    <Dropdown.Item eventKey="No Auth" className="dropdownitem">
+                      No Auth
+                    </Dropdown.Item>
+                    <Dropdown.Item eventKey="Basic" className="dropdownitem">
+                      Basic
+                    </Dropdown.Item>
+                    <Dropdown.Item eventKey="Oauth" className="dropdownitem">
+                      Oauth
+                    </Dropdown.Item>
+                    <Dropdown.Item eventKey="Oauth2" className="dropdownitem">
+                      Oauth2
+                    </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
+
+ {showAuthDropdowns && (
+  <>
+          <Form.Label style={{ fontWeight: "bold" }} className="mt-3">
+            {auth.type === "Basic" ? "Login API:" : "Token API:"}
+          </Form.Label>
+          <Dropdown onSelect={handleAuthDropdownSelect}>
+            <Dropdown.Toggle variant="secondary" id="apiDropdown">
+              Select API
+            </Dropdown.Toggle>
+            <Dropdown.Menu style={{ textAlign: "center" }}>
+              <Dropdown.Item eventKey="Login API" className="dropdownitem">Login API</Dropdown.Item>
+              <Dropdown.Item eventKey="Token API" className="dropdownitem">Token API</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        </>
+      )}
+    
 
                 {/* List of AuthContent inputs */}
                 {auth.content.map((authContent, index) => (

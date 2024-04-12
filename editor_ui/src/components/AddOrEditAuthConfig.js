@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button} from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 import CustomPanel from "./CustomPanel";
 import close from "../assets/icons/close.svg";
 import "../css/AddOrEditAuthConfigStyles.css";
@@ -10,6 +10,7 @@ import AuthorizationUrls from "./AddOrEditAuthConfigSubComponents/AuthorizationU
 import SelectAuthentication from "./AddOrEditAuthConfigSubComponents/SelectAuthentication";
 import SelectTokenStorage from "./AddOrEditAuthConfigSubComponents/SelectTokenStorage";
 import SelectKey from "./AddOrEditAuthConfigSubComponents/SelectKey";
+import Custom from "./ Custom";
 function AddOrEditAuthConfig({
   availableApis,
   onClose,
@@ -34,14 +35,12 @@ function AddOrEditAuthConfig({
   const selectedAuthApi = Object.values(authApis).find(
     (api) => api.uuid === selectedUuid
   );
-
   const handleSave = () => {
     let token_store = {
       store_in: selectedTokenStorageMethod,
       access_token_key: selectedAccessKey,
-      refresh_token_key: selectedRefreshKey
+      refresh_token_key: selectedRefreshKey,
     };
-    
 
     let flow = {};
     flow.authorizationUrl = authorizationUrl;
@@ -56,7 +55,8 @@ function AddOrEditAuthConfig({
     const resultantApi = {
       request: authApis[selectedApi].request,
       response: authApis[selectedApi].response,
-      operation_id: authApis[selectedApi].operation_id,
+      // operation_id: authApis[selectedApi].operation_id,
+      operation_id: "new_auth_api",
       tags: authApis[selectedApi].tags,
       summary: authApis[selectedApi].summary,
       auth_api_type: selectedType,
@@ -66,8 +66,6 @@ function AddOrEditAuthConfig({
       token_store: token_store,
     };
 
-    console.log(resultantApi, "resultant");
-    console.log(authApis[selectedApi], "selected api");
   };
 
   return (
@@ -85,9 +83,7 @@ function AddOrEditAuthConfig({
           alignItems: "center",
         }}>
         <h2 style={{ color: "white" }}>
-          {isEditMode
-            ? "Edit Authentication Configuration"
-            : "Add Authentication Configuration"}
+          {isEditMode ? "" : "Add Authentication Configuration"}
         </h2>
         <Button variant="secondary" onClick={onClose} size="sm">
           <img src={close} alt="" height={24} className="mx-2" />
@@ -135,13 +131,15 @@ function AddOrEditAuthConfig({
                   selectedTokenStorageMethod={selectedTokenStorageMethod}
                   onSelectTokenStorage={setSelectedTokenStorageMethod}
                 />
-                {selectedTokenStorageMethod && <SelectKey
-                  selectedAccessKey={selectedAccessKey}
-                  onSetAccessKey={setSelectedAccessKey}
-                  selectedRefreshKey={selectedRefreshKey}
-                  onSetRefreshKey={setSelectedRefreshKey}
-                  tokenStorageMethod={selectedTokenStorageMethod}
-                />}
+                {selectedTokenStorageMethod && (
+                  <SelectKey
+                    selectedAccessKey={selectedAccessKey}
+                    onSetAccessKey={setSelectedAccessKey}
+                    selectedRefreshKey={selectedRefreshKey}
+                    onSetRefreshKey={setSelectedRefreshKey}
+                    tokenStorageMethod={selectedTokenStorageMethod}
+                  />
+                )}
               </div>
             )}
             <Button
@@ -155,9 +153,10 @@ function AddOrEditAuthConfig({
         </div>
       ) : isEditMode ? (
         <div style={{ overflow: "auto", maxHeight: "80vh" }}>
-          <CustomPanel
+          <Custom
             dummyData={selectedAuthApi}
             tagsList={["tag1", "tag2", "tag3"]}
+            onClose={onClose}
           />
         </div>
       ) : (
