@@ -101,7 +101,7 @@ class PostmanCollectionConverter:
         query_parameters = url_data.get("query", [])
         parameters = [
             Parameter(
-                param_in="query",
+                param_in=param.get("in"),
                 name=param.get("key"),
                 type="string",
                 required=True,

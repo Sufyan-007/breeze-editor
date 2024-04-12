@@ -1,4 +1,6 @@
 from ...helper_models.base_models.api_model import ApiModel
+from ...helper_models.base_models.auth_api_model import AuthApiModel,TokenStore
+
 from ...helper_models.base_models.request import Request
 from ...helper_models.base_models.response import Response
 from ...helper_models.base_models.key_value import KeyValue
@@ -12,6 +14,8 @@ from ...helper_models.enums.status import StatusEnum
 from ...helper_models.enums.content import ContentEnum
 from ...helper_models.enums.mode import ModeEnum
 from ...helper_models.enums.auth_type import AuthTypeEnum
+from ...helper_models.enums.auth_api_type import AuthApiTypeEnum
+from ...helper_models.enums.token_store_type import TokenStoreTypeEnum
 
 
 class ApiModelLoader:
@@ -57,16 +61,15 @@ class ApiModelLoader:
 
     @staticmethod
     def load_response(response_data):
-        if response_data:
-            status = StatusEnum[response_data.get("status").upper()]
-            content_type = ContentEnum[response_data.get(
-                "content_type").upper()]
+        response=[]
+        if response_data and isinstance(response_data,list) and len(response_data) > 0:
+            for r_data in response_data:
+                response = Response(
+                    **r_data
+                )
+        elif response_data and isinstance(response_data,dict):
             response = Response(
-                status,
-                content_type,
-                response_data.get("schema_name"),
-                response_data.get("raw_content"),
-                response_data.get("file"),
+                    **response_data
             )
         else:
             response = []
@@ -74,8 +77,7 @@ class ApiModelLoader:
 
     @staticmethod
     def load_auth(auth_data):
-
-        auth_type = AuthTypeEnum(auth_data.get("type")).name
+        auth_type = auth_data.get("type")
         login_api = auth_data.get("login_api", None)
         token_api = auth_data.get("token_api", None)
         content_data = auth_data.get("content", [])
@@ -108,6 +110,7 @@ class ApiModelLoader:
             )
         return params
 
+    @staticmethod
     def load_url(url_data):
         url = Url(
             baseurl=url_data.get("baseurl"),
@@ -120,8 +123,20 @@ class ApiModelLoader:
         return url
 
     @staticmethod
+    def load_token_store(token_sore):
+        token_sore = TokenStore(
+            store_in=TokenStoreTypeEnum(token_sore.get("store_in")),
+            access_token_key=token_sore.get("access_token_key"),
+            refresh_token_key=token_sore.get("refresh_token_key")
+        )
+        return token_sore
+
+
+    @staticmethod
     def load_body(body_data):
         formdata_list = []
+        if body_data.get("mode") is None:
+            return None
         formdata_data = body_data.get("formdata", [])
 
         for item in formdata_data:
@@ -175,5 +190,27 @@ class ApiModelLoader:
             response=response_obj,
             summary=model_json.get("summary"),  # Summary later,
             is_authentication_api=False
+        )
+        return api_model
+
+    @staticmethod
+    def load_auth_api_model(model_json):
+        request_data = model_json.get("request", {})
+        response_data = model_json.get("response", {})
+        request_obj = ApiModelLoader.load_request(request_data=request_data)
+        response_obj = ApiModelLoader.load_response(
+            response_data=response_data)
+        api_model = AuthApiModel(
+            id=model_json.get("id"),
+            operation_id=model_json.get("operation_id"),
+            tags=model_json.get("tags"),  # Tags remaining
+            request=request_obj,
+            response=response_obj,
+            summary=model_json.get("summary"),  # Summary later,
+            auth_api_type=AuthApiTypeEnum(model_json.get("auth_api_type")) ,
+            authentication_type= AuthTypeEnum(model_json.get("authentication_type")),
+            is_authorization_url=model_json.get("is_authorization_url"),
+            flow=model_json.get("flow"),
+            token_store=ApiModelLoader.load_token_store(model_json.get("token_store"))
         )
         return api_model

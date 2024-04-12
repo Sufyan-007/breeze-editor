@@ -18,24 +18,20 @@ class OpenapiConverter:
         pass
 
     def create_request(self,path, path_data, operation, security_schemes, servers, schemas):
-            method = MethodsEnum[operation.upper()]
-            auth_data = self._create_auth( path_data.get("security"), security_schemes=security_schemes)
-            url_data = self._create_url(path,servers)
-            parameters = self._create_parameters(path_data.get("parameters"))
-            body_data = self._create_body(path_data.get("requestBody", {}), components_schemas= schemas)
-            header_data = []
-            if body_data:
-                header_data.append(KeyValue(key= body_data.content_type.split('/')[-1] if body_data.content_type else None, value=body_data.content_type))
-            else:
-                header_data.append(KeyValue(key= '',value=''))
-            request_obj = Request(method=method, auth=auth_data, headers=header_data, parameters=parameters, url=url_data, body=body_data)
-            
-            return request_obj
-            
-            
+        method = MethodsEnum[operation.upper()]
+        auth_data = self._create_auth( path_data.get("security"), security_schemes=security_schemes)
+        url_data = self._create_url(path,servers)
+        parameters = self._create_parameters(path_data.get("parameters"))
+        body_data = self._create_body(path_data.get("requestBody", {}), components_schemas= schemas)
+        header_data = []
+        if body_data:
+            header_data.append(KeyValue(key= body_data.content_type.split('/')[-1] if body_data.content_type else None, value=body_data.content_type))
+        else:
+            header_data.append(KeyValue(key= '',value=''))
+        request_obj = Request(method=method, auth=auth_data, headers=header_data, parameters=parameters, url=url_data, body=body_data)
         
-
-    
+        return request_obj
+            
 
     def _create_auth(self, auth_data, security_schemes):
         auth= None
@@ -72,7 +68,7 @@ class OpenapiConverter:
         if parameter_data:
             parameters = [
                     Parameter(
-                        param_in="query",
+                        param_in=param.get("in"),
                         name=param.get("name"),
                         type=param.get("schema").get("type"),
                         required=param.get("required"),
@@ -84,11 +80,14 @@ class OpenapiConverter:
 
     def _create_url(self,path, url_data):
         paths = path.split("/")
+        primary_url = {}
+        if url_data is not None:
+            primary_url = url_data[0] 
         url = Url(
-                baseurl= url_data[0].get("url"), 
+                baseurl= primary_url.get("url",""), 
                 host= '',
                 protocol= '', 
-                port= url_data[0].get("port"),
+                port= primary_url.get("port",""),
                 path= paths,
                 url_env=""
             )
@@ -195,19 +194,15 @@ class OpenapiConverter:
 
         return schema
 
-
-
-
-
     
     def _create_headers(self, header_data):
         pass
     
-    
-    
     def create_response(self, path_data, operation):
         operation_responses = path_data.get("responses", {})
         responses = []
+        if operation_responses is None:
+            return {}
         for status, data in operation_responses.items():
             content_type = None
             schema_name = None

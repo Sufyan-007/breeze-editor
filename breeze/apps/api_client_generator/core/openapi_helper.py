@@ -3,11 +3,15 @@ from ..helper_models.base_models.api_model import ApiModel
 from ..helper_models.base_models.auth_api_model import AuthApiModel
 from ..helper_models.base_models.request import Request
 from ..helper_models.base_models.response import Response 
+from ..helper_models.enums.auth_type import AuthTypeEnum
+from ..helper_models.enums.auth_api_type import AuthApiTypeEnum
+import traceback
 
 from ..helper_models.base_models.url import Url
 from ..helper_models.base_models.body import Body
 from ..helper_models.base_models.auth import Auth
-
+from ..helper_models.base_models.auth_api_model import TokenStore
+from ..helper_models.enums.token_store_type import TokenStoreTypeEnum
 from ..helper_models.base_models.url import Url
 import os
 from ..helper_models.encoder import EnhancedJSONEncoder
@@ -23,9 +27,10 @@ class OpenApiHelper:
         auth = Auth(None,[],None,None)
         url = Url(None,None,None,None,[],None)
         body = Body(None,None,None,None,None,None,None,None)
-        request_obj = Request(None,auth,[],[],url,body)
+        request_obj = Request("post",auth,[],[],url,body)
         response_obj = Response(None,None,None,None,None)
-    
+        token_store = TokenStore(store_in=TokenStoreTypeEnum.NONE,access_token_key="",refresh_token_key="")
+
         auth_api_models = []
         if schema_name == "basicAuth":
             
@@ -35,12 +40,12 @@ class OpenApiHelper:
                 request=request_obj,
                 response=response_obj,
                 summary="summary",
-                auth_api_type= "",
+                auth_api_type= None,
                 id=id,
-                authentication_type= "BASIC",
+                authentication_type= AuthTypeEnum["BASIC"],
                 is_authorization_url=False,
                 flow= {},
-                token_store = {}
+                token_store = token_store
     
             )
             auth_api_models.append(api_model)
@@ -52,12 +57,12 @@ class OpenApiHelper:
                 request=request_obj,
                 response=response_obj,
                 summary="summary",
-                auth_api_type= "LOGIN",
+                auth_api_type= AuthApiTypeEnum["LOGIN"],
                 id=id,
-                authentication_type= "BEARER",
+                authentication_type= AuthTypeEnum["BEARER"],
                 is_authorization_url = False,
                 flow= {},
-                token_store = {}
+                token_store = token_store
             )
             auth_api_models.append(api_model_login)
 
@@ -67,12 +72,12 @@ class OpenApiHelper:
                 request=request_obj,
                 response=response_obj,
                 summary="summary",
-                auth_api_type= "REFRESH",
-                authentication_type= "BEARER",
+                auth_api_type= AuthApiTypeEnum["REFRESH"],
+                authentication_type= AuthTypeEnum["BEARER"],
                 is_authorization_url = False,
                 id=id,
                 flow= {},
-                token_store = {}
+                token_store = token_store
             )
             auth_api_models.append(api_model_refresh)
 
@@ -99,12 +104,12 @@ class OpenApiHelper:
                                 request=request_obj,
                                 response=response_obj,
                                 summary="summary",
-                                auth_api_type= "LOGIN",
-                                authentication_type= "OAUTH2",
+                                auth_api_type= AuthApiTypeEnum["LOGIN"],
+                                authentication_type= AuthTypeEnum["OAUTH2"],
                                 is_authorization_url = True,
                                 flow = obj,
                                 id=id,
-                                token_store = {}
+                                token_store = token_store
                             )
                             auth_api_models.append(api_model)
                     
@@ -126,11 +131,11 @@ class OpenApiHelper:
                                 request=request_obj,
                                 response=response_obj,
                                 summary="summary",
-                                auth_api_type= "LOGIN",
-                                authentication_type= "OAUTH2",
+                                auth_api_type= AuthApiTypeEnum["LOGIN"],
+                                authentication_type= AuthTypeEnum["OAUTH2"],
                                 flow = obj,
                                 id=id,
-                                token_store = {}
+                                token_store = token_store
                             )
                             auth_api_models.append(api_model)
                         if "refreshUrl" in obj and obj.get("refreshUrl") is not None:
@@ -150,11 +155,11 @@ class OpenApiHelper:
                                 request=request_obj,
                                 response=response_obj,
                                 summary="summary",
-                                auth_api_type= "REFRESH",
-                                authentication_type= "OAUTH2",
+                                auth_api_type= AuthApiTypeEnum["REFRESH"],
+                                authentication_type= AuthTypeEnum["OAUTH2"],
                                 flows = [],
                                 id=id,
-                                token_store = {}
+                                token_store = token_store
                             )
                             auth_api_models.append(api_model)
                     
@@ -181,11 +186,15 @@ class OpenApiHelper:
         operation_id = json_data.get("operation_id","")
         tags =  json_data.get("tags",[])
         summary =  json_data.get("summary","")
-        auth_api_type  =  json_data.get("auth_api_type","")
-        authentication_type =  json_data.get("authentication_type","")
+        auth_api_type = AuthApiTypeEnum(json_data.get("auth_api_type")).name
+        auth_api_type = AuthApiTypeEnum[auth_api_type]
+        
+        authentication_type = AuthTypeEnum(json_data.get("authentication_type")).name
+        authentication_type = AuthTypeEnum[authentication_type]
+        
         is_authorization_url =  json_data.get("is_authorization_url",False)
         flow =  json_data.get("flow",{})
-        token_store =  json_data.get("token_store",{})
+        token_store =  TokenStore(**json_data.get("token_store",{}))
         return AuthApiModel(id=id,operation_id=operation_id,tags=tags,auth_api_type=auth_api_type,
                             authentication_type=authentication_type,
                             is_authorization_url=is_authorization_url,flow=flow,
@@ -221,12 +230,11 @@ class OpenApiHelper:
             if not json_data:
                 raise ValueError("Empty JSON data")
 
-            openapi_data = yaml.safe_load(json_data) if json_data.endswith('.yml') else yaml.safe_load(json_data)
-
+            openapi_data = yaml.safe_load(json_data)
             result = {}
             paths = openapi_data.get('paths', {})
             ## load seperate api model for the security schema if present
-            security_schemes = openapi_data.get("components").get("securitySchemes",{})
+            security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
             auth_apis = []
             for schema_name , schema in security_schemes.items():
                 auth_api_models = OpenApiHelper.generate_model_for_security_schema(schema_name,schema)
@@ -235,10 +243,12 @@ class OpenApiHelper:
             ## append this auth api configuration to the auth json file
             OpenApiHelper.append_auth_json(auth_apis)
                 
-            tags_map = {}
+            tags_map = {
+                "default" : []
+            }
             for path, path_data in paths.items():
                 for operation, operation_data in path_data.items():
-                    tags = operation_data.get("tags", [])
+                    tags = operation_data.get("tags", None)
                     if isinstance(tags,list):
                         for tag in tags:
                             if tag not in tags_map:
@@ -249,6 +259,9 @@ class OpenApiHelper:
                         if tags not in tags_map:
                             tags_map[tags] = []
                         tags_map[tags].append((path, operation, operation_data))
+                    else:
+                        operation_data["tag"] = "default"
+                        tags_map["default"].append((path, operation, operation_data))
 
             for tag, tag_operations in tags_map.items():
                 api_models = []
@@ -258,9 +271,9 @@ class OpenApiHelper:
                         path=path,
                         path_data=operation_data,
                         operation=operation,
-                        security_schemes=openapi_data.get("components").get("securitySchemes"),
+                        security_schemes=openapi_data.get("components",{}).get("securitySchemes",{}),
                         servers=openapi_data.get("servers"),
-                        schemas=openapi_data.get("components").get("schemas"))
+                        schemas=openapi_data.get("components",{}).get("schemas",{}))
                     response_obj = openApiConverter.create_response(
                         path_data=operation_data,
                         operation=operation)
@@ -282,5 +295,6 @@ class OpenApiHelper:
             return result
 
         except Exception as e:
+            print(traceback.format_exc())
             return {"error": str(e)}
 

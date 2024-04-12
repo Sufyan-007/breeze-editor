@@ -7,13 +7,14 @@ from ..helper_models.base_models.body import Body
 from ..helper_models.base_models.parameter import Parameter
 from ..helper_models.base_models.auth import Auth, AuthContent
 from ..helper_models.base_models.formdata import Formdata
-from ..helper_models.enums.methods import MethodsEnum
-from ..helper_models.enums.status import StatusEnum
+from ..helper_models.enums.token_store_type import TokenStoreTypeEnum
+from ..helper_models.enums.auth_api_type import AuthApiTypeEnum
 from ..helper_models.enums.content import ContentEnum
 from ..helper_models.enums.mode import ModeEnum
 from ..helper_models.enums.params_in import ParamsInEnum
 
 from ..helper_models.enums.auth_type import AuthTypeEnum
+from ..helper_models.enums.token_store_type import TokenStoreTypeEnum
 from .helpers.api_model_loader import ApiModelLoader
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import read_config_file, read_file_json, write_file
@@ -49,7 +50,7 @@ REQUEST_INTERCEPTOR = """
     // Add a request interceptor
     api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token');
+        const token = {FETCH_TOKEN};
         if (token) {
             {AUTH_CODE}
         }
@@ -77,6 +78,12 @@ class ReactApiClientGenerator:
     def _manage_service_tags(self, tags, react_function, map_services):
         # prepare dict obj for each tag
         # each react functions will be bind to a tag/service class
+        if tags is None or len(tags) == 0:
+            if "default" in map_services:
+                map_services["default"].append(react_function)
+            else:
+                map_services["default"] = [react_function]
+            return map_services
         for tag in tags:
             if tag in map_services:
                 map_services.get(tag).append(react_function)
@@ -99,23 +106,53 @@ class ReactApiClientGenerator:
             write_file(path, content)
         print("services generated.............")
 
-    def generate_react_service(self, app_name, filename):
+    def generate_react_service(self, app_name, filename,service_type):
         service_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/{filename}.json"
         service_config = read_file_json(service_path)
         map_services = {}
-        for config in service_config:
-            model = ApiModelLoader.load_api_model(config)
+        for key,config in service_config.items():
+            model = None
+            if service_type == "AUTH":
+                model = ApiModelLoader.load_auth_api_model(config)
+            else:
+                model = ApiModelLoader.load_api_model(config)
             react_function = self.generate_service_function(
-                model, False, app_name)
+                model, False, app_name,service_type)
+            
             map_services = self._manage_service_tags(
                 model.tags, react_function, map_services)
         self.create_serice_files(map_services)
+
+    
+    def retrive_token_code(self,auth_api_id,app_name):
+        service_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/auth.json"
+        service_config = read_file_json(service_path)
+        auth_config = service_config.get(auth_api_id,None)
+        if auth_config is not None:
+            auth_config = ApiModelLoader.load_auth_api_model(auth_config)
+            token_store_info = auth_config.token_store
+            store_in = token_store_info.store_in
+            access_token_key = token_store_info.access_token_key
+            refresh_token_key = token_store_info.refresh_token_key
+            code = ""
+            if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
+                code = "localStorage.getItem('%s');"%(access_token_key)
+            elif store_in == TokenStoreTypeEnum.SESSION:
+                code = "sessionStorage.getItem('%s');"%(access_token_key)
+
+            elif store_in == TokenStoreTypeEnum.COOKIES:
+                code = "localStorage.getItem('%s');"%(access_token_key)
+            return code
+        else:
+            return ""
+            
 
     def generate_api_interceptor(self, auth, app_name):
         type = auth.type
         auth_code = ""
         interceptor_code = REQUEST_INTERCEPTOR
-
+        token = self.retrive_token_code(auth.login_api,app_name)
+        interceptor_code = interceptor_code.replace("{FETCH_TOKEN}",token)
         if type == AuthTypeEnum.BASIC:
             auth_code = "config.headers.Authorization = `Basic ${token}`;"
 
@@ -299,11 +336,11 @@ class ReactApiClientGenerator:
             "function_args" : function_args
         }
 
-    def generate_service_function(self, model, anonymous, app_name):
+    def generate_service_function(self, model, anonymous, app_name,service_type):
         func_name = model.operation_id
         interceptor_code = ""
         response_interceptor_code = ""
-        if model.request.auth is not None:
+        if service_type != "AUTH" and  model.request.auth is not None:
             interceptor_code = self.generate_api_interceptor(
                 model.request.auth, app_name)
 
@@ -328,6 +365,7 @@ class ReactApiClientGenerator:
                     {INTERCEPTOR_CODE}
                     {RESPONSE_INTERCEPTOR_CODE}
                     let resp = await api({URL})
+                    {RESPONSE_CODE}
                     return resp
                 };
                 """ % (func_name)
@@ -391,5 +429,30 @@ class ReactApiClientGenerator:
         react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
         react_code = react_code.replace(
             '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
+        
+        ## handle api response code
+        if service_type == "AUTH":
+            auth_api_type = model.auth_api_type
+            code = ""
+            if auth_api_type == AuthApiTypeEnum.LOGIN:
+                
+                token_store_info = model.token_store
+                store_in = token_store_info.store_in
+                access_token_key = token_store_info.access_token_key
+                refresh_token_key = token_store_info.refresh_token_key
+                if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
+                    code = "localStorage.setItem('%s','`${resp.data.access_token}`');"%(access_token_key)
+                    code = code + '\n' + "localStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
+
+                elif store_in == TokenStoreTypeEnum.SESSION:
+                    code = "sessionStorage.setItem('%s','`${resp.data}`');"%(access_token_key)
+                    code = code + '\n' + "sessionStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
+
+            elif auth_api_type == AuthApiTypeEnum.REFRESH:
+                pass
+                
+            react_code = react_code.replace('{RESPONSE_CODE}',code)
+        else:
+            react_code = react_code.replace('{RESPONSE_CODE}',"")
 
         return react_code
