@@ -9,16 +9,17 @@ import AuthenticationConfig from "./AuthenticationConfig";
 export default function ServicePageNavbar(props) {
   const [showServicesList, setShowServicesList] = useState(false);
   const [showAuthenticationConfig, SetShowAuthenticationConfig] = useState(false);
-  const [showApiList, setShowApiList]=useState(false);
+
   
   const toggleServicesList = () => {
     setShowServicesList(!showServicesList);
     SetShowAuthenticationConfig(false)
+    // setServiceMode("Navbar"); 
   };
   const toggleAuthenticationConfig = () =>{
     SetShowAuthenticationConfig(!showAuthenticationConfig)
     setShowServicesList(false)
-    setShowApiList(false);
+
   }
 
   return (
@@ -71,7 +72,7 @@ export default function ServicePageNavbar(props) {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      {showServicesList && <ServiceList />}
+      {showServicesList && <ServiceList apis={""} tagsList={["tag1", "tag2"]} />}
       {showAuthenticationConfig &&  <AuthenticationConfig />}
     </>
   );
