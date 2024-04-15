@@ -183,7 +183,7 @@ class OpenApiHelper:
                               json_data.get("request").get("parameters"),
                               url,
                               body
-                              ),
+                              )
         response_objs = []
         for response_data in json_data.get("response", []):
             response_objs.append(Response(**response_data))

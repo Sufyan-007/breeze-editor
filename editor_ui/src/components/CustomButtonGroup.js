@@ -23,7 +23,7 @@ const CustomButtonGroup = ({
                                 return <Button
                                     variant={option.variant}
                                     onClick={() => onButtonClick(formId,option.name)}
-                                    active={selectedButton == option.name}
+                                    active={selectedButton === option.name}
                                 >
                                     {option.label}
                                 </Button>

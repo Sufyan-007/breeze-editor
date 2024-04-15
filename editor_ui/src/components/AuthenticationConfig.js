@@ -10,21 +10,19 @@ function AuthenticationConfig() {
   const [auth_apis, setAuthApis] = useState({});
   const [showAddOrEditModal, setShowAddOrEditModal] = useState(false);
   const [showAuthConfig, setShowAuthConfig] = useState(true);
-  const [selectedUuid, setSelectedUuid] = useState("");
+  const [selectedUuid, setSelectedUuid] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false); 
   const [mode, setMode] = useState("Add"); 
-
+  const fetchAuthApis = async () => {
+    try {
+      const data = await getAuthFileConfig("creator");
+      setAuthApis(data.data);
+    } catch (error) {
+      console.error('Error fetching auth APIs:', error);
+    }
+  };
   const available_apis = []
   useEffect(() => {
-    const fetchAuthApis = async () => {
-      try {
-        const data = await getAuthFileConfig("creator");
-        setAuthApis(data.data);
-      } catch (error) {
-        console.error('Error fetching auth APIs:', error);
-      }
-    };
-
     fetchAuthApis();
   }, []);
 
@@ -37,7 +35,7 @@ function AuthenticationConfig() {
     setSelectedUuid(uuid)
     setMode("Edit")
     setShowAddOrEditModal(true);
-    // setShowAuthConfig(false)
+    setShowAuthConfig(false)
   };
 
   const handleDeleteApi = ()=>{
@@ -46,6 +44,8 @@ function AuthenticationConfig() {
   
 
   const handleClose = ()=>{
+    fetchAuthApis()
+    setSelectedUuid(null)
     setShowAddOrEditModal(false)
     setShowAuthConfig(true)
   }

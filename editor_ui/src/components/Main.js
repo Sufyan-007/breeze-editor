@@ -10,7 +10,7 @@ export default function Main() {
     useEffect(() => {
         const loadProjects = async () => {
             const projects = await (
-                await fetch("http://localhost:8000/editor/all-projects")
+                await fetch("http://localhost:8000/editor/all-projects/")
             ).json();
             setProjects(projects)
         }

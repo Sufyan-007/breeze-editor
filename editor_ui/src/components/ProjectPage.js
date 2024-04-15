@@ -213,11 +213,11 @@ export default function ProjectPage() {
                 <Custom dummyData={dummyData} />
               </div>
             )}
-            {/* {yamlUploaded && (
+            {yamlUploaded && (
               <div>
                 <ServiceLists apis={yamlApis} tagsList={["tag1","tag2"]} />
               </div>
-            )} */}
+            )}
             {postmanUploaded && (
               <div>
                 <ServiceLists apis={postmanApis} serviceMode={"Upload"} />

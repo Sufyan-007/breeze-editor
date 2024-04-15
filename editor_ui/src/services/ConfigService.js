@@ -1,7 +1,7 @@
 const HOST="http://localhost:8000"
 
 export async function getComponentConfig(projectName) {
-    const config = await (await fetch(HOST+"/editor/read-config/" + projectName)).json()
+    const config = await (await fetch(HOST+"/editor/read-config/" + projectName + '/')).json()
     return config
 }
 
