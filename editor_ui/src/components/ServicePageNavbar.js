@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
 import ServicePageSidebarCss from "../css/ServicePageSidebar.css";
-import CustomPanel from "./CustomPanel";
+
 import ServiceList from "./ServiceList";
 import AuthenticationConfig from "./AuthenticationConfig";
 import IntermediateFiles from "./IntermediateFiles";

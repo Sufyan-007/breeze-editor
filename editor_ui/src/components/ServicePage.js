@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from "react";
-import CustomPanel from "./CustomPanel";
+
 import ApiList from "./ApiList";
 import ServicePageNavbar from "./ServicePageNavbar";
-import Custom from "./ Custom";
+import Custom from "./Custom";
 
 export function ServicePage() {
   const fileInputYAML = useRef(null); // this is created to reference the file input element .
@@ -152,7 +152,7 @@ export function ServicePage() {
           <div className="col-9 overflow-y-auto h-100 fs-6 text-light">
             {showCustomPanel && (
               <div className="custom-panel-container">
-                <CustomPanel dummyData={dummyData} />
+                {/* <CustomPanel dummyData={dummyData} /> */}
               </div>
             )}
             {yamlUploaded && (

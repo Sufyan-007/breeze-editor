@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { fetchIntermediate } from "../services/IntermediatesService";
 import { Table, Pagination } from "react-bootstrap";
-import DeleteIcon from "../assets/icons/deleteicon.svg";
+import DeleteIcon from "../assets/icons/delete.svg";
 import EditIcon from "../assets/icons/edit.svg";
 import { current } from "@reduxjs/toolkit";
-import Custom from "./ Custom";
+import Custom from "./Custom";
 export default function ServiceLists({ apis, tagsList, onClose,}) {
   const [fetchedIntermediates, setFetchedIntermediates] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Number of items per page
+  const itemsPerPage = 5;
   const [selectedApi, setSelectedApi] = useState(null);
   const [formData, setFormData] = useState([]);
   // const { data, filename } = apis;
@@ -40,6 +40,7 @@ export default function ServiceLists({ apis, tagsList, onClose,}) {
   };
   const handleClose = () => {
     setSelectedApi("");
+    getServices()
     if (onClose) {
       onClose();
     }
@@ -63,32 +64,6 @@ export default function ServiceLists({ apis, tagsList, onClose,}) {
   // console.log(fetchedIntermediates, "fetchedIntermediate");
   const handleEditClick = (api) => {
     setSelectedApi(api); //set the selected API in the state
-  };
-  const dummyData = {
-    operation_id: "get orders",
-    tags: [],
-    request: {
-      method: "get",
-      auth: null,
-      headers: [
-        {
-          key: "Authorization",
-          value:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U",
-        },
-      ],
-      parameters: [],
-      url: {
-        baseurl: "{{url}}/api/orders/7",
-        host: ["{{url}}"],
-        protocol: "",
-        port: 0,
-        path: ["api", "orders", "7"],
-      },
-      body: [],
-    },
-    response: [],
-    summary: "",
   };
   return (
     <div className="m-3">
@@ -199,7 +174,7 @@ export default function ServiceLists({ apis, tagsList, onClose,}) {
         </Table>
       )} */}
       {selectedApi && (
-        <Custom dummyData={dummyData} onClose={handleClose} tagsList={["tag1", "tag2"]} />
+        <Custom dummyData={selectedApi} onClose={handleClose} tagsList={["tag1", "tag2"]} />
       )}
      
     </div>

@@ -198,7 +198,7 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
               formdata: "",
             },
           },
-      response: selectedApiInfo.response ? selectedApiInfo.response : [],
+      response: selectedApiInfo.response ? [selectedApiInfo.response] : [],
       operation_id: selectedApiInfo.operation_id,
       tags: selectedApiInfo.tags ? selectedApiInfo.tags : [],
       summary: selectedApiInfo.summary ? selectedApiInfo.summary : "",

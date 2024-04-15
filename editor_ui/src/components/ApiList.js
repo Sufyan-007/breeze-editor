@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Accordion,Table  } from "react-bootstrap";
-import CustomPanel from "./CustomPanel";
+
 import DeleteIcon from '../assets/icons/delete.svg';
 import EditIcon from '../assets/icons/edit.svg'
-import Custom from "./ Custom";
+import Custom from "./Custom";
 
 const ApiList = ({ apis , tagsList, onClose}) => {
   // Extracting data and filenames from props

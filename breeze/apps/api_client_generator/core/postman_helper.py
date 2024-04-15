@@ -27,5 +27,5 @@ class PostmanHelper:
                 id = generate_uuid_as_key()
             )
             api_models.append(api_model)
-        result = {"filename":"DummyTag.json", "api_models":api_models}
+        result = {"filename":"DummyTagService.json", "api_models":api_models}
         return result

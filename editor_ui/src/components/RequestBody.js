@@ -17,6 +17,8 @@ function RequestBody({ onChange, requestBody }) {
   const [auth, setAuth] = useState({
     type: requestBody.auth?.type || "No Auth",
     content: requestBody.auth?.content || [{ key: "", value: "", type: "" }],
+    login_api : requestBody.auth? requestBody.auth.login_api : '',
+    token_api: requestBody.auth? requestBody.auth.token_api : ''
   });
   const [body, setBody] = useState(requestBody.body);
 const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
@@ -131,8 +133,13 @@ const [loginApis, setLoginApis] = useState([]);
       },
     });
   };
- const handleAuthApiSelect = ()=>{
-  
+ const handleAuthApiSelect = (e, key)=>{
+  let auth_new = {...auth}
+  auth_new[key] = e 
+  setAuth({...auth_new})
+  onChange({
+    ...requestBody, auth:{...auth_new}
+  })
  }
 
   useEffect(()=>{
@@ -151,10 +158,10 @@ const [loginApis, setLoginApis] = useState([]);
   useEffect(() => {
     // Filter APIs based on auth_api_type
     const loginApisFiltered = Object.values(apis).filter(
-      (api) => api.auth_api_type === "LOGIN"
+      (api) => api.auth_api_type === "Login"
     );
     const tokenApisFiltered = Object.values(apis).filter(
-      (api) => api.auth_api_type === "TOKEN"
+      (api) => api.auth_api_type === "Refresh"
     );
 
     setLoginApis(loginApisFiltered);
@@ -459,18 +466,18 @@ const [loginApis, setLoginApis] = useState([]);
                   </Dropdown.Menu>
                 </Dropdown>
 
- {showAuthDropdowns && (
+ { (
   <>
           <Row>
         <Col sm={3}>
-          <Form.Label style={{ fontWeight: "bold" }} className="mt-2">
+          <Form.Label style={{ fontWeight: "bold" }} className="m-2">
             Login API:
           </Form.Label>
         </Col>
         <Col sm={9}>
-          <Dropdown onSelect={handleAuthApiSelect} className="mt-2">
+          <Dropdown onSelect={(e)=>handleAuthApiSelect(e, "login_api")} className="m-2">
             <Dropdown.Toggle variant="secondary" id="loginApiDropdown">
-              Select API
+              {auth.login_api ? auth.login_api : 'Login Api'}
             </Dropdown.Toggle>
             <Dropdown.Menu style={{ textAlign: "center" }}>
               {loginApis.map((api) => (
@@ -489,21 +496,22 @@ const [loginApis, setLoginApis] = useState([]);
 
       <Row>
         <Col sm={3}>
-          <Form.Label style={{ fontWeight: "bold" }} className="mt-2">
+          <Form.Label style={{ fontWeight: "bold" }} className="m-2">
             Token API:
           </Form.Label>
         </Col>
         <Col sm={9}>
-          <Dropdown onSelect={handleAuthApiSelect} className="mt-2">
+          <Dropdown onSelect={(e)=>handleAuthApiSelect(e, "token_api")} className="m-2">
             <Dropdown.Toggle variant="secondary" id="tokenApiDropdown">
-              Select API
+              {auth.token_api ? auth.token_api : 'Token Api'}
             </Dropdown.Toggle>
-            <Dropdown.Menu style={{ textAlign: "center" }}>
+            <Dropdown.Menu style={{ textAlign: "center" }} >
               {tokenApis.map((api) => (
                 <Dropdown.Item
                   key={api.id}
                   eventKey={api.id}
                   className="dropdownitem"
+                 
                 >
                   {api.operation_id}
                 </Dropdown.Item>

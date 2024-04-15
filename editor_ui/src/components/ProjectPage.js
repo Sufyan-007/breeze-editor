@@ -29,7 +29,7 @@ import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from "./ProjectSidebar";
 import { Col, Row } from "react-bootstrap";
 import ServicePageNavbar from "./ServicePageNavbar";
-import Custom from "./ Custom";
+import Custom from "./Custom";
 import ServiceLists from "./ServiceList";
 
 export default function ProjectPage() {
@@ -76,32 +76,7 @@ export default function ProjectPage() {
     <ReduxConfig />,
     //rest to be added
   ];
-  const dummyData = {
-    operation_id: "get orders",
-    tags: [],
-    request: {
-      method: "get",
-      auth: null,
-      headers: [
-        {
-          key: "Authorization",
-          value:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U",
-        },
-      ],
-      parameters: [],
-      url: {
-        baseurl: "{{url}}/api/orders/7",
-        host: ["{{url}}"],
-        protocol: "",
-        port: 0,
-        path: ["api", "orders", "7"],
-      },
-      body: [],
-    },
-    response: [],
-    summary: "",
-  };
+
 
   async function fileUpload(file, fileType) {
     try {
@@ -129,7 +104,6 @@ export default function ProjectPage() {
           setYamlApis(responseData);
           setYamlUploaded(true);
           
-          navigate("/service-list")
         } else if (fileType === "postman") {
           setPostmanApis(responseData);
           setPostmanUploaded(true);
@@ -165,6 +139,7 @@ export default function ProjectPage() {
     setIsSidebarExpanded(!isSidebarExpanded);
   };
 
+  console.log(yamlApis,"yamlapis");
   return (
     <div className="container-fluid vh-100 d-flex flex-column">
       <Navbar
@@ -210,7 +185,7 @@ export default function ProjectPage() {
               <div >
             {showCustomPanel && (
               <div className="custom-panel-container">
-                <Custom dummyData={dummyData} />
+                <Custom />
               </div>
             )}
             {yamlUploaded && (

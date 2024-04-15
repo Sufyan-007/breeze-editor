@@ -11,8 +11,8 @@ class ModifyIntermediateJson(View):
             filename = data.get("filename")
             intermediate_validation_helper = IntermediateValidationHelper()
             # Check the validity of the intermediate's structure
-            if not intermediate_validation_helper.validate_intermediate_structure(data):
-                return JsonResponse({"error": "Invalid intermediate structure"}, status=400)
+            # if not intermediate_validation_helper.validate_intermediate_structure(data):
+            #     return JsonResponse({"error": "Invalid intermediate structure"}, status=400)
             
             result = IntermediateModificationHelper.process_api_data(data, filename)
             return JsonResponse({"message": result}, status=201)
