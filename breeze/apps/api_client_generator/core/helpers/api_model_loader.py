@@ -125,7 +125,7 @@ class ApiModelLoader:
     @staticmethod
     def load_token_store(token_sore):
         token_sore = TokenStore(
-            store_in=TokenStoreTypeEnum(token_sore.get("store_in")),
+            store_in=TokenStoreTypeEnum[token_sore.get("store_in")],
             access_token_key=token_sore.get("access_token_key"),
             refresh_token_key=token_sore.get("refresh_token_key")
         )

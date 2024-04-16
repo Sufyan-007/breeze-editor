@@ -344,7 +344,7 @@ class ReactApiClientGenerator:
             interceptor_code = self.generate_api_interceptor(
                 model.request.auth, app_name)
 
-            if model.request.auth.token_api is not None:
+            if model.request.auth and model.request.auth.token_api != "" and model.request.auth.token_api is not None:
                 response_interceptor_code = self.set_response_interceptor(
                     model.request.auth, app_name)
 
