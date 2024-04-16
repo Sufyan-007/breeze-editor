@@ -4,8 +4,8 @@ import Form from "react-bootstrap/Form";
 
 const SelectKey = ({ selectedAccessKey, onSetAccessKey,selectedRefreshKey,onSetRefreshKey, tokenStorageMethod }) => {
   return (
-    tokenStorageMethod === "localStorage" ||
-    tokenStorageMethod === "sessionStorage"|| "cookie" ? (
+    tokenStorageMethod === "LOCAL_STORAGE" ||
+    tokenStorageMethod === "SESSION"|| "COOKIE" ? (
       <Form.Group controlId="formTokenKey" className="mt-4">
         <Row>
           <Col sm={3}>

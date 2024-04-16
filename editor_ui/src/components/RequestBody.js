@@ -457,6 +457,10 @@ const [loginApis, setLoginApis] = useState([]);
                     <Dropdown.Item eventKey="Basic" className="dropdownitem">
                       Basic
                     </Dropdown.Item>
+                    <Dropdown.Item eventKey="Bearer" className="dropdownitem">
+                      Bearer
+                    </Dropdown.Item>
+                    
                     <Dropdown.Item eventKey="Oauth" className="dropdownitem">
                       Oauth
                     </Dropdown.Item>

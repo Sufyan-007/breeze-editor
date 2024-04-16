@@ -17,22 +17,22 @@ const SelectTokenStorage = ({
           <ButtonGroup className="mx-5">
             <Button
               variant="secondary"
-              onClick={() => onSelectTokenStorage("localStorage")}
-              active={selectedTokenStorageMethod === "localStorage"}
+              onClick={() => onSelectTokenStorage("LOCAL_STORAGE")}
+              active={selectedTokenStorageMethod === "LOCAL_STORAGE"}
             >
               Local Storage
             </Button>
             <Button
               variant="secondary"
-              onClick={() => onSelectTokenStorage("sessionStorage")}
-              active={selectedTokenStorageMethod === "sessionStorage"}
+              onClick={() => onSelectTokenStorage("SESSION")}
+              active={selectedTokenStorageMethod === "SESSION"}
             >
               Session Storage
             </Button>
             <Button
               variant="secondary"
-              onClick={() => onSelectTokenStorage("cookie")}
-              active={selectedTokenStorageMethod === "cookie"}
+              onClick={() => onSelectTokenStorage("COOKIE")}
+              active={selectedTokenStorageMethod === "COOKIE"}
             >
               Cookie
             </Button>
