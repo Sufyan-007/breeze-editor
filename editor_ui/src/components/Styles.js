@@ -18,7 +18,7 @@ function Styles() {
   const getAllCSSFiles = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/editor/all-css-files"
+        "http://localhost:8000/editor/all-css-files/"
       );
       const data = await response.json();
       setFiles(data.files);
@@ -131,7 +131,7 @@ function Styles() {
             </button>
           </div>
         </div>
-        {files.map((file, index) => (
+        {files?.map((file, index) => (
           <div key={index} className="col-12">
             <CssFileCard
               fileName={file.css_file}
