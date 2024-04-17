@@ -284,6 +284,9 @@ class CSSConfig(APIView):
     
     def get(self, request):
         try:
+            dir_path = f"uploaded_css/"
+            if not default_storage.exists(dir_path):
+                return JsonResponse({'files' : []}, status=200)
             files = default_storage.listdir("uploaded_css")[0]
             files_list = [{'css_file': file} for file in files]
             return JsonResponse({'files': files_list}, status=200)
