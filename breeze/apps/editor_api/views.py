@@ -241,7 +241,15 @@ class ComponentReader(APIView):
     def get(self, request,param):
         try:
             config_reader = ConfigService(param)
-            return JsonResponse(config_reader.get_component_configs(),status=200)
+            return JsonResponse(config_reader.get_all_component_configs(),status=200)
+        except:
+            return JsonResponse({},status=404)
+        
+    def post(self,request,param):
+        try:
+            config_reader = ConfigService(param)
+            data= json.loads(request.body.decode("utf-8"))
+            return JsonResponse(config_reader.get_component_config(data["componentName"]),status=200)
         except:
             return JsonResponse({},status=404)
         
