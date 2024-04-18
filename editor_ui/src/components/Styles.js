@@ -20,7 +20,7 @@ function Styles() {
   const getAllCSSFiles = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/editor/all-css-files"
+        "http://localhost:8000/editor/all-css-files/"
       );
       const data = await response.json();
       setFiles(data.files);

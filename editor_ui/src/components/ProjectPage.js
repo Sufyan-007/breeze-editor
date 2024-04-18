@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLoaderData } from "react-router";
+import { Outlet, useLoaderData } from "react-router";
 import { useParams } from 'react-router-dom';
 import { useDispatch } from "react-redux";
 import { getAllConfigs } from "../services/ConfigService";
@@ -7,7 +7,6 @@ import { setReducerConfig, setReduxStoreConfig } from "../reducers/ReduxConfigRe
 import { setServiceConfig } from "../reducers/ServiceConfigReducer";
 import { setRouterConfig } from "../reducers/RouterConfigReducer";
 import { setConfig } from "../reducers/ConfigReducer";
-import { router } from '../App';
 //components
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
@@ -51,21 +50,21 @@ export default function ProjectPage() {
     }, [allConfig, dispatch]);
 
     const sidebarItems = [
-        { id: 0, name: "Home", icon: home },
-        { id: 1, name: "Pages", icon: pages },
-        { id: 2, name: "Routing", icon: routing },
-        { id: 3, name: "Services", icon: services },
-        { id: 4, name: "Constants", icon: constants }, 
-        { id: 5, name: "Styles", icon: styles }, 
-        { id: 6, name: "Code", icon: code },
-        { id: 7, name: "Third-party App", icon: apps },
-        { id: 8, name: "Settings", icon: settings }, 
+        { id: 0, name: "Home", icon: home, path: "" },
+        { id: 1, name: "Pages", icon: pages, path: "pages" },
+        { id: 2, name: "Routing", icon: routing, path: "routing" },
+        { id: 3, name: "Services", icon: services, path: "services" },
+        { id: 4, name: "Constants", icon: constants, path: "constants" }, 
+        { id: 5, name: "Styles", icon: styles, path: "styles" }, 
+        { id: 6, name: "Code", icon: code, path: "code" },
+        { id: 7, name: "Third-party App", icon: apps, path: "apps" },
+        { id: 8, name: "Settings", icon: settings, path: "settings" }, 
 
     ];
 
     const components = [
         <ProjectHome />,
-        <ProjectComponents project = {projectName} />,
+        <ProjectComponents/>,
         <ProjectRouting />,
         <ServicePage />,
         <ReduxConfig />,
