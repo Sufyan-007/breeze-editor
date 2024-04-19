@@ -10,7 +10,7 @@ import sys
 # from core.generate_project import AppGenerator
 from common.utils.app_consts import THIRD_PARTY_CONFIG_PATH, THIRD_PARTY_DIR, JS_FILE_PATH, JS_FUNCTION_NAME
 from common.utils.file_utils import get_filename_without_ext
-from common.utils.file_helper import write_file, create_dir_if_not_exists
+from common.utils.file_helper import write_file, create_parent_dir_if_not_exists
 
 # Go to root of the django project breezeui/breeze
 # Run  python3 -m apps.code_generator.core.js_ast_parser
@@ -188,7 +188,7 @@ def save_comp_config(props,  comp_config):
 
     print(props, comp_config)
     
-    create_dir_if_not_exists(f"{THIRD_PARTY_CONFIG_PATH}/{lib_name}")
+    create_parent_dir_if_not_exists(f"{THIRD_PARTY_CONFIG_PATH}/{lib_name}")
     write_file(f"{THIRD_PARTY_CONFIG_PATH}/{lib_name}/{file_name}",  json.dumps(initial_config))
 
     
@@ -200,7 +200,9 @@ def fetch_props_from_comps():
     lib_name = "react-bootstrap"
     # comp_files = ["/home/raj/Desktop/bridge/processor/bridge_ui_server/testing_ts.tsx"]
     # comp_files = comp_files[0:10]
-    create_dir_if_not_exists(THIRD_PARTY_CONFIG_PATH)
+    # create_dir_if_not_exists(THIRD_PARTY_CONFIG_PATH)
+    comp_files = comp_files[0:10]
+    create_parent_dir_if_not_exists(THIRD_PARTY_CONFIG_PATH)
     for fl in comp_files:
         f = open(fl, "r")
         file_content = f.read()

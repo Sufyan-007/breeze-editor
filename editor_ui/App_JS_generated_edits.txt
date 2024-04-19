@@ -1,0 +1,29 @@
+useEffect(() => {
+    const style = document.createElement('style');
+    const cssClass = '.custom-highlight {background-color: yellow;outline: red solid 3px ;}';
+    style.appendChild(document.createTextNode(cssClass));
+    document.head.appendChild(style);
+    const handleMessage = (event) => {
+      if (event.origin === 'http://localhost:3000') {
+        const id = event.data.id;
+        const highlight = event.data.highlight
+        // console.log("Div ID", id);
+        // console.log("highlight ", highlight)
+        const elem = document.getElementById(event.data.id)
+        if (elem) {
+          if (highlight) {
+            elem.classList.add("custom-highlight")
+            setTimeout(() =>elem.classList.remove("custom-highlight"),2000)
+          }
+          else {
+            elem.classList.remove("custom-highlight")
+          }
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+  

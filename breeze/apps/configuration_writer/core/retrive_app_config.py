@@ -1,5 +1,5 @@
 from common.consts.consts import CONFIG_FILES_PATH, APP_CONFIG_PATH
-from common.utils.file_helper import read_json_file, write_file, create_dir_if_not_exists
+from common.utils.file_helper import read_json_file, write_file, create_parent_dir_if_not_exists
 import json
 from common.utils.request_code import REQUEST
 from ...code_generator.core.generate_project import GenerateProject

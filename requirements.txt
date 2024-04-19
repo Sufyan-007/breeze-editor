@@ -1,0 +1,7 @@
+django
+djangorestframework
+django-rest-swagger
+drf-yasg
+django-cors-headers
+daphne
+channels

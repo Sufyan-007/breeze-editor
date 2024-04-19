@@ -6,7 +6,7 @@ def read_json_file(file_path, ext=".json"):
     json_config = json.load(config_file)
     return json_config
 
-def create_dir_if_not_exists(dir_path):
+def create_parent_dir_if_not_exists(dir_path):
     Path(dir_path).mkdir(parents=True, exist_ok=True)
 
 def write_file(file_path, content, mode="w"):

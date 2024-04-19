@@ -1,5 +1,5 @@
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
-from common.utils.file_helper import read_json_file, write_file, create_dir_if_not_exists
+from common.utils.file_helper import read_json_file, write_file, create_parent_dir_if_not_exists
 import json
 from common.utils.request_code import REQUEST
 from ...code_generator.core.generate_project import GenerateProject
@@ -69,7 +69,7 @@ class AppConfigWriter:
         app_config_dir = f"{CONFIG_PATH}/{data['name']}"
 
         # Create Dir if not exists for config folder
-        create_dir_if_not_exists(app_config_dir)
+        create_parent_dir_if_not_exists(app_config_dir)
 
         app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
 

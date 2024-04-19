@@ -1,14 +1,9 @@
 from django.http import JsonResponse
-import json
-from ..core.app_config_writer import AppConfigWriter
 from ..core.retrive_app_config import RetriveAppConfig
+from django.views import View
 
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.views import APIView
 
-@method_decorator(csrf_exempt, name='dispatch')
-class ReriveComponent(APIView):
+class ReriveComponent(View):
     
     def get(self, request,app,compId):
 
