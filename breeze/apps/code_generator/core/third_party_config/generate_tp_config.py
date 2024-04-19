@@ -11,10 +11,10 @@
 
 
 import execjs
-import traceback
+import os
 import subprocess
 
-from common.utils.app_consts import THIRD_PARTY_CONFIG_PATH, JS_FILE_PATH, JS_FUNCTION_NAME
+from common.utils.app_consts import THIRD_PARTY_CONFIG_PATH, JS_FILE_PATH, JS_FUNCTION_NAME, DEFAULT_THIRD_PARTY_CONFIG_FOLDER_NAME
 
 
 def call_config_generator(library_name):
@@ -49,5 +49,20 @@ def call_node_script(script_path, function_name, *args):
         print("Error:", result.stderr)
 
 
-call_node_script(JS_FILE_PATH, JS_FUNCTION_NAME, 'react-bootstrap', THIRD_PARTY_CONFIG_PATH)
+def get_path():
+    if THIRD_PARTY_CONFIG_PATH is not None:
+
+        # if not os.path.isdir(THIRD_PARTY_CONFIG_PATH):
+        #     print("THIRD PARTY CONFIG FOLDER PATH DOES NOT EXISTS, CREATING ...")
+        #     os.makedirs(THIRD_PARTY_CONFIG_PATH)
+
+        return THIRD_PARTY_CONFIG_PATH
+
+    default_path = os.path.abspath(os.path.join(os.path.dirname(__name__), '..', DEFAULT_THIRD_PARTY_CONFIG_FOLDER_NAME))
+    print(f'Path not given, Storing config using default path {default_path}')
+
+    
+    return default_path
+
+# call_node_script(JS_FILE_PATH, JS_FUNCTION_NAME, 'react-bootstrap', get_path())
 

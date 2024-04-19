@@ -4,6 +4,8 @@ CONFIG_PATH = "/home/raj/Desktop/bridge/processor/bridge_ui_server/breezeui/conf
 # Path of directory where all the config of third party libraries are stored or you want to store
 THIRD_PARTY_CONFIG_PATH = "/home/raj/Desktop/bridge/processor/third_party_configs"
 
+DEFAULT_THIRD_PARTY_CONFIG_FOLDER_NAME = "third_party_configs"
+
 CONFIG_FILES_PATH = {
     'APP_CONFIG' : 'app_basic_config',
     'COMPONENT_CONFIG': 'component_config',
