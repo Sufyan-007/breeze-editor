@@ -1,10 +1,8 @@
-import os
-import json
-from .utils.jsonencoder import EnhancedJSONEncoder
-from .utils.append_dict_file import append_to_dict_file
-
-from .core.openapi_swagger_converter import OpenapiConverter
-from .core.postman_collection_converter import PostmanCollectionConverter
+import json, traceback, os
+from .helper_models.encoder import EnhancedJSONEncoder
+from .core.openapi_helper import OpenApiHelper
+from .core.helpers.append_dict_file import append_to_dict_file
+from .core.postman_helper import PostmanHelper
 from common.utils.app_consts import CONFIG_PATH
 from django.views import View
 from django.http import JsonResponse
@@ -59,7 +57,6 @@ class ApiClientGenerator(View):
                 return JsonResponse({"error": "Invalid collection type or file format."}, status=400)
 
         except Exception as e:
-            import traceback
             print(traceback.format_exc())
             return JsonResponse({"error": str(e)}, status=400)
         

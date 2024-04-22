@@ -8,8 +8,52 @@ from ..utils.api_model_loader import ApiModelLoader
 
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import read_config_file, read_file_json, write_file
+import json
+from ..helper_models.encoder import EnhancedJSONEncoder
+from ..api.intermediate_validation_helper import IntermediateValidationHelper
 
-from ..consts import RESPONSE_STATUS_CONDITION,REFRESH_TOKEN_API,RESPONSE_INTERCEPTOR,REQUEST_INTERCEPTOR
+
+RESPONSE_INTERCEPTOR = """
+    // Add a response interceptor
+    api.interceptors.response.use((response) => { 
+        // block to handle success case
+        return response
+    }, function (error) { 
+        // block to handle error case
+        const originalRequest = error.config;
+        if (error.response.status === 401 && originalRequest.url === '{REFRESH_TOKEN_URL}') { 
+            // Added this condition to avoid infinite loop 
+            // Redirect to any unauthorised route to avoid infinite loop...
+            return Promise.reject(error);
+        }
+ 
+        if (error.response.status === 401 && !originalRequest._retry) { 
+            // Code inside this block will refresh the auth token
+            originalRequest._retry = true;
+            {GET_REFRESHED_TOKEN_CODE}
+        }
+    return Promise.reject(error);
+});
+
+"""
+
+REQUEST_INTERCEPTOR = """
+    // Add a request interceptor
+    api.interceptors.request.use(
+    (config) => {
+        const token = {FETCH_TOKEN};
+        if (token) {
+            {AUTH_CODE}
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+    );
+
+    
+"""
+
+
 class ReactApiClientGenerator:
 
     app_config_dir = None
@@ -63,7 +107,15 @@ class ReactApiClientGenerator:
                 model = ApiModelLoader.load_auth_api_model(config)
             else:
                 model = ApiModelLoader.load_api_model(config)
-            react_functions = self.generate_service_function(model, False, app_name,service_type)
+            #validation
+            intermediate_validator = IntermediateValidationHelper()
+            model_json  = json.dumps(model, cls=EnhancedJSONEncoder)
+            errors = intermediate_validator.validate_intermediate_structure({"modified_api": model_json})
+            if any(errors.values()):
+                return
+            else:
+                react_function = self.generate_service_function(
+                    model, False, app_name,service_type)
             
             map_services = self._manage_service_tags(model.tags, react_functions, map_services)
         self.create_serice_files(map_services)
