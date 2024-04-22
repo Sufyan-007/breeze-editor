@@ -1,5 +1,4 @@
-import os
-import json
+import json, traceback, os
 from .helper_models.encoder import EnhancedJSONEncoder
 from .core.openapi_helper import OpenApiHelper
 from .core.helpers.append_dict_file import append_to_dict_file
@@ -49,7 +48,6 @@ class ApiClientGenerator(View):
                 return JsonResponse({"error": "Invalid collection type or file format."}, status=400)
 
         except Exception as e:
-            import traceback
             print(traceback.format_exc())
             return JsonResponse({"error": str(e)}, status=400)
         

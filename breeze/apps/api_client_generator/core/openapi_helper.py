@@ -1,5 +1,4 @@
-import yaml, uuid
-import yaml, uuid
+import yaml
 
 from ..helper_models.base_models.api_model import ApiModel
 from ..helper_models.base_models.auth_api_model import AuthApiModel
@@ -220,7 +219,7 @@ class OpenApiHelper:
             json_data = json.load(fp)
             ## append to existing json data 
             for model in auth_models:
-                key = model.id # was model.id
+                key = model.id 
                 json_data[key] = model
             
             ## write all data back to file

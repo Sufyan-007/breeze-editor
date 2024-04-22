@@ -20,6 +20,7 @@ from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import read_config_file, read_file_json, write_file
 import json
 from ..helper_models.encoder import EnhancedJSONEncoder
+from ..api.intermediate_validation_helper import IntermediateValidationHelper
 
 
 RESPONSE_INTERCEPTOR = """
@@ -116,8 +117,15 @@ class ReactApiClientGenerator:
                 model = ApiModelLoader.load_auth_api_model(config)
             else:
                 model = ApiModelLoader.load_api_model(config)
-            react_function = self.generate_service_function(
-                model, False, app_name,service_type)
+            #validation
+            intermediate_validator = IntermediateValidationHelper()
+            model_json  = json.dumps(model, cls=EnhancedJSONEncoder)
+            errors = intermediate_validator.validate_intermediate_structure({"modified_api": model_json})
+            if any(errors.values()):
+                return
+            else:
+                react_function = self.generate_service_function(
+                    model, False, app_name,service_type)
             
             map_services = self._manage_service_tags(
                 model.tags, react_function, map_services)

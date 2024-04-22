@@ -9,13 +9,15 @@ class ModifyIntermediateJson(View):
         try:
             data = json.loads(request.body.decode("utf-8"))
             filename = data.get("filename")
-            intermediate_validation_helper = IntermediateValidationHelper()
+            intermediate_validation_helper = IntermediateValidationHelper(errors= {})
             # Check the validity of the intermediate's structure
-            # if not intermediate_validation_helper.validate_intermediate_structure(data):
-            #     return JsonResponse({"error": "Invalid intermediate structure"}, status=400)
-            
-            result = IntermediateModificationHelper.process_api_data(data, filename)
-            return JsonResponse({"message": result}, status=201)
+            errors =  intermediate_validation_helper.validate_intermediate_structure(data)
+            if any(errors.values()):
+                 return JsonResponse({"errors": errors}, status=400)
+            else:
+                intermediate_modification_helper = IntermediateModificationHelper()
+                result = intermediate_modification_helper.process_api_data(data, filename)
+                return JsonResponse({"message": result}, status=201)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
