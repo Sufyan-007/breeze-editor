@@ -1,17 +1,6 @@
-from ..helper_models.base_models.api_model import ApiModel
-from ..helper_models.base_models.request import Request
-from ..helper_models.base_models.response import Response
-from ..helper_models.base_models.key_value import KeyValue
-from ..helper_models.base_models.url import Url
-from ..helper_models.base_models.body import Body
-from ..helper_models.base_models.parameter import Parameter
-from ..helper_models.base_models.auth import Auth, AuthContent
-from ..helper_models.base_models.formdata import Formdata
-from ..helper_models.enums.methods import MethodsEnum
-from ..helper_models.enums.status import StatusEnum
-from ..helper_models.enums.content import ContentEnum
-from ..helper_models.enums.mode import ModeEnum
-from ..helper_models.enums.auth_type import AuthTypeEnum
+from ..api_models import Request,Response,KeyValue,Url,Body,Parameter,Auth
+from ..api_models import Formdata,AuthContent
+from ..api_models import MethodsEnum,StatusEnum,ContentEnum,AuthTypeEnum,ModeEnum
 
 
 class IntermediateConversion:

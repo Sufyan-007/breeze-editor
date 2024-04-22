@@ -1,6 +1,7 @@
 from enum import Enum
 
 class ContentEnum(str, Enum):
+    NONE = None
     JSON = "application/json"
     TEXT = "text/plain"
     HTML = "text/html"
