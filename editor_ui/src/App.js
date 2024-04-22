@@ -11,6 +11,7 @@ import ReduxConfig from './components/ReduxConfig';
 import CreateApp from './components/CreateApp';
 import { ServicePage } from './components/ServicePage';
 import ProjectPage,{projectLoader} from './components/ProjectPage';
+import ComponentConfigPage,{configLoader} from './components/ComponentConfig/ComponentConfigPage';
 
 export const router = createBrowserRouter(
   [
@@ -18,6 +19,11 @@ export const router = createBrowserRouter(
       path:"/project/:projectName",
       element:<ProjectPage />,
       loader:projectLoader
+    },
+    {
+      path:"/project/:projectName/component/:componentName",
+      element:<ComponentConfigPage />,
+      loader:configLoader
     },
     {
       path: "/editor/:projectName",

@@ -9,7 +9,7 @@ export default function ProjectComponents(props) {
   const [selected, setSelected] = useState(0);
 
   const handleClick = (key) => {
-    const path = `/editor/${props.project}/comp/${key}`;
+    const path = `/project/${props.project}/component/${key}`;
     router.navigate(path);
   };
 

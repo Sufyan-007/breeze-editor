@@ -5,8 +5,19 @@ export async function getAppBasicConfig(projectName) {
     return config
 }
 
-export async function getComponentConfig(projectName) {
-    const config = await (await fetch(HOST+"/editor/get-components/" + projectName)).json()
+export async function getComponentConfig(projectName,componentName) {
+    console.log(projectName,componentName)
+    const config = await (await fetch(HOST+"/editor/get-components/" + projectName+"/",{
+        method:"POST",
+        headers: { 'Content-Type': 'application/json' },
+        body:JSON.stringify({"componentName":componentName})
+    })).json()
+    return config
+}
+
+
+export async function getAllComponentConfig(projectName) {
+    const config = await (await fetch(HOST+"/editor/get-components/" + projectName+"/")).json()
     return config
 }
 
@@ -40,7 +51,7 @@ export async function getRunningPort(projectName) {
 export async function getAllConfigs(projectName) {
     return {
         appBasicConfig: await getAppBasicConfig(projectName),
-        componentConfig: await getComponentConfig(projectName),
+        componentConfig: await getAllComponentConfig(projectName),
         routerConfig : await getRouterConfig(projectName),
         serviceConfig : await getServiceConfig(projectName),
         reduxStoreConfig : await getReduxStoreConfig(projectName),
