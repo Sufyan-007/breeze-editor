@@ -59,17 +59,17 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
   ];
   let tokenStorageSchemes = [
     {
-      name: "localStorage",
+      name: "LOCAL_STORAGE",
       label: "Local Storage",
       variant: "secondary",
     },
     {
-      name: "sessionStorage",
+      name: "SESSION",
       label: "Session Storage",
       variant: "secondary",
     },
     {
-      name: "cookie",
+      name: "COOKIE",
       label: "Cookie",
       variant: "secondary",
     },
@@ -170,34 +170,34 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
       request: selectedApiInfo.request
         ? selectedApiInfo.request
         : {
-            method: "POST",
-            auth: {
-              type: "",
-              content: "",
-              login_api: "",
-              token_api: "",
-            },
-            headers: [],
-            parameters: [],
-            url: {
-              baseurl: "",
-              host: "",
-              protocol: "",
-              port: "",
-              path: "",
-              url_env: "",
-            },
-            body: {
-              mode: "",
-              content_type: "",
-              required: "",
-              schema_name: "",
-              raw_content: "",
-              file: "",
-              schema: "",
-              formdata: "",
-            },
+          method: "POST",
+          auth: {
+            type: "",
+            content: "",
+            login_api: "",
+            token_api: "",
           },
+          headers: [],
+          parameters: [],
+          url: {
+            baseurl: "",
+            host: "",
+            protocol: "",
+            port: "",
+            path: "",
+            url_env: "",
+          },
+          body: {
+            mode: "",
+            content_type: "",
+            required: "",
+            schema_name: "",
+            raw_content: "",
+            file: "",
+            schema: "",
+            formdata: "",
+          },
+        },
       response: selectedApiInfo.response ? [selectedApiInfo.response] : [],
       operation_id: selectedApiInfo.operation_id,
       tags: selectedApiInfo.tags ? selectedApiInfo.tags : [],
@@ -222,7 +222,7 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
       operation = "update";
       console.log(resultantApi, "resulsdkf");
     }
-    
+
     const result = await appendToAuthApi(resultantApi, operation);
     if (result.list) {
       setOperationSuccess(true);
@@ -231,7 +231,7 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
       setOperationSuccess(false);
     }
   };
- 
+
   return (
     <>
       {operationSuccess && (

@@ -1,5 +1,5 @@
 import json
-from ...helper_models.encoder import EnhancedJSONEncoder
+from ..utils.jsonencoder import EnhancedJSONEncoder
 
 def append_to_dict_file(filepath,content):
     json_data = {}

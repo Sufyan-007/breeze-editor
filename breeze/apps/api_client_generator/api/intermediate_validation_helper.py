@@ -1,9 +1,9 @@
-from ..helper_models.enums.methods import MethodsEnum
-from ..helper_models.enums.auth_type import AuthTypeEnum
-from ..helper_models.enums.status import StatusEnum
-from ..helper_models.enums.content import ContentEnum
-from ..helper_models.enums.mode import ModeEnum         
-from ..helper_models.enums.errors import ErrorsEnum        
+from ..api_models.enums.methods import MethodsEnum
+from ..api_models.enums.auth_type import AuthTypeEnum
+from ..api_models.enums.status import StatusEnum
+from ..api_models.enums.content import ContentEnum
+from ..api_models.enums.mode import ModeEnum
+
 class IntermediateValidationHelper:
     def __init__(self, errors):
         self.errors = {

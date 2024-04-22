@@ -1,8 +1,10 @@
-import json, traceback, os
-from .helper_models.encoder import EnhancedJSONEncoder
-from .core.openapi_helper import OpenApiHelper
-from .core.helpers.append_dict_file import append_to_dict_file
-from .core.postman_helper import PostmanHelper
+import os
+import json
+from .utils.jsonencoder import EnhancedJSONEncoder
+from .utils.append_dict_file import append_to_dict_file
+
+from .core.openapi_swagger_converter import OpenapiConverter
+from .core.postman_collection_converter import PostmanCollectionConverter
 from common.utils.app_consts import CONFIG_PATH
 from django.views import View
 from django.http import JsonResponse
@@ -18,32 +20,41 @@ class ApiClientGenerator(View):
             json_data = json_file.read().decode("utf-8")
 
             if collectionType.lower() == 'postman' and json_file.name.endswith('.json'):
-                converted_data = PostmanHelper.postman_helper(json_data)
+                converted_data = PostmanCollectionConverter.prepare_api_models(json_data)
                 api_models = converted_data.get("api_models",[])
-                filename = converted_data.get("filename")
+                filename = converted_data.get("filename","")+".json"
                 model_dict = {}
                 for model in api_models:
-                    model_dict[model.id] = model
+                    model_dict[model.id] = model.as_dict()
                 full_file_path = os.path.join(folder_path, filename)
                 append_to_dict_file(full_file_path,model_dict)
-                serialized_data = json.loads(json.dumps(model_dict, cls=EnhancedJSONEncoder))
-                return JsonResponse({"data": serialized_data, "filename": filename}, status=201)
+                
+                return JsonResponse({"data": model_dict, "filename": filename}, status=201)
 
             elif collectionType.lower() == 'openapi' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
-                converted_data = OpenApiHelper.open_api_helper(json_data)
+                converted_data = OpenapiConverter.prepare_api_models(json_data)
+                
+                ## for auth.json
+                security_schemes_models = converted_data.get("security_schemes_models")
+                auth_file = "auth.json"
+                auth_model_dict = {}
+                for model in security_schemes_models:
+                    auth_model_dict[model.id] = model.as_dict()    
+                full_auth_file_path = os.path.join(folder_path, auth_file)
+                append_to_dict_file(full_auth_file_path,auth_model_dict)
+                
+                ## for other models
+                tag_models = converted_data.get("tag_models")
                 resultant_filename = []
-                resultant_api_models = {}
-                for filename, api_models in converted_data.items():
+                for tag, api_models in tag_models.items():
+                    filename = tag+".json"
                     full_file_path = os.path.join(folder_path, filename)
                     resultant_filename.append(filename)
                     model_dict = {}
                     for model in api_models:
-                        model_dict[model.id] = model
-                    serialized_data = json.loads(json.dumps(model_dict, cls=EnhancedJSONEncoder))
-                    for key,value in serialized_data.items():
-                        resultant_api_models[key] = value
+                        model_dict[model.id] = model.as_dict()
                     append_to_dict_file(full_file_path,model_dict)
-                return JsonResponse({"data": resultant_api_models, "filename": resultant_filename}, status=201)
+                return JsonResponse({"data": model_dict, "filename": resultant_filename}, status=201)
             else:
                 return JsonResponse({"error": "Invalid collection type or file format."}, status=400)
 

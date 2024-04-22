@@ -1,69 +1,14 @@
-from ..helper_models.base_models.api_model import ApiModel
-from ..helper_models.base_models.request import Request
-from ..helper_models.base_models.response import Response
-from ..helper_models.base_models.key_value import KeyValue
-from ..helper_models.base_models.url import Url
-from ..helper_models.base_models.body import Body
-from ..helper_models.base_models.parameter import Parameter
-from ..helper_models.base_models.auth import Auth, AuthContent
-from ..helper_models.base_models.formdata import Formdata
-from ..helper_models.enums.token_store_type import TokenStoreTypeEnum
-from ..helper_models.enums.auth_api_type import AuthApiTypeEnum
-from ..helper_models.enums.content import ContentEnum
-from ..helper_models.enums.mode import ModeEnum
-from ..helper_models.enums.params_in import ParamsInEnum
+import json
 
-from ..helper_models.enums.auth_type import AuthTypeEnum
-from ..helper_models.enums.token_store_type import TokenStoreTypeEnum
-from .helpers.api_model_loader import ApiModelLoader
+from ..api_models import TokenStoreTypeEnum,AuthApiTypeEnum,ContentEnum,ModeEnum
+from ..api_models import ParamsInEnum,AuthTypeEnum,TokenStoreTypeEnum
+
+from ..utils.api_model_loader import ApiModelLoader
+
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import read_config_file, read_file_json, write_file
-import json
-from ..helper_models.encoder import EnhancedJSONEncoder
-from ..api.intermediate_validation_helper import IntermediateValidationHelper
 
-
-RESPONSE_INTERCEPTOR = """
-    // Add a response interceptor
-    api.interceptors.response.use((response) => { 
-        // block to handle success case
-        return response
-    }, function (error) { 
-        // block to handle error case
-        const originalRequest = error.config;
-        if (error.response.status === 401 && originalRequest.url === '{REFRESH_TOKEN_URL}') { 
-            // Added this condition to avoid infinite loop 
-            // Redirect to any unauthorised route to avoid infinite loop...
-            return Promise.reject(error);
-        }
- 
-        if (error.response.status === 401 && !originalRequest._retry) { 
-            // Code inside this block will refresh the auth token
-            originalRequest._retry = true;
-            {GET_REFRESHED_TOKEN_CODE}
-        }
-    return Promise.reject(error);
-});
-
-"""
-
-REQUEST_INTERCEPTOR = """
-    // Add a request interceptor
-    api.interceptors.request.use(
-    (config) => {
-        const token = {FETCH_TOKEN};
-        if (token) {
-            {AUTH_CODE}
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-    );
-
-    
-"""
-
-
+from ..consts import RESPONSE_STATUS_CONDITION,REFRESH_TOKEN_API,RESPONSE_INTERCEPTOR,REQUEST_INTERCEPTOR
 class ReactApiClientGenerator:
 
     app_config_dir = None
@@ -187,7 +132,7 @@ class ReactApiClientGenerator:
         return interceptor_code
 
     def set_response_interceptor(self, auth, app_name):
-        interceptor_code = RESPONSE_INTERCEPTOR
+        interceptor_code = REFRESH_TOKEN_API
         auth_api_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/auth.json"
         auth_api_config = read_file_json(auth_api_path)
         token_api_config = auth_api_config.get(auth.token_api)
@@ -195,8 +140,7 @@ class ReactApiClientGenerator:
         token_api_code = self.generate_service_function(token_api_model, True, app_name)
 
         interceptor_code = interceptor_code.replace('{REFRESH_TOKEN_URL}', token_api_model.request.url.baseurl)
-        interceptor_code = interceptor_code.replace(
-            '{GET_REFRESHED_TOKEN_CODE}', token_api_code)
+        interceptor_code = interceptor_code.replace('{GET_REFRESHED_TOKEN_CODE}', token_api_code)
         return interceptor_code
 
     def set_request_headers(self, model, app_name):
@@ -209,6 +153,8 @@ class ReactApiClientGenerator:
         else:
             return {}
     
+    ## only for schema object .
+    ## for type array is remaining
     def generate_request_body_schema(self,parent_key,schema_name,schema):
         body = {}
         if "type" in schema:
@@ -235,6 +181,16 @@ class ReactApiClientGenerator:
 
     def set_request_body(self,model,app_name):
         body = model.request.body
+        body = body[0] if body and len(model.request.body)>0 else None
+
+        if body is None:
+            return {
+                 "code" : "",
+                "raw_data" : None,
+                "headers" : [],
+                "params" : []
+            }
+        
         raw_data = None
         variable_declaration = ""
         headers = []
@@ -269,8 +225,6 @@ class ReactApiClientGenerator:
                 headers.append({"key" : "content-type","value" : ContentEnum.TEXT.value})
                 params.append("text_body")
                 raw_data = "text_body"
-
-
 
         elif mode == ModeEnum.FORMDATA:                
             headers.append({"key" : "content-type","value" : ContentEnum.FORMDATA.value})
@@ -347,16 +301,21 @@ class ReactApiClientGenerator:
     def generate_service_function(self, model, anonymous, app_name,service_type):
         func_name = model.operation_id
         interceptor_code = ""
-        response_interceptor_code = ""
-        if service_type != "AUTH" and  model.request.auth is not None:
-            interceptor_code = self.generate_api_interceptor(
-                model.request.auth, app_name)
+        response_interceptor_code = RESPONSE_INTERCEPTOR
+        if service_type != "AUTH" and model.request.auth and len(model.request.auth) > 0:
+            ## currently only support for single auth
+            ## need to handle all array of auth
+            auth = model.request.auth[0]
+            interceptor_code = self.generate_api_interceptor(auth, app_name)
 
-            if model.request.auth.token_api is not None:
-                response_interceptor_code = self.set_response_interceptor(
-                    model.request.auth, app_name)
+            if auth and auth.token_api != "" and auth.token_api is not None:
+                r_interceptor_code = self.set_response_interceptor(auth, app_name)
+                response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',r_interceptor_code)
+            else:
+                response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
 
         react_code = ""
+        response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
         if anonymous is True:
             react_code = """
                 {AXIOS_OBJECT_DECLARATION}
@@ -412,8 +371,9 @@ class ReactApiClientGenerator:
         for head in extra_headers:
             headers[head.get("key")] = head.get("value")
         
-        ## merge params
-        function_args = function_args + extra_params
+        if extra_params:
+            ## merge params
+            function_args = function_args + extra_params
 
         if request_body is not None:
             axis_object_declation = axis_object_declation.replace('{BODY}',"data : %s"%(request_body))
@@ -430,6 +390,16 @@ class ReactApiClientGenerator:
         ## set function args comma seperated
         function_args = ",".join(function_args)
         
+        ## set response conditions if provided
+        r_status_conditions = []
+        for res in model.response:
+            if res.status != "200" and res.staus != "201":
+                r_status = RESPONSE_STATUS_CONDITION%(res.status,res.description)
+                r_status_conditions.append(r_status)
+        if len(r_status_conditions)> 0:
+            response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
+        else:
+            response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","")
 
         react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
         react_code = react_code.replace('{FUNC_ARGS}',function_args)

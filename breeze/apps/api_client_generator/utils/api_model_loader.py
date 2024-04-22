@@ -1,21 +1,6 @@
-from ...helper_models.base_models.api_model import ApiModel
-from ...helper_models.base_models.auth_api_model import AuthApiModel,TokenStore
-
-from ...helper_models.base_models.request import Request
-from ...helper_models.base_models.response import Response
-from ...helper_models.base_models.key_value import KeyValue
-from ...helper_models.base_models.url import Url
-from ...helper_models.base_models.body import Body
-from ...helper_models.base_models.parameter import Parameter
-from ...helper_models.base_models.auth import Auth, AuthContent
-from ...helper_models.base_models.formdata import Formdata
-from ...helper_models.enums.methods import MethodsEnum
-from ...helper_models.enums.status import StatusEnum
-from ...helper_models.enums.content import ContentEnum
-from ...helper_models.enums.mode import ModeEnum
-from ...helper_models.enums.auth_type import AuthTypeEnum
-from ...helper_models.enums.auth_api_type import AuthApiTypeEnum
-from ...helper_models.enums.token_store_type import TokenStoreTypeEnum
+from ..api_models import AuthApiModel,Auth,AuthContent,ApiModel,TokenStore
+from ..api_models import Request,Response,KeyValue,Url,Body,Parameter
+from ..api_models import MethodsEnum,StatusEnum,ParamsInEnum,ContentEnum,ModeEnum,AuthTypeEnum,AuthApiTypeEnum,TokenStoreTypeEnum
 
 
 class ApiModelLoader:
@@ -24,15 +9,17 @@ class ApiModelLoader:
     def load_request(request_data):
         # Build Request Object
         method_name = request_data.get("method")
-        method = MethodsEnum[method_name.upper()]
-
-        auth_data = request_data.get("auth")
+        method = MethodsEnum[method_name]
+        auths_model = []
+        auth_data_arr = request_data.get("auth",[])
 
         # call to auth data creation
-        if auth_data:
-            auth = ApiModelLoader.load_auth(auth_data=auth_data)
+        if auth_data_arr and len(auth_data_arr)>0:
+            for auth_d in auth_data_arr:
+                auth = ApiModelLoader.load_auth(auth_data=auth_d)
+                auths_model.append(auth)
         else:
-            auth = auth_data
+            auths_model = []
 
         # handle headers
         headers = []
@@ -56,23 +43,22 @@ class ApiModelLoader:
             body_data = request_data.get("body")
             body = ApiModelLoader.load_body(body_data=body_data)
 
-        request_obj = Request(method, auth, headers, parameters, url, body)
+        request_obj = Request(method, auths_model, headers, parameters, url, body)
         return request_obj
 
     @staticmethod
     def load_response(response_data):
         response=[]
-        if response_data and isinstance(response_data,list) and len(response_data) > 0:
-            for r_data in response_data:
-                response = Response(
-                    **r_data
-                )
-        elif response_data and isinstance(response_data,dict):
-            response = Response(
-                    **response_data
-            )
-        else:
-            response = []
+        for r_data in response_data:
+            response.append(Response(
+                status= StatusEnum[r_data.get("status")],
+                content_type=ContentEnum[r_data.get("content_type")],
+                schema_name = r_data.get("schema_name",None),
+                schema = r_data.get("schema",{}),
+                raw_content=r_data.get("raw_content",None),
+                file=r_data.get("file",None),
+                description = r_data.get("description",None),
+            ))
         return response
 
     @staticmethod
@@ -91,7 +77,7 @@ class ApiModelLoader:
                     type=content.get("type"),
                 )
             )
-        auth = Auth(type=auth_type, content=auth_content,
+        auth = Auth(type=AuthTypeEnum[auth_type], content=auth_content,
                     login_api=login_api, token_api=token_api)
         return auth
 
@@ -101,7 +87,7 @@ class ApiModelLoader:
         for param in parameters:
             params.append(
                 Parameter(
-                    param_in=param.get("param_in"),
+                    param_in=ParamsInEnum[param.get("param_in")],
                     name=param.get("name"),
                     type=param.get("type"),
                     required=param.get("required"),
@@ -113,8 +99,9 @@ class ApiModelLoader:
     @staticmethod
     def load_url(url_data):
         url = Url(
+            servers=url_data.get("servers",[]),
             baseurl=url_data.get("baseurl"),
-            host=url_data.get("host"),
+            host=url_data.get("host",[]),
             protocol=url_data.get("protocol", ""),
             port=url_data.get("port", 0),
             path=url_data.get("path"),
@@ -123,49 +110,36 @@ class ApiModelLoader:
         return url
 
     @staticmethod
-    def load_token_store(token_sore):
-        token_sore = TokenStore(
-            store_in=TokenStoreTypeEnum(token_sore.get("store_in")),
-            access_token_key=token_sore.get("access_token_key"),
-            refresh_token_key=token_sore.get("refresh_token_key")
-        )
-        return token_sore
-
+    def load_token_store(token_store):
+        if token_store :
+            token_store = TokenStore(
+                store_in=TokenStoreTypeEnum[token_store.get("store_in")],
+                access_token_key=token_store.get("access_token_key"),
+                refresh_token_key=token_store.get("refresh_token_key")
+            )
+            return token_store
+        return None
 
     @staticmethod
     def load_body(body_data):
-        formdata_list = []
-        if body_data.get("mode") is None:
-            return None
-        formdata_data = body_data.get("formdata", [])
-
-        for item in formdata_data:
-            formdata_list.append(
-                Formdata(
-                    key=item.get("key"),
-                    value=item.get("value"),
-                    description=item.get("description"),
-                    type=item.get("type"),
-                    src=item.get("src"),
+        arr_body = []
+        if len(body_data) <= 0:
+            return []
+        
+        for body in body_data:
+            arr_body.append(
+                Body(
+                    content_type=ContentEnum[body.get("content_type")],
+                    mode=ModeEnum[body.get("mode")],
+                    raw_content=body.get("raw"),
+                    schema=body.get("schema", {}),
+                    required=body.get("required"),
+                    schema_name=body.get("schema_name"),
+                    file=body.get("file"),
+                    anonymous=body.get("anonymous")
                 )
             )
-
-        content_type = body_data.get("content_type")
-        if content_type:
-            content_type = ContentEnum(content_type).name
-            content_type = ContentEnum[content_type]
-
-        body = Body(
-            mode=ModeEnum(body_data.get("mode")),
-            raw_content=body_data.get("raw"),
-            formdata=formdata_list,
-            content_type=content_type,
-            schema=body_data.get("schema", {}),
-            required=body_data.get("required"),
-            schema_name=body_data.get("schema_name"),
-            file=body_data.get("file"),
-        )
-        return body
+        return arr_body
 
     @staticmethod
     def load_headers(header_data):
@@ -178,10 +152,9 @@ class ApiModelLoader:
     @staticmethod
     def load_api_model(model_json):
         request_data = model_json.get("request", {})
-        response_data = model_json.get("response", {})
+        response_data = model_json.get("response", [])
         request_obj = ApiModelLoader.load_request(request_data=request_data)
-        response_obj = ApiModelLoader.load_response(
-            response_data=response_data)
+        response_obj = ApiModelLoader.load_response(response_data=response_data)
         api_model = ApiModel(
             id=model_json.get("id"),
             operation_id=model_json.get("operation_id"),
@@ -189,7 +162,7 @@ class ApiModelLoader:
             request=request_obj,
             response=response_obj,
             summary=model_json.get("summary"),  # Summary later,
-            is_authentication_api=False
+            is_authentication_api=model_json.get("is_authentication_api")
         )
         return api_model
 
@@ -198,8 +171,7 @@ class ApiModelLoader:
         request_data = model_json.get("request", {})
         response_data = model_json.get("response", {})
         request_obj = ApiModelLoader.load_request(request_data=request_data)
-        response_obj = ApiModelLoader.load_response(
-            response_data=response_data)
+        response_obj = ApiModelLoader.load_response(response_data=response_data)
         api_model = AuthApiModel(
             id=model_json.get("id"),
             operation_id=model_json.get("operation_id"),
@@ -207,10 +179,10 @@ class ApiModelLoader:
             request=request_obj,
             response=response_obj,
             summary=model_json.get("summary"),  # Summary later,
-            auth_api_type=AuthApiTypeEnum(model_json.get("auth_api_type")) ,
-            authentication_type= AuthTypeEnum(model_json.get("authentication_type")),
+            auth_api_type=AuthApiTypeEnum[model_json.get("auth_api_type")] ,
+            authentication_type= AuthTypeEnum[model_json.get("authentication_type")],
             is_authorization_url=model_json.get("is_authorization_url"),
             flow=model_json.get("flow"),
-            token_store=ApiModelLoader.load_token_store(model_json.get("token_store"))
+            token_store=ApiModelLoader.load_token_store(model_json.get("token_store",{}))
         )
         return api_model
