@@ -4,6 +4,7 @@ import json
 from .core.app_editor import AppEditor
 from .core.config_service import ConfigService
 from .core.generate_project import GenerateProject
+from .core.component_config_service import ComponentConfigService
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
@@ -392,3 +393,13 @@ class CSSFileDownloadView(APIView):
             return response
         else:
             raise Http404(f"The file does not exist in the folder {css_name}.")
+
+@method_decorator(csrf_exempt, name='dispatch')
+class HtmlConfigReader(APIView):
+    def post(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            return JsonResponse(componentConfigService.get_html_by_id(data["component"],data["html_id"]),status = 200)
+        except:
+            return JsonResponse({},status=500)

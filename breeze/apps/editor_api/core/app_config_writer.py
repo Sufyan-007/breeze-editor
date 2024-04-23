@@ -38,6 +38,7 @@ class AppConfigWriter:
                 "functions": [],
                 "html": {
                                     "type": "Element",
+                                    "_id": app_config['defaultComponent'],
                                     "elementType":"HTML",
                                     "typeId":"DIV",
                                     "tagName": "div",

@@ -15,6 +15,7 @@ from .views import ComponentReader
 from .views import CSSConfig
 from .views import CSSConfigReader
 from .views import CSSFileDownloadView
+from .views import HtmlConfigReader
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -43,5 +44,6 @@ urlpatterns = [
         path('delete-css-file/<str:css_name>/', CSSConfig.as_view()),
         path('get-css-file/<str:css_name>/', CSSConfigReader.as_view()),
         path('css-file-download/<str:css_name>/', CSSFileDownloadView.as_view()),
+        path('get-html-config/', HtmlConfigReader.as_view()),
 ]
 
