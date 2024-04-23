@@ -1,4 +1,4 @@
-import json, uuid
+import json
 import traceback
 
 from ..api_models import ModeEnum
