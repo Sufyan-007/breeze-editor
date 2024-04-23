@@ -1,4 +1,5 @@
 import json
+import copy
 
 from ..api_models import TokenStoreTypeEnum,AuthApiTypeEnum,ContentEnum,ModeEnum
 from ..api_models import ParamsInEnum,AuthTypeEnum,TokenStoreTypeEnum
@@ -21,20 +22,20 @@ class ReactApiClientGenerator:
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{app_name}"
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
 
-    def _manage_service_tags(self, tags, react_function, map_services):
+    def _manage_service_tags(self, tags, react_functions, map_services):
         # prepare dict obj for each tag
         # each react functions will be bind to a tag/service class
         if tags is None or len(tags) == 0:
             if "default" in map_services:
-                map_services["default"].append(react_function)
+                map_services["default"]+=react_functions
             else:
-                map_services["default"] = [react_function]
+                map_services["default"] = react_functions
             return map_services
         for tag in tags:
             if tag in map_services:
-                map_services.get(tag).append(react_function)
+                map_services[tag] += react_functions
             else:
-                map_services[tag] = [react_function]
+                map_services[tag] = react_functions
         return map_services
 
     def create_serice_files(self, map_services):
@@ -62,18 +63,9 @@ class ReactApiClientGenerator:
                 model = ApiModelLoader.load_auth_api_model(config)
             else:
                 model = ApiModelLoader.load_api_model(config)
-            #validation
-            intermediate_validator = IntermediateValidationHelper()
-            model_json  = json.dumps(model, cls=EnhancedJSONEncoder)
-            errors = intermediate_validator.validate_intermediate_structure({"modified_api": model_json})
-            if any(errors.values()):
-                return
-            else:
-                react_function = self.generate_service_function(
-                    model, False, app_name,service_type)
+            react_functions = self.generate_service_function(model, False, app_name,service_type)
             
-            map_services = self._manage_service_tags(
-                model.tags, react_function, map_services)
+            map_services = self._manage_service_tags(model.tags, react_functions, map_services)
         self.create_serice_files(map_services)
 
     
@@ -179,81 +171,93 @@ class ReactApiClientGenerator:
         body_str = "{" + body_str + "}"
         return body_str
 
+    
     def set_request_body(self,model,app_name):
-        body = model.request.body
-        body = body[0] if body and len(model.request.body)>0 else None
-
-        if body is None:
+        
+        if model.request.body is None:
             return {
-                 "code" : "",
+                "code" : "",
                 "raw_data" : None,
                 "headers" : [],
                 "params" : []
             }
         
         raw_data = None
-        variable_declaration = ""
+        variable_declaration_arr = {}
         headers = []
         params = []
-        mode = body.mode
-        if mode == ModeEnum.FILE:
-            params.append("file")
-            variable_declaration = "let fileData = Buffer.from(await file.arrayBuffer())"
-            raw_data = "fileData"            
+        for body in model.request.body:
+            variable_declaration = ""
+            params = []
+            headers = []
+            raw_data = None
+            mode = body.mode
+            if mode == ModeEnum.FILE:
+                params.append("file")
+                variable_declaration = "let fileData = Buffer.from(await file.arrayBuffer())"
+                raw_data = "fileData"     
+                       
 
-        elif mode == ModeEnum.RAW:
-            content_type = body.content_type
-            if content_type == ContentEnum.JSON:
-                headers.append({"key" : "content-type","value" : ContentEnum.JSON.value})
-                if body.schema_name is None:
-                    params.append(model.operation_id)
-                    value = model.operation_id
-                    raw_data = value
-                else:
-                
-                    schema_name = body.schema_name
-                    params.append(schema_name)
-                    schema = body.schema
-                    ## generate request body schema
-                    model_data = {}
-                    model_data = self.generate_request_body_schema(None,schema_name,schema)  
-                    variable_declaration = "let reqBody = %s"%(model_data)
-                    raw_data = "reqBody";
+            elif mode == ModeEnum.RAW:
+                content_type = body.content_type
+                if content_type == ContentEnum.JSON:
+                    headers.append({"key" : "content-type","value" : ContentEnum.JSON.value})
+                    if body.schema_name is None:
+                        params.append(model.operation_id)
+                        value = model.operation_id
+                        schema = body.schema
+                        raw_data = value
+                        model_data = {}
+                        model_data = self.generate_request_body_schema(None,value,schema)  
+                        variable_declaration = "let reqBody = %s"%(model_data)
+                        raw_data = "reqBody";
+
+                    else:
+                    
+                        schema_name = body.schema_name
+                        params.append(schema_name)
+                        schema = body.schema
+                        ## generate request body schema
+                        model_data = {}
+                        model_data = self.generate_request_body_schema(None,schema_name,schema)  
+                        variable_declaration = "let reqBody = %s"%(model_data)
+                        raw_data = "reqBody";
 
 
-            elif content_type == ContentEnum.TEXT:
-                headers.append({"key" : "content-type","value" : ContentEnum.TEXT.value})
-                params.append("text_body")
-                raw_data = "text_body"
+                elif content_type == ContentEnum.TEXT:
+                    headers.append({"key" : "content-type","value" : ContentEnum.TEXT.value})
+                    params.append("text_body")
+                    raw_data = "text_body"
 
-        elif mode == ModeEnum.FORMDATA:                
-            headers.append({"key" : "content-type","value" : ContentEnum.FORMDATA.value})
-            variable_declaration = "let bodyFormData = new FormData();"
-            form_data = body.formdata
-            for item in form_data:
-                params.append(item.key)
-                if item.type == "file":
-                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s}`);"%(item.key,item.key)
-                else:
-                    variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s}`);"%(item.key,item.key)
-                raw_data = "bodyFormData"
-        
-        elif mode == ModeEnum.URLENCODED:
-            headers.append({"key" : "content-type","value" : ContentEnum.URLENCODED.value})
-            variable_declaration = "let formBody = [];"
-            form_data = body.formdata
-            for item in form_data:
-                params.append(item.key)
-                variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")}` + "=" + `${encodeURIComponent(%s)}`);'%(item.key,item.key)
-                raw_data = "formBody"
-            variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
+            elif mode == ModeEnum.FORMDATA:                
+                headers.append({"key" : "content-type","value" : ContentEnum.FORMDATA.value})
+                variable_declaration = "let bodyFormData = new FormData();"
+                form_data = body.schema
+                for key,item in form_data.get("properties",{}).items():
+                    params.append(key)
+                    if item.get("type") == "text":
+                        variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s}`);"%(key,key)
+                    else:
+                        variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s}`);"%(item.key,item.key)
+                    raw_data = "bodyFormData"
+            
+            elif mode == ModeEnum.URLENCODED:
+                headers.append({"key" : "content-type","value" : ContentEnum.URLENCODED.value})
+                variable_declaration = "let formBody = [];"
+                form_data = body.schema
+                for key,item in form_data.get("properties",{}).items():
+                    params.append(key)
+                    variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")}` + "=" + `${encodeURIComponent(%s)}`);'%(key,key)
+                    raw_data = "formBody"
+                variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
 
-        return {
-            "code" : variable_declaration,
-            "raw_data" : raw_data,
-            "headers" : headers,
-            "params" : params
-        }
+            variable_declaration_arr[mode.name]= {
+                    "headers" : headers,
+                    "variable_declaration" : variable_declaration,
+                    "raw_data" : raw_data,
+                    "params" : params
+            }
+        return variable_declaration_arr
 
     def set_request_url(self,model,app_name):
         function_args = []
@@ -327,7 +331,7 @@ class ReactApiClientGenerator:
 
         else:
             react_code = """
-                export const %s = async ({FUNC_ARGS}) => {
+                export const {FUNC_NAME} = async ({FUNC_ARGS}) => {
                     {AXIOS_OBJECT_DECLARATION}
                     {INTERCEPTOR_CODE}
                     {RESPONSE_INTERCEPTOR_CODE}
@@ -335,7 +339,7 @@ class ReactApiClientGenerator:
                     {RESPONSE_CODE}
                     return resp
                 };
-                """ % (func_name)
+                """ 
 
         axis_object_declation = """
             const api = axios.create({
@@ -356,81 +360,94 @@ class ReactApiClientGenerator:
         headers = self.set_request_headers(model,app_name)
         
         # set request body if given
-        body = self.set_request_body(model,app_name)
-        variable_declaration = body.get("code","")
-        
-        if len(variable_declaration) > 0:
-            ## declare any formdata or file variable befor passing it to axios
-            axis_object_declation = variable_declaration + axis_object_declation
+        body_items = self.set_request_body(model,app_name)
+        react_service_functions = []
+        common_data = {
+            "headers" : copy.deepcopy(headers),
+            "axis_object_declation" : copy.deepcopy(axis_object_declation),
+            "react_code" : react_code,
+            "function_args" : function_args
+        }
+        for mode,body in body_items.items():
+            variable_declaration = body.get("variable_declaration","")
+            react_code = copy.deepcopy(common_data.get("react_code"))
+            if len(variable_declaration) > 0:
+                ## declare any formdata or file variable befor passing it to axios
+                axis_object_declation = copy.deepcopy(common_data.get("axis_object_declation"))
+                axis_object_declation = variable_declaration + axis_object_declation
 
-        request_body = body.get("raw_data",None)
-        extra_headers = body.get("headers",[])
-        extra_params = body.get("params",[])
-        
-        ## merge headers
-        for head in extra_headers:
-            headers[head.get("key")] = head.get("value")
-        
-        if extra_params:
-            ## merge params
-            function_args = function_args + extra_params
+            request_body = body.get("raw_data",None)
+            extra_headers = body.get("headers",[])
+            extra_params = body.get("params",[])
+            
+            ## merge headers
+            headers = copy.deepcopy(common_data.get("headers"))
+            for head in extra_headers:
+                headers[head.get("key")] = head.get("value")
+            
+            function_args = copy.deepcopy(common_data.get("function_args"))
+            if extra_params:
+                ## merge params
+                function_args = function_args + extra_params
 
-        if request_body is not None:
-            axis_object_declation = axis_object_declation.replace('{BODY}',"data : %s"%(request_body))
-        else:
-            axis_object_declation = axis_object_declation.replace('{BODY}','')
+            if request_body is not None:
+                axis_object_declation = axis_object_declation.replace('{BODY}',"data : %s"%(request_body))
+            else:
+                axis_object_declation = axis_object_declation.replace('{BODY}','')
 
 
-        if bool(headers) is True:
-            headers =  ' headers : %s'%(json.dumps(headers))
-            axis_object_declation = axis_object_declation.replace('{HEADERS}',headers)
-        else:
-            axis_object_declation = axis_object_declation.replace('{HEADERS},',"")
+            if bool(headers) is True:
+                headers =  ' headers : %s'%(json.dumps(headers))
+                axis_object_declation = axis_object_declation.replace('{HEADERS}',headers)
+            else:
+                axis_object_declation = axis_object_declation.replace('{HEADERS},',"")
 
-        ## set function args comma seperated
-        function_args = ",".join(function_args)
-        
-        ## set response conditions if provided
-        r_status_conditions = []
-        for res in model.response:
-            if res.status != "200" and res.staus != "201":
-                r_status = RESPONSE_STATUS_CONDITION%(res.status,res.description)
-                r_status_conditions.append(r_status)
-        if len(r_status_conditions)> 0:
-            response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
-        else:
-            response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","")
+            ## set function args comma seperated
+            function_args = ",".join(function_args)
+            
+            ## set response conditions if provided
+            r_status_conditions = []
+            for res in model.response:
+                if res.status != "200" and res.staus != "201":
+                    r_status = RESPONSE_STATUS_CONDITION%(res.status,res.description)
+                    r_status_conditions.append(r_status)
+            if len(r_status_conditions)> 0:
+                response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
+            else:
+                response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","")
 
-        react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
-        react_code = react_code.replace('{FUNC_ARGS}',function_args)
-        react_code = react_code.replace('{AXIOS_OBJECT_DECLARATION}', axis_object_declation)
-        react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
-        react_code = react_code.replace(
-            '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
-        
-        ## handle api response code
-        if service_type == "AUTH":
-            auth_api_type = model.auth_api_type
-            code = ""
-            if auth_api_type == AuthApiTypeEnum.LOGIN:
-                
-                token_store_info = model.token_store
-                store_in = token_store_info.store_in
-                access_token_key = token_store_info.access_token_key
-                refresh_token_key = token_store_info.refresh_token_key
-                if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
-                    code = "localStorage.setItem('%s','`${resp.data.access_token}`');"%(access_token_key)
-                    code = code + '\n' + "localStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
+            react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
+            react_code = react_code.replace('{FUNC_ARGS}',function_args)
+            react_code = react_code.replace('{AXIOS_OBJECT_DECLARATION}', axis_object_declation)
+            react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
+            react_code = react_code.replace(
+                '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
+            
+            ## handle api response code
+            if service_type == "AUTH":
+                auth_api_type = model.auth_api_type
+                code = ""
+                if auth_api_type == AuthApiTypeEnum.LOGIN:
+                    
+                    token_store_info = model.token_store
+                    store_in = token_store_info.store_in
+                    access_token_key = token_store_info.access_token_key
+                    refresh_token_key = token_store_info.refresh_token_key
+                    if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
+                        code = "localStorage.setItem('%s','`${resp.data.access_token}`');"%(access_token_key)
+                        code = code + '\n' + "localStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
 
-                elif store_in == TokenStoreTypeEnum.SESSION:
-                    code = "sessionStorage.setItem('%s','`${resp.data}`');"%(access_token_key)
-                    code = code + '\n' + "sessionStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
+                    elif store_in == TokenStoreTypeEnum.SESSION:
+                        code = "sessionStorage.setItem('%s','`${resp.data}`');"%(access_token_key)
+                        code = code + '\n' + "sessionStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
 
-            elif auth_api_type == AuthApiTypeEnum.REFRESH:
-                pass
-                
-            react_code = react_code.replace('{RESPONSE_CODE}',code)
-        else:
-            react_code = react_code.replace('{RESPONSE_CODE}',"")
+                elif auth_api_type == AuthApiTypeEnum.REFRESH:
+                    pass
+                    
+                react_code = react_code.replace('{RESPONSE_CODE}',code)
+            else:
+                react_code = react_code.replace('{RESPONSE_CODE}',"")
 
-        return react_code
+            react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
+            react_service_functions.append(react_code)
+        return react_service_functions
