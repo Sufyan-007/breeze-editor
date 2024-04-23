@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useLoaderData } from "react-router";
+import { useLoaderData } from "react-router";
 import { useParams } from 'react-router-dom';
 import { useDispatch } from "react-redux";
 import { getAllConfigs } from "../services/ConfigService";
@@ -30,6 +30,7 @@ import Settings from './Settings';
 import Styles from './Styles';
 import Code from './Code';
 import ThirdPartyApp from './ThirdPartyApp';
+import { router } from '../App';
 
 export default function ProjectPage() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
