@@ -20,6 +20,24 @@
                     "body": "console.log('Loader Called'); \n return null;"
                 }
             },
+            "shouldRevalidate": {
+                "implementation": {
+                    "name": "",
+                    "$id": "FUNCTIONS/A1",
+                    "isAnonymous": true,
+                    "parameters": {
+                        "destructured": false,
+                        "list": [
+                            {
+                                "name": "args"
+                            }
+                        ]
+                    },
+                    "isAsync": false,
+                    "body": "console.log('Should revalidate called'); \n return true;"
+                }
+            },
+            "lazy" : true,
             "loader": {
                 "implementation": {
                     "name": "",
@@ -40,6 +58,7 @@
         },
         {
             "component": "create_app_page",
+            "lazy" : true,
             "path": "/home"
         },
         {

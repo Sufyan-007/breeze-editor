@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ServiceContext } from '../store/Context';
 import ElementConfig from './ElementConfig';
 import Navbar from './Navbar';
+import { router } from '../App';
 
 function Editor() {
   const dispatch = useDispatch()
@@ -58,7 +59,7 @@ function Editor() {
         <Navbar 
           leftContent={
             <div className=' d-flex'>
-              <div className=' d-flex align-items-center text-white me-3'>
+              <div className=' d-flex align-items-center text-white me-3' onClick={() => { router.navigate(`/project/${projectName}`);}}>
                 {projectName}
               </div>
             </div>

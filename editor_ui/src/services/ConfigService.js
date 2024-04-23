@@ -1,7 +1,7 @@
 const HOST="http://localhost:8000"
 
 export async function getAppBasicConfig(projectName) {
-    const config = await (await fetch(HOST+"/editor/read-app-basic-config/" + projectName)).json()
+    const config = await (await fetch(HOST+"/editor/read-app-basic-config/" + projectName + "/")).json()
     return config
 }
 
@@ -23,28 +23,28 @@ export async function getAllComponentConfig(projectName) {
 
 
 export async function getRouterConfig(projectName) {
-    const config = await (await fetch(HOST+"/editor/read-router-config/" + projectName)).json()
+    const config = await (await fetch(HOST+"/editor/read-router-config/" + projectName + "/")).json()
     return config
 }
 
 export async function getServiceConfig(projectName) {
-    const config = await (await fetch(HOST+"/editor/read-services/" + projectName)).json()
+    const config = await (await fetch(HOST+"/editor/read-services/" + projectName + "/")).json()
     return config
 }
 
 export async function getReduxStoreConfig(projectName) {
-    const config = await (await fetch(HOST+"/editor/read-redux-store/" + projectName)).json()
+    const config = await (await fetch(HOST+"/editor/read-redux-store/" + projectName + "/")).json()
     return config
 }
 
 export async function getReducerConfig(projectName) {
-    const config = await (await fetch(HOST+"/editor/read-reducers/" + projectName)).json()
+    const config = await (await fetch(HOST+"/editor/read-reducers/" + projectName + "/")).json()
     return config
 
 }
 
 export async function getRunningPort(projectName) {
-    const port = await (await fetch(HOST+"/editor/run-project/"+projectName)).json()
+    const port = await (await fetch(HOST+"/editor/run-project/" + projectName + "/")).json()
     return port.port
 }
 
