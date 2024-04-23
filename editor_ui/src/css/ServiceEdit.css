@@ -1,0 +1,44 @@
+.section-div {
+  background-color: #212529;
+  color: white;
+}
+
+.main-container {
+  padding-left: 48px;
+}
+.main-container::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-form-control {
+  max-width: 50vw;
+  background-color: #6c757d !important;
+  border: none !important;
+  color: white;
+  font-size: 16px;
+}
+.form-control {
+  color: white !important;
+  font-size: 16px;
+}
+
+.section-div {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  margin-bottom: 16px;
+  max-width: 74.2vw;
+}
+.body-sec {
+  padding-left: 14px;
+}
+label.form-label {
+  font-size: 16px;
+}
+.mx-1.btn.btn-secondary {
+  cursor: pointer;
+  border-color: white;
+}
+.close-button.btn.btn-secondary {
+  cursor: pointer;
+  margin-right: 38px;
+}
