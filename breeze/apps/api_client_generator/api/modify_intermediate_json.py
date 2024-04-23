@@ -2,7 +2,6 @@ from django.http import JsonResponse
 import json
 from ..core.intermediate_modification_helper import IntermediateModificationHelper
 from django.views import View
-from .intermediate_validation_helper import IntermediateValidationHelper
 
 class ModifyIntermediateJson(View):
     def post(self, request):

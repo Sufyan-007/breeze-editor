@@ -291,7 +291,7 @@ class OpenapiConverter:
     @staticmethod
     def generate_json_for_security_schema(schema_name,schema_data,meta_data):
         auth_obj = {
-            "tags" : ["auth"],
+            "tags" : "auth",
             "auth" : None,
             "url" : None,
             "body" : None,
