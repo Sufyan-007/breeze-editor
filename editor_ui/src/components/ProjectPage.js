@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useLoaderData } from "react-router";
+import { useLoaderData } from "react-router";
 import { useParams } from 'react-router-dom';
 import { useDispatch } from "react-redux";
 import { getAllConfigs } from "../services/ConfigService";
@@ -23,7 +23,6 @@ import pages from "../assets/icons/pages.svg";
 import routing from "../assets/icons/routing.svg";
 import settings from "../assets/icons/settings.svg";
 import services from "../assets/icons/services.svg";
-import config from "../assets/icons/config.svg";
 import constants from "../assets/icons/constants.svg";
 import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from './ProjectSidebar';
@@ -31,6 +30,7 @@ import Settings from './Settings';
 import Styles from './Styles';
 import Code from './Code';
 import ThirdPartyApp from './ThirdPartyApp';
+import { router } from '../App';
 
 export default function ProjectPage() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -83,7 +83,7 @@ export default function ProjectPage() {
         <div className="container-fluid vh-100 d-flex flex-column">
             <Navbar leftContent={
                 <div className=' d-flex'>
-                    <div className=' d-flex align-items-center text-white me-3'>
+                    <div className=' d-flex align-items-center text-white me-3'  onClick={() => { router.navigate(`/project/${projectName}`);}}>
                         {projectName}
                     </div>
                     {/* <button className="btn btn-outlined text-white-50" style={{ color: "white" }} onClick={() => router.navigate("/")}>

@@ -1,15 +1,17 @@
 import { React, useState, useEffect } from "react";
 import { Toast } from "react-bootstrap";
 import CssFileCard from "./CssFileCard";
-import CssFileModal from "./CssFileModal";
+import CssFileUploadModal from "./CssFileUploadModal";
+import {useParams} from "react-router-dom";
+import { router } from "../App";
 
 function Styles() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [files, setFiles] = useState([]);
-  const [modalMode, setModalMode] = useState("add"); // "add", "edit", "view"
-  const [initialData, setInitialData] = useState({});
+  const {projectName} = useParams();
+
 
   useEffect(() => {
     getAllCSSFiles();
@@ -24,21 +26,6 @@ function Styles() {
       setFiles(data.files);
     } catch (error) {
       console.error("Error fetching files:", error);
-    }
-  };
-
-  const handleView = async (css_name) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8000/editor/get-css-file/${css_name}/`
-      );
-      const data = await response.json();
-      setModalMode("view");
-      setInitialData(data);
-      setShowModal(true);
-    } catch (error) {
-      setToastMessage("An error occurred while trying to fetch the file.");
-      setShowToast(true);
     }
   };
 
@@ -64,40 +51,34 @@ function Styles() {
       setShowToast(true);
     }
   };
-  const handleEdit = async (css_name) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8000/editor/get-css-file/${css_name}/`
-      );
-      const data = await response.json();
-      setModalMode("edit");
-      setInitialData(data);
-      setShowModal(true);
-    } catch (error) {
-      setToastMessage("An error occurred while trying to edit the file.");
-      setShowToast(true);
-    }
+
+  const handleDownload = (css_name) => {
+    const downloadUrl = `http://localhost:8000/editor/css-file-download/${css_name}/`;
+    window.location.href = downloadUrl;
   };
 
-  const onSubmit = async (payload, mode) => {
-    // const obj = Object.fromEntries(payload.entries());
-    const url =
-      mode === "add"
-        ? `http://localhost:8000/editor/add-css-file/`
-        : `http://localhost:8000/editor/update-css-file/`;
-    const method = mode === "add" ? "POST" : "PUT";
+  const handleAdd = () => {
+    router.navigate(`/project/${projectName}/styles/add`);
+  };
+
+  const handleView = (css_name) => {
+    router.navigate(`/project/${projectName}/styles/view/${css_name}`);
+  };
+
+  const handleEdit = (css_name) => {
+    router.navigate(`/project/${projectName}/styles/edit/${css_name}`);
+  };
+
+
+  const handleUpload = async (formData) => {
     try {
-      const response = await fetch(url, {
-        method: method,
-        body: payload,
+      const response = await fetch("http://localhost:8000/editor/upload-css-file/", {
+        method: "POST",
+        body: formData,
       });
       const result = await response.json();
       if (response.ok) {
-        setToastMessage(
-          result.message || mode === "add"
-            ? "CSS Added Successfully"
-            : "CSS Updated Successfully"
-        );
+        setToastMessage("CSS file uploaded successfully");
       } else {
         setToastMessage(result.error || "Upload failed.");
       }
@@ -110,24 +91,16 @@ function Styles() {
     }
   };
 
-  const handleDownload = (css_name) => {
-    const downloadUrl = `http://localhost:8000/editor/css-file-download/${css_name}/`;
-    window.location.href = downloadUrl;
-  };
-
-  const handleAdd = () => {
-    setModalMode("add");
-    setInitialData({});
-    setShowModal(true);
-  };
-
   return (
     <>
       <div className="container-fluid text-white px-4">
         <div className="col-12 my-3">
           <div className="d-flex justify-content-end">
+            <button className="btn btn-secondary mx-2" onClick={() => {setShowModal(true)}}>
+              Upload CSS
+            </button>
             <button className="btn btn-secondary" onClick={handleAdd}>
-              + Add CSS
+              Add CSS
             </button>
           </div>
         </div>
@@ -158,14 +131,12 @@ function Styles() {
           <strong className="me-auto text-success">{toastMessage}</strong>
         </Toast.Header>
       </Toast>
-      <CssFileModal
+      <CssFileUploadModal
         show={showModal}
         onHide={() => {
           setShowModal(false);
         }}
-        mode={modalMode}
-        initialData={initialData}
-        onSubmit={onSubmit}
+        onSubmit={handleUpload}
       />
     </>
   );

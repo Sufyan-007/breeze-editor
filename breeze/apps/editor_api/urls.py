@@ -15,6 +15,7 @@ from .views import ComponentReader
 from .views import CSSConfig
 from .views import CSSConfigReader
 from .views import CSSFileDownloadView
+from .views import CSSFileUpload
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -37,7 +38,8 @@ urlpatterns = [
         path('run-project/<str:param>/',AppStartup.as_view()),
         path('get-components/<str:param>/',ComponentReader.as_view()),
         path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
-        path('add-css-file/', CSSConfig.as_view()),
+        path('add-css-content/', CSSConfig.as_view()),
+        path('upload-css-file/', CSSFileUpload.as_view()),
         path('all-css-files/', CSSConfig.as_view()),
         path('update-css-file/', CSSConfig.as_view()),
         path('delete-css-file/<str:css_name>/', CSSConfig.as_view()),
