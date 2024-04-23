@@ -224,7 +224,7 @@ class PostmanCollectionConverter:
                 api_model_obj = {
                     "id" : generate_uuid_as_key(),
                     "operation_id":item.get("name",""),
-                    "tags" :[tag],
+                    "tags" :tag,
                     "request":request_obj,
                     "response":response_arr,
                     "summary":item.get("summary"),

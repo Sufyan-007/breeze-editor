@@ -7,7 +7,7 @@ from ..validators import required_validator
 class ApiModel:
     id : str = CustomizedAttr((str),[required_validator])
     operation_id: str = CustomizedAttr((str),[required_validator])
-    tags: list = CustomizedAttr((list),[required_validator])
+    tags: str = CustomizedAttr((str),[required_validator])
     request : Request = CustomizedAttr((Request),[required_validator])
     response : list = CustomizedAttr(list,[required_validator])
     summary : str =  CustomizedAttr((str),[])
