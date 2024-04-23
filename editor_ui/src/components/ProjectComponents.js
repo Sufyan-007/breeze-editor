@@ -13,7 +13,7 @@ export default function ProjectComponents(props) {
 
 
   const handleClick = (key) => {
-    const path = `/project/${props.project}/component/${key}`;
+    const path = `/project/${projectName}/component/${key}`;
     router.navigate(path);
   };
 
