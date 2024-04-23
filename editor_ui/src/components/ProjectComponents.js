@@ -3,10 +3,14 @@ import { useSelector } from "react-redux";
 import page_ss from "../assets/icons/page_ss.png";
 import custom_ss from "../assets/icons/custom-component.png";
 import { router } from "../App";
+import { useParams } from 'react-router-dom';
+
 
 export default function ProjectComponents(props) {
   const config = useSelector((state) => state.config);
   const [selected, setSelected] = useState(0);
+  const {projectName} = useParams();
+
 
   const handleClick = (key) => {
     const path = `/project/${props.project}/component/${key}`;

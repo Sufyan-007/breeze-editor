@@ -64,6 +64,10 @@ def prepare_tp_comp_config():
     global COMPONENTS_CONFIG
     global COMPONENTS_LIST
 
+    # If the folder doesnt exits then skip all the execution
+    if not pathlib.Path(THIRD_PARTY_CONFIG_PATH).exists():
+        return
+
     all_tp_path = pathlib.Path(THIRD_PARTY_CONFIG_PATH)
     all_tp_path = list(all_tp_path.iterdir())
 

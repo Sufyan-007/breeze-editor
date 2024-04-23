@@ -7,7 +7,6 @@ import { setReducerConfig, setReduxStoreConfig } from "../reducers/ReduxConfigRe
 import { setServiceConfig } from "../reducers/ServiceConfigReducer";
 import { setRouterConfig } from "../reducers/RouterConfigReducer";
 import { setConfig } from "../reducers/ConfigReducer";
-import { router } from '../App';
 //components
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
@@ -24,7 +23,6 @@ import pages from "../assets/icons/pages.svg";
 import routing from "../assets/icons/routing.svg";
 import settings from "../assets/icons/settings.svg";
 import services from "../assets/icons/services.svg";
-import config from "../assets/icons/config.svg";
 import constants from "../assets/icons/constants.svg";
 import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from './ProjectSidebar';
@@ -32,6 +30,7 @@ import Settings from './Settings';
 import Styles from './Styles';
 import Code from './Code';
 import ThirdPartyApp from './ThirdPartyApp';
+import { router } from '../App';
 
 export default function ProjectPage() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -52,21 +51,21 @@ export default function ProjectPage() {
     }, [allConfig, dispatch]);
 
     const sidebarItems = [
-        { id: 0, name: "Home", icon: home },
-        { id: 1, name: "Pages", icon: pages },
-        { id: 2, name: "Routing", icon: routing },
-        { id: 3, name: "Services", icon: services },
-        { id: 4, name: "Constants", icon: constants }, 
-        { id: 5, name: "Styles", icon: styles }, 
-        { id: 6, name: "Code", icon: code },
-        { id: 7, name: "Third-party App", icon: apps },
-        { id: 8, name: "Settings", icon: settings }, 
+        { id: 0, name: "Home", icon: home, path: "" },
+        { id: 1, name: "Pages", icon: pages, path: "pages" },
+        { id: 2, name: "Routing", icon: routing, path: "routing" },
+        { id: 3, name: "Services", icon: services, path: "services" },
+        { id: 4, name: "Constants", icon: constants, path: "constants" }, 
+        { id: 5, name: "Styles", icon: styles, path: "styles" }, 
+        { id: 6, name: "Code", icon: code, path: "code" },
+        { id: 7, name: "Third-party App", icon: apps, path: "apps" },
+        { id: 8, name: "Settings", icon: settings, path: "settings" }, 
 
     ];
 
     const components = [
         <ProjectHome />,
-        <ProjectComponents project = {projectName} />,
+        <ProjectComponents/>,
         <ProjectRouting />,
         <ServicePage />,
         <ReduxConfig />,
@@ -84,7 +83,7 @@ export default function ProjectPage() {
         <div className="container-fluid vh-100 d-flex flex-column">
             <Navbar leftContent={
                 <div className=' d-flex'>
-                    <div className=' d-flex align-items-center text-white me-3'>
+                    <div className=' d-flex align-items-center text-white me-3'  onClick={() => { router.navigate(`/project/${projectName}`);}}>
                         {projectName}
                     </div>
                     {/* <button className="btn btn-outlined text-white-50" style={{ color: "white" }} onClick={() => router.navigate("/")}>
