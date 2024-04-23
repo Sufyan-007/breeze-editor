@@ -39,7 +39,7 @@ class IntermediateModificationHelper:
         try:
             api_model = ApiModelLoader.load_api_model(modified_api)
             resultant_model =  {f"{api_model.id}" : api_model.as_dict()}
-            tag = modified_api.get("tags", ["default"])[0]
+            tag = modified_api.get("tags", "default")
             if os.path.exists(file_path):
                 with open(file_path, "r") as file:
                     existing_data = json.load(file)
@@ -47,8 +47,8 @@ class IntermediateModificationHelper:
                 if modified_api['id'] not in uuids:
                     return f"UUID {modified_api['id']} does not exist in {file_path}."
 
-                if tag != existing_data[modified_api["id"]].get('tags', [''])[0]:
-                    new_file_path = os.path.join(self.folder_path, f"{tag}Service.json")
+                if tag != existing_data[modified_api["id"]].get('tags', 'default'):
+                    new_file_path = os.path.join(self.folder_path, f"{tag}.json")
                     append_to_dict_file(new_file_path, resultant_model)
                     if modified_api['id'] in existing_data:
                         del existing_data[modified_api['id']]

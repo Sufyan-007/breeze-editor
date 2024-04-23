@@ -517,7 +517,7 @@ class OpenapiConverter:
                     api_model_obj = {
                         "id" : id,
                         "operation_id":operation_data.get("operationId"),
-                        "tags" :[tag],
+                        "tags" :tag,
                         "request":request_obj,
                         "response":response_arr,
                         "summary":operation_data.get("summary"),
