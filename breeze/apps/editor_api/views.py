@@ -390,7 +390,44 @@ class CSSFileDownloadView(APIView):
             return response
         else:
             raise Http404(f"The file does not exist in the folder {css_name}.")
-            raise Http404(f"The file does not exist in the folder {css_name}.")
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class CSSFileUpload(APIView):
+    def post(self, request):
+        try:
+            css_name = request.POST.get('css_name')
+            css_file = request.FILES.get('css_file')
+            
+            if not css_file:
+                return JsonResponse({'error': 'No CSS file provided.'}, status=400)
+            
+            if not css_name:
+                return JsonResponse({'error': 'CSS Name is required.'}, status=400)
+
+            base_dir = os.path.join('uploaded_css')
+            folder_path = os.path.join(base_dir, css_name)
+
+            if os.path.exists(folder_path):
+                return JsonResponse({'error': f'A folder with the name "{css_name}" already exists.'}, status=400)
+            
+            file_path = f"{folder_path}/{css_file.name}"
+            file_name = default_storage.save(file_path, ContentFile(css_file.read()))
+
+            with default_storage.open(file_name, 'r') as f:
+                css_text = f.read()
+
+            rules = tinycss2.parse_stylesheet(css_text, skip_whitespace=True)
+            class_names = extract_class_names(rules)
+            print(len(class_names))
+            return JsonResponse({
+                'message': 'CSS file uploaded successfully',
+                'css_name': css_name,
+                'class_names': list(class_names)
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+
 @method_decorator(csrf_exempt, name='dispatch')
 class HtmlConfigReader(APIView):
     def post(self,request):
