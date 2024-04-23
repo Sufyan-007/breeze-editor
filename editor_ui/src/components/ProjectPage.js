@@ -14,10 +14,10 @@ import { router } from "../App";
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
 import ServicePage from "./Services/ServicePage";
+import ServicePage from "./Services/ServicePage";
 import ProjectComponents from "./ProjectComponents";
 import ProjectRouting from "./ProjectRouting";
 import ProjectHome from "./ProjectHome";
-
 //icons
 import styles from "../assets/icons/styles.svg";
 import home from "../assets/icons/home.svg";
@@ -59,11 +59,11 @@ export default function ProjectPage() {
     { id: 7, name: "Third-party App", icon: apps },
     { id: 8, name: "Config", icon: pages }, //icon
   ];
-
   const components = [
     <ProjectHome />,
     <ProjectComponents />,
     <ProjectRouting />,
+    <ServiceGeneralSetting />,
     <ServiceGeneralSetting />,
     <ReduxConfig />,
     //rest to be added
@@ -80,6 +80,8 @@ export default function ProjectPage() {
           <button
             className="btn btn-outlined"
             style={{ color: "white" }}
+            onClick={() => router.navigate("/")}
+          >
             onClick={() => router.navigate("/")}
           >
             All Apps
@@ -115,10 +117,8 @@ export default function ProjectPage() {
     </div>
   );
 }
-
 export async function projectLoader({ params }) {
   const projectName = params.projectName;
-
   console.log("Loading project ", projectName);
   const config = await getAllConfigs(projectName);
   return config;

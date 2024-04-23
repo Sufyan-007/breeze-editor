@@ -183,9 +183,7 @@ useEffect(()=>{
                 <Nav.Link onClick={toggleAuthenticationConfig} className="mx-3">
                   Authentication Config
                 </Nav.Link>
-                <Nav.Link onClick={toggleIntermediateFiles} className="mx-3">
-                  Intermediates files
-                </Nav.Link>
+                
               </Nav>
             </Navbar.Collapse>
           </Container>

@@ -75,11 +75,11 @@ class ReactApiClientGenerator:
             else:
                 map_services["default"] = react_functions
             return map_services
-        for tag in tags:
-            if tag in map_services:
-                map_services[tag] += react_functions
+        else:
+            if tags in map_services:
+                map_services[tags] += react_functions
             else:
-                map_services[tag] = react_functions
+                map_services[tags] = react_functions
         return map_services
 
     def create_serice_files(self, map_services):
@@ -460,7 +460,7 @@ class ReactApiClientGenerator:
             ## set response conditions if provided
             r_status_conditions = []
             for res in model.response:
-                if res.status != "200" and res.staus != "201":
+                if res.status != "200" and res.status != "201":
                     r_status = RESPONSE_STATUS_CONDITION%(res.status,res.description)
                     r_status_conditions.append(r_status)
             if len(r_status_conditions)> 0:

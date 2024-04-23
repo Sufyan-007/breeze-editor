@@ -27,7 +27,7 @@ class TokenStore:
 class AuthApiModel:
     id : str = CustomizedAttr((str),[required_validator])
     operation_id: str = CustomizedAttr((str),[required_validator])
-    tags: list = CustomizedAttr((list),[required_validator])
+    tags: str = CustomizedAttr((str),[required_validator])
     auth_api_type : AuthApiTypeEnum =CustomizedAttr(AuthApiTypeEnum,[])
     authentication_type : AuthTypeEnum = CustomizedAttr(AuthTypeEnum,[required_validator])
     request : Request = CustomizedAttr((Request),[])
