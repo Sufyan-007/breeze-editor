@@ -9,9 +9,9 @@ import Sidebar from "./components/Sidebar";
 import DetailedComponent from "./components/DetailedComponent";
 import ReduxConfig from "./components/ReduxConfig";
 import CreateApp from "./components/CreateApp";
-import { ServicePage } from "./components/ServicePage";
+import { ServicePage } from "./components/Services/ServicePage";
 import ProjectPage, { projectLoader } from "./components/ProjectPage";
-import ServicesList from "./components/ServiceList";
+import ServicesList from "./components/Services/ServiceList";
 
 export const router = createBrowserRouter([
   {

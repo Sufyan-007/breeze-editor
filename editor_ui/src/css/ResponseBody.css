@@ -1,6 +1,14 @@
 
-.form-control {
+input.form-control {
     max-width: 50vw;
     background-color: #6C757D;
     border: none;
+    color: white !important;
   }
+
+.mb-3 custom-form-group{
+  background-color: #303033;
+}
+input.form-control::placeholder{
+  color:white;
+}

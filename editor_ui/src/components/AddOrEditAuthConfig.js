@@ -8,6 +8,8 @@ import { getAuthApiConfig } from "../services/IntermediatesService.js";
 import { appendToAuthApi } from "../services/IntermediatesService";
 import CustomButtonGroup from "./CustomButtonGroup.js";
 import CustomFormControl from "./CustomFormControl.js";
+import RequestBody from "./Services/RequestBody.js";
+import ResponseBody from "./Services/ResponseBody.js";
 
 function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
   const [selectedApiInfo, setSelectedApiInfo] = useState({});
@@ -170,34 +172,34 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
       request: selectedApiInfo.request
         ? selectedApiInfo.request
         : {
-          method: "POST",
-          auth: {
-            type: "",
-            content: "",
-            login_api: "",
-            token_api: "",
+            method: "POST",
+            auth: {
+              type: "",
+              content: "",
+              login_api: "",
+              token_api: "",
+            },
+            headers: [],
+            parameters: [],
+            url: {
+              baseurl: "",
+              host: "",
+              protocol: "",
+              port: "",
+              path: "",
+              url_env: "",
+            },
+            body: {
+              mode: "",
+              content_type: "",
+              required: "",
+              schema_name: "",
+              raw_content: "",
+              file: "",
+              schema: "",
+              formdata: "",
+            },
           },
-          headers: [],
-          parameters: [],
-          url: {
-            baseurl: "",
-            host: "",
-            protocol: "",
-            port: "",
-            path: "",
-            url_env: "",
-          },
-          body: {
-            mode: "",
-            content_type: "",
-            required: "",
-            schema_name: "",
-            raw_content: "",
-            file: "",
-            schema: "",
-            formdata: "",
-          },
-        },
       response: selectedApiInfo.response ? [selectedApiInfo.response] : [],
       operation_id: selectedApiInfo.operation_id,
       tags: selectedApiInfo.tags ? selectedApiInfo.tags : [],
@@ -231,7 +233,7 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
       setOperationSuccess(false);
     }
   };
-
+console.log(selectedApiInfo,"api");
   return (
     <>
       {operationSuccess && (
@@ -240,18 +242,21 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
         </Toast>
       )}
       <div
+        className="outer-div"
         style={{
           overflowY: "auto",
           overflowX: "hidden",
           maxHeight: "80vh",
           maxWidth: "100%",
-        }}>
+        }}
+      >
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-          }}>
+          }}
+        >
           <h2 style={{ color: "white" }}>
             {isEditMode ? "" : "Add Authentication Configuration"}
           </h2>
@@ -265,7 +270,7 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
             <Form>
               <Row>
                 <Col sm={3} className="mt-4">
-                  <Form.Label>Selected Api</Form.Label>
+                  <Form.Label className="m-3">Selected Api</Form.Label>
                 </Col>
                 <Col sm={9}>
                   <Form.Control
@@ -284,13 +289,15 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
                 selectedButton={selectedApiInfo.auth_api_type}
                 onButtonClick={onValueChanges}
                 formId="auth_api_type"
-                title="Select Type:"></CustomButtonGroup>
+                title="Select Type:"
+              ></CustomButtonGroup>
               <CustomButtonGroup
                 options={authenticationTypes}
                 selectedButton={selectedApiInfo.authentication_type}
                 onButtonClick={onValueChanges}
                 formId="authentication_type"
-                title="Authentication Scheme:"></CustomButtonGroup>
+                title="Authentication Scheme:"
+              ></CustomButtonGroup>
 
               {selectedApiInfo.authentication_type === "Oauth2" && (
                 <>
@@ -301,7 +308,8 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
                     }
                     onButtonClick={onValueChanges}
                     formId="flow_type"
-                    title="Select Flow or Grant Types:"></CustomButtonGroup>
+                    title="Select Flow or Grant Types:"
+                  ></CustomButtonGroup>
 
                   <CustomFormControl
                     options={AuthUrls}
@@ -320,19 +328,24 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
                 }
                 onButtonClick={onValueChanges}
                 formId="token_store.store_in"
-                title="Select Token Storage Scheme"></CustomButtonGroup>
+                title="Select Token Storage Scheme"
+              ></CustomButtonGroup>
               {selectedApiInfo.token_store && (
                 <CustomFormControl
                   options={selectKeys}
                   onChange={onValueChanges}
-                  controlId="selectedKey"></CustomFormControl>
+                  controlId="selectedKey"
+                ></CustomFormControl>
               )}
-
+                 {selectedApiInfo.request && <RequestBody requestBody={selectedApiInfo.request} />}
+                 {selectedApiInfo.response && <ResponseBody responseBody={selectedApiInfo.response} />}
+              
               <Button
                 className="mt-5"
                 variant="secondary"
                 style={{ width: "10%" }}
-                onClick={handleSave}>
+                onClick={handleSave}
+              >
                 Save
               </Button>
             </Form>

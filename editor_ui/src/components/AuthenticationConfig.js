@@ -120,7 +120,7 @@ function AuthenticationConfig() {
           </Button>
         </Modal.Footer>
       </Modal>
-
+      
       {showAddOrEditModal && <div className='p-5'>
         <AddOrEditAuthConfig 
         availableApis={available_apis} 

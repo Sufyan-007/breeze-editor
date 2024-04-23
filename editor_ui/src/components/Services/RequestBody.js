@@ -1,35 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Dropdown, Row, Col } from "react-bootstrap";
 import Body from "./Body.js";
-import RequestBodycss from "../css/RequestBody.css";
-import {getAuthFileConfig} from '../services/IntermediatesService.js'
+import Urls from "./Urls.js";
+import RequestBodycss from "../../css/RequestBody.css";
+import { getAuthFileConfig } from "../../services/IntermediatesService.js";
+
 function RequestBody({ onChange, requestBody }) {
+  console.log(requestBody, "request body");
   const [method, setMethod] = useState(requestBody.method);
   const [parameters, setParameters] = useState(requestBody.parameters || []);
-  const [url, setUrl] = useState({
-    baseurl: requestBody.url?.baseurl || "",
-    host: requestBody.url?.host || "",
-    protocol: requestBody.url?.protocol || "",
-    port: requestBody.url?.port || 443,
-    path: requestBody.url?.path || [],
-  });
+  const [url, setUrl] = useState(requestBody.url);
   const [headers, setHeaders] = useState(requestBody.headers || []);
   const [auth, setAuth] = useState({
     type: requestBody.auth?.type || "No Auth",
     content: requestBody.auth?.content || [{ key: "", value: "", type: "" }],
-    login_api : requestBody.auth? requestBody.auth.login_api : '',
-    token_api: requestBody.auth? requestBody.auth.token_api : ''
+    login_api: requestBody.auth ? requestBody.auth.login_api : "",
+    token_api: requestBody.auth ? requestBody.auth.token_api : "",
   });
   const [body, setBody] = useState(requestBody.body);
-const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
-const [apis, setApis] = useState("");
-const [loginApis, setLoginApis] = useState([]);
+  const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
+  const [apis, setApis] = useState("");
+  const [loginApis, setLoginApis] = useState([]);
   const [tokenApis, setTokenApis] = useState([]);
 
   const handleBodyChange = (updatedBody) => {
     const newBody = { ...body, ...updatedBody };
     setBody(newBody);
     onChange({ ...requestBody, body: newBody });
+  };
+
+  const handleUrlChange = (updatedUrl) => {
+    const newUrl = { ...url, ...updatedUrl };
+    setUrl(newUrl);
+    onChange({ ...requestBody, url: newUrl });
   };
 
   const handleMethodChange = (selectedMethod) => {
@@ -56,15 +59,6 @@ const [loginApis, setLoginApis] = useState([]);
     updatedParameters[index][name] = value;
     setParameters(updatedParameters);
     onChange({ ...requestBody, parameters: updatedParameters });
-  };
-
-  const handleUrlChange = (name, value) => {
-    // Update the specified property of the URL in the state
-    setUrl({
-      ...url,
-      [name]: value,
-    });
-    onChange({ ...requestBody, url: { ...url, [name]: value } }); //pass the updated state of the url
   };
 
   const handleHeaderChange = (index, name, value) => {
@@ -133,27 +127,28 @@ const [loginApis, setLoginApis] = useState([]);
       },
     });
   };
- const handleAuthApiSelect = (e, key)=>{
-  let auth_new = {...auth}
-  auth_new[key] = e 
-  setAuth({...auth_new})
-  onChange({
-    ...requestBody, auth:{...auth_new}
-  })
- }
+  const handleAuthApiSelect = (e, key) => {
+    let auth_new = { ...auth };
+    auth_new[key] = e;
+    setAuth({ ...auth_new });
+    onChange({
+      ...requestBody,
+      auth: { ...auth_new },
+    });
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchAuthApis = async () => {
       try {
         const data = await getAuthFileConfig("creator");
         setApis(data.data);
       } catch (error) {
-        console.error('Error fetching auth APIs:', error);
+        console.error("Error fetching auth APIs:", error);
       }
     };
 
     fetchAuthApis();
-  }, [])
+  }, []);
 
   useEffect(() => {
     // Filter APIs based on auth_api_type
@@ -168,6 +163,7 @@ const [loginApis, setLoginApis] = useState([]);
     setTokenApis(tokenApisFiltered);
   }, [apis]);
 
+  console.log(requestBody, "updated req body");
   return (
     <div>
       <div className="mb-3 text-dark requestbody">
@@ -175,12 +171,10 @@ const [loginApis, setLoginApis] = useState([]);
           <Form.Group controlId="formMethod">
             <Row>
               <Col sm={3}>
-                <Form.Label style={{ fontWeight: "bold" }}>
-                  HTTP Method:
-                </Form.Label>
+                <Form.Label className="m-3">HTTP Method:</Form.Label>
               </Col>
               <Col sm={9}>
-                <Dropdown onSelect={handleMethodChange}>
+                <Dropdown className="mx-5" onSelect={handleMethodChange}>
                   <Dropdown.Toggle variant="secondary" id="dropdown-method">
                     {method}
                   </Dropdown.Toggle>
@@ -206,17 +200,16 @@ const [loginApis, setLoginApis] = useState([]);
           <Form.Group controlId="formParameters">
             <Row>
               <Col sm={3}>
-                <Form.Label style={{ fontWeight: "bold" }} className="mt-3">
-                  Parameters:
-                </Form.Label>
+                <Form.Label className="m-3">Parameters:</Form.Label>
               </Col>
               <Col sm={9}>
                 {parameters.map((parameter, index) => (
                   <div key={index}>
                     <Form.Check
-                      className="m-3"
+                      className="mx-5 m-3"
                       type="checkbox"
                       label="Required"
+                      style={{ color: "white" }}
                       checked={parameter.required}
                       onChange={(e) =>
                         handleParameterChange(
@@ -227,7 +220,7 @@ const [loginApis, setLoginApis] = useState([]);
                       }
                     />
                     <Form.Control
-                      className="mb-1"
+                      className="mx-5 mb-1"
                       style={{
                         maxWidth: "50vw",
                         backgroundColor: "#6C757D",
@@ -248,7 +241,7 @@ const [loginApis, setLoginApis] = useState([]);
                     </Form.Control>
 
                     <Form.Control
-                      className="mb-1"
+                      className="mx-5 mb-1"
                       style={{
                         maxWidth: "50vw",
                         backgroundColor: "#6C757D",
@@ -262,7 +255,7 @@ const [loginApis, setLoginApis] = useState([]);
                       }
                     />
                     <Form.Control
-                      className="mb-1"
+                      className="mx-5 mb-1"
                       style={{
                         maxWidth: "50vw",
                         backgroundColor: "#6C757D",
@@ -276,7 +269,7 @@ const [loginApis, setLoginApis] = useState([]);
                       }
                     />
                     <Form.Control
-                      className="mb-1"
+                      className="mx-5 mb-1"
                       style={{
                         maxWidth: "50vw",
                         backgroundColor: "#6C757D",
@@ -300,7 +293,7 @@ const [loginApis, setLoginApis] = useState([]);
                     variant="secondary"
                     type="button"
                     onClick={handleAddParameter}
-                    className="mt-3"
+                    className="mx-5 mt-3"
                   >
                     Add Parameter
                   </Button>
@@ -309,113 +302,27 @@ const [loginApis, setLoginApis] = useState([]);
             </Row>
           </Form.Group>
 
-          <Form.Group controlId="formUrls" className="mt-3">
-            <Row>
-              <Col sm={3}>
-                <Form.Label style={{ fontWeight: "bold" }}>URL:</Form.Label>
-              </Col>
-              <Col sm={9}>
-                <Form.Control
-                  className="mb-1"
-                  style={{
-                    maxWidth: "50vw",
-                    backgroundColor: "#6C757D",
-                    border: "none",
-                  }}
-                  type="text"
-                  placeholder="www.example.com"
-                  value={url.baseurl}
-                  onChange={(e) => handleUrlChange("baseurl", e.target.value)}
-                />
-                <Form.Control
-                  className="mb-1"
-                  style={{
-                    maxWidth: "50vw",
-                    backgroundColor: "#6C757D",
-                    border: "none",
-                  }}
-                  type="text"
-                  placeholder="example.com"
-                  value={url.host}
-                  onChange={(e) => handleUrlChange("host", e.target.value)}
-                />
-                <Form.Control
-                  className="mb-1"
-                  style={{
-                    maxWidth: "50vw",
-                    backgroundColor: "#6C757D",
-                    border: "none",
-                  }}
-                  type="text"
-                  placeholder="https"
-                  value={url.protocol}
-                  onChange={(e) => handleUrlChange("protocol", e.target.value)}
-                />
-                <Form.Control
-                  className="mb-1"
-                  style={{
-                    maxWidth: "50vw",
-                    backgroundColor: "#6C757D",
-                    border: "none",
-                  }}
-                  type="number"
-                  placeholder="Port"
-                  value={url.port}
-                  onChange={(e) =>
-                    handleUrlChange("port", parseInt(e.target.value, 10))
-                  }
-                />
-                <Form.Control
-                  className="mb-1"
-                  style={{
-                    maxWidth: "50vw",
-                    backgroundColor: "#6C757D",
-                    border: "none",
-                  }}
-                  type="text"
-                  placeholder="path1 , path2 "
-                  value={url.path || [].join(", ")}
-                  onChange={(e) =>
-                    handleUrlChange(
-                      "path",
-                      e.target.value.split(",").map((p) => p.trim())
-                    )
-                  }
-                />
-              </Col>
-            </Row>
-          </Form.Group>
+          <Urls onChange={handleUrlChange} urls={url} />
 
           <Form.Group controlId="formHeaders" className="mt-3">
             <Row>
               <Col sm={3}>
-                <Form.Label style={{ fontWeight: "bold" }} className="mt-3">
-                  Headers:
-                </Form.Label>
+                <Form.Label className="m-3">Headers:</Form.Label>
               </Col>
               <Col sm={9}>
                 {headers.map((header, index) => (
                   <div key={index} className="d-flex mb-2">
                     <Form.Control
-                      style={{
-                        maxWidth: "24.5vw",
-                        backgroundColor: "#6C757D",
-                        border: "none",
-                      }}
                       type="text"
                       placeholder="Key"
                       value={header.key}
                       onChange={(e) =>
                         handleHeaderChange(index, "key", e.target.value)
                       }
-                      className="me-2"
+                      className="mx-5 me-2"
                     />
                     <Form.Control
-                      style={{
-                        maxWidth: "24.5vw",
-                        backgroundColor: "#6C757D",
-                        border: "none",
-                      }}
+                      className="value"
                       type="text"
                       placeholder="Value"
                       value={header.value}
@@ -426,7 +333,11 @@ const [loginApis, setLoginApis] = useState([]);
                   </div>
                 ))}
                 <div>
-                  <Button variant="secondary" onClick={addHeader}>
+                  <Button
+                    variant="secondary"
+                    className="mx-5"
+                    onClick={addHeader}
+                  >
                     Add Header
                   </Button>
                 </div>
@@ -437,13 +348,11 @@ const [loginApis, setLoginApis] = useState([]);
           <Form.Group controlId="formAuth" className="mt-3">
             <Row>
               <Col sm={3}>
-                <Form.Label style={{ fontWeight: "bold" }}>
-                  Authorization:
-                </Form.Label>
+                <Form.Label className="m-3">Authorization:</Form.Label>
               </Col>
               <Col sm={9}>
                 <Dropdown
-                  className="mb-3"
+                  className="mx-5 mb-3"
                   onSelect={(value) => handleAuthChange("type", value)}
                 >
                   <Dropdown.Toggle variant="secondary" id="authTypeDropdown">
@@ -460,7 +369,7 @@ const [loginApis, setLoginApis] = useState([]);
                     <Dropdown.Item eventKey="Bearer" className="dropdownitem">
                       Bearer
                     </Dropdown.Item>
-                    
+
                     <Dropdown.Item eventKey="Oauth" className="dropdownitem">
                       Oauth
                     </Dropdown.Item>
@@ -470,63 +379,67 @@ const [loginApis, setLoginApis] = useState([]);
                   </Dropdown.Menu>
                 </Dropdown>
 
- { (
-  <>
-          <Row>
-        <Col sm={3}>
-          <Form.Label style={{ fontWeight: "bold" }} className="m-2">
-            Login API:
-          </Form.Label>
-        </Col>
-        <Col sm={9}>
-          <Dropdown onSelect={(e)=>handleAuthApiSelect(e, "login_api")} className="m-2">
-            <Dropdown.Toggle variant="secondary" id="loginApiDropdown">
-              {auth.login_api ? auth.login_api : 'Login Api'}
-            </Dropdown.Toggle>
-            <Dropdown.Menu style={{ textAlign: "center" }}>
-              {loginApis.map((api) => (
-                <Dropdown.Item
-                  key={api.id}
-                  eventKey={api.id}
-                  className="dropdownitem"
-                >
-                  {api.operation_id}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </Col>
-      </Row>
+                <>
+                  <Row>
+                    <Col sm={3}>
+                      <Form.Label className="mx-5 m-2">Login API:</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                      <Dropdown
+                        onSelect={(e) => handleAuthApiSelect(e, "login_api")}
+                        className="mx-5 m-2"
+                      >
+                        <Dropdown.Toggle
+                          variant="secondary"
+                          id="loginApiDropdown"
+                        >
+                          {auth.login_api ? auth.login_api : "Login Api"}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu style={{ textAlign: "center" }}>
+                          {loginApis.map((api) => (
+                            <Dropdown.Item
+                              key={api.id}
+                              eventKey={api.id}
+                              className="dropdownitem"
+                            >
+                              {api.operation_id}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </Col>
+                  </Row>
 
-      <Row>
-        <Col sm={3}>
-          <Form.Label style={{ fontWeight: "bold" }} className="m-2">
-            Token API:
-          </Form.Label>
-        </Col>
-        <Col sm={9}>
-          <Dropdown onSelect={(e)=>handleAuthApiSelect(e, "token_api")} className="m-2">
-            <Dropdown.Toggle variant="secondary" id="tokenApiDropdown">
-              {auth.token_api ? auth.token_api : 'Token Api'}
-            </Dropdown.Toggle>
-            <Dropdown.Menu style={{ textAlign: "center" }} >
-              {tokenApis.map((api) => (
-                <Dropdown.Item
-                  key={api.id}
-                  eventKey={api.id}
-                  className="dropdownitem"
-                 
-                >
-                  {api.operation_id}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </Col>
-      </Row>
-        </>
-      )}
-    
+                  <Row>
+                    <Col sm={3}>
+                      <Form.Label className="mx-5 m-2">Token API:</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                      <Dropdown
+                        onSelect={(e) => handleAuthApiSelect(e, "token_api")}
+                        className="mx-5 m-2"
+                      >
+                        <Dropdown.Toggle
+                          variant="secondary"
+                          id="tokenApiDropdown"
+                        >
+                          {auth.token_api ? auth.token_api : "Token Api"}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu style={{ textAlign: "center" }}>
+                          {tokenApis.map((api) => (
+                            <Dropdown.Item
+                              key={api.id}
+                              eventKey={api.id}
+                              className="dropdownitem"
+                            >
+                              {api.operation_id}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </Col>
+                  </Row>
+                </>
 
                 {/* List of AuthContent inputs */}
                 {auth.content.map((authContent, index) => (
@@ -543,7 +456,7 @@ const [loginApis, setLoginApis] = useState([]);
                       onChange={(e) =>
                         handleAuthContentChange(index, "key", e.target.value)
                       }
-                      className="me-2"
+                      className="mx-5 me-2"
                     />
                     <Form.Control
                       style={{
@@ -557,7 +470,7 @@ const [loginApis, setLoginApis] = useState([]);
                       onChange={(e) =>
                         handleAuthContentChange(index, "value", e.target.value)
                       }
-                      className="me-2"
+                      className="mx-5 me-2"
                     />
                     <Form.Control
                       style={{
@@ -574,7 +487,7 @@ const [loginApis, setLoginApis] = useState([]);
                     />
                     <Button
                       variant="secondary"
-                      className="ms-2"
+                      className="mx-5 ms-2"
                       onClick={() => removeAuthContent(index)}
                     >
                       Remove
@@ -584,7 +497,7 @@ const [loginApis, setLoginApis] = useState([]);
 
                 <Button
                   variant="secondary"
-                  className="mt-2"
+                  className="mx-5 mt-2"
                   onClick={addAuthContent}
                 >
                   Add AuthContent

@@ -14,7 +14,7 @@ const CustomFormControl = ({
           {filteredOptions.map((option) => (
             <Row key={option.name}>
               <Col sm={3}>
-                <Form.Label>{option.label}</Form.Label>
+                <Form.Label className="m-3">{option.label}</Form.Label>
               </Col>
               <Col sm={9}>
                 <Form.Control

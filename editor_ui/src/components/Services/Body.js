@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import { Form, Button, Row, Col, ButtonGroup } from "react-bootstrap";
+import BodyCss from "../../css/Body.css";
 
 export default function Body({ onChange, body }) {
-  console.log(body, "body in body");
   const [mode, setMode] = useState(body.mode);
   const [contentType, setContentType] = useState(
     body.content_type || "application/json"
@@ -10,9 +10,7 @@ export default function Body({ onChange, body }) {
   const [required, setRequired] = useState(body.required || false);
   const [schemaName, setSchemaName] = useState(body.schema_name || "");
   const [rawContent, setRawContent] = useState(body.raw_content || "");
-  // const [file, setFile] = useState(body.file || "");
   const [formdata, setFormData] = useState(body.formdata || []);
-  // const fileInputRefBinary = useRef(null);
   const fileInputRefFormData = useRef(null);
 
   const handleModeChange = (value) => {
@@ -77,13 +75,13 @@ export default function Body({ onChange, body }) {
       onChange({ ...body, formdata: updatedFormData });
     }
   };
-
+ console.log(mode ,  "hi" ,formdata);
   return (
     <div>
       <Form.Group controlId="formBody">
         <Row>
           <Col sm={3}>
-            <Form.Label className="mt-3" style={{ fontWeight: "bold" }}>
+            <Form.Label className="m-3">
               Body:
             </Form.Label>
           </Col>
@@ -92,14 +90,13 @@ export default function Body({ onChange, body }) {
               <Row>
                 <Col sm={2}>
                   <Form.Label
-                    style={{ fontWeight: "bold" }}
-                    className="mt-3"
+                    className="mx-5 mt-3"
                   >
                     Mode:
                   </Form.Label>
                 </Col>
                 <Col sm={7}>
-                  <ButtonGroup className="mt-1">
+                  <ButtonGroup className="mx-5 mt-3">
                     <Button
                       variant="secondary"
                       onClick={() => handleModeChange("raw")}
@@ -146,14 +143,13 @@ export default function Body({ onChange, body }) {
                   <Row>
                     <Col sm={2}>
                       <Form.Label
-                        style={{ fontWeight: "bold" }}
-                        className="mt-3"
+                        className="mx-5 mt-3"
                       >
                         Content Type:
                       </Form.Label>
                     </Col>
                     <Col sm={10}>
-                      <ButtonGroup className="mt-1">
+                      <ButtonGroup className="mx-5 mt-3">
                         <Button
                           variant="secondary"
                           onClick={() =>
@@ -228,13 +224,13 @@ export default function Body({ onChange, body }) {
                   <Row>
                     <Col sm={2}>
                       <Form.Label
-                        style={{ fontWeight: "bold" }}
-                        className="mt-3"
+        
+                        className="mx-5 mt-3"
                       >
                         Raw Content:
                       </Form.Label>
                     </Col>
-                    <Col sm={7} className="mt-1">
+                    <Col sm={7} className="mx-5 mt-3">
                       <Form.Control
                         style={{
                           maxWidth: "30vw",
@@ -256,7 +252,7 @@ export default function Body({ onChange, body }) {
                 <Row>
                   <Col sm={2}>
                     <Form.Label
-                      style={{ fontWeight: "bold" }}
+                
                       className="mt-3 p-1"
                     >
                       FormData:
@@ -414,8 +410,8 @@ export default function Body({ onChange, body }) {
               <Col sm={3}></Col>
               <Col sm={9}>
                 <Form.Check
-                  style={{ fontWeight: "bold" }}
-                  className="mt-3"
+                style={{"color":"white"}}
+                  className="mx-5 mt-3"
                   type="checkbox"
                   label="Required"
                   id="body-required"
@@ -428,7 +424,7 @@ export default function Body({ onChange, body }) {
 
           <Row className="mt-3">
             <Col sm={3}>
-              <Form.Label style={{ fontWeight: "bold" }}>
+              <Form.Label className="m-3">
                 Schema Name:
               </Form.Label>
             </Col>
@@ -439,6 +435,7 @@ export default function Body({ onChange, body }) {
                   backgroundColor: " #6C757D",
                   border: "none"
                 }}
+                className="mx-5"
                 type="text"
                 value={schemaName}
                 onChange={(e) => handleSchemaNameChange(e.target.value)}

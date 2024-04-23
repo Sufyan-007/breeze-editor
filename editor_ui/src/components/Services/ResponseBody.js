@@ -1,6 +1,6 @@
 import React, { useState , useEffect} from "react";
 import {Form, Button, ButtonGroup, Row , Col} from 'react-bootstrap';
-import responsebodycss from '../css/ResponseBody.css'
+import ResponseBodyCss from "../../css/ResponseBody.css";
 
 function ResponseBody({onChange, responseBody}) {
    const [status, setStatus] = useState(responseBody.status || "");
@@ -37,17 +37,17 @@ function ResponseBody({onChange, responseBody}) {
  };
 
   return (
-    <div className="mb-3 text-dark" style={{ backgroundColor: "#212529" }}>
+    <div className="mb-3 text-dark">
       <Form>
         <Form.Group>
           <Row>
             <Col sm={3}>
-              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+              <Form.Label className="m-3">
                 Status
               </Form.Label>
             </Col>
             <Col sm={9}>
-              <ButtonGroup>
+              <ButtonGroup className="mx-5">
                 <Button
                   variant="secondary"
                   onClick={() => handleStatusChange("200")}
@@ -84,12 +84,12 @@ function ResponseBody({onChange, responseBody}) {
         <Form.Group>
           <Row>
             <Col sm={3}>
-              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+              <Form.Label className="m-3">
                 Content Type
               </Form.Label>
             </Col>
             <Col sm={9}>
-              <ButtonGroup>
+              <ButtonGroup className="mx-5">
                 <Button
                   variant="secondary"
                   onClick={() => handleContentTypeChange("application/json")}
@@ -135,13 +135,13 @@ function ResponseBody({onChange, responseBody}) {
         <Form.Group>
           <Row>
             <Col sm={3}>
-              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+              <Form.Label className="m-3">
                 Schema Name:
               </Form.Label>
             </Col>
             <Col sm={9}>
               <Form.Control
-                className="form-control"
+              className="mx-5"
                 type="text"
                 value={responseBody.schema_name}
                 onChange={(e) => handleSchemaNameChange(e.target.value)}
@@ -153,13 +153,13 @@ function ResponseBody({onChange, responseBody}) {
         <Form.Group>
           <Row>
             <Col sm={3}>
-              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+              <Form.Label className="m-3">
                 Raw Content:
               </Form.Label>
             </Col>
             <Col sm={9}>
               <Form.Control
-                className="form-control"
+                className="mx-5"
                 type="text"
                 value={responseBody.raw_content}
                 onChange={(e) => handleRawContentChange(e.target.value)}
@@ -171,13 +171,13 @@ function ResponseBody({onChange, responseBody}) {
         <Form.Group>
           <Row>
             <Col sm={3}>
-              <Form.Label style={{ fontWeight: "bold" }} className="m-3">
+              <Form.Label className="m-3">
                 File:
               </Form.Label>
             </Col>
             <Col sm={9}>
               <Form.Control
-                className="form-control"
+                className="mx-5"
                 type="text"
                 value={responseBody.file}
                 onChange={(e) => handleFileChange(e.target.value)}

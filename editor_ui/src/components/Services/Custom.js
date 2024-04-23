@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import RequestBody from "./RequestBody";
 import ResponseBody from "./ResponseBody";
-import Customcss from "../css/Custom.css";
+
 function Custom({ dummyData, tagsList = [], onClose, isVisible }) {
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
   const [tags, setTags] = useState(dummyData.tags || []);
@@ -80,6 +80,7 @@ function Custom({ dummyData, tagsList = [], onClose, isVisible }) {
     const data = {
       filename: dummyData.tags[0] + "Service.json",
       modified_api: {
+        id: dummyData.id,
         isAuthenticationApi: dummyData.isAuthenticationApi,
         isLogin: dummyData.isLogin,
         isToken: dummyData.isToken,
@@ -102,12 +103,14 @@ function Custom({ dummyData, tagsList = [], onClose, isVisible }) {
         }
       );
       const responseData = await response.json(); // Await the response data
-      console.log(responseData);
+      onClose();
     } catch (error) {
       console.error("Error:", error);
     }
   }
-  console.log("show before rendere", show);
+  // console.log(dummyData.tags[0], "filename");
+  // console.log(dummyData, "dd");
+  // console.log("show before rendere", show);
   return (
     <div>
       <Offcanvas
