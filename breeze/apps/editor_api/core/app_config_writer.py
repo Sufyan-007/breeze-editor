@@ -48,6 +48,7 @@ class AppConfigWriter:
                                     "children": [
                                         {
                                             "type": "text",
+                                            "_id": app_config['defaultComponent']+"-0",
                                             "text": "This is main page"
                                         }
                                     ]

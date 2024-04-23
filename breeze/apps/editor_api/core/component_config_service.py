@@ -12,12 +12,13 @@ class ComponentConfigService:
         html = [self.comp_config.get(component).get("html")]
         print(html)
         
-        return self.find_html_config(html,id.split("-"),"")
+        html= self.find_html_config(html,id.split("-"),"")
+        return html
     
     def find_html_config(self,html,id_arr,prefix):
         id=id_arr.pop(0)
         for x in html:
-            if x["attributes"]["id"]["value"]==prefix+id:
+            if x["_id"]==prefix+id:
                 html=x
                 # print(x)
                 break

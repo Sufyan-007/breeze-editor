@@ -167,6 +167,7 @@ class AppEditor:
         comp["$id"] = name.upper()
         comp['containingFile'] = "components/"+name+".js"
         comp["html"]["attributes"]["id"]["value"]=name
+        comp["html"]["_id"]=name
         config=self.write_component(comp)
         
         return {"config":config, "comp":name}
