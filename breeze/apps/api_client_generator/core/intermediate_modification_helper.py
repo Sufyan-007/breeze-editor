@@ -1,7 +1,7 @@
-import json
-import os
+import json,os,traceback
 from common.utils.app_consts import CONFIG_PATH
-from ..utils.jsonencoder import EnhancedJSONEncoder
+from ..utils.api_model_loader import ApiModelLoader
+from ..utils.append_dict_file import append_to_dict_file
 
 class IntermediateModificationHelper:
     def __init__(self):
@@ -16,53 +16,47 @@ class IntermediateModificationHelper:
         else:
             return self.process_regular_api(modified_api, file_path)
 
-    def move_api_to_new_file(self, modified_api, new_file_path, existing_data, file_path, filename):
-        if modified_api['id'] in existing_data:
-            return f"API with UUID {modified_api['id']} already exists in {new_file_path}"
-
-        existing_data[modified_api['id']] = modified_api
-        with open(new_file_path, "w") as file:
-            json.dump(existing_data, file, cls=EnhancedJSONEncoder)
-
-        if os.path.exists(file_path):
-            with open(file_path, "r") as file:
-                existing_data = json.load(file)
-            if modified_api['id'] in existing_data:
-                del existing_data[modified_api['id']]
-            with open(file_path, "w") as file:
-                json.dump(existing_data, file, cls=EnhancedJSONEncoder)
-        return f"API {modified_api['id']} moved to {new_file_path} and API {modified_api['id']} removed from {filename}"
 
     def process_auth_api(self, modified_api, file_path):
-        new_file_path = os.path.join(self.folder_path, "auth.json")
-        if os.path.exists(new_file_path):
-            with open(new_file_path, "r") as file:
-                existing_data = json.load(file)
-        else:
+        try:
+            auth_api_model = ApiModelLoader.load_auth_api_model(modified_api)
+            resultant_auth_api_model = {f"{auth_api_model.id}": auth_api_model.as_dict()}
+            new_file_path = os.path.join(self.folder_path, "auth.json")
+            append_to_dict_file(new_file_path, resultant_auth_api_model)
             existing_data = {}
-
-        return self.move_api_to_new_file(modified_api, new_file_path, existing_data, file_path, "auth.json")
+            if os.path.exists(file_path):
+                with open(file_path, "r") as file:
+                    existing_data = json.load(file)
+            if modified_api['id'] in existing_data:
+                del existing_data[modified_api['id']]
+                append_to_dict_file(file_path, existing_data, False)
+            
+        except Exception as e:
+            print(traceback.format_exc())
+            return {"error": str(e)}
 
     def process_regular_api(self, modified_api, file_path):
-        tag = modified_api.get("tags", ["default"])[0]
-        if os.path.exists(file_path):
-            with open(file_path, "r") as file:
-                existing_data = json.load(file)
-            uuids = {api['id'] for api in existing_data.values()}
-            if modified_api['id'] not in uuids:
-                return f"UUID {modified_api['id']} does not exist in {file_path}."
+        try:
+            api_model = ApiModelLoader.load_api_model(modified_api)
+            resultant_model =  {f"{api_model.id}" : api_model.as_dict()}
+            tag = modified_api.get("tags", ["default"])[0]
+            if os.path.exists(file_path):
+                with open(file_path, "r") as file:
+                    existing_data = json.load(file)
+                uuids = {api['id'] for api in existing_data.values()}
+                if modified_api['id'] not in uuids:
+                    return f"UUID {modified_api['id']} does not exist in {file_path}."
 
-            if tag != existing_data[modified_api["id"]].get('tags', [''])[0]:
-                new_file_path = os.path.join(self.folder_path, f"{tag}Service.json")
-                if os.path.exists(new_file_path):
-                    with open(new_file_path, "r") as file:
-                        existing_data = json.load(file)
+                if tag != existing_data[modified_api["id"]].get('tags', [''])[0]:
+                    new_file_path = os.path.join(self.folder_path, f"{tag}Service.json")
+                    append_to_dict_file(new_file_path, resultant_model)
+                    if modified_api['id'] in existing_data:
+                        del existing_data[modified_api['id']]
+                        print(existing_data, "existing data")
+                        append_to_dict_file(file_path, existing_data, False)
                 else:
-                    existing_data = {}
-
-                return self.move_api_to_new_file(modified_api, new_file_path, existing_data, file_path, f"{tag}Service.json")
-
-        existing_data[modified_api['id']] = modified_api
-        with open(file_path, "w") as file:
-            json.dump(existing_data, file, cls=EnhancedJSONEncoder)
-        return f"Modified API {modified_api['id']} written to {file_path}"
+                    append_to_dict_file(file_path, resultant_model)
+        
+        except Exception as e:
+            print(traceback.format_exc())
+            return {"error": str(e)}

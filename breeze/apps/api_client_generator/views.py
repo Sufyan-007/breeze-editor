@@ -1,8 +1,10 @@
-import json, traceback, os
-from .helper_models.encoder import EnhancedJSONEncoder
-from .core.openapi_helper import OpenApiHelper
-from .core.helpers.append_dict_file import append_to_dict_file
-from .core.postman_helper import PostmanHelper
+import os
+import json,traceback
+from .utils.jsonencoder import EnhancedJSONEncoder
+from .utils.append_dict_file import append_to_dict_file
+
+from .core.openapi_swagger_converter import OpenapiConverter
+from .core.postman_collection_converter import PostmanCollectionConverter
 from common.utils.app_consts import CONFIG_PATH
 from django.views import View
 from django.http import JsonResponse

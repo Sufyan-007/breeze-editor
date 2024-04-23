@@ -64,17 +64,18 @@ class OpenapiConverter:
                 })
         
         elif isinstance(auth_data,list):
-            for security_name in auth_data:
-                scheme_details = security_schemes.get(security_name, {})
-                auth_type = scheme_details.get("type","")
-                auth_type = auth_type.strip().upper()
-                arr_auth.append({
-                    "type" : auth_type,
-                    "content": [],
-                    "login_api" : None,
-                    "token_api" : None
-                })
-        
+            for security_item in auth_data:
+                for security_name, _ in security_item.items():
+                    scheme_details = security_schemes.get(security_name, {})
+                    auth_type = scheme_details.get("type","")
+                    auth_type = auth_type.strip().upper()
+                    arr_auth.append({
+                        "type" : auth_type,
+                        "content": [],
+                        "login_api" : None,
+                        "token_api" : None
+                    })
+            
             
         return arr_auth
 
