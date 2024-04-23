@@ -1,8 +1,8 @@
 *.pyc
 */node_modules/*
-.vscode/launch.json
-breeze/common/consts/consts.py
-breeze/common/utils/app_consts.py
+package-lock.json
+*/.vscode
+
 /configurations
 /generated_projects
 /uploaded_css
