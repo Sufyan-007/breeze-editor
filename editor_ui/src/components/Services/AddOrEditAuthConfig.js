@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, Toast } from "react-bootstrap";
-import close from "../assets/icons/close.svg";
-import "../css/AddOrEditAuthConfigStyles.css";
+import close from "../../assets/icons/close.svg";
+import "../../css/AddOrEditAuthConfigStyles.css";
 
-import { getAuthApiConfig } from "../services/IntermediatesService.js";
+import { getAuthApiConfig } from "../../services/IntermediatesService.js";
 
-import { appendToAuthApi } from "../services/IntermediatesService";
-import CustomButtonGroup from "./CustomButtonGroup.js";
-import CustomFormControl from "./CustomFormControl.js";
-import RequestBody from "./Services/RequestBody.js";
-import ResponseBody from "./Services/ResponseBody.js";
+import { appendToAuthApi } from "../../services/IntermediatesService.js";
+import CustomButtonGroup from "../CustomButtonGroup.js";
+import CustomFormControl from "../CustomFormControl.js";
+import RequestBody from "./RequestBody.js";
+import ResponseBody from "./ResponseBody.js";
 
 function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
   const [selectedApiInfo, setSelectedApiInfo] = useState({});
@@ -233,7 +233,21 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
       setOperationSuccess(false);
     }
   };
-console.log(selectedApiInfo,"api");
+
+const handleRequestBodyChange = (updatedRequestBody) => {
+  setSelectedApiInfo((prevSelectedApiInfo) => ({
+    ...prevSelectedApiInfo,
+    request: updatedRequestBody,
+  }));
+};
+
+const handleResponseBodyChange = (updatedResponseBody) => {
+  setSelectedApiInfo((prevSelectedApiInfo) => ({
+    ...prevSelectedApiInfo,
+    response: updatedResponseBody,
+  }));
+};
+
   return (
     <>
       {operationSuccess && (
@@ -337,9 +351,17 @@ console.log(selectedApiInfo,"api");
                   controlId="selectedKey"
                 ></CustomFormControl>
               )}
-                 {selectedApiInfo.request && <RequestBody requestBody={selectedApiInfo.request} />}
-                 {selectedApiInfo.response && <ResponseBody responseBody={selectedApiInfo.response} />}
-              
+              {selectedApiInfo.request && (
+                <RequestBody 
+                onChange={handleRequestBodyChange}
+                requestBody={selectedApiInfo.request} />
+              )}
+              {selectedApiInfo.response && (
+                <ResponseBody 
+                onChange={handleResponseBodyChange}
+                responseBody={selectedApiInfo.response} />
+              )}
+
               <Button
                 className="mt-5"
                 variant="secondary"

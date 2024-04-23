@@ -13,8 +13,7 @@ import { router } from "../App";
 //components
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
-import ServicePage from "./Services/ServicePage";
-import ServicePage from "./Services/ServicePage";
+
 import ProjectComponents from "./ProjectComponents";
 import ProjectRouting from "./ProjectRouting";
 import ProjectHome from "./ProjectHome";
@@ -29,7 +28,6 @@ import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from "./ProjectSidebar";
 import { Col, Row } from "react-bootstrap";
 import ServiceGeneralSetting from "./Services/ServiceGeneralSetting";
-import Custom from "./Services/Custom";
 import ServiceLists from "./Services/ServiceList";
 
 export default function ProjectPage() {
@@ -80,8 +78,6 @@ export default function ProjectPage() {
           <button
             className="btn btn-outlined"
             style={{ color: "white" }}
-            onClick={() => router.navigate("/")}
-          >
             onClick={() => router.navigate("/")}
           >
             All Apps

@@ -1,7 +1,7 @@
 import React, { useState , useRef, useEffect} from "react";
 import { Button, Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
 import ServiceList from "./ServiceList";
-import AuthenticationConfig from "../AuthenticationConfig";
+import AuthenticationConfig from "./AuthenticationConfig";
 import IntermediateFiles from "../IntermediateFiles";
 import ServiceEdit from './ServiceEdit';
 import {
