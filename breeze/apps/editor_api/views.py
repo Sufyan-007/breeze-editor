@@ -53,7 +53,8 @@ class RoutingReader(APIView):
         try:
             app_editor= AppEditor(param)
             return JsonResponse(app_editor.get_router_config(),status=200)
-        except:
+        except Exception as e:
+            print(str(e))
             return JsonResponse({},status=404)
 
 @method_decorator(csrf_exempt,name='dispatch')
@@ -208,7 +209,7 @@ class ProjectDetailsConfig(APIView):
                 file.write(newData)
                 
             print('--------------- ALL APPLICATION NAME CHANGES CONDUCTED SUCCESSFULLY -----------')
-            return JsonResponse({}, status=200)
+            return JsonResponse(app_basic_config, status=200)
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({e},status=500)
