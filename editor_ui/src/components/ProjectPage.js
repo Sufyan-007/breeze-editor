@@ -39,7 +39,6 @@ export default function ProjectPage() {
     const allConfig = useLoaderData();
     const dispatch = useDispatch();
     const {projectName} = useParams();
-    const [projectNameFromParams, setProjectName] = useState(projectName);
 
     useEffect(() => {
         console.log(allConfig)
@@ -72,7 +71,7 @@ export default function ProjectPage() {
         <Styles />,
         <Code />,
         <ThirdPartyApp />,
-        <Settings projectName = {projectNameFromParams} changeProjectName = {setProjectName} />
+        <Settings />
     ];
 
     const toggleSidebar = () => {

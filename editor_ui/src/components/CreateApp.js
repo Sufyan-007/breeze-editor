@@ -323,6 +323,7 @@ export default function CreateApp({ ...props }) {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: `${progress}%` }}
+                              aria-label="project completion bar"
                             >
                               {progress}%
                             </div>
