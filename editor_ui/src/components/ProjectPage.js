@@ -13,7 +13,7 @@ import { router } from "../App";
 //components
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
-// import ServicePage from "./Services/ServicePage";
+
 import ProjectComponents from "./ProjectComponents";
 import ProjectRouting from "./ProjectRouting";
 import ProjectHome from "./ProjectHome";
@@ -28,8 +28,8 @@ import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from "./ProjectSidebar";
 import { Col, Row } from "react-bootstrap";
 import ServiceGeneralSetting from "./Services/ServiceGeneralSetting";
-import Custom from "./Services/Custom";
 import ServiceLists from "./Services/ServiceList";
+
 export default function ProjectPage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [tagSelection, setSelection] = useState(0);
@@ -38,12 +38,14 @@ export default function ProjectPage() {
   const allConfig = useLoaderData();
   const dispatch = useDispatch();
   const { projectName } = useParams();
+  
   useEffect(() => {
     dispatch(setReducerConfig(allConfig.reducerConfig));
     dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
     dispatch(setServiceConfig(allConfig.serviceConfig));
     dispatch(setRouterConfig(allConfig.reducerConfig));
   }, [allConfig, dispatch]);
+
   const sidebarItems = [
     { id: 0, name: "Home", icon: home },
     { id: 1, name: "Pages", icon: pages },
@@ -60,12 +62,15 @@ export default function ProjectPage() {
     <ProjectComponents />,
     <ProjectRouting />,
     <ServiceGeneralSetting />,
+    <ServiceGeneralSetting />,
     <ReduxConfig />,
     //rest to be added
   ];
+
   const toggleSidebar = () => {
     setIsSidebarExpanded(!isSidebarExpanded);
   };
+
   return (
     <div className="container-fluid vh-100 d-flex flex-column">
       <Navbar
@@ -95,6 +100,7 @@ export default function ProjectPage() {
             </Col>
             {tagSelection === 3 && (
               <Col sm={11}>
+              
               </Col>
             )}
           </Row>

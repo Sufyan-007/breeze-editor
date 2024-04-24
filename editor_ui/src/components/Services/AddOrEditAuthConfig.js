@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, Toast } from "react-bootstrap";
-import close from "../../assets/icons/close-button.svg";
+import close from "../../assets/icons/close.svg";
 import "../../css/AddOrEditAuthConfigStyles.css";
-import RequestBody from './RequestBody.js';
-import ResponseBody from "./ResponseBody.js";
+
 import { getAuthApiConfig } from "../../services/IntermediatesService.js";
 
 import { appendToAuthApi } from "../../services/IntermediatesService.js";
 import CustomButtonGroup from "../CustomButtonGroup.js";
 import CustomFormControl from "../CustomFormControl.js";
+import RequestBody from "./RequestBody.js";
+import ResponseBody from "./ResponseBody.js";
 
 function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
   const [selectedApiInfo, setSelectedApiInfo] = useState({
@@ -218,34 +219,34 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
       request: selectedApiInfo.request
         ? selectedApiInfo.request
         : {
-          method: "POST",
-          auth: {
-            type: "",
-            content: "",
-            login_api: "",
-            token_api: "",
+            method: "POST",
+            auth: {
+              type: "",
+              content: "",
+              login_api: "",
+              token_api: "",
+            },
+            headers: [],
+            parameters: [],
+            url: {
+              baseurl: "",
+              host: "",
+              protocol: "",
+              port: "",
+              path: "",
+              url_env: "",
+            },
+            body: {
+              mode: "",
+              content_type: "",
+              required: "",
+              schema_name: "",
+              raw_content: "",
+              file: "",
+              schema: "",
+              formdata: "",
+            },
           },
-          headers: [],
-          parameters: [],
-          url: {
-            baseurl: "",
-            host: "",
-            protocol: "",
-            port: "",
-            path: "",
-            url_env: "",
-          },
-          body: {
-            mode: "",
-            content_type: "",
-            required: "",
-            schema_name: "",
-            raw_content: "",
-            file: "",
-            schema: "",
-            formdata: "",
-          },
-        },
       response: selectedApiInfo.response ? [selectedApiInfo.response] : [],
       operation_id: selectedApiInfo.operation_id,
       tags: selectedApiInfo.tags ? selectedApiInfo.tags : [],
@@ -280,7 +281,19 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
     }
   };
 
-  console.log(selectedApiInfo,"api info");
+const handleRequestBodyChange = (updatedRequestBody) => {
+  setSelectedApiInfo((prevSelectedApiInfo) => ({
+    ...prevSelectedApiInfo,
+    request: updatedRequestBody,
+  }));
+};
+
+const handleResponseBodyChange = (updatedResponseBody) => {
+  setSelectedApiInfo((prevSelectedApiInfo) => ({
+    ...prevSelectedApiInfo,
+    response: updatedResponseBody,
+  }));
+};
 
   return (
     <>
@@ -290,7 +303,7 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
         </Toast>
       )}
       <div
-      className="outer-div"
+        className="outer-div"
         style={{
           overflowY: "auto",
           overflowX: "hidden",
@@ -384,6 +397,16 @@ function AddOrEditAuthConfig({ onClose, selectedUuid, mode }) {
                   onChange={onValueChanges}
                   controlId="selectedKey"
                 ></CustomFormControl>
+              )}
+              {selectedApiInfo.request && (
+                <RequestBody 
+                onChange={handleRequestBodyChange}
+                requestBody={selectedApiInfo.request} />
+              )}
+              {selectedApiInfo.response && (
+                <ResponseBody 
+                onChange={handleResponseBodyChange}
+                responseBody={selectedApiInfo.response} />
               )}
               {selectedApiInfo.request && (
                 <RequestBody

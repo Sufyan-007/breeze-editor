@@ -16,7 +16,7 @@ import { useParams } from "react-router";
 
 function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
-  const [tags, setTags] = useState(dummyData.tags || "");
+  const [tags, setTags] = useState(dummyData.tags || []);
   const [summary, setSummary] = useState(dummyData.summary || "");
   const [requestBody, setRequestBody] = useState(dummyData.request);
   const [responseBody, setResponseBody] = useState(dummyData.response);
@@ -28,14 +28,14 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
     setOperationId(e.target.value);
   };
   const handleTagsChange = (e) => {
-    const newTag = e.target.value.trim();
-    setTags(newTag);
+    const newTags = e.target.value.split(",").map((tag) => tag.trim());
+    setTags(newTags);
   };
   const handleSummaryChange = (e) => {
     setSummary(e.target.value);
   };
   const handleTagSelect = (tag) => {
-    setTags(tag);
+    setTags([tag]);
   };
   const handleRequestBodyChange = (newData) => {
     setRequestBody((prevState) => {
@@ -143,7 +143,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
                     <Form.Control
                       className="mx-5 custom-form-control"
                       type="text"
-                      value={tags}
+                      value={tags.join(", ")}
                       onChange={handleTagsChange}
                     />
                   </Col>
@@ -217,7 +217,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
             controlId="formRequestBody"
           >
             <RequestBody
-              onChange={handleRequestBodyChange}
+              onChange={handleRequestBodyChange} 
               requestBody={requestBody}
             />
           </Form.Group>
