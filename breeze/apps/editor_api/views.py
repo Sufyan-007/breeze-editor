@@ -436,5 +436,7 @@ class HtmlConfigReader(APIView):
         try:
             componentConfigService = ComponentConfigService(data["project_id"])
             return JsonResponse(componentConfigService.get_html_by_id(data["component"],data["html_id"]),status = 200)
+        except IndexError:
+            return JsonResponse({},status =404)
         except:
             return JsonResponse({},status=500)

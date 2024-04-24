@@ -12,25 +12,31 @@ class ComponentConfigService:
         html = [self.comp_config.get(component).get("html")]
         print(html)
         
-        html= self.find_html_config(html,id.split("-"),"")
+        html,index= self.find_html_config(html,id.split("-"),"")
+        print(index)
         if html.get("children"):
             html["children"]=map_children(html["children"])
         return html
     
     def find_html_config(self,html,id_arr,prefix):
         id=id_arr.pop(0)
-        for x in html:
+        index=-1
+        for i,x in enumerate(html):
             if x["_id"]==prefix+id:
                 html=x
+                index = i
                 # print(x)
                 break
         else:
-            raise Exception("Not Found")
+            raise IndexError("Not Found")
         prefix+=id+"-"
         if id_arr:
-            return self.find_html_config(html["children"],id_arr,prefix)
+            if html.get("children"):
+                return self.find_html_config(html["children"],id_arr,prefix)
+            else:
+                raise IndexError("Not Found")
         else:
-            return html
+            return html,index
         
 def map_children(children):
     return [
