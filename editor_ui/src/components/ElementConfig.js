@@ -189,8 +189,11 @@ export default function ElementConfig({ ...props }) {
                                 <Form.Select className="bg-dark-subtle  " size="sm" onChange={(event) => { addAttribute(event.target.value); event.target.selectedIndex = 0; }}>
                                     <option selected disabled hidden>Add Attributes</option>
                                     <option value="className">ClassName</option>
+                                    <option value="name">name</option>
                                     <option value="src">src</option>
                                     <option value="value">value</option>
+                                    {/* here onSubmit will be placed in event listeners instead of an attributes */}
+                                    <option value="onSubmit">onSubmit</option>
                                     <option value="config">config</option>
                                     <option value="height">height</option>
                                     <option value="component">component</option>

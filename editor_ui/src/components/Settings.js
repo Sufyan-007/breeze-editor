@@ -3,8 +3,12 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { updateProject } from "../services/ProjectService";
 import { getAppBasicConfig } from "../services/ConfigService";
+import { useParams } from "react-router";
+import { useNavigate } from "react-router";
 
-const GeneralSettings = ({ appDetails, changeProjectName }) => {
+const GeneralSettings = ({ appDetails }) => {
+
+  const navigate = useNavigate();
   const { register, handleSubmit } = useForm({
     defaultValues: {
       name: appDetails?.projectName,
@@ -21,8 +25,10 @@ const GeneralSettings = ({ appDetails, changeProjectName }) => {
       oldConfig: { ...appDetails },
     };
 
+
     updateProject(newAppBasicConfig).then((res) => {
-      changeProjectName(data.name);
+      console.log(res);
+      navigate(`/project/${res.body.name}`, { replace: true });
     });
   };
 
@@ -132,21 +138,22 @@ const Content = ({ selected, items }) => {
   return selectedItem ? selectedItem.component : null;
 };
 
-const Settings = (props) => {
+const Settings = () => {
   const [selected, setSelected] = useState("general");
   const [appBasicConfig, setAppBasicConfig] = useState();
+  const { projectName } = useParams();
+
   const handleSelect = (section) => {
     setSelected(section);
   };
-
   useEffect(() => {
     const fetchAppBasicConfig = () => {
-      getAppBasicConfig(props.projectName.replace(/ /g, "_")).then((res) => {
+      getAppBasicConfig(projectName).then((res) => {
         setAppBasicConfig(res);
       });
     };
     fetchAppBasicConfig();
-  }, [props.projectName]);
+  }, [projectName]);
 
   const sidebarItems = [
     {
@@ -155,7 +162,6 @@ const Settings = (props) => {
       component: appBasicConfig ? (
         <GeneralSettings
           appDetails={appBasicConfig}
-          changeProjectName={props.changeProjectName}
         />
       ) : null,
     },

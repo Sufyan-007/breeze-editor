@@ -82,7 +82,7 @@ import { Modal, Button, Form } from 'react-bootstrap'
                     </div>
                 </div>
                 {showDropdown ?
-                    Object.entries(routerConfig.routes).map(([index, route]) => <Route className="row" route={route} />)
+                    Object.entries(routerConfig.routes).map(([index, route]) => <Route key={route.component} className="row" route={route} />)
                     : null}
 
                 {showDropdown ? <div className="row">
