@@ -14,7 +14,7 @@ const CustomButtonGroup = ({
         <Form.Group controlId={{ formId }} className="mt-4">
             <Row>
                 <Col sm={3}>
-                    <Form.Label>{title}</Form.Label>
+                    <Form.Label className="m-3">{title}</Form.Label>
                 </Col>
                 <Col sm={9}>
                     <ButtonGroup className="mx-5">

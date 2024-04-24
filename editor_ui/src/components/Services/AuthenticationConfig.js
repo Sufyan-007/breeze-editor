@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, Table } from 'react-bootstrap';
-import { getAuthFileConfig } from '../services/IntermediatesService';
-import edit from "../assets/icons/edit.svg";
-import Delete from "../assets/icons/delete.svg";
-import Add from "../assets/icons/add.svg";
+import { getAuthFileConfig } from '../../services/IntermediatesService';
+import edit from "../../assets/icons/edit.svg";
+import Delete from "../../assets/icons/delete.svg";
+import Add from "../../assets/icons/add.svg";
 import AddOrEditAuthConfig from './AddOrEditAuthConfig';
 
 function AuthenticationConfig() {

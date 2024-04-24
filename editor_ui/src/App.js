@@ -9,7 +9,7 @@ import Sidebar from "./components/Sidebar";
 import DetailedComponent from "./components/DetailedComponent";
 import ReduxConfig from "./components/ReduxConfig";
 import CreateApp from "./components/CreateApp";
-import { ServicePage } from "./components/ServicePage";
+// import { ServicePage } from "./components/ServicePage";
 import ProjectPage, { projectLoader } from "./components/ProjectPage";
 import ServiceGeneralSetting from "./components/Services/ServiceGeneralSetting";
 

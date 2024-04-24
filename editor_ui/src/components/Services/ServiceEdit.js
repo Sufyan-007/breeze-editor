@@ -46,10 +46,9 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
     });
   };
   const handleResponseBodyChange = (newData) => {
-    setResponseBody((prevState) => ({
-      ...prevState,
+    setResponseBody((prevState) => ([
       ...newData,
-    }));
+    ]));
   };
   const handleClose = () => {
     setShow(false);
@@ -71,7 +70,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
         tags: tags,
         summary: summary,
         request: requestBody,
-        response: responseBody,
+        response:responseBody
       },
     };
     try {
@@ -82,7 +81,9 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
       console.log("Error while submitting the data", error);
     }
   }
-
+// console.log(responseBody,"res in service edit");
+// console.log(requestBody,"req in service edit");
+// console.log(operationId,"op id");
   return (
     <>
       <div

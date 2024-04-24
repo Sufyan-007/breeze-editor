@@ -11,3 +11,6 @@
   border: none !important;
   max-width: 90% !important;
 }
+.outer-div::-webkit-scrollbar {
+  display: none;
+}

@@ -13,7 +13,7 @@ import { router } from "../App";
 //components
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
-import ServicePage from "./Services/ServicePage";
+// import ServicePage from "./Services/ServicePage";
 import ProjectComponents from "./ProjectComponents";
 import ProjectRouting from "./ProjectRouting";
 import ProjectHome from "./ProjectHome";

@@ -1,8 +1,7 @@
 import React, { useState , useRef, useEffect} from "react";
 import { Button, Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
 import ServiceList from "./ServiceList";
-import AuthenticationConfig from "../AuthenticationConfig";
-import IntermediateFiles from "../IntermediateFiles";
+import AuthenticationConfig from "./AuthenticationConfig";
 import ServiceEdit from './ServiceEdit';
 import {
   fetchYamlApis,
@@ -10,6 +9,7 @@ import {
 } from "../../services/yamlPostmanService";
 import { fetchIntermediate } from "../../services/IntermediatesService";
 import ServiceGeneralSettingCss from "../../css/ServiceGeneralSetting.css";
+import { useParams } from "react-router";
 
 export default function ServiceGeneralSetting() {
 const fileInputYAML = useRef(null); // this is created to reference the file input element .
@@ -25,7 +25,7 @@ const [postmanUploaded, setPostmanUploaded] = useState(false);
  const [editMode, setEditMode] = useState(false);
 const [selectedApi, setSelectedApi] = useState(null);
 const [fetchedIntermediates, setFetchedIntermediates] = useState([]);
-
+const appName = useParams()
 
 useEffect(()=>{
   getServices();
@@ -64,7 +64,7 @@ useEffect(()=>{
      } else if (fileType === "postman") {
        apiFunction = fetchPostmanApis;
      }
-     const responseData = await apiFunction(formData);
+     const responseData = await apiFunction(formData, appName.projectName);
 
      if (fileType === "yaml") {
        setYamlApis(responseData);
@@ -210,7 +210,7 @@ useEffect(()=>{
             )}{" "}
             {/* Render ServiceEdit only when in edit mode */}
             {showAuthenticationConfig && <AuthenticationConfig />}
-            {showIntermediateFiles && <IntermediateFiles />}
+            {/* {showIntermediateFiles && <IntermediateFiles />} */}
           </div>
         </div>
       </div>
