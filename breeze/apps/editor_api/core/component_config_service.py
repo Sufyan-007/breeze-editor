@@ -13,6 +13,8 @@ class ComponentConfigService:
         print(html)
         
         html= self.find_html_config(html,id.split("-"),"")
+        if html.get("children"):
+            html["children"]=map_children(html["children"])
         return html
     
     def find_html_config(self,html,id_arr,prefix):
@@ -29,3 +31,10 @@ class ComponentConfigService:
             return self.find_html_config(html["children"],id_arr,prefix)
         else:
             return html
+        
+def map_children(children):
+    return [
+        {
+            "_id":child["_id"]
+        } for child in children
+    ]
