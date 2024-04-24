@@ -8,7 +8,8 @@ class ModifyIntermediateJson(View):
         try:
             data = json.loads(request.body.decode("utf-8"))
             filename = data.get("filename")
-            intermediate_modification_helper = IntermediateModificationHelper()
+            project_name = data.get("appName")
+            intermediate_modification_helper = IntermediateModificationHelper(project_name)
             result = intermediate_modification_helper.process_api_data(data, filename)
             return JsonResponse({"message": result}, status=201)
 

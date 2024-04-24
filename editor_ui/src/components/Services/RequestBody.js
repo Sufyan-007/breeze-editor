@@ -11,13 +11,15 @@ function RequestBody({ onChange, requestBody }) {
   const [parameters, setParameters] = useState(requestBody.parameters || []);
   const [url, setUrl] = useState(requestBody.url);
   const [headers, setHeaders] = useState(requestBody.headers || []);
-  const [auth, setAuth] = useState({
-    type: requestBody.auth?.type || "No Auth",
+  const [auth, setAuth] = useState(
+    {
+      type: requestBody.auth?.type || "No Auth",
     content: requestBody.auth?.content || [{ key: "", value: "", type: "" }],
     login_api: requestBody.auth ? requestBody.auth.login_api : "",
-    token_api: requestBody.auth ? requestBody.auth.token_api : "",
-  });
-  const [body, setBody] = useState(requestBody.body);
+    token_api: requestBody.auth ? requestBody.auth.token_api : ""
+  }
+  );
+  const [body, setBody] = useState(requestBody.body, []);
   const [showAuthDropdowns, setShowAuthDropdowns] = useState(false);
   const [apis, setApis] = useState("");
   const [loginApis, setLoginApis] = useState([]);

@@ -125,7 +125,7 @@ useEffect(()=>{
  
   return (
     <>
-      <div className="container-fluid d-flex flex-column vh-100  ">
+      <div className="container-fluid d-flex flex-column h-100  ">
         <Navbar
           variant="dark"
           style={{ backgroundColor: "#303033" }}

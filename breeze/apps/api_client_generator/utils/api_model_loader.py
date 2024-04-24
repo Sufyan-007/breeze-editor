@@ -23,7 +23,7 @@ class ApiModelLoader:
 
         # handle headers
         headers = []
-        header_data = request_data.get("header", [])
+        header_data = request_data.get("headers", [])
         if header_data:
             headers = ApiModelLoader.load_headers(header_data=header_data)
 
@@ -87,7 +87,7 @@ class ApiModelLoader:
         for param in parameters:
             params.append(
                 Parameter(
-                    param_in=ParamsInEnum[param.get("param_in")],
+                    param_in=ParamsInEnum[param.get("param_in").upper()],
                     name=param.get("name"),
                     type=param.get("type"),
                     required=param.get("required"),

@@ -4,11 +4,11 @@ import UrlsCss from "../../css/Urls.css";
 
 function Urls({ onChange, urls }) {
   const [url, setUrl] = useState({
-    baseurl: urls.url?.baseurl || "",
-    host: urls.url?.host || "",
-    protocol: urls.url?.protocol || "",
-    port: urls.url?.port || 443,
-    path: urls.url?.path || [],
+    baseurl: urls? urls.baseurl :"",
+    host: urls? urls.host : [],
+    protocol: urls?urls.protocol : "",
+    port: urls? urls.port : "443",
+    path: urls? urls.path : [],
   });
 
   const handleUrlChange = (name, value) => {
@@ -32,21 +32,24 @@ function Urls({ onChange, urls }) {
             <Form.Control
               className="mx-5 mb-1"
               type="text"
-              placeholder="www.example.com"
+              placeholder="baseurl"
               value={url.baseurl}
               onChange={(e) => handleUrlChange("baseurl", e.target.value)}
             />
             <Form.Control
               className="mx-5 mb-1"
               type="text"
-              placeholder="example.com"
-              value={url.host}
-              onChange={(e) => handleUrlChange("host", e.target.value)}
+              placeholder="host"
+              value={url.host || [].join(", ")}
+              onChange={(e) => handleUrlChange(
+                "host",
+                e.target.value.split(",").map((p) => p.trim())
+              )}
             />
             <Form.Control
               className="mx-5 mb-1"
               type="text"
-              placeholder="https"
+              placeholder="protocol"
               value={url.protocol}
               onChange={(e) => handleUrlChange("protocol", e.target.value)}
             />
@@ -56,13 +59,13 @@ function Urls({ onChange, urls }) {
               placeholder="Port"
               value={url.port}
               onChange={(e) =>
-                handleUrlChange("port", parseInt(e.target.value, 10))
+                handleUrlChange("port", e.target.value)
               }
             />
             <Form.Control
               className="mx-5 mb-1"
               type="text"
-              placeholder="path1 , path2 "
+              placeholder="path params"
               value={url.path || [].join(", ")}
               onChange={(e) =>
                 handleUrlChange(
