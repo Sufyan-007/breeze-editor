@@ -39,7 +39,7 @@ export default function ProjectComponents(props) {
       </div>
       <div className="row p-2 my-3 flex-grow-1">
         {selected === 0
-          ? Object.entries(config.pages).map(([key, value]) => (
+          ? (config.pages) && Object.entries(config.pages).map(([key, value]) => (
               <div className="col-sm-6 col-lg-4 col-xl-3 my-3">
                 <div
                   className="card p-0 bg-black text-white position-relative border-0"
@@ -55,7 +55,7 @@ export default function ProjectComponents(props) {
                 </div>
               </div>
             ))
-          : Object.entries(config.custom_components).map(([key, value]) => (
+          : (config.custom_components) && Object.entries(config.custom_components).map(([key, value]) => (
               <div className="col-sm-6 col-lg-4 col-xl-3 my-3">
                 <div
                   className="card p-0 bg-black text-white position-relative border-0"

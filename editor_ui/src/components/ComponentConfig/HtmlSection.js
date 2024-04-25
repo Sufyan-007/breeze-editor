@@ -11,7 +11,7 @@ export default function HtmlSection({ config }) {
     console.log(iframeSrc)
 
     return (
-        <div className="row flex-grow-1">
+        <div className="row flex-grow-1" style={{ height: "35rem"}}>
             <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
                 <div className="row">
                     <div
