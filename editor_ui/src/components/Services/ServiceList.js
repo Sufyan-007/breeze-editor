@@ -54,8 +54,17 @@ export default function ServiceLists({
               eventKey={service.filename}
               style={{ cursor: "pointer" }}
             >
-              <Accordion.Header>{service.filename}</Accordion.Header>
+              <Accordion.Header>{service.filename} <Button
+                                variant="link"
+                                className="mx-1"
+                                onClick={() => {
+                                  generateService(service.filename);
+                                }}
+                              >
+                                Generate Service
+                              </Button></Accordion.Header>
               <Accordion.Body>
+
                 {service.apis && service.apis.length > 0 ? (
                   <Table striped bordered hover variant="dark">
                     <thead>
@@ -93,15 +102,7 @@ export default function ServiceLists({
                                 }}
                               />
 
-                              <Button
-                                variant="secondary"
-                                className="mx-1"
-                                onClick={() => {
-                                  generateService(service.filename);
-                                }}
-                              >
-                                Generate Service
-                              </Button>
+                              
                             </div>
                           </td>
                         </tr>

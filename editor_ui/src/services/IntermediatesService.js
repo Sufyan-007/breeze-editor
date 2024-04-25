@@ -25,7 +25,7 @@ export async function getAuthApiConfig(projectName,apiId) {
 
 export async function generateReactService(projectName,filename) {
     let path = "ORDINARY"
-    if (filename === "auth.json"){
+    if (filename == "auth.json"){
         path = "AUTH"
     }
     let file = filename.split(".")[0];
