@@ -35,7 +35,8 @@ class ApiModelLoader:
 
         parameters = []
         parameters = request_data.get("parameters", [])
-        parameters = ApiModelLoader.load_parameters(parameters=parameters)
+        if parameters:
+            parameters = ApiModelLoader.load_parameters(parameters=parameters)
 
         # call to body creation
         body = []
@@ -49,16 +50,17 @@ class ApiModelLoader:
     @staticmethod
     def load_response(response_data):
         response=[]
-        for r_data in response_data:
-            response.append(Response(
-                status= StatusEnum[r_data.get("status")],
-                content_type=ContentEnum[r_data.get("content_type")],
-                schema_name = r_data.get("schema_name",None),
-                schema = r_data.get("schema",{}),
-                raw_content=r_data.get("raw_content",None),
-                file=r_data.get("file",None),
-                description = r_data.get("description",None),
-            ))
+        if response_data:
+            for r_data in response_data:
+                response.append(Response(
+                    status= StatusEnum[r_data.get("status")],
+                    content_type=ContentEnum[r_data.get("content_type")],
+                    schema_name = r_data.get("schema_name",None),
+                    schema = r_data.get("schema",{}),
+                    raw_content=r_data.get("raw_content",None),
+                    file=r_data.get("file",None),
+                    description = r_data.get("description",None),
+                ))
         return response
 
     @staticmethod
@@ -179,10 +181,11 @@ class ApiModelLoader:
             request=request_obj,
             response=response_obj,
             summary=model_json.get("summary"),  # Summary later,
-            auth_api_type=AuthApiTypeEnum[model_json.get("auth_api_type")] ,
-            authentication_type= AuthTypeEnum[model_json.get("authentication_type")],
+            auth_api_type=AuthApiTypeEnum[model_json.get("auth_api_type").upper()] ,
+            authentication_type= AuthTypeEnum[model_json.get("authentication_type").upper()],
             is_authorization_url=model_json.get("is_authorization_url"),
             flow=model_json.get("flow"),
+            flow_type= model_json.get("flow_type"),
             token_store=ApiModelLoader.load_token_store(model_json.get("token_store",{}))
         )
         return api_model

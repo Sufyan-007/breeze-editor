@@ -1,191 +1,199 @@
-import React, { useState , useEffect} from "react";
-import {Form, Button, ButtonGroup, Row , Col} from 'react-bootstrap';
+import React, { useState, useEffect } from "react";
+import { Form, Button, ButtonGroup, Row, Col } from "react-bootstrap";
 import ResponseBodyCss from "../../css/ResponseBody.css";
 
-function ResponseBody({onChange, responseBody}) {
-   const [status, setStatus] = useState(responseBody.status || "");
-   const [contentType, setContentType] = useState(
-     responseBody.content_type || ""
-   );
-   const [schemaName, setSchemaName] = useState(responseBody.schema_name || "");
-   const [rawContent, setRawContent] = useState(responseBody.raw_content || "");
-   const [file, setFile] = useState(responseBody.file || "");
+function ResponseBody({ onChange, responseBody }) {
+  const [response, setResponse] = useState([]);
 
- const handleStatusChange = (value) => {
-   setStatus(value);
-   onChange({ ...responseBody, status: value });
- };
+  useEffect(() => {
+    const initialResponse =
+    responseBody.length > 0
+    ?
+    responseBody.map((response) => ({
+      status: response.status,
+      content_type: response.content_type ,
+      schema_name: response.schema_name ,
+      raw_content: response.raw_content,
+      file: response.file ,
+    })):[
+      {
+        status:"",
+        content_type: "",
+        schema_name: "",
+        raw_content: "",
+        file: ""
+      }
+    ];
+    setResponse(initialResponse);
+  }, [responseBody]);
 
- const handleContentTypeChange = (value) => {
-   setContentType(value);
-   onChange({ ...responseBody, content_type: value });
- };
+  const handleChange = (index, property, value) => {
+    const updatedResponseBodies = [...response];
+    console.log("updatedResponseBodies before", updatedResponseBodies);
 
- const handleSchemaNameChange = (value) => {
-   setSchemaName(value);
-   onChange({ ...responseBody, schema_name: value });
- };
+    updatedResponseBodies[index][property] = value;
+    console.log("index", index, property, value);
+    console.log("updatedResponseBodies", updatedResponseBodies);
+    setResponse(updatedResponseBodies);
+    onChange(updatedResponseBodies);
+  };
 
- const handleRawContentChange = (value) => {
-   setRawContent(value);
-   onChange({ ...responseBody, raw_content: value });
- };
-
- const handleFileChange = (value) => {
-   setFile(value);
-   onChange({ ...responseBody, file: value });
- };
-
+  // console.log(responseBody,"response body ");
   return (
     <div className="mb-3 text-dark">
-      <Form>
-        <Form.Group>
-          <Row>
-            <Col sm={3}>
-              <Form.Label className="m-3">
-                Status
-              </Form.Label>
-            </Col>
-            <Col sm={9}>
-              <ButtonGroup className="mx-5">
-                <Button
-                  variant="secondary"
-                  onClick={() => handleStatusChange("200")}
-                  active={status === "200"}
-                >
-                  200
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleStatusChange("201")}
-                  active={status === "201"}
-                >
-                  201
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleStatusChange("403")}
-                  active={status === "403"}
-                >
-                  403
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleStatusChange("500")}
-                  active={status === "500"}
-                >
-                  500
-                </Button>
-              </ButtonGroup>
-            </Col>
-          </Row>
-        </Form.Group>
+      {response.map((response, index) => (
+        <Form key={index}>
+          <Form.Group>
+            <Row>
+              <Col sm={3}>
+                <Form.Label className="m-3">Status</Form.Label>
+              </Col>
+              <Col sm={9}>
+                <ButtonGroup className="mx-5">
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleChange(index, "status", "S_200")}
+                    active={response.status === "S_200"}
+                  >
+                    200
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleChange(index, "status", "S_201")}
+                    active={response.status === "S_201"}
+                  >
+                    201
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleChange(index, "status", "S_403")}
+                    active={response.status === "S_403"}
+                  >
+                    403
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleChange(index, "status", "S_500")}
+                    active={response.status === "S_500"}
+                  >
+                    500
+                  </Button>
+                </ButtonGroup>
+              </Col>
+            </Row>
+          </Form.Group>
 
-        <Form.Group>
-          <Row>
-            <Col sm={3}>
-              <Form.Label className="m-3">
-                Content Type
-              </Form.Label>
-            </Col>
-            <Col sm={9}>
-              <ButtonGroup className="mx-5">
-                <Button
-                  variant="secondary"
-                  onClick={() => handleContentTypeChange("application/json")}
-                  active={contentType === "application/json"}
-                >
-                  JSON
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleContentTypeChange("text/plain")}
-                  active={contentType === "text/plain"}
-                >
-                  TEXT
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleContentTypeChange("text/html")}
-                  active={contentType === "text/html"}
-                >
-                  HTML
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleContentTypeChange("application/xml")}
-                  active={contentType === "application/xml"}
-                >
-                  XML
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() =>
-                    handleContentTypeChange("application/javascript")
+          <Form.Group>
+            <Row>
+              <Col sm={3}>
+                <Form.Label className="m-3">Content Type</Form.Label>
+              </Col>
+              <Col sm={9}>
+                <ButtonGroup className="mx-5">
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      handleChange(index, "content_type", "JSON")
+                    }
+                    active={response.content_type === "JSON"}
+                  >
+                    JSON
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      handleChange(index, "content_type", "TEXT")
+                    }
+                    active={response.content_type === "TEXT"}
+                  >
+                    TEXT
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      handleChange(index, "content_type", "HTML")
+                    }
+                    active={response.content_type === "HTML"}
+                  >
+                    HTML
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      handleChange(index, "content_type", "XML")
+                    }
+                    active={response.content_type === "XML"}
+                  >
+                    XML
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      handleChange(
+                        index,
+                        "content_type",
+                        "Javascript"
+                      )
+                    }
+                    active={response.content_type === "Javascript"}
+                  >
+                    Javascript
+                  </Button>
+                </ButtonGroup>
+              </Col>
+            </Row>
+          </Form.Group>
+          <Form.Group>
+            <Row>
+              <Col sm={3}>
+                <Form.Label className="m-3">Schema Name:</Form.Label>
+              </Col>
+              <Col sm={9}>
+                <Form.Control
+                  className="mx-5"
+                  type="text"
+                  value={response.schema_name}
+                  onChange={(e) =>
+                    handleChange(index, "schema_name", e.target.value)
                   }
-                  active={contentType === "application/javascript"}
-                >
-                  Javascript
-                </Button>
-              </ButtonGroup>
-            </Col>
-          </Row>
-        </Form.Group>
-
-        <Form.Group>
-          <Row>
-            <Col sm={3}>
-              <Form.Label className="m-3">
-                Schema Name:
-              </Form.Label>
-            </Col>
-            <Col sm={9}>
-              <Form.Control
-              className="mx-5"
-                type="text"
-                value={responseBody.schema_name}
-                onChange={(e) => handleSchemaNameChange(e.target.value)}
-              />
-            </Col>
-          </Row>
-        </Form.Group>
-
-        <Form.Group>
-          <Row>
-            <Col sm={3}>
-              <Form.Label className="m-3">
-                Raw Content:
-              </Form.Label>
-            </Col>
-            <Col sm={9}>
-              <Form.Control
-                className="mx-5"
-                type="text"
-                value={responseBody.raw_content}
-                onChange={(e) => handleRawContentChange(e.target.value)}
-              />
-            </Col>
-          </Row>
-        </Form.Group>
-
-        <Form.Group>
-          <Row>
-            <Col sm={3}>
-              <Form.Label className="m-3">
-                File:
-              </Form.Label>
-            </Col>
-            <Col sm={9}>
-              <Form.Control
-                className="mx-5"
-                type="text"
-                value={responseBody.file}
-                onChange={(e) => handleFileChange(e.target.value)}
-              />
-            </Col>
-          </Row>
-        </Form.Group>
-      </Form>
+                />
+              </Col>
+            </Row>
+          </Form.Group>
+          <Form.Group>
+            <Row>
+              <Col sm={3}>
+                <Form.Label className="m-3">Raw Content:</Form.Label>
+              </Col>
+              <Col sm={9}>
+                <Form.Control
+                  className="mx-5"
+                  type="text"
+                  value={response.raw_content}
+                  onChange={(e) =>
+                    handleChange(index, "raw_content", e.target.value)
+                  }
+                />
+              </Col>
+            </Row>
+          </Form.Group>
+          <Form.Group>
+            <Row>
+              <Col sm={3}>
+                <Form.Label className="m-3">File:</Form.Label>
+              </Col>
+              <Col sm={9}>
+                <Form.Control
+                  className="mx-5"
+                  type="text"
+                  value={response.file}
+                  onChange={(e) => handleChange(index, "file", e.target.value)}
+                />
+              </Col>
+            </Row>
+          </Form.Group>
+        </Form>
+      ))}
     </div>
   );
 }

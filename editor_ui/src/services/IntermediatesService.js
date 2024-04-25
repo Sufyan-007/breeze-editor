@@ -42,12 +42,12 @@ export async function generateReactService(projectName,filename) {
     return result
 }
 
-export async function appendToAuthApi(authObj,update) {
+export async function appendToAuthApi(authObj,update, appName) {
     let operation = "add";
     if (update){
         operation = "update";
     }
-    let apiUrl = HOST+"/api-client-generator/append-to-auth-api/"+operation
+    let apiUrl = HOST+"/api-client-generator/append-to-auth-api/"+operation+ "/" + appName
     const res = await fetch(apiUrl, {
         method: "POST",
         body: JSON.stringify(authObj)

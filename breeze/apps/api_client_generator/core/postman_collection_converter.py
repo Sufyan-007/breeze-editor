@@ -150,8 +150,8 @@ class PostmanCollectionConverter:
 
     def _create_url_json(self, url_data):
         url = {
-            "baseurl":url_data.get("raw",url_data.get("baseurl")),
-            "host":url_data.get("host"),
+            "baseurl":url_data.get("raw", url_data.get("baseurl", '')),
+            "host":url_data.get("host", ''),
             "protocol":url_data.get("protocol", ""),
             "port":url_data.get("port", 0),
             "path":url_data.get("path",[]),

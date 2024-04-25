@@ -11,7 +11,6 @@ from ..utils.set_response_status import set_response_status
 from ..utils.jsonencoder import EnhancedJSONEncoder
 from ..utils.uuid_as_key import generate_uuid_as_key
 from ..utils.api_model_loader import ApiModelLoader
-
 from common.utils.app_consts import CONFIG_PATH
 class OpenapiConverter:
     def __init__(self):
@@ -413,10 +412,10 @@ class OpenapiConverter:
 
     ## complete        
     @staticmethod
-    def append_auth_json(auth_models):
+    def append_auth_json(auth_models, appName, operation):
         ##first load existing file data into json
         # Read JSON file
-        project_name = "creator"
+        project_name = appName
         folder_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json"
         filename = "auth.json"
         full_file_path = os.path.join(folder_path, filename)
@@ -425,7 +424,7 @@ class OpenapiConverter:
             json_data = json.load(fp)
             ## append to existing json data 
             for model in auth_models:
-                key = model.id # was model.id
+                key = model.get("id")
                 json_data[key] = model
             
             ## write all data back to file

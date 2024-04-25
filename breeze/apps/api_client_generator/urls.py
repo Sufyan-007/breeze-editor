@@ -10,7 +10,7 @@ urlpatterns = [
         path('convert-starndard-json/<str:collectionType>/<str:appName>', csrf_exempt(ApiClientGenerator.as_view())), #changed
         path('modified-intermediate-json/', csrf_exempt(ModifyIntermediateJson.as_view())), #changed
         path('fetch-all-intermediates/<str:projectName>/<str:files_only>', csrf_exempt(ApiClientGenerator.as_view())),
-        path('append-to-auth-api/<str:operation>', csrf_exempt(AppendAuthApi.as_view())),
+        path('append-to-auth-api/<str:operation>/<str:projectName>', csrf_exempt(AppendAuthApi.as_view())),
         path('fetch-auth-file/<str:projectName>', csrf_exempt(RetrieveAuthFile.as_view())),
 ]
 

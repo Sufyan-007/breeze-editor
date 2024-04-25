@@ -1,5 +1,5 @@
 import { React, useState } from "react";
-import closeButton from "../../assets/icons/close.svg";
+import closeButton from "../../assets/icons/close-button.svg";
 import {
   Form,
   Button,
@@ -46,10 +46,8 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
     });
   };
   const handleResponseBodyChange = (newData) => {
-    setResponseBody((prevState) => ({
-      ...prevState,
-      ...newData,
-    }));
+    console.log('new response', newData);
+    setResponseBody([...newData]);
   };
   const handleClose = () => {
     setShow(false);
@@ -71,7 +69,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
         tags: tags,
         summary: summary,
         request: requestBody,
-        response: responseBody,
+        response: Object.values(responseBody),
       },
     };
     try {
@@ -82,7 +80,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
       console.log("Error while submitting the data", error);
     }
   }
-
+console.log('res outsidE', responseBody);
   return (
     <>
       <div
