@@ -2,10 +2,11 @@ from django.http import JsonResponse
 import json, os
 from django.views import View
 from common.utils.app_consts import CONFIG_PATH
-class RetrieveAuthFile(View):
-    def get(self, request, projectName):
+class RetrieveApiConfig(View):
+    
+    def get(self, request, projectName,filename):
         try:
-            file_path = f"{CONFIG_PATH}/{projectName}/generated_intermediate_json/auth.json"
+            file_path = f"{CONFIG_PATH}/{projectName}/generated_intermediate_json/{filename}.json"
             api_id = request.GET.get('api_id', None)
         
             if not os.path.exists(file_path):
@@ -17,16 +18,12 @@ class RetrieveAuthFile(View):
                 if not file_content.strip():
                     return JsonResponse({"data": []}, status=200)
                 result = None
-                auth_apis = json.loads(file_content)
+                apis = json.loads(file_content)
                 if api_id is not None:
-                    result = auth_apis.get(api_id)
+                    result = apis.get(api_id)
                 else:
                     result = []
-                    for api in auth_apis.keys():
-                        result.append({
-                            "id" : api.get("id"),
-                            "operation_id" : api.get("operation_id"),
-                        })
+                
             return JsonResponse({"data": result}, status=200)
 
         except Exception as e:

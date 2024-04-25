@@ -56,6 +56,10 @@ class OpenapiConverter:
                 scheme_details = security_schemes.get(security_name, {})
                 auth_type = scheme_details.get("type","")
                 auth_type = auth_type.strip().upper()
+                if security_name.lower() == "bearerauth":
+                    auth_type = "BEARER" 
+                elif security_name.lower() == "basicauth":
+                    auth_type = "BASIC"
                 arr_auth.append({
                     "type" : auth_type,
                     "content": [],
@@ -65,16 +69,33 @@ class OpenapiConverter:
         
         elif isinstance(auth_data,list):
             for security_item in auth_data:
-                for security_name, _ in security_item.items():
-                    scheme_details = security_schemes.get(security_name, {})
+                auth_type= "NOAUTH"
+                if isinstance(security_item,str):
+                    scheme_details = security_schemes.get(security_item, {})
                     auth_type = scheme_details.get("type","")
                     auth_type = auth_type.strip().upper()
-                    arr_auth.append({
-                        "type" : auth_type,
-                        "content": [],
-                        "login_api" : None,
-                        "token_api" : None
-                    })
+                    if security_item.lower() == "bearerauth":
+                        auth_type = "BEARER" 
+                    elif security_item.lower() == "basicauth":
+                        auth_type = "BASIC"
+                
+                    
+                else:
+                    for security_name, _ in security_item.items():
+                        scheme_details = security_schemes.get(security_name, {})
+                        auth_type = scheme_details.get("type","")
+                        auth_type = auth_type.strip().upper()
+                        if security_name.lower() == "bearerauth":
+                            auth_type = "BEARER" 
+                        elif security_name.lower() == "basicauth":
+                            auth_type = "BASIC"
+                
+                arr_auth.append({
+                    "type" : auth_type,
+                    "content": [],
+                    "login_api" : None,
+                    "token_api" : None
+                })
             
             
         return arr_auth
@@ -142,13 +163,13 @@ class OpenapiConverter:
                 else:
                     is_anonymous = True
                     if schema.get("type") == "object":
-                        schema = {
+                        body_schema = {
                             'type': "object",
                             'properties': {},
                             'required': []
                         }
                         for prop_name, prop_data in schema.get("properties").items():
-                            prop_ref = prop_data.get('$ref', '')
+                            prop_ref = prop_data.get('$ref', None)
                             if prop_ref:
                                 prop_name = prop_ref.split('/')[-1]
                                 prop_schema = self._create_schema(prop_name, schemas)
@@ -442,7 +463,7 @@ class OpenapiConverter:
 
             openapi_data = yaml.safe_load(json_data)
             tag_models = {}
-            security_schemes = openapi_data.get("components",{}).get("securitySchemes")
+            security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
             security_schemes_models = OpenapiConverter.handle_security_schema(security_schemes,openapi_data)
             
             

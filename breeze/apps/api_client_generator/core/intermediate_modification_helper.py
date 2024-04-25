@@ -7,8 +7,7 @@ class IntermediateModificationHelper:
     def __init__(self):
         self.folder_path = f"{CONFIG_PATH}/creator/generated_intermediate_json"
 
-    def process_api_data(self, data, filename):
-        modified_api = data.get("modified_api")
+    def process_api_data(self, modified_api, filename):
         file_path = os.path.join(self.folder_path, filename)
         is_auth_api = modified_api.get("is_authentication_api")
         if is_auth_api:
