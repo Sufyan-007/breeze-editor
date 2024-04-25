@@ -55,7 +55,7 @@ class AppConfigWriter:
                         "className": { "type": "LITERAL", "value": "" },
                         "id": { "type": "LITERAL", "value": "" }
                         },
-                        "children": [{ "_id": "Main-0" }, { "_id": "Main-1" }]
+                        "children": [{ "_id": "Main-0" }]
                     },
                     "Main-0": { "type": "text", "text": "Hello world" }
                 }

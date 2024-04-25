@@ -440,3 +440,23 @@ class HtmlConfigReader(APIView):
             return JsonResponse({},status =404)
         except:
             return JsonResponse({},status=500)
+
+@method_decorator(csrf_exempt,name='dispatch')
+class HtmlConfigWriter(APIView):
+    def put(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            componentConfigService.update_html_config(data["component"],data["html_id"],data["html_config"])
+            return JsonResponse({},status=200)
+        except:
+            return JsonResponse({},status=500)
+    
+    def delete(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            componentConfigService.delete_html_config(data["component"],data["html_id"])
+            return JsonResponse({},status=200)
+        except:
+            return JsonResponse({},status=500)
