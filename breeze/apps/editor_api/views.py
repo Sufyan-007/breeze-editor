@@ -167,6 +167,20 @@ class ProjectDetailsConfig(APIView):
                 generated_paths = os.path.split(app_basic_config['path'])
                 app_basic_config['path'] = os.path.join(generated_paths[0], app_basic_config['name'])
                 
+                # remove all the extra project folders whose config files are not present 
+                # in the configuration folder but are present in the generated_projects
+                # folder for eg. with a .cache folder in a previously named folder
+                try:
+                    project_names_in_config = os.listdir(CONFIG_PATH)
+                    project_names_in_generated_proj = os.listdir(generated_paths[0])
+                    for dir in project_names_in_generated_proj:
+                        if dir not in project_names_in_config:
+                            dir_to_remove = os.path.join(generated_paths[0], dir)
+                            if os.path.isdir(dir_to_remove):
+                                shutil.rmtree(dir_to_remove)
+                except Exception as e:
+                    return JsonResponse({e},status=500)
+                
                 # renaming all the affected folders
                 try:
                     os.rename(
