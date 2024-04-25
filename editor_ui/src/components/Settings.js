@@ -3,10 +3,11 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { updateProject } from "../services/ProjectService";
 import { getAppBasicConfig } from "../services/ConfigService";
-import { useParams } from "react-router";
-import { useNavigate } from "react-router";
+import { useParams, useNavigate } from "react-router";
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 
-const GeneralSettings = ({ appDetails }) => {
+const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
 
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm({
@@ -25,9 +26,9 @@ const GeneralSettings = ({ appDetails }) => {
       oldConfig: { ...appDetails },
     };
 
-
     updateProject(newAppBasicConfig).then((res) => {
       console.log(res);
+      toggleShowSaveToast();
       navigate(`/project/${res.body.name}`, { replace: true });
     });
   };
@@ -142,7 +143,9 @@ const Settings = () => {
   const [selected, setSelected] = useState("general");
   const [appBasicConfig, setAppBasicConfig] = useState();
   const { projectName } = useParams();
+  const [showSaveToast, setShowSaveToast] = useState(false);
 
+  const toggleShowSaveToast = () => setShowSaveToast(!showSaveToast);
   const handleSelect = (section) => {
     setSelected(section);
   };
@@ -162,6 +165,7 @@ const Settings = () => {
       component: appBasicConfig ? (
         <GeneralSettings
           appDetails={appBasicConfig}
+          toggleShowSaveToast={toggleShowSaveToast}
         />
       ) : null,
     },
@@ -183,6 +187,16 @@ const Settings = () => {
         <div className="content">
           <Content items={sidebarItems} selected={selected} />
         </div>
+      </div>
+      <div>
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1 }}>
+      <Toast bg={'primary'} show={showSaveToast} onClose={toggleShowSaveToast} delay={2000} autohide>
+          <Toast.Header closeButton={false}>
+            <strong>Success..!</strong>
+          </Toast.Header>
+          <Toast.Body>Project Details are Updated</Toast.Body>
+        </Toast>
+        </ToastContainer>
       </div>
     </div>
   );
