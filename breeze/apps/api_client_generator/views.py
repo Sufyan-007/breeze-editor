@@ -74,11 +74,15 @@ class ApiClientGenerator(View):
             
             for filename in files:
                 full_file_path = os.path.join(folder_path, filename)
-
+                result_arr = []
                 # Read the file
                 with open(full_file_path, "r") as file:
                     api_models = json.load(file)
-                    api_models = list(api_models.values())
+                    for data in api_models.values():
+                        result_arr.append({
+                            "id" : data.get("id"),
+                            "operation_id" : data.get("operation_id"),
+                        })
 
                 # Append file name and APIs to the list
                 files_with_apis.append({
