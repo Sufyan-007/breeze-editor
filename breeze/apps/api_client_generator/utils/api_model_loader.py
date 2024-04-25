@@ -68,7 +68,7 @@ class ApiModelLoader:
         auth_type = auth_data.get("type")
         login_api = auth_data.get("login_api", None)
         token_api = auth_data.get("token_api", None)
-        content_data = auth_data.get("content", [])
+        content_data = auth_data.get("contents", [])
 
         auth_content = []
         for content in content_data:
@@ -133,7 +133,7 @@ class ApiModelLoader:
                 Body(
                     content_type=ContentEnum[body.get("content_type")],
                     mode=ModeEnum[body.get("mode")],
-                    raw_content=body.get("raw"),
+                    raw_content=body.get("raw", body.get("raw_content")),
                     schema=body.get("schema", {}),
                     required=body.get("required"),
                     schema_name=body.get("schema_name"),

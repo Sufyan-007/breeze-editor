@@ -13,7 +13,7 @@ export default function Body({ onChange, body }) {
           mode: bodyDetails.mode || "",
           content_type: bodyDetails.content_type || "application/json",
           required: bodyDetails.required || false,
-          schemaName: bodyDetails.schemaName || "",
+          schema_name: bodyDetails.schema_name || "",
           raw_content: bodyDetails.raw_content || "",
           anonymous: bodyDetails.anonymous || false
         }))
@@ -22,7 +22,7 @@ export default function Body({ onChange, body }) {
             mode: "",
             content_type: "application/json",
             required: false,
-            schemaName: "",
+            schema_name: "",
             raw_content: "",
             anonymous: false
           },
@@ -343,9 +343,9 @@ export default function Body({ onChange, body }) {
                     }}
                     className="mx-5"
                     type="text"
-                    value={body.schemaName}
+                    value={body.schema_name}
                     onChange={(e) =>
-                      handleChange(index, "schemaName", e.target.value)
+                      handleChange(index, "schema_name", e.target.value)
                     }
                   />
                 </Col>

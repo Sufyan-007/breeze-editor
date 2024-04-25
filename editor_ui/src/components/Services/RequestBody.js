@@ -8,7 +8,7 @@ import { getAuthFileConfig } from "../../services/IntermediatesService.js";
 
 function RequestBody({ onChange, requestBody }) {
   // console.log(requestBody, "request body");
-  const [method, setMethod] = useState(requestBody.method);
+  const [method, setMethod] = useState(requestBody.method || "GET");
   const [parameters, setParameters] = useState(requestBody.parameters || []);
   const [url, setUrl] = useState(requestBody.url);
   const [headers, setHeaders] = useState(requestBody.headers || []);

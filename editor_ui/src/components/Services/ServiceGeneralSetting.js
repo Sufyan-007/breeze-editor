@@ -52,6 +52,7 @@ useEffect(()=>{
 
   const handleClose = () => {
     setEditMode(false); // Set edit mode to false when editing is closed
+    getServices();
   };
  async function fileUpload(file, fileType) {
    try {
