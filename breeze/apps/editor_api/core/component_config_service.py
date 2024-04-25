@@ -9,38 +9,15 @@ class ComponentConfigService:
         self.comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
         
     def get_html_by_id(self,component,id):
-        html = [self.comp_config.get(component).get("html")]
-        print(html)
-        
-        html,index= self.find_html_config(html,id.split("-"),"")
-        print(index)
-        if html.get("children"):
-            html["children"]=map_children(html["children"])
+        html= self.comp_config.get(component).get("html_elements").get(id)
+        self.map_children(component,html)
         return html
+    def update_html_config(self,component,id,html):
+        self.comp_config.get(component).get("html_elements")[id] = html
+        return self.comp_config
     
-    def find_html_config(self,html,id_arr,prefix):
-        id=id_arr.pop(0)
-        index=-1
-        for i,x in enumerate(html):
-            if x["_id"]==prefix+id:
-                html=x
-                index = i
-                # print(x)
-                break
-        else:
-            raise IndexError("Not Found")
-        prefix+=id+"-"
-        if id_arr:
-            if html.get("children"):
-                return self.find_html_config(html["children"],id_arr,prefix)
-            else:
-                raise IndexError("Not Found")
-        else:
-            return html,index
+    def map_children(self,component,html):
+        if html.get("children"):
+            for i,x in enumerate(html["children"]):
+                html["children"][i]["type"] = self.comp_config[component]["html_elements"][x["_id"]]["type"]
         
-def map_children(children):
-    return [
-        {
-            "_id":child["_id"]
-        } for child in children
-    ]

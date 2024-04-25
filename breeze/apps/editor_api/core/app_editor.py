@@ -21,17 +21,7 @@ NEW_COMP_FORMAT={
     "otherVars": [],
     "functions": [],
     "$id":"COMP",
-    "html": {
-      "type": "Element",
-      "elementType": "HTML",
-      "typeId": "DIV",
-      "tagName": "div",
-      "attributes": {
-        "className": { "type": "LITERAL", "value": "" },
-        "id": { "type": "LITERAL", "value": "" }
-      },
-      "children": [{ "type": "text", "text": "Hello world" }]
-    },
+    "html": {"_id":"Main"},
     "wrapper_store": None,
     "imports": { "components": [], "other": [
         {
@@ -47,7 +37,44 @@ NEW_COMP_FORMAT={
           "import_type": "SINGLE"
         }] 
     },
-    "hooks": []
+    "hooks": [],
+    "html_elements":{
+        "Main":{
+            "type": "Element",
+            "elementType": "HTML",
+            "typeId": "DIV",
+            "tagName": "div",
+            "attributes": {
+                "className": { "type": "LITERAL", "value": "" },
+                "id": { "type": "LITERAL", "value": "" }
+            },
+            "children": [
+                {"_id":"Main-0"},
+                {"_id":"Main-1"}
+            ]
+        },
+        "Main-0":{
+            "type": "text", 
+            "text": "Hello world" 
+        },
+        "Main-1":{
+            "type":"Element",
+            "elementType":"HTML",
+            "typeId":"DIV",
+            "tagName":"div",
+            "attributes": {
+                "className": { "type": "LITERAL", "value": "" },
+                "id": { "type": "LITERAL", "value": "" }
+            },
+            "children":[
+                {"_id":"Main-1-0"}
+            ]
+        },
+        "Main-1-0":{
+            "type":"text",
+            "text": "Hello"
+        }
+    }
 }
 
 

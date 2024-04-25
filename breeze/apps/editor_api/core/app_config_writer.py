@@ -36,23 +36,7 @@ class AppConfigWriter:
                 "propsVars": [],
                 "otherVars" : [],
                 "functions": [],
-                "html": {
-                                    "type": "Element",
-                                    "_id": app_config['defaultComponent'],
-                                    "elementType":"HTML",
-                                    "typeId":"DIV",
-                                    "tagName": "div",
-                                    "attributes": {
-                                        "id": { "type": "LITERAL", "value": app_config['defaultComponent']} 
-                                    },
-                                    "children": [
-                                        {
-                                            "type": "text",
-                                            "_id": app_config['defaultComponent']+"-0",
-                                            "text": "This is main page"
-                                        }
-                                    ]
-                                },
+                "html": { "_id": "Main" },
                 "wrapper_store": None,
                 "imports": {
                     "components": [
@@ -60,7 +44,21 @@ class AppConfigWriter:
                     "other": [
                     ]
                 },
-                "hooks": []
+                "hooks": [],
+                "html_elements": {
+                    "Main": {
+                        "type": "Element",
+                        "elementType": "HTML",
+                        "typeId": "DIV",
+                        "tagName": "div",
+                        "attributes": {
+                        "className": { "type": "LITERAL", "value": "" },
+                        "id": { "type": "LITERAL", "value": "" }
+                        },
+                        "children": [{ "_id": "Main-0" }, { "_id": "Main-1" }]
+                    },
+                    "Main-0": { "type": "text", "text": "Hello world" }
+                }
             }
         }
 

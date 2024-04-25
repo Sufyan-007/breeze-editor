@@ -43,8 +43,9 @@ class HTMLGenerator:
             val= f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
         return f"{attr}={val}"
 
-    def generateHTML(self,config):
+    def generateHTML(self,config_id):
         # print("---", config)
+        config=self.config["html_elements"][config_id["_id"]]
         if config.get('type') == 'Element':
             # print(config)
             if config.get('elementType',"") == 'CUSTOM':
@@ -121,96 +122,3 @@ class HTMLGenerator:
                 return f""" {config['code']} """
         
         return ""
-    
-config = {
-            "tagName": "div",
-            "type" : "Element",
-            "children": [{
-              "type": "Element",
-              "tagName": "div",
-              "attributes": {
-                "style": "height:10rpx;width: 20rpx;"
-              },
-              "children": [
-               {
-                "type": "Element",
-                "tagName": "Layout",
-                "attributes": {},
-                "children": [
-                        {
-                      "type": "Element",
-                      "tagName": "Header",
-                      "attributes": {},
-                            "children": [
-                                {
-                              "type": "Element",
-                              "tagName": "icon",
-                              "attributes": {},
-                                    "children": []
-                                }	
-                            ]
-                        },
-                        {
-                      "type": "Element",
-                      "tagName": "Content",
-                      "attributes": {},
-                            "children": [
-                                {
-                              "type": "Element",
-                              "tagName": "Sidebar",
-                              "attributes": {},
-                                    "children": [
-                                        {
-                                            "type": "Element",
-                                      "tagName": "Nav",
-                                      "attributes": {},
-                                            "children": [
-                                                {
-                                                    "type" : "Element",
-                                                    "tagName" : "div",
-                                                    "attributes" : {},
-                                                    "children" : [
-                                                        {
-                                                            "type": "Expression",
-                                                            "operation": "map",
-                                                            "variable": "allData",
-                                                            "code": "a = 1",
-                                                            "callbackParams": ["item", "index"],
-                                                            "attributes": {},
-                                                            "children": [
-                                                                {
-                                                                    "type": "Element",
-                                                                    "tagName": "div",
-                                                                    "attributes": {},
-                                                                    "children": []
-                                                                }
-                                                            ]
-                                                        }
-                                                        
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                              "type": "Element",
-                              "tagName": "MainContent",
-                              "attributes": {},
-                                    "children": []
-                                }
-                            ]
-                        },
-                        {
-                      "type": "Element",
-                      "tagName": "Footer",
-                      "attributes": {},
-                            "children": []
-                        } 
-                    ]
-                    
-                }]
-              
-            }]
-          }
-# print(HTMLGenerator.generateHTML(config))
