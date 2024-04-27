@@ -19,7 +19,7 @@ export default function AuthApiList({
     const fetchAuthApiList = async () => {
 
         try {
-            const result = await getAuthFileApis("creator");
+            const result = await getAuthFileApis("creator", null);
             setApiList(result["data"])
         } catch (error) {
             console.error("Error generate react service:", error);

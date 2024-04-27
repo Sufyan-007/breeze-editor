@@ -13,27 +13,29 @@ export default function Root() {
 
     const onEditService = (serviceInfo) => {
         setView("EDIT_SERVICE_FUNCTION");
-        selectedServiceInfo(serviceInfo);
+        setSelectedServiceInfo(serviceInfo);
     };
 
     const onAddService = () => {
         setView("EDIT_SERVICE_FUNCTION");
-        selectedServiceInfo({});
+        setSelectedServiceInfo({});
     };
 
     const onEditAuthService = (serviceId) => {
         setView("EDIT_AUTH_FUNCTION");
-        selectedAuthServiceId(serviceId);
+        setSelectedAuthServiceId(serviceId);
     };
 
     const onAddAuthService = () => {
-        setView("EDIT_SERVICE_FUNCTION");
-        selectedAuthServiceId(null);
+        setView("EDIT_AUTH_FUNCTION");
+        setSelectedAuthServiceId(null);
     };
-
+    useEffect(()=>{
+        console.log("Root");
+    },[])
     return (
         <>
-            <div className="container-fluid d-flex flex-column vh-100  ">
+            <div className="container-fluid d-flex flex-column">
                 <Navbar
                     variant="dark"
                     style={{ backgroundColor: "#303033" }}
@@ -63,10 +65,10 @@ export default function Root() {
                     style={{ backgroundColor: "#303033" }}
                 >
                     {
-                        view == "LIST_SERVICE" ? <ServiceList onEditService={onEditService}></ServiceList> :
-                            view == "AUTH_API_LIST" ? <AuthApiList onEditAuthService={onEditAuthService}></AuthApiList> :
-                                view == "EDIT_AUTH_FUNCTION" ? <EditAuthFunction selectedAuthServiceId={selectedAuthServiceId} onClose={() => { setView("AUTH_API_LIST") }} ></EditAuthFunction> :
-                                    view == "EDIT_SERVICE_FUNCTION" ? <EditServiceFuntion selectedServiceInfo={selectedServiceInfo} onClose={() => { setView("LIST_SERVICE") }} ></EditServiceFuntion> :
+                        view === "LIST_SERVICE" ? <ServiceList onEditService={onEditService}></ServiceList> :
+                            view === "AUTH_API_LIST" ? <AuthApiList onEditAuthService={onEditAuthService}></AuthApiList> :
+                                view === "EDIT_AUTH_FUNCTION" ? <EditAuthFunction selectedAuthServiceId={selectedAuthServiceId} onClose={() => { setView("AUTH_API_LIST") }} ></EditAuthFunction> :
+                                    view === "EDIT_SERVICE_FUNCTION" ? <EditServiceFuntion selectedServiceInfo={selectedServiceInfo} onClose={() =>  setView("LIST_SERVICE") } ></EditServiceFuntion> :
                                         null
 
                     }

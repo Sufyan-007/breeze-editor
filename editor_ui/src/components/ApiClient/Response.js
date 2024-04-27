@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, ButtonGroup, Row, Col } from 'react-bootstrap';
+import CustomButtonGroup from "../CustomButtonGroup";
 
 let responseStatus = [
     {
@@ -14,6 +15,11 @@ let responseStatus = [
     },
     {
         name: "S_500",
+        label: "500",
+        variant: "secondary",
+    },
+    {
+        name: "S_200",
         label: "500",
         variant: "secondary",
     },
@@ -47,16 +53,26 @@ let contentTypes = [
     },
 
 ];
-function Response({ index,onChange, response }) {
-
-    const [response, setResponse] = useState(response || {});
+function Response({ index,onChange, responseData }) {
+    const [response, setResponse] = useState(responseData || {});
+    console.log("resposne", response);
 
     const onValueChange = (prop, value) => {
         let r = response;
         r[prop] = value
         onChange(index, r);
     };
-
+    const handleAddResponse = () => {
+        setResponse([...response, {}]);
+      };
+    
+      const handleRemoveResponse = (index) => {
+        if (response.length > 1) {
+          const updatedResponses = response.filter((_, i) => i !== index);
+          setResponse(updatedResponses);
+        //   onRemoveResponse(index); 
+        }
+      };
 
     return (
         <div className="mb-3 text-dark">

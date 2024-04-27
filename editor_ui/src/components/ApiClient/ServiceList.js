@@ -6,13 +6,14 @@ import {
 import { Table, Accordion, Button } from "react-bootstrap";
 import DeleteIcon from "../../assets/icons/delete.svg";
 import EditIcon from "../../assets/icons/edit.svg";
-
+import "../../css/ServiceList.css"
 export default function ServiceLists({
     onEditService
 }) {
     const [apiList, setApiList] = useState([]);
 
     useEffect(() => {
+        console.log("in service list");
         fetchServiceList();
     }, []);
 
@@ -39,17 +40,18 @@ export default function ServiceLists({
         onEditService(apiInfo);
     };
 
-
-    return (
-        <div className="m-3">
-            {apiList &&
-                apiList.map((service, index) => (
-                    <Accordion key={index}>
-                        <Accordion.Item
-                            eventKey={service.filename}
-                            style={{ cursor: "pointer" }}
-                        >
-                            <Accordion.Header>{service.filename} <Button
+return (
+    <div className="m-3">
+        {apiList &&
+            apiList.map((service, index) => (
+                <Accordion key={index}>
+                    <Accordion.Item
+                        eventKey={service.filename}
+                        style={{ cursor: "pointer" }}
+                    >
+                        <Accordion.Header>
+                            {service.filename}{" "}
+                            <Button
                                 variant="link"
                                 className="mx-1"
                                 onClick={(e) => {
@@ -58,62 +60,63 @@ export default function ServiceLists({
                                 }}
                             >
                                 Generate Service
-                            </Button></Accordion.Header>
-                            <Accordion.Body>
-
-                                {service.apis && service.apis.length > 0 ? (
-                                    <Table striped bordered hover variant="dark">
-                                        <thead>
-                                            <tr>
-                                                <th colSpan={9} >Name</th>
-                                                <th colSpan={3} >Actions</th>
+                            </Button>
+                        </Accordion.Header>
+                        <Accordion.Body>
+                            {service.apis && Object.keys(service.apis).length > 0 ? (
+                                <Table striped bordered hover variant="dark">
+                                    <thead>
+                                        <tr>
+                                            <th colSpan={9}>Name</th>
+                                            <th colSpan={3}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.entries(service.apis).map(([key, value]) => (
+                                            <tr key={key}>
+                                                <td colSpan={9}>
+                                                    <div className="name-cell">
+                                                        {value.operation_id}
+                                                    </div>
+                                                </td>
+                                                <td colSpan={3}>
+                                                    <div className="actions-cell">
+                                                        <img
+                                                            className="m-1"
+                                                            src={EditIcon}
+                                                            alt="Edit"
+                                                            style={{
+                                                                cursor: "pointer",
+                                                                width: "20px",
+                                                                height: "20px",
+                                                            }}
+                                                            onClick={() => handleEditClick({ "id": value.id, "filename": service.filename })}
+                                                        />
+                                                        <img
+                                                            src={DeleteIcon}
+                                                            alt="Delete"
+                                                            style={{
+                                                                cursor: "pointer",
+                                                                width: "20px",
+                                                                height: "20px",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {service.apis.map((api, apiIndex) => (
-                                                <tr key={`${api.id}`}>
-                                                    <td colSpan={9}>
-                                                        <div className="name-cell">{api.operation_id}</div>
-                                                    </td>
-                                                    <td colSpan={3}>
-                                                        <div className="actions-cell">
-                                                            <img
-                                                                className="m-1"
-                                                                src={EditIcon}
-                                                                alt="Edit"
-                                                                style={{
-                                                                    cursor: "pointer",
-                                                                    width: "20px",
-                                                                    height: "20px",
-                                                                }}
-                                                                onClick={() => handleEditClick({"id":api.id,"filename" : service.filename})}
-                                                            />
-                                                            <img
-                                                                src={DeleteIcon}
-                                                                alt="Delete"
-                                                                style={{
-                                                                    cursor: "pointer",
-                                                                    width: "20px",
-                                                                    height: "20px",
-                                                                }}
-                                                            />
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            ) : (
+                                <h5 style={{ color: "black", textAlign: "center" }}>
+                                    No services found
+                                </h5>
+                            )}
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
+            ))}
+    </div>
+);
 
-
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </Table>
-                                ) : (
-                                    <h5 style={{ color: "white", textAlign: "center" }}>
-                                        No services found
-                                    </h5>
-                                )}
-                            </Accordion.Body>
-                        </Accordion.Item>
-                    </Accordion>
-                ))}
-        </div>
-    );
 }

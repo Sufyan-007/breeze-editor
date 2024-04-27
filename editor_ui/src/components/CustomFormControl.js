@@ -10,20 +10,31 @@ const CustomFormControl = ({
     const filteredOptions = flow_type === "authorization_code" ? options : options.filter(option => option.name !== "flow.authorizationUrl");
 
     return (
-        <Form.Group controlId={controlId} className="mt-4">
+        <Form.Group controlId={controlId} className="mt-4 d-flex">
           {filteredOptions.map((option) => (
-            <Row key={option.name}>
-              <Col sm={3}>
-                <Form.Label>{option.label}</Form.Label>
-              </Col>
-              <Col sm={9}>
-                <Form.Control
-                  className="formControl mx-5 mb-2"
-                  type="text"
-                  value={option.value}
-                  onChange={(e) => onChange(option.name, e.target.value)}
-                />
-              </Col>
+            <Row key={option.name} className = "mx-2" style={{width: option.width, padding: '5px'}}>
+             
+                <Form.Label className="mb-2 px-2">{`${option.label}:`}</Form.Label>
+             
+             
+              {Array.isArray(option.value) ? (
+                            <Form.Control
+                                className="formControl mb-2 "
+                                
+                                type="text"
+                                value={option.value.join(", ")} 
+                                onChange={(e) => onChange(option.name, e.target.value.split(", "))} 
+                            />
+                        ) : (
+                            <Form.Control
+                                className="formControl mb-2"
+                                
+                                type="text"
+                                value={option.value || ''}
+                                onChange={(e) => onChange(option.name, e.target.value)}
+                            />
+                        )}
+            
             </Row>
           ))}
         </Form.Group>

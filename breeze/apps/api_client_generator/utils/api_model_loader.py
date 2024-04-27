@@ -8,7 +8,7 @@ class ApiModelLoader:
     @staticmethod
     def load_request(request_data):
         # Build Request Object
-        method_name = request_data.get("method")
+        method_name = request_data.get("method").upper()
         method = MethodsEnum[method_name]
         auths_model = []
         auth_data_arr = request_data.get("auth",[])
@@ -50,7 +50,7 @@ class ApiModelLoader:
     @staticmethod
     def load_response(response_data):
         response=[]
-        if response_data:
+        if len(response_data)>0:
             for r_data in response_data:
                 response.append(Response(
                     status= StatusEnum[r_data.get("status")],
