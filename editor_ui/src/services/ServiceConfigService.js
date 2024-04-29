@@ -1,6 +1,6 @@
 export async function getServiceConfig(projectName) {
     const services = await (
-        await fetch("http://localhost:8000/editor/read-services/" + projectName)
+        await fetch("http://localhost:8000/editor/read-services/" + projectName + "/")
     ).json();
     return services
 }

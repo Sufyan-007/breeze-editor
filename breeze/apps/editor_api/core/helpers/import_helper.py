@@ -32,7 +32,11 @@ class ImportHelper:
         for imp in component_config['imports']['other']:
             if imp['TYPE'] == "THIRD_PARTY":
                 if imp['import_type'] == 'FULL':
-                    import_statement = f'import {imp["import_entity"]} from \'{imp["from"]}\' ;'
+                # added a case to check if import is already present
+                    if imp["import_entity"] in imported_components:
+                        continue
+                    else:
+                        import_statement = f'import {imp["import_entity"]} from \'{imp["from"]}\' ;'
                 # elif imp['import_type'] == 'SINGLE':
                 else:
                     import_statement = f'import  {{ {imp["import_entity"]} }} from \'{imp["from"]}\' ;'

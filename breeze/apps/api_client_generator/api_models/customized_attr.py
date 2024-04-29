@@ -15,7 +15,10 @@ class CustomizedAttr:
 
      def __set__(self, instance, value):
           if value and not isinstance(value, self.type):
-               raise TypeError(f"{self.name!r} values must be of type {self.type!r}")
+               raise TypeError({
+                    "key" : self.name, 
+                    "message" : "values must be of type {self.type!r}"
+                    })
           for validator in self.validators:
             validator(self.name, value)
           instance.__dict__[self.name] = value

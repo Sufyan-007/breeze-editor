@@ -456,35 +456,58 @@ class OpenapiConverter:
     ## complete
     @staticmethod
     def prepare_api_models(json_data):
+        error_obj = {"general_error" : None} 
+        tag_models = {}
+        security_schemes_models = []
         try:
             if not json_data:
                 raise ValueError("Empty JSON data")
 
             openapi_data = yaml.safe_load(json_data)
-            tag_models = {}
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
             security_schemes_models = OpenapiConverter.handle_security_schema(security_schemes,openapi_data)
             
             
             tags_map = OpenapiConverter.classified_tags_and_method(openapi_data) 
             converted_json_tags_mapping = OpenapiConverter.convert_to_json_data_model(tags_map,openapi_data)
-            
             ## now load these json obj to api models
             for tag,arr_obj in converted_json_tags_mapping.items():
                 for obj in arr_obj:
-                    api_model = ApiModelLoader.load_api_model(obj)
-                    if tag in tag_models:
-                        tag_models[tag].append(api_model)
-                    else:
-                        tag_models[tag] = [api_model] 
+                    try:
+                        api_model = ApiModelLoader.load_api_model(obj)
+                        if tag in tag_models:
+                            tag_models[tag].append(api_model)
+                        else:
+                            tag_models[tag] = [api_model] 
+                    except TypeError as err:
+                        if obj["id"] not in error_obj:
+                            error_obj[obj.get("id")] = []    
+                        error_obj[obj.get("id")].append(err)
+                    
+                    except ValueError as err:
+                        
+                        if obj["id"] not in error_obj:
+                            error_obj[obj.get("id")] = []    
+                        error_obj[obj.get("id")].append(err)
+                    except Exception as e:
+
+                        if obj["id"] not in error_obj:
+                            error_obj[obj.get("id")] = []    
+                        error_obj[obj.get("id")].append(e)
             return  {
                 "tag_models" : tag_models,
-                "security_schemes_models" : security_schemes_models
+                "security_schemes_models" : security_schemes_models,
+                "error_obj" : error_obj
             }
 
         except Exception as e:
             print(traceback.format_exc())
-            return {"error": str(e)}
+            error_obj["general_error"] = str(e)
+            return  {
+                "tag_models" : tag_models,
+                "security_schemes_models" : security_schemes_models,
+                "error_obj" : error_obj
+            }
 
 
     ##done

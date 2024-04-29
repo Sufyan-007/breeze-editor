@@ -53,7 +53,8 @@ def prepare_config_map():
             for single_comp_config in comp_config:
                 COMPONENTS_LIST["CUSTOM"][project_config['name']].append({
                     "name" : comp_config[single_comp_config]['name'],
-                    "id" : comp_config[single_comp_config]['name']
+                    #Certain config files don't contain $ID field, will remove later
+                    "id" : comp_config[single_comp_config].get("$id",comp_config[single_comp_config]['name'])
                 })
             
 
@@ -62,6 +63,10 @@ def prepare_config_map():
 def prepare_tp_comp_config():
     global COMPONENTS_CONFIG
     global COMPONENTS_LIST
+
+    # If the folder doesnt exits then skip all the execution
+    if not pathlib.Path(THIRD_PARTY_CONFIG_PATH).exists():
+        return
 
     all_tp_path = pathlib.Path(THIRD_PARTY_CONFIG_PATH)
     all_tp_path = list(all_tp_path.iterdir())
@@ -92,6 +97,7 @@ def prepare_html_comp_config():
 
     html_elements = [
         "DOCTYPE html",
+        "div",
         "html",
         "head",
         "title",
@@ -133,8 +139,11 @@ def prepare_html_comp_config():
         "label",
         "fieldset",
         "legend",
-        "body"
+        "body",
+        "img"
     ]
+    
+    html_elements = sorted(html_elements)
     
     # common_config = read_file_json("/home/raj/Desktop/bridge/processor/bridge_ui_server/html_attributes.json")
     common_config = COMMON_HTML_ATTRIBUTES    
