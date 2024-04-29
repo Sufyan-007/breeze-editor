@@ -433,7 +433,7 @@ class OpenapiConverter:
 
     ## complete        
     @staticmethod
-    def append_auth_json(auth_models, appName, operation):
+    def append_auth_json(auth_models, appName):
         ##first load existing file data into json
         # Read JSON file
         project_name = appName

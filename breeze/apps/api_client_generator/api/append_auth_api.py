@@ -11,6 +11,6 @@ class AppendAuthApi(View):
             data["id"] = generate_uuid_as_key()
         model = ApiModelLoader.load_auth_api_model(data)
         model_json = model.as_dict()
-        OpenapiConverter.append_auth_json([model_json], appName=projectName, operation=operation)
+        OpenapiConverter.append_auth_json([model_json], appName=projectName)
         return JsonResponse({"list" : []}, status = 201)
    

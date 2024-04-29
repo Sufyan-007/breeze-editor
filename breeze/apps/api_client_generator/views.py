@@ -83,10 +83,11 @@ class ApiClientGenerator(View):
                             "id" : data.get("id"),
                             "operation_id" : data.get("operation_id"),
                         })
+                filename_without_extension = os.path.splitext(filename)[0]
 
                 # Append file name and APIs to the list
                 files_with_apis.append({
-                    "filename": filename,
+                    "filename": filename_without_extension,
                     "apis": api_models
                 })
 

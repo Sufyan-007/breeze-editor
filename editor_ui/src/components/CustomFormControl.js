@@ -12,15 +12,14 @@ const CustomFormControl = ({
     return (
         <Form.Group controlId={controlId} className="mt-4 d-flex">
           {filteredOptions.map((option) => (
-            <Row key={option.name} className = "mx-2" style={{width: option.width, padding: '5px'}}>
+            <Row key={option.name} className = "mx-1" style={{width: option.width}}>
              
                 <Form.Label className="mb-2 px-2">{`${option.label}:`}</Form.Label>
              
              
               {Array.isArray(option.value) ? (
                             <Form.Control
-                                className="formControl mb-2 "
-                                
+                                className="mb-2 "
                                 type="text"
                                 value={option.value.join(", ")} 
                                 onChange={(e) => onChange(option.name, e.target.value.split(", "))} 
@@ -28,7 +27,6 @@ const CustomFormControl = ({
                         ) : (
                             <Form.Control
                                 className="formControl mb-2"
-                                
                                 type="text"
                                 value={option.value || ''}
                                 onChange={(e) => onChange(option.name, e.target.value)}

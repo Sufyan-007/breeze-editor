@@ -11,13 +11,13 @@ const CustomButtonGroup = ({
     onButtonClick,
 }) => {
     return (
-        <Form.Group controlId={{ formId }} className="mt-3">
+        <Form.Group controlId={{ formId }} className="mb-1">
             <Row>
                 <Col sm={3}>
-                    <Form.Label className="">{title}</Form.Label>
+                    <Form.Label className="mx-3">{title}</Form.Label>
                 </Col>
                 <Col sm={9}>
-                    <ButtonGroup style={{maxWidth: "100%"}}>
+                    <ButtonGroup style={{width: options[0].width ? options[0].width : "100%"}} className={options.className} >
                         {
                             options.map(option => {
                                 return <Button

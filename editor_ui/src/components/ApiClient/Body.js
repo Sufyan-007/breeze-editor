@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Form, Row, Col, Button } from "react-bootstrap";
 import CustomButtonGroup from "../CustomButtonGroup";
-
+import remove from "../../assets/icons/remove.svg";
 const modeOptions = [
   { name: "RAW", label: "Raw", variant: "secondary" },
   { name: "FORMDATA", label: "Formdata", variant: "secondary" },
@@ -17,8 +17,7 @@ const contentTypes = [
   { name: "XML", label: "Xml", variant: "secondary" },
 ];
 
-const Body = ({ index, onChange, bodyData, onRemove }) => {
-  console.log(bodyData, "bodyData");
+const Body = ({ index, onChange, bodyData, onRemove, key }) => {
   const [body, setBody] = useState(bodyData || {});
 
   const onValueChange = (prop, value) => {
@@ -30,57 +29,59 @@ const Body = ({ index, onChange, bodyData, onRemove }) => {
   };
 
   const handleRemoveBody = () => {
-    onRemove(index); 
+    console.log(index, "index in body");
+    onRemove(index);
   };
 
-
   return (
-    <div key={index}>
-      <Form.Group controlId={`body-${index}`}>
-        <CustomButtonGroup
-          options={modeOptions}
-          title={"Mode"}
-          selectedButton={body["mode"]}
-          onButtonClick={onValueChange}
-          formId={"mode"}
-        />
-        {body.mode === "RAW" && (
-          <>
-            <CustomButtonGroup
-              options={contentTypes}
-              title={"Content Type"}
-              selectedButton={body["content_type"]}
-              onButtonClick={onValueChange}
-              formId={"content_type"}
-            />
+    <Row key={key} className="mx-4 mt-2" style={{ width: "45%" }}>
+      <Col sm={1}>
+        <img src={remove} height={24} alt="remove" onClick={handleRemoveBody} />
+      </Col>
+      <Col sm={11}>
+        <Form.Group controlId={`body-${index}`}>
+          <CustomButtonGroup
+            options={modeOptions}
+            title={"Mode"}
+            selectedButton={body["mode"]}
+            onButtonClick={onValueChange}
+            formId={"mode"}
+          />
+          {body.mode === "RAW" && (
+            <>
+              <CustomButtonGroup
+                options={contentTypes}
+                title={"Type"}
+                selectedButton={body["content_type"]}
+                onButtonClick={onValueChange}
+                formId={"content_type"}
+              />
 
-            <Row>
-              <Col sm={2}>
-                <Form.Label className="mb-2">Schema Name:</Form.Label>
-              </Col>
-              <Col sm={7}>
-                <Form.Control
-                  className="mx-5 mt-3"
-                  style={{
-                    maxWidth: "30vw",
-                    border: "none",
-                    backgroundColor: "#6C757D",
-                  }}
-                  type="text"
-                  value={body["schema_name"] || ""}
-                  onChange={(e) => onValueChange("schema_name", e.target.value)}
-                />
-              </Col>
-            </Row>
-          </>
-        )}
-        <div className="d-flex justify-content-center">
-        <Button className="mt-3" variant="secondary" size="sm" onClick={handleRemoveBody}>
-                  Remove Body
-                </Button>
-        </div>
-      </Form.Group>
-    </div>
+              <Row>
+                <Col sm={3}>
+                  <Form.Label className="mb-2 mx-3">Schema:</Form.Label>
+                </Col>
+                <Col sm={9}>
+                  <Form.Control
+                    className=""
+                    style={{
+                      border: "none",
+                      backgroundColor: "#6C757D",
+                    }}
+                    type="text"
+                    value={body["schema_name"] || ""}
+                    onChange={(e) =>
+                      onValueChange("schema_name", e.target.value)
+                    }
+                  />
+                </Col>
+              </Row>
+            </>
+          )}
+         
+        </Form.Group>
+      </Col>
+    </Row>
   );
 };
 

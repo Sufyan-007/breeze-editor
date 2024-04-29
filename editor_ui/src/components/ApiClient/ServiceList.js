@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import {
-    fetchIntermediate,
-    generateReactService,
+    callApiClientGenerator
 } from "../../services/IntermediatesService";
-import { Table, Accordion, Button } from "react-bootstrap";
+import { Table, Accordion, Button, Alert } from "react-bootstrap";
 import DeleteIcon from "../../assets/icons/delete.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import "../../css/ServiceList.css"
+import { useParams } from "react-router";
 export default function ServiceLists({
-    onEditService
+    onEditService, errorMessage
 }) {
     const [apiList, setApiList] = useState([]);
-
+    const appName = useParams()
     useEffect(() => {
         console.log("in service list");
         fetchServiceList();
@@ -20,16 +20,22 @@ export default function ServiceLists({
     const fetchServiceList = async () => {
 
         try {
-            const result = await fetchIntermediate("creator");
+            const result = await callApiClientGenerator("http://localhost:8000/api-client-generator/fetch-all-intermediates/creator/false", "GET", null, false,{})
             setApiList(result["files_with_apis"])
         } catch (error) {
             console.error("Error generate react service:", error);
         }
     }
-
     const generateService = async (filename) => {
         try {
-            const result = await generateReactService("creator", filename);
+            let path = "ORDINARY"
+            if (filename === "auth.json"){
+                path = "AUTH"
+            }
+            let file = filename.split(".")[0];
+            const apiUrl = "http://localhost:8000/api-client-generator/generate-react-api-client/"+path
+            const res = await callApiClientGenerator(apiUrl,"POST", {"appName": appName.projectName, "filename":file},false, {})
+            // const result = await generateReactService("creator", filename);
         } catch (error) {
             console.error("Error generate react service:", error);
         }
@@ -41,8 +47,8 @@ export default function ServiceLists({
     };
 
 return (
-    <div className="m-3">
-        {apiList &&
+    <div className="m-5" style={{width:"95%"}}>
+        {apiList.length >0 ?
             apiList.map((service, index) => (
                 <Accordion key={index}>
                     <Accordion.Item
@@ -115,7 +121,13 @@ return (
                         </Accordion.Body>
                     </Accordion.Item>
                 </Accordion>
-            ))}
+            ))
+        : errorMessage ? (
+            <Alert className="error-message" variant="warning">{errorMessage}</Alert>
+        ) : (
+            <>
+            </>
+        )}
     </div>
 );
 
