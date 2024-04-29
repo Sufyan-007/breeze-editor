@@ -48,6 +48,9 @@ class RouteHandler:
     def get_comp_name_by_id(self, cmp_id):
         return self.comp_config[cmp_id]['name']
     
+    def get_comp_path_by_id(self, cmp_id):
+        return self.comp_config[cmp_id]['containingFile']
+    
     # def generate_routing_code(self):
     #     converted_route_config = self.transform_route_config(self.route_config)
 
@@ -131,6 +134,25 @@ class RouteHandler:
             code += FunctionCodeGenerator.generate_function(route_config['action']['implementation'], None)
             code += "\n }"
             props_code.append(code)
+
+        if route_config.get("errorElement", None):
+            code = f" errorElement={{<{self.get_comp_name_by_id(route_config['errorElement'])} />}} "
+            props_code.append(code)
+
+        if route_config.get("hydrateFallbackElement", None):
+            code = f" hydrateFallbackElement={{<{self.get_comp_name_by_id(route_config['hydrateFallbackElement'])} />}} "
+            props_code.append(code)
+
+        if route_config.get("shouldRevalidate", None):
+            code = " shouldRevalidate = {"
+            code += FunctionCodeGenerator.generate_function(route_config['shouldRevalidate']['implementation'], None)
+            code += "\n } "
+            props_code.append(code)
+
+        if route_config.get("lazy", None) is True:
+            code = f" lazy = {{ () => import({get_path_without_ext(route_config['component'])})}} "
+            props_code.append(code)
+
 
         print(props_code)
         return "  ".join(props_code)

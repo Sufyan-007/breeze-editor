@@ -5,6 +5,8 @@ import SidebarService from "../services/SidebarService"
 import { useDispatch, useSelector } from 'react-redux'
 import { ServiceContext } from '../store/Context';
 import ElementConfig from './ElementConfig';
+import Navbar from './Navbar';
+import { router } from '../App';
 
 function Editor() {
   const dispatch = useDispatch()
@@ -54,18 +56,22 @@ function Editor() {
   return (
     <ServiceContext.Provider value={{ configService, sidebarService }}>
       <div className="container-fluid vh-100 d-flex flex-column ">
-        <div className=" navbar row" style={{ backgroundColor: "#151518" }}>
-          <div className="container-fluid">
-            <div className=" navbar-brand text-white">
-              Breeze Studio
+        <Navbar 
+          leftContent={
+            <div className=' d-flex'>
+              <div className=' d-flex align-items-center text-white me-3' onClick={() => { router.navigate(`/project/${projectName}`);}}>
+                {projectName}
+              </div>
             </div>
+          } 
+          rightContent={
             <div>
-              <input ref={portInput} defaultValue="3001" type="text" className="p-1 m-1 " placeholder='Port Number' />
-              <input ref={routeInput} type="text" className="p-1" placeholder='Route' />
-              <button className=" btn btn-primary m-1" onClick={setPort}> Go</button>
-            </div>
+            <input ref={portInput} defaultValue="3001" type="text" className="p-1 m-1 " placeholder='Port Number' />
+            <input ref={routeInput} type="text" className="p-1" placeholder='Route' />
+            <button className=" btn btn-primary m-1" onClick={setPort}> Go</button>
           </div>
-        </div>
+          }
+        />
         <div className=" row flex-grow-1 overflow-hidden">
           <div className=" col-3   overflow-y-auto h-100 fs-6 text-white" style={{ width: "18rem" , backgroundColor: "#303033" }} >
             <Outlet />
@@ -75,7 +81,7 @@ function Editor() {
           <div className="col m-0 p-0 overflow-hidden">
             {
               portNumber ?
-                <iframe ref={iFrameRef} id="iFrame" src={"http://localhost:" + portNumber + "/" + route} style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} className='border-1 border border-black' title='a' frameborder="0"></iframe>
+                <iframe ref={iFrameRef} id="iFrame" src={"http://localhost:" + portNumber + "/" + route} style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} className='border-1 border border-black' title='a' ></iframe>
                 : null
             }
           </div>
