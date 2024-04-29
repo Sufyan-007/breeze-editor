@@ -471,6 +471,7 @@ class GenerateAPIClient():
                 imports.append(dependency_schema_name.capitalize())
             # print(imports, "imports")
         return imports
+    
     def _translate_js_type(self,python_type):
         type_map = {
             'string': 'string',

@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useLoaderData } from "react-router";
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import { useLoaderData, useNavigate } from "react-router";
+import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { getAllConfigs } from "../services/ConfigService";
-import { setReducerConfig, setReduxStoreConfig } from "../reducers/ReduxConfigReducer";
+import {
+  setReducerConfig,
+  setReduxStoreConfig,
+} from "../reducers/ReduxConfigReducer";
 import { setServiceConfig } from "../reducers/ServiceConfigReducer";
 import { setRouterConfig } from "../reducers/RouterConfigReducer";
 import { setConfig } from "../reducers/ConfigReducer";
 //components
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
-import { ServicePage } from "./ServicePage";
+// import ServicePage from "./Services/ServicePage";
 import ProjectComponents from "./ProjectComponents";
 import ProjectRouting from "./ProjectRouting";
 import ProjectHome from "./ProjectHome";
-
 //icons
 import styles from "../assets/icons/styles.svg";
 import home from "../assets/icons/home.svg";
@@ -105,7 +107,9 @@ export default function ProjectPage() {
                 </div>
             </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 

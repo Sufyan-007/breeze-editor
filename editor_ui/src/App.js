@@ -72,7 +72,6 @@ export const router = createBrowserRouter(
 );
 
 function App() {
-
   return (
     <Provider store={configureStore}>
       <RouterProvider router={router} />

@@ -1,0 +1,9 @@
+{
+  "name": "testing1",
+  "description": "test",
+  "path": "/home/anushka/Desktop/generated_react_app",
+  "author": "Sufyan",
+  "defaultComponent": "Main",
+  "dependencies": { "react-router-dom": "*", "bootstrap": "^5.3.2" },
+  "components_src_dir": "src"
+}

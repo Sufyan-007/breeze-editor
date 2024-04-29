@@ -1,7 +1,6 @@
 from django.http import JsonResponse
 import json
 from ..core.app_config_writer import AppConfigWriter
-from ..core.retrive_app_config import RetriveAppConfig
 from django.views import View
 
 class WriteComponent(View):

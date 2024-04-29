@@ -1,111 +1,113 @@
-import { useCallback, useRef, useState } from "react"
-import { useParams } from "react-router"
-import Loader from "./Loader"
-import { getServiceConfig, updateServiceConfig } from "../services/ServiceConfigService"
-import yaml from "js-yaml"
-import ServicePaths from "./ServicePaths"
-import SchemaConfig from "./SchemaConfig"
-import EntityConfig from "./EntityConfig"
-import { Form, Modal } from "react-bootstrap"
-import PathConfig from "./PathConfig"
+import { useRef, useState, useEffect } from "react";
 
+import ApiList from "./ApiList";
+import ServicePageNavbar from "./ServicePageNavbar";
+import Custom from "./Custom";
 
 export function ServicePage() {
-    const { projectName } = useParams()
-    const [serviceConfig, setServiceConfig] = useState()
-    const fileInput = useRef()
-    const [showModelModal, setShowModelModal] = useState(false)
-    const [newModelName, setNewModelName] = useState("")
-    const [selected, setSelected] = useState({ type: "", selected: "" })
+  const fileInputYAML = useRef(null); // this is created to reference the file input element .
+  const fileInputPostman = useRef(null);
+  const [showCustomPanel, setShowCustomPanel] = useState(false);
+  const [yamlApis, setYamlApis] = useState({}); // State to store the list of YAML APIs
+  const [yamlUploaded, setYamlUploaded] = useState(false);
+  const [postmanApis, setPostmanApis] = useState({}); //state to store the list of postman collection APis
+  const [postmanUploaded, setPostmanUploaded] = useState(false);
+  const [tagsList, setTagsList] = useState([]);
 
+  useEffect(() => {
+    if (yamlUploaded && yamlApis) {
+      const tags = getAllTagsFromYamlApis(yamlApis);
+      setTagsList(tags);
+      // console.log(tags, "tags in use effect");
+    }
+  }, [yamlUploaded, yamlApis]);
 
-    const loader = useCallback(async () => {
-        const services = await getServiceConfig(projectName)
-        setServiceConfig(services)
-    }, [projectName])
+  function getAllTagsFromYamlApis(yamlApis) {
+    if (yamlApis && yamlApis.data) {
+      const data = yamlApis.data;
+      const tagsList = [];
 
-    const readFile = async (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                resolve(event.target.result);
-            };
-            reader.onerror = (error) => {
-                reject(error);
-            };
-            reader.readAsText(file);
-        });
-    };
+      for (const dataArray of data) {
+        if (Array.isArray(dataArray) && dataArray.length > 0) {
+          const item = dataArray[0];
 
-    async function fileUpload(file) {
-
-        try {
-            const loadedFile = await readFile(file)
-            const config = yaml.load(loadedFile);
-            const resp = window.confirm("Update Services? This will overwrite existing config!")
-            if (resp) {
-                updateService(config)
+          if (item.tags && Array.isArray(item.tags) && item.tags.length > 0) {
+            for (const tag of item.tags) {
+              tagsList.push(tag);
             }
-        } catch (error) {
-            alert("Failed to load file, check file syntax: ")
+          }
         }
+      }
+      // console.log(tagsList, "tagsList");
+      return tagsList;
     }
+  }
 
-    async function updateService(config) {
-        const response = await updateServiceConfig(projectName, config)
-        setServiceConfig(response)
-    }
+  const allTags = getAllTagsFromYamlApis(yamlApis);
+  // console.log(allTags, "Tags in yaml ");
 
-    function openFileInput() {
-        fileInput.current.click()
-    }
+  const dummyData = {
+    operation_id: "get orders",
+    tags: [],
+    request: {
+      method: "get",
+      auth: null,
+      headers: [
+        {
+          key: "Authorization",
+          value:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA2MTU1MjQ2LCJpYXQiOjE3MDM1NjMyNDYsImp0aSI6IjQ5YTliZWJjNWE0MzRkMjhhNjA5N2U4NDU0MjgzNGM1IiwidXNlcl9pZCI6MX0.Dc8mA704kS_ZgzuPnYmE7w7Kt0GWKR-oVgyOpi2O-2U",
+        },
+      ],
+      parameters: [],
+      url: {
+        baseurl: "{{url}}/api/orders/7",
+        host: ["{{url}}"],
+        protocol: "",
+        port: 0,
+        path: ["api", "orders", "7"],
+      },
+      body: [],
+    },
+    response: [],
+    summary: "",
+  };
 
-    function updateServiceConf(key, value) {
-        setServiceConfig((state) => {
-            updateService({ ...state, [key]: value })
-            return { ...state, [key]: value }
-        })
-    }
+  async function fileUpload(file, fileType, appName) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    function updateComponents(key, value) {
-        const components = { ...serviceConfig.components, [key]: value }
-        updateServiceConf("components", components)
-    }
+      let apiUrl = "";
+      if (fileType === "yaml") {
+        apiUrl =
+          `http://127.0.0.1:8000/api-client-generator/convert-starndard-json/openapi/${appName}`;
+      } else if (fileType === "postman") {
+        apiUrl =
+        `http://127.0.0.1:8000/api-client-generator/convert-starndard-json/postman/${appName}`;
+      }
 
-    function closeModal(added) {
-        if (added) {
-            const newModel = {
-                type: "object",
-                properties: {},
-                required: []
-            }
-            const name = newModelName.replace(" ", "")
-            const schemas = { ...serviceConfig.components.schemas }
-            if (name !== "") {
-                if (schemas[name]) {
-                    alert("Model already exists")
-                } else {
-                    schemas[name] = newModel
-                    updateComponents("schemas", schemas)
-                    setNewModelName("")
-                    setShowModelModal(false)
-                }
-            } else {
-                alert("Enter a name")
-            }
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        body: formData,
+      });
 
+      if (response.ok) {
+        const responseData = await response.json();
 
-        } else {
-            setShowModelModal(false)
+        if (fileType === "yaml") {
+          setYamlApis(responseData);
+          setYamlUploaded(true);
+        } else if (fileType === "postman") {
+          setPostmanApis(responseData);
+          setPostmanUploaded(true);
         }
-    }
-
-    function updateSchema(entityName, newEntity) {
-        const schemas = serviceConfig.components.schemas
-        schemas[entityName] = newEntity
-        updateComponents("schemas", schemas)
-
-
+      } else {
+        throw new Error("Failed to upload file");
+      }
+    } catch (error) {
+      alert("Failed to load file, check file syntax");
+      console.error(error);
     }
 
     return (

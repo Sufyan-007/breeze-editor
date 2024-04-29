@@ -1,0 +1,124 @@
+[
+  {
+    "operation_id": "getPosts",
+    "tags": ["Post"],
+    "request": {
+      "method": "get",
+      "auth": null,
+      "headers": [{ "key": "plain", "value": "text/plain" }],
+      "parameters": [],
+      "url": {
+        "baseurl": "http://api.openai.com/v1",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "raw",
+        "content_type": "text/plain",
+        "required": false,
+        "schema_name": "",
+        "raw_content": "",
+        "file": "",
+        "schema": {},
+        "formdata": []
+      }
+    },
+    "response": [
+      {
+        "status": "200",
+        "content_type": "application/json",
+        "schema_name": "ListPostsResponse",
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Returns a list of posts that belong to the user's organization.",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  },
+  {
+    "operation_id": "test-form",
+    "tags": ["Post"],
+    "request": {
+      "method": "post",
+      "auth": null,
+      "headers": [{ "key": "form-data", "value": "multipart/form-data" }],
+      "parameters": [],
+      "url": {
+        "baseurl": "http://api.openai.com/v1",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "form-data",
+        "content_type": "multipart/form-data",
+        "required": false,
+        "schema_name": null,
+        "raw_content": "",
+        "file": "",
+        "schema": {},
+        "formdata": [
+          { "type": "array", "items": { "type": "string", "format": "binary" } }
+        ]
+      }
+    },
+    "response": [
+      {
+        "status": "200",
+        "content_type": "application/json",
+        "schema_name": "PostDetails",
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Returns a post that belong to the user's organization.",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  },
+  {
+    "operation_id": "editPost",
+    "tags": ["Post"],
+    "request": {
+      "method": "put",
+      "auth": null,
+      "headers": [{ "key": null, "value": null }],
+      "parameters": [],
+      "url": {
+        "baseurl": "http://api.openai.com/v1",
+        "host": "",
+        "protocol": "",
+        "port": null,
+        "path": ""
+      },
+      "body": {
+        "mode": "binary",
+        "content_type": null,
+        "required": false,
+        "schema_name": null,
+        "raw_content": "",
+        "file": { "type": "string", "format": "binary" },
+        "schema": {},
+        "formdata": []
+      }
+    },
+    "response": [
+      {
+        "status": "200",
+        "content_type": "application/json",
+        "schema_name": "PostDetails",
+        "raw_content": "",
+        "file": ""
+      }
+    ],
+    "summary": "Returns a post that belong to the user's organization.",
+    "isAuthenticationApi": false,
+    "isLogin": false,
+    "isToken": false
+  }
+]
