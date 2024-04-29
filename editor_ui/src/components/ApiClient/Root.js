@@ -5,7 +5,8 @@ import AuthApiList from "./AuthApiList";
 import EditAuthFunction from "./EditAuthFunction";
 import EditServiceFuntion from "./EditServiceFunction";
 import { useParams } from "react-router";
-import { callApiClientGenerator } from '../../services/IntermediatesService'
+import { generateIntermediates } from '../../services/IntermediatesService'
+
 export default function Root() {
   const [view, setView] = useState("LIST_SERVICE");
   const [selectedServiceInfo, setSelectedServiceInfo] = useState({});
@@ -39,26 +40,11 @@ export default function Root() {
     if (!file) {
       return;
     }
-
     const formData = new FormData();
     formData.append("file", file);
-
-    let apiUrl = "";
-    switch (fileType) {
-      case "yml":
-        apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/openapi/${appName.projectName}`;
-        break;
-      case "postman":
-        apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/postman/${appName.projectName}`;
-        break;
-      default:
-        console.error("Unsupported file type:", fileType);
-        return;
-    }
-
     try {
-      const result = await callApiClientGenerator(apiUrl, "POST", formData,true, {})
-      if (result.data) {
+      const response = await generateIntermediates(fileType,appName.projectName,formData)
+      if (response.ok) {
         setView("LIST_SERVICE");
       } else {
         throw new Error("Upload failed. Check server logs for details.");

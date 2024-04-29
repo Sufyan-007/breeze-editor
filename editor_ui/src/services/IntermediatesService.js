@@ -1,4 +1,85 @@
 import Blocker from "./LoaderService"
+
+const HOST="http://localhost:8000"
+
+
+export async function generateIntermediates(fileType, appName, formData)
+{
+    let apiUrl = ''
+    switch (fileType) {
+        case "yml":
+          apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/openapi/${appName}`;
+          break;
+        case "postman":
+          apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/postman/${appName}`;
+          break;
+        default:
+          console.error("Unsupported file type:", fileType);
+          return;
+      }
+      const response = await callApiClientGenerator(apiUrl, "POST", formData, true, {})
+      const responseData = await response.json()
+      return responseData
+
+}
+export async function fetchIntermediate(projectName) {
+    const apiUrl = HOST+"/api-client-generator/fetch-all-intermediates/" + projectName+"/false"
+    const result = await callApiClientGenerator(apiUrl, "GET", null, false, {})
+    return result
+}
+
+export async function fetchIntermediateFilenames(projectName) {
+    const apiUrl = HOST+"/api-client-generator/fetch-all-intermediates/" + projectName+"/true"
+    const result = await callApiClientGenerator(apiUrl, "GET", null, false, {})
+    return result
+}
+export async function getAuthFileApis(projectName, apiId) {
+    const apiUrl = HOST+"/api-client-generator/fetch-auth-file/" + projectName + '/' + apiId
+    const auth_apis = await callApiClientGenerator(apiUrl, "GET", null, false, {})
+    return auth_apis
+}
+
+export async function getAuthApiConfig(projectName,apiId) {
+    const apiUrl =HOST+"/api-client-generator/fetch-auth-file/" + projectName+"/"+apiId
+    const auth_api = await callApiClientGenerator(apiUrl, "GET", null, false, {})
+    return auth_api
+}
+
+export async function modifyApiConfig(data,projectName,filename){
+    filename = filename.replace(/\.json$/, '');
+    const apiUrl = "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/"+ projectName+"/"+filename
+    const response = await callApiClientGenerator(apiUrl, "POST", data,false,{})
+    // const responseData = await response.json();
+    return response;
+    
+}
+export async function getApiConfig(projectName,filename,apiId) {
+    filename = filename.replace(/\.json$/, '');
+    const apiUrl = HOST+"/api-client-generator/fetch-api-config/"+projectName+"/"+filename+ "/"+apiId
+    const auth_api = await callApiClientGenerator(apiUrl, "GET", null, false, {})
+    return auth_api
+}
+
+export async function generateReactService(projectName,filename) {
+    let path = "ORDINARY"
+    if (filename === "auth.json"){
+        path = "AUTH"
+    }
+    let file = filename.split(".")[0];
+    let apiUrl = HOST+"/api-client-generator/generate-react-api-client/"+path
+    const res = callApiClientGenerator(apiUrl, "POST", {"appName": projectName, "filename": file},false, {})
+    return res
+}
+
+export async function appendToAuthApi(authObj,update, appName) {
+    let operation = "add";
+    if (update){
+        operation = "update";
+    }
+    let apiUrl = HOST+"/api-client-generator/append-to-auth-api/"+operation+ "/" + appName
+    const res = await callApiClientGenerator(apiUrl, "POST", authObj, false,{});
+    return res
+}
 export async function callApiClientGenerator(url, method, payload, isFormData, options = {}) {
     const { headers = {}, ...otherOptions } = options;
     const loader = new Blocker("Loading...");
@@ -17,7 +98,6 @@ export async function callApiClientGenerator(url, method, payload, isFormData, o
   
       const response = await fetch(url, requestOptions);
       const responseData = await response.json();
-  
       return responseData;
     } catch (error) {
       console.error("API call failed:", error);

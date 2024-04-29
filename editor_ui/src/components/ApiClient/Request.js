@@ -69,7 +69,11 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
   
   const addBodySection = () => {
     const newBody = {
-      id: Date.now()
+      id: Date.now(),
+      mode: "RAW",
+      content_type: "NONE",
+      schema_name: '',
+      anonymous: false
     };
     setRequest({
       ...request,
