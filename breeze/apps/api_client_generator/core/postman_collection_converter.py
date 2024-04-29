@@ -248,15 +248,31 @@ class PostmanCollectionConverter:
         if tag == "":
             tag = "default"
         api_models = []
+        error_obj = {}
         
 
         arr_obj = PostmanCollectionConverter.convert_to_json_data_model(tag,items,info)
         
         ## now load these json obj to api models
         for obj in arr_obj:
-            api_model = ApiModelLoader.load_api_model(obj)
-            api_models.append(api_model)
-             
-        return {"filename" : tag, "api_models": api_models}
+            try:
+                api_model = ApiModelLoader.load_api_model(obj)
+                api_models.append(api_model)
+            except TypeError as err:
+                if obj["id"] not in error_obj:
+                    error_obj[obj.get("id")] = []    
+                error_obj[obj.get("id")].append(err)
+                    
+            except ValueError as err:
+                if obj["id"] not in error_obj:
+                    error_obj[obj.get("id")] = []    
+                error_obj[obj.get("id")].append(err)
+            except Exception as e:
+
+                if obj["id"] not in error_obj:
+                    error_obj[obj.get("id")] = []    
+                error_obj[obj.get("id")].append(e) 
+        
+        return {"filename" : tag, "api_models": api_models,"error_obj" : error_obj}
 
         
