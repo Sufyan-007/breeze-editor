@@ -12,6 +12,7 @@ import RequestBody from "./RequestBody";
 import ResponseBody from "./ResponseBody";
 import ServiceEditCss from "../../css/ServiceEdit.css";
 import { handleServiceData } from "../../services/CreateEditService.js";
+import { useParams } from "react-router";
 
 function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
   const [operationId, setOperationId] = useState(dummyData.operation_id || "");
@@ -22,7 +23,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
   const [show, setShow] = useState(true);
   const [isAuthApi, setIsAuthApi] = useState(dummyData.is_authentication_api);
   const isEditMode = editMode === "Edit" ? true : false;
-
+  const appName = useParams()
   const handleOperationIdChange = (e) => {
     setOperationId(e.target.value);
   };
@@ -45,10 +46,8 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
     });
   };
   const handleResponseBodyChange = (newData) => {
-    setResponseBody((prevState) => ({
-      ...prevState,
-      ...newData,
-    }));
+    console.log('new response', newData);
+    setResponseBody([...newData]);
   };
   const handleClose = () => {
     setShow(false);
@@ -60,6 +59,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
   async function handleSubmit(e) {
     const data = {
       filename: dummyData.tags + ".json",
+      appName: appName.projectName,
       modified_api: {
         id: dummyData.id,
         is_authentication_api: isAuthApi,
@@ -69,7 +69,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
         tags: tags,
         summary: summary,
         request: requestBody,
-        response: responseBody,
+        response: Object.values(responseBody),
       },
     };
     try {
@@ -80,7 +80,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
       console.log("Error while submitting the data", error);
     }
   }
-
+console.log('res outsidE', responseBody);
   return (
     <>
       <div
@@ -103,7 +103,7 @@ function ServiceEdit({ dummyData, tagsList = [], onClose, editMode }) {
         style={{
           overflowY: "auto",
           overflowX: "hidden",
-          maxHeight: "90vh",
+          maxHeight: "100%",
           maxWidth: "100%",
         }}
       >

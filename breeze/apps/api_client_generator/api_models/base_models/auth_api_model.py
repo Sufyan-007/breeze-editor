@@ -35,6 +35,7 @@ class AuthApiModel:
     summary : str =  CustomizedAttr((str),[])
     is_authorization_url : bool = CustomizedAttr(bool,[])
     flow : dict = CustomizedAttr(dict,[])
+    flow_type : str = CustomizedAttr((str),[])
     token_store: TokenStore = CustomizedAttr(TokenStore,[])
 
     def as_dict(self):
@@ -54,6 +55,7 @@ class AuthApiModel:
             'summary' : self.summary,
             'is_authorization_url' : self.is_authorization_url,
             'flow' : self.flow,
+            'flow_type': self.flow_type,
             'token_store': self.token_store.as_dict() if self.token_store else None
 
         }

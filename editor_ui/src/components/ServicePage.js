@@ -73,7 +73,7 @@ export function ServicePage() {
     summary: "",
   };
 
-  async function fileUpload(file, fileType) {
+  async function fileUpload(file, fileType, appName) {
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -81,10 +81,10 @@ export function ServicePage() {
       let apiUrl = "";
       if (fileType === "yaml") {
         apiUrl =
-          "http://127.0.0.1:8000/api-client-generator/convert-starndard-json/openapi";
+          `http://127.0.0.1:8000/api-client-generator/convert-starndard-json/openapi/${appName}`;
       } else if (fileType === "postman") {
         apiUrl =
-          "http://127.0.0.1:8000/api-client-generator/convert-starndard-json/postman";
+        `http://127.0.0.1:8000/api-client-generator/convert-starndard-json/postman/${appName}`;
       }
 
       const response = await fetch(apiUrl, {

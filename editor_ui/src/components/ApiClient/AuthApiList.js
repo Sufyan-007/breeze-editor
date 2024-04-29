@@ -1,47 +1,37 @@
 import React, { useState, useEffect } from "react";
 import {
-    getAuthFileApis,
-    generateReactService,
+    callApiClientGenerator
 } from "../../services/IntermediatesService";
 import { Table, Accordion, Button } from "react-bootstrap";
 import DeleteIcon from "../../assets/icons/delete.svg";
 import EditIcon from "../../assets/icons/edit.svg";
+import { useParams } from "react-router";
 
 export default function AuthApiList({
     onEditAuthService
 }) {
     const [apiList, setApiList] = useState([]);
-
+    const appName = useParams()
     useEffect(() => {
         fetchAuthApiList();
     }, []);
 
     const fetchAuthApiList = async () => {
-
         try {
-            const result = await getAuthFileApis("creator");
+            const apiUrl = "http://127.0.0.1:8000/api-client-generator/fetch-auth-file/" + appName.projectName + "/" + null
+            const result = await callApiClientGenerator(apiUrl,"GET",null,false,{})
             setApiList(result["data"])
         } catch (error) {
             console.error("Error generate react service:", error);
         }
     }
-
-    const generateService = async (filename) => {
-        try {
-            const result = await generateReactService("creator", filename);
-        } catch (error) {
-            console.error("Error generate react service:", error);
-        }
-    };
-
-
     const handleEditClick = (apiId) => {
         onEditAuthService(apiId);
     };
 
 
     return (
-        <div className="m-3">
+        <div className="m-5" style={{width:"95%"}}>
 
             {apiList && apiList.length > 0 ? (
                 <Table striped bordered hover variant="dark">

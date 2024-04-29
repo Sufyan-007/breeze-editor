@@ -1,6 +1,4 @@
-import os
-import json,traceback
-from .utils.jsonencoder import EnhancedJSONEncoder
+import os,json,traceback
 from .utils.append_dict_file import append_to_dict_file
 
 from .core.openapi_swagger_converter import OpenapiConverter
@@ -11,8 +9,8 @@ from django.http import JsonResponse
 
 class ApiClientGenerator(View):
 
-    def post(self, request, collectionType):
-        project_name = "creator"
+    def post(self, request, collectionType, appName):
+        project_name = appName
         folder_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json"
         filename = ''
         try:
@@ -85,10 +83,11 @@ class ApiClientGenerator(View):
                             "id" : data.get("id"),
                             "operation_id" : data.get("operation_id"),
                         })
+                filename_without_extension = os.path.splitext(filename)[0]
 
                 # Append file name and APIs to the list
                 files_with_apis.append({
-                    "filename": filename,
+                    "filename": filename_without_extension,
                     "apis": api_models
                 })
 
@@ -96,3 +95,5 @@ class ApiClientGenerator(View):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+        
+        #gijson-auth.json appname

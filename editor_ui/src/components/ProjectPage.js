@@ -13,7 +13,7 @@ import { router } from "../App";
 //components
 import Navbar from "./Navbar";
 import ReduxConfig from "./ReduxConfig";
-import ServicePage from "./Services/ServicePage";
+// import ServicePage from "./Services/ServicePage";
 import ProjectComponents from "./ProjectComponents";
 import ProjectRouting from "./ProjectRouting";
 import ProjectHome from "./ProjectHome";
@@ -27,9 +27,10 @@ import settings from "../assets/icons/settings.svg";
 import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from "./ProjectSidebar";
 import { Col, Row } from "react-bootstrap";
-import ServiceGeneralSetting from "./Services/ServiceGeneralSetting";
-import Custom from "./Services/Custom";
-import ServiceLists from "./Services/ServiceList";
+import Root from "./ApiClient/Root";
+// import ServiceGeneralSetting from "./Services/ServiceGeneralSetting";
+// import Custom from "./Services/Custom";
+// import ServiceLists from "./Services/ServiceList";
 export default function ProjectPage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [tagSelection, setSelection] = useState(0);
@@ -59,7 +60,8 @@ export default function ProjectPage() {
     <ProjectHome />,
     <ProjectComponents />,
     <ProjectRouting />,
-    <ServiceGeneralSetting />,
+    // <ServiceGeneralSetting />,
+    <Root />,
     <ReduxConfig />,
     //rest to be added
   ];
