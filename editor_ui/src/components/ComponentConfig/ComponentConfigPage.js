@@ -17,12 +17,13 @@ import {
   getComponentConfig,
   getRunningPort,
 } from "../../services/ConfigService";
-import { useState } from "react";
+import { createContext, useMemo, useState } from "react";
 import ProjectSidebar from "../ProjectSidebar";
 import HtmlSection from "./HtmlSection";
 import StateVarsSection from "./StateVarsSection";
 import LifeCycleSection from "./LifeCycleSection";
 import FunctionSection from "./FunctionSection";
+import SidebarService from "../../services/SidebarService";
 
 const sidebarItems = [
   { id: 0, name: "Home", icon: home, path: "" },
@@ -43,6 +44,13 @@ const menu = [
   { id: 3, name: "Life Cycle", icon: cycle },
 ];
 
+
+export const ComponentContext = createContext({
+  componentConfig: null,
+  componentName: null,
+  sidebarService: null
+})
+
 export default function ComponentConfigPage() {
   const componentConfig = useLoaderData();
   console.log(componentConfig);
@@ -50,6 +58,12 @@ export default function ComponentConfigPage() {
   const [selectedItem, setSelectedItem] = useState(0);
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const sidebarService = useMemo(() => {
+    console.log("Created Service")
+    return new SidebarService()
+  }, [])
+  
+  console.log(sidebarService)
   const highlightedStyle = { backgroundColor: "#303033" };
 
   const toggleSidebar = () => {
@@ -57,65 +71,66 @@ export default function ComponentConfigPage() {
   };
 
   const components = [
-    <HtmlSection config={componentConfig} />,
+    <HtmlSection config={componentConfig} componentName={componentName} />,
     <StateVarsSection />,
     <FunctionSection />,
     <LifeCycleSection />,
   ];
 
   return (
-    <div className="container-fluid vh-100 d-flex flex-column">
-      <Navbar
-        leftContent={
-          <div className=" d-flex">
-            <div className=" d-flex align-items-center text-white me-3">
-              {projectName + " - " + componentName}
-            </div>
-          </div>
-        }
-      />
 
-      <div className="row d-flex no-wrap h-100">
-        <div className="col-auto px-0">
-          <ProjectSidebar
-            isSidebarExpanded={isSidebarExpanded}
-            sidebarItems={sidebarItems}
-            tagSelection={selectedItem}
-            setSelection={setSelectedItem}
-            toggleSidebar={toggleSidebar}
-            highlightedStyle={highlightedStyle}
-          />
-        </div>
-        <div className="col px-0">
-          <div className="row mx-0 bg-dark p-1">
-            <div className="d-flex justify-content-start">
-              {menu.map((item, index) => (
-                <button
-                  key={item.id}
-                  className={`btn ${
-                    index === selectedMenu
+    <ComponentContext.Provider value={{ componentConfig, componentName, sidebarService }}>
+      <div className="container-fluid vh-100 d-flex flex-column">
+        <Navbar
+          leftContent={
+            <div className=" d-flex">
+              <div className=" d-flex align-items-center text-white me-3">
+                {projectName + " - " + componentName}
+              </div>
+            </div>
+          }
+        />
+        <div className="row d-flex no-wrap h-100">
+          <div className="col-auto px-0">
+            <ProjectSidebar
+              isSidebarExpanded={isSidebarExpanded}
+              sidebarItems={sidebarItems}
+              tagSelection={selectedItem}
+              setSelection={setSelectedItem}
+              toggleSidebar={toggleSidebar}
+              highlightedStyle={highlightedStyle}
+            />
+          </div>
+          <div className="col px-0 d-flex flex-column">
+            <div className="row mx-0 bg-dark p-1">
+              <div className="d-flex justify-content-start">
+                {menu.map((item, index) => (
+                  <button
+                    key={item.id}
+                    className={`btn ${index === selectedMenu
                       ? "btn-outline-secondary border-bottom btn-sm"
                       : "btn-outline-secondary btn-sm"
-                  }`}
-                  onClick={() => setSelectedMenu(index)}
-                  style={{ marginRight: 10, borderRadius: 0 }}
-                >
-                  <img
-                    src={item.icon}
-                    alt={item.name}
-                    style={{ height: 20, marginRight: 5 }}
-                  />
-                  {item.name}
-                </button>
-              ))}
+                      }`}
+                    onClick={() => setSelectedMenu(index)}
+                    style={{ marginRight: 10, borderRadius: 0 }}
+                  >
+                    <img
+                      src={item.icon}
+                      alt={item.name}
+                      style={{ height: 20, marginRight: 5 }}
+                    />
+                    {item.name}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="row mx-0">
-            <div className="col">{components[selectedMenu]}</div>
+            <div className="row mx-0 flex-grow-1">
+              <div className=" d-flex flex-column">{components[selectedMenu]}</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ComponentContext.Provider>
   );
 }
 

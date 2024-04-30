@@ -1,14 +1,16 @@
-import { useRef, useState } from "react"
+import {  useContext, useRef, useState } from "react"
 import HtmlTree from "../HtmlTree/HtmlTree"
+import ElementConfigSidebar from "./ElementConfigSidebar"
+import { ComponentContext } from "./ComponentConfigPage"
 
-
-export default function HtmlSection({ config }) {
-
-    const [iframeSrc, setIframeSrc] = useState("http://localhost:" + config.port)
+export default function HtmlSection() {
+    const {componentName,componentConfig} = useContext(ComponentContext)
+    const [iframeSrc, setIframeSrc] = useState("http://localhost:" + componentConfig.port)
     const srcInput = useRef(iframeSrc)
     const [selected,setSelected] = useState(0)
-
-    console.log(iframeSrc)
+    
+    
+    
 
     return (
         <div className="row flex-grow-1" style={{ height: "35rem"}}>
@@ -30,7 +32,7 @@ export default function HtmlSection({ config }) {
                     </div>
                 </div>
                 {selected===0?
-                    <HtmlTree Val={config.html} component={config} className="row " changeParent={(val,offeset=0, importComp = null) => console.log(val, importComp)} />
+                    <HtmlTree htmlId={componentName} config={componentConfig} className="row "  />
                     :
                     <div className="row">
                         Add Element
@@ -41,8 +43,9 @@ export default function HtmlSection({ config }) {
                 <div className=" bg-dark-subtle align-items-center d-flex" style={{ 'height': "1.25rem" }}>
                     <input ref={srcInput} defaultValue={iframeSrc} type="text " className=" mx-2 " style={{ height: "1rem" }} onKeyDown={e => { if (e.key === "Enter") setIframeSrc(e.target.value) }} />
                 </div>
-                <iframe src={iframeSrc} style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} ></iframe>
+                <iframe src={iframeSrc} title="Generated Project" style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} ></iframe>
             </div>
+            <ElementConfigSidebar/>
         </div>
     )
 }
