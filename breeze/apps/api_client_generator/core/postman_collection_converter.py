@@ -2,6 +2,7 @@ import json
 import traceback
 
 from ..api_models import ModeEnum
+from ..api_models.custom_exception import CustomeException
 from ..utils.content_type_and_mode import get_content_type_and_mode
 from ..utils.body_type_from_postman import get_body_type
 from ..utils.set_response_status import set_response_status
@@ -240,39 +241,42 @@ class PostmanCollectionConverter:
 
     @staticmethod
     def prepare_api_models(data):
+        error_obj = {"general_error" : None} 
         
-        json_data = json.loads(data)
-        info =  json_data.get("info")
-        items = json_data.get("item",[])
-        tag = info.get("name","default")
-        if tag == "":
-            tag = "default"
-        api_models = []
-        error_obj = {}
-        
+        try:
+            json_data = json.loads(data)
+            info =  json_data.get("info")
+            items = json_data.get("item",[])
+            tag = info.get("name","default")
+            if tag == "":
+                tag = "default"
+            api_models = []            
+            arr_obj = PostmanCollectionConverter.convert_to_json_data_model(tag,items,info)
+            
+            ## now load these json obj to api models
+            for obj in arr_obj:
+                try:
+                    api_model = ApiModelLoader.load_api_model(obj)
+                    api_models.append(api_model)
+                except TypeError as err:
+                    if obj["id"] not in error_obj:
+                        error_obj[obj.get("id")] = []    
+                    error_obj[obj.get("id")].append(err)
+                        
+                except ValueError as err:
+                    if obj["id"] not in error_obj:
+                        error_obj[obj.get("id")] = []    
+                    error_obj[obj.get("id")].append(err)
+                except Exception as e:
 
-        arr_obj = PostmanCollectionConverter.convert_to_json_data_model(tag,items,info)
-        
-        ## now load these json obj to api models
-        for obj in arr_obj:
-            try:
-                api_model = ApiModelLoader.load_api_model(obj)
-                api_models.append(api_model)
-            except TypeError as err:
-                if obj["id"] not in error_obj:
-                    error_obj[obj.get("id")] = []    
-                error_obj[obj.get("id")].append(err)
-                    
-            except ValueError as err:
-                if obj["id"] not in error_obj:
-                    error_obj[obj.get("id")] = []    
-                error_obj[obj.get("id")].append(err)
-            except Exception as e:
+                    if obj["id"] not in error_obj:
+                        error_obj[obj.get("id")] = []    
+                    error_obj[obj.get("id")].append(e) 
+            
+            return {"filename" : tag, "api_models": api_models,"error_obj" : error_obj}
 
-                if obj["id"] not in error_obj:
-                    error_obj[obj.get("id")] = []    
-                error_obj[obj.get("id")].append(e) 
-        
-        return {"filename" : tag, "api_models": api_models,"error_obj" : error_obj}
-
+        except Exception as e:
+            print(traceback.format_exc())
+            error_obj["general_error"] = str(e)  
+            raise (CustomeException(error_obj)) 
         

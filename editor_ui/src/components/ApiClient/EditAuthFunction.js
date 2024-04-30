@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Row, Col} from "react-bootstrap";
+import { Form, Button, Row, Col, Toast } from "react-bootstrap";
 import close from "../../assets/icons/close.svg";
-import { callApiClientGenerator } from "../../services/IntermediatesService.js";
+import {
+  getAuthApiConfig,
+  appendToAuthApi,
+} from "../../services/IntermediatesService.js";
+
 import CustomButtonGroup from "../CustomButtonGroup.js";
 import CustomFormControl from "../CustomFormControl.js";
 import { useParams } from "react-router";
@@ -204,9 +208,8 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
   useEffect(() => {
     const fetchAuthApi = async () => {
       if (selectedAuthServiceId) {
-        const apiUrl = "http://127.0.0.1:8000/api-client-generator/fetch-auth-file/" + appName.projectName+ "/" + selectedAuthServiceId
-        const result = await callApiClientGenerator(apiUrl, "GET", null, false, {})
-        setSelectedApiInfo({ ...result.data });
+        let rs = await getAuthApiConfig("creator", selectedAuthServiceId);
+        setSelectedApiInfo({ ...rs.data });
       }
     };
     fetchAuthApi();
@@ -262,17 +265,20 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
         ? selectedApiInfo.token_store
         : {},
     };
-    let operation = "add";
+    let operation = null;
     if (selectedAuthServiceId) {
       resultantApi = { ...resultantApi, id: selectedAuthServiceId };
       operation = "update";
       console.log(resultantApi, "resulsdkf");
     }
-    const apiUrl = "http://127.0.0.1:8000/api-client-generator/append-to-auth-api/"+operation+"/"+appName.projectName
-    const result = await callApiClientGenerator(apiUrl,"POST",resultantApi,false, {})
-    if(result.list)
-    {
-      onClose()
+
+    const result = await appendToAuthApi(
+      resultantApi,
+      operation,
+      appName.projectName
+    );
+    if (result.list) {
+      onClose();
     }
   };
 
@@ -282,8 +288,6 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
         style={{
           overflowY: "auto",
           overflowX: "hidden",
-          maxHeight: "100%",
-          maxWidth: "100%",
         }}>
         <div
           style={{

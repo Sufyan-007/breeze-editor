@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
-    callApiClientGenerator
+    fetchIntermediate,
+    generateReactService
 } from "../../services/IntermediatesService";
 import { Table, Accordion, Button, Alert } from "react-bootstrap";
 import DeleteIcon from "../../assets/icons/delete.svg";
@@ -11,31 +12,26 @@ export default function ServiceLists({
     onEditService, errorMessage
 }) {
     const [apiList, setApiList] = useState([]);
-    const appName = useParams()
+
     useEffect(() => {
         console.log("in service list");
         fetchServiceList();
     }, []);
+    const appName = useParams()
 
     const fetchServiceList = async () => {
 
         try {
-            const result = await callApiClientGenerator("http://localhost:8000/api-client-generator/fetch-all-intermediates/creator/false", "GET", null, false,{})
+            const result = await fetchIntermediate(appName.projectName);
             setApiList(result["files_with_apis"])
         } catch (error) {
             console.error("Error generate react service:", error);
         }
     }
+
     const generateService = async (filename) => {
         try {
-            let path = "ORDINARY"
-            if (filename === "auth.json"){
-                path = "AUTH"
-            }
-            let file = filename.split(".")[0];
-            const apiUrl = "http://localhost:8000/api-client-generator/generate-react-api-client/"+path
-            const res = await callApiClientGenerator(apiUrl,"POST", {"appName": appName.projectName, "filename":file},false, {})
-            // const result = await generateReactService("creator", filename);
+            const result = await generateReactService(appName.projectName, filename);
         } catch (error) {
             console.error("Error generate react service:", error);
         }
@@ -48,7 +44,7 @@ export default function ServiceLists({
     console.log(apiList,"api list in service list comp ");
 
 return (
-    <div className="m-5" style={{width:"95%"}}>
+    <div className="m-3" style={{width:"95%"}}>
         {apiList.length >0 ?
             apiList.map((service, index) => (
                 <Accordion key={index}>

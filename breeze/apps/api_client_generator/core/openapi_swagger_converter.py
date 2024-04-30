@@ -11,6 +11,7 @@ from ..utils.set_response_status import set_response_status
 from ..utils.jsonencoder import EnhancedJSONEncoder
 from ..utils.uuid_as_key import generate_uuid_as_key
 from ..utils.api_model_loader import ApiModelLoader
+from ..api_models.custom_exception import CustomeException
 from common.utils.app_consts import CONFIG_PATH
 class OpenapiConverter:
     def __init__(self):
@@ -502,12 +503,8 @@ class OpenapiConverter:
 
         except Exception as e:
             print(traceback.format_exc())
-            error_obj["general_error"] = str(e)
-            return  {
-                "tag_models" : tag_models,
-                "security_schemes_models" : security_schemes_models,
-                "error_obj" : error_obj
-            }
+            error_obj["general_error"] = str(e)  
+            raise (CustomeException(error_obj)) 
 
 
     ##done
