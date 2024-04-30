@@ -13,7 +13,7 @@ class Body:
     schema : dict = CustomizedAttr((dict),[])
     raw_content : str = CustomizedAttr((str),[])
     file : str = CustomizedAttr((str),[])
-    anonymous : bool = CustomizedAttr((bool),[required_validator])
+    anonymous : bool = CustomizedAttr((bool),[])
 
     def as_dict(self):
         

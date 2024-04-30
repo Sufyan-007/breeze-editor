@@ -238,8 +238,8 @@ class ReactApiClientGenerator:
                     if item.get("type") == "text":
                         variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s}`);"%(key,key)
                     else:
-                        variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s}`);"%(item.key,item.key)
-                    raw_data = "bodyFormData"
+                        variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s}`);"%(key,key)
+                raw_data = "bodyFormData"
             
             elif mode == ModeEnum.URLENCODED:
                 headers.append({"key" : "content-type","value" : ContentEnum.URLENCODED.value})
@@ -248,7 +248,7 @@ class ReactApiClientGenerator:
                 for key,item in form_data.get("properties",{}).items():
                     params.append(key)
                     variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")}` + "=" + `${encodeURIComponent(%s)}`);'%(key,key)
-                    raw_data = "formBody"
+                raw_data = "formBody"
                 variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
 
             variable_declaration_arr[mode.name]= {

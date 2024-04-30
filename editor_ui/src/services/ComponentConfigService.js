@@ -12,12 +12,12 @@ class ComponentConfigService {
     }
 
     async getRouterConfig() {
-        const routerConfig = await (await fetch("http://localhost:8000/editor/read-router-config/" + this.projectName)).json()
+        const routerConfig = await (await fetch("http://localhost:8000/editor/read-router-config/" + this.projectName + "/")).json()
         this.dispatch(setRouterConfig(routerConfig))
     }
 
     async getComponentConfig() {
-        const config = await (await fetch("http://localhost:8000/editor/read-config/" + this.projectName)).json()
+        const config = await (await fetch("http://localhost:8000/editor/read-config/" + this.projectName + "/")).json()
         this.dispatch(setConfig(config))
     }
 

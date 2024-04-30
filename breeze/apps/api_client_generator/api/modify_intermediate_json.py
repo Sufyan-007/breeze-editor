@@ -4,12 +4,11 @@ from ..core.intermediate_modification_helper import IntermediateModificationHelp
 from django.views import View
 
 class ModifyIntermediateJson(View):
-    def post(self, request):
+    def post(self, request,projectName,filename):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            filename = data.get("filename")
-            project_name = data.get("appName")
-            intermediate_modification_helper = IntermediateModificationHelper(project_name)
+            filename = filename+".json"
+            intermediate_modification_helper = IntermediateModificationHelper(project_name=projectName)
             result = intermediate_modification_helper.process_api_data(data, filename)
             return JsonResponse({"message": result}, status=201)
 

@@ -223,26 +223,34 @@ class HookCodeHelper:
 
     @staticmethod
     def generate_hook_code(hook_conf, comp_conf):
-        if hook_conf['type'] == 'USE_EFFECT':
-            return HookCodeHelper.handle_use_effect(hook_conf, comp_conf)
+        if hook_conf['type'] in ['USE_EFFECT', 'USE_CALLBACK', 'USE_MEMO']:
+            return HookCodeHelper.handle_generic_hook(hook_conf, comp_conf)
 
     @staticmethod
-    def handle_use_effect(hook_config, comp_config):
-
+    def handle_generic_hook(hook_config, comp_config):
         related_func_config = next(item for item in comp_config['functions'] if item["$id"] == hook_config['implementation']['$ref'])
-        dependent_vars = []
+        dependent_vars = hook_config.get('dependantVars', [])
+        hook_name = ""
 
-        for dep_var in hook_config['dependantVars']:
-            # related_var =  next(item for item in comp_config['stateVars'] if item["$id"] == dep_var)
-            dependent_vars.append(dep_var)
+        if hook_config['type'] == 'USE_EFFECT':
+            hook_name = 'useEffect'
+        elif hook_config['type'] == 'USE_CALLBACK':
+            hook_name = 'useCallback'
+        elif hook_config['type'] == 'USE_MEMO':
+            hook_name = 'useMemo'
+        else:
+            raise ValueError("Unsupported hook type")
 
-        hook_code = f"""
+        function_code = FunctionCodeGenerator.generate_function(related_func_config, comp_config)
 
-            useEffect({FunctionCodeGenerator.generate_function(related_func_config, comp_config)} 
-            
-            , [{", ".join(dependent_vars)}])
-
-        """
+        if hook_config['type'] == 'USE_EFFECT':
+            hook_code = f"""
+            React.{hook_name}({function_code}, [{", ".join(dependent_vars)}]);
+            """
+        else:
+            hook_code = f"""
+            const {hook_config['name']} = React.{hook_name}({function_code}, [{", ".join(dependent_vars)}]);
+            """
 
         return hook_code
 

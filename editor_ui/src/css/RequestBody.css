@@ -1,23 +1,23 @@
 element.style {
-  padding: 20px;
-  background-color: currentcolor;
-  text-decoration-color: white;
-}
-a.dropdownitem.dropdown-item {
-  color: black;
-}
-a.dropdownitem.dropdown-item:active {
-  background-color: #6c757d;
-}
-.me-2.form-control {
-  max-width: 24.5vw;
-  background-color: #6c757d;
-  border: none;
-  color:white;
-}
-.value.form-control {
-  max-width: 24.5vw;
-  background-color: #6c757d;
-  border: none;
-  color:white;
-}
+    padding: 20px;
+    background-color: currentcolor;
+    text-decoration-color: white;
+  }
+  a.dropdownitem.dropdown-item {
+    color: black;
+  }
+  a.dropdownitem.dropdown-item:active {
+    background-color: #6c757d;
+  }
+  .me-2.form-control {
+    max-width: 24.5vw;
+    background-color: #6c757d;
+    border: none;
+    color:white;
+  }
+  .value.form-control {
+    max-width: 24.5vw;
+    background-color: #6c757d;
+    border: none;
+    color:white;
+  }

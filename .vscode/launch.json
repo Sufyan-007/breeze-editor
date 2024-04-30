@@ -8,7 +8,7 @@
       "name": "Python: Django",
       "type": "python",
       "request": "launch",
-      "program": "/home/anushka/Desktop/BreezeRepo/breezeui/breeze/manage.py",
+      "program": "breeze/manage.py",
       "args": ["runserver"],
       "django": true,
       "justMyCode": true

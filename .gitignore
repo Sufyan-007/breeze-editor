@@ -4,3 +4,10 @@
 */configurations/*
 launch.json
 app_consts.py
+package-lock.json
+*/.vscode
+
+/configurations
+/generated_projects
+/uploaded_css
+breeze/uploaded_css/

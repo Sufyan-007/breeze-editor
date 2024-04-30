@@ -11,7 +11,6 @@ from ..utils.set_response_status import set_response_status
 from ..utils.jsonencoder import EnhancedJSONEncoder
 from ..utils.uuid_as_key import generate_uuid_as_key
 from ..utils.api_model_loader import ApiModelLoader
-
 from common.utils.app_consts import CONFIG_PATH
 class OpenapiConverter:
     def __init__(self):
@@ -56,6 +55,10 @@ class OpenapiConverter:
                 scheme_details = security_schemes.get(security_name, {})
                 auth_type = scheme_details.get("type","")
                 auth_type = auth_type.strip().upper()
+                if security_name.lower() == "bearerauth":
+                    auth_type = "BEARER" 
+                elif security_name.lower() == "basicauth":
+                    auth_type = "BASIC"
                 arr_auth.append({
                     "type" : auth_type,
                     "content": [],
@@ -65,16 +68,33 @@ class OpenapiConverter:
         
         elif isinstance(auth_data,list):
             for security_item in auth_data:
-                for security_name, _ in security_item.items():
-                    scheme_details = security_schemes.get(security_name, {})
+                auth_type= "NOAUTH"
+                if isinstance(security_item,str):
+                    scheme_details = security_schemes.get(security_item, {})
                     auth_type = scheme_details.get("type","")
                     auth_type = auth_type.strip().upper()
-                    arr_auth.append({
-                        "type" : auth_type,
-                        "content": [],
-                        "login_api" : None,
-                        "token_api" : None
-                    })
+                    if security_item.lower() == "bearerauth":
+                        auth_type = "BEARER" 
+                    elif security_item.lower() == "basicauth":
+                        auth_type = "BASIC"
+                
+                    
+                else:
+                    for security_name, _ in security_item.items():
+                        scheme_details = security_schemes.get(security_name, {})
+                        auth_type = scheme_details.get("type","")
+                        auth_type = auth_type.strip().upper()
+                        if security_name.lower() == "bearerauth":
+                            auth_type = "BEARER" 
+                        elif security_name.lower() == "basicauth":
+                            auth_type = "BASIC"
+                
+                arr_auth.append({
+                    "type" : auth_type,
+                    "content": [],
+                    "login_api" : None,
+                    "token_api" : None
+                })
             
             
         return arr_auth
@@ -142,13 +162,13 @@ class OpenapiConverter:
                 else:
                     is_anonymous = True
                     if schema.get("type") == "object":
-                        schema = {
+                        body_schema = {
                             'type': "object",
                             'properties': {},
                             'required': []
                         }
                         for prop_name, prop_data in schema.get("properties").items():
-                            prop_ref = prop_data.get('$ref', '')
+                            prop_ref = prop_data.get('$ref', None)
                             if prop_ref:
                                 prop_name = prop_ref.split('/')[-1]
                                 prop_schema = self._create_schema(prop_name, schemas)
@@ -413,10 +433,10 @@ class OpenapiConverter:
 
     ## complete        
     @staticmethod
-    def append_auth_json(auth_models):
+    def append_auth_json(auth_models, appName):
         ##first load existing file data into json
         # Read JSON file
-        project_name = "creator"
+        project_name = appName
         folder_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json"
         filename = "auth.json"
         full_file_path = os.path.join(folder_path, filename)
@@ -425,7 +445,7 @@ class OpenapiConverter:
             json_data = json.load(fp)
             ## append to existing json data 
             for model in auth_models:
-                key = model.id # was model.id
+                key = model.get("id")
                 json_data[key] = model
             
             ## write all data back to file
@@ -436,35 +456,58 @@ class OpenapiConverter:
     ## complete
     @staticmethod
     def prepare_api_models(json_data):
+        error_obj = {"general_error" : None} 
+        tag_models = {}
+        security_schemes_models = []
         try:
             if not json_data:
                 raise ValueError("Empty JSON data")
 
             openapi_data = yaml.safe_load(json_data)
-            tag_models = {}
-            security_schemes = openapi_data.get("components",{}).get("securitySchemes")
+            security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
             security_schemes_models = OpenapiConverter.handle_security_schema(security_schemes,openapi_data)
             
             
             tags_map = OpenapiConverter.classified_tags_and_method(openapi_data) 
             converted_json_tags_mapping = OpenapiConverter.convert_to_json_data_model(tags_map,openapi_data)
-            
             ## now load these json obj to api models
             for tag,arr_obj in converted_json_tags_mapping.items():
                 for obj in arr_obj:
-                    api_model = ApiModelLoader.load_api_model(obj)
-                    if tag in tag_models:
-                        tag_models[tag].append(api_model)
-                    else:
-                        tag_models[tag] = [api_model] 
+                    try:
+                        api_model = ApiModelLoader.load_api_model(obj)
+                        if tag in tag_models:
+                            tag_models[tag].append(api_model)
+                        else:
+                            tag_models[tag] = [api_model] 
+                    except TypeError as err:
+                        if obj["id"] not in error_obj:
+                            error_obj[obj.get("id")] = []    
+                        error_obj[obj.get("id")].append(err)
+                    
+                    except ValueError as err:
+                        
+                        if obj["id"] not in error_obj:
+                            error_obj[obj.get("id")] = []    
+                        error_obj[obj.get("id")].append(err)
+                    except Exception as e:
+
+                        if obj["id"] not in error_obj:
+                            error_obj[obj.get("id")] = []    
+                        error_obj[obj.get("id")].append(e)
             return  {
                 "tag_models" : tag_models,
-                "security_schemes_models" : security_schemes_models
+                "security_schemes_models" : security_schemes_models,
+                "error_obj" : error_obj
             }
 
         except Exception as e:
             print(traceback.format_exc())
-            return {"error": str(e)}
+            error_obj["general_error"] = str(e)
+            return  {
+                "tag_models" : tag_models,
+                "security_schemes_models" : security_schemes_models,
+                "error_obj" : error_obj
+            }
 
 
     ##done
