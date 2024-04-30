@@ -3,7 +3,9 @@ import { Form, Button, Row, Col } from "react-bootstrap";
 import Request from "./Request";
 import Response from "./Response";
 import {
-  callApiClientGenerator
+  getApiConfig,
+  modifyApiConfig,
+  getAuthFileApis,
 } from "../../services/IntermediatesService";
 import { useParams } from "react-router";
 
@@ -20,8 +22,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
   }, []);
 
   const setAuthApis = async () => {
-    const apiUrl= "http://127.0.0.1:8000/api-client-generator/fetch-auth-file/" + appName.projectName + '/' + null
-    const result = await callApiClientGenerator(apiUrl, "GET", null, false, {})
+    const result = await getAuthFileApis(appName.projectName, null);
     let login_api = [];
     let token_api = [];
     if (!Array.isArray(result.data)) {
@@ -50,10 +51,11 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
   };
   const fetchModelConfig = async (selectedServiceInfo) => {
     try {
-      const filename = selectedServiceInfo["filename"].replace(/\.json$/, '');
-      const apiUrl = "http://127.0.0.1:8000/api-client-generator/fetch-api-config/" + appName.projectName + "/"+ filename + "/"+selectedServiceInfo["id"]
-      const result = await callApiClientGenerator(apiUrl, "GET", null, false, {})
-      
+      const result = await getApiConfig(
+        appName.projectName,
+        selectedServiceInfo["filename"],
+        selectedServiceInfo["id"]
+      );
       const updatedModel = result["data"];
       if (updatedModel.response && updatedModel.response.length > 0) {
         const updatedRes = updatedModel.response.map(res => ({
@@ -102,10 +104,13 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
  
 
   async function handleSubmit(e) {
+    console.log(apiModel, "submitted");
     e.preventDefault();
-    const filename =  selectedServiceInfo["filename"].replace(/\.json$/, '');
-    const apiUrl = "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/"+ appName.projectName+"/"+ filename
-    const result = await callApiClientGenerator(apiUrl, "POST", apiModel, false, {});
+    const result = await modifyApiConfig(
+      apiModel,
+      appName.projectName,
+      selectedServiceInfo["filename"]
+    );
     setApiModel({});
     onClose();
   }
