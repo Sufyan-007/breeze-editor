@@ -183,7 +183,6 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                     <Form.Control
                       style={{
                         width: "100%",
-                        backgroundColor: "#222222",
                       }}
                       className="custom-form-control"
                       as="textarea"
@@ -195,6 +194,25 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                     />
                   </Col>
                 </Row>
+              </Form.Group>
+              <Form.Group
+                className="mb-3 mt-3 custom-form-group"
+                controlId="auth_api">
+                <Row>
+      <Col sm={3}>
+        {/* <Form.Label className="mx-3">Is Authentication API</Form.Label> */}
+      </Col>
+      <Col sm={9}>
+        <Form.Check
+        style={{color:"white"}}
+          label="Is Authentication API"
+          type="checkbox"
+          id="is-auth-api"
+          checked={apiModel["is_authentication_api"]}
+          onChange={(e)=> {onApiModelChange("is_authentication_api", e.target.checked)}}
+        />
+      </Col>
+    </Row>
               </Form.Group>
             </>
             {apiModel.request && (

@@ -26,7 +26,6 @@ let authTypes = [
 ];
 
 export default function Auth({ index, onChange, auth, loginApis, tokenApis }) {
-  console.log(auth,loginApis, tokenApis, "auth in auth");
   const [authData, setAuthData] = useState(auth || {});
   
   const onValueChange = (prop, value) => {

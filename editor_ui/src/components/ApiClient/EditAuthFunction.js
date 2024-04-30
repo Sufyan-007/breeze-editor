@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, Toast } from "react-bootstrap";
 import close from "../../assets/icons/close.svg";
+import Add from "../../assets/icons/add.svg";
 import {
   getAuthApiConfig,
   appendToAuthApi,
@@ -286,6 +287,9 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
           overflowY: "auto",
           overflowX: "hidden",
         }}>
+          <Button variant='secondary'  size='lg' style={{}}>
+              <img src={Add} alt="" height={24} className="mx-4" /> <span style={{ fontSize: 18 ,color:"white"}}>Add a New API</span>
+           </Button>
         <Row className="d-flex justify-content-between align-items-center w-100 mb-3">
         <Col></Col>
           <Col md={{span:1}}>

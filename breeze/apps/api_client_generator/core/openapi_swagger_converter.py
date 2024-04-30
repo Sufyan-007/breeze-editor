@@ -481,18 +481,18 @@ class OpenapiConverter:
                     except TypeError as err:
                         if obj["id"] not in error_obj:
                             error_obj[obj.get("id")] = []    
-                        error_obj[obj.get("id")].append(err)
+                        error_obj[obj.get("id")].append(str(err))
                     
                     except ValueError as err:
                         
                         if obj["id"] not in error_obj:
                             error_obj[obj.get("id")] = []    
-                        error_obj[obj.get("id")].append(err)
+                        error_obj[obj.get("id")].append(str(err))
                     except Exception as e:
 
                         if obj["id"] not in error_obj:
                             error_obj[obj.get("id")] = []    
-                        error_obj[obj.get("id")].append(e)
+                        error_obj[obj.get("id")].append(str(e))
             return  {
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,
