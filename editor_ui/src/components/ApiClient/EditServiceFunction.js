@@ -121,7 +121,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
           <Row className="d-flex justify-content-between align-items-center w-100 mb-3">
             <Col></Col>
             <Col md={{ span: 1 }}>
-              <Button variant="secondary" onClick={handleSubmit}>
+              <Button variant="secondary" onClick={handleSubmit} className="my-3">
                 Submit
               </Button>
             </Col>
@@ -161,7 +161,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                   </Col>
                   <Col sm={9}>
                         <Form.Control
-                        style={{width:"80%"}}
+                       style={{width: "100%"}}
                           className=" custom-form-control"
                           type="text"
                           value={apiModel["tags"]}
@@ -182,8 +182,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                   <Col sm={9}>
                     <Form.Control
                       style={{
-                        width: "80%",
-                        backgroundColor: "#222222",
+                        width: "100%",
                       }}
                       className="custom-form-control"
                       as="textarea"
@@ -195,6 +194,25 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                     />
                   </Col>
                 </Row>
+              </Form.Group>
+              <Form.Group
+                className="mb-3 mt-3 custom-form-group"
+                controlId="auth_api">
+                <Row>
+      <Col sm={3}>
+        {/* <Form.Label className="mx-3">Is Authentication API</Form.Label> */}
+      </Col>
+      <Col sm={9}>
+        <Form.Check
+        style={{color:"white"}}
+          label="Is Authentication API"
+          type="checkbox"
+          id="is-auth-api"
+          checked={apiModel["is_authentication_api"]}
+          onChange={(e)=> {onApiModelChange("is_authentication_api", e.target.checked)}}
+        />
+      </Col>
+    </Row>
               </Form.Group>
             </>
             {apiModel.request && (
@@ -212,13 +230,13 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
 
             {apiModel["response"] && (
               <Row>
-                <Col sm={2}>
+                <Col sm={3}>
                 <Form.Label className="mx-3 mt-3">Response</Form.Label>
                 <Button variant="secondary" size="sm" onClick={handleAddResponse}>
                 <img width="24" height="24" src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png" alt="add--v1"/> 
                 </Button>
                 </Col>
-              <Col sm={10} className="d-flex flex-wrap mt-3 p-2" style={{width: "65%", marginLeft: "140px", backgroundColor: "rgba(239, 239, 239, 0.5)"}}>
+              <Col sm={9} className="d-flex flex-wrap mt-3 p-2" style={{ backgroundColor: "rgba(239, 239, 239, 0.5)"}}>
                 {apiModel["response"].map((res, index) => (
                   <Response
                     key={res.id}

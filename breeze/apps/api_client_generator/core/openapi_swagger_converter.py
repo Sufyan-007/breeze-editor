@@ -24,8 +24,6 @@ class OpenapiConverter:
         url_data = self._create_url_json(path,meta_data)
         parameters = self._create_parameters_json(path_data.get("parameters"))
         arr_body_data = self._create_body_arr_json(path_data.get("requestBody", {}), meta_data= meta_data)
-        print(MethodsEnum[method].name)
-        print(MethodsEnum[method].value)
         request_obj = {
             "method":MethodsEnum[method].name, 
             "auth":auth_data, 
@@ -483,18 +481,18 @@ class OpenapiConverter:
                     except TypeError as err:
                         if obj["id"] not in error_obj:
                             error_obj[obj.get("id")] = []    
-                        error_obj[obj.get("id")].append(err)
+                        error_obj[obj.get("id")].append(str(err))
                     
                     except ValueError as err:
                         
                         if obj["id"] not in error_obj:
                             error_obj[obj.get("id")] = []    
-                        error_obj[obj.get("id")].append(err)
+                        error_obj[obj.get("id")].append(str(err))
                     except Exception as e:
 
                         if obj["id"] not in error_obj:
                             error_obj[obj.get("id")] = []    
-                        error_obj[obj.get("id")].append(e)
+                        error_obj[obj.get("id")].append(str(e))
             return  {
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,
@@ -556,7 +554,7 @@ class OpenapiConverter:
                     id = generate_uuid_as_key()
                     api_model_obj = {
                         "id" : id,
-                        "operation_id":operation_data.get("operationId"),
+                        "operation_id":operation_data.get("operationId","function_name"),
                         "tags" :tag,
                         "request":request_obj,
                         "response":response_arr,

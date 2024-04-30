@@ -34,6 +34,7 @@ import Code from './Code';
 import ThirdPartyApp from './ThirdPartyApp';
 import { router } from '../App';
 
+
 export default function ProjectPage() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     const [tagSelection, setSelection] = useState(0);
@@ -107,7 +108,7 @@ export default function ProjectPage() {
                 </div>
             </div>
         </div>
-       );
+  );
 }
 
 

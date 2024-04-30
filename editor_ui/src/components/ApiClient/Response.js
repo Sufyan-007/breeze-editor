@@ -55,8 +55,6 @@ let contentTypes = [
 ];
 function Response({ index,onChange, responseData,key,onRemove }) {
     const [response, setResponse] = useState(responseData || {});
-    console.log("resposne", response);
-
     const onValueChange = (prop, value) => {
         let r = response;
         r[prop] = value

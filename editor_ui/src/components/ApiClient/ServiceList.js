@@ -44,7 +44,7 @@ export default function ServiceLists({
     console.log(apiList,"api list in service list comp ");
 
 return (
-    <div className="m-3" style={{width:"95%"}}>
+    <div className="m-5" style={{width:"95%"}}>
         {apiList.length >0 ?
             apiList.map((service, index) => (
                 <Accordion key={index}>
