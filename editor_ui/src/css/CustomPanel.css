@@ -1,0 +1,32 @@
+/* Custom CSS for styling the form */
+.custom-form-group {
+  margin-bottom: 2rem; 
+}
+
+.form-label {
+  font-weight: bold; /* Make form labels bold */
+}
+
+.custom-form-control {
+  background-color: #343a40; /* Set background color to dark grey */
+  border-color: #343a40; /* Set border color to dark grey */
+  color: #fff; /* Set text color to white */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add box-shadow */
+}
+
+.custom-form-control:focus {
+  border-color: #007bff; /* Change border color on focus */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Add box-shadow on focus */
+}
+
+.custom-btn {
+  background-color: #2482d5; /* Set background color of secondary buttons */
+  border-color: #1072c7; /* Set border color of secondary buttons */
+  color: #fff; /* Set text color of secondary buttons */
+  transition: background-color 0.3s ease; /* Add transition effect */
+}
+
+.custom-btn:hover {
+  background-color: hsl(206, 87%, 38%); /* Change background color of secondary buttons on hover */
+  border-color: #2babe7; /* Change border color of secondary buttons on hover */
+}

@@ -7,6 +7,10 @@ import {
   setReducerConfig,
   setReduxStoreConfig,
 } from "../reducers/ReduxConfigReducer";
+import {
+  setReducerConfig,
+  setReduxStoreConfig,
+} from "../reducers/ReduxConfigReducer";
 import { setServiceConfig } from "../reducers/ServiceConfigReducer";
 import { setRouterConfig } from "../reducers/RouterConfigReducer";
 import { setConfig } from "../reducers/ConfigReducer";

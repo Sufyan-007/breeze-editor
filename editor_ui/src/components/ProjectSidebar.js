@@ -1,5 +1,5 @@
-import React from 'react';
-import arrowLeft from "../assets/icons/arrow-left.svg"; 
+import React from "react";
+import arrowLeft from "../assets/icons/arrow-left.svg";
 import arrowRight from "../assets/icons/arrow-right.svg";
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -31,8 +31,22 @@ function ProjectSidebar({ isSidebarExpanded, sidebarItems, tagSelection, setSele
               </OverlayTrigger>
           ))}
       </div>
-      <div className="sidebar-toggle bg-white mt-auto d-flex justify-content-center p-2" onClick={toggleSidebar} style={{ borderRadius: '70px', width: '40px', marginLeft: isSidebarExpanded ? '125px' : '0px', cursor: 'pointer'}}>
-          <img src={isSidebarExpanded ? arrowLeft : arrowRight} alt="Toggle Sidebar" height={20} width={20} />
+      <div
+        className="sidebar-toggle bg-white mt-auto d-flex justify-content-center p-2"
+        onClick={toggleSidebar}
+        style={{
+          borderRadius: "70px",
+          width: "40px",
+          marginLeft: isSidebarExpanded ? "125px" : "0px",
+          cursor: "pointer",
+        }}
+      >
+        <img
+          src={isSidebarExpanded ? arrowLeft : arrowRight}
+          alt="Toggle Sidebar"
+          height={20}
+          width={20}
+        />
       </div>
     </div>
   );

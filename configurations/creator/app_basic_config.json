@@ -5,7 +5,7 @@
     "type" : "V_0",
     "defaultComponent": "main_comp",
     "strictMode" : false,
-    "path" : "/home/yash/Documents/Projects/bridge_generated_projects",
+    "path" : "/home/anushka/Desktop/generated_react_app",
     "components_src_dir" : "src",
     "dependencies" : {
         "axios" : "^1.5.1",

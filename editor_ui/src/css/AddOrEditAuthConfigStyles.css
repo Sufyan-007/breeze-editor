@@ -1,0 +1,13 @@
+::placeholder {
+  color: white;
+}
+.form-label {
+  color: white;
+  font-size: 20px;
+}
+.formControl {
+  background-color: #6c757d !important;
+  color: white !important;
+  border: none !important;
+  max-width: 90% !important;
+}

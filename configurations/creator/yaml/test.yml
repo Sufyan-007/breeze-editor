@@ -1,0 +1,234 @@
+openapi: 3.0.0
+info:
+  title: OpenAI API
+  description: The OpenAI REST API. Please see https://platform.openai.com/docs/api-reference for more details.
+  version: "2.0.0"
+  termsOfService: https://openai.com/policies/terms-of-use
+  contact:
+    name: OpenAI Support
+    url: https://help.openai.com/
+  license:
+    name: MIT
+    url: https://github.com/openai/openai-openapi/blob/master/LICENSE
+servers:
+  - url: http://api.openai.com/v1
+tags:
+  - name: Post
+    description: Sample posts.
+  - name: Comment
+    description: Comments from posts.
+  - name: Config
+    description: Comments from posts.
+  
+paths:
+  /breeze/config-writer/:
+    post:
+      operationId: saveAppConfiguration
+      summary: Crete basic app config.
+      tags :
+        - Config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppConfigDetails"
+  /posts:
+    post:
+      operationId: createPost
+      tags:
+        - Post
+      summary: Creates a post response for the given  conversation.
+      requestBody:
+        content:
+            multipart/form-data:
+                schema:
+                    type: object
+                    properties:
+                        # 'file' will be the field name in this multipart request
+                        file:
+                            type: string
+                            format: binary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDetails"
+    get:
+      operationId: getPosts
+      tags:
+        - Post
+      summary: Returns a list of posts that belong to the user's organization.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListPostsResponse"
+  /test-binary:
+    put:
+        operationId: test-binary
+        tags:
+          - Put
+        requestBody:
+            content:
+                application/octet-stream:
+                    schema:
+                        type: string
+                        format: binary
+  /test-form:
+    post:
+      operationId: test-form
+      tags:
+        - Post
+      requestBody:
+        content:
+            multipart/form-data:
+                schema:
+                    type: object
+                    properties:
+                        # The property name 'file' will be used for all files.
+                        file:
+                            type: array
+                            items:
+                                type: string
+                                format: binary
+      summary: Returns a post that belong to the user's organization.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDetails"
+    put:
+      operationId: editPost
+      tags:
+        - Post
+      requestBody:
+        content:
+          application/octet-stream:
+           # any media type is accepted, functionally equivalent to `*/*`
+           schema:
+             # a binary file of any type
+             type: string
+             format: binary
+      summary: Returns a post that belong to the user's organization.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDetails"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: "bearer"
+
+  schemas:
+    
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: false
+        param:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: false
+      required:
+        - type
+        - message
+        - param
+        - code
+    
+    
+    AppConfigDetails:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        path:
+          type: string
+        author:
+          type: string
+        defaultComponent:
+          type: string
+        dependencies:
+          type: object
+          $ref: "#/components/schemas/DependencyObject"
+  
+    PostDetails:
+      type: object
+      properties:
+        id:
+          description: id of post
+          type: number
+        userId:
+          description: id of user
+          type: number
+        title:
+          description: title of post
+          type: string
+        body:
+          description: body of post
+          type: string
+        
+        
+      required:
+        - id
+        - userId
+
+    DependencyObject: 
+      type: object
+      properties:
+        obj:
+          type: object
+          $ref: "#/components/schemas/Error"
+
+        name:
+          description: name of dependency
+          type: string
+        value:
+          description: value of dependency
+          type: string
+      
+    CreatePostResponse:
+      type: object
+      description: Represents a chat completion response returned by model, based on the provided input.
+      properties:
+        id:
+          type: number
+          description: id of post.
+        
+    ListPostsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostDetails"
+        
+    ListCommntsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommentDetails"
+    
+    

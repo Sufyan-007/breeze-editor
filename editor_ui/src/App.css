@@ -28,6 +28,14 @@
   color: #61dafb;
 }
 
+.loader{
+    z-index: 4;
+    background-color: #303033;
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -41,6 +49,7 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
 
 .container-height {
   height:  calc(100% - 56px);
