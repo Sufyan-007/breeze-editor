@@ -7,6 +7,8 @@ from common.utils.app_consts import CONFIG_PATH
 from django.views import View
 from django.http import JsonResponse
 
+from .api_models.custom_exception import CustomeException
+
 class ApiClientGenerator(View):
 
     def post(self, request, collectionType, appName):
@@ -44,21 +46,25 @@ class ApiClientGenerator(View):
                 ## for other models
                 tag_models = converted_data.get("tag_models")
                 resultant_filename = []
+                model_dict = {}
+                
                 for tag, api_models in tag_models.items():
                     filename = tag+".json"
                     full_file_path = os.path.join(folder_path, filename)
                     resultant_filename.append(filename)
-                    model_dict = {}
                     for model in api_models:
                         model_dict[model.id] = model.as_dict()
                     append_to_dict_file(full_file_path,model_dict)
                 return JsonResponse({"data": model_dict, "filename": resultant_filename}, status=201)
             else:
                 return JsonResponse({"error": "Invalid collection type or file format."}, status=400)
-
+        except CustomeException as e:
+            print(e)
+            return JsonResponse({"error": str(e)}, status=500)
+        
         except Exception as e:
             print(traceback.format_exc())
-            return JsonResponse({"error": str(e)}, status=400)
+            return JsonResponse({"error": str(e)}, status=500)
         
         
     
