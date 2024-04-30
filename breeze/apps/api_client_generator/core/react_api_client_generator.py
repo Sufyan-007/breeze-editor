@@ -123,14 +123,20 @@ class ReactApiClientGenerator:
         interceptor_code = interceptor_code.replace('{AUTH_CODE}', auth_code)
         return interceptor_code
 
+    ## needs to think for refresh token api response
     def set_response_interceptor(self, auth, app_name):
         interceptor_code = REFRESH_TOKEN_API
         auth_api_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/auth.json"
         auth_api_config = read_file_json(auth_api_path)
         token_api_config = auth_api_config.get(auth.token_api)
-        token_api_model = ApiModelLoader.load_api_model(token_api_config)
-        token_api_code = self.generate_service_function(token_api_model, True, app_name)
-
+        token_api_code = ""
+        token_api_model = ApiModelLoader.load_auth_api_model(token_api_config)
+        ## needs to think for refresh token api response
+        # token_api_code = self.generate_service_function(token_api_model, False, app_name,"AUTH")
+        # if len(token_api_code) > 0:
+        #     token_api_code = token_api_code[0]
+        # else:
+        #     token_api_code = ""
         interceptor_code = interceptor_code.replace('{REFRESH_TOKEN_URL}', token_api_model.request.url.baseurl)
         interceptor_code = interceptor_code.replace('{GET_REFRESHED_TOKEN_CODE}', token_api_code)
         return interceptor_code
@@ -306,7 +312,7 @@ class ReactApiClientGenerator:
         func_name = model.operation_id
         interceptor_code = ""
         response_interceptor_code = RESPONSE_INTERCEPTOR
-        if service_type != "AUTH" and model.request.auth and len(model.request.auth) > 0:
+        if service_type != "AUTH" and model.request.auth and len(model.request.auth) > 0 and model.request.auth[0].type != AuthTypeEnum.NOAUTH:
             ## currently only support for single auth
             ## need to handle all array of auth
             auth = model.request.auth[0]
@@ -317,7 +323,6 @@ class ReactApiClientGenerator:
                 response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',r_interceptor_code)
             else:
                 response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
-
         react_code = ""
         response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
         if anonymous is True:
@@ -409,7 +414,7 @@ class ReactApiClientGenerator:
             r_status_conditions = []
             for res in model.response:
                 if res.status != "200" and res.status != "201":
-                    r_status = RESPONSE_STATUS_CONDITION%(res.status,res.description)
+                    r_status = RESPONSE_STATUS_CONDITION%(res.status.value,res.description)
                     r_status_conditions.append(r_status)
             if len(r_status_conditions)> 0:
                 response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
@@ -427,22 +432,20 @@ class ReactApiClientGenerator:
             if service_type == "AUTH":
                 auth_api_type = model.auth_api_type
                 code = ""
-                if auth_api_type == AuthApiTypeEnum.LOGIN:
+                if auth_api_type == AuthApiTypeEnum.LOGIN or auth_api_type == AuthApiTypeEnum.REFRESH:
                     
                     token_store_info = model.token_store
                     store_in = token_store_info.store_in
                     access_token_key = token_store_info.access_token_key
                     refresh_token_key = token_store_info.refresh_token_key
                     if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
-                        code = "localStorage.setItem('%s','`${resp.data.access_token}`');"%(access_token_key)
+                        code = "localStorage.setItem('%s',`${resp.data.access_token}`);"%(access_token_key)
                         code = code + '\n' + "localStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
 
                     elif store_in == TokenStoreTypeEnum.SESSION:
-                        code = "sessionStorage.setItem('%s','`${resp.data}`');"%(access_token_key)
+                        code = "sessionStorage.setItem('%s',`${resp.data.access_token}`);"%(access_token_key)
                         code = code + '\n' + "sessionStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
 
-                elif auth_api_type == AuthApiTypeEnum.REFRESH:
-                    pass
                     
                 react_code = react_code.replace('{RESPONSE_CODE}',code)
             else:
