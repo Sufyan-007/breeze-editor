@@ -20,19 +20,19 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       name: "LOUGOUT",
       label: "Logout",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "REFRESH",
       label: "Refresh",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "LOGIN",
       label: "Login",
       variant: "secondary",
-      width: "76%",
+      
     },
   ];
   let authenticationTypes = [
@@ -40,31 +40,31 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       name: "BASIC",
       label: "Basic",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "OAUTH2",
       label: "OAUTH2",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "BEARER",
       label: "Bearer",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "APIKEY",
       label: "ApiKey",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "OAUTH",
       label: "Oauth",
       variant: "secondary",
-      width: "76%",
+      
     },
   ];
   let tokenStorageSchemes = [
@@ -72,19 +72,19 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       name: "LOCAL_STORAGE",
       label: "Local Storage",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "SESSION",
       label: "Session Storage",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "COOKIE",
       label: "Cookie",
       variant: "secondary",
-      width: "76%",
+      
     },
   ];
   let selectFlow = [
@@ -92,25 +92,25 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       name: "authorization_code",
       label: "Authorization Code",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "implicit",
       label: "Implicit",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "password",
       label: "Password",
       variant: "secondary",
-      width: "76%",
+      
     },
     {
       name: "clientCredentials",
       label: "Client Credentials",
       variant: "secondary",
-      width: "76%",
+      
     },
   ];
 
@@ -120,21 +120,18 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       label: "Authorization Url",
       variant: "secondary",
       value: selectedApiInfo.flow ? selectedApiInfo.flow.authorizationUrl : "",
-      width: "25%",
     },
     {
       name: "flow.tokenUrl",
       label: "Token Url",
       variant: "secondary",
       value: selectedApiInfo.flow ? selectedApiInfo.flow.tokenUrl : "",
-      width: "25%",
     },
     {
       name: "flow.refreshUrl",
       label: "Refresh Url",
       variant: "secondary",
       value: selectedApiInfo.flow ? selectedApiInfo.flow.refreshUrl : "",
-      width: "25%",
     },
   ];
   let selectKeys = [
@@ -144,7 +141,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       value: selectedApiInfo.token_store
         ? selectedApiInfo.token_store.access_token_key
         : "",
-      width: "25%",
+     
     },
     {
       name: "token_store.refresh_token_key",
@@ -152,7 +149,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       value: selectedApiInfo.token_store
         ? selectedApiInfo.token_store.refresh_token_key
         : "",
-      width: "25%",
+     
     },
   ];
 
@@ -289,16 +286,22 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
           overflowY: "auto",
           overflowX: "hidden",
         }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}>
-          <Button variant="secondary" onClick={onClose} size="sm">
+        <Row className="d-flex justify-content-between align-items-center w-100 mb-3">
+        <Col></Col>
+          <Col md={{span:1}}>
+          <Button variant="secondary" onClick={onClose} size="sm" className="my-3">
             <img src={close} alt="" height={24} className="mx-2" />
           </Button>
-        </div>
+          </Col>
+          <Col md={{span:1}}>
+          <Button
+                className="my-3"
+                variant="secondary"
+                onClick={handleSave}>
+                Save
+              </Button>
+          </Col>
+        </Row>
         {selectedApiInfo ? (
           <div>
             <Form>
@@ -393,7 +396,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
               )}
               {selectedApiInfo["response"] && (
                 <Row>
-                  <Col sm={2}>
+                  <Col sm={3}>
                     <Form.Label className="mx-3 mt-3">Response</Form.Label>
                     <Button
                       variant="secondary"
@@ -408,11 +411,11 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                     </Button>
                   </Col>
                   <Col
-                    sm={10}
-                    className="d-flex flex-wrap mt-3 p-2"
+                    sm={9}
+                    className="d-flex flex-wrap mt-3 p-2 "
                     style={{
-                      width: "65%",
-                      marginLeft: "140px",
+                      
+                      
                       backgroundColor: "rgba(239, 239, 239, 0.5)",
                     }}>
                     {selectedApiInfo["response"].map((res, index) => (
@@ -427,13 +430,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                   </Col>
                 </Row>
               )}
-              <Button
-                className="mt-5"
-                variant="secondary"
-                style={{ width: "10%" }}
-                onClick={handleSave}>
-                Save
-              </Button>
+              
             </Form>
           </div>
         ) : (

@@ -12,28 +12,28 @@ let methodType = [
     label: "Get",
     variant: "secondary",
     className: "mx-3",
-    width: "76%"
+    width: "100%"
   },
   {
     name: "POST",
     label: "Post",
     variant: "secondary",
     className: "mx-3",
-    width: "76%"
+    width: "100%"
   },
   {
     name: "PUT",
     label: "Put",
     variant: "secondary",
     className: "mx-3",
-    width: "76%"
+    width: "100%"
   },
   {
     name: "DELETE",
     label: "Delete",
     variant: "secondary",
     className: "mx-3",
-    width: "76%"
+    width: "100%"
   },
 ];
 function Request({ loginApis, tokenApis, onChange, requestBody }) {
@@ -168,7 +168,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
                 <Col
                   sm={9}
                   className="d-flex flex-wrap mt-3"
-                  style={{ flexDirection: "row", justifyContent: "normal", backgroundColor: "rgba(239, 239, 239, 0.5)", width: "65%" }}>
+                  style={{ flexDirection: "row", justifyContent: "normal", backgroundColor: "rgba(239, 239, 239, 0.5)" }}>
                   {request["body"].map((body, index) => (
                     <Body
                       key={body.id}

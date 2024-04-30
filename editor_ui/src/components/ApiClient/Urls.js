@@ -51,7 +51,7 @@ function Urls({ urlData, onChange }) {
         <Col sm={3}>
           <Form.Label className="mx-3 mt-5">URL:</Form.Label>
         </Col>
-        <Col sm={9} style={{width: "60%"}}>
+        <Col sm={9} >
           <CustomFormControl
             controlId="url"
             options={urlFields}

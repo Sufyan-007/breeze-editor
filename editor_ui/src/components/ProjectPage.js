@@ -33,6 +33,8 @@ import Styles from './Styles';
 import Code from './Code';
 import ThirdPartyApp from './ThirdPartyApp';
 import { router } from '../App';
+import { ServicePage } from "./ServicePage";
+import Root from "./ApiClient/Root";
 
 export default function ProjectPage() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -68,7 +70,7 @@ export default function ProjectPage() {
         <ProjectHome />,
         <ProjectComponents/>,
         <ProjectRouting />,
-        <ServicePage />,
+        <Root />,
         <ReduxConfig />,
         <Styles />,
         <Code />,
@@ -107,8 +109,6 @@ export default function ProjectPage() {
                 </div>
             </div>
         </div>
-      </div>
-    </div>
   );
 }
 
