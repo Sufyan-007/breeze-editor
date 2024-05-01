@@ -1,1 +1,0 @@
-{"routes": [{"path": "/", "component": "Main"},{"path": "create-app-page", "component": "CreateAppPage"},{"path": "react-bootstrap", "component": "ReactBootstrap"}]}
