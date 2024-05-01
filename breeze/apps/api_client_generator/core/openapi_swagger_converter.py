@@ -4,7 +4,7 @@ import copy
 import os
 import json
 
-from ..api_models import MethodsEnum
+from ..api_models import MethodsEnum,AuthApiTypeEnum,AuthTypeEnum
 
 from ..utils.content_type_and_mode import get_content_type_and_mode
 from ..utils.set_response_status import set_response_status
@@ -18,9 +18,9 @@ class OpenapiConverter:
         pass
 
     ## headers remaining
-    def create_request_json(self,path, path_data, operation, meta_data):
+    def create_request_json(self,path, path_data, operation, meta_data,security_schemes_models=[]):
         method = operation.strip().upper()
-        auth_data = self._create_auth_arr_json(path_data, meta_data=meta_data)
+        auth_data = self._create_auth_arr_json(path_data, meta_data=meta_data,security_schemes_models=security_schemes_models)
         url_data = self._create_url_json(path,meta_data)
         parameters = self._create_parameters_json(path_data.get("parameters"))
         arr_body_data = self._create_body_arr_json(path_data.get("requestBody", {}), meta_data= meta_data)
@@ -35,9 +35,21 @@ class OpenapiConverter:
         
         return request_obj
           
-
+    
+    def _get_login_refresh_auth_id_from_models(self,auth_type,security_schemes_models):
+        login_api = None
+        token_api = None
+        for model in security_schemes_models:
+            if model.authentication_type == AuthTypeEnum[auth_type]:
+                if model.auth_api_type == AuthApiTypeEnum.LOGIN:
+                    login_api = model.id  
+                if model.auth_api_type ==  AuthApiTypeEnum.REFRESH:
+                    token_api = model.id
+        
+        return login_api,token_api
+    
     ## complete
-    def _create_auth_arr_json(self, path_data, meta_data):
+    def _create_auth_arr_json(self, path_data, meta_data,security_schemes_models= []):
         auth_type = "NOAUTH"
         security_schemes = meta_data.get("components",{}).get("securitySchemes",{})
         ## first check if secuirty is provided on the path data
@@ -58,11 +70,12 @@ class OpenapiConverter:
                     auth_type = "BEARER" 
                 elif security_name.lower() == "basicauth":
                     auth_type = "BASIC"
+                login_api,token_api = self._get_login_refresh_auth_id_from_models(auth_type,security_schemes_models)
                 arr_auth.append({
                     "type" : auth_type,
                     "content": [],
-                    "login_api" : None,
-                    "token_api" : None
+                    "login_api" : login_api,
+                    "token_api" : token_api
                 })
         
         elif isinstance(auth_data,list):
@@ -88,11 +101,12 @@ class OpenapiConverter:
                         elif security_name.lower() == "basicauth":
                             auth_type = "BASIC"
                 
+                login_api,token_api = self._get_login_refresh_auth_id_from_models(auth_type,security_schemes_models)
                 arr_auth.append({
                     "type" : auth_type,
                     "content": [],
-                    "login_api" : None,
-                    "token_api" : None
+                    "login_api" : login_api,
+                    "token_api" : token_api
                 })
             
             
@@ -314,7 +328,7 @@ class OpenapiConverter:
             "auth" : None,
             "url" : None,
             "body" : None,
-            "request" : {},
+            "request" : {"method" : "POST"},
             "response" : [],
             "token_store" : None,
             "authentication_type" : "BASIC",
@@ -325,15 +339,15 @@ class OpenapiConverter:
         }
 
         auth_api_objects = []
-        if schema_name == "basicAuth":
+        if schema_name.lower() == "basicauth":
             auth_obj["id"] = generate_uuid_as_key()
-            auth_obj["operation_id"] =schema_name+"_basic",
+            auth_obj["operation_id"] = schema_name + "_basic"
             auth_obj["authentication_type"] = "BASIC"
-            auth_obj["auth_api_type"] = None
+            auth_obj["auth_api_type"] = "LOGIN"
 
             auth_api_objects.append(auth_obj)
 
-        elif schema_name == "bearerAuth":
+        elif schema_name.lower() == "bearerauth":
             br_auth_login = copy.deepcopy(auth_obj)
             br_auth_login["id"] = generate_uuid_as_key()
             br_auth_login["operation_id"] =schema_name+"_login"
@@ -343,7 +357,7 @@ class OpenapiConverter:
 
             br_auth_refresh = copy.deepcopy(auth_obj)            
             br_auth_refresh["id"] = generate_uuid_as_key()
-            br_auth_refresh["operation_id"] =schema_name+"_efresh"
+            br_auth_refresh["operation_id"] =schema_name+"_refresh"
             br_auth_refresh["authentication_type"] = "BEARER"
             br_auth_refresh["auth_api_type"] = "REFRESH"
             auth_api_objects.append(br_auth_refresh)
@@ -423,11 +437,18 @@ class OpenapiConverter:
     def handle_security_schema(security_schemas,meta_data):
         auth_api_objects = []
         auth_api_models = []
+        auth_errors = []
         for schema_name,schema in security_schemas.items():
             auth_api_objects = auth_api_objects + OpenapiConverter.generate_json_for_security_schema(schema_name,schema,meta_data)
         for obj in auth_api_objects:
-            auth_api_models.append(ApiModelLoader.load_auth_api_model(obj))
-        return auth_api_models
+            try:
+                auth_api_models.append(ApiModelLoader.load_auth_api_model(obj))
+            except Exception as e:
+                auth_errors.append(str(e))
+        return {
+            "auth_api_models" : auth_api_models,
+            "auth_errors" : auth_errors
+        }
     
 
     ## complete        
@@ -455,7 +476,10 @@ class OpenapiConverter:
     ## complete
     @staticmethod
     def prepare_api_models(json_data):
-        error_obj = {"general_error" : None} 
+        error_obj = {
+            "general_error" : [],
+            "auth_error" : []
+        } 
         tag_models = {}
         security_schemes_models = []
         try:
@@ -464,15 +488,18 @@ class OpenapiConverter:
 
             openapi_data = yaml.safe_load(json_data)
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
-            security_schemes_models = OpenapiConverter.handle_security_schema(security_schemes,openapi_data)
-            
+            auth_data = OpenapiConverter.handle_security_schema(security_schemes,openapi_data)
+            security_schemes_models = auth_data.get("auth_api_models")
+            error_obj["auth_error"] = auth_data["auth_errors"]
             
             tags_map = OpenapiConverter.classified_tags_and_method(openapi_data) 
-            converted_json_tags_mapping = OpenapiConverter.convert_to_json_data_model(tags_map,openapi_data)
+            converted_json_tags_mapping = OpenapiConverter.convert_to_json_data_model(tags_map,openapi_data,security_schemes_models)
             ## now load these json obj to api models
             for tag,arr_obj in converted_json_tags_mapping.items():
                 for obj in arr_obj:
                     try:
+                        if obj.get("error",False) is True:
+                            raise Exception(obj.get("message"))
                         api_model = ApiModelLoader.load_api_model(obj)
                         if tag in tag_models:
                             tag_models[tag].append(api_model)
@@ -489,10 +516,9 @@ class OpenapiConverter:
                             error_obj[obj.get("id")] = []    
                         error_obj[obj.get("id")].append(err)
                     except Exception as e:
-
-                        if obj["id"] not in error_obj:
+                        if obj.get("id",None) not in error_obj:
                             error_obj[obj.get("id")] = []    
-                        error_obj[obj.get("id")].append(e)
+                        error_obj[obj.get("id")].append(str(e))
             return  {
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,
@@ -501,7 +527,7 @@ class OpenapiConverter:
 
         except Exception as e:
             print(traceback.format_exc())
-            error_obj["general_error"] = str(e)  
+            error_obj["general_error"].append(str(e))  
             raise (CustomeException(error_obj)) 
 
 
@@ -535,17 +561,18 @@ class OpenapiConverter:
     ## done
     ## it will return the tags mapping with json object of api model
     @staticmethod
-    def convert_to_json_data_model(tags_map,meta_data):
-        try:
-            tag_mappings = {}
-            for tag, tag_operations in tags_map.items():
-                for path, operation, operation_data in tag_operations:
-                    openApiConverter = OpenapiConverter()
+    def convert_to_json_data_model(tags_map,meta_data,security_schemes_models=[]):
+        tag_mappings = {}
+        openApiConverter = OpenapiConverter()
+        for tag, tag_operations in tags_map.items():
+            for path, operation, operation_data in tag_operations:
+                try:
                     request_obj = openApiConverter.create_request_json(
                         path=path,
                         path_data=operation_data,
                         operation=operation,
-                        meta_data=meta_data
+                        meta_data=meta_data,
+                        security_schemes_models = security_schemes_models
                     )
                     response_arr = openApiConverter.create_response_arr_json(
                         path_data=operation_data,
@@ -564,13 +591,24 @@ class OpenapiConverter:
                     if tag in tag_mappings:
                         tag_mappings[tag].append(api_model_obj) 
                     else:
-                         tag_mappings[tag]= [api_model_obj]
+                        tag_mappings[tag]= [api_model_obj]
 
-            return tag_mappings
+                except Exception as e:
+                    if tag in tag_mappings:
+                        tag_mappings[tag].append({
+                        "error" : True,
+                        "message" : str(e),
+                        "id": operation_data.get("operationId","default")
+                    }) 
+                    else:
+                        tag_mappings[tag]= [
+                            {"error" : True,
+                            "message" : str(e),
+                            "id": operation_data.get("operationId","default")
+                    }]
+                    print(traceback.format_exc())
+        return tag_mappings
 
-        except Exception as e:
-            print(traceback.format_exc())
-            return {"error": str(e)}
 
 
     
