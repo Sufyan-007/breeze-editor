@@ -474,3 +474,13 @@ class HtmlConfigWriter(APIView):
             return JsonResponse({},status=200)
         except:
             return JsonResponse({},status=500)
+
+    def post(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            # raise NotImplementedError()
+            componentConfigService = ComponentConfigService(data["project_id"])
+            new_child_id=componentConfigService.add_child_html(data["component"],data["parent_html_id"],data["child"])
+            return JsonResponse({"new_child_id":new_child_id},status=200)
+        except:
+            return JsonResponse({},status=500)

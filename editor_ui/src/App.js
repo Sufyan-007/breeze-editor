@@ -86,10 +86,10 @@ export const router = createBrowserRouter([
     path: "new",
     element: <CreateApp />,
   },
-  {
-    path: "editor/:projectName/service",
-    element: <ServicePage />,
-  },
+  // {
+  //   path: "editor/:projectName/service",
+  //   element: <ServicePage />,
+  // },
 ]);
 
 function App() {

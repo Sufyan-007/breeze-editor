@@ -1,17 +1,45 @@
+import { useContext, useEffect, useRef } from "react"
 import Html from "./Html"
 import Text from "./Text"
-export default function HtmlTree({ htmlId, config, className }) {
-    const value = config.html_elements[htmlId]
+import { ComponentContext } from "../ComponentConfig/ComponentConfigPage"
+
+
+export default function HtmlTree({ htmlId, className }) {
+    const { componentConfig, sidebarService } = useContext(ComponentContext)
+    const value = componentConfig.html_elements[htmlId]
+    const ref = useRef()
+
+    useEffect(() => {
+        var updateSub;
+        const sub = sidebarService.getSelectedElem().subscribe((elem)=>{
+            console.log(elem)
+            if(elem?.elem ===htmlId){
+                console.log(elem)
+                ref.current?.classList.add("bg-dark")
+                console.log(ref.current?.classList)
+            }else{
+                ref.current?.classList.remove("bg-dark")
+            }
+        })
+        return () => {
+            sub.unsubscribe()
+            updateSub?.unsubscribe()
+        }
+    }, [])
+
+    function selectElem(){
+        sidebarService.setSelectedElem(htmlId)
+    }
 
     return (
-        <div className={className}>
+        <div className={className} >
             {value.type === "Element" ?
-                <Html value={value} config={config} />
+                <Html value={value} selectElem={selectElem} reference={ref} />
                 :
                 value.type === "Expression" ?
                     "Expression"
                     :
-                    <Text value={value}  />
+                    <Text selectElem={selectElem} reference={ref} value={value} />
             }
         </div>
     )

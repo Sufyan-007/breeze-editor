@@ -48,3 +48,7 @@ class ComponentConfigService:
                 html["children"][i]["type"]=elemType
                 if elemType=="Element":
                     html["children"][i]["tagName"]=self.comp_config[component]["html_elements"][x["_id"]]["tagName"]
+    
+    def add_child(self,component,parent_html_id,child):
+        
+        raise NotImplementedError()

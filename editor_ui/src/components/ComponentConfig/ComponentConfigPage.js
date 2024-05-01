@@ -25,6 +25,13 @@ import LifeCycleSection from "./LifeCycleSection";
 import FunctionSection from "./FunctionSection";
 import SidebarService from "../../services/SidebarService";
 
+const components = [
+  HtmlSection,
+  StateVarsSection,
+  FunctionSection,
+  LifeCycleSection,
+];
+
 const sidebarItems = [
   { id: 0, name: "Home", icon: home, path: "" },
   { id: 1, name: "Pages", icon: pages, path: "pages" },
@@ -69,13 +76,7 @@ export default function ComponentConfigPage() {
   const toggleSidebar = () => {
     setIsSidebarExpanded(!isSidebarExpanded);
   };
-
-  const components = [
-    <HtmlSection config={componentConfig} componentName={componentName} />,
-    <StateVarsSection />,
-    <FunctionSection />,
-    <LifeCycleSection />,
-  ];
+  const SelectedElement =components[selectedMenu]
 
   return (
 
@@ -106,7 +107,7 @@ export default function ComponentConfigPage() {
               <div className="d-flex justify-content-start">
                 {menu.map((item, index) => (
                   <button
-                    key={item.id}
+                    key={item.id}ServicePage
                     className={`btn ${index === selectedMenu
                       ? "btn-outline-secondary border-bottom btn-sm"
                       : "btn-outline-secondary btn-sm"
@@ -125,7 +126,7 @@ export default function ComponentConfigPage() {
               </div>
             </div>
             <div className="row mx-0 flex-grow-1">
-              <div className=" d-flex flex-column">{components[selectedMenu]}</div>
+              <div className=" d-flex flex-column">{< SelectedElement />}</div>
             </div>
           </div>
         </div>
