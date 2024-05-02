@@ -181,11 +181,11 @@ class ApiModelLoader:
             request=request_obj,
             response=response_obj,
             summary=model_json.get("summary"),  # Summary later,
-            auth_api_type=AuthApiTypeEnum[model_json.get("auth_api_type").upper()] ,
+            auth_api_type=AuthApiTypeEnum[model_json.get("auth_api_type", "NONE").upper()] ,
             authentication_type= AuthTypeEnum[model_json.get("authentication_type").upper()],
-            is_authorization_url=model_json.get("is_authorization_url"),
-            flow=model_json.get("flow"),
-            flow_type= model_json.get("flow_type"),
+            is_authorization_url=model_json.get("is_authorization_url", ""),
+            flow=model_json.get("flow", {}),
+            flow_type= model_json.get("flow_type", ""),
             token_store=ApiModelLoader.load_token_store(model_json.get("token_store",{}))
         )
         return api_model

@@ -13,6 +13,8 @@ import {
   Modal,
   Tooltip,
   OverlayTrigger,
+  ToastContainer,
+  Toast,
 } from "react-bootstrap";
 import DeleteIcon from "../../assets/icons/delete.svg";
 import EditIcon from "../../assets/icons/edit.svg";
@@ -25,13 +27,17 @@ export default function ServiceLists({
   onAddService,
 }) {
   const [apiList, setApiList] = useState([]);
-  const [selectedIds, setSelectedIds] = useState({});
+  const [selectdInfo, setSelectdInfo] = useState({});
   const [showTransferModal, setShowTransferModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [error, setError] = useState("");
+  const [selectedAuthenticationType, setSelectedAuthenticationType] =
+    useState("");
 
   useEffect(() => {
-    console.log("in service list");
     fetchServiceList();
   }, []);
+
   useEffect(() => {}, [apiList]);
   const appName = useParams();
   const fetchServiceList = async () => {
@@ -54,29 +60,29 @@ export default function ServiceLists({
   const handleEditClick = (apiInfo) => {
     onEditService(apiInfo);
   };
-  const onApiCheckBoxChange = (filename, id) => {
-    setSelectedIds((prevSelectedIds) => {
-      const isSelected = prevSelectedIds[filename]?.includes(id);
-      const updatedIds = {
-        ...prevSelectedIds,
-        [filename]: isSelected
-          ? prevSelectedIds[filename]?.filter((selectedId) => selectedId !== id)
-          : [...(prevSelectedIds[filename] || []), id],
-      };
-      return updatedIds;
-    });
-  };
 
   const onTransfer = async () => {
-    if(selectedIds && Object.keys(selectedIds).length > 0)
-    {
-        const result = await transferToAuthApi(selectedIds, appName.projectName);
-        if (result.message) {
-          fetchServiceList();
-        }
+    const result = await transferToAuthApi(selectdInfo, appName.projectName);
+    setSelectedAuthenticationType("");
+    setSelectdInfo({});
+    setShowToast(true);
+    if (result) {
+      setError(result.message ? result.message : result.error);
+      fetchServiceList();
+    } else {
+      setError("API call Failed!");
     }
+
     setShowTransferModal(false);
   };
+  const onDropDownChange = (value) => {
+    setSelectedAuthenticationType(value);
+    setSelectdInfo((prevSelectdInfo) => ({
+      ...prevSelectdInfo,
+      authentication_type: value,
+    }));
+  };
+  
 
   return (
     <div className="m-5" style={{ width: "95%" }}>
@@ -90,11 +96,23 @@ export default function ServiceLists({
         />
         <span>Add API</span>
       </Button>
-      {apiList.length > 0 ? (
+      {apiList && apiList.length > 0 ? (
         apiList
           .filter((service) => service.filename !== "auth")
           .map((service, index) => (
             <>
+              <ToastContainer
+                position="top-end"
+                className="p-3"
+                style={{ zIndex: 1 }}>
+                <Toast
+                  onClose={() => setShowToast(false)}
+                  show={showToast}
+                  autohide>
+                  <Toast.Header>Transfer Status</Toast.Header>
+                  <Toast.Body>{error}</Toast.Body>
+                </Toast>
+              </ToastContainer>
               <Accordion key={index}>
                 <Accordion.Item
                   eventKey={service.filename}
@@ -116,34 +134,20 @@ export default function ServiceLists({
                       <Table striped bordered hover variant="dark">
                         <thead>
                           <tr>
-                            <th colSpan={6}>Name</th>
-                            <th colSpan={3}>Select</th>
+                            <th colSpan={9}>Name</th>
+
                             <th colSpan={3}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
                           {Object.entries(service.apis).map(([key, value]) => (
                             <tr key={key}>
-                              <td colSpan={6}>
+                              <td colSpan={9}>
                                 <div className="name-cell">
                                   {value.operation_id}
                                 </div>
                               </td>
-                              <td colSpan={3}>
-                                <Form.Check
-                                  className="mx-4"
-                                  id="is-auth-api"
-                                  checked={(
-                                    selectedIds[service.filename] || []
-                                  ).includes(value.id)}
-                                  onChange={() =>
-                                    onApiCheckBoxChange(
-                                      service.filename,
-                                      value.id
-                                    )
-                                  }
-                                />
-                              </td>
+
                               <td colSpan={3}>
                                 <div className="actions-cell d-flex">
                                   <OverlayTrigger
@@ -210,7 +214,13 @@ export default function ServiceLists({
                                         width: "20px",
                                         height: "20px",
                                       }}
-                                      onClick={() => setShowTransferModal(true)}
+                                      onClick={() => {
+                                        setShowTransferModal(true);
+                                        setSelectdInfo({
+                                          id: value.id,
+                                          filename: service.filename,
+                                        });
+                                      }}
                                     />
                                   </OverlayTrigger>
                                 </div>
@@ -230,21 +240,42 @@ export default function ServiceLists({
                   show={showTransferModal}
                   onHide={() => {
                     setShowTransferModal(false);
-                    setSelectedIds({});
+                    setSelectedAuthenticationType("");
+                    setSelectdInfo({})
                   }}
                   centered
                   animation>
                   <Modal.Header closeButton>
-                    <Modal.Title>Confirmation</Modal.Title>
+                    <Modal.Title>Select Authentication Type:</Modal.Title>
                   </Modal.Header>
                   <Modal.Body>
-                    Are you sure you want to transfer this Api to Authentication
-                    Configuration?
+                    <Form.Group controlId="authenticationType">
+                      <Form.Label>Select Authentication Type:</Form.Label>
+                      <Form.Control
+                        as="select"
+                        value={selectedAuthenticationType}
+                        onChange={(e) =>
+                          onDropDownChange(e.target.value)
+                        }>
+                        <option value="">Select</option>
+                        <option value="NOAUTH">NOAUTH</option>
+                        <option value="BASIC">BASIC</option>
+                        <option value="OAUTH">OAUTH</option>
+                        <option value="OAUTH2">OAUTH2</option>
+                        <option value="BEARER">BEARER</option>
+                        <option value="APIKEY">APIKEY</option>
+                      </Form.Control>
+                    </Form.Group>
                   </Modal.Body>
                   <Modal.Footer>
-                    <Button variant="danger" onClick={onTransfer}>
-                      Transfer
-                    </Button>
+                    {console.log(selectedAuthenticationType, "selecteddd")}
+                    {selectedAuthenticationType && (
+                      <Button
+                        variant="danger"
+                        onClick={onTransfer}>
+                        Transfer
+                      </Button>
+                    )}
                   </Modal.Footer>
                 </Modal>
               </Accordion>

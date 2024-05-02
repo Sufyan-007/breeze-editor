@@ -80,9 +80,9 @@ export async function appendToAuthApi(authObj,update, appName) {
     const res = await callApiClientGenerator(apiUrl, "POST", authObj, false,{});
     return res
 }
-export async function transferToAuthApi(idList, appName) {
+export async function transferToAuthApi(authObj, appName) {
   let apiUrl = HOST+"/api-client-generator/transfer-to-auth-api/" + appName
-  const res = await callApiClientGenerator(apiUrl, "POST", idList, false,{});
+  const res = await callApiClientGenerator(apiUrl, "POST", authObj, false,{});
   return res
 }
 export async function callApiClientGenerator(url, method, payload, isFormData, options = {}) {
