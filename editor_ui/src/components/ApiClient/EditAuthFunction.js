@@ -18,7 +18,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
   const appName = useParams();
   let selectTypes = [
     {
-      name: "LOUGOUT",
+      name: "LOGOUT",
       label: "Logout",
       variant: "secondary",
       
@@ -287,9 +287,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
           overflowY: "auto",
           overflowX: "hidden",
         }}>
-          <Button variant='secondary'  size='lg' style={{}}>
-              <img src={Add} alt="" height={24} className="mx-4" /> <span style={{ fontSize: 18 ,color:"white"}}>Add a New API</span>
-           </Button>
+         
         <Row className="d-flex justify-content-between align-items-center w-100 mb-3">
         <Col></Col>
           <Col md={{span:1}}>
@@ -306,7 +304,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
               </Button>
           </Col>
         </Row>
-        {selectedApiInfo ? (
+        
           <div>
             <Form>
               <Form.Group>
@@ -315,11 +313,12 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                     <Form.Label className="mx-3">Selected Api</Form.Label>
                   </Col>
                   <Col sm={9}>
+                    {console.log(selectedApiInfo, "selected")}
                     <Form.Control
                       className=""
                       style={{ width: "100%" }}
                       type="text"
-                      value={selectedApiInfo.operation_id}
+                      value={selectedApiInfo.operation_id ? selectedApiInfo.operation_id : ''}
                       name="operation_id"
                       onChange={(e) =>
                         onValueChanges("operation_id", e.target.value)
@@ -330,13 +329,13 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
               </Form.Group>
               <CustomButtonGroup
                 options={selectTypes}
-                selectedButton={selectedApiInfo.auth_api_type}
+                selectedButton={selectedApiInfo.auth_api_type ? selectedApiInfo.auth_api_type : ''}
                 onButtonClick={onValueChanges}
                 formId="auth_api_type"
                 title="Select Type:"></CustomButtonGroup>
               <CustomButtonGroup
                 options={authenticationTypes}
-                selectedButton={selectedApiInfo.authentication_type}
+                selectedButton={selectedApiInfo.authentication_type? selectedApiInfo.authentication_type : ''}
                 onButtonClick={onValueChanges}
                 formId="authentication_type"
                 title="Authentication Scheme:"></CustomButtonGroup>
@@ -386,7 +385,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                   </Col>
                 </Row>
               )}
-              {selectedApiInfo.request && (
+              
                 <Form.Group
                   className="mb-3 custom-form-group"
                   controlId="request">
@@ -394,11 +393,11 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                     loginApis={""}
                     tokenApis={""}
                     onChange={onValueChanges}
-                    requestBody={selectedApiInfo.request}
+                    requestBody={selectedApiInfo.request || {"body": [], "auth":[]}}
                   />
                 </Form.Group>
-              )}
-              {selectedApiInfo["response"] && (
+              
+             
                 <Row>
                   <Col sm={3}>
                     <Form.Label className="mx-3 mt-3">Response</Form.Label>
@@ -422,7 +421,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                       
                       backgroundColor: "rgba(239, 239, 239, 0.5)",
                     }}>
-                    {selectedApiInfo["response"].map((res, index) => (
+                    {selectedApiInfo["response"] && selectedApiInfo["response"].map((res, index) => (
                       <Response
                         key={res.id}
                         index={index}
@@ -433,15 +432,15 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                     ))}
                   </Col>
                 </Row>
-              )}
+              
               
             </Form>
           </div>
-        ) : (
-          <p>
+        
+          {/* <p>
             No authentication APIs available. Please create APIs in the backend.
-          </p>
-        )}
+          </p> */}
+        
       </div>
     </>
   );

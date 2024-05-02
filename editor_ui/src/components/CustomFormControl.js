@@ -23,7 +23,7 @@ const CustomFormControl = ({
                                 className="mb-2 "
                                 type="text"
                                 value={option.value.join(", ")} 
-                                onChange={(e) => onChange(option.name, e.target.value.split(", "))} 
+                                onChange={(e) => onChange(option.name, e.target.value.split(",").map((element) => element.trim()))}
                             />
                         ) : (
                             <Form.Control

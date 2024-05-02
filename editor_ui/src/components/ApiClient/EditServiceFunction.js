@@ -13,7 +13,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
   const [apiModel, setApiModel] = useState({});
   const [loginApis, setLoginApis] = useState([]);
   const [tokenApis, setTokenApis] = useState([]);
-  const appName = useParams()
+  const appName = useParams();
   useEffect(() => {
     setAuthApis();
     if (selectedServiceInfo["id"] && selectedServiceInfo["filename"]) {
@@ -58,9 +58,9 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
       );
       const updatedModel = result["data"];
       if (updatedModel.response && updatedModel.response.length > 0) {
-        const updatedRes = updatedModel.response.map(res => ({
+        const updatedRes = updatedModel.response.map((res) => ({
           ...res,
-          id: Date.now() + Math.random()
+          id: Date.now() + Math.random(),
         }));
         updatedModel.response = updatedRes;
       }
@@ -70,7 +70,6 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
     }
   };
 
-
   const handleResponseBodyChange = (index, newData) => {
     let responses = apiModel["response"];
     responses[index] = newData;
@@ -79,16 +78,23 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
       response: responses,
     });
   };
-  const handleAddResponse = ()=>{
+  const handleAddResponse = () => {
     const newResponse = {
       id: Date.now()
     };
-    setApiModel({...apiModel, response: apiModel.response ? [...apiModel.response, newResponse] : [newResponse] })
-  }
+    setApiModel({
+      ...apiModel,
+      response: apiModel.response
+        ? [...apiModel.response, newResponse]
+        : [newResponse]
+    });
+  };
   const removeResponse = (indexToRemove) => {
     if (apiModel.response && apiModel.response.length > 0) {
-           const updatedRes = apiModel.response.filter((_, index) => index !== indexToRemove);
-      setApiModel(prevState => ({
+      const updatedRes = apiModel.response.filter(
+        (_, index) => index !== indexToRemove
+      );
+      setApiModel((prevState) => ({
         ...prevState,
         response: updatedRes,
       }));
@@ -101,27 +107,33 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
       ...model,
     });
   };
- 
 
   async function handleSubmit(e) {
     console.log(apiModel, "submitted");
+    let operation = "ADD";
+    if(apiModel.id){
+      operation = "UPDATE"
+    }
     e.preventDefault();
     const result = await modifyApiConfig(
       apiModel,
       appName.projectName,
-      selectedServiceInfo["filename"]
+      selectedServiceInfo["filename"] ? selectedServiceInfo["filename"] : apiModel["tags"],
+      operation
     );
     setApiModel({});
     onClose();
   }
   return (
     <div>
-      {apiModel && (
         <>
           <Row className="d-flex justify-content-between align-items-center w-100 mb-3">
             <Col></Col>
             <Col md={{ span: 1 }}>
-              <Button variant="secondary" onClick={handleSubmit} className="my-3">
+              <Button
+                variant="secondary"
+                onClick={handleSubmit}
+                className="my-3">
                 Submit
               </Button>
             </Col>
@@ -131,18 +143,18 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
               </Button>
             </Col>
           </Row>
-          <Form className="mt-4" >
+          <Form className="mt-4">
             <>
               <Form.Group
                 className="mt-3 mb-3 custom-form-group"
                 controlId="operation_id">
-                <Row >
+                <Row>
                   <Col sm={3}>
                     <Form.Label className="mx-3">Function Name</Form.Label>
                   </Col>
                   <Col sm={9}>
                     <Form.Control
-                      style={{width: "100%"}}
+                      style={{ width: "100%" }}
                       type="text"
                       value={apiModel["operation_id"]}
                       onChange={(e) => {
@@ -160,15 +172,15 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                     <Form.Label className="mx-3">Service Name</Form.Label>
                   </Col>
                   <Col sm={9}>
-                        <Form.Control
-                       style={{width: "100%"}}
-                          className=" custom-form-control"
-                          type="text"
-                          value={apiModel["tags"]}
-                          onChange={(e) => {
-                            onApiModelChange("tags", e.target.value);
-                          }}
-                        />
+                    <Form.Control
+                      style={{ width: "100%" }}
+                      className=" custom-form-control"
+                      type="text"
+                      value={apiModel["tags"]}
+                      onChange={(e) => {
+                        onApiModelChange("tags", e.target.value);
+                      }}
+                    />
                   </Col>
                 </Row>
               </Form.Group>
@@ -195,64 +207,52 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                   </Col>
                 </Row>
               </Form.Group>
-              <Form.Group
-                className="mb-3 mt-3 custom-form-group"
-                controlId="auth_api">
-                <Row>
-      <Col sm={3}>
-        {/* <Form.Label className="mx-3">Is Authentication API</Form.Label> */}
-      </Col>
-      <Col sm={9}>
-        <Form.Check
-        style={{color:"white"}}
-          label="Is Authentication API"
-          type="checkbox"
-          id="is-auth-api"
-          checked={apiModel["is_authentication_api"]}
-          onChange={(e)=> {onApiModelChange("is_authentication_api", e.target.checked)}}
-        />
-      </Col>
-    </Row>
-              </Form.Group>
             </>
-            {apiModel.request && (
-              <Form.Group
-                className="mb-3 custom-form-group"
-                controlId="request">
-                <Request
-                  loginApis={loginApis}
-                  tokenApis={tokenApis}
-                  onChange={onApiModelChange}
-                  requestBody={apiModel.request}
-                />
-              </Form.Group>
-            )}
 
-            {apiModel["response"] && (
-              <Row>
-                <Col sm={3}>
+            <Form.Group className="mb-3 custom-form-group" controlId="request">
+               <Request
+                loginApis={loginApis}
+                tokenApis={tokenApis}
+                onChange={onApiModelChange}
+                requestBody={
+                  apiModel.request || {"body":[], "auth":[]}
+                }
+              /> 
+            </Form.Group>
+
+            <Row>
+              <Col sm={3}>
                 <Form.Label className="mx-3 mt-3">Response</Form.Label>
-                <Button variant="secondary" size="sm" onClick={handleAddResponse}>
-                <img width="24" height="24" src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png" alt="add--v1"/> 
-                </Button>
-                </Col>
-              <Col sm={9} className="d-flex flex-wrap mt-3 p-2" style={{ backgroundColor: "rgba(239, 239, 239, 0.5)"}}>
-                {apiModel["response"].map((res, index) => (
-                  <Response
-                    key={res.id}
-                    index={index}
-                    onChange={handleResponseBodyChange}
-                    responseData={res}
-                    onRemove = {removeResponse}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddResponse}>
+                  <img
+                    width="24"
+                    height="24"
+                    src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+                    alt="add--v1"
                   />
-                ))}
+                </Button>
               </Col>
-              </Row>
-              
-            )}
+              <Col
+                sm={9}
+                className="d-flex flex-wrap mt-3 p-2"
+                style={{ backgroundColor: "rgba(239, 239, 239, 0.5)" }}>
+                {apiModel.response &&
+                  apiModel["response"].map((res, index) => (
+                    <Response
+                      key={res.id}
+                      index={index}
+                      onChange={handleResponseBodyChange}
+                      responseData={res}
+                      onRemove={removeResponse}
+                    />
+                  ))}
+              </Col>
+            </Row>
           </Form>
         </>
-      )}
     </div>
   );
 }

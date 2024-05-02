@@ -125,9 +125,10 @@ export default function Root() {
           {view === "LIST_SERVICE" ? (
             <ServiceList
               onEditService={onEditService}
-              errorMessage={errorMessage}></ServiceList>
+              errorMessage={errorMessage}
+              onAddService={onAddService}></ServiceList>
           ) : view === "AUTH_API_LIST" ? (
-            <AuthApiList onEditAuthService={onEditAuthService}></AuthApiList>
+            <AuthApiList onEditAuthService={onEditAuthService} onAddAuthService = {onAddAuthService}></AuthApiList>
           ) : view === "EDIT_AUTH_FUNCTION" ? (
             <EditAuthFunction
               selectedAuthServiceId={selectedAuthServiceId}

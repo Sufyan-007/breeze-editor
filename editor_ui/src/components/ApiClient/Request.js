@@ -37,26 +37,20 @@ let methodType = [
   },
 ];
 function Request({ loginApis, tokenApis, onChange, requestBody }) {
-    // console.log(loginApis, tokenApis, "login token");
-  const [request, setRequest] = useState(requestBody || {});
-  const [hasBody, setHasBody] = useState(request.body?.length > 0);
-  const onUrlValueChange = (value) => {
-    let r = request;
-    r["url"] = value;
-    setRequest({
-      ...r,
-    });
-    onChange("request", r);
-  };
+  const [request, setRequest] = useState(requestBody);
   const onListValueChange = (prop, index, data) => {
-    let r = request;
+    console.log(request, "request");
+    let r = {...request};
     r[prop][index] = data;
     setRequest({
       ...r,
     });
-    setHasBody(data.length > 0);
     onChange("request", r);
   };
+
+  useEffect(()=>{
+    setRequest(requestBody)
+  },[requestBody])
 
   const onValueChange = (prop, value) => {
     let r = request;
@@ -80,7 +74,6 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
       body: request.body ? [...request.body, newBody] : [newBody],
     });
     onChange("request", request)
-    setHasBody(true);
   };
   useEffect(() => {
     if (request.body && request.body.length > 0) {
@@ -103,7 +96,6 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
       };
       setRequest(updatedRequest);
       onChange("request", updatedRequest);
-      setHasBody(updatedBody.length > 0);
     }
   };
   const addAuthSection = () => {
@@ -122,13 +114,11 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
    <>
           <CustomButtonGroup
             options={methodType}
-            selectedButton={request["method"]}
+            selectedButton={request.method}
             onButtonClick={onValueChange}
             formId="method"
             title="Method:" />
-        {request["url"] && (
-          <Urls urlData={request["url"]} onChange={onUrlValueChange} />
-        )}
+          <Urls urlData={request["url"] } onChange={onValueChange} />
         <div>
           <Row>
             <Col sm={3}>

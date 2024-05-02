@@ -45,9 +45,9 @@ export async function getAuthApiConfig(projectName,apiId) {
     return auth_api
 }
 
-export async function modifyApiConfig(data,projectName,filename){
+export async function modifyApiConfig(data,projectName,filename,operation){
     filename = filename.replace(/\.json$/, '');
-    const apiUrl = "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/"+ projectName+"/"+filename
+    const apiUrl = "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/"+ projectName+"/"+filename+"/"+ operation
     const response = await callApiClientGenerator(apiUrl, "POST", data,false,{})
     // const responseData = await response.json();
     return response;
@@ -79,6 +79,11 @@ export async function appendToAuthApi(authObj,update, appName) {
     let apiUrl = HOST+"/api-client-generator/append-to-auth-api/"+operation+ "/" + appName
     const res = await callApiClientGenerator(apiUrl, "POST", authObj, false,{});
     return res
+}
+export async function transferToAuthApi(idList, appName) {
+  let apiUrl = HOST+"/api-client-generator/transfer-to-auth-api/" + appName
+  const res = await callApiClientGenerator(apiUrl, "POST", idList, false,{});
+  return res
 }
 export async function callApiClientGenerator(url, method, payload, isFormData, options = {}) {
     const { headers = {}, ...otherOptions } = options;
