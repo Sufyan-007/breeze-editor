@@ -54,12 +54,14 @@ const menu = [
 
 export const ComponentContext = createContext({
   componentConfig: null,
+  setComponentConfig: null,
   componentName: null,
   sidebarService: null
 })
 
 export default function ComponentConfigPage() {
-  const componentConfig = useLoaderData();
+  const componentConfigInit = useLoaderData();
+  const [ componentConfig, setComponentConfig] = useState(componentConfigInit)
   console.log(componentConfig);
   const { projectName, componentName } = useParams();
   const [selectedItem, setSelectedItem] = useState(0);
@@ -80,7 +82,7 @@ export default function ComponentConfigPage() {
 
   return (
 
-    <ComponentContext.Provider value={{ componentConfig, componentName, sidebarService }}>
+    <ComponentContext.Provider value={{ componentConfig, setComponentConfig, componentName, sidebarService }}>
       <div className="container-fluid vh-100 d-flex flex-column">
         <Navbar
           leftContent={

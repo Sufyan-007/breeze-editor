@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { ComponentContext } from "./ComponentConfigPage"
 
 export default function ElementConfigSidebar({config}){
-    const {sidebarService} = useContext(ComponentContext)
+    const {sidebarService,componentConfig} = useContext(ComponentContext)
     console.log(sidebarService)
     const [selectedElem, setSelectedElement] = useState(null)
     const elem = selectedElem?.elem
