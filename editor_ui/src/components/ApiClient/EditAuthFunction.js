@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Row, Col, Toast } from "react-bootstrap";
+import { Form, Button, Row, Col } from "react-bootstrap";
 import close from "../../assets/icons/close.svg";
-import Add from "../../assets/icons/add.svg";
 import {
   getAuthApiConfig,
   appendToAuthApi,

@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Col, Row } from "react-bootstrap";
+import { Form, Row } from "react-bootstrap";
 import '../css/AddOrEditAuthConfigStyles.css'
 const CustomFormControl = ({
     onChange,

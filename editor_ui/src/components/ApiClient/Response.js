@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Form, Button, ButtonGroup, Row, Col } from 'react-bootstrap';
+import React, { useState } from "react";
+import { Form, Row, Col } from 'react-bootstrap';
 import CustomButtonGroup from "../CustomButtonGroup";
 import remove from '../../assets/icons/remove.svg'
 let responseStatus = [

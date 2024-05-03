@@ -1,7 +1,6 @@
-import React, { useState, useRef } from "react";
-import { Form, Button, Row, Col, ButtonGroup, Dropdown } from "react-bootstrap";
+import React, { useState } from "react";
+import { Form,  Row, Col, Dropdown } from "react-bootstrap";
 import CustomButtonGroup from "../CustomButtonGroup";
-import context from "react-bootstrap/esm/AccordionContext";
 let authTypes = [
   {
     name: "NOAUTH",
@@ -96,8 +95,7 @@ export default function Auth({ index, onChange, auth, loginApis, tokenApis }) {
             >
               <Dropdown.Toggle variant="secondary" id="loginApiDropdown">
                 {authData["login_api"]
-                  ? loginApis.find((api) => api.id === authData["login_api"])
-                      .operation_id
+                  ? loginApis.find((api) => api.id === authData["login_api"]).operation_id
                   : "Select Login Api"}
               </Dropdown.Toggle>
               <Dropdown.Menu style={{ textAlign: "center" }}>

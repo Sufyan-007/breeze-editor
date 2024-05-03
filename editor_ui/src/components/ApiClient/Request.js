@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Dropdown, Row, Col } from "react-bootstrap";
+import { Form, Button, Row, Col } from "react-bootstrap";
 import Body from "./Body.js";
 import Auth from "./Auth.js";
 import Urls from "./Urls.js";
-import add from "../../assets/icons/add.svg";
 import CustomButtonGroup from "../CustomButtonGroup.js";
+import Parameter from "./Parameter.js";
 
 let methodType = [
   {
@@ -61,20 +61,21 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
     onChange("request", r);
   };
 
-  const addBodySection = () => {
-    const newBody = {
-      id: Date.now(),
-      mode: "RAW",
-      content_type: "NONE",
-      schema_name: "",
-      anonymous: false,
-    };
+  const addProperty = (name, initial_values) => {
+     const newProperty = {
+      ...initial_values,
+      id: Date.now()
+     }
+     console.log(newProperty, "newprop");
     setRequest({
       ...request,
-      body: request.body ? [...request.body, newBody] : [newBody],
+      [name]: request[name]
+        ? [...request[name], newProperty]
+        : [newProperty],
     });
     onChange("request", request);
   };
+
   useEffect(() => {
     if (request.body && request.body.length > 0) {
       const updatedBody = request.body.map((body) => ({
@@ -87,14 +88,15 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
       }));
     }
   }, []);
-  const removeBodySection = (indexToRemove) => {
-    if (request.body && request.body.length > 0) {
-      const updatedBody = request.body.filter(
+
+  const removeProperty = (name, indexToRemove) => {
+    if (request[name] && request[name].length > 0) {
+      const updatedProperty = request[name].filter(
         (_, index) => index !== indexToRemove
       );
       const updatedRequest = {
         ...request,
-        body: updatedBody,
+        [name]: updatedProperty,
       };
       setRequest(updatedRequest);
       onChange("request", updatedRequest);
@@ -150,8 +152,46 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
 
       <Row>
         <Col sm={3}>
+          <Form.Label className="mt-3 mx-3">Parameter:</Form.Label>
+          <Button variant="secondary" size="sm" onClick={()=> addProperty("parameters", {"param_in":'',
+        "type":'', "required": false, "description":'', "name":''})}>
+            <img
+              width="24"
+              height="24"
+              src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+              alt="add--v1"
+            />{" "}
+          </Button>
+        </Col>
+        {request["parameters"] && (
+          <Col
+            sm={9}
+            className="d-flex flex-wrap mt-3"
+            style={{
+              flexDirection: "row",
+              justifyContent: "normal",
+              backgroundColor: "rgba(239, 239, 239, 0.5)",
+            }}>
+            {request["parameters"].map((parameter, index) => (
+              <Parameter
+                key={parameter.id}
+                index={index}
+                onChange={onListValueChange}
+                parameterData={parameter}
+                onRemove={() => removeProperty("parameters",index)}
+              />
+            ))}
+          </Col>
+        )}
+      </Row>
+
+      <Row>
+        <Col sm={3}>
           <Form.Label className="mt-3 mx-3">Body:</Form.Label>
-          <Button variant="secondary" size="sm" onClick={addBodySection}>
+          <Button variant="secondary" size="sm" onClick={()=> addProperty("body", {mode: "RAW",
+      content_type: "NONE",
+      schema_name: "",
+      anonymous: false,})}>
             <img
               width="24"
               height="24"
@@ -175,7 +215,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
                 index={index}
                 onChange={onListValueChange}
                 bodyData={body}
-                onRemove={() => removeBodySection(index)}
+                onRemove={() => removeProperty("body", index)}
               />
             ))}
           </Col>

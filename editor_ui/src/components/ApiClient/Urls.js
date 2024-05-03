@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import CustomFormControl from "../CustomFormControl";
-import { Col, Form, FormGroup, Row } from "react-bootstrap";
+import { Col, Form, Row } from "react-bootstrap";
 
 function Urls({ urlData, onChange }) {
   const onValueChange = (field, fieldValue) => {

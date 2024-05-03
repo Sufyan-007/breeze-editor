@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Button, Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
+import React, { useState, useRef } from "react";
+import {  Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
 import ServiceList from "./ServiceList";
 import AuthApiList from "./AuthApiList";
 import EditAuthFunction from "./EditAuthFunction";

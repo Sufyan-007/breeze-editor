@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Row, Col, Button } from "react-bootstrap";
+import { Form, Row, Col } from "react-bootstrap";
 import CustomButtonGroup from "../CustomButtonGroup";
 import remove from "../../assets/icons/remove.svg";
 const modeOptions = [
@@ -21,8 +21,6 @@ const Body = ({ index, onChange, bodyData, onRemove, key }) => {
   const [body, setBody] = useState(bodyData || {});
 
   const onValueChange = (prop, value) => {
-    console.log(prop, "prop");
-    console.log(value, "value");
     const updatedBody = { ...body, [prop]: value };
     setBody(updatedBody);
     onChange("body", index, updatedBody);

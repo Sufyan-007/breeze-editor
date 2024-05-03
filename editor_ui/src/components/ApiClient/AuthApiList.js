@@ -3,7 +3,6 @@ import { getAuthFileApis } from "../../services/IntermediatesService";
 import { Button, Table } from "react-bootstrap";
 import DeleteIcon from "../../assets/icons/delete.svg";
 import EditIcon from "../../assets/icons/edit.svg";
-import Add from "../../assets/icons/add.svg";
 import { useParams } from "react-router";
 
 export default function AuthApiList({ onEditAuthService, onAddAuthService}) {

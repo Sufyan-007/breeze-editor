@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useLoaderData, useNavigate } from "react-router";
+import React, { useState, useEffect } from "react";
+import { useLoaderData } from "react-router";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { getAllConfigs } from "../services/ConfigService";
