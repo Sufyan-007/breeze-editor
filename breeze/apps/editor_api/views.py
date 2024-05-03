@@ -470,8 +470,8 @@ class HtmlConfigWriter(APIView):
         data = json.loads(request.body.decode("utf-8"))
         try:
             componentConfigService = ComponentConfigService(data["project_id"])
-            componentConfigService.delete_html_config(data["component"],data["html_id"])
-            return JsonResponse({},status=200)
+            res=componentConfigService.delete_html_config(data["component"],data["html_id"])
+            return JsonResponse(res,status=200)
         except:
             return JsonResponse({},status=500)
 
@@ -480,7 +480,7 @@ class HtmlConfigWriter(APIView):
         try:
             # raise NotImplementedError()
             componentConfigService = ComponentConfigService(data["project_id"])
-            new_child_id=componentConfigService.add_child_html(data["component"],data["parent_html_id"],data["child"])
-            return JsonResponse({"new_child_id":new_child_id},status=200)
+            new_child_id,child_config,parent_html=componentConfigService.add_child_html(data["component"],data["parent_html_id"],data["child"])
+            return JsonResponse({"new_child_id":new_child_id,"child_config":child_config,"parent_html":parent_html},status=200)
         except:
             return JsonResponse({},status=500)

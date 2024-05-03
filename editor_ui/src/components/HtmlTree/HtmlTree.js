@@ -6,13 +6,13 @@ import { ComponentContext } from "../ComponentConfig/ComponentConfigPage"
 
 export default function HtmlTree({ htmlId, className }) {
     const { componentConfig, sidebarService } = useContext(ComponentContext)
+    
     const value = componentConfig.html_elements[htmlId]
     const ref = useRef()
 
     useEffect(() => {
         var updateSub;
         const sub = sidebarService.getSelectedElem().subscribe((elem)=>{
-            console.log(elem)
             if(elem?.elem ===htmlId){
                 console.log(elem)
                 ref.current?.classList.add("bg-dark")
@@ -34,12 +34,12 @@ export default function HtmlTree({ htmlId, className }) {
     return (
         <div className={className} >
             {value.type === "Element" ?
-                <Html value={value} selectElem={selectElem} reference={ref} />
+                <Html value={value} htmlId={htmlId} selectElem={selectElem} reference={ref} />
                 :
                 value.type === "Expression" ?
                     "Expression"
                     :
-                    <Text selectElem={selectElem} reference={ref} value={value} />
+                    <Text selectElem={selectElem} htmlId={htmlId} reference={ref} value={value} />
             }
         </div>
     )

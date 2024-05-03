@@ -4,22 +4,48 @@ import rightArrow from "../../assets/icons/arrow_right_icon.svg"
 import downArrow from "../../assets/icons/arrow_down_icon.svg"
 import threeDots from "../../assets/icons/three_dots_icon.svg"
 import HtmlTree from "./HtmlTree"
-import { Fragment, useState } from "react"
+import { Fragment, useContext, useState } from "react"
 import AddChildModal from "../AddChildModal"
+import { addHtmlChild, removeHtmlElem } from "../../services/HtmlConfigService"
+import { useParams } from "react-router"
+import { ComponentContext } from "../ComponentConfig/ComponentConfigPage"
 
-export default function Html({ value, reference, selectElem }) {
+export default function Html({ value,htmlId, reference, selectElem }) {
     const [showChild, setShowChild] = useState(false)
+    const {setComponentConfig} = useContext(ComponentContext)
+    const { projectName, componentName } = useParams();
     const hasChildren = value.children?.length > 0
-    const [showAdd,setShowAdd] = useState(false)
+    const [showAdd, setShowAdd] = useState(false)
 
 
-    function addChild(val){
-        console.log(val)
+    function addChild(val) {
+        addHtmlChild(projectName,htmlId,componentName,val).then((res)=>{
+            console.log(res)
+            setComponentConfig(state=>{
+                state["html_elements"][htmlId] = res["parent_html"]
+                state["html_elements"][res["new_child_id"]] = res["child_config"]
+                console.log(state)
+                return {...state}
+            })
+        })
         setShowAdd(false)
     }
 
     function toggleShowChild() {
         setShowChild(state => !state)
+    }
+
+    function addText(){
+        addChild({elementType:"TEXT",text:"Hello World"})
+        // addHtmlChild(projectName,htmlId,componentName,{elementType:"TEXT",text:"Hello World"}).then((res)=>{
+        //     console.log(res)
+        // })
+    }
+
+    function removeElem(){
+        removeHtmlElem(projectName,componentName,htmlId).then((res)=>{
+            setComponentConfig(res)
+        })
     }
 
     return (
@@ -51,10 +77,10 @@ export default function Html({ value, reference, selectElem }) {
                         </button>
                         <div className="dropdown-menu p-0 my-1 " aria-labelledby="dropdownMenuButton">
 
-                            <div className="dropdown-item my-1  "  onClick={()=>setShowAdd(true)} >
+                            <div className="dropdown-item my-1  " onClick={() => setShowAdd(true)} >
                                 Add Child
                             </div>
-                            <div className="dropdown-item my-1  "  >
+                            <div className="dropdown-item my-1  " onClick={()=> addText()}  >
                                 Add Text
                             </div>
                             <div className="dropdown-item my-1  "  >
@@ -64,7 +90,7 @@ export default function Html({ value, reference, selectElem }) {
                                 Move Down
                             </div>
 
-                            <div className="dropdown-item my-1 bg-danger " >
+                            <div className="dropdown-item my-1 bg-danger " onClick={removeElem} >
                                 Remove
                             </div>
 
