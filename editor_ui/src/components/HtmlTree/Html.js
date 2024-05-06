@@ -10,24 +10,26 @@ import { addHtmlChild, removeHtmlElem } from "../../services/HtmlConfigService"
 import { useParams } from "react-router"
 import { ComponentContext } from "../ComponentConfig/ComponentConfigPage"
 
-export default function Html({ value,htmlId, reference, selectElem }) {
+export default function Html({ value, htmlId, reference, selectElem }) {
     const [showChild, setShowChild] = useState(false)
-    const {setComponentConfig} = useContext(ComponentContext)
+    const { setComponentConfig } = useContext(ComponentContext)
     const { projectName, componentName } = useParams();
     const hasChildren = value.children?.length > 0
     const [showAdd, setShowAdd] = useState(false)
 
 
     function addChild(val) {
-        addHtmlChild(projectName,htmlId,componentName,val).then((res)=>{
-            console.log(res)
-            setComponentConfig(state=>{
-                state["html_elements"][htmlId] = res["parent_html"]
-                state["html_elements"][res["new_child_id"]] = res["child_config"]
-                console.log(state)
-                return {...state}
+        if (val) {
+            addHtmlChild(projectName, htmlId, componentName, val).then((res) => {
+                console.log(res)
+                setComponentConfig(state => {
+                    state["html_elements"][htmlId] = res["parent_html"]
+                    state["html_elements"][res["new_child_id"]] = res["child_config"]
+                    console.log(state)
+                    return { ...state }
+                })
             })
-        })
+        }
         setShowAdd(false)
     }
 
@@ -35,15 +37,15 @@ export default function Html({ value,htmlId, reference, selectElem }) {
         setShowChild(state => !state)
     }
 
-    function addText(){
-        addChild({elementType:"TEXT",text:"Hello World"})
+    function addText() {
+        addChild({ elementType: "TEXT", text: "Hello World" })
         // addHtmlChild(projectName,htmlId,componentName,{elementType:"TEXT",text:"Hello World"}).then((res)=>{
         //     console.log(res)
         // })
     }
 
-    function removeElem(){
-        removeHtmlElem(projectName,componentName,htmlId).then((res)=>{
+    function removeElem() {
+        removeHtmlElem(projectName, componentName, htmlId).then((res) => {
             setComponentConfig(res)
         })
     }
@@ -80,7 +82,7 @@ export default function Html({ value,htmlId, reference, selectElem }) {
                             <div className="dropdown-item my-1  " onClick={() => setShowAdd(true)} >
                                 Add Child
                             </div>
-                            <div className="dropdown-item my-1  " onClick={()=> addText()}  >
+                            <div className="dropdown-item my-1  " onClick={() => addText()}  >
                                 Add Text
                             </div>
                             <div className="dropdown-item my-1  "  >
