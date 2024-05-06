@@ -52,7 +52,13 @@ class ComponentConfigService {
 
     }
 
-
+    async addAllRoutes(allRoutes) {
+        console.log(allRoutes);
+        const response = await (await fetch("http://localhost:8000/editor/add-all-routes/" + this.projectName + "/",
+            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ allRoutes }) }
+        )).json();
+        console.log(response);
+    }
 }
 
 export default ComponentConfigService

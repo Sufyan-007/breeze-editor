@@ -24,6 +24,7 @@ urlpatterns = [
         path('read-router-config/<str:param>/',RoutingReader.as_view()),
         path('add-component/<str:param>/',NewComponentWriter.as_view()),
         path('add-route/<str:param>/',RoutingWriter.as_view()),
+        path('add-all-routes/<str:param>/',RoutingWriter.as_view()),
         path('read-reducers/<str:param>/',ReducerConfig.as_view()),
         path('write-reducers/<str:param>/',ReducerConfig.as_view()),
         path('read-redux-store/<str:param>/',StoreConfig.as_view()),

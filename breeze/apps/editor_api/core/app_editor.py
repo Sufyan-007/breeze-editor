@@ -194,6 +194,14 @@ class AppEditor:
         self.modify_main_component()
         return self.routing_config
     
+    def set_all_routes(self, allRoutes):
+        print(allRoutes)
+        self.routing_config["routes"] = allRoutes
+        routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
+        write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
+        self.modify_main_component()
+        return self.routing_config
+
     def write_reducers(self):
         reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)
         reducer_generator.write_all_reducers()
