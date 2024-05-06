@@ -62,7 +62,7 @@ class HTMLGenerator:
                 else:
                     imports = {
                         "TYPE": "THIRD_PARTY",
-                        "from": config.get("libary"),
+                        "from": config["library"],
                         "import_entity": tag,
                         "import_type": "SINGLE"
                     }
