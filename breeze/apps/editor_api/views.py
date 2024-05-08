@@ -462,9 +462,9 @@ class HtmlConfigWriter(APIView):
         try:
             componentConfigService = ComponentConfigService(data["project_id"])
             componentConfigService.update_html_config(data["component"],data["html_id"],data["html_config"])
-            return JsonResponse({},status=200)
-        except:
-            return JsonResponse({},status=500)
+            return JsonResponse(data,status=200)
+        except Exception as e:
+            return JsonResponse({str(e)},status=500)
     
     def delete(self,request):
         data = json.loads(request.body.decode("utf-8"))

@@ -1,19 +1,28 @@
 import React from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 
 const HtmlELementConfig = ({ selectedElement, componentConfig }) => {
   const [selectedAttributes, setSelectedAttributes] = useState([]);
   const [selectedEventListeners, setSelectedEventListeners] = useState([]);
-  const [attributes, setAttributes] = useState(["ClassName", "value", "id"]);
-  const [eventListeners, setEventListners] = useState(["One", "Two", "Three"]);
+  const [attributes, setAttributes] = useState([]);
+  const [eventListeners, setEventListners] = useState(["onClick", "onMousehover"]);
 
   console.log("sdhys", selectedElement);
   console.log("sdkjs", componentConfig);
   const handleFormSubmit = (e) => {
     e.preventDefault();
   };
+
+  useEffect(() => {
+    // Set initial state here
+    const  attributesValue =componentConfig.html_elements[selectedElement.elem].attributes;
+    const keysArray = Object.keys(attributesValue);
+
+    setAttributes(keysArray);
+  }, []);
+
   const handleSelectAttributeChange = (event) => {
     const selectedOption = event.target.value;
     event.target.value = "Add Attributes";
@@ -45,7 +54,7 @@ const HtmlELementConfig = ({ selectedElement, componentConfig }) => {
     setSelectedEventListeners([...selectedEventListeners, selectedOption]);
   };
   console.log("sjd", selectedElement);
-  console.log(componentConfig.html_elements);
+  console.log(componentConfig.html_elements[selectedElement.elem].attributes);
 
   const handleDeleteAttribute = (index) => {
     setSelectedAttributes((prevSelectedAttributes) =>
