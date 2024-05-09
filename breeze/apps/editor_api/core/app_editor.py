@@ -20,6 +20,7 @@ NEW_COMP_FORMAT={
     "stateVars": [],
     "propsVars": [],
     "otherVars": [],
+    "componentType" : "CUSTOM",
     "functions": [],
     "$id":"$NAME",
     "html": {"_id":"$NAME"},
@@ -73,7 +74,7 @@ NEW_COMP_FORMAT={
         },
         "$NAME-1-0":{
             "type":"text",
-            "text": "Hello"
+            "text": "BYe"
         }
     }
 }
@@ -188,18 +189,14 @@ class AppEditor:
     
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
-    def add_component(self,name):
+    def add_component(self,name,type):
         name=name.replace(' ',"")
         comp=NEW_COMP_FORMAT.copy()
         replace_variable(comp,"$NAME",name)
-        # comp['name'] = name
-        # comp["$id"] = name.upper()
-        # comp['containingFile'] = "components/"+name+".js"
-        # comp["html"]["attributes"]["id"]["value"]=name
-        # comp["html"]["_id"]=name
-        # config=self.write_component(comp)
+        comp["type"] = type
+        config=self.write_component(comp)
         
-        return {"config":comp, "comp":name}
+        return {"config":config, "comp":name}
     
     # Adds a new route to specified component,
     #!!! routes preferably placed in a new file that's imported to App.js to avoid re-writing it

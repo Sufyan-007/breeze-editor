@@ -63,7 +63,7 @@ class NewComponentWriter(APIView):
         data= json.loads(request.body.decode("utf-8"))
         try:
             app_component_writer= AppEditor(param)
-            res=app_component_writer.add_component(data["name"])
+            res=app_component_writer.add_component(data["name"],data["type"])
             return JsonResponse(res)
         except:
             return JsonResponse({}, status=500)
