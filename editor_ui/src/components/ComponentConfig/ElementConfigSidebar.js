@@ -6,7 +6,8 @@ import TextElement from "../SidebarConfigHelper/components/TextELementConfig";
 import HtmlELementConfig from "../SidebarConfigHelper/components/HtmlELementConfig";
 
 export default function ElementConfigSidebar({ config }) {
-  const { sidebarService, componentConfig ,setComponentConfig} = useContext(ComponentContext);
+  const { sidebarService, componentConfig, setComponentConfig } =
+    useContext(ComponentContext);
   const [selectedElem, setSelectedElement] = useState(null);
   const elem = selectedElem?.elem;
   const [textValue, setTextValue] = useState("");
@@ -20,7 +21,6 @@ export default function ElementConfigSidebar({ config }) {
     sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
       const htmlElements = componentConfig?.html_elements;
-      console.log("sdks", elem);
       const idName = elem?.elem;
       setTextValue(htmlElements[idName]?.text);
       setElemTypeValue(htmlElements[idName]?.type);
@@ -32,38 +32,51 @@ export default function ElementConfigSidebar({ config }) {
   };
   const handleTextChange = (event) => {
     setTextValue(event.target.value);
-    // console.log(projectName,componentName)
-    // console.log(elem)
-    console.log(componentConfig);
+    //
+    //
   };
-  const handleUpdateClick = () => {
-    console.log("handleUpdateClick");
-    console.log("kjfvnjdf",componentConfig.html_elements);
-    console.log("sdclkdfcdfvdf",selectedElem)
-    const html_config= componentConfig.html_elements;
-    console.log("sdk",html_config)
-    //html_config[elem].text=textValue
-    console.log(  html_config[elem].text    )
-    console.log(html_config)
-    console.log(componentConfig)
-    console.log("elem hai ye",elem)
+  const handleUpdateTextClick = () => {
+    const html_config = { ...componentConfig.html_elements };
 
-   // updateHtmlConfig(projectName, elem, componentName, html_config);
+    html_config[elem].text = textValue;
+    console.log(html_config);
+
+    updateHtmlConfig(projectName, elem, componentName, html_config[elem]);
   };
+  const handleUpdateHtmlClick = (html_config) => {
+    console.log("hI", html_config);
 
+    updateHtmlConfig(projectName, elem, componentName, html_config);
+  };
   //Api
 
   async function updateHtmlConfig(project_id, html_id, component, html_config) {
-    const response = await (
-      await fetch("http://localhost:8000/editor/update-html-config/", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ project_id, html_id, component, html_config }),
-      })
-    ).json();
-    console.log("response",response)
-    setComponentConfig(response)
-    console.log("com", componentConfig);
+    try {
+      const response = await fetch(
+        "http://localhost:8000/editor/update-html-config/",
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ project_id, html_id, component, html_config }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update HTML config");
+      }
+
+      const responseData = await response.json();
+      // Assuming `setComponentConfig` is a state setter function
+      setComponentConfig((state) => {
+        state["html_elements"][responseData["html_id"]] =
+          responseData["html_config"];
+
+        return { ...state };
+      });
+      // console.log(responseData)
+    } catch (error) {
+      console.error("Error:", error);
+    }
   }
 
   //APi
@@ -88,47 +101,22 @@ export default function ElementConfigSidebar({ config }) {
               className="btn-close-white btn-close"
               onClick={makeSelectedElementNull}
             ></button>
-
             {elemTypeValue === "text" && (
               <TextElement
                 textValue={textValue}
                 handleTextChange={handleTextChange}
+                makeSelectedElementNull={makeSelectedElementNull}
+                handleUpdateTextClick={handleUpdateTextClick}
               />
             )}
             {elemTypeValue === "Element" && (
               <HtmlELementConfig
                 selectedElement={selectedElem}
                 componentConfig={componentConfig}
+                makeSelectedElementNull={makeSelectedElementNull}
+                handleUpdateHtmlClick={handleUpdateHtmlClick}
               />
             )}
-            <div
-              className="pt-1 pb-1   w-100"
-              style={{
-                position: "sticky",
-                bottom: "0",
-                backgroundColor: "#303033",
-              }}
-            >
-              <div className="d-flex justify-content-between  ps-3 pe-3">
-                <div>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={makeSelectedElementNull}
-                  >
-                    Cancel
-                  </button>
-                </div>
-
-                <div>
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleUpdateClick}
-                  >
-                    Update
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </>
