@@ -2,7 +2,7 @@ import React from "react";
 import { Form } from "react-bootstrap";
 import { useRef, useEffect } from "react";
 
-const TextELement = ({
+const TextElement = ({
   textValue,
   handleTextChange,
   makeSelectedElementNull,
@@ -61,4 +61,4 @@ const TextELement = ({
   );
 };
 
-export default TextELement;
+export default TextElement;

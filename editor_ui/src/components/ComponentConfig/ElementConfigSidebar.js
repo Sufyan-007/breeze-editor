@@ -2,8 +2,8 @@ import { useContext, useEffect, useState } from "react";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
 
-import TextElement from "../SidebarConfigHelper/components/TextELementConfig";
-import HtmlELementConfig from "../SidebarConfigHelper/components/HtmlELementConfig";
+import TextElement from "../SidebarConfigHelper/components/TextElementConfig";
+import HtmlElementConfig from "../SidebarConfigHelper/components/HtmlElementConfig";
 
 export default function ElementConfigSidebar({ config }) {
   const { sidebarService, componentConfig, setComponentConfig } =
@@ -11,11 +11,8 @@ export default function ElementConfigSidebar({ config }) {
   const [selectedElem, setSelectedElement] = useState(null);
   const elem = selectedElem?.elem;
   const [textValue, setTextValue] = useState("");
-  const [elemTypeValue, setElemTypeValue] = useState(""); // const update = selectedElem?.updateSub
+  const [elemTypeValue, setElemTypeValue] = useState("");
   const { projectName, componentName } = useParams();
-
-  // const update = selectedElem?.updateSub
-  // const component = selectedElem?.component
 
   useEffect(() => {
     sidebarService.getSelectedElem().subscribe((elem) => {
@@ -39,13 +36,9 @@ export default function ElementConfigSidebar({ config }) {
     const html_config = { ...componentConfig.html_elements };
 
     html_config[elem].text = textValue;
-    console.log(html_config);
-
     updateHtmlConfig(projectName, elem, componentName, html_config[elem]);
   };
   const handleUpdateHtmlClick = (html_config) => {
-    console.log("hI", html_config);
-
     updateHtmlConfig(projectName, elem, componentName, html_config);
   };
   //Api
@@ -73,7 +66,7 @@ export default function ElementConfigSidebar({ config }) {
 
         return { ...state };
       });
-      // console.log(responseData)
+      //
     } catch (error) {
       console.error("Error:", error);
     }
@@ -110,7 +103,7 @@ export default function ElementConfigSidebar({ config }) {
               />
             )}
             {elemTypeValue === "Element" && (
-              <HtmlELementConfig
+              <HtmlElementConfig
                 selectedElement={selectedElem}
                 componentConfig={componentConfig}
                 makeSelectedElementNull={makeSelectedElementNull}

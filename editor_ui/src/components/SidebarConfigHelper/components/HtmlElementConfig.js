@@ -4,7 +4,7 @@ import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import Accordion from "react-bootstrap/Accordion";
 
-const HtmlELementConfig = ({
+const HtmlElementConfig = ({
   selectedElement,
   componentConfig,
   makeSelectedElementNull,
@@ -17,17 +17,14 @@ const HtmlELementConfig = ({
     "onClick",
     "onMousehover",
   ]);
-  const [htmlELementConfig, setHtmlELementConfig] = useState(null);
+  const [htmlElementConfig, setHtmlElementConfig] = useState(null);
 
-  console.log("sdhys", selectedElement);
-  console.log("sdkjs", componentConfig);
   const handleFormSubmit = (e) => {
     e.preventDefault();
   };
 
-  const updateHtmlELementConfig = () => {
-    console.log("upfate", htmlELementConfig);
-    handleUpdateHtmlClick(htmlELementConfig);
+  const updateHtmlElementConfig = () => {
+    handleUpdateHtmlClick(htmlElementConfig);
   };
   useEffect(() => {
     const attributesValue =
@@ -36,10 +33,9 @@ const HtmlELementConfig = ({
     setAttributes(keysArray);
   }, []);
   useEffect(() => {
-    setHtmlELementConfig({
+    setHtmlElementConfig({
       ...componentConfig.html_elements[selectedElement.elem],
     });
-    
   }, [selectedElement, componentConfig]);
 
   const handleSelectAttributeChange = (event) => {
@@ -72,9 +68,6 @@ const HtmlELementConfig = ({
     // Add selected option to the array
     setSelectedEventListeners([...selectedEventListeners, selectedOption]);
   };
-  console.log("sjd", selectedElement);
-  console.log(componentConfig.html_elements[selectedElement.elem].attributes);
-
   const handleDeleteAttribute = (index) => {
     setSelectedAttributes((prevSelectedAttributes) =>
       prevSelectedAttributes.filter((_, i) => i !== index)
@@ -86,7 +79,7 @@ const HtmlELementConfig = ({
     );
   };
   const handleAttributeChange = (key, value) => {
-    setHtmlELementConfig((prevConfig) => ({
+    setHtmlElementConfig((prevConfig) => ({
       ...prevConfig,
       attributes: {
         ...prevConfig.attributes,
@@ -102,7 +95,7 @@ const HtmlELementConfig = ({
     <div className="mt-3 ps-4 pe-4">
       <Form onSubmit={handleFormSubmit} className="text-light">
         <Form.Group className="mb-3">
-          <Form.Label>ELement</Form.Label>
+          <Form.Label>Element</Form.Label>
           <Form.Control
             type="text"
             value={componentConfig.html_elements[selectedElement?.elem].tagName}
@@ -145,7 +138,7 @@ const HtmlELementConfig = ({
                       <div className="d-flex">
                         <Form.Control
                           type="text"
-                          value={htmlELementConfig.attributes[option].value}
+                          value={htmlElementConfig.attributes[option].value}
                           onChange={(e) =>
                             handleAttributeChange(option, e.target.value)
                           }
@@ -239,7 +232,7 @@ const HtmlELementConfig = ({
           <div>
             <button
               className="btn btn-primary"
-              onClick={updateHtmlELementConfig}
+              onClick={updateHtmlElementConfig}
             >
               Update
             </button>
@@ -250,4 +243,4 @@ const HtmlELementConfig = ({
   );
 };
 
-export default HtmlELementConfig;
+export default HtmlElementConfig;
