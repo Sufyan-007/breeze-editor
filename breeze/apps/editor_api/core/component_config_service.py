@@ -66,3 +66,62 @@ class ComponentConfigService:
             return new_elem_id,child_config,parent_html
         else:
             raise NotImplementedError()
+        
+    def add_lifecycle(self, lifecycle_data):
+        hooks = self.comp_config.get(lifecycle_data["comp_name"], {}).setdefault("hooks", [])
+        if any(hook["name"] == lifecycle_data["hook_name"] for hook in hooks):
+            raise ValueError("Hook name already exists.")
+
+        new_hook = {
+            "name": lifecycle_data["hook_name"],
+            "type": lifecycle_data["type"],
+            "dependantVars": lifecycle_data["dependantVars"],
+            "implementation": {
+                "body": lifecycle_data["body"],
+                "returnBody": lifecycle_data.get("return_body", "")
+            }
+        }
+        hooks.append(new_hook)
+        appEditor = AppEditor(self.projectId)
+        appEditor.write_component(self.comp_config.get(lifecycle_data["comp_name"]))
+        return new_hook
+
+    def update_lifecycle(self, updates):
+        hooks = self.comp_config.get(updates["comp_name"], {}).get("hooks", [])
+        for hook in hooks:
+            if hook['name'] == updates["hook_name"]:
+                hook.update({
+                    "type": updates["type"],
+                    "dependantVars": updates["dependantVars"],
+                    "implementation": {
+                        "body": updates["body"],
+                        "returnBody": updates.get("return_body", "")  
+                    }
+                })
+                appEditor = AppEditor(self.projectId)
+                appEditor.write_component(self.comp_config.get(updates["comp_name"]))
+                return hook
+        raise LookupError("Hook not found")
+    
+    def get_lifecycle(self, comp_name=None, hook_name=None):
+        hooks = self.comp_config.get(comp_name, {}).get("hooks", [])
+        if hook_name is not None:
+            for hook in hooks:
+                if hook['name'] == hook_name:
+                    return hook
+            return None  
+        return hooks  
+    
+    def delete_lifecycle(self, comp_name, hook_name):
+        hooks = self.comp_config.get(comp_name, {}).get("hooks", [])
+        
+        new_hooks = [hook for hook in hooks if hook['name'] != hook_name]
+        
+        if len(hooks) != len(new_hooks):
+            self.comp_config[comp_name]["hooks"] = new_hooks
+            
+            appEditor=AppEditor(self.projectId)
+            appEditor.write_component(self.comp_config.get(comp_name))
+            return True 
+        else: 
+           return False 
