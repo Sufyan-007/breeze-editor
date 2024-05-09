@@ -484,3 +484,71 @@ class HtmlConfigWriter(APIView):
             return JsonResponse({"new_child_id":new_child_id,"child_config":child_config,"parent_html":parent_html},status=200)
         except:
             return JsonResponse({},status=500)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class LifeCycleConfigWriter(APIView):
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            componentConfigService = ComponentConfigService(data["project_id"])
+            lifecycle_data = self.extract_lifecycle_data(data)
+            new_hook = componentConfigService.add_lifecycle(lifecycle_data)
+            return JsonResponse(new_hook, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except ValueError as e:
+            return JsonResponse({'error': str(e)}, status=409)  # 409 Conflict
+
+    def get(self, request):
+        try:
+            project_id = request.GET.get('project_id')
+            comp_name = request.GET.get('comp_name')
+            hook_name = request.GET.get('hook_name')
+            if not project_id or not comp_name:
+                return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            componentConfigService = ComponentConfigService(project_id)
+            lifecycle_hooks = componentConfigService.get_lifecycle(comp_name, hook_name)
+            if lifecycle_hooks or isinstance(lifecycle_hooks, list):
+                return JsonResponse(lifecycle_hooks, safe=False, status=200)
+            return JsonResponse({'error': 'Hook not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def put(self, request):
+        try:
+            data = json.loads(request.body)
+            lifecycle_data = self.extract_lifecycle_data(data)
+            componentConfigService = ComponentConfigService(data["project_id"])
+            updated_hook = componentConfigService.update_lifecycle(lifecycle_data)
+            return JsonResponse(updated_hook, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except (KeyError, LookupError, ValueError) as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    def delete(self, request):
+        try:
+            project_id = request.GET.get('project_id')
+            comp_name = request.GET.get('comp_name')
+            hook_name = request.GET.get('hook_name')
+            if not project_id or not comp_name or not hook_name:
+                return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            componentConfigService = ComponentConfigService(project_id)
+            isDeleted = componentConfigService.delete_lifecycle(comp_name, hook_name)
+            if isDeleted:
+                return JsonResponse({'msg': 'Hook deleted.'}, status=200)
+            return JsonResponse({'error': 'Hook not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    @staticmethod
+    def extract_lifecycle_data(data):
+        return {
+            "comp_name": data["comp_name"],
+            "type": data["type"],
+            "hook_name": data["hook_name"],
+            "dependantVars": data["dependantVars"],
+            "body": data["body"],
+            "return_body": data.get("return_body")
+        }

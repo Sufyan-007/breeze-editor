@@ -66,7 +66,7 @@ export default function ProjectPage() {
             <div
               className=" d-flex align-items-center text-white me-3"
               onClick={() => {
-                router.navigate(`/${projectName}`);
+                router.navigate(`/project/${projectName}`);
               }}
               style={{ cursor: "pointer" }}
             >
