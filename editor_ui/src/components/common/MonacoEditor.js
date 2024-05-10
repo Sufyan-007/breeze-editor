@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as monaco from 'monaco-editor';
 
-function JSeditor({ defaultValue = "", height = "500px", width = "100%", language = "javascript", theme = "vs-dark", onChange, id="monaco-editor" }) {
+function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", language = "javascript", theme = "vs-dark", onChange, id="monaco-editor" }) {
   const editorRef = useRef(null);
 
   useEffect(() => {
@@ -35,4 +35,4 @@ function JSeditor({ defaultValue = "", height = "500px", width = "100%", languag
   );
 }
 
-export default JSeditor;
+export default MonacoEditor;
