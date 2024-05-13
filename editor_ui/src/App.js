@@ -9,7 +9,7 @@ import Sidebar from "./components/Sidebar";
 import DetailedComponent from "./components/DetailedComponent";
 import ReduxConfig from "./components/ReduxConfig";
 import CreateApp from "./components/CreateApp";
-import { ServicePage } from "./components/ServicePage";
+import  Root  from "./components/ApiClient/Root";
 import ProjectPage, { projectLoader } from "./components/ProjectPage";
 import ComponentConfigPage, {
   configLoader,
@@ -32,7 +32,7 @@ export const router = createBrowserRouter([
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
       { path: "routing", element: <ProjectRouting /> },
-      { path: "services", element: <ServicePage /> },
+      { path: "services", element: <Root/> },
       { path: "constants", element: <ReduxConfig /> },
       {
         path: "styles",
@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
       { path: "routing", element: <ProjectRouting /> },
-      { path: "services", element: <ServicePage /> },
+      { path: "services", element: <Root /> },
     ]
   },
   {
@@ -86,10 +86,10 @@ export const router = createBrowserRouter([
     path: "new",
     element: <CreateApp />,
   },
-  // {
-  //   path: "editor/:projectName/service",
-  //   element: <ServicePage />,
-  // },
+  {
+    path: "editor/:projectName/service",
+    element: <Root />,
+  },
 ]);
 
 function App() {
