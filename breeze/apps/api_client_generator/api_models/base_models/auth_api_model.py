@@ -11,14 +11,22 @@ class TokenStore:
     store_in : TokenStoreTypeEnum =  CustomizedAttr((TokenStoreTypeEnum),[required_validator])
     access_token_key : str= CustomizedAttr((str),[])
     refresh_token_key : str= CustomizedAttr((str),[])
+    errors : dict = CustomizedAttr((dict), [])
+    # errors = {}
+    
+
+    def add_error(self, attribute, error_message):
+        if attribute not in self.errors:
+            self.errors[attribute] = []
+        self.errors[attribute].append(error_message)
 
     def as_dict(self):
         
         return {
             'store_in' : self.store_in.name,
             'access_token_key' : self.access_token_key,
-            'refresh_token_key' : self.refresh_token_key
-
+            'refresh_token_key' : self.refresh_token_key,
+            'errors': self.errors if self.errors else None
         }
     
     
@@ -37,6 +45,12 @@ class AuthApiModel:
     flow : dict = CustomizedAttr(dict,[])
     flow_type : str = CustomizedAttr((str),[])
     token_store: TokenStore = CustomizedAttr(TokenStore,[])
+    errors: dict = CustomizedAttr(dict,[])
+
+    def add_error(self, attribute, error_message):
+        if attribute not in self.errors:
+            self.errors[attribute] = []
+        self.errors[attribute].append(error_message)
 
     def as_dict(self):
         
@@ -56,7 +70,8 @@ class AuthApiModel:
             'is_authorization_url' : self.is_authorization_url,
             'flow' : self.flow,
             'flow_type': self.flow_type,
-            'token_store': self.token_store.as_dict() if self.token_store else None
+            'token_store': self.token_store.as_dict() if self.token_store else None,
+            'errors': self.errors if self.errors else None
 
         }
     
