@@ -93,8 +93,8 @@ function Styles() {
 
   return (
     <>
-      <div className="container-fluid text-white px-4">
-        <div className="col-12 my-3">
+      <div className="container-fluid text-white">
+        <div className="col-12 my-3 px-4">
           <div className="d-flex justify-content-end">
             <button className="btn btn-secondary mx-2" onClick={() => {setShowModal(true)}}>
               Upload CSS
@@ -105,7 +105,7 @@ function Styles() {
           </div>
         </div>
         {files?.map((file, index) => (
-          <div key={index} className="col-12">
+          <div key={index} className="col-12 px-3">
             <CssFileCard
               fileName={file.css_file}
               onEdit={() => handleEdit(file.css_file)}

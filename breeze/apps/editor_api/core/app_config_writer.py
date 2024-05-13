@@ -36,21 +36,7 @@ class AppConfigWriter:
                 "propsVars": [],
                 "otherVars" : [],
                 "functions": [],
-                "html": {
-                                    "type": "Element",
-                                    "elementType":"HTML",
-                                    "typeId":"DIV",
-                                    "tagName": "div",
-                                    "attributes": {
-                                        "id": { "type": "LITERAL", "value": app_config['defaultComponent']} 
-                                    },
-                                    "children": [
-                                        {
-                                            "type": "text",
-                                            "text": "This is main page"
-                                        }
-                                    ]
-                                },
+                "html": { "_id": "Main" },
                 "wrapper_store": None,
                 "imports": {
                     "components": [
@@ -58,7 +44,21 @@ class AppConfigWriter:
                     "other": [
                     ]
                 },
-                "hooks": []
+                "hooks": [],
+                "html_elements": {
+                    "Main": {
+                        "type": "Element",
+                        "elementType": "HTML",
+                        "typeId": "DIV",
+                        "tagName": "div",
+                        "attributes": {
+                        "className": { "type": "LITERAL", "value": "" },
+                        "id": { "type": "LITERAL", "value": "" }
+                        },
+                        "children": [{ "_id": "Main-0" }]
+                    },
+                    "Main-0": { "type": "text", "text": "Hello world" }
+                }
             }
         }
 

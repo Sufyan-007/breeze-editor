@@ -136,7 +136,7 @@ export default function CreateApp({ ...props }) {
         setLoading(false);
         showToast("Project created successfully", "success");
         setTimeout(() => {
-          router.navigate("/editor/" + response.name);
+          router.navigate("/project/" + response.name);
         }, 2000);
       })
       .catch((error) => {
