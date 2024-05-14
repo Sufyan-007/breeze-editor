@@ -44,13 +44,12 @@ export default function ServiceLists({
     console.log(apiList,"api list in service list comp ");
 
 return (
-    <div className="m-5" style={{width:"95%"}}>
+    <div className="main-div m-5 ">
         {apiList.length >0 ?
             apiList.map((service, index) => (
                 <Accordion key={index}>
                     <Accordion.Item
                         eventKey={service.filename}
-                        style={{ cursor: "pointer" }}
                     >
                         <Accordion.Header>
                             {service.filename}{" "}
@@ -85,24 +84,16 @@ return (
                                                 <td colSpan={3}>
                                                     <div className="actions-cell">
                                                         <img
-                                                            className="m-1"
+                                                            className=" edit-icon m-1"
                                                             src={EditIcon}
                                                             alt="Edit"
-                                                            style={{
-                                                                cursor: "pointer",
-                                                                width: "20px",
-                                                                height: "20px",
-                                                            }}
                                                             onClick={() => handleEditClick({ "id": value.id, "filename": service.filename })}
                                                         />
                                                         <img
+                                                        className="delete-icon"
                                                             src={DeleteIcon}
                                                             alt="Delete"
-                                                            style={{
-                                                                cursor: "pointer",
-                                                                width: "20px",
-                                                                height: "20px",
-                                                            }}
+                                        
                                                         />
                                                     </div>
                                                 </td>
@@ -111,7 +102,7 @@ return (
                                     </tbody>
                                 </Table>
                             ) : (
-                                <h5 style={{ color: "black", textAlign: "center" }}>
+                                <h5 className="h5">
                                     No services found
                                 </h5>
                             )}

@@ -2,6 +2,9 @@ import React, { useState, useRef } from "react";
 import { Form, Button, Row, Col, ButtonGroup, Dropdown } from "react-bootstrap";
 import CustomButtonGroup from "../CustomButtonGroup";
 import context from "react-bootstrap/esm/AccordionContext";
+import CustomFormGroup from "../CustomFormGroup";
+import CustomDropdown from "../CustomDropdown";
+import remove from "../../assets/icons/remove.svg";
 let authTypes = [
   {
     name: "NOAUTH",
@@ -25,10 +28,12 @@ let authTypes = [
   },
 ];
 
-export default function Auth({ index, onChange, auth, loginApis, tokenApis }) {
+export default function Auth({ index, onChange, auth,onRemove, loginApis, tokenApis }) {
+  console.log(auth,"auth prop in auth. look for type");
   const [authData, setAuthData] = useState(auth || {});
-  
+
   const onValueChange = (prop, value) => {
+    console.log(prop, value, "auth type in auth");
     let au = authData;
     au[prop] = value;
     setAuthData({
@@ -36,7 +41,8 @@ export default function Auth({ index, onChange, auth, loginApis, tokenApis }) {
     });
     onChange("auth", index, authData);
   };
-  const handleAuthApiSelect = (api, prop) => { 
+  const handleAuthApiSelect = (api, prop) => {
+    console.log(api , prop, "in auth");
     let au = authData;
     au[prop] = api;
     setAuthData({
@@ -45,46 +51,72 @@ export default function Auth({ index, onChange, auth, loginApis, tokenApis }) {
     onChange("auth", index, authData);
   };
 
-//   const handleAuthContentChange = (contentIndex, property, value) => {
-//     let updatedAuth = authData;
-//     updatedAuth.content[contentIndex][property] = value;
-//     setAuthData(updatedAuth);
-//     onChange(updatedAuth);
-//   };
+    const handleRemoveAuth = () => {
+      console.log(index, "index in body");
+      onRemove(index);
+    };
 
-//   const addAuthContent = (index) => {
-//     let updatedAuth = authData;
-//     updatedAuth.content.push({ key: "", value: "", type: "" });
-//     setAuthData(updatedAuth);
-//     onChange(updatedAuth);
-//   };
+  //   const handleAuthContentChange = (contentIndex, property, value) => {
+  //     let updatedAuth = authData;
+  //     updatedAuth.content[contentIndex][property] = value;
+  //     setAuthData(updatedAuth);
+  //     onChange(updatedAuth);
+  //   };
 
-//   const removeAuthContent = (index, contentIndex) => {
-//     let updatedAuth = authData;
-//     updatedAuth.content.splice(contentIndex, 1);
-//     setAuthData(updatedAuth);
-//     onChange(updatedAuth);
-//   };
+  //   const addAuthContent = (index) => {
+  //     let updatedAuth = authData;
+  //     updatedAuth.content.push({ key: "", value: "", type: "" });
+  //     setAuthData(updatedAuth);
+  //     onChange(updatedAuth);
+  //   };
+
+  //   const removeAuthContent = (index, contentIndex) => {
+  //     let updatedAuth = authData;
+  //     updatedAuth.content.splice(contentIndex, 1);
+  //     setAuthData(updatedAuth);
+  //     onChange(updatedAuth);
+  //   };
 
   return (
-    <div className="d-flex">
-      <Form.Group controlId="auth">
+    <div className="d-flex custom-grid body">
+      <div className="custom-grid-item one">
+        <img src={remove} height={24} alt="remove" onClick={handleRemoveAuth} />
+      </div>
+      {/* <Form.Group controlId="auth">
         <Row>
-          
-              <Col sm={1}>
-                <Form.Label className="">Type:</Form.Label>
-              </Col>
-              <Col sm={8}>
-                <CustomButtonGroup
-                  options={authTypes}
-                  selectedButton={auth["type"]}
-                  onButtonClick={onValueChange}
-                  formId="type"
-                ></CustomButtonGroup>
-              </Col>
+          <Col sm={1}>
+            <Form.Label className="">Type:</Form.Label>
+          </Col>
+          <Col sm={8}>
+            <CustomButtonGroup
+              options={authTypes}
+              selectedButton={auth["type"]}
+              onButtonClick={onValueChange}
+              formId="type"
+            ></CustomButtonGroup>
+          </Col>
         </Row>
-      </Form.Group>
-      <Form.Group className=" mb-3 custom-form-group" controlId="login_api">
+      </Form.Group> */}
+      <CustomFormGroup
+        controls={[
+          {
+            label: "Type",
+            type: "buttongroup",
+            selectedButton: auth["type"],
+            onButtonClick: (e) => {
+              onValueChange("type", e);
+            },
+            width: "90%",
+            labelColWidth: 3,
+            inputColWidth: 9,
+            buttonGroupOptions: authTypes,
+            formId: "type",
+          },
+        ]}
+        inline={true}
+      />
+      {/* <CustomFormGroup controls={authFields} inline={true} /> */}
+      {/* <Form.Group className=" mb-3 custom-form-group" controlId="login_api">
         <Row>
           <Col sm={3}>
             <Form.Label>Login Api</Form.Label>
@@ -101,21 +133,59 @@ export default function Auth({ index, onChange, auth, loginApis, tokenApis }) {
                   : "Select Login Api"}
               </Dropdown.Toggle>
               <Dropdown.Menu style={{ textAlign: "center" }}>
-                {loginApis && loginApis.map((api) => (
-                  <Dropdown.Item
-                    key={api.id}
-                    eventKey={api.id}
-                    className="dropdownitem"
-                  >
-                    {api.operation_id}
-                  </Dropdown.Item>
-                ))}
+                {loginApis &&
+                  loginApis.map((api) => (
+                    <Dropdown.Item
+                      key={api.id}
+                      eventKey={api.id}
+                      className="dropdownitem"
+                    >
+                      {api.operation_id}
+                    </Dropdown.Item>
+                  ))}
               </Dropdown.Menu>
             </Dropdown>
           </Col>
         </Row>
-      </Form.Group>
-      <Form.Group className=" mb-3 custom-form-group" controlId="token_api">
+      </Form.Group> */}
+
+      <CustomFormGroup
+        controls={[
+          {
+            label: "Login Api",
+            type: "dropdown",
+            value: "",
+            onSelect: (api) => {
+              handleAuthApiSelect(api, "login_api");
+            },
+            width: "90%",
+            labelColWidth: 3,
+            inputColWidth: 9,
+            dropdownOptions: loginApis,
+          },
+        ]}
+        inline={true}
+      />
+
+      <CustomFormGroup
+        controls={[
+          {
+            label: "Token Api",
+            type: "dropdown",
+            value: "",
+            onSelect: (api) => {
+              handleAuthApiSelect(api, "token_api");
+            },
+            width: "90%",
+            labelColWidth: 3,
+            inputColWidth: 9,
+            dropdownOptions: loginApis,
+          },
+        ]}
+        inline={true}
+      />
+
+      {/* <Form.Group className=" mb-3 custom-form-group" controlId="token_api">
         <Row>
           <Col sm={3}>
             <Form.Label>Token Api</Form.Label>
@@ -132,21 +202,22 @@ export default function Auth({ index, onChange, auth, loginApis, tokenApis }) {
                   : "Select Token Api"}
               </Dropdown.Toggle>
               <Dropdown.Menu style={{ textAlign: "center" }}>
-                {tokenApis && tokenApis.map((api) => (
-                  <Dropdown.Item
-                    key={api.id}
-                    eventKey={api.id}
-                    className="dropdownitem"
-                  >
-                    {api.operation_id}
-                  </Dropdown.Item>
-                ))}
+                {tokenApis &&
+                  tokenApis.map((api) => (
+                    <Dropdown.Item
+                      key={api.id}
+                      eventKey={api.id}
+                      className="dropdownitem"
+                    >
+                      {api.operation_id}
+                    </Dropdown.Item>
+                  ))}
               </Dropdown.Menu>
             </Dropdown>
           </Col>
         </Row>
-      </Form.Group>
-      
+      </Form.Group> */}
+
       {/* <Form.Group>
         {auth.content &&
           auth.content.map((authContent, contentIndex) => {

@@ -1,0 +1,13 @@
+.custom-text-area {
+
+  background-color: #303033;
+  width: 90%;
+  border: 1px solid grey;
+  border-radius: 5px;
+  color: white;
+  padding: 5px 5px 5px 5px;
+  margin: 5px 0px 5px 0px;
+}
+.custom-text-area::placeholder{
+  color: white
+}

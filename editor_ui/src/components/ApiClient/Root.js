@@ -4,6 +4,7 @@ import ServiceList from "./ServiceList";
 import AuthApiList from "./AuthApiList";
 import EditAuthFunction from "./EditAuthFunction";
 import EditServiceFuntion from "./EditServiceFunction";
+import ServiceRoot from "../../css/ServiceRoot.css";
 import { useParams } from "react-router";
 import { generateIntermediates } from '../../services/IntermediatesService'
 
@@ -63,37 +64,35 @@ export default function Root() {
 
   return (
     <>
-      <div
-        className="container-fluid d-flex flex-column"
-        style={{ width: "100%" }}>
-        <Navbar
-          variant="dark"
-          style={{ backgroundColor: "#303033" }}
-          className="justify-content-end">
+      <div className="container-fluid d-flex flex-column">
+        <Navbar variant="dark" className="justify-content-end">
           <Container className="mx-0">
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse
               id="basic-navbar-nav"
-              className="justify-content-end">
+              className="justify-content-end"
+            >
               <Nav>
                 <Nav.Link
                   onClick={() => {
                     setView("LIST_SERVICE");
                   }}
-                  className="mx-3">
+                  className="mx-3"
+                >
                   Services
                 </Nav.Link>
                 <NavDropdown
                   title="Upload"
                   id="basic-nav-dropdown"
-                  className="mx-3">
+                  className="mx-3"
+                >
                   <NavDropdown.Item onClick={() => openFileInput("yaml")}>
                     Upload YAML
                   </NavDropdown.Item>
                   <input
                     ref={fileInputYAML}
                     type="file"
-                    style={{ display: "none" }}
+                    className="upload"
                     onChange={(e) => handleUpload(e, "yml")}
                     accept=".yaml,.yml"
                   />
@@ -103,7 +102,7 @@ export default function Root() {
                   <input
                     ref={fileInputPostman}
                     type="file"
-                    style={{ display: "none" }}
+                    className="upload"
                     onChange={(e) => handleUpload(e, "postman")}
                     accept=".json"
                   />
@@ -112,20 +111,20 @@ export default function Root() {
                   onClick={() => {
                     setView("AUTH_API_LIST");
                   }}
-                  className="mx-3">
+                  className="mx-3"
+                >
                   Authentication Config
                 </Nav.Link>
               </Nav>
             </Navbar.Collapse>
           </Container>
         </Navbar>
-        <div
-          className="row flex-grow-1 overflow-hidden  "
-          style={{ backgroundColor: "#303033" }}>
+        <div className="row flex-grow-1 overflow-hidden">
           {view === "LIST_SERVICE" ? (
             <ServiceList
               onEditService={onEditService}
-              errorMessage={errorMessage}></ServiceList>
+              errorMessage={errorMessage}
+            ></ServiceList>
           ) : view === "AUTH_API_LIST" ? (
             <AuthApiList onEditAuthService={onEditAuthService}></AuthApiList>
           ) : view === "EDIT_AUTH_FUNCTION" ? (
@@ -133,11 +132,13 @@ export default function Root() {
               selectedAuthServiceId={selectedAuthServiceId}
               onClose={() => {
                 setView("AUTH_API_LIST");
-              }}></EditAuthFunction>
+              }}
+            ></EditAuthFunction>
           ) : view === "EDIT_SERVICE_FUNCTION" ? (
             <EditServiceFuntion
               selectedServiceInfo={selectedServiceInfo}
-              onClose={() => setView("LIST_SERVICE")}></EditServiceFuntion>
+              onClose={() => setView("LIST_SERVICE")}
+            ></EditServiceFuntion>
           ) : null}
         </div>
       </div>
