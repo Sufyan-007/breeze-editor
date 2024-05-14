@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo,useEffect, useState } from "react";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
 
@@ -6,42 +6,27 @@ import TextElement from "../SidebarConfigHelper/components/TextElementConfig";
 import HtmlElementConfig from "../SidebarConfigHelper/components/HtmlElementConfig";
 
 export default function ElementConfigSidebar({ config }) {
-  const { sidebarService, componentConfig, setComponentConfig } =
-    useContext(ComponentContext);
-  const [selectedElem, setSelectedElement] = useState(null);
-  const elem = selectedElem?.elem;
-  const [textValue, setTextValue] = useState("");
-  const [elemTypeValue, setElemTypeValue] = useState("");
+  const { sidebarService, componentConfig, setComponentConfig } = useContext(ComponentContext);
+  console.log("sideBar",sidebarService)
+  const [selectedElement, setSelectedElement] = useState(null);
   const { projectName, componentName } = useParams();
+  const element = useMemo(() => componentConfig?.html_elements[selectedElement?.elem], [componentConfig, selectedElement]);
 
   useEffect(() => {
     sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
-      const htmlElements = componentConfig?.html_elements;
-      const idName = elem?.elem;
-      setTextValue(htmlElements[idName]?.text);
-      setElemTypeValue(htmlElements[idName]?.type);
+     
     });
   }, [sidebarService]);
 
   const makeSelectedElementNull = () => {
     sidebarService.setSelectedElem(null);
   };
-  const handleTextChange = (event) => {
-    setTextValue(event.target.value);
-    //
-    //
-  };
-  const handleUpdateTextClick = () => {
-    const html_config = { ...componentConfig.html_elements };
+  
 
-    html_config[elem].text = textValue;
-    updateHtmlConfig(projectName, elem, componentName, html_config[elem]);
+  const handleUpdateClick = (html_config) => {
+    updateHtmlConfig(projectName, selectedElement?.elem, componentName, html_config);
   };
-  const handleUpdateHtmlClick = (html_config) => {
-    updateHtmlConfig(projectName, elem, componentName, html_config);
-  };
-  //Api
 
   async function updateHtmlConfig(project_id, html_id, component, html_config) {
     try {
@@ -59,7 +44,6 @@ export default function ElementConfigSidebar({ config }) {
       }
 
       const responseData = await response.json();
-      // Assuming `setComponentConfig` is a state setter function
       setComponentConfig((state) => {
         state["html_elements"][responseData["html_id"]] =
           responseData["html_config"];
@@ -72,9 +56,8 @@ export default function ElementConfigSidebar({ config }) {
     }
   }
 
-  //APi
 
-  if (!elem) {
+  if (!selectedElement?.elem) {
     return null;
   } else {
     return (
@@ -94,20 +77,18 @@ export default function ElementConfigSidebar({ config }) {
               className="btn-close-white btn-close"
               onClick={makeSelectedElementNull}
             ></button>
-            {elemTypeValue === "text" && (
+            {element.type === "text" && (
               <TextElement
-                textValue={textValue}
-                handleTextChange={handleTextChange}
                 makeSelectedElementNull={makeSelectedElementNull}
-                handleUpdateTextClick={handleUpdateTextClick}
+                handleUpdateClick={handleUpdateClick}
+                element={element}
               />
             )}
-            {elemTypeValue === "Element" && (
+            {element.type === "Element" && (
               <HtmlElementConfig
-                selectedElement={selectedElem}
-                componentConfig={componentConfig}
+                element={element}
                 makeSelectedElementNull={makeSelectedElementNull}
-                handleUpdateHtmlClick={handleUpdateHtmlClick}
+                handleUpdateClick={handleUpdateClick}
               />
             )}
           </div>

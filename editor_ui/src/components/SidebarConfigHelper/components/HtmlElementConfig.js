@@ -1,106 +1,80 @@
-import React from "react";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
-import { useState, useEffect } from "react";
-import Accordion from "react-bootstrap/Accordion";
+import React, { useState, useEffect } from "react";
+import { Form, Button, Accordion } from "react-bootstrap";
 
 const HtmlElementConfig = ({
-  selectedElement,
-  componentConfig,
+  element,
   makeSelectedElementNull,
-  handleUpdateHtmlClick,
+  handleUpdateClick,
 }) => {
-  const [selectedAttributes, setSelectedAttributes] = useState([]);
-  const [selectedEventListeners, setSelectedEventListeners] = useState([]);
-  const [attributes, setAttributes] = useState([]);
-  const [eventListeners, setEventListners] = useState([
-    "onClick",
-    "onMousehover",
+  const [elementValue, setElementValue] = useState(null);
+  const [availableAttributes, setAvailableAttributes] = useState([
+    "src",
+    "img",
+    "width",
+    "height",
   ]);
-  const [htmlElementConfig, setHtmlElementConfig] = useState(null);
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-  };
+  useEffect(() => {
+    setElementValue(element);
+  }, [element]);
 
   const updateHtmlElementConfig = () => {
-    handleUpdateHtmlClick(htmlElementConfig);
+    console.log("selectedAttributes", elementValue);
+
+    handleUpdateClick(elementValue);
   };
-  useEffect(() => {
-    const attributesValue =
-      componentConfig.html_elements[selectedElement.elem].attributes;
-    const keysArray = Object.keys(attributesValue);
-    setAttributes(keysArray);
-  }, []);
-  useEffect(() => {
-    setHtmlElementConfig({
-      ...componentConfig.html_elements[selectedElement.elem],
-    });
-  }, [selectedElement, componentConfig]);
 
   const handleSelectAttributeChange = (event) => {
-    const selectedOption = event.target.value;
+    const selectedOption = event.target?.value;
     event.target.value = "Add Attributes";
 
     if (
       selectedOption === "Add Attributes" ||
-      selectedAttributes.includes(selectedOption)
+      Object.keys(elementValue.attributes).includes(selectedOption)
     ) {
       return;
     }
-
-    // Add selected option to the array
-    setSelectedAttributes([...selectedAttributes, selectedOption]);
-  };
-
-  const handleSelectedEventListenersChange = (event) => {
-    const selectedOption = event.target.value;
-    event.target.value = "Add Event Listener";
-
-    // Prevent adding the "Attributes" option
-    if (
-      selectedOption === "Add Event Listener" ||
-      selectedEventListeners.includes(selectedOption)
-    ) {
-      return;
-    }
-
-    // Add selected option to the array
-    setSelectedEventListeners([...selectedEventListeners, selectedOption]);
-  };
-  const handleDeleteAttribute = (index) => {
-    setSelectedAttributes((prevSelectedAttributes) =>
-      prevSelectedAttributes.filter((_, i) => i !== index)
-    );
-  };
-  const handleDeleteEventListener = (index) => {
-    setSelectedEventListeners((prevSelectedEventListeners) =>
-      prevSelectedEventListeners.filter((_, i) => i !== index)
-    );
-  };
-  const handleAttributeChange = (key, value) => {
-    setHtmlElementConfig((prevConfig) => ({
-      ...prevConfig,
+    setElementValue((prevElementValue) => ({
+      ...prevElementValue,
       attributes: {
-        ...prevConfig.attributes,
-        [key]: {
-          type: "LITERAL",
-          value: value,
-        },
+        ...prevElementValue.attributes,
+        [selectedOption]: { type: "LITERAL", value: "" },
+      },
+    }));
+  };
+
+  const handleDeleteAttribute = (index) => {
+    setElementValue((prevElementValue) => {
+      const updatedAttributes = { ...prevElementValue.attributes };
+      const attributeKeys = Object.keys(updatedAttributes);
+      const deletedAttributeKey = attributeKeys[index];
+      delete updatedAttributes[deletedAttributeKey];
+      return {
+        ...prevElementValue,
+        attributes: updatedAttributes,
+      };
+    });
+  };
+
+  const handleAttributeChange = (key, value) => {
+    console.log(elementValue);
+    setElementValue((prevElementValue) => ({
+      ...prevElementValue,
+      attributes: {
+        ...prevElementValue.attributes,
+        [key]: { type: "LITERAL", value: value },
       },
     }));
   };
 
   return (
     <div className="mt-3 ps-4 pe-4">
-      <Form onSubmit={handleFormSubmit} className="text-light">
+      <Form className="text-light">
         <Form.Group className="mb-3">
           <Form.Label>Element</Form.Label>
           <Form.Control
             type="text"
-            value={componentConfig.html_elements[selectedElement?.elem].tagName}
-            readOnly={true}
-            className="p-3"
+            value={element.tagName}
+            readOnly
           />
         </Form.Group>
 
@@ -108,9 +82,8 @@ const HtmlElementConfig = ({
           <Form.Label>Id</Form.Label>
           <Form.Control
             type="text"
-            value={selectedElement?.elem}
-            className="p-3"
-            readOnly={true}
+            value={element.attributes.id.value}
+            readOnly
           />
         </Form.Group>
 
@@ -119,41 +92,46 @@ const HtmlElementConfig = ({
             <Accordion.Header>Attributes</Accordion.Header>
             <Accordion.Body>
               <Form.Group className="mb-4">
-                {/* <Form.Label>Attributes</Form.Label> */}
                 <Form.Select
                   aria-label="Default select example"
                   onChange={handleSelectAttributeChange}
                 >
-                  <option> Add Attributes</option>
-                  {attributes.map((attribute, index) => (
+                  <option>Add Attributes</option>
+                  {availableAttributes.map((attribute, index) => (
                     <option key={index} value={attribute}>
                       {attribute}
                     </option>
                   ))}
                 </Form.Select>
                 <div>
-                  {selectedAttributes.map((option, index) => (
-                    <div key={index} className="mt-2">
-                      <Form.Label>{option}</Form.Label>
-                      <div className="d-flex">
-                        <Form.Control
-                          type="text"
-                          value={htmlElementConfig.attributes[option].value}
-                          onChange={(e) =>
-                            handleAttributeChange(option, e.target.value)
-                          }
-                        />
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          className="ms-2"
-                          onClick={() => handleDeleteAttribute(index)}
-                        >
-                          <i class="bi bi-trash3 p-1"></i>
-                        </Button>
+                  { elementValue && Object.keys(elementValue?.attributes).map(
+                    (attribute, index) => (
+                      <div key={index} className="mt-2">
+                        <Form.Label>{attribute}</Form.Label>
+                        <div className="d-flex">
+                          <Form.Control
+                            type="text"
+                            value={elementValue.attributes[attribute].value}
+                            onChange={(e) =>
+                              handleAttributeChange(attribute, e.target.value)
+                            }
+                            disabled={attribute === 'id'}
+                          />
+                          {attribute !== 'id' && (<Button
+                            variant="danger"
+                            size="sm"
+                            className="ms-2"
+                            onClick={() => handleDeleteAttribute(index)}
+                          >
+                            <i className="bi bi-trash3 p-1"></i>
+                          </Button>)}
+                          
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
+
+                 
                 </div>
               </Form.Group>
             </Accordion.Body>
@@ -163,7 +141,6 @@ const HtmlElementConfig = ({
             <Accordion.Header>Styles</Accordion.Header>
             <Accordion.Body>
               <Form.Group className="mb-4">
-                <Form.Label>Style</Form.Label>
                 <Button variant="secondary" className="d-block">
                   Secondary
                 </Button>
@@ -171,7 +148,7 @@ const HtmlElementConfig = ({
             </Accordion.Body>
           </Accordion.Item>
 
-          <Accordion.Item eventKey="2" className="mt-5">
+          {/* <Accordion.Item eventKey="2" className="mt-5">
             <Accordion.Header>Event Listeners</Accordion.Header>
             <Accordion.Body>
               <Form.Group className="mb-4">
@@ -207,11 +184,11 @@ const HtmlElementConfig = ({
                 </div>
               </Form.Group>
             </Accordion.Body>
-          </Accordion.Item>
+          </Accordion.Item> */}
         </Accordion>
       </Form>
       <div
-        className="pt-1  mb-0 mt-3  w-100"
+        className="pt-1   mt-3  w-100"
         style={{
           position: "sticky",
           bottom: "0",
