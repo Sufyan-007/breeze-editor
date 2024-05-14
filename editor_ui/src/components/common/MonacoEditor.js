@@ -12,7 +12,7 @@ function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", lan
 
   useEffect(() => {
     console.log("setChange")
-    if (editor) {
+    if (editor && onChange) {
       editor.onDidChangeModelContent(() => {
         if (`onChange`) {
           onChange(editor.getValue());
