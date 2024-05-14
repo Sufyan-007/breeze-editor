@@ -552,3 +552,35 @@ class LifeCycleConfigWriter(APIView):
             "body": data["body"],
             "return_body": data.get("return_body")
         }
+        
+@method_decorator(csrf_exempt,name="dispatch")
+class FunctionConfigReader(APIView):
+    
+    def post(self,request):
+        raise NotImplementedError()
+        return JsonResponse({},status=200)
+
+@method_decorator(csrf_exempt,name="dispatch")
+class FunctionConfigWriter(APIView):
+    
+    def post(self,request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            componentConfigService = ComponentConfigService(data["project_id"])
+            func=componentConfigService.add_function(data["component"],data["function_config"])
+            return JsonResponse(func,status=200,safe=False)
+        except IndexError:
+            return JsonResponse({},status=409)
+        except:
+            return JsonResponse({},status=200)
+        
+    def put(self,request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            componentConfigService = ComponentConfigService(data["project_id"])
+            func=componentConfigService.update_function(data["component"],data["function_config"])
+            return JsonResponse(func,status=200,safe=False)
+        except IndexError:
+            return JsonResponse({},status=404)
+        except:
+            return JsonResponse({},status=500)

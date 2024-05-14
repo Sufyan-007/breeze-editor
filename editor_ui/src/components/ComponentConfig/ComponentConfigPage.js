@@ -22,7 +22,7 @@ import ProjectSidebar from "../ProjectSidebar";
 import HtmlSection from "./HtmlSection";
 import StateVarsSection from "./StateVarsSection";
 import LifeCycleSection from "./LifeCycleSection";
-import FunctionSection from "./FunctionSection";
+import FunctionSection from "../FunctionsSection/FunctionSection";
 import SidebarService from "../../services/SidebarService";
 
 const components = [

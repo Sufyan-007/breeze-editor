@@ -29,7 +29,7 @@ export default function HtmlSection() {
 
 
     return (
-        <div className="row flex-grow-1" style={{ height: "35rem" }}>
+        <div className="row flex-grow-1" >
             
             <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
                 <div className="row">

@@ -26,7 +26,7 @@ export default function HtmlTree({ htmlId, className }) {
             sub.unsubscribe()
             updateSub?.unsubscribe()
         }
-    }, [])
+    }, [sidebarService,htmlId])
 
     function selectElem(){
         sidebarService.setSelectedElem(htmlId)

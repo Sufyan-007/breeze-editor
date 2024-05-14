@@ -2,6 +2,7 @@ from common.utils.config_reader import read_config_file, read_file_json, write_f
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from .app_editor import AppEditor
 from .helpers.html_config_generator import HtmlConfigGenerator
+import re
 class ComponentConfigService:
     def __init__(self,projectId):
         self.projectId = projectId
@@ -125,3 +126,49 @@ class ComponentConfigService:
             return True 
         else: 
            return False 
+       
+    def add_function(self,comp_name,function_config):
+        functions =  self.comp_config.get(comp_name)["functions"]
+        
+        id=0
+        for func in functions:
+            if func["name"] == function_config["name"]:
+                raise IndexError("Duplicate function name")
+            else:
+                pattern = r'\d+$'
+                match = re.search(pattern, func["$id"])
+                if match :
+                    id = max(id, int(match.group()))
+        id = "FUNCTION/UUID"+str(id+1)
+        
+        new_func_config ={
+            "name": function_config["name"],
+            "$id": id,
+            "parameters": function_config.get("parameters",{"list":[]}),
+            "isAnonymous":  function_config.get("isAnonymous",False),
+            "isAsync": function_config.get("isAsync",False),
+            "body": function_config["body"],
+        }
+        functions.append(new_func_config)
+        appEditor=AppEditor(self.projectId)
+        appEditor.write_component(self.comp_config.get(comp_name))
+        return new_func_config
+                
+    def update_function(self,comp_name,function_config):
+        functions =  self.comp_config.get(comp_name)["functions"]
+        function_to_update = None
+        for func in functions:
+            if func["name"] == function_config["name"]:
+                function_to_update=func
+                break
+        else:
+            raise IndexError("Could not find function")
+        
+        function_to_update["body"] = function_config.get("body",function_to_update["body"] )
+        function_to_update["parameters"] = function_config.get("parameters",function_to_update["parameters"])
+        function_to_update["isAnonymous"] = function_config.get("isAnonymous",function_to_update["isAnonymous"])
+        function_to_update["isAsync"] = function_config.get("isAsync",function_to_update["isAsync"] )
+        appEditor=AppEditor(self.projectId)
+        appEditor.write_component(self.comp_config.get(comp_name))
+        return function_to_update
+            
