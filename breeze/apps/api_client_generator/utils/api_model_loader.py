@@ -1,6 +1,6 @@
-from ..api_models import AuthApiModel,Auth,AuthContent,ApiModel,TokenStore
-from ..api_models import Request,Response,KeyValue,Url,Body,Parameter
-from ..api_models import MethodsEnum,StatusEnum,ParamsInEnum,ContentEnum,ModeEnum,AuthTypeEnum,AuthApiTypeEnum,TokenStoreTypeEnum
+from ..api_models import AuthApiModel,Auth,AuthContent,ApiModel,TokenStore,Channel
+from ..api_models import Request,Response,KeyValue,Url,Body,Parameter,WebsocketModel
+from ..api_models import MethodsEnum,StatusEnum,ParamsInEnum,ContentEnum,ModeEnum,AuthTypeEnum,AuthApiTypeEnum,SchemaRelationEnum,TokenStoreTypeEnum
 
 
 class ApiModelLoader:
@@ -89,6 +89,15 @@ class ApiModelLoader:
         
         return auth
 
+    @staticmethod
+    def load_channel(data):
+        return Channel(operation_id=data.get("operation_id"),
+                description=data.get("description"),
+                schema_relation=s,
+                messages=data.get("messages"),
+                schema=data.get("schema"))
+    
+        
     @staticmethod
     def load_parameters(parameters):
         params = []
@@ -205,3 +214,23 @@ class ApiModelLoader:
             errors={}
         )
         return api_model
+    
+    @staticmethod
+    def load_ws_model(model_json):
+        url_data = model_json.get("url", "")
+        url = []
+        if url_data:
+            url = ApiModelLoader.load_url(url_data=url_data)
+
+        publish_obj = ApiModelLoader.load_channel(data=model_json.get("publish"))
+        subscribe_obj = ApiModelLoader.load_channel(data=model_json.get("subscribe"))
+        api_model = WebsocketModel(
+            id=model_json.get("id"),
+            url=url,
+            tags=model_json.get("tags"),  # Tags remaining
+            publish=publish_obj,
+            subscribe=subscribe_obj
+        )
+        return api_model
+
+    

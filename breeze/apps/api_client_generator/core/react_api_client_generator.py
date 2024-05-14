@@ -9,7 +9,7 @@ from ..utils.api_model_loader import ApiModelLoader
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import read_config_file, read_file_json, write_file
 
-from ..consts import RESPONSE_STATUS_CONDITION,REFRESH_TOKEN_API,RESPONSE_INTERCEPTOR,REQUEST_INTERCEPTOR
+from ..consts import RESPONSE_STATUS_CONDITION,REFRESH_TOKEN_API,RESPONSE_INTERCEPTOR,REQUEST_INTERCEPTOR,WEBSOCKET_HOOK
 class ReactApiClientGenerator:
 
     app_config_dir = None
@@ -38,7 +38,7 @@ class ReactApiClientGenerator:
                 map_services[tags] = react_functions
         return map_services
 
-    def create_serice_files(self, map_services):
+    def create_service_files(self, map_services):
         # preprare new service file for each tag
         folder_name = "service"
         for tag, func_arr in map_services.items():
@@ -53,20 +53,37 @@ class ReactApiClientGenerator:
             write_file(path, content)
         print("services generated.............")
 
+    def create_websocket_hook_file(self, filename):
+        # preprare new service file for each tag
+        folder_name = "hooks"
+        filename = filename.title()
+        filename = filename+"Service.js"
+        content = WEBSOCKET_HOOK
+        path = f"{self.app_config['APP_SOURCE_DIR']}/{folder_name}/{filename}"
+        write_file(path, content)
+        print("services generated.............")
+
+
     def generate_react_service(self, app_name, filename,service_type):
         service_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/{filename}.json"
         service_config = read_file_json(service_path)
         map_services = {}
-        for key,config in service_config.items():
-            model = None
-            if service_type == "AUTH":
-                model = ApiModelLoader.load_auth_api_model(config)
-            else:
-                model = ApiModelLoader.load_api_model(config)
-            react_functions = self.generate_service_function(model, False, app_name,service_type)
+        if service_type == "WS":
+            for key,config in service_config.items():
+                model = ApiModelLoader.load_ws_model(config)
+                self.create_websocket_hook_file(model.tags)
+        else:
+            for key,config in service_config.items():
+                model = None
+                if service_type == "AUTH":
+                    model = ApiModelLoader.load_auth_api_model(config)
+                else:
+                    model = ApiModelLoader.load_api_model(config)
+                react_functions = self.generate_service_function(model, False, app_name,service_type)
+                
+                map_services = self._manage_service_tags(model.tags, react_functions, map_services)
             
-            map_services = self._manage_service_tags(model.tags, react_functions, map_services)
-        self.create_serice_files(map_services)
+            self.create_service_files(map_services)
 
     
     def retrive_token_code(self,auth_api_id,app_name):
@@ -454,3 +471,9 @@ class ReactApiClientGenerator:
             react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
             react_service_functions.append(react_code)
         return react_service_functions
+    
+    def generate_websocket_function(self, model, service_type):
+        func_name = model.operation_id
+        react_code = ""
+        response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
+        

@@ -3,6 +3,8 @@ from .utils.append_dict_file import append_to_dict_file
 
 from .core.openapi_swagger_converter import OpenapiConverter
 from .core.postman_collection_converter import PostmanCollectionConverter
+from .core.websocket_converter import WebsocketConverter
+
 from common.utils.app_consts import CONFIG_PATH
 from django.views import View
 from django.http import JsonResponse
@@ -58,7 +60,19 @@ class ApiClientGenerator(View):
                     for model in api_models:
                         model_dict[model.id] = model.as_dict()
                     append_to_dict_file(full_file_path,model_dict)
-                return JsonResponse({"data": model_dict, "filename": resultant_filename}, status=201)
+                return JsonResponse({"data": model_dict, "filename": resultant_filename,"error_obj" : error_obj}, status=201)
+            elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
+                converted_data = WebsocketConverter.prepare_api_models(json_data)
+                error_obj = converted_data.get("error_obj",{})
+                model = converted_data.get("channel_obj",{})
+                filename = converted_data.get("filename","")+".json"
+                model_dict = {}
+                model_dict[model.id] = model.as_dict()
+                full_file_path = os.path.join(folder_path, filename)
+                append_to_dict_file(full_file_path,model_dict)
+                
+                return JsonResponse({"data": model_dict, "filename": filename,"error_obj" : error_obj}, status=201)
+            
             else:
                 return JsonResponse({"error": "Invalid collection type or file format."}, status=400)
         except CustomeException as e:
