@@ -12,6 +12,15 @@ class ApiModel:
     response : list = CustomizedAttr(list,[required_validator])
     summary : str =  CustomizedAttr((str),[])
     is_authentication_api: bool = CustomizedAttr((bool),[])
+    # errors  = {}
+    errors : dict = CustomizedAttr((dict), [])
+
+   
+
+    def add_error(self, attribute, error_message):
+        if attribute not in self.errors:
+            self.errors[attribute] = []
+        self.errors[attribute].append(error_message)
 
     def as_dict(self):
         responses = []
@@ -25,6 +34,7 @@ class ApiModel:
             'request': self.request.as_dict() if self.request else None,
             'response': responses,
             'summary' : self.summary,
-            'is_authentication_api' : self.is_authentication_api
+            'is_authentication_api' : self.is_authentication_api,
+            'errors': self.errors if self.errors else None
         }
     

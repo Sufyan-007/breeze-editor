@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  getAuthFileApis
-} from "../../services/IntermediatesService";
-import { Table } from "react-bootstrap";
+import { getAuthFileApis } from "../../services/IntermediatesService";
+import { Button, Table } from "react-bootstrap";
 import DeleteIcon from "../../assets/icons/delete.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import { useParams } from "react-router";
 
-export default function AuthApiList({ onEditAuthService }) {
+export default function AuthApiList({ onEditAuthService, onAddAuthService}) {
   const [apiList, setApiList] = useState([]);
 
   useEffect(() => {
@@ -29,6 +27,17 @@ export default function AuthApiList({ onEditAuthService }) {
 
   return (
     <div className="m-5" style={{ width: "95%" }}>
+      <Button variant="secondary" onClick={onAddAuthService} className="mb-3">
+        <img
+          className="mx-1"
+          width="24"
+          height="24"
+          src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+          alt="add--v1"
+        />
+        <span>Add API</span>
+        
+      </Button>
       {apiList && apiList.length > 0 ? (
         <Table striped bordered hover variant="dark">
           <thead>

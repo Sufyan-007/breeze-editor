@@ -13,6 +13,8 @@ class GenerateReactApiClient(View):
         service_type = "ORDINARY"
         if(type == "AUTH"):
             service_type = "AUTH"
+        elif type == "WS":
+            service_type = "WS"
         client_generator = ReactApiClientGenerator(app_config_dir)
         client_generator.generate_react_service(app_name,filename,service_type)
         print(data)

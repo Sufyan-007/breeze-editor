@@ -24,6 +24,6 @@ NEW_LINE_CHAR = "\n"
 THIRD_PARTY_DIR = "/home/raj/Desktop/bridge/npm_libraries/react_bootstrap/react-bootstrap/src"
 
 # Path of file where the javascript parser is stored
-JS_FILE_PATH = '/home/raj/Desktop/bridge/breeze_ssh/breezeui/third_party_config_generator/index.js'
+JS_FILE_PATH = 'third_party_config_generator/index.js'
 JS_FUNCTION_NAME = 'generate_config'
 

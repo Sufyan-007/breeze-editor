@@ -5,21 +5,10 @@ const HOST="http://localhost:8000"
 
 export async function generateIntermediates(fileType, appName, formData)
 {
-    let apiUrl = ''
-    switch (fileType) {
-        case "yml":
-          apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/openapi/${appName}`;
-          break;
-        case "postman":
-          apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/postman/${appName}`;
-          break;
-        default:
-          console.error("Unsupported file type:", fileType);
-          return;
-      }
+          let apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/${fileType}/${appName}`;
+    
       const response = await callApiClientGenerator(apiUrl, "POST", formData, true, {})
-      const responseData = await response.json()
-      return responseData
+      return response
 
 }
 export async function fetchIntermediate(projectName) {
@@ -45,9 +34,9 @@ export async function getAuthApiConfig(projectName,apiId) {
     return auth_api
 }
 
-export async function modifyApiConfig(data,projectName,filename){
+export async function modifyApiConfig(data,projectName,filename,operation){
     filename = filename.replace(/\.json$/, '');
-    const apiUrl = "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/"+ projectName+"/"+filename
+    const apiUrl = "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/"+ projectName+"/"+filename+"/"+ operation
     const response = await callApiClientGenerator(apiUrl, "POST", data,false,{})
     // const responseData = await response.json();
     return response;
@@ -80,6 +69,11 @@ export async function appendToAuthApi(authObj,update, appName) {
     const res = await callApiClientGenerator(apiUrl, "POST", authObj, false,{});
     return res
 }
+export async function transferToAuthApi(authObj, appName) {
+  let apiUrl = HOST+"/api-client-generator/transfer-to-auth-api/" + appName
+  const res = await callApiClientGenerator(apiUrl, "POST", authObj, false,{});
+  return res
+}
 export async function callApiClientGenerator(url, method, payload, isFormData, options = {}) {
     const { headers = {}, ...otherOptions } = options;
     const loader = new Blocker("Loading...");
@@ -98,6 +92,7 @@ export async function callApiClientGenerator(url, method, payload, isFormData, o
   
       const response = await fetch(url, requestOptions);
       const responseData = await response.json();
+      console.log(responseData, "respdaata");
       return responseData;
     } catch (error) {
       console.error("API call failed:", error);

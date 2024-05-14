@@ -1,17 +1,16 @@
-import React from "react";
+import React , {useEffect} from "react";
 import { Col, Form, FormGroup, Row } from "react-bootstrap";
 import CustomFormGroup from "../CustomFormGroup";
 import UrlsCss from "../../css/Urls.css";
 function Urls({ urlData, onChange }) {
-  // console.log(urlData, "urldata");
   const onValueChange = (field, fieldValue) => {
     const updatedUrlData = {
-      ...urlData,
-      [field]: fieldValue,
+        ...urlData,
+        [field]: Array.isArray(fieldValue) ? [...fieldValue] : fieldValue,
     };
-    onChange(updatedUrlData);
-  };
-
+    onChange("url",updatedUrlData);
+};
+useEffect(()=>{},[urlData])
   const urlFields = [
     {
       id: "host",

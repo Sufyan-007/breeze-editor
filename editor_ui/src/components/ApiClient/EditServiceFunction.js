@@ -17,6 +17,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
   const [loginApis, setLoginApis] = useState([]);
   const [tokenApis, setTokenApis] = useState([]);
   const appName = useParams();
+
   useEffect(() => {
     setAuthApis();
     if (selectedServiceInfo["id"] && selectedServiceInfo["filename"]) {
@@ -111,8 +112,10 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
       const updatedModel = result["data"];
       if (updatedModel.response && updatedModel.response.length > 0) {
         const updatedRes = updatedModel.response.map((res) => ({
+     
           ...res,
           id: Date.now() + Math.random(),
+        
         }));
         updatedModel.response = updatedRes;
       }
@@ -130,6 +133,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
       response: responses,
     });
   };
+
   const handleAddResponse = () => {
     const newResponse = {
       id: Date.now(),
@@ -141,11 +145,14 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
         : [newResponse],
     });
   };
+
   const removeResponse = (indexToRemove) => {
     if (apiModel.response && apiModel.response.length > 0) {
       const updatedRes = apiModel.response.filter(
         (_, index) => index !== indexToRemove
       );
+     
+      
       setApiModel((prevState) => ({
         ...prevState,
         response: updatedRes,
@@ -163,18 +170,22 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
 
   async function handleSubmit(e) {
     console.log(apiModel, "submitted");
+    let operation = "ADD";
+    if(apiModel.id){
+      operation = "UPDATE"
+    }
     e.preventDefault();
     const result = await modifyApiConfig(
       apiModel,
       appName.projectName,
-      selectedServiceInfo["filename"]
+      selectedServiceInfo["filename"] ? selectedServiceInfo["filename"] : apiModel["tags"],
+      operation
     );
     setApiModel({});
     onClose();
   }
   return (
     <div>
-      {apiModel && (
         <>
           <div className="custom-grid d-flex justify-content-end align-items-center w-100 mb-3">
             <div className="custom-grid-item one">
@@ -247,7 +258,6 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
             )}
           </Form>
         </>
-      )}
     </div>
   );
 }

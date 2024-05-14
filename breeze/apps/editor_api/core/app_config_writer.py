@@ -1,6 +1,6 @@
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.file_helper import read_json_file, write_file, create_parent_dir_if_not_exists
-import json
+import json,os
 from common.utils.request_code import REQUEST
 from .generate_project import GenerateProject
 
@@ -36,21 +36,7 @@ class AppConfigWriter:
                 "propsVars": [],
                 "otherVars" : [],
                 "functions": [],
-                "html": {
-                                    "type": "Element",
-                                    "elementType":"HTML",
-                                    "typeId":"DIV",
-                                    "tagName": "div",
-                                    "attributes": {
-                                        "id": { "type": "LITERAL", "value": app_config['defaultComponent']} 
-                                    },
-                                    "children": [
-                                        {
-                                            "type": "text",
-                                            "text": "This is main page"
-                                        }
-                                    ]
-                                },
+                "html": { "_id": "Main" },
                 "wrapper_store": None,
                 "imports": {
                     "components": [
@@ -58,7 +44,21 @@ class AppConfigWriter:
                     "other": [
                     ]
                 },
-                "hooks": []
+                "hooks": [],
+                "html_elements": {
+                    "Main": {
+                        "type": "Element",
+                        "elementType": "HTML",
+                        "typeId": "DIV",
+                        "tagName": "div",
+                        "attributes": {
+                        "className": { "type": "LITERAL", "value": "" },
+                        "id": { "type": "LITERAL", "value": "" }
+                        },
+                        "children": [{ "_id": "Main-0" }]
+                    },
+                    "Main-0": { "type": "text", "text": "Hello world" }
+                }
             }
         }
 
@@ -75,6 +75,7 @@ class AppConfigWriter:
 
         # Create Dir if not exists for config folder
         create_parent_dir_if_not_exists(app_config_dir)
+        create_parent_dir_if_not_exists(f"{app_config_dir}/generated_intermediate_json")
         create_parent_dir_if_not_exists(data["path"])
 
         app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
@@ -100,6 +101,11 @@ class AppConfigWriter:
         }
         
         # write configuration
+        # first check for an existing auth.json file
+        auth_json_path = f"{app_config_dir}/generated_intermediate_json/auth.json"
+        if not os.path.exists(auth_json_path):
+            write_file(auth_json_path, json.dumps({}))
+            
         write_file(f"{app_config_path}.json", json.dumps(app_current_config))
 
         self.write_basic_main_comp_config(app_current_config)

@@ -7,13 +7,22 @@ class AuthContent:
     key: str = CustomizedAttr((str),[required_validator])
     value: str = CustomizedAttr((str),[])
     type: str = CustomizedAttr((str),[required_validator])
+    errors : dict = CustomizedAttr((dict), [])
+    
+   
+
+    def add_error(self, attribute, error_message):
+        if attribute not in self.errors:
+            self.errors[attribute] = []
+        self.errors[attribute].append(error_message)
     
     def as_dict(self):
         
         return {
             'key': self.key,
             'value': self.value,
-            'type': self.type
+            'type': self.type,
+            'errors': self.errors if self.errors else None
         }
     
 
@@ -23,6 +32,13 @@ class Auth:
     content: list= CustomizedAttr((list),[required_validator])
     login_api: str= CustomizedAttr((str),[])
     token_api : str= CustomizedAttr((str),[])
+    # errors  = {}
+    errors : dict = CustomizedAttr((dict), [])
+
+    def add_error(self, attribute, error_message):
+        if attribute not in self.errors:
+            self.errors[attribute] = []
+        self.errors[attribute].append(error_message)
 
     def as_dict(self):
         contents = []
@@ -33,7 +49,8 @@ class Auth:
             'type': self.type.name,
             'contents': contents,
             'login_api': self.login_api,
-            'token_api': self.token_api
+            'token_api': self.token_api,
+            'errors': self.errors if self.errors else None
         }
     
     

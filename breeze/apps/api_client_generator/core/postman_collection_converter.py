@@ -151,11 +151,11 @@ class PostmanCollectionConverter:
 
     def _create_url_json(self, url_data):
         url = {
-            "baseurl":url_data.get("raw", url_data.get("baseurl", '')),
-            "host":url_data.get("host", ''),
-            "protocol":url_data.get("protocol", ""),
-            "port":url_data.get("port", 0),
-            "path":url_data.get("path",[]),
+            "baseurl":url_data.get("raw", url_data.get("baseurl")),
+            "host":url_data.get("host"),
+            "protocol":url_data.get("protocol"),
+            "port":url_data.get("port"),
+            "path":url_data.get("path"),
             "url_env":None
         }
         return url
@@ -223,11 +223,11 @@ class PostmanCollectionConverter:
                 response_arr = postmanConverter.create_response_arr_json(response_data=response_data,meta_data=meta_data)
                 
             except Exception as e:
-                api_models.append({
-                    "error" : True,
-                    "message" : str(e),
-                    "id":item.get("name","default"),
-                }) 
+                # api_models.append({
+                #     "error" : True,
+                #     "message" : str(e),
+                #     "id":item.get("name","default"),
+                # }) 
                     
                 print(traceback.format_exc())
             api_model_obj = {
@@ -246,8 +246,6 @@ class PostmanCollectionConverter:
 
     @staticmethod
     def prepare_api_models(data):
-        error_obj = {"general_error" : None} 
-        
         try:
             json_data = json.loads(data)
             info =  json_data.get("info")
@@ -261,29 +259,32 @@ class PostmanCollectionConverter:
             ## now load these json obj to api models
             for obj in arr_obj:
                 try:
-                    if obj.get("error",False) is True:
-                        raise Exception(obj.get("message"))
+                    # if obj.get("error",False) is True:
+                    #     raise Exception(obj.get("message"))
                     api_model = ApiModelLoader.load_api_model(obj)
                     api_models.append(api_model)
                 except TypeError as err:
-                    if obj["id"] not in error_obj:
-                        error_obj[obj.get("id")] = []    
-                    error_obj[obj.get("id")].append(err)
+                    print(traceback.format_exc())
+                    # if obj["id"] not in error_obj:
+                    #     error_obj[obj.get("id")] = []    
+                    # error_obj[obj.get("id")].append(err)
                         
                 except ValueError as err:
-                    if obj["id"] not in error_obj:
-                        error_obj[obj.get("id")] = []    
-                    error_obj[obj.get("id")].append(err)
+                    print(traceback.format_exc())
+                    # if obj["id"] not in error_obj:
+                    #     error_obj[obj.get("id")] = []    
+                    # error_obj[obj.get("id")].append(err)
                 except Exception as e:
+                    print(traceback.format_exc())
 
-                    if obj["id"] not in error_obj:
-                        error_obj[obj.get("id")] = []    
-                    error_obj[obj.get("id")].append(e) 
+                    # if obj["id"] not in error_obj:
+                    #     error_obj[obj.get("id")] = []    
+                    # error_obj[obj.get("id")].append(e) 
             
-            return {"filename" : tag, "api_models": api_models,"error_obj" : error_obj}
+            return {"filename" : tag, "api_models": api_models}
 
         except Exception as e:
             print(traceback.format_exc())
-            error_obj["general_error"] = str(e)  
-            raise (CustomeException(error_obj)) 
+            # error_obj["general_error"] = str(e)  
+            # raise (CustomeException(error_obj)) 
         

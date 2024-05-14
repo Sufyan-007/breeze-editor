@@ -97,42 +97,44 @@ function CssEditor({ mode }) {
   };
   return (
     <>
-      <div className="p-3 bg-light">
-        <h1>
-          {mode === "view"
-            ? "View CSS"
-            : mode === "edit"
-            ? "Edit CSS"
-            : "Add CSS"}
-        </h1>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group>
-            <Form.Label>CSS Name</Form.Label>
-            <Form.Control
-              placeholder="My Styles"
-              type="text"
-              value={cssName}
-              onChange={(e) => setCssName(e.target.value)}
-              disabled={mode === "edit"}
-              className="mb-3"
-            />
-          </Form.Group>
-          <div id="css-editor" style={{ height: "400px" }}></div>
-          <div className="d-flex justify-content-end">
-            <Button
-              variant="secondary"
-              onClick={() => navigate(`/project/${projectName}`)}
-              className="m-2"
-            >
-              Back
-            </Button>
-            {mode !== "view" && (
-              <Button variant="primary" type="submit" className="m-2">
-                {mode === "edit" ? "Update" : "Save"}
-              </Button>
-            )}
+      <div className="container-fluid text-white">
+        <div class="row py-2">
+          <h3>
+            {mode === "view"
+              ? "View CSS"
+              : mode === "edit"
+              ? "Edit CSS"
+              : "Add CSS"}
+          </h3>
+          <div className="col-12 px-3">
+            <Form onSubmit={handleSubmit}>
+              <Form.Group>
+                <Form.Control
+                  placeholder="Enter CSS Name"
+                  type="text"
+                  value={cssName}
+                  onChange={(e) => setCssName(e.target.value)}
+                  disabled={mode === "edit"}
+                  className="mb-3 w-50"
+                />
+              </Form.Group>
+              <Form.Label>Add your styles here</Form.Label>
+              <div className="d-flex justify-content-start">
+                <div
+                  id="css-editor"
+                  style={{ height: "350px", width: "85%" }}
+                ></div>
+              </div>
+              <div className="d-flex justify-content-start">
+                {mode !== "view" && (
+                  <Button variant="primary" type="submit" className="my-2">
+                    {mode === "edit" ? "Update" : "Save"}
+                  </Button>
+                )}
+              </div>
+            </Form>
           </div>
-        </Form>
+        </div>
       </div>
       <Toast
         onClose={() => setShowToast(false)}

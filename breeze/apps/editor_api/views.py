@@ -4,6 +4,7 @@ import json
 from .core.app_editor import AppEditor
 from .core.config_service import ConfigService
 from .core.generate_project import GenerateProject
+from .core.component_config_service import ComponentConfigService
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
@@ -256,7 +257,15 @@ class ComponentReader(APIView):
     def get(self, request,param):
         try:
             config_reader = ConfigService(param)
-            return JsonResponse(config_reader.get_component_configs(),status=200)
+            return JsonResponse(config_reader.get_all_component_configs(),status=200)
+        except:
+            return JsonResponse({},status=404)
+        
+    def post(self,request,param):
+        try:
+            config_reader = ConfigService(param)
+            data= json.loads(request.body.decode("utf-8"))
+            return JsonResponse(config_reader.get_component_config(data["componentName"]),status=200)
         except:
             return JsonResponse({},status=404)
         
@@ -432,4 +441,46 @@ class CSSFileUpload(APIView):
             }, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+        
+
+@method_decorator(csrf_exempt, name='dispatch')
+class HtmlConfigReader(APIView):
+    def post(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            return JsonResponse(componentConfigService.get_html_by_id(data["component"],data["html_id"]),status = 200)
+        except IndexError:
+            return JsonResponse({},status =404)
+        except:
+            return JsonResponse({},status=500)
+
+@method_decorator(csrf_exempt,name='dispatch')
+class HtmlConfigWriter(APIView):
+    def put(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            componentConfigService.update_html_config(data["component"],data["html_id"],data["html_config"])
+            return JsonResponse({},status=200)
+        except:
+            return JsonResponse({},status=500)
     
+    def delete(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            res=componentConfigService.delete_html_config(data["component"],data["html_id"])
+            return JsonResponse(res,status=200)
+        except:
+            return JsonResponse({},status=500)
+
+    def post(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            # raise NotImplementedError()
+            componentConfigService = ComponentConfigService(data["project_id"])
+            new_child_id,child_config,parent_html=componentConfigService.add_child_html(data["component"],data["parent_html_id"],data["child"])
+            return JsonResponse({"new_child_id":new_child_id,"child_config":child_config,"parent_html":parent_html},status=200)
+        except:
+            return JsonResponse({},status=500)
