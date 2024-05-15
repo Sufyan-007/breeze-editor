@@ -31,7 +31,7 @@ class ApiModelLoader:
         url_data = request_data.get("url", "")
         url = []
         if url_data:
-            url = api_model_loader.load_url(**url_data)
+            url = api_model_loader.load_url(url_data)
             
         parameters = []
         parameters = request_data.get("parameters", [])
@@ -93,7 +93,7 @@ class ApiModelLoader:
     def load_channel(data):
         return Channel(operation_id=data.get("operation_id"),
                 description=data.get("description"),
-                schema_relation=s,
+                schema_relation=data.get("schema_relation"),
                 messages=data.get("messages"),
                 schema=data.get("schema"))
     
@@ -115,7 +115,7 @@ class ApiModelLoader:
         return params
 
     @staticmethod
-    def load_url(**url_data):
+    def load_url(url_data):
         url = Url(
             servers = url_data.get("servers"),
             baseurl=url_data.get("baseurl"),

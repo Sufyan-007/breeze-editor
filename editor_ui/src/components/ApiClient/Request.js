@@ -12,28 +12,28 @@ import CustomFormGroup from "../CustomFormGroup.js";
 let methodType = [
   {
     name: "GET",
-    label: "Get",
+    label: "GET",
     variant: "secondary",
     className: "mx-3",
     width: "100%",
   },
   {
     name: "POST",
-    label: "Post",
+    label: "POST",
     variant: "secondary",
     className: "mx-3",
     width: "100%",
   },
   {
     name: "PUT",
-    label: "Put",
+    label: "PUT",
     variant: "secondary",
     className: "mx-3",
     width: "100%",
   },
   {
     name: "DELETE",
-    label: "Delete",
+    label: "DELETE",
     variant: "secondary",
     className: "mx-3",
     width: "100%",
@@ -42,10 +42,9 @@ let methodType = [
 function Request({ loginApis, tokenApis, onChange, requestBody }) {
   // console.log(loginApis, tokenApis, "login token");
   const [request, setRequest] = useState(requestBody || {});
-  const [hasBody, setHasBody] = useState(request.body?.length > 0);
-  const[hasAuth , setHasAuth] = useState(request.auth?.length > 0);
-
+  useEffect(()=>{setRequest(requestBody)},[requestBody])
   const onUrlValueChange = (value) => {
+    console.log(value, "onurlchange");
     let r = request;
     r["url"] = value;
     setRequest({
@@ -59,12 +58,11 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
     setRequest({
       ...r,
     });
-    setHasBody(data.length > 0);
     onChange("request", r);
   };
 
   const onValueChange = (prop, value) => {
-    console.log(prop, value ,"see for method value change ");
+    // console.log(prop, value ,"see for method value change ");
     let r = request;
     r[prop] = value;
     setRequest({
@@ -85,8 +83,6 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
       ...request,
       body: request.body ? [...request.body, newBody] : [newBody],
     });
-
-    setHasBody(true);
   };
   useEffect(() => {
     if (request.body && request.body.length > 0) {
@@ -111,7 +107,6 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
       };
       setRequest(updatedRequest);
       onChange("request", updatedRequest);
-      setHasBody(updatedBody.length > 0);
     }
   };
   const removeAuthSection = (indexToRemove) => {
@@ -121,7 +116,6 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
       const updatedRequest = { ...request, auth: updatedAuth };
       setRequest(updatedRequest);
       onChange("request", updatedRequest);
-      setHasAuth(updatedAuth.length > 0);
     }
   };
   
@@ -150,6 +144,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
             type: "buttongroup",
             selectedButton: request["method"],
             onButtonClick: (e) => {
+              console.log(e, "click");
               onValueChange("method", e);
             },
             width: "90%",
@@ -166,9 +161,9 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
             <Form.Label className="mt-3 mx-3">URLs:</Form.Label>
           </div>
           <div className="custom-grid-item nine d-flex mt-3">
-            {request["url"] && (
+            {
               <Urls urlData={request["url"]} onChange={onUrlValueChange} />
-            )}
+            }
           </div>
         </div>
       </div>
@@ -186,9 +181,9 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
               />{" "}
             </Button>
           </div>
-          {request["auth"] && (
+          {
             <div className="custom-grid-item nine  d-flex flex-wrap  mt-3">
-              {request["auth"].map((auth, index) => (
+              {request["auth"]&& request["auth"].map((auth, index) => (
                 <Auth
                   key={index}
                   index={index}
@@ -200,7 +195,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
                 />
               ))}
             </div>
-          )}
+          }
         </div>
       </div>
 
@@ -216,7 +211,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
             />{" "}
           </Button>
         </div>
-        {request["body"] && (
+        {
           <div className="custom-grid-item nine d-flex flex-wrap mt-3">
             {request["body"].map((body, index) => (
               <Body
@@ -228,7 +223,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
               />
             ))}
           </div>
-        )}
+        }
       </div>
     </>
   );

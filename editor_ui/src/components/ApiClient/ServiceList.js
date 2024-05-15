@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   fetchIntermediate,
   generateReactService,
@@ -25,6 +25,8 @@ export default function ServiceLists({
   onEditService,
   errorMessage,
   onAddService,
+  uploadSuccess,
+  setUpload,
 }) {
   const [apiList, setApiList] = useState([]);
   const [selectdInfo, setSelectdInfo] = useState({});
@@ -33,25 +35,30 @@ export default function ServiceLists({
   const [error, setError] = useState("");
   const [selectedAuthenticationType, setSelectedAuthenticationType] =
     useState("");
-
-  useEffect(() => {
-    fetchServiceList();
-  }, []);
-
-  useEffect(() => {}, [apiList]);
   const appName = useParams();
-  const fetchServiceList = async () => {
+  const fetchServiceList = useCallback(async () => {
     try {
       const result = await fetchIntermediate(appName.projectName);
       setApiList(result["files_with_apis"]);
     } catch (error) {
       console.error("Error generate react service:", error);
     }
-  };
+  }, [appName.projectName]);
+  useEffect(() => {
+    fetchServiceList();
+  }, [fetchServiceList]);
+
+  useEffect(() => {
+    if (uploadSuccess) {
+      fetchServiceList();
+      setUpload(false);
+    }
+  }, [uploadSuccess, fetchServiceList, setUpload]);
 
   const generateService = async (filename) => {
     try {
       const result = await generateReactService(appName.projectName, filename);
+      console.log(result, "result");
     } catch (error) {
       console.error("Error generate react service:", error);
     }
@@ -82,7 +89,6 @@ export default function ServiceLists({
       authentication_type: value,
     }));
   };
-  
 
   return (
     <div className="m-5" style={{ width: "95%" }}>
@@ -241,7 +247,7 @@ export default function ServiceLists({
                   onHide={() => {
                     setShowTransferModal(false);
                     setSelectedAuthenticationType("");
-                    setSelectdInfo({})
+                    setSelectdInfo({});
                   }}
                   centered
                   animation>
@@ -254,9 +260,7 @@ export default function ServiceLists({
                       <Form.Control
                         as="select"
                         value={selectedAuthenticationType}
-                        onChange={(e) =>
-                          onDropDownChange(e.target.value)
-                        }>
+                        onChange={(e) => onDropDownChange(e.target.value)}>
                         <option value="">Select</option>
                         <option value="NOAUTH">NOAUTH</option>
                         <option value="BASIC">BASIC</option>
@@ -270,9 +274,7 @@ export default function ServiceLists({
                   <Modal.Footer>
                     {console.log(selectedAuthenticationType, "selecteddd")}
                     {selectedAuthenticationType && (
-                      <Button
-                        variant="danger"
-                        onClick={onTransfer}>
+                      <Button variant="danger" onClick={onTransfer}>
                         Transfer
                       </Button>
                     )}

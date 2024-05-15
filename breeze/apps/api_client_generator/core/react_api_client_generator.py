@@ -8,6 +8,7 @@ from ..utils.api_model_loader import ApiModelLoader
 
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import read_config_file, read_file_json, write_file
+from common.utils.file_helper import create_parent_dir_if_not_exists
 
 from ..consts import RESPONSE_STATUS_CONDITION,REFRESH_TOKEN_API,RESPONSE_INTERCEPTOR,REQUEST_INTERCEPTOR,WEBSOCKET_HOOK
 class ReactApiClientGenerator:
@@ -41,10 +42,11 @@ class ReactApiClientGenerator:
     def create_service_files(self, map_services):
         # preprare new service file for each tag
         folder_name = "service"
+        content = "import axios from 'axios'\n"
+        create_parent_dir_if_not_exists(f"{self.app_config['APP_SOURCE_DIR']}/{folder_name}")
         for tag, func_arr in map_services.items():
             tag = tag.title()
             filename = tag+"Service.js"
-            content = "\n"
             for func in func_arr:
                 content += "\n"
                 content += func
@@ -270,7 +272,7 @@ class ReactApiClientGenerator:
                 form_data = body.schema
                 for key,item in form_data.get("properties",{}).items():
                     params.append(key)
-                    variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")}` + "=" + `${encodeURIComponent(%s)}`);'%(key,key)
+                    variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")} = ${encodeURIComponent(%s)}`);'%(key,key)
                 raw_data = "formBody"
                 variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
 

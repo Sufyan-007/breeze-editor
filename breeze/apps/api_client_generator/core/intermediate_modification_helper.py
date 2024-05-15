@@ -11,7 +11,7 @@ class IntermediateModificationHelper:
     def process_api_data(self, modified_api, filename):
         file_path = os.path.join(self.folder_path, filename)
         try:
-            api_model,errors = ApiModelLoader.load_api_model(modified_api)
+            api_model = ApiModelLoader.load_api_model(modified_api)
             api_model_dict = api_model.as_dict()
             resultant_model =  {api_model_dict["id"] : api_model_dict}
             tag = modified_api.get("tags", "default")
