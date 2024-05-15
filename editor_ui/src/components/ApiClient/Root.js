@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
-import {  Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
+import { Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
 import ServiceList from "./ServiceList";
 import AuthApiList from "./AuthApiList";
 import EditAuthFunction from "./EditAuthFunction";
 import EditServiceFuntion from "./EditServiceFunction";
 import ServiceRoot from "../../css/ServiceRoot.css";
 import { useParams } from "react-router";
-import { generateIntermediates } from '../../services/IntermediatesService'
+import { generateIntermediates } from "../../services/IntermediatesService";
 
 export default function Root() {
   const [view, setView] = useState("LIST_SERVICE");
@@ -38,9 +38,9 @@ export default function Root() {
     setView("EDIT_AUTH_FUNCTION");
     setSelectedAuthServiceId(null);
   };
-  const setUpload = (value)=>{
-    setUploadSuccess(value)
-  }
+  const setUpload = (value) => {
+    setUploadSuccess(value);
+  };
   const handleUpload = async (event, fileType) => {
     const file = event.target.files[0];
     if (!file) {
@@ -49,12 +49,16 @@ export default function Root() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const response = await generateIntermediates(fileType,appName.projectName,formData)
+      const response = await generateIntermediates(
+        fileType,
+        appName.projectName,
+        formData
+      );
       console.log(response, "response");
       if (response) {
         setUploadSuccess(true);
         setView("LIST_SERVICE");
-        event.target.value = '';
+        event.target.value = "";
       } else {
         throw new Error("Upload failed. Check server logs for details.");
       }
@@ -63,10 +67,12 @@ export default function Root() {
     }
   };
   function openFileInput(fileType) {
-    if (fileType === "yaml") {
+    if (fileType === "openapi") {
       fileInputYAML.current.click();
     } else if (fileType === "postman") {
       fileInputPostman.current.click();
+    } else if (fileType === "websocket") {
+      fileInputWebsocket.current.click();
     }
   }
 
@@ -94,7 +100,7 @@ export default function Root() {
                   id="basic-nav-dropdown"
                   className="mx-3"
                 >
-                  <NavDropdown.Item onClick={() => openFileInput("yaml")}>
+                  <NavDropdown.Item onClick={() => openFileInput("openapi")}>
                     Upload YAML
                   </NavDropdown.Item>
                   <input
@@ -104,8 +110,8 @@ export default function Root() {
                     onChange={(e) => handleUpload(e, "openapi")}
                     accept=".yaml,.yml"
                   />
-                  <NavDropdown.Item onClick={() => openFileInput("yaml")}>
-                   {"YAML (Websocket)"}
+                  <NavDropdown.Item onClick={() => openFileInput("websocket")}>
+                    {"YAML (Websocket)"}
                   </NavDropdown.Item>
                   <input
                     ref={fileInputWebsocket}
@@ -143,10 +149,14 @@ export default function Root() {
               onEditService={onEditService}
               errorMessage={errorMessage}
               onAddService={onAddService}
-              uploadSuccess = {uploadSuccess}
-              setUpload = {setUpload}></ServiceList>
+              uploadSuccess={uploadSuccess}
+              setUpload={setUpload}
+            ></ServiceList>
           ) : view === "AUTH_API_LIST" ? (
-            <AuthApiList onEditAuthService={onEditAuthService} onAddAuthService = {onAddAuthService}></AuthApiList>
+            <AuthApiList
+              onEditAuthService={onEditAuthService}
+              onAddAuthService={onAddAuthService}
+            ></AuthApiList>
           ) : view === "EDIT_AUTH_FUNCTION" ? (
             <EditAuthFunction
               selectedAuthServiceId={selectedAuthServiceId}

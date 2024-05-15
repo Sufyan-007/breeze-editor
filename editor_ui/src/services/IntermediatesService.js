@@ -54,6 +54,12 @@ export async function generateReactService(projectName,filename) {
     if (filename === "auth"){
         path = "AUTH"
     }
+    else {
+      if(filename.substring("websocket"))
+      {
+        path = "WS"
+      }
+    }
     let file = filename.split(".")[0];
     let apiUrl = HOST+"/api-client-generator/generate-react-api-client/"+path
     const res = callApiClientGenerator(apiUrl, "POST", {"appName": projectName, "filename": file},false, {})

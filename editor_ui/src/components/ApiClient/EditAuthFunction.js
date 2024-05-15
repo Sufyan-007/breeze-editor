@@ -10,28 +10,38 @@ import CustomButtonGroup from "../CustomButtonGroup.js";
 import { useParams } from "react-router";
 import Request from "./Request.js";
 import Response from "./Response.js";
+import CustomFormGroup from "../CustomFormGroup.js";
 
 function EditAuthFunction({ onClose, selectedAuthServiceId }) {
   const [selectedApiInfo, setSelectedApiInfo] = useState({});
   const appName = useParams();
+  let controls = [
+    {
+      label: "Selected Api",
+      type: "text",
+      value: selectedApiInfo.operation_id ? selectedApiInfo.operation_id : "",
+      onChange: (value) => onValueChanges("operation_id", value),
+      placeholder: "Enter Function Name",
+      width: "90%",
+      labelColWidth: 3,
+      inputColWidth: 9,
+    },
+  ];
   let selectTypes = [
     {
       name: "LOGOUT",
       label: "Logout",
       variant: "secondary",
-      
     },
     {
       name: "REFRESH",
       label: "Refresh",
       variant: "secondary",
-      
     },
     {
       name: "LOGIN",
       label: "Login",
       variant: "secondary",
-      
     },
   ];
   let authenticationTypes = [
@@ -39,31 +49,26 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       name: "BASIC",
       label: "Basic",
       variant: "secondary",
-      
     },
     {
       name: "OAUTH2",
       label: "OAUTH2",
       variant: "secondary",
-      
     },
     {
       name: "BEARER",
       label: "Bearer",
       variant: "secondary",
-      
     },
     {
       name: "APIKEY",
       label: "ApiKey",
       variant: "secondary",
-      
     },
     {
       name: "OAUTH",
       label: "Oauth",
       variant: "secondary",
-      
     },
   ];
   let tokenStorageSchemes = [
@@ -71,19 +76,16 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       name: "LOCAL_STORAGE",
       label: "Local Storage",
       variant: "secondary",
-      
     },
     {
       name: "SESSION",
       label: "Session Storage",
       variant: "secondary",
-      
     },
     {
       name: "COOKIE",
       label: "Cookie",
       variant: "secondary",
-      
     },
   ];
   let selectFlow = [
@@ -91,25 +93,21 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       name: "authorization_code",
       label: "Authorization Code",
       variant: "secondary",
-      
     },
     {
       name: "implicit",
       label: "Implicit",
       variant: "secondary",
-      
     },
     {
       name: "password",
       label: "Password",
       variant: "secondary",
-      
     },
     {
       name: "clientCredentials",
       label: "Client Credentials",
       variant: "secondary",
-      
     },
   ];
 
@@ -140,7 +138,6 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       value: selectedApiInfo.token_store
         ? selectedApiInfo.token_store.access_token_key
         : "",
-     
     },
     {
       name: "token_store.refresh_token_key",
@@ -148,12 +145,12 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       value: selectedApiInfo.token_store
         ? selectedApiInfo.token_store.refresh_token_key
         : "",
-     
     },
   ];
 
   const onValueChanges = (name, value) => {
     // Check if the property is nested
+    console.log(name, value , "see the changes in response body");
     if (name.includes(".")) {
       const [parent, nestedProperty] = name.split(".");
       setSelectedApiInfo((prevState) => ({
@@ -281,164 +278,171 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
   return (
     <>
       <div
-        style={{
-          overflowY: "auto",
-          overflowX: "hidden",
-        }}>
-         
-        <Row className="d-flex justify-content-between align-items-center w-100 mb-3">
-        <Col></Col>
-          <Col md={{span:1}}>
-          <Button variant="secondary" onClick={onClose} size="sm" className="my-3">
-            <img src={close} alt="" height={24} className="mx-2" />
-          </Button>
-          </Col>
-          <Col md={{span:1}}>
-          <Button
-                className="my-3"
-                variant="secondary"
-                onClick={handleSave}>
-                Save
-              </Button>
-          </Col>
-        </Row>
-        
-          <div>
-            <Form>
-              <Form.Group>
-                <Row>
-                  <Col sm={3} className="mt-4">
-                    <Form.Label className="mx-3">Selected Api</Form.Label>
-                  </Col>
-                  <Col sm={9}>
-                    {console.log(selectedApiInfo, "selected")}
-                    <Form.Control
-                      className=""
-                      style={{ width: "100%" }}
-                      type="text"
-                      value={selectedApiInfo.operation_id ? selectedApiInfo.operation_id : ''}
-                      name="operation_id"
-                      onChange={(e) =>
-                        onValueChanges("operation_id", e.target.value)
-                      }
-                    />
-                  </Col>
-                </Row>
-              </Form.Group>
-              <CustomButtonGroup
-                options={selectTypes}
-                selectedButton={selectedApiInfo.auth_api_type ? selectedApiInfo.auth_api_type : ''}
-                onButtonClick={onValueChanges}
-                formId="auth_api_type"
-                title="Select Type:"></CustomButtonGroup>
-              <CustomButtonGroup
-                options={authenticationTypes}
-                selectedButton={selectedApiInfo.authentication_type? selectedApiInfo.authentication_type : ''}
-                onButtonClick={onValueChanges}
-                formId="authentication_type"
-                title="Authentication Scheme:"></CustomButtonGroup>
-
-              {selectedApiInfo.authentication_type === "OAUTH2" && (
-                <>
-                  <CustomButtonGroup
-                    options={selectFlow}
-                    selectedButton={
-                      selectedApiInfo.flow_type ? selectedApiInfo.flow_type : ""
-                    }
-                    onButtonClick={onValueChanges}
-                    formId="flow_type"
-                    title="Select Flow or Grant Types:"></CustomButtonGroup>
-
-                  <Row>
-                    <Col sm={3}></Col>
-                    <Col sm={9}>
-                      {/* <CustomFormControl
-                        options={AuthUrls}
-                        onChange={onValueChanges}
-                        controlId="selectedAuthUrl"
-                        flow_type={selectedApiInfo.flow_type} // Pass the flow object
-                      /> */}
-                    </Col>
-                  </Row>
-                </>
-              )}
-              <CustomButtonGroup
-                options={tokenStorageSchemes}
-                selectedButton={
-                  selectedApiInfo.token_store
-                    ? selectedApiInfo.token_store.store_in
-                    : ""
-                }
-                onButtonClick={onValueChanges}
-                formId="token_store.store_in"
-                title="Select Token Storage Scheme"></CustomButtonGroup>
-              {selectedApiInfo.token_store && (
-                <Row>
-                  <Col sm={3}></Col>
-                  <Col sm={9}>
-                    {/* <CustomFormControl
-                      options={selectKeys}
-                      onChange={onValueChanges}
-                      controlId="selectedKey"></CustomFormControl> */}
-                  </Col>
-                </Row>
-              )}
-              
-                <Form.Group
-                  className="mb-3 custom-form-group"
-                  controlId="request">
-                  <Request
-                    loginApis={""}
-                    tokenApis={""}
-                    onChange={onValueChanges}
-                    requestBody={selectedApiInfo.request || {"body": [], "auth":[]}}
-                  />
-                </Form.Group>
-              
+      style={{
+        overflowY: "auto",
+        overflowX: "hidden",
+      }}
+      >
+        <div className="custom-grid d-flex justify-content-end align-items-center w-100 mb-3">
+          <div className="custom-grid-item"></div>
+          <div className="custom-grid-item one">
+            <Button
+              variant="secondary"
+              onClick={onClose}
              
-                <Row>
-                  <Col sm={3}>
-                    <Form.Label className="mx-3 mt-3">Response</Form.Label>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleAddResponse}>
-                      <img
-                        width="24"
-                        height="24"
-                        src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
-                        alt="add--v1"
-                      />
-                    </Button>
-                  </Col>
-                  <Col
-                    sm={9}
-                    className="d-flex flex-wrap mt-3 p-2 "
-                    style={{
-                      
-                      
-                      backgroundColor: "rgba(239, 239, 239, 0.5)",
-                    }}>
-                    {selectedApiInfo["response"] && selectedApiInfo["response"].map((res, index) => (
-                      <Response
-                        key={res.id}
-                        index={index}
-                        onChange={handleResponseBodyChange}
-                        responseData={res}
-                        onRemove={removeResponse}
-                      />
-                    ))}
-                  </Col>
-                </Row>
-              
-              
-            </Form>
+              className="my-3"
+            >
+              Close
+            </Button>
           </div>
+          <div className="custom-grid-item one">
+            <Button className="my-3" variant="secondary" onClick={handleSave}>
+              Save
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <Form>
+            
+            <CustomFormGroup controls={controls} />
+           
+            <CustomFormGroup
+              controls={[
+                {
+                  label: "Select Type:",
+                  type: "buttongroup",
+                  selectedButton: selectedApiInfo.auth_api_type
+                    ? selectedApiInfo.auth_api_type
+                    : "",
+                  onButtonClick: (e) => {
+                    onValueChanges("auth_api_type", e);
+                  },
+                  width: "100%",
+                  labelColWidth: 3,
+                  inputColWidth: 9,
+                  buttonGroupOptions: selectTypes,
+                  formId: "auth_api_type",
+                },
+              ]}
+          
+            />
+            
+            <CustomFormGroup
+              controls={[
+                {
+                  label: "Authentication Scheme ",
+                  type: "buttongroup",
+                  selectedButton: selectedApiInfo.authentication_type
+                    ? selectedApiInfo.authentication_type
+                    : "",
+                  onButtonClick: (e) => {
+                    onValueChanges("authentication_type",e);
+                  },
+                  width: "100%",
+                  labelColWidth: 3,
+                  inputColWidth: 9,
+                  buttonGroupOptions: authenticationTypes,
+                  formId: "authentication_type",
+                },
+              ]}
+          
+            />
+            {selectedApiInfo.authentication_type === "OAUTH2" && (
+              <>
+                
+                <CustomFormGroup
+                  controls={[
+                    {
+                      label: "Select Flow or Grant Types: ",
+                      type: "buttongroup",
+                      selectedButton: selectedApiInfo.flow_type
+                        ? selectedApiInfo.flow_type
+                        : "",
+                      onButtonClick: (e) => {
+                        onValueChanges("flow_type",e);
+                      },
+                      width: "100%",
+                      labelColWidth: 3,
+                      inputColWidth: 9,
+                      buttonGroupOptions: selectFlow,
+                      formId: "flow_type",
+                    },
+                  ]}
         
-          {/* <p>
+                />
+              </>
+            )}
+            
+            <CustomFormGroup
+              controls={[
+                {
+                  label: "Select Token Storage Scheme ",
+                  type: "buttongroup",
+                  selectedButton: selectedApiInfo.token_store
+                    ? selectedApiInfo.token_store.store_in
+                    : "",
+                  onButtonClick: (e) => {
+                    onValueChanges("token_store.store_in", e);
+                  },
+                  width: "100%",
+                  labelColWidth: 3,
+                  inputColWidth: 9,
+                  buttonGroupOptions: tokenStorageSchemes,
+                  formId: "token_store.store_in",
+                },
+              ]}
+    
+            />
+            <section className="divider-sec mt-3">
+              <p>Request Body</p>
+            </section>
+            <Form.Group className="mb-3 custom-form-group" controlId="request">
+              <Request
+                loginApis={""}
+                tokenApis={""}
+                onChange={onValueChanges}
+                requestBody={selectedApiInfo.request || { body: [], auth: [] }}
+              />
+            </Form.Group>
+            <section className="divider-sec">
+              <p>Response Body</p>
+            </section>
+            <div className="custom-grid">
+              <div className="custom-grid-item three">
+                <Form.Label className="mx-3 mt-3">Response</Form.Label>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddResponse}
+                >
+                  <img
+                    width="24"
+                    height="24"
+                    src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+                    alt="add--v1"
+                  />
+                </Button>
+              </div>
+              <div className="custom-grid-item nine d-flex flex-wrap mt-3 p-2 ">
+                {selectedApiInfo["response"] &&
+                  selectedApiInfo["response"].map((res, index) => (
+                    <Response
+                      key={res.id}
+                      index={index}
+                      onChange={handleResponseBodyChange}
+                      responseData={res}
+                      onRemove={removeResponse}
+                    />
+                  ))}
+              </div>
+            </div>
+          </Form>
+        </div>
+
+        {/* <p>
             No authentication APIs available. Please create APIs in the backend.
           </p> */}
-        
       </div>
     </>
   );
