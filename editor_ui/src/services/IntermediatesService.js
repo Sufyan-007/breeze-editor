@@ -5,21 +5,9 @@ const HOST="http://localhost:8000"
 
 export async function generateIntermediates(fileType, appName, formData)
 {
-    let apiUrl = ''
-    switch (fileType) {
-        case "yml":
-          apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/openapi/${appName}`;
-          break;
-        case "postman":
-          apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/postman/${appName}`;
-          break;
-        default:
-          console.error("Unsupported file type:", fileType);
-          return;
-      }
+      let apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/${fileType}/${appName}`;
       const response = await callApiClientGenerator(apiUrl, "POST", formData, true, {})
-      const responseData = await response.json()
-      return responseData
+      return response
 
 }
 export async function fetchIntermediate(projectName) {

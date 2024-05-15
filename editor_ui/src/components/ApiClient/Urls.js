@@ -3,12 +3,14 @@ import { Col, Form, FormGroup, Row } from "react-bootstrap";
 import CustomFormGroup from "../CustomFormGroup";
 import UrlsCss from "../../css/Urls.css";
 function Urls({ urlData, onChange }) {
+  console.log(urlData, "urldata");
   const onValueChange = (field, fieldValue) => {
+    // console.log(field, fieldValue, "field and value");
     const updatedUrlData = {
         ...urlData,
         [field]: Array.isArray(fieldValue) ? [...fieldValue] : fieldValue,
     };
-    onChange("url",updatedUrlData);
+    onChange(updatedUrlData);
 };
 useEffect(()=>{},[urlData])
   const urlFields = [
