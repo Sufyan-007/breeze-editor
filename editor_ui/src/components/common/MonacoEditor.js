@@ -11,7 +11,7 @@ function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", lan
   // })
 
   useEffect(() => {
-    console.log("setChange")
+    // console.log("setChange")
     if (editor && onChange) {
       editor.onDidChangeModelContent(() => {
         if (`onChange`) {
@@ -23,15 +23,16 @@ function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", lan
 
 
   useEffect(() => {
-    console.log("INit editor")
+    // console.log("INit editor")
     const editorDiv = document.getElementById(id);
     if (editorDiv) {
 
-      console.log("Actual init")
+      // console.log("Actual init")
       const editor = monaco.editor.create(editorDiv, {
         value: defaultValue,
         language,
         theme,
+        automaticLayout: true
       });
       editorRef.current = editor;
       setEditor(editor);

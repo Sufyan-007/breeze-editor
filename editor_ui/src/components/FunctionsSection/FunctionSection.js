@@ -4,9 +4,16 @@ import Function from "./Function"
 
 export default function FunctionSection() {
 
-    const {  componentConfig } = useContext(ComponentContext)
+    const {  componentConfig, setComponentConfig } = useContext(ComponentContext)
     const functions = componentConfig.functions
 
+    function updateFunctions(func,index){
+        setComponentConfig((componentConfig)=>{
+            componentConfig.functions[index] = func
+            console.log(componentConfig)
+            return {...componentConfig}
+        })
+    }
 
     return (
         <div className="row flex-grow-1 text-white" style={{backgroundColor:'rgb(48, 48, 51)'}}>
@@ -15,9 +22,9 @@ export default function FunctionSection() {
                     Functions
                 </h3>
                 {functions?.length > 0 ?
-                    functions.map(func =>
+                    functions.map((func,index) =>
                         < div className="row mx-2 my-3">
-                            <Function func={func} />
+                            <Function func={func} updateFunctions={(func)=>updateFunctions(func,index)}/>
                         </div>
                     )
 
