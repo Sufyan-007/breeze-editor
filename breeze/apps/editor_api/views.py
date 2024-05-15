@@ -494,7 +494,7 @@ class LifeCycleConfigWriter(APIView):
             componentConfigService = ComponentConfigService(data["project_id"])
             lifecycle_data = self.extract_lifecycle_data(data)
             new_hook = componentConfigService.add_lifecycle(lifecycle_data)
-            return JsonResponse(new_hook, status=201)
+            return JsonResponse(new_hook, status=200)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except ValueError as e:
@@ -547,8 +547,9 @@ class LifeCycleConfigWriter(APIView):
         return {
             "comp_name": data["comp_name"],
             "type": data["type"],
+            "lifecycleType": data["lifecycleType"],
             "hook_name": data["hook_name"],
-            "dependantVars": data["dependantVars"],
+            "dependentVars": data["dependentVars"],
             "body": data["body"],
             "return_body": data.get("return_body")
         }
