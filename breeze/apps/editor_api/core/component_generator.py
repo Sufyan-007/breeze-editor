@@ -230,8 +230,8 @@ class HookCodeHelper:
         hook_body = hook_config['implementation']['body']
         hook_return_body = hook_config['implementation'].get('returnBody', None)
 
-        if 'dependantVars' in hook_config:
-            dependent_vars = hook_config.get('dependantVars', [])
+        if 'dependentVars' in hook_config:
+            dependent_vars = hook_config.get('dependentVars', [])
             if len(dependent_vars) == 0:
                 dependencies = "[]"
             elif dependent_vars == "null":
