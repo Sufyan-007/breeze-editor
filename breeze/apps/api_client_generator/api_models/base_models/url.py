@@ -20,6 +20,7 @@ class Url:
         if attribute not in self.errors:
             self.errors[attribute] = []
         self.errors[attribute].append(error_message)
+        print(self.errors, "erorroejfskfjd")
 
     def as_dict(self):
         return {

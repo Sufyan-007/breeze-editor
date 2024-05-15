@@ -13,11 +13,8 @@ export default function Root() {
   const [selectedServiceInfo, setSelectedServiceInfo] = useState({});
   const [selectedAuthServiceId, setSelectedAuthServiceId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileInputYAML = useRef(null);
   const fileInputPostman = useRef(null);
-  const fileInputWebsocket = useRef(null);
-
   const appName = useParams();
   const onEditService = (serviceInfo) => {
     setView("EDIT_SERVICE_FUNCTION");
@@ -38,9 +35,7 @@ export default function Root() {
     setView("EDIT_AUTH_FUNCTION");
     setSelectedAuthServiceId(null);
   };
-  const setUpload = (value)=>{
-    setUploadSuccess(value)
-  }
+
   const handleUpload = async (event, fileType) => {
     const file = event.target.files[0];
     if (!file) {
@@ -50,11 +45,8 @@ export default function Root() {
     formData.append("file", file);
     try {
       const response = await generateIntermediates(fileType,appName.projectName,formData)
-      console.log(response, "response");
-      if (response) {
-        setUploadSuccess(true);
+      if (response.ok) {
         setView("LIST_SERVICE");
-        event.target.value = '';
       } else {
         throw new Error("Upload failed. Check server logs for details.");
       }
@@ -101,17 +93,7 @@ export default function Root() {
                     ref={fileInputYAML}
                     type="file"
                     style={{ display: "none" }}
-                    onChange={(e) => handleUpload(e, "openapi")}
-                    accept=".yaml,.yml"
-                  />
-                  <NavDropdown.Item onClick={() => openFileInput("yaml")}>
-                   {"YAML (Websocket)"}
-                  </NavDropdown.Item>
-                  <input
-                    ref={fileInputWebsocket}
-                    type="file"
-                    style={{ display: "none" }}
-                    onChange={(e) => handleUpload(e, "websocket")}
+                    onChange={(e) => handleUpload(e, "yml")}
                     accept=".yaml,.yml"
                   />
                   <NavDropdown.Item onClick={() => openFileInput("postman")}>
@@ -142,9 +124,7 @@ export default function Root() {
             <ServiceList
               onEditService={onEditService}
               errorMessage={errorMessage}
-              onAddService={onAddService}
-              uploadSuccess = {uploadSuccess}
-              setUpload = {setUpload}></ServiceList>
+              onAddService={onAddService}></ServiceList>
           ) : view === "AUTH_API_LIST" ? (
             <AuthApiList onEditAuthService={onEditAuthService} onAddAuthService = {onAddAuthService}></AuthApiList>
           ) : view === "EDIT_AUTH_FUNCTION" ? (
