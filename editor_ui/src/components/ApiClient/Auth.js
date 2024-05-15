@@ -29,7 +29,6 @@ let authTypes = [
 ];
 
 export default function Auth({ index, onChange, auth,onRemove, loginApis, tokenApis }) {
-  console.log(auth,"auth prop in auth. look for type");
   const [authData, setAuthData] = useState(auth || {});
 
   const onValueChange = (prop, value) => {

@@ -54,10 +54,11 @@ export default function ServiceLists({
       setUpload(false);
     }
   }, [uploadSuccess, fetchServiceList, setUpload]);
+
   const generateService = async (filename) => {
     try {
       const result = await generateReactService(appName.projectName, filename);
-      console.log(result);
+      console.log(result, "result");
     } catch (error) {
       console.error("Error generate react service:", error);
     }

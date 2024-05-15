@@ -4,9 +4,10 @@ import ServiceList from "./ServiceList";
 import AuthApiList from "./AuthApiList";
 import EditAuthFunction from "./EditAuthFunction";
 import EditServiceFuntion from "./EditServiceFunction";
-import ServiceRoot from "../../css/ServiceRoot.css";
+import "../../css/ServiceRoot.css";
 import { useParams } from "react-router";
 import { generateIntermediates } from "../../services/IntermediatesService";
+// import CustomFunction from "./CustomFunction";
 
 export default function Root() {
   const [view, setView] = useState("LIST_SERVICE");
@@ -17,7 +18,6 @@ export default function Root() {
   const fileInputYAML = useRef(null);
   const fileInputPostman = useRef(null);
   const fileInputWebsocket = useRef(null);
-
   const appName = useParams();
   const onEditService = (serviceInfo) => {
     setView("EDIT_SERVICE_FUNCTION");
@@ -41,6 +41,7 @@ export default function Root() {
   const setUpload = (value) => {
     setUploadSuccess(value);
   };
+
   const handleUpload = async (event, fileType) => {
     const file = event.target.files[0];
     if (!file) {
@@ -54,7 +55,6 @@ export default function Root() {
         appName.projectName,
         formData
       );
-      console.log(response, "response");
       if (response) {
         setUploadSuccess(true);
         setView("LIST_SERVICE");
@@ -75,7 +75,6 @@ export default function Root() {
       fileInputWebsocket.current.click();
     }
   }
-
   return (
     <>
       <div className="container-fluid d-flex flex-column">
@@ -110,6 +109,7 @@ export default function Root() {
                     onChange={(e) => handleUpload(e, "openapi")}
                     accept=".yaml,.yml"
                   />
+
                   <NavDropdown.Item onClick={() => openFileInput("websocket")}>
                     {"YAML (Websocket)"}
                   </NavDropdown.Item>
@@ -139,6 +139,13 @@ export default function Root() {
                 >
                   Authentication Config
                 </Nav.Link>
+                {/* <Nav.Link
+                  onClick={() => {
+                    setView("CUSTOM_FUNCTION");
+                  }}
+                  className="mx-3">
+                  Custom
+                </Nav.Link> */}
               </Nav>
             </Navbar.Collapse>
           </Container>
@@ -169,7 +176,11 @@ export default function Root() {
               selectedServiceInfo={selectedServiceInfo}
               onClose={() => setView("LIST_SERVICE")}
             ></EditServiceFuntion>
-          ) : null}
+          ) : // : view === "CUSTOM_FUNCTION" ? (
+          //   <CustomFunction
+          //     onClose={() => setView("LIST_SERVICE")}></CustomFunction>
+          // )
+          null}
         </div>
       </div>
     </>

@@ -150,7 +150,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
 
   const onValueChanges = (name, value) => {
     // Check if the property is nested
-    console.log(name, value , "see the changes in response body");
+    console.log(name, value, "see the changes ");
     if (name.includes(".")) {
       const [parent, nestedProperty] = name.split(".");
       setSelectedApiInfo((prevState) => ({
@@ -166,6 +166,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
         [name]: value,
       }));
     }
+    console.log(selectedApiInfo, "see the flow type");
   };
   const handleAddResponse = () => {
     const newResponse = {
@@ -253,6 +254,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
       is_authorization_url: selectedApiInfo.is_authorization_url
         ? selectedApiInfo.is_authorization_url
         : false,
+      flow_type: selectedApiInfo.flow_type ? selectedApiInfo.flow_type : "",
       flow: selectedApiInfo.flow ? selectedApiInfo.flow : {},
       token_store: selectedApiInfo.token_store
         ? selectedApiInfo.token_store
@@ -278,20 +280,15 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
   return (
     <>
       <div
-      style={{
-        overflowY: "auto",
-        overflowX: "hidden",
-      }}
+        style={{
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
       >
         <div className="custom-grid d-flex justify-content-end align-items-center w-100 mb-3">
           <div className="custom-grid-item"></div>
           <div className="custom-grid-item one">
-            <Button
-              variant="secondary"
-              onClick={onClose}
-             
-              className="my-3"
-            >
+            <Button variant="secondary" onClick={onClose} className="my-3">
               Close
             </Button>
           </div>
@@ -304,9 +301,8 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
 
         <div>
           <Form>
-            
             <CustomFormGroup controls={controls} />
-           
+
             <CustomFormGroup
               controls={[
                 {
@@ -318,16 +314,15 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                   onButtonClick: (e) => {
                     onValueChanges("auth_api_type", e);
                   },
-                  width: "100%",
+                  width: "90%",
                   labelColWidth: 3,
                   inputColWidth: 9,
                   buttonGroupOptions: selectTypes,
                   formId: "auth_api_type",
                 },
               ]}
-          
             />
-            
+
             <CustomFormGroup
               controls={[
                 {
@@ -337,20 +332,18 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                     ? selectedApiInfo.authentication_type
                     : "",
                   onButtonClick: (e) => {
-                    onValueChanges("authentication_type",e);
+                    onValueChanges("authentication_type", e);
                   },
-                  width: "100%",
+                  width: "90%",
                   labelColWidth: 3,
                   inputColWidth: 9,
                   buttonGroupOptions: authenticationTypes,
                   formId: "authentication_type",
                 },
               ]}
-          
             />
             {selectedApiInfo.authentication_type === "OAUTH2" && (
               <>
-                
                 <CustomFormGroup
                   controls={[
                     {
@@ -360,20 +353,129 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                         ? selectedApiInfo.flow_type
                         : "",
                       onButtonClick: (e) => {
-                        onValueChanges("flow_type",e);
+                        onValueChanges("flow_type", e);
                       },
-                      width: "100%",
+                      width: "90%",
                       labelColWidth: 3,
                       inputColWidth: 9,
                       buttonGroupOptions: selectFlow,
                       formId: "flow_type",
                     },
                   ]}
-        
                 />
               </>
             )}
-            
+            {selectedApiInfo.authentication_type === "OAUTH2" &&
+              selectedApiInfo.flow_type === "authorization_code" && (
+                <>
+                  {/* Authorization URL Input */}
+                  <CustomFormGroup
+                    controls={[
+                      {
+                        label: "Authorization URL: ",
+                        type: "text",
+                        value:
+                          selectedApiInfo.flow &&
+                          selectedApiInfo.flow.authorization_url
+                            ? selectedApiInfo.flow.authorization_url
+                            : "",
+                        onChange: (e) =>
+                          onValueChanges("flow.authorization_url", e),
+                        width: "90%",
+                        labelColWidth: 3,
+                        inputColWidth: 9,
+                      },
+                    ]}
+                  />
+
+                  {/* Refresh URL Input */}
+                  <CustomFormGroup
+                    controls={[
+                      {
+                        label: "Refresh URL: ",
+                        type: "text",
+                        value:
+                          selectedApiInfo.flow &&
+                          selectedApiInfo.flow.refresh_url
+                            ? selectedApiInfo.flow.refresh_url
+                            : "",
+                        onChange: (e) => {
+                          onValueChanges("flow.refresh_url", e);
+                        },
+                        width: "90%",
+                        labelColWidth: 3,
+                        inputColWidth: 9,
+                      },
+                    ]}
+                  />
+
+                  {/* Token URL Input */}
+                  <CustomFormGroup
+                    controls={[
+                      {
+                        label: "Token URL: ",
+                        type: "text",
+                        value:
+                          selectedApiInfo.flow && selectedApiInfo.flow.token_url
+                            ? selectedApiInfo.flow.token_url
+                            : "",
+                        onChange: (e) => {
+                          onValueChanges("flow.token_url", e);
+                        },
+                        width: "90%",
+                        labelColWidth: 3,
+                        inputColWidth: 9,
+                      },
+                    ]}
+                  />
+                </>
+              )}
+
+            {selectedApiInfo.authentication_type === "OAUTH2" &&
+              selectedApiInfo.flow_type &&
+              selectedApiInfo.flow_type !== "authorization_code" && (
+                <>
+                  {/* Refresh URL Input */}
+                  <CustomFormGroup
+                    controls={[
+                      {
+                        label: "Refresh URL: ",
+                        type: "text",
+                        value: selectedApiInfo.flow.refresh_url
+                          ? selectedApiInfo.flow.refresh_url
+                          : "",
+                        onChange: (e) => {
+                          onValueChanges("flow.refresh_url", e);
+                        },
+                        width: "90%",
+                        labelColWidth: 3,
+                        inputColWidth: 9,
+                      },
+                    ]}
+                  />
+
+                  {/* Token URL Input */}
+                  <CustomFormGroup
+                    controls={[
+                      {
+                        label: "Token URL: ",
+                        type: "text",
+                        value: selectedApiInfo.flow.token_url
+                          ? selectedApiInfo.flow.token_url
+                          : "",
+                        onChange: (e) => {
+                          console.log(e, "fsdfsdfdsx");
+                          onValueChanges("flow.token_url", e);
+                        },
+                        width: "90%",
+                        labelColWidth: 3,
+                        inputColWidth: 9,
+                      },
+                    ]}
+                  />
+                </>
+              )}
+
             <CustomFormGroup
               controls={[
                 {
@@ -385,15 +487,56 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                   onButtonClick: (e) => {
                     onValueChanges("token_store.store_in", e);
                   },
-                  width: "100%",
+                  width: "90%",
                   labelColWidth: 3,
                   inputColWidth: 9,
                   buttonGroupOptions: tokenStorageSchemes,
                   formId: "token_store.store_in",
                 },
               ]}
-    
             />
+            {selectedApiInfo.token_store && (
+              <>
+                <CustomFormGroup
+                  controls={[
+                    {
+                      label: "Refresh Token Key: ",
+                      type: "text",
+                      value: selectedApiInfo.token_store
+                        ? selectedApiInfo.token_store.refresh_token_key
+                        : "",
+                      onChange: (e) => {
+                        onValueChanges("token_store.refresh_token_key", e);
+                      },
+                      width: "90%",
+                      labelColWidth: 3,
+                      inputColWidth: 9,
+                      formId: "token_store.refresh_token_key",
+                    },
+                  ]}
+                />
+
+                <CustomFormGroup
+                  controls={[
+                    {
+                      label: "Access Token Key: ",
+                      type: "text",
+                      value: selectedApiInfo.token_store
+                        ? selectedApiInfo.token_store.access_token_key
+                        : "",
+                      onChange: (e) => {
+                        onValueChanges("token_store.access_token_key", e);
+                      },
+                      width: "90%",
+                      labelColWidth: 3,
+                      inputColWidth: 9,
+                      formId: "token_store.access_token_key",
+                    },
+                  ]}
+                />
+              </>
+            )}
+
             <section className="divider-sec mt-3">
               <p>Request Body</p>
             </section>
@@ -403,6 +546,7 @@ function EditAuthFunction({ onClose, selectedAuthServiceId }) {
                 tokenApis={""}
                 onChange={onValueChanges}
                 requestBody={selectedApiInfo.request || { body: [], auth: [] }}
+                renderAuth={false}
               />
             </Form.Group>
             <section className="divider-sec">

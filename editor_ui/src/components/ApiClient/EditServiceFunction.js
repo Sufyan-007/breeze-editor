@@ -60,18 +60,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
       placeholder: "Enter summary",
       labelColWidth: 3,
       inputColWidth: 9,
-    },
-    {
-      type: "checkbox",
-      id: "is-auth-api",
-      label: "Is Authentication API",
-      checked: apiModel["is_authentication_api"],
-      onChange: (e) => {
-        onApiModelChange("is_authentication_api", e.target.checked);
-      },
-      labelColWidth: 3,
-      inputColWidth: 9,
-    },
+    }
   ];
 
   const setAuthApis = async () => {
@@ -205,7 +194,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
             <section className="divider-sec">
               <p>Request Body</p>
             </section>
-            {apiModel.request && (
+            {
               <Form.Group
                 className="mb-3 custom-form-group"
                 controlId="request"
@@ -214,16 +203,17 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                   loginApis={loginApis}
                   tokenApis={tokenApis}
                   onChange={onApiModelChange}
-                  requestBody={apiModel.request}
+                  requestBody={apiModel.request || {"auth":[], "body":[]}}
+                  renderAuth={true}
                 />
               </Form.Group>
-            )}
+            }
 
             <section className="divider-sec">
               <p>Response Body</p>
             </section>
 
-            {apiModel["response"] && (
+            {
               <div className="custom-grid">
                 <div className="custom-grid-item three">
                   <Form.Label className="mx-3 mt-3">Response</Form.Label>
@@ -244,7 +234,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                   className="custom-grid-item nine d-flex flex-wrap mt-3 p-2"
                   
                 >
-                  {apiModel["response"].map((res, index) => (
+                  {apiModel["response"]&& apiModel["response"].map((res, index) => (
                     <Response
                       key={res.id}
                       index={index}
@@ -255,7 +245,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                   ))}
                 </div>
               </div>
-            )}
+            }
           </Form>
         </>
     </div>

@@ -4,12 +4,16 @@ import CustomFormGroup from "../CustomFormGroup";
 import UrlsCss from "../../css/Urls.css";
 function Urls({ urlData, onChange }) {
   const onValueChange = (field, fieldValue) => {
+    let updatedFieldValue = fieldValue;
+    if (field === "host" || field === "path") {
+      updatedFieldValue = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+    }
     const updatedUrlData = {
-        ...urlData,
-        [field]: Array.isArray(fieldValue) ? [...fieldValue] : fieldValue,
+      ...urlData,
+      [field]: updatedFieldValue,
     };
-    onChange("url",updatedUrlData);
-};
+    onChange(updatedUrlData);
+  };
 useEffect(()=>{},[urlData])
   const urlFields = [
     {
