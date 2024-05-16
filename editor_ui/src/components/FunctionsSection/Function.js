@@ -25,6 +25,7 @@ export default function Function({ func , updateFunctions}) {
     }
 
     return (
+
         <div className={" container-fluid  border p-2 " + (showDetails ? "bg-dark" : "")}>
             <div className="d-flex px-1 " style={{ cursor: 'pointer' }} onClick={() => setShowDetails(state => !state)} >
                 <button className="btn p-0 m-0 shadow-none" >
