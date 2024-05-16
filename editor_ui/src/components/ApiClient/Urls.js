@@ -1,67 +1,74 @@
-import React from "react";
-import CustomFormControl from "../CustomFormControl";
+import React , {useEffect} from "react";
 import { Col, Form, FormGroup, Row } from "react-bootstrap";
-
+import CustomFormGroup from "../CustomFormGroup";
+import UrlsCss from "../../css/Urls.css";
 function Urls({ urlData, onChange }) {
-  // console.log(urlData, "urldata");
   const onValueChange = (field, fieldValue) => {
+    let updatedFieldValue = fieldValue;
+    if (field === "host" || field === "path") {
+      updatedFieldValue = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+    }
     const updatedUrlData = {
       ...urlData,
-      [field]: fieldValue,
+      [field]: updatedFieldValue,
     };
     onChange(updatedUrlData);
   };
-
+useEffect(()=>{},[urlData])
   const urlFields = [
     {
-      name: "host",
+      id: "host",
       label: "Host",
       value: urlData ? urlData.host : [],
-      width: "30%",
+      onChange: (value) => onValueChange("host", value),
+      placeholder: "Enter host",
+      type: "text",
+      width: "50%",
+      inputColWidth: 9,
     },
     {
-      name: "protocol",
+      id: "protocol",
       label: "Protocol",
       value: urlData ? urlData.protocol : "",
-      width: "30%",
+      onChange: (value) => onValueChange("protocol", value),
+      placeholder: "Enter protocol",
+      type: "text",
+      inputColWidth: 9,
+      width: "50%",
     },
     {
-      name: "port",
+      id: "port",
       label: "Port",
       value: urlData ? urlData.port : "",
-      width: "30%",
+      onChange: (value) => onValueChange("port", value),
+      placeholder: "Enter port",
+      type: "text",
+      inputColWidth: 9,
+      width: "50%",
     },
     {
-      name: "path",
+      id: "path",
       label: "Path",
       value: urlData ? urlData.path : [],
-      width: "30%",
+      onChange: (value) => onValueChange("path", value),
+      placeholder: "Enter path",
+      type: "text",
+      inputColWidth: 9,
+      width: "80%",
     },
     {
-      name: "baseurl",
+      id: "baseurl",
       label: "Base URL",
       value: urlData ? urlData.baseurl : "",
-      width: "80%",
+      onChange: (value) => onValueChange("baseurl", value),
+      placeholder: "Enter base URL",
+      type: "text",
+      inputColWidth: 9,
+      width: "100%",
     },
   ];
 
-  return (
-    <Form.Group>
-      <Row>
-        <Col sm={3}>
-          <Form.Label className="mx-3 mt-5">URL:</Form.Label>
-        </Col>
-        <Col sm={9} style={{width: "60%"}}>
-          <CustomFormControl
-            controlId="url"
-            options={urlFields}
-            flow_type="authorization_code"
-            onChange={(name, value) => onValueChange(name, value)}
-          />
-        </Col>
-      </Row>
-    </Form.Group>
-  );
+  return <CustomFormGroup controls={urlFields} inline={true} />;
 }
 
 export default Urls;

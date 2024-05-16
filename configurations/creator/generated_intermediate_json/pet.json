@@ -1,0 +1,752 @@
+{
+  "0955e0e5_9b86_4ba3_911d_4555eb721a26": {
+    "id": "0955e0e5_9b86_4ba3_911d_4555eb721a26",
+    "operation_id": "updatePet",
+    "tags": "pet",
+    "request": {
+      "method": "PUT",
+      "auth": [
+        {
+          "type": "OAUTH2",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        }
+      ],
+      "headers": [],
+      "parameters": [],
+      "url": {
+        "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": [],
+        "protocol": "HTTP",
+        "port": null,
+        "path": ["", "pet"],
+        "url_env": null
+      },
+      "body": [
+        {
+          "content_type": "JSON",
+          "mode": "RAW",
+          "required": true,
+          "schema_name": "Pet",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "example": 10 },
+              "name": { "type": "string", "example": "doggie" },
+              "Category": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "example": 1 },
+                  "name": { "type": "string", "example": "Dogs" }
+                },
+                "required": []
+              },
+              "photoUrls": {
+                "type": "array",
+                "items": { "type": "string", "xml": { "name": "photoUrl" } }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "name": { "type": "string" }
+                  },
+                  "required": []
+                }
+              },
+              "status": { "type": "string" }
+            },
+            "required": ["name", "photoUrls"]
+          },
+          "raw_content": null,
+          "file": null,
+          "anonymous": false
+        },
+        {
+          "content_type": "XML",
+          "mode": "RAW",
+          "required": true,
+          "schema_name": "Pet",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "example": 10 },
+              "name": { "type": "string", "example": "doggie" },
+              "Category": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "example": 1 },
+                  "name": { "type": "string", "example": "Dogs" }
+                },
+                "required": []
+              },
+              "photoUrls": {
+                "type": "array",
+                "items": { "type": "string", "xml": { "name": "photoUrl" } }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "name": { "type": "string" }
+                  },
+                  "required": []
+                }
+              },
+              "status": { "type": "string" }
+            },
+            "required": ["name", "photoUrls"]
+          },
+          "raw_content": null,
+          "file": null,
+          "anonymous": false
+        },
+        {
+          "content_type": "URLENCODED",
+          "mode": "URLENCODED",
+          "required": true,
+          "schema_name": "Pet",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "example": 10 },
+              "name": { "type": "string", "example": "doggie" },
+              "Category": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "example": 1 },
+                  "name": { "type": "string", "example": "Dogs" }
+                },
+                "required": []
+              },
+              "photoUrls": {
+                "type": "array",
+                "items": { "type": "string", "xml": { "name": "photoUrl" } }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "name": { "type": "string" }
+                  },
+                  "required": []
+                }
+              },
+              "status": { "type": "string" }
+            },
+            "required": ["name", "photoUrls"]
+          },
+          "raw_content": null,
+          "file": null,
+          "anonymous": false
+        }
+      ]
+    },
+    "response": [
+      {
+        "content_type": "TEXT",
+        "status": "S_200",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Successful operation",
+        "file": "",
+        "description": "Successful operation"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_400",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Invalid ID supplied",
+        "file": "",
+        "description": "Invalid ID supplied"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_404",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Pet not found",
+        "file": "",
+        "description": "Pet not found"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_200",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Validation exception",
+        "file": "",
+        "description": "Validation exception"
+      }
+    ],
+    "summary": "Update an existing pet",
+    "is_authentication_api": false
+  },
+  "752f5936_2d31_40e6_8b9e_c986fa6d22a3": {
+    "id": "752f5936_2d31_40e6_8b9e_c986fa6d22a3",
+    "operation_id": "addPet",
+    "tags": "pet",
+    "request": {
+      "method": "POST",
+      "auth": [
+        {
+          "type": "OAUTH2",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        }
+      ],
+      "headers": [],
+      "parameters": [],
+      "url": {
+        "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": [],
+        "protocol": "HTTP",
+        "port": null,
+        "path": ["", "pet"],
+        "url_env": null
+      },
+      "body": [
+        {
+          "content_type": "JSON",
+          "mode": "RAW",
+          "required": true,
+          "schema_name": "Pet",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "example": 10 },
+              "name": { "type": "string", "example": "doggie" },
+              "Category": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "example": 1 },
+                  "name": { "type": "string", "example": "Dogs" }
+                },
+                "required": []
+              },
+              "photoUrls": {
+                "type": "array",
+                "items": { "type": "string", "xml": { "name": "photoUrl" } }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "name": { "type": "string" }
+                  },
+                  "required": []
+                }
+              },
+              "status": { "type": "string" }
+            },
+            "required": ["name", "photoUrls"]
+          },
+          "raw_content": null,
+          "file": null,
+          "anonymous": false
+        },
+        {
+          "content_type": "XML",
+          "mode": "RAW",
+          "required": true,
+          "schema_name": "Pet",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "example": 10 },
+              "name": { "type": "string", "example": "doggie" },
+              "Category": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "example": 1 },
+                  "name": { "type": "string", "example": "Dogs" }
+                },
+                "required": []
+              },
+              "photoUrls": {
+                "type": "array",
+                "items": { "type": "string", "xml": { "name": "photoUrl" } }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "name": { "type": "string" }
+                  },
+                  "required": []
+                }
+              },
+              "status": { "type": "string" }
+            },
+            "required": ["name", "photoUrls"]
+          },
+          "raw_content": null,
+          "file": null,
+          "anonymous": false
+        },
+        {
+          "content_type": "URLENCODED",
+          "mode": "URLENCODED",
+          "required": true,
+          "schema_name": "Pet",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "example": 10 },
+              "name": { "type": "string", "example": "doggie" },
+              "Category": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "example": 1 },
+                  "name": { "type": "string", "example": "Dogs" }
+                },
+                "required": []
+              },
+              "photoUrls": {
+                "type": "array",
+                "items": { "type": "string", "xml": { "name": "photoUrl" } }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "name": { "type": "string" }
+                  },
+                  "required": []
+                }
+              },
+              "status": { "type": "string" }
+            },
+            "required": ["name", "photoUrls"]
+          },
+          "raw_content": null,
+          "file": null,
+          "anonymous": false
+        }
+      ]
+    },
+    "response": [
+      {
+        "content_type": "TEXT",
+        "status": "S_200",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Successful operation",
+        "file": "",
+        "description": "Successful operation"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_400",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Invalid input",
+        "file": "",
+        "description": "Invalid input"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_200",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Validation exception",
+        "file": "",
+        "description": "Validation exception"
+      }
+    ],
+    "summary": "Add a new pet to the store",
+    "is_authentication_api": false
+  },
+  "9d704eed_84fa_4ea7_9dbd_a996ddea04b9": {
+    "id": "9d704eed_84fa_4ea7_9dbd_a996ddea04b9",
+    "operation_id": "findPetsByStatus",
+    "tags": "pet",
+    "request": {
+      "method": "GET",
+      "auth": [
+        {
+          "type": "OAUTH2",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        }
+      ],
+      "headers": [],
+      "parameters": [
+        {
+          "param_in": "QUERY",
+          "name": "status",
+          "type": "STRING",
+          "required": false,
+          "description": "Status values that need to be considered for filter"
+        }
+      ],
+      "url": {
+        "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": [],
+        "protocol": "HTTP",
+        "port": null,
+        "path": ["", "pet", "findByStatus"],
+        "url_env": null
+      },
+      "body": []
+    },
+    "response": [
+      {
+        "content_type": "TEXT",
+        "status": "S_200",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "successful operation",
+        "file": "",
+        "description": "successful operation"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_400",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Invalid status value",
+        "file": "",
+        "description": "Invalid status value"
+      }
+    ],
+    "summary": "Finds Pets by status",
+    "is_authentication_api": false
+  },
+  "a354948d_f7ce_4e2c_b00a_36e2c0c0fcde": {
+    "id": "a354948d_f7ce_4e2c_b00a_36e2c0c0fcde",
+    "operation_id": "findPetsByTags",
+    "tags": "pet",
+    "request": {
+      "method": "GET",
+      "auth": [
+        {
+          "type": "OAUTH2",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        }
+      ],
+      "headers": [],
+      "parameters": [
+        {
+          "param_in": "QUERY",
+          "name": "tags",
+          "type": "ARRAY",
+          "required": false,
+          "description": "Tags to filter by"
+        }
+      ],
+      "url": {
+        "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": [],
+        "protocol": "HTTP",
+        "port": null,
+        "path": ["", "pet", "findByTags"],
+        "url_env": null
+      },
+      "body": []
+    },
+    "response": [
+      {
+        "content_type": "TEXT",
+        "status": "S_200",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "successful operation",
+        "file": "",
+        "description": "successful operation"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_400",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Invalid tag value",
+        "file": "",
+        "description": "Invalid tag value"
+      }
+    ],
+    "summary": "Finds Pets by tags",
+    "is_authentication_api": false
+  },
+  "3fc2f785_9cbe_46b4_83b5_0d2bcf7dcc44": {
+    "id": "3fc2f785_9cbe_46b4_83b5_0d2bcf7dcc44",
+    "operation_id": "getPetById",
+    "tags": "pet",
+    "request": {
+      "method": "GET",
+      "auth": [
+        {
+          "type": "APIKEY",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        },
+        {
+          "type": "OAUTH2",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        }
+      ],
+      "headers": [],
+      "parameters": [
+        {
+          "param_in": "PATH",
+          "name": "petId",
+          "type": "INTEGER",
+          "required": true,
+          "description": "ID of pet to return"
+        }
+      ],
+      "url": {
+        "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": [],
+        "protocol": "HTTP",
+        "port": null,
+        "path": ["", "pet", "{petId}"],
+        "url_env": null
+      },
+      "body": []
+    },
+    "response": [
+      {
+        "content_type": "TEXT",
+        "status": "S_200",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "successful operation",
+        "file": "",
+        "description": "successful operation"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_400",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Invalid ID supplied",
+        "file": "",
+        "description": "Invalid ID supplied"
+      },
+      {
+        "content_type": "TEXT",
+        "status": "S_404",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Pet not found",
+        "file": "",
+        "description": "Pet not found"
+      }
+    ],
+    "summary": "Find pet by ID",
+    "is_authentication_api": false
+  },
+  "50720128_fe30_4e35_9b01_d8b4d6a4747b": {
+    "id": "50720128_fe30_4e35_9b01_d8b4d6a4747b",
+    "operation_id": "updatePetWithForm",
+    "tags": "pet",
+    "request": {
+      "method": "POST",
+      "auth": [
+        {
+          "type": "OAUTH2",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        }
+      ],
+      "headers": [],
+      "parameters": [
+        {
+          "param_in": "PATH",
+          "name": "petId",
+          "type": "INTEGER",
+          "required": true,
+          "description": "ID of pet that needs to be updated"
+        },
+        {
+          "param_in": "QUERY",
+          "name": "name",
+          "type": "STRING",
+          "required": null,
+          "description": "Name of pet that needs to be updated"
+        },
+        {
+          "param_in": "QUERY",
+          "name": "status",
+          "type": "STRING",
+          "required": null,
+          "description": "Status of pet that needs to be updated"
+        }
+      ],
+      "url": {
+        "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": [],
+        "protocol": "HTTP",
+        "port": null,
+        "path": ["", "pet", "{petId}"],
+        "url_env": null
+      },
+      "body": []
+    },
+    "response": [
+      {
+        "content_type": "TEXT",
+        "status": "S_400",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Invalid input",
+        "file": "",
+        "description": "Invalid input"
+      }
+    ],
+    "summary": "Updates a pet in the store with form data",
+    "is_authentication_api": false
+  },
+  "f835c40a_d83d_4068_a042_d4bc0ea3b5f9": {
+    "id": "f835c40a_d83d_4068_a042_d4bc0ea3b5f9",
+    "operation_id": "deletePet",
+    "tags": "pet",
+    "request": {
+      "method": "DELETE",
+      "auth": [
+        {
+          "type": "OAUTH2",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        }
+      ],
+      "headers": [],
+      "parameters": [
+        {
+          "param_in": "HEADER",
+          "name": "api_key",
+          "type": "STRING",
+          "required": false,
+          "description": ""
+        },
+        {
+          "param_in": "PATH",
+          "name": "petId",
+          "type": "INTEGER",
+          "required": true,
+          "description": "Pet id to delete"
+        }
+      ],
+      "url": {
+        "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": [],
+        "protocol": "HTTP",
+        "port": null,
+        "path": ["", "pet", "{petId}"],
+        "url_env": null
+      },
+      "body": []
+    },
+    "response": [
+      {
+        "content_type": "TEXT",
+        "status": "S_400",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "Invalid pet value",
+        "file": "",
+        "description": "Invalid pet value"
+      }
+    ],
+    "summary": "Deletes a pet",
+    "is_authentication_api": false
+  },
+  "45bda542_b8c1_4cfe_ba88_603ad7d15012": {
+    "id": "45bda542_b8c1_4cfe_ba88_603ad7d15012",
+    "operation_id": "uploadFile",
+    "tags": "pet",
+    "request": {
+      "method": "POST",
+      "auth": [
+        {
+          "type": "OAUTH2",
+          "contents": [],
+          "login_api": null,
+          "token_api": null
+        }
+      ],
+      "headers": [],
+      "parameters": [
+        {
+          "param_in": "PATH",
+          "name": "petId",
+          "type": "INTEGER",
+          "required": true,
+          "description": "ID of pet to update"
+        },
+        {
+          "param_in": "QUERY",
+          "name": "additionalMetadata",
+          "type": "STRING",
+          "required": false,
+          "description": "Additional Metadata"
+        }
+      ],
+      "url": {
+        "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
+        "baseurl": "https://petstore3.swagger.io/api/v3",
+        "host": [],
+        "protocol": "HTTP",
+        "port": null,
+        "path": ["", "pet", "{petId}", "uploadImage"],
+        "url_env": null
+      },
+      "body": [
+        {
+          "content_type": "NONE",
+          "mode": "BINARY",
+          "required": false,
+          "schema_name": null,
+          "schema": { "type": "object", "properties": {}, "required": [] },
+          "raw_content": null,
+          "file": null,
+          "anonymous": true
+        }
+      ]
+    },
+    "response": [
+      {
+        "content_type": "TEXT",
+        "status": "S_200",
+        "schema_name": null,
+        "schema": {},
+        "raw_content": "successful operation",
+        "file": "",
+        "description": "successful operation"
+      }
+    ],
+    "summary": "uploads an image",
+    "is_authentication_api": false
+  }
+}

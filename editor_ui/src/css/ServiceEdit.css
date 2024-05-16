@@ -1,7 +1,4 @@
-.section-div {
-  background-color: #212529;
-  color: white;
-}
+
 
 .main-container {
   padding-left: 48px;
@@ -11,9 +8,8 @@
 }
 
 .custom-form-control {
-  max-width: 50vw;
-  background-color: #6c757d !important;
-  border: none !important;
+  max-width: 95%;
+  background-color: #303033 !important;
   color: white;
   font-size: 16px;
 }
@@ -41,4 +37,29 @@ label.form-label {
 .close-button.btn.btn-secondary {
   cursor: pointer;
   margin-right: 38px;
+}
+.auth-api-checkbox {
+  color: white;
+}
+
+.divider-sec {
+  background-color: rgb(33, 37, 41);
+  color: white;
+  font-size: 16px;
+  padding: 8px;
+  position: relative;
+  z-index:999;
+}
+
+.divider-sec p{
+  margin-bottom: 0px;
+  padding-left: 8px;
+}
+.d-flex.mt-3{
+  flex-direction: row;
+  justify-content: normal;
+  background-color:#303033 ;
+  border: 1px solid grey;
+  max-width: 90%;
+  padding:8px;
 }

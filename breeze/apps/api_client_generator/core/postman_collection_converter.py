@@ -2,6 +2,7 @@ import json
 import traceback
 
 from ..api_models import ModeEnum
+from ..api_models.custom_exception import CustomeException
 from ..utils.content_type_and_mode import get_content_type_and_mode
 from ..utils.body_type_from_postman import get_body_type
 from ..utils.set_response_status import set_response_status
@@ -150,11 +151,11 @@ class PostmanCollectionConverter:
 
     def _create_url_json(self, url_data):
         url = {
-            "baseurl":url_data.get("raw", url_data.get("baseurl", '')),
-            "host":url_data.get("host", ''),
-            "protocol":url_data.get("protocol", ""),
-            "port":url_data.get("port", 0),
-            "path":url_data.get("path",[]),
+            "baseurl":url_data.get("raw", url_data.get("baseurl")),
+            "host":url_data.get("host"),
+            "protocol":url_data.get("protocol"),
+            "port":url_data.get("port"),
+            "path":url_data.get("path"),
             "url_env":None
         }
         return url
@@ -212,67 +213,78 @@ class PostmanCollectionConverter:
     ## it will return the tags mapping with json object of api model
     @staticmethod
     def convert_to_json_data_model(tag,items,meta_data):
-        try:
-            postmanConverter = PostmanCollectionConverter()
-            api_models = []
-            for item in items:
+        postmanConverter = PostmanCollectionConverter()
+        api_models = []
+        for item in items:
+            try:
                 request_data = item.get("request", {})
                 response_data = item.get("response", {})
                 request_obj = postmanConverter.create_request_json(request_data=request_data,meta_data=meta_data)
                 response_arr = postmanConverter.create_response_arr_json(response_data=response_data,meta_data=meta_data)
                 
-                api_model_obj = {
-                    "id" : generate_uuid_as_key(),
-                    "operation_id":item.get("name",""),
-                    "tags" :tag,
-                    "request":request_obj,
-                    "response":response_arr,
-                    "summary":item.get("summary"),
-                    "is_authentication_api":False
-                }    
-                api_models.append(api_model_obj)
-            return api_models
+            except Exception as e:
+                # api_models.append({
+                #     "error" : True,
+                #     "message" : str(e),
+                #     "id":item.get("name","default"),
+                # }) 
+                    
+                print(traceback.format_exc())
+            api_model_obj = {
+                "id" : generate_uuid_as_key(),
+                "operation_id":item.get("name","default"),
+                "tags" :tag,
+                "request":request_obj,
+                "response":response_arr,
+                "summary":item.get("summary"),
+                "is_authentication_api":False
+            }    
+            api_models.append(api_model_obj)
+        return api_models
             
-        except Exception as e:
-            print(traceback.format_exc())
-            return {"error": str(e)}
 
 
     @staticmethod
     def prepare_api_models(data):
-        
-        json_data = json.loads(data)
-        info =  json_data.get("info")
-        items = json_data.get("item",[])
-        tag = info.get("name","default")
-        if tag == "":
-            tag = "default"
-        api_models = []
-        error_obj = {}
-        
+        try:
+            json_data = json.loads(data)
+            info =  json_data.get("info")
+            items = json_data.get("item",[])
+            tag = info.get("name","default")
+            if tag == "":
+                tag = "default"
+            api_models = []            
+            arr_obj = PostmanCollectionConverter.convert_to_json_data_model(tag,items,info)
+            
+            ## now load these json obj to api models
+            for obj in arr_obj:
+                try:
+                    # if obj.get("error",False) is True:
+                    #     raise Exception(obj.get("message"))
+                    api_model = ApiModelLoader.load_api_model(obj)
+                    api_models.append(api_model)
+                except TypeError as err:
+                    print(traceback.format_exc())
+                    # if obj["id"] not in error_obj:
+                    #     error_obj[obj.get("id")] = []    
+                    # error_obj[obj.get("id")].append(err)
+                        
+                except ValueError as err:
+                    print(traceback.format_exc())
+                    # if obj["id"] not in error_obj:
+                    #     error_obj[obj.get("id")] = []    
+                    # error_obj[obj.get("id")].append(err)
+                except Exception as e:
+                    print(traceback.format_exc())
 
-        arr_obj = PostmanCollectionConverter.convert_to_json_data_model(tag,items,info)
-        
-        ## now load these json obj to api models
-        for obj in arr_obj:
-            try:
-                api_model = ApiModelLoader.load_api_model(obj)
-                api_models.append(api_model)
-            except TypeError as err:
-                if obj["id"] not in error_obj:
-                    error_obj[obj.get("id")] = []    
-                error_obj[obj.get("id")].append(err)
-                    
-            except ValueError as err:
-                if obj["id"] not in error_obj:
-                    error_obj[obj.get("id")] = []    
-                error_obj[obj.get("id")].append(err)
-            except Exception as e:
+                    # if obj["id"] not in error_obj:
+                    #     error_obj[obj.get("id")] = []    
+                    # error_obj[obj.get("id")].append(e) 
+            
+            return {"filename" : tag, "api_models": api_models}
 
-                if obj["id"] not in error_obj:
-                    error_obj[obj.get("id")] = []    
-                error_obj[obj.get("id")].append(e) 
-        
-        return {"filename" : tag, "api_models": api_models,"error_obj" : error_obj}
-
+        except Exception as e:
+            print(traceback.format_exc())
+            # error_obj["general_error"] = str(e)  
+            # raise (CustomeException(error_obj)) 
         

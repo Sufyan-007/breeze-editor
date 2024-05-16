@@ -1,88 +1,90 @@
 import React, { useState, useEffect } from "react";
-import {
-    callApiClientGenerator
-} from "../../services/IntermediatesService";
-import { Table, Accordion, Button } from "react-bootstrap";
+import { getAuthFileApis } from "../../services/IntermediatesService";
+import { Button, Table } from "react-bootstrap";
 import DeleteIcon from "../../assets/icons/delete.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import { useParams } from "react-router";
 
-export default function AuthApiList({
-    onEditAuthService
-}) {
-    const [apiList, setApiList] = useState([]);
-    const appName = useParams()
-    useEffect(() => {
-        fetchAuthApiList();
-    }, []);
+export default function AuthApiList({ onEditAuthService, onAddAuthService}) {
+  const [apiList, setApiList] = useState([]);
 
-    const fetchAuthApiList = async () => {
-        try {
-            const apiUrl = "http://127.0.0.1:8000/api-client-generator/fetch-auth-file/" + appName.projectName + "/" + null
-            const result = await callApiClientGenerator(apiUrl,"GET",null,false,{})
-            setApiList(result["data"])
-        } catch (error) {
-            console.error("Error generate react service:", error);
-        }
+  useEffect(() => {
+    fetchAuthApiList();
+  }, []);
+  const appName = useParams();
+
+  const fetchAuthApiList = async () => {
+    try {
+      const result = await getAuthFileApis(appName.projectName, null);
+      setApiList(result["data"]);
+    } catch (error) {
+      console.error("Error generate react service:", error);
     }
-    const handleEditClick = (apiId) => {
-        onEditAuthService(apiId);
-    };
+  };
+  const handleEditClick = (apiId) => {
+    onEditAuthService(apiId);
+  };
 
-
-    return (
-        <div className="m-5" style={{width:"95%"}}>
-
-            {apiList && apiList.length > 0 ? (
-                <Table striped bordered hover variant="dark">
-                    <thead>
-                        <tr>
-                            <th colSpan={9} >Name</th>
-                            <th colSpan={3} >Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {apiList.map((api, apiIndex) => (
-                            <tr key={`${api.id}`}>
-                                <td colSpan={9}>
-                                    <div className="name-cell">{api.operation_id}</div>
-                                </td>
-                                <td colSpan={3}>
-                                    <div className="actions-cell">
-                                        <img
-                                            className="m-1"
-                                            src={EditIcon}
-                                            alt="Edit"
-                                            style={{
-                                                cursor: "pointer",
-                                                width: "20px",
-                                                height: "20px",
-                                            }}
-                                            onClick={() => handleEditClick(api.id)}
-                                        />
-                                        <img
-                                            src={DeleteIcon}
-                                            alt="Delete"
-                                            style={{
-                                                cursor: "pointer",
-                                                width: "20px",
-                                                height: "20px",
-                                            }}
-                                        />
-
-
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
-            ) : (
-                <h5 style={{ color: "white", textAlign: "center" }}>
-                    No services found
-                </h5>
-            )}
-
-        </div>
-    );
+  return (
+    <div className="m-5" style={{ width: "95%" }}>
+      <Button variant="secondary" onClick={onAddAuthService} className="mb-3">
+        <img
+          className="mx-1"
+          width="24"
+          height="24"
+          src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+          alt="add--v1"
+        />
+        <span>Add API</span>
+        
+      </Button>
+      {apiList && apiList.length > 0 ? (
+        <Table striped bordered hover variant="dark">
+          <thead>
+            <tr>
+              <th colSpan={9}>Name</th>
+              <th colSpan={3}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {apiList.map((api, apiIndex) => (
+              <tr key={`${api.id}`}>
+                <td colSpan={9}>
+                  <div className="name-cell">{api.operation_id}</div>
+                </td>
+                <td colSpan={3}>
+                  <div className="actions-cell">
+                    <img
+                      className="m-1"
+                      src={EditIcon}
+                      alt="Edit"
+                      style={{
+                        cursor: "pointer",
+                        width: "20px",
+                        height: "20px",
+                      }}
+                      onClick={() => handleEditClick(api.id)}
+                    />
+                    <img
+                      src={DeleteIcon}
+                      alt="Delete"
+                      style={{
+                        cursor: "pointer",
+                        width: "20px",
+                        height: "20px",
+                      }}
+                    />
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      ) : (
+        <h5 style={{ color: "white", textAlign: "center" }}>
+          No services found
+        </h5>
+      )}
+    </div>
+  );
 }

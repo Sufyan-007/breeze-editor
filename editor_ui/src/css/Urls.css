@@ -1,15 +1,3 @@
-input.mb-1.form-control{
-    max-width: 50vw;
-    background-color: #6C757D;
-    border:none;
-    color:white;
-}
-
-input.mb-1.form-control::placeholder {
-  color: white; /* Set the color for the placeholder */
-}
-
-/* Additional style for focused form control */
-input.mb-1.form-control:focus{
-  color: #6C757D; /* Change placeholder color when focused */
+.label{
+  color:white;
 }

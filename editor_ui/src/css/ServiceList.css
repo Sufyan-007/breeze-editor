@@ -24,6 +24,10 @@ button.accordion-button:focus {
   border-color: black;
 }
 
+.accordion-item {
+  cursor: pointer;
+  max-width: 95%;
+}
 .overflow-y-auto.h-100.fs-6.text-light::-webkit-scrollbar {
   display: none;
 }
@@ -38,9 +42,28 @@ button.accordion-button:focus {
   justify-content: flex-end;
   align-items: center;
 }
-.name{
+.name {
   text-align: start;
 }
-.actions{
+.actions {
   text-align: end;
+}
+
+.main-div {
+  width: 95%;
+}
+
+.edit-icon {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+.delete-icon {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+.h5{
+ color: white !important;
+ text-align: center;
 }
