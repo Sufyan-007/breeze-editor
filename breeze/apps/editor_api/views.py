@@ -4,6 +4,7 @@ import json
 from .core.app_editor import AppEditor
 from .core.config_service import ConfigService
 from .core.generate_project import GenerateProject
+from .core.component_config_service import ComponentConfigService
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
@@ -52,7 +53,8 @@ class RoutingReader(APIView):
         try:
             app_editor= AppEditor(param)
             return JsonResponse(app_editor.get_router_config(),status=200)
-        except:
+        except Exception as e:
+            print(str(e))
             return JsonResponse({},status=404)
 
 @method_decorator(csrf_exempt,name='dispatch')
@@ -165,6 +167,20 @@ class ProjectDetailsConfig(APIView):
                 generated_paths = os.path.split(app_basic_config['path'])
                 app_basic_config['path'] = os.path.join(generated_paths[0], app_basic_config['name'])
                 
+                # remove all the extra project folders whose config files are not present 
+                # in the configuration folder but are present in the generated_projects
+                # folder for eg. with a .cache folder in a previously named folder
+                try:
+                    project_names_in_config = os.listdir(CONFIG_PATH)
+                    project_names_in_generated_proj = os.listdir(generated_paths[0])
+                    for dir in project_names_in_generated_proj:
+                        if dir not in project_names_in_config:
+                            dir_to_remove = os.path.join(generated_paths[0], dir)
+                            if os.path.isdir(dir_to_remove):
+                                shutil.rmtree(dir_to_remove)
+                except Exception as e:
+                    return JsonResponse({e},status=500)
+                
                 # renaming all the affected folders
                 try:
                     os.rename(
@@ -207,7 +223,7 @@ class ProjectDetailsConfig(APIView):
                 file.write(newData)
                 
             print('--------------- ALL APPLICATION NAME CHANGES CONDUCTED SUCCESSFULLY -----------')
-            return JsonResponse({}, status=200)
+            return JsonResponse(app_basic_config, status=200)
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({e},status=500)
@@ -241,7 +257,15 @@ class ComponentReader(APIView):
     def get(self, request,param):
         try:
             config_reader = ConfigService(param)
-            return JsonResponse(config_reader.get_component_configs(),status=200)
+            return JsonResponse(config_reader.get_all_component_configs(),status=200)
+        except:
+            return JsonResponse({},status=404)
+        
+    def post(self,request,param):
+        try:
+            config_reader = ConfigService(param)
+            data= json.loads(request.body.decode("utf-8"))
+            return JsonResponse(config_reader.get_component_config(data["componentName"]),status=200)
         except:
             return JsonResponse({},status=404)
         
@@ -249,41 +273,36 @@ class ComponentReader(APIView):
 class CSSConfig(APIView):
     def post(self, request):
         try:
-            css_name = request.POST.get('css_name')
-            css_content = request.POST.get('css_content', '')
-
-            css_file = request.FILES.get('css_file') if 'css_file' in request.FILES else None
-
+            data = json.loads(request.body.decode("utf-8"))
+            
+            css_name = data.get('css_name')
+            css_content = data.get('css_content')
+            
             if not css_name:
                 return JsonResponse({'error': 'CSS Name is required.'}, status=400)
-
-            base_dir = os.path.join('uploaded_css')
-            folder_path = os.path.join(base_dir, css_name)
-
+            if not css_content:
+                return JsonResponse({'error': 'CSS Content is required.'}, status=400)
+            
+            folder_path = os.path.join('uploaded_css', css_name)
+            
             if os.path.exists(folder_path):
                 return JsonResponse({'error': f'A folder with the name "{css_name}" already exists.'}, status=400)
 
-            if css_content:
-                css_file_name = css_name.lower().replace(" ","_")
-                file_path = f"{folder_path}/{css_file_name}.css"
-                file_name = default_storage.save(file_path, ContentFile(css_content))
-            elif css_file:
-                file_path = f"{folder_path}/{css_file.name}"
-                file_name = default_storage.save(file_path, ContentFile(css_file.read()))
-            else:
-                return JsonResponse({'error': 'No CSS content or file provided.'}, status=400)
-            
-            with default_storage.open(file_name, 'r') as f:
-                css_text = f.read()
+            css_file_name = css_name.lower().replace(" ", "_")
+            file_path = os.path.join(folder_path, f"{css_file_name}.css")
+            default_storage.save(file_path, ContentFile(css_content))
 
-            rules = tinycss2.parse_stylesheet(css_text, skip_whitespace=True)
+            rules = tinycss2.parse_stylesheet(css_content, skip_whitespace=True)
             class_names = extract_class_names(rules)
-
+            
             return JsonResponse({
                 'message': 'CSS data processed successfully',
                 'css_file': css_name,
                 'class_names': list(class_names)
             }, status=200)
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     
@@ -301,31 +320,30 @@ class CSSConfig(APIView):
     
     def put(self, request):
         try:
-            css_name = request.POST.get('css_name')
-            css_content = request.POST.get('css_content', None)
-
-            css_file = request.FILES.get('css_file', None)
-
-            if not css_name:
-                return JsonResponse({'error': 'CSS name is required.'}, status=400)
+            data = json.loads(request.body.decode("utf-8"))
             
-            folder_path = f"uploaded_css/{css_name}/"
+            css_name = data.get('css_name')
+            css_content = data.get('css_content')
+            
+            if not css_name:
+                return JsonResponse({'error': 'CSS Name is required.'}, status=400)
+            if not css_content:
+                return JsonResponse({'error': 'CSS Content is required.'}, status=400)
+            
+            folder_path = os.path.join('uploaded_css', css_name)
+            file_name = f"{css_name.lower().replace(' ', '_')}.css"
+            file_path = os.path.join(folder_path, file_name)
             
             if default_storage.exists(folder_path):
                 shutil.rmtree(default_storage.path(folder_path))
             
             os.makedirs(folder_path, exist_ok=True)
-            
-            if css_content is not None:
-                file_name = css_name.lower().replace(" ", "_")
-                file_path = f"{folder_path}{file_name}.css"
-                with default_storage.open(file_path, 'w') as f:
-                    f.write(css_content)
-            elif css_file:
-                file_path = f"{folder_path}{css_file.name}"
-                default_storage.save(file_path, css_file)
-
+            with default_storage.open(file_path, 'w') as f:
+                f.write(css_content)
+        
             return JsonResponse({'message': 'CSS configuration updated successfully', 'css_name': css_name}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     
@@ -377,7 +395,6 @@ class CSSFileDownloadView(APIView):
         if not default_storage.exists(full_folder_path) or not os.listdir(full_folder_path):
             raise Http404(f"No files found in the folder {css_name}.")
 
-        # Assuming there is only one file per css_name folder or downloading the first file found
         filename = os.listdir(full_folder_path)[0]
         file_path = os.path.join(folder_path, filename)
 
@@ -388,3 +405,82 @@ class CSSFileDownloadView(APIView):
             return response
         else:
             raise Http404(f"The file does not exist in the folder {css_name}.")
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class CSSFileUpload(APIView):
+    def post(self, request):
+        try:
+            css_name = request.POST.get('css_name')
+            css_file = request.FILES.get('css_file')
+            
+            if not css_file:
+                return JsonResponse({'error': 'No CSS file provided.'}, status=400)
+            
+            if not css_name:
+                return JsonResponse({'error': 'CSS Name is required.'}, status=400)
+
+            base_dir = os.path.join('uploaded_css')
+            folder_path = os.path.join(base_dir, css_name)
+
+            if os.path.exists(folder_path):
+                return JsonResponse({'error': f'A folder with the name "{css_name}" already exists.'}, status=400)
+            
+            file_path = f"{folder_path}/{css_file.name}"
+            file_name = default_storage.save(file_path, ContentFile(css_file.read()))
+
+            with default_storage.open(file_name, 'r') as f:
+                css_text = f.read()
+
+            rules = tinycss2.parse_stylesheet(css_text, skip_whitespace=True)
+            class_names = extract_class_names(rules)
+            print(len(class_names))
+            return JsonResponse({
+                'message': 'CSS file uploaded successfully',
+                'css_name': css_name,
+                'class_names': list(class_names)
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+
+@method_decorator(csrf_exempt, name='dispatch')
+class HtmlConfigReader(APIView):
+    def post(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            return JsonResponse(componentConfigService.get_html_by_id(data["component"],data["html_id"]),status = 200)
+        except IndexError:
+            return JsonResponse({},status =404)
+        except:
+            return JsonResponse({},status=500)
+
+@method_decorator(csrf_exempt,name='dispatch')
+class HtmlConfigWriter(APIView):
+    def put(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            componentConfigService.update_html_config(data["component"],data["html_id"],data["html_config"])
+            return JsonResponse({},status=200)
+        except:
+            return JsonResponse({},status=500)
+    
+    def delete(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            componentConfigService = ComponentConfigService(data["project_id"])
+            res=componentConfigService.delete_html_config(data["component"],data["html_id"])
+            return JsonResponse(res,status=200)
+        except:
+            return JsonResponse({},status=500)
+
+    def post(self,request):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            # raise NotImplementedError()
+            componentConfigService = ComponentConfigService(data["project_id"])
+            new_child_id,child_config,parent_html=componentConfigService.add_child_html(data["component"],data["parent_html_id"],data["child"])
+            return JsonResponse({"new_child_id":new_child_id,"child_config":child_config,"parent_html":parent_html},status=200)
+        except:
+            return JsonResponse({},status=500)

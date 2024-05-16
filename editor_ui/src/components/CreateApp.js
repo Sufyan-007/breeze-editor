@@ -136,7 +136,7 @@ export default function CreateApp({ ...props }) {
         setLoading(false);
         showToast("Project created successfully", "success");
         setTimeout(() => {
-          router.navigate("/editor/" + response.name);
+          router.navigate("/project/" + response.name);
         }, 2000);
       })
       .catch((error) => {
@@ -323,6 +323,7 @@ export default function CreateApp({ ...props }) {
                               aria-valuemin="0"
                               aria-valuemax="100"
                               style={{ width: `${progress}%` }}
+                              aria-label="project completion bar"
                             >
                               {progress}%
                             </div>

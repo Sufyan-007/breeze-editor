@@ -1,5 +1,9 @@
 *.pyc
 */node_modules/*
+*/third_party_configs/*
+*/configurations/*
+launch.json
+app_consts.py
 package-lock.json
 */.vscode
 

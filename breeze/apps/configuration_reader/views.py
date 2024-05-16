@@ -5,14 +5,13 @@ from .core.app_config_reader import AppConfigReader
 from common.utils.app_consts import THIRD_PARTY_CONFIG_PATH
 from common.utils.config_reader import read_file_json
 
+## this APIs are for common custom global components shared by each project
 class GetComponents(View):
-    
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
         print(data)
         app_config_reader = AppConfigReader()
         response = app_config_reader.get_components(data)
-
         return JsonResponse(response, status = 200)
     
 class GetComponentConfig(View):
@@ -35,3 +34,4 @@ class ReadFromPath(View):
 
         return JsonResponse(response, status = 200)
 
+        return JsonResponse(response, status = 200)

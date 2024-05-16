@@ -103,7 +103,7 @@ class AppConfigWriter:
     
     def create_or_update_component_config(self,app_name, key,data):
         
-        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
+        app_config_dir = f"{CONFIG_PATH}/{app_name}"
 
         comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
         current_comp_config = {}
@@ -121,7 +121,7 @@ class AppConfigWriter:
 
     def update_component_html_config(self,app_name, key,html_data):
         
-        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
+        app_config_dir = f"{CONFIG_PATH}/{app_name}"
 
         comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
         current_comp_config = {}

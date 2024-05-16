@@ -29,7 +29,7 @@ class ConfigService():
         # self.prepare_path_mappings() 
         self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
     
-    def get_component_configs(self):
+    def get_all_component_configs(self):
         page_list = { x.get("component",None)  for x in self.routing_config["routes"]}
         page_list.discard(None)
         pages = {}
@@ -40,3 +40,7 @@ class ConfigService():
             else:
                 custom_components[x] = self.comp_config[x]
         return {"pages":pages,"custom_components":custom_components}
+    
+    def get_component_config(self,componentName):
+        print(componentName)
+        return self.comp_config[componentName]

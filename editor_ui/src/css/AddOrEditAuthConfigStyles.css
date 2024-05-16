@@ -1,0 +1,15 @@
+::placeholder {
+  color: white;
+}
+.form-label {
+  color: white;
+}
+.formControl {
+  background-color: #6c757d !important;
+  color: white !important;
+  border: none !important;
+  max-width: 90% !important;
+}
+.outer-div::-webkit-scrollbar {
+  display: none;
+}
