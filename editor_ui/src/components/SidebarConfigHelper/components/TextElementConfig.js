@@ -2,15 +2,20 @@ import React from "react";
 import { useState } from "react";
 import { Form } from "react-bootstrap";
 import { useRef, useEffect } from "react";
+import Spinner from 'react-bootstrap/Spinner';
+
 
 const TextElement = ({
   
   makeSelectedElementNull,
   handleUpdateClick,
-  element
+  element,
+  isLoading
 }) => {
   const textareaRef = useRef(null);
   const [elementValue, setElementValue] = useState(null);
+  console.log(isLoading)
+
  
   useEffect(() => {
     setElementValue(element);
@@ -23,6 +28,7 @@ const TextElement = ({
   }, [element.text]);
  
   const handleTextChange = (e) => {
+    
     console.log(elementValue)
     const newText = e.target.value;
     setElementValue({ ...elementValue, text: newText });
@@ -64,6 +70,11 @@ const TextElement = ({
 
           <div>
             <button className="btn btn-primary" onClick={()=>handleUpdateClick(elementValue)}>
+            {isLoading && (
+          <Spinner as="span" animation="border" role="status" size="sm" className="mr-2">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        )}
               Update
             </button>
           </div>

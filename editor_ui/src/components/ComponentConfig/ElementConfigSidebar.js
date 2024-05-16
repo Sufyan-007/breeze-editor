@@ -11,6 +11,10 @@ export default function ElementConfigSidebar({ config }) {
   const [selectedElement, setSelectedElement] = useState(null);
   const { projectName, componentName } = useParams();
   const element = useMemo(() => componentConfig?.html_elements[selectedElement?.elem], [componentConfig, selectedElement]);
+  const [isLoading, setIsLoading] = useState(false);
+
+
+
 
   useEffect(() => {
     sidebarService.getSelectedElem().subscribe((elem) => {
@@ -29,7 +33,9 @@ export default function ElementConfigSidebar({ config }) {
   };
 
   async function updateHtmlConfig(project_id, html_id, component, html_config) {
+    
     try {
+      setIsLoading(true);
       const response = await fetch(
         "http://localhost:8000/editor/update-html-config/",
         {
@@ -40,7 +46,12 @@ export default function ElementConfigSidebar({ config }) {
       );
 
       if (!response.ok) {
+        setIsLoading(false)
         throw new Error("Failed to update HTML config");
+      }
+      else{
+        setIsLoading(false)
+
       }
 
       const responseData = await response.json();
@@ -63,12 +74,12 @@ export default function ElementConfigSidebar({ config }) {
     return (
       <>
         <div
-          className="col-1"
           style={{
             width: "30%",
             backgroundColor: "#303033",
             overflowY: "scroll",
-            position: "relative",
+            position: "absolute",
+            right:0,
             height: "100%",
           }}
         >
@@ -82,6 +93,7 @@ export default function ElementConfigSidebar({ config }) {
                 makeSelectedElementNull={makeSelectedElementNull}
                 handleUpdateClick={handleUpdateClick}
                 element={element}
+                isLoading={isLoading}
               />
             )}
             {element.type === "Element" && (
@@ -89,6 +101,7 @@ export default function ElementConfigSidebar({ config }) {
                 element={element}
                 makeSelectedElementNull={makeSelectedElementNull}
                 handleUpdateClick={handleUpdateClick}
+                isLoading={isLoading}
               />
             )}
           </div>
