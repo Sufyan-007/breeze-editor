@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Container,
   Button,
-  Card,
   Form,
   Row,
   Col,
@@ -15,7 +14,6 @@ import LifeCycleCard from "./LifeCycleCard";
 
 function LifeCycleSection() {
   const { projectName, componentName } = useParams();
-  const [showForm, setShowForm] = useState(false);
   const [lifecycle, setLifecycle] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -26,7 +24,7 @@ function LifeCycleSection() {
     body: "",
     returnBody: "",
   });
-
+  const offcanvasRef = React.useRef(null);
   const constantsList = ["var1", "var2", "var3", "var4"];
 
   const fetchLifecycle = async () => {
@@ -69,10 +67,6 @@ function LifeCycleSection() {
       ...prevState,
       dependentVars: selectedList,
     }));
-  };
-
-  const handleAddLifecycle = () => {
-    setShowForm(true);
   };
 
   const handleEditLifecycle = async (index, value) => {
@@ -156,9 +150,14 @@ function LifeCycleSection() {
         body: JSON.stringify(newHook),
       });
       const data = await response.json();
-      console.log("data POST response::>>", data);
+      console.log("data POST response::>>", data.error);
       fetchLifecycle();
-      setToastMessage("Lifecycle Created !");
+      if (data?.error){
+        setToastMessage(data.error);
+      }
+      else {
+        setToastMessage("Lifecycle created !")
+      }
       setShowToast(true);
     } catch (error) {
       console.error("Error saving lifecycle:", error);
@@ -167,10 +166,13 @@ function LifeCycleSection() {
     }
 
     handleCancel();
+    if (offcanvasRef.current) {
+      const offcanvas = window.bootstrap.Offcanvas.getInstance(offcanvasRef.current);
+      offcanvas.hide();
+    }
   };
 
   const handleCancel = () => {
-    setShowForm(false);
     setFormState({
       name: "",
       lifecycleType: "",
@@ -192,132 +194,147 @@ function LifeCycleSection() {
               <h4>Lifecycle</h4>
             </div>
             <div>
-              <Button
+              <button
                 className="btn btn-secondary"
-                onClick={handleAddLifecycle}
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#createLifecycle"
+                aria-controls="createLifecycle"
               >
                 Add Lifecycle
-              </Button>
+              </button>
             </div>
           </div>
-          {showForm && (
-            <Card className="m-2">
-              <Card.Body>
-                <Form>
+          <div
+            class="offcanvas offcanvas-end"
+            tabindex="-1"
+            id="createLifecycle"
+            data-bs-theme="dark"
+            aria-labelledby="offcanvasRightLabel"
+            style={{ width: "500px"}}
+            ref={offcanvasRef}
+          >
+            <div class="offcanvas-header pb-0">
+              <h5 id="offcanvasRightLabel">Add Lifecycle</h5>
+              <button
+                type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="offcanvas-body">
+              <Form>
+                <Row className="mb-3">
+                  <Form.Group as={Col} controlId="formGridName">
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Lifecycle Name"
+                      value={formState.name}
+                      onChange={(e) => handleFormChange("name", e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3">
+                  <Form.Group as={Col} controlId="formGridType">
+                    <Form.Label>Type</Form.Label>
+                    <Form.Select
+                      value={formState.lifecycleType}
+                      onChange={(e) =>
+                        handleFormChange("lifecycleType", e.target.value)
+                      }
+                    >
+                      <option value="">Select Type</option>
+                      <option value="onEveryMount">onEveryMount</option>
+                      <option value="onComponentMount">onComponentMount</option>
+                      <option value="onMountAndUnmount">
+                        onMountAndUnmount
+                      </option>
+                      <option value="onUnmount">onUnmount</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Row>
+
+                {(formState.lifecycleType === "onComponentMount" ||
+                  formState.lifecycleType === "onMountAndUnmount" ||
+                  formState.lifecycleType === "onUnmount") && (
                   <Row className="mb-3">
-                    <Form.Group as={Col} controlId="formGridName">
-                      <Form.Label>Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Lifecycle Name"
-                        value={formState.name}
-                        onChange={(e) =>
-                          handleFormChange("name", e.target.value)
-                        }
+                    <Form.Group
+                      controlId="formGridDependentVars"
+                    >
+                      <Form.Label>Dependent Variables</Form.Label>
+                      <Multiselect
+                        options={constantsList}
+                        selectedValues={formState.dependentVars}
+                        onSelect={handleSelect}
+                        onRemove={handleRemove}
+                        isObject={false}
+                        showCheckbox={true}
+                        style={{
+                          optionListContainer: {
+                            background: "red"
+                          }
+                        }}
                       />
                     </Form.Group>
-
-                    <Form.Group as={Col} controlId="formGridType">
-                      <Form.Label>Type</Form.Label>
-                      <Form.Select
-                        value={formState.lifecycleType}
-                        onChange={(e) =>
-                          handleFormChange("lifecycleType", e.target.value)
-                        }
-                      >
-                        <option value="">Select Type</option>
-                        <option value="onEveryMount">onEveryMount</option>
-                        <option value="onComponentMount">
-                          onComponentMount
-                        </option>
-                        <option value="onMountAndUnmount">
-                          onMountAndUnmount
-                        </option>
-                        <option value="onUnmount">onUnmount</option>
-                      </Form.Select>
-                    </Form.Group>
                   </Row>
+                )}
 
-                  {(formState.lifecycleType === "onComponentMount" ||
-                    formState.lifecycleType === "onMountAndUnmount" ||
-                    formState.lifecycleType === "onUnmount") && (
-                    <Row>
-                      <Form.Group
-                        className="mb-3"
-                        controlId="formGridDependentVars"
-                      >
-                        <Form.Label>Dependent Variables</Form.Label>
-                        <Multiselect
-                          options={constantsList}
-                          selectedValues={formState.dependentVars}
-                          onSelect={handleSelect}
-                          onRemove={handleRemove}
-                          isObject={false}
-                          showCheckbox={true}
-                        />
-                      </Form.Group>
-                    </Row>
-                  )}
-
-                  <Row>
-                    {(formState.lifecycleType === "onEveryMount" ||
-                      formState.lifecycleType === "onComponentMount" ||
-                      formState.lifecycleType === "onMountAndUnmount") && (
-                      <Form.Group
-                        as={Col}
-                        className="mb-3"
-                        controlId="formGridFunctionBody"
-                      >
-                        <Form.Label>Function Body</Form.Label>
-                        <MonacoEditor
-                          defaultValue=""
-                          onChange={(value) => handleFormChange("body", value)}
-                          height="150px"
-                          width="450px"
-                          id="function-body-editor"
-                          language="javascript"
-                        />
-                      </Form.Group>
-                    )}
-
-                    {(formState.lifecycleType === "onUnmount" ||
-                      formState.lifecycleType === "onMountAndUnmount") && (
-                      <Form.Group
-                        as={Col}
-                        className="mb-3"
-                        controlId="formGridReturnBody"
-                      >
-                        <Form.Label>Return Body</Form.Label>
-                        <MonacoEditor
-                          defaultValue=""
-                          onChange={(value) =>
-                            handleFormChange("returnBody", value)
-                          }
-                          height="150px"
-                          width="450px"
-                          id="return-body-editor"
-                          language="javascript"
-                        />
-                      </Form.Group>
-                    )}
-                  </Row>
-                  <div className="d-flex">
-                    <Button
-                      variant="secondary"
-                      className="me-3"
-                      onClick={handleSubmit}
+                <Row className="mb-3">
+                  {(formState.lifecycleType === "onEveryMount" ||
+                    formState.lifecycleType === "onComponentMount" ||
+                    formState.lifecycleType === "onMountAndUnmount") && (
+                    <Form.Group
+                      as={Col}
+                      controlId="formGridFunctionBody"
                     >
-                      Submit
-                    </Button>
-                    <Button variant="danger" onClick={handleCancel}>
-                      Cancel
-                    </Button>
-                  </div>
-                </Form>
-              </Card.Body>
-            </Card>
-          )}
-
+                      <Form.Label>Function Body</Form.Label>
+                      <MonacoEditor
+                        defaultValue=""
+                        onChange={(value) => handleFormChange("body", value)}
+                        height="150px"
+                        width="450px"
+                        id="function-body-editor"
+                        language="javascript"
+                      />
+                    </Form.Group>
+                  )}
+                </Row>
+                <Row className="mb-3">
+                  {(formState.lifecycleType === "onUnmount" ||
+                    formState.lifecycleType === "onMountAndUnmount") && (
+                    <Form.Group
+                      as={Col}
+                      controlId="formGridReturnBody"
+                    >
+                      <Form.Label>Return Body</Form.Label>
+                      <MonacoEditor
+                        defaultValue=""
+                        onChange={(value) =>
+                          handleFormChange("returnBody", value)
+                        }
+                        height="150px"
+                        width="450px"
+                        id="return-body-editor"
+                        language="javascript"
+                      />
+                    </Form.Group>
+                  )}
+                </Row>
+                <div className="d-flex">
+                  <Button
+                    variant="secondary"
+                    className="me-3"
+                    onClick={handleSubmit}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </Form>
+            </div>
+          </div>
           <div>
             {lifecycle.map((lifecycle, index) => (
               <div className="m-2">
