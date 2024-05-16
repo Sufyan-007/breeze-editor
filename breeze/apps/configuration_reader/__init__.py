@@ -44,7 +44,6 @@ def prepare_config_map():
         # Prepare config map for custom project components
         for project_config_dir in all_projects_path:
             project_config = read_config_file(project_config_dir, CONFIG_FILES_PATH['APP_CONFIG']) 
-
             comp_config = prepare_comp_config(project_config_dir)
             COMPONENTS_CONFIG["CUSTOM"][project_config['name']] = comp_config
 
@@ -258,7 +257,7 @@ def read_components_configs_path(project_config_path):
 
 def prepare_comp_config(project_config_path):
     comp_config = read_config_file(project_config_path, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
-
+    print(comp_config,"comp_congif ")
     comp_paths = read_components_configs_path(project_config_path)
 
     for comp_path in comp_paths:

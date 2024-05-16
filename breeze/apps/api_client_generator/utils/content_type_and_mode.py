@@ -1,6 +1,6 @@
 def get_content_type_and_mode(content_type_str):
         mode = "RAW"
-        content_type = "JSON"
+        content_type = content_type_str
         if content_type_str == "application/json":
             mode = 'RAW'
             content_type = 'JSON'

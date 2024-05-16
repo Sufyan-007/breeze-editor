@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { Form, Row, Col, Button } from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 import CustomButtonGroup from "../CustomButtonGroup";
 import remove from "../../assets/icons/remove.svg";
+import BodyCss from "../../css/Body.css"
+import CustomLayoutCss from "../../css/CustomLayout.css";
+import CustomFormGroup from "../CustomFormGroup";
 const modeOptions = [
   { name: "RAW", label: "Raw", variant: "secondary" },
   { name: "FORMDATA", label: "Formdata", variant: "secondary" },
@@ -21,8 +24,6 @@ const Body = ({ index, onChange, bodyData, onRemove, key }) => {
   const [body, setBody] = useState(bodyData || {});
 
   const onValueChange = (prop, value) => {
-    console.log(prop, "prop");
-    console.log(value, "value");
     const updatedBody = { ...body, [prop]: value };
     setBody(updatedBody);
     onChange("body", index, updatedBody);
@@ -34,54 +35,70 @@ const Body = ({ index, onChange, bodyData, onRemove, key }) => {
   };
 
   return (
-    <Row key={key} className="mx-4 mt-2" style={{ width: "45%" }}>
-      <Col sm={1}>
+    <div key={key} className="custom-grid body">
+      <div className="custom-grid-item one">
         <img src={remove} height={24} alt="remove" onClick={handleRemoveBody} />
-      </Col>
-      <Col sm={11}>
-        <Form.Group controlId={`body-${index}`}>
-          <CustomButtonGroup
-            options={modeOptions}
-            title={"Mode"}
-            selectedButton={body["mode"]}
-            onButtonClick={onValueChange}
-            formId={"mode"}
+      </div>
+      <div className="custom-grid-item el">
+          <CustomFormGroup
+            controls={[
+              {
+                label: "Mode",
+                type: "buttongroup",
+                selectedButton: body["mode"],
+                onButtonClick: (e) => {
+                  onValueChange("mode",e);
+                },
+                width: "100%",
+                labelColWidth: 3,
+                inputColWidth: 9,
+                buttonGroupOptions: modeOptions,
+                formId: "mode",
+              },
+            ]}
+            inline={true}
           />
           {body.mode === "RAW" && (
-            <>
-              <CustomButtonGroup
-                options={contentTypes}
-                title={"Type"}
-                selectedButton={body["content_type"]}
-                onButtonClick={onValueChange}
-                formId={"content_type"}
+            <>         
+              <CustomFormGroup
+                controls={[
+                  {
+                    label: "Type",
+                    type: "buttongroup",
+                    selectedButton: body["content_type"],
+                    onButtonClick: (e) => {
+                      onValueChange("content_type",e);
+                    },
+                    width: "100%",
+                    labelColWidth: 3,
+                    inputColWidth: 9,
+                    buttonGroupOptions: contentTypes,
+                    formId: "content_type",
+                  },
+                ]}
+                inline={true}
+              />             
+              <CustomFormGroup
+                controls={[
+                  {
+                    label: "Schema:",
+                    type: "text",
+                    value:body["schema_name"] || "",
+                    onChange:(value) =>
+                      onValueChange("schema_name", value)
+                    ,
+                    width: "100%",
+                    labelColWidth: 3,
+                    inputColWidth: 9,
+                  },
+                ]}
+                inline={true}
               />
-
-              <Row>
-                <Col sm={3}>
-                  <Form.Label className="mb-2 mx-3">Schema:</Form.Label>
-                </Col>
-                <Col sm={9}>
-                  <Form.Control
-                    className=""
-                    style={{
-                      border: "none",
-                      backgroundColor: "#6C757D",
-                    }}
-                    type="text"
-                    value={body["schema_name"] || ""}
-                    onChange={(e) =>
-                      onValueChange("schema_name", e.target.value)
-                    }
-                  />
-                </Col>
-              </Row>
             </>
           )}
-         
-        </Form.Group>
-      </Col>
-    </Row>
+      
+      </div>
+    </div>
   );
 };
 

@@ -9,6 +9,15 @@ class Parameter:
     type: str= CustomizedAttr((str),[required_validator])
     required: bool= CustomizedAttr((bool),[])
     description: str= CustomizedAttr((str),[])
+    # errors = {}
+    errors : dict = CustomizedAttr((dict), [])
+
+
+    def add_error(self, attribute, error_message):
+        if attribute not in self.errors:
+            self.errors[attribute] = []
+        self.errors[attribute].append(error_message)
+        
 
     def as_dict(self):
         
@@ -17,6 +26,7 @@ class Parameter:
             'name': self.name,
             'type': self.type,
             'required': self.required,
-            'description': self.description
+            'description': self.description,
+            'errors': self.errors if self.errors else None
         }
       
