@@ -3,8 +3,8 @@ const path = require('path');
 const { Project } = require('ts-morph');
 const { SyntaxKind } = require('typescript');
 // Use this (handlePropTypes) for original code, decodePropType is only for easy debugging
-const { handlePropTypes } = require('./handle_prop_types');
-const { decodePropType } = require('./decodePropTypes');
+const { HandlePropTypes } = require('./handle_prop_types');
+const { DecodePropType } = require('./decodePropTypes');
 const { handleConfigFileGeneration } = require('./store_config');
 const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint } = require('./helper');
 
@@ -55,12 +55,12 @@ function readExportsFromTypeScriptFile(project, filePath) {
 }
 
 // Process exports variable
-function processExports(project, entryPoint, exportsConfig, libraryPath) {
+function processExports(project, entryPoint, exportsConfig, libraryPath, libName, storePath) {
 
     // console.log(exportsConfig.length);
-    // exportsConfig = exportsConfig.slice(0, 1)
-    expList = exportsConfig
-    for (expConfig of expList) {
+    // exportsConfig = exportsConfig.slice(205, 206)
+    const expList = exportsConfig
+    for (const expConfig of expList) {
         try {
 
             const typeDefinitionFile = findTypeDefinitionFile(entryPoint, expConfig['module'], libraryPath);
@@ -79,7 +79,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath) {
                 const exportVarSymbol = sourceFile.getDefaultExportSymbol().getAliasedSymbol()
 
                 const attributesOfVar = exportVarSymbol.getValueDeclaration().getType().getProperties()
-                
+
                 // Determine if it is component or not
                 const isComponent = checkIfComponentType(attributesOfVar)
                 expConfig['isComponent'] = isComponent
@@ -87,7 +87,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath) {
                 // Add props if it is component
                 if (isComponent) {
                     expConfig['props'] = []
-                    const propsList = getPropsForDefaultExportVar(sourceFile, expConfig['name'])
+                    const propsList = getPropsForDefaultExportVar(sourceFile, expConfig['name'], libName, storePath)
                     expConfig['props'] = propsList
                 }
             }
@@ -101,14 +101,17 @@ function processExports(project, entryPoint, exportsConfig, libraryPath) {
 
 
         } catch (error) {
-            console.log('-----ERROR_IN_PROCESS_EXPORTS-----');
+            console.log('-----ERROR_IN_PROCESS_EXPORTS-----', expConfig['name']);
             // console.log(error);
         }
     }
 
 }
 
-function getPropsForDefaultExportVar(sourceFile, componentName) {
+function getPropsForDefaultExportVar(sourceFile, componentName, libName, storePath) {
+
+    const handlePropTypes = new HandlePropTypes(libName, storePath);
+    const propsReader = new PropsReader(libName, storePath);
 
     const defaultExportDec = sourceFile.getDefaultExportSymbol().getAliasedSymbol().getValueDeclaration()
 
@@ -132,7 +135,7 @@ function getPropsForDefaultExportVar(sourceFile, componentName) {
         // // // console.log('Getting parameter type for finding the propType variable');
         // // // console.log(defaultExportDec.getParameters()[0].getTypeNode().getText());
         propVarName = defaultExportDec.getParameters()[0].getTypeNode().getText();
-        propList = getPropsList(propVarName, sourceFile)
+        propList = propsReader.getPropsList(propVarName, sourceFile)
 
     }
     else {
@@ -152,7 +155,7 @@ function getPropsForDefaultExportVar(sourceFile, componentName) {
                 // This gets the type reference to the props type
                 // // // console.log(relatedCallSign.getParameters()[0].getTypeNode().getText());
                 propVarName = relatedCallSign.getParameters()[0].getTypeNode().getText();
-                propList = getPropsList(propVarName, sourceFile)
+                propList = propsReader.getPropsList(propVarName, sourceFile)
 
                 // // // console.log(relatedCallSign.getSignature().getParameters().map(t => t.getStructure()));
                 // // // console.log(ch.getCallSignatures().map(cs => cs.getReturnTypeNode().getText()));
@@ -189,21 +192,22 @@ function getPropsForDefaultExportVar(sourceFile, componentName) {
                     // console.log(ta.getText());
                     if (ta.getKind() == SyntaxKind.TypeReference) {
                         // console.log(ta.getType().getProperties());
-                        // processProps(ta)
-                        // console.log('ssss',ta.getTypeName().getText());
-                        if (ta.getTypeArguments().length > 0) {
-                            propVarName = ta.getTypeName().getText();
-                        } else {
+                        // // console.log('ssss',ta.getTypeName().getText());
+                        // if (ta.getTypeArguments().length > 0) {
+                        //     propVarName = ta.getTypeName().getText();
+                        // } else {
 
-                            propVarName = ta.getText();
-                        }
+                        //     propVarName = ta.getText();
+                        // }
 
-                        // console.log('sdf', propVarName);
-                        if (!propVarName) {
-                            propVarName = `${componentName}Props`
-                        }
+                        // // console.log('sdf', propVarName);
+                        // if (!propVarName) {
+                        //     propVarName = `${componentName}Props`
+                        // }
 
-                        propList = getPropsList(propVarName, sourceFile)
+                        // propList = propsReader.getPropsList(propVarName, sourceFile)
+
+                        propList = propsReader.processProps(ta)
                         break;
                     }
                     else if (ta.getKind() == SyntaxKind.IntersectionType) {
@@ -211,21 +215,17 @@ function getPropsForDefaultExportVar(sourceFile, componentName) {
 
                             // If true then its simple interface like ImageProps
                             if (subType.getTypeArguments().length == 0) {
-                                propList = propList.concat(getPropsList(subType.getText(), sourceFile))
+                                propList = propList.concat(propsReader.getPropsList(subType.getText(), sourceFile))
 
                             } else { // Else it is like React.RefAttributes<HTMLElement> so it has type arugments
                                 const tempListOfProps = subType.getType().getProperties();
-
-                                // for(const tp of tempListOfProps){
-                                    // console.log(tp.getValueDeclaration().getType().getText());
-                                // }
 
                                 propList = propList.concat(tempListOfProps.map(prop => ({
                                     name: prop.getName(),
                                     type: prop.getValueDeclaration().getType().getText(),
                                     raw: prop.getValueDeclaration().getType().getText(),
                                     isOptional: prop.isOptional(),
-                                    fullData: decodePropType(prop, prop.getValueDeclaration().getTypeNode())
+                                    fullData: handlePropTypes.handleProps(prop, prop.getValueDeclaration().getTypeNode())
                                 })));
                             }
                         }
@@ -271,46 +271,6 @@ function getTypeReferenceOfComponentVar(variableNode) {
     }
 
     return variableNode
-}
-
-// Prepare and return details for single prop of the component
-function getSinglePropObject(prop) {
-    try {
-        const propConfig = {
-            name: prop.getName(),
-            type: prop.getType().getText(),
-            raw: prop.getTypeNode().getText(),
-            isOptional: prop.getSymbol().isOptional(),
-            fullData: decodePropType(prop, prop.getTypeNode().getType())
-        }
-
-
-        return propConfig;
-
-    } catch (error) {
-        console.log('EEEEE');
-        // console.log(error);
-    }
-    // // console.log('----', prop.getTypeNode().getType().isUnion(), prop.getType().getText());
-}
-
-// Get propsList from the prop variable 
-function getPropsList(propName, sourceFile) {
-    // console.log(propName);
-    const propVar = getDeclarationOfProps(propName, sourceFile)
-
-    const propsList = []
-
-    if (propVar) {
-        for (const prop of propVar.getProperties()) {
-            propsList.push(getSinglePropObject(prop))
-        }
-    }
-
-    // console.log(propsList);
-
-    return propsList;
-
 }
 
 // This function returns InterfaceDeclaration type of object
@@ -362,18 +322,6 @@ function getDeclarationOfProps(propName, sourceFile) {
     return propVar
 }
 
-
-function processProps(referenceVar) {
-    // // console.log(referenceVar.getType().getProperties());
-    const propsList = referenceVar.getType().getProperties();
-
-    // // console.log(propsList.length);
-    // for( const pr of propsList){
-    //     // // console.log(pr.getName());
-    // }
-
-}
-
 // Check if it is component by going through all the properties of the variable or class or object
 function checkIfComponentType(properties) {
 
@@ -384,6 +332,120 @@ function checkIfComponentType(properties) {
     }
 
     return false
+}
+
+class PropsReader {
+    constructor(libraryName, storePath) {
+        this.libraryName = libraryName;
+        this.storePath = storePath;
+
+        this.handlePropTypes = new HandlePropTypes(libraryName, storePath);
+
+    }
+
+    processProps(referenceVar) {
+        // // console.log(referenceVar.getType().getProperties());
+        const props = referenceVar.getType().getProperties();
+        const propsList = [];
+        // // console.log(propsList.length);
+        for (const pr of props) {
+
+            const declaration = pr.getValueDeclaration() || pr.getDeclarations()[0]
+
+            propsList.push(this.getSinglePropObject(declaration || pr))
+
+            if (pr.getName() == 'onSelect') {
+
+                // console.log(pr.getName(), pr);
+            }
+        }
+
+        return propsList;
+
+    }
+
+
+    // Get propsList from the prop variable 
+    getPropsList(propName, sourceFile) {
+        // console.log(propName);
+        const propVar = getDeclarationOfProps(propName, sourceFile)
+
+        const propsList = []
+
+        if (propVar) {
+            for (const prop of propVar.getProperties()) {
+                propsList.push(this.getSinglePropObject(prop))
+            }
+        }
+
+        // console.log(propsList);
+
+        return propsList;
+
+    }
+
+    // Handle 
+    handleSymbolProps(prop) {
+        return {
+            name: prop.getName(),
+            type: prop.getDeclaredType().getText(),
+            raw: prop.getDeclaredType().getText(),
+            isOptional: prop.isOptional(),
+            isSymbolTypeProp: true,
+            fullData: this.handlePropTypes.handleProps(prop, prop.getDeclaredType())
+        }
+    }
+
+    // Prepare and return details for single prop of the component
+    getSinglePropObject(prop) {
+
+
+        try {
+
+            let typeConfig;
+
+            let isTypeNodeAvailable;
+
+            // Handle scenario when it is of symbol type
+            // We dont have access to certain props when its symbol type
+            if (prop.constructor.name == 'Symbol') {
+                return this.handleSymbolProps(prop)
+            }
+
+            if (prop.getKind() == SyntaxKind.MethodSignature) {
+                typeConfig = prop.getType()
+                isTypeNodeAvailable = false;
+            } else {
+                isTypeNodeAvailable = true;
+                typeConfig = prop.getTypeNode()
+
+                if (typeConfig.getKind() != SyntaxKind.UnionType) {
+                    typeConfig = typeConfig.getType()
+                }
+            }
+
+            const propConfig = {
+                name: prop.getName(),
+                type: prop.getType().getText(),
+                raw: isTypeNodeAvailable ? prop.getTypeNode().getText() : prop.getType().getText(),
+                isOptional: prop.getSymbol().isOptional(),
+                fullData: this.handlePropTypes.handleProps(prop, typeConfig)
+            }
+
+            return propConfig;
+
+        } catch (error) {
+            console.log('EEEEE', error);
+            // console.log(error);
+        }
+        // // console.log('----', prop.getTypeNode().getType().isUnion(), prop.getType().getText());
+    }
+
+
+
+
+
+
 }
 
 function generator_function(libraryName, storePath) {
@@ -402,7 +464,7 @@ function generator_function(libraryName, storePath) {
     // console.log(exports);
 
     // Process exports variable and get detailed config
-    processExports(project, entryPoint, exports, libraryPath)
+    processExports(project, entryPoint, exports, libraryPath, libraryName, storePath)
     // fs.writeFileSync(`${libraryName}_exports.json`, JSON.stringify(exports));
 
     // console.log(exports);
@@ -417,11 +479,7 @@ function generator_function(libraryName, storePath) {
 
 // Todo:
 
-// Handle omit
-// Try to find all the props
-// Try to get detailed info about the prop type
 // Add type of export
-// configure details that can be useful when we want to import it in cretaed project so test it
 
 module.exports = {
     generator_function
