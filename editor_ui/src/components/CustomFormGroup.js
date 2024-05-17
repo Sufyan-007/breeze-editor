@@ -16,7 +16,7 @@ const CustomFormGroup = ({ controls, inline }) => {
         {controls.map((control, index) => (
           <div key={index} className="row">
             <div className={`col-${control.labelColWidth}`}>
-              <label className="label" htmlFor={control.id}>
+              <label className="custom-label" htmlFor={control.id}>
                 {control.label}
               </label>
             </div>
@@ -83,7 +83,7 @@ const CustomFormGroup = ({ controls, inline }) => {
           <div key={index}>
             <div className="row">
               <div className={`col-${control.labelColWidth}`}>
-                <label className="label" htmlFor={control.id}>
+                <label className="custom-label" htmlFor={control.id}>
                   {control.label}
                 </label>
               </div>

@@ -86,7 +86,6 @@ export async function getApiConfig(projectName, filename, apiId) {
 }
 
 export async function generateReactService(projectName, filename) {
-  console.log(filename,"jjiiiiiiiiiiii");
   let path = "ORDINARY";
   if (filename === "auth") {
     path = "AUTH";
