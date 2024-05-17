@@ -11,7 +11,7 @@ const CustomTextField = ({ value, onChange, placeholder , width }) => {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="custom-input"
+        className="custom-text-input"
         style={{ width: width }}
       />
 

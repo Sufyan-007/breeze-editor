@@ -218,7 +218,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
           {
             <div className="custom-grid">
               <div className="custom-grid-item three">
-                <Form.Label className="mx-3 mt-3 label">Response</Form.Label>
+                <Form.Label className="outer-label">Response</Form.Label>
                 <Button
                   variant="secondary"
                   size="sm"
@@ -232,7 +232,7 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                   />
                 </Button>
               </div>
-              <div className="custom-grid-item nine d-flex flex-wrap mt-3 p-2">
+              <div className="custom-grid-item nine outer-control">
                 {apiModel["response"] &&
                   apiModel["response"].map((res, index) => (
                     <Response

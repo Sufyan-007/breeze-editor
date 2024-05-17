@@ -82,8 +82,8 @@ export default function Root() {
       <div className="error-message">{errorMessage}</div>
     </Alert>
     }
-      <div className="container-fluid d-flex flex-column">
-        <Navbar variant="dark" className="justify-content-end">
+      <div className="service-root container-fluid">
+        <Navbar variant="dark" className="service-root justify-content-end">
           <Container className="mx-0">
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse
@@ -131,7 +131,7 @@ export default function Root() {
                   <input
                     ref={fileInputPostman}
                     type="file"
-                    className="upload"
+                    className="service-root-upload"
                     onChange={(e) => handleUpload(e, "postman")}
                     accept=".json"
                   />
@@ -155,7 +155,7 @@ export default function Root() {
             </Navbar.Collapse>
           </Container>
         </Navbar>
-        <div className="row flex-grow-1 overflow-hidden">
+        <div className="service-root row flex-grow-1 overflow-hidden">
           {view === "LIST_SERVICE" ? (
             <ServiceList
               onEditService={onEditService}

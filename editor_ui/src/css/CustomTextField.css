@@ -1,4 +1,4 @@
-.custom-input {
+.custom-text-input {
 
   background-color: #303033;
 
@@ -9,6 +9,6 @@
   margin: 16px 0px 5px 0px;
 }
 
-.custom-input::placeholder{
+.custom-text-input::placeholder{
   color: white;
 }

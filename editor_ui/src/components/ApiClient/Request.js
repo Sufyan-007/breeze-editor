@@ -179,9 +179,9 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
       <div>
         <div className="custom-grid">
           <div className="custom-grid-item three">
-            <Form.Label className="mt-3 mx-3 label">URLs:</Form.Label>
+            <Form.Label className="outer-label">URLs:</Form.Label>
           </div>
-          <div className="custom-grid-item nine d-flex mt-3">
+          <div className="custom-grid-item nine outer-control">
             {<Urls urlData={request["url"]} onChange={onUrlValueChange} />}
           </div>
         </div>
@@ -191,7 +191,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
         <div>
           <div className="custom-grid">
             <div className="custom-grid-item three">
-              <Form.Label className="mt-3 mx-3 label">Auth:</Form.Label>
+              <Form.Label className="outer-label">Auth:</Form.Label>
               <Button variant="secondary" size="sm" onClick={addAuthSection}>
                 <img
                   width="24"
@@ -202,7 +202,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
               </Button>
             </div>
             {
-              <div className="custom-grid-item nine  d-flex flex-wrap  mt-3">
+              <div className="custom-grid-item nine outer-control">
                 {request["auth"] &&
                   request["auth"].map((auth, index) => (
                     <Auth
@@ -223,7 +223,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
 
       <div className="custom-grid">
         <div className="custom-grid-item three">
-          <Form.Label className="mt-3 mx-3 label">Parameter:</Form.Label>
+          <Form.Label className="outer-label">Parameter:</Form.Label>
           <Button
             variant="secondary"
             size="sm"
@@ -247,7 +247,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
         </div>
         {request["parameters"] && (
           <div
-            className="custom-grid-item nine d-flex flex-wrap mt-3"
+            className="custom-grid-item nine outer-control"
             style={{
               flexDirection: "row",
               justifyContent: "normal",
@@ -268,7 +268,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
 
       <div className="custom-grid">
         <div className="custom-grid-item three">
-          <Form.Label className="mt-3 mx-3 label">Body:</Form.Label>
+          <Form.Label className="outer-label">Body:</Form.Label>
           <Button
             variant="secondary"
             size="sm"
@@ -290,7 +290,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
           </Button>
         </div>
         {
-          <div className="custom-grid-item nine d-flex flex-wrap mt-3">
+          <div className="custom-grid-item nine outer-control">
             {request["body"].map((body, index) => (
               <Body
                 key={body.id}

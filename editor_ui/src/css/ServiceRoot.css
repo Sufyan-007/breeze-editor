@@ -1,15 +1,14 @@
-.container-fluid.d-flex.flex-column{
+.service-root.container-fluid{
     width: 100%;
+    display: flex;
+    flex-direction: column;
 }
-.justify-content-end{
+.service-root.justify-content-end{
     background-color: #303033;
 }
-.row.flex-grow-1.overflow-hidden{
+.service-root.row.flex-grow-1.overflow-hidden{
     background-color:  #303033;
 }
-input.upload{
+input.service-root-upload{
     display: none;
 }
-/* .row.flex-grow-1.overflow-hidden::-webkit-scrollbar{
-    display: none;
-} */
