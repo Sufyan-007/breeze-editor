@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
+import { Navbar, Nav, NavDropdown, Container, Alert } from "react-bootstrap";
 import ServiceList from "./ServiceList";
 import AuthApiList from "./AuthApiList";
 import EditAuthFunction from "./EditAuthFunction";
@@ -77,6 +77,11 @@ export default function Root() {
   }
   return (
     <>
+    {errorMessage && 
+    <Alert>
+      <div className="error-message">{errorMessage}</div>
+    </Alert>
+    }
       <div className="container-fluid d-flex flex-column">
         <Navbar variant="dark" className="justify-content-end">
           <Container className="mx-0">

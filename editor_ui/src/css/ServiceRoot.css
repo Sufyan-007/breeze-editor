@@ -10,3 +10,6 @@
 input.upload{
     display: none;
 }
+/* .row.flex-grow-1.overflow-hidden::-webkit-scrollbar{
+    display: none;
+} */

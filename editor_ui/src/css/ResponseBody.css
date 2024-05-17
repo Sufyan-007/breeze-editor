@@ -1,19 +1,4 @@
-input.form-control {
-  max-width: 50vw;
 
-  border: none;
-  color: white !important;
-}
-
-.mb-3 custom-form-group{
-background-color: #303033;
-}
-input.form-control::placeholder{
-color:white;
-}
-/* input.form-control::focus{
-  background-color: #6C757D !important;
-} */
 .custom-grid.response{
   width: 45%;
 padding: 8px 24px 8px 24px;

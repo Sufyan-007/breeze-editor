@@ -3,36 +3,16 @@ element.style {
   background-color: currentcolor;
   text-decoration-color: white;
 }
-a.dropdownitem.dropdown-item {
-  color: black;
-}
-a.dropdownitem.dropdown-item:active {
-  background-color: #6c757d;
-}
-.me-2.form-control {
-  max-width: 24.5vw;
-  background-color: #6c757d;
-  border: none;
-  color: white;
-}
-.value.form-control {
-  max-width: 24.5vw;
-  background-color: #6c757d;
-  border: none;
-  color: white;
-}
-.d-flex.mt-3{
+
+.d-flex.mt-3 {
   flex-direction: row;
   justify-content: normal;
-  background-color:#303033 ;
+  background-color: #303033;
   border: 1px solid grey;
   max-width: 90%;
-  padding:8px;
+  padding: 8px;
 }
-.button-group{
-  max-width: 90%;
-}
-.mt-3.mx-3{
-  color:white;
-  
+
+.mt-3.mx-3.label {
+  color: white;
 }
