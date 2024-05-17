@@ -122,8 +122,9 @@ export default function ServiceLists({
               <Accordion key={index}>
                 <Accordion.Item
                   eventKey={service.filename}
-                  style={{ cursor: "pointer" }}>
-                  <Accordion.Header>
+                  style={{ cursor: "pointer" }}
+                  className="custom-accordion-item">
+                  <Accordion.Header className="custom-accordion-header">
                     {service.filename}{" "}
                     <Button
                       variant="link"
@@ -135,7 +136,7 @@ export default function ServiceLists({
                       Generate Service
                     </Button>
                   </Accordion.Header>
-                  <Accordion.Body>
+                  <Accordion.Body className="custom-accordion-body">
                     {service.apis && Object.keys(service.apis).length > 0 ? (
                       <Table striped bordered hover variant="dark">
                         <thead>
@@ -236,7 +237,7 @@ export default function ServiceLists({
                         </tbody>
                       </Table>
                     ) : (
-                      <h5 style={{ color: "black", textAlign: "center" }}>
+                      <h5 className="no-service">
                         No services found
                       </h5>
                     )}

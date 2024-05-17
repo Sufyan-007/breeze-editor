@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, ButtonGroup, Row, Col } from "react-bootstrap";
 import CustomButtonGroup from "../CustomButtonGroup";
 import remove from "../../assets/icons/remove.svg";
-import ResponseBodyCss from "../../css/ResponseBody.css";
-import CustomLayout from "../../css/CustomLayout.css";
+import"../../css/ResponseBody.css";
+import "../../css/CustomLayout.css";
 import CustomFormGroup from "../CustomFormGroup";
 
 let responseStatus = [

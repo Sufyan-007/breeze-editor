@@ -6,8 +6,8 @@ import Urls from "./Urls.js";
 import Parameter from "./Parameter.js"
 import add from "../../assets/icons/add.svg";
 import CustomButtonGroup from "../CustomButtonGroup.js";
-import RequestBodyCss from "../../css/RequestBody.css";
-import CustomLayoutCss from "../../css/CustomLayout.css";
+import  "../../css/RequestBody.css";
+import  "../../css/CustomLayout.css";
 import CustomFormGroup from "../CustomFormGroup.js";
 
 let methodType = [
@@ -179,50 +179,51 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
       <div>
         <div className="custom-grid">
           <div className="custom-grid-item three">
-            <Form.Label className="mt-3 mx-3">URLs:</Form.Label>
+            <Form.Label className="mt-3 mx-3 label">URLs:</Form.Label>
           </div>
           <div className="custom-grid-item nine d-flex mt-3">
-            {
-              <Urls urlData={request["url"]} onChange={onUrlValueChange} />
-            }
+            {<Urls urlData={request["url"]} onChange={onUrlValueChange} />}
           </div>
         </div>
       </div>
 
-{      renderAuth && (<div>
-        <div className="custom-grid">
-          <div className="custom-grid-item three">
-            <Form.Label className="mt-3 mx-3">Auth:</Form.Label>
-            <Button variant="secondary" size="sm" onClick={addAuthSection}>
-              <img
-                width="24"
-                height="24"
-                src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
-                alt="add--v1"
-              />{" "}
-            </Button>
-          </div>
-          {
-            <div className="custom-grid-item nine  d-flex flex-wrap  mt-3">
-              {request["auth"]&& request["auth"].map((auth, index) => (
-                <Auth
-                  key={index}
-                  index={index}
-                  onChange={onListValueChange}
-                  auth={auth}
-                  tokenApis={tokenApis}
-                  loginApis={loginApis}
-                  onRemove={() => removeAuthSection(index)}
-                />
-              ))}
+      {renderAuth && (
+        <div>
+          <div className="custom-grid">
+            <div className="custom-grid-item three">
+              <Form.Label className="mt-3 mx-3 label">Auth:</Form.Label>
+              <Button variant="secondary" size="sm" onClick={addAuthSection}>
+                <img
+                  width="24"
+                  height="24"
+                  src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+                  alt="add--v1"
+                />{" "}
+              </Button>
             </div>
-          }
+            {
+              <div className="custom-grid-item nine  d-flex flex-wrap  mt-3">
+                {request["auth"] &&
+                  request["auth"].map((auth, index) => (
+                    <Auth
+                      key={index}
+                      index={index}
+                      onChange={onListValueChange}
+                      auth={auth}
+                      tokenApis={tokenApis}
+                      loginApis={loginApis}
+                      onRemove={() => removeAuthSection(index)}
+                    />
+                  ))}
+              </div>
+            }
+          </div>
         </div>
-      </div>)}
+      )}
 
       <div className="custom-grid">
         <div className="custom-grid-item three">
-          <Form.Label className="mt-3 mx-3">Parameter:</Form.Label>
+          <Form.Label className="mt-3 mx-3 label">Parameter:</Form.Label>
           <Button
             variant="secondary"
             size="sm"
@@ -250,7 +251,6 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
             style={{
               flexDirection: "row",
               justifyContent: "normal",
-            
             }}
           >
             {request["parameters"].map((parameter, index) => (
@@ -268,7 +268,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
 
       <div className="custom-grid">
         <div className="custom-grid-item three">
-          <Form.Label className="mt-3 mx-3">Body:</Form.Label>
+          <Form.Label className="mt-3 mx-3 label">Body:</Form.Label>
           <Button
             variant="secondary"
             size="sm"
