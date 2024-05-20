@@ -173,21 +173,20 @@ class AppEditor:
     
     # Adds a new route to specified component,
     #!!! routes preferably placed in a new file that's imported to App.js to avoid re-writing it
-    def add_route(self,route,component,redirect_url=None):
-        if route[0]!='/':
-            route = "/"+route
-        
-        
-        if component:
-            route_={"path":route,"component":component}
-        elif redirect_url:
-            route_={"path":route,"redirectTo":redirect_url}
+    def add_route(self,route_obj):
+        print(route_obj)
+        if route_obj.get('path')[0]!='/':
+            route_obj['path'] = "/"+route_obj.get('path')        
+        if route_obj['component']:
+            route_obj.pop('redirectTo')
+        elif route_obj['redirectTo']:
+            route_obj.pop('component')
         for i,routes in enumerate(self.routing_config["routes"]):
-            if routes["path"] ==route:
-                self.routing_config["routes"][i] = route_
+            if routes["path"] ==route_obj['path']:
+                self.routing_config["routes"][i] = route_obj
                 break
         else:
-            self.routing_config["routes"].append(route_)
+            self.routing_config["routes"].append(route_obj)
         
         routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
         write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
@@ -195,13 +194,36 @@ class AppEditor:
         return self.routing_config
     
     def set_all_routes(self, allRoutes):
-        print(allRoutes)
-        self.routing_config["routes"] = allRoutes
-        routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
-        write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
+        try:
+            self.routing_config["routes"] = allRoutes
+            routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
+            write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
+        except Exception as e:
+            print("Error route config ", e)
         self.modify_main_component()
+        self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
         return self.routing_config
-
+    
+    def add_child_route(self, child_object):
+        for route in self.routing_config['routes']:
+            if route['path'] == child_object['parentPath']:
+                child_object.pop('parentPath')
+                if route.get('childRoutes') is None:
+                    route['childRoutes'] = []
+                if child_object['component']:
+                    child_object.pop('redirectTo')
+                elif child_object['redirectTo']: 
+                    child_object.pop('component')
+                    
+                route['childRoutes'].append(child_object)
+                route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
+                react_code = route_handler.handle_routing_code()
+                with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
+                    formatted_code = format_by_prettier(react_code)
+                    component_file.write(formatted_code)
+                return {'case': True, 'res' : self.routing_config}
+        return {'case' : False, 'res' : 'No matching rounds were present'}
+        
     def write_reducers(self):
         reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)
         reducer_generator.write_all_reducers()

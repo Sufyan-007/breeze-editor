@@ -2,7 +2,7 @@ import { Form } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 function ProjectRouteModal(props) {
   const {
@@ -12,6 +12,10 @@ function ProjectRouteModal(props) {
     show,
     onHide: handleClose,
     onSubmit,
+    addRouteModalShow,
+    setAddRouteModalShow,
+    childModalState,
+    addChildRoute
   } = props;
   const {
     register,
@@ -19,10 +23,12 @@ function ProjectRouteModal(props) {
     formState: { errors },
     reset,
   } = useForm();
+  const formRef = useRef();
   const submitFormData = (data) => {
     onSubmit(data);
   };
   const [isEditChildRoutePresent, setIsEditChildRoutePresent] = useState(false);
+  
   const handleChildRouteChange = (selectedChildRoute) => {
     // reset({
     //   ...register,
@@ -30,6 +36,20 @@ function ProjectRouteModal(props) {
     // });
     // setChildRoute(e.target.value);
   };
+
+  const handleAddRouteModalClose = () => {
+    setAddRouteModalShow(false);
+  }
+
+  const addRoute = (modal, parentPath) => {
+    const route=formRef.current[0].value
+    const component= formRef.current[1].value
+    const redirectTo= formRef.current[2].value
+    modal === "addChild"
+      ? addChildRoute({ parentPath, path:route, component, redirectTo })
+      : setAddRouteModalShow(false);
+  }
+
 
   useEffect(() => {
     const getChildRoutes = () => {
@@ -54,20 +74,20 @@ function ProjectRouteModal(props) {
       }
     };
 
-    if (routeData) {
-      reset({
-        path: routeMode === "Add" ? "" : routeData.path,
-        component:
-          routeMode === "Add"
-            ? ""
-            : routeData.component || routeData?.redirectTo,
-        // childRoutes: getChildRoutes(),
-        action: routeMode === "Add" ? "" : routeData?.action,
-        loader: routeMode === "Add" ? "" : routeData?.loader,
-        lazy: routeMode === "Add" ? "" : routeData?.lazy,
-        caseSensitive: routeMode === "Add" ? "" : routeData?.caseSensitive,
-      });
-    }
+    // if (routeData) {
+    //   reset({
+    //     path: routeMode === "Add" ? "" : routeData.path,
+    //     component:
+    //       routeMode === "Add"
+    //         ? ""
+    //         : routeData.component || routeData?.redirectTo,
+    //     // childRoutes: getChildRoutes(),
+    //     action: routeMode === "Add" ? "" : routeData?.action,
+    //     loader: routeMode === "Add" ? "" : routeData?.loader,
+    //     lazy: routeMode === "Add" ? "" : routeData?.lazy,
+    //     caseSensitive: routeMode === "Add" ? "" : routeData?.caseSensitive,
+    //   });
+    // }
   }, [routeData, routeMode, reset]);
 
   return (
@@ -163,24 +183,140 @@ function ProjectRouteModal(props) {
         ) : null}
       </Modal> */}
 
+      {/* Child Route Modal */}
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Child Routes</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          { routeData.childRoutes ? routeData.childRoutes.map((route) => (
-            <div className="btn d-flex">{route.path + " - " + (routeData.component ? routeData.component : routeData.redirectTo) }</div>
-          )) : 'No Child Route present'}
+          {childModalState === "view" && (
+            <div className="card ">
+              <ul class="list-group list-group-flush">
+                {routeData.childRoutes ? (
+                  routeData.childRoutes?.map((route) => (
+                    <div className="list-group-item">
+                      <div className="btn d-flex">
+                        {route.path +
+                          " - " +
+                          (route.component
+                            ? route.component
+                            : route.redirectTo)}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="list-group-item">No Child Route present</div>
+                )}
+              </ul>
+            </div>
+          )}
+
+          {childModalState === "add" && (
+            <Form ref={formRef}>
+              <Form.Group name="route">
+                <Form.Label>Route</Form.Label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text" id="basic-addon3" title="parent route path" role="button">
+                    {routeData.path}
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="basic-url"
+                    aria-describedby="basic-addon3"
+                  />
+                </div>
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Component </Form.Label>
+                <Form.Select
+                  aria-label="select component"
+                  className="mb-3"
+                  onChange={(e) => {                    
+                    console.log(e.target.value);
+                  }}
+                >
+                  (<option value="">None</option>)
+                  {[...new Set(routes.map((route) => route.component))].map(
+                    (component, index) =>
+                      component && (
+                        <option key={index} value={component}>
+                          {component}
+                        </option>
+                      )
+                  )}
+                </Form.Select>
+              </Form.Group>
+
+              <Form.Group name="route">
+                <Form.Label>Redirect To</Form.Label>
+                <Form.Control name="redirect" placeholder="redirect_url" />
+              </Form.Group>
+            </Form>
+          )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          {false && (
-            <Button variant="primary" onClick={handleClose}>
+          {childModalState === "add" && (
+            <Button variant="primary" onClick={() => addRoute('addChild', routeData.path)}>
               Save Changes
             </Button>
           )}
+        </Modal.Footer>
+      </Modal>
+
+      {/* Add Route Modal */}
+      <Modal show={addRouteModalShow} onHide={handleAddRouteModalClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Route</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form ref={formRef}>
+            <Form.Group name="route">
+              <Form.Label>Route</Form.Label>
+              <Form.Control name="route" placeholder="route" />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Component </Form.Label>
+              <Form.Select
+                aria-label="select component"
+                className="mb-3"
+                onChange={(e) => {
+                  // handleErrorElementChange(
+                  //   route,
+                  //   e.target.value
+                  // );
+                }}
+                value=""
+              >
+                (<option value="">None</option>)
+                {[...new Set(routes.map((route) => route.component))].map(
+                  (component, index) =>
+                    component && (
+                      <option key={index} value={component}>
+                        {component}
+                      </option>
+                    )
+                )}
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group name="route">
+              <Form.Label>Redirect To</Form.Label>
+              <Form.Control name="redirect" placeholder="redirect_url" />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleAddRouteModalClose}>
+            Close
+          </Button>
+
+          <Button variant="primary" onClick={() => addRoute('add')}>
+            Save Changes
+          </Button>
         </Modal.Footer>
       </Modal>
     </>

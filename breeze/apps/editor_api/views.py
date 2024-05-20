@@ -7,9 +7,8 @@ from .core.generate_project import GenerateProject
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
-from rest_framework.views import APIView
 from .core.app_config_writer import AppConfigWriter
-from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
+from common.utils.app_consts import CONFIG_PATH
 import os
 import tinycss2
 import shutil 
@@ -73,12 +72,40 @@ class RoutingWriter(APIView):
         data= json.loads(request.body.decode("utf-8"))
         try:
             app_editor= AppEditor(param)
-            res= app_editor.add_route(data["route"],data.get("component"),data.get("redirectTo"))
+            if 'allRoutes' in data:
+                is_unique = self.check_unique_route_paths(data['allRoutes'])
+                if is_unique is False:
+                    return JsonResponse('Duplicate route paths are not allowed', status=400, safe=False)
+                res = app_editor.set_all_routes(data['allRoutes'])
+                return JsonResponse(res, status=200)
+            res= app_editor.add_route(data)
             return JsonResponse(res)
-        except:
-            return JsonResponse({}, status=500)
-
-
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse({e}, status=500)
+    
+    def check_unique_route_paths(self, allRoutes):
+        allPaths = [route['path'] for route in allRoutes]
+        if len(allPaths) == len(list(set(allPaths))):
+            return True
+        else:
+            return False
+        
+@method_decorator(csrf_exempt,name='dispatch')
+class ChildRouteHandler(APIView):
+    def post(self,request,param):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            app_editor= AppEditor(param);
+            res = app_editor.add_child_route(data)
+            if res['case']:
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400)
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse(e, status=500)
+    
 @method_decorator(csrf_exempt,name='dispatch')
 class ReducerConfig(APIView):
     def get(self,request,param):

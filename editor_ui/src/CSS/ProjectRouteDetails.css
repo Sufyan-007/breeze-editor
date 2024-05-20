@@ -1,8 +1,32 @@
-#multiselectContainerReact .searchWrapper {
-    border: none !important;
-  }
+
+  #multiselectContainerReact .searchWrapper {
+      border: none !important;
+    }
 
   .lessen-h1-mb{
     margin-bottom: 0px !important;
   }
   
+  .routeAccordionDetails {
+    max-height: 950px;
+    overflow-y: scroll;
+    /* scrollbar-width: none; */
+  }
+
+  .routeAccordionDetails::-webkit-scrollbar {
+    display: none;
+    /* scrollbar-width: none; */
+  }
+
+  .offcanvas-size-xl {
+    width: min(95vw, 600px) !important;
+    /* --bs-offcanvas-width: min(95vw, 600px) !important; */
+  }
+
+  .pdt {
+    padding-top: 0px !important;
+  }
+
+  .pdt::-webkit-scrollbar {
+    display: none;
+  }
