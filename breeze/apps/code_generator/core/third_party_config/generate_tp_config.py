@@ -66,3 +66,15 @@ def get_path():
 
 # call_node_script(JS_FILE_PATH, JS_FUNCTION_NAME, 'react-bootstrap', get_path())
 
+class GenerateTPConfigAPI:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def generate_tp_config(req_data):
+        print("Starting Generating Config")
+        lib_name = req_data['libraryName']
+        lib_version = req_data.get('libraryVersion', None)
+        call_node_script(JS_FILE_PATH, JS_FUNCTION_NAME, lib_name, lib_version, get_path())
+
+        print("Config Generation Completed")
