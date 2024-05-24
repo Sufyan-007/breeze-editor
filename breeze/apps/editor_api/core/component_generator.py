@@ -124,6 +124,7 @@ class ComponentGenerator():
         state_vars = config['stateVars']
         other_vars = config.get('otherVars',[])
         props_vars = config['propsVars']
+        ref_vars = config.get('refVars', [])
         html_config = config['html']
         generator = HTMLGenerator(config)
         html_code = generator.generateHTML(html_config)
@@ -151,17 +152,25 @@ class ComponentGenerator():
             
             store = all_store_config[wrapper_store]
             html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
-        
         state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_raw_val(var["defaultValue"])});' for var in state_vars])
-        props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
+        ref_vars_declaration = '\n'.join([f'const {var["name"]} = React.useRef({format_raw_val(var["defaultValue"])});' for var in ref_vars])
+        # props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
+        props_vars_declaration = ', '.join([f'{var["name"]}={var["defaultValue"]}' if var["defaultValue"] else var["name"] for var in props_vars])
         
         # other vars
         other_vars_declaration = ""
-        for ovar in other_vars:
-            parameters = ""
-            if len(ovar.get("parameters",[]))> 0:
-                parameters = ",".join(ovar["parameters"])
-            other_vars_declaration = other_vars_declaration + " \n %s %s = %s(%s);"%(ovar["declarationType"],ovar.get("name"),ovar.get("className"),parameters)
+        for var in other_vars:
+            datatype = var.get("datatype")
+            default_value = var.get("defaultValue")
+            
+            if datatype == "string":
+                formatted_value = f'"{default_value}"'
+            elif datatype == "boolean":
+                formatted_value = str(default_value).lower()  # Ensure true/false is in lowercase
+            else:
+                formatted_value = f'{default_value}'
+            
+            other_vars_declaration += f"\nconst {var.get('name')} = {formatted_value};"
         
         # functions_code = '\n\n'.join()
 
@@ -200,7 +209,7 @@ class ComponentGenerator():
             import React, { useState , Fragment } from 'react';
             %s
             
-            const %s = (props) => {
+            const %s = ({ %s }) => {
                 %s
                 %s
                 %s
@@ -212,7 +221,7 @@ class ComponentGenerator():
             }
 
             export default %s;
-        """%(import_stats,name,props_vars_declaration,state_vars_declaration,other_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
+        """%(import_stats,name,props_vars_declaration,state_vars_declaration,ref_vars_declaration,other_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
 
         return react_component
 

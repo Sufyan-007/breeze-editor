@@ -132,7 +132,130 @@ class ComponentConfigService:
             return True 
         else: 
            return False 
-       
+    
+    def get_variables(self, comp_name=None, variable_id=None):
+        state_variables = self.comp_config.get(comp_name, {}).get("stateVars", [])
+        prop_variables = self.comp_config.get(comp_name, {}).get("propsVars", [])
+        other_variables = self.comp_config.get(comp_name, {}).get("otherVars", [])
+        ref_variables = self.comp_config.get(comp_name, {}).get("refVars", [])
+
+        variables = state_variables + prop_variables + other_variables + ref_variables
+
+        if variable_id is not None:
+            for var in variables:
+                if var["$id"] == variable_id:
+                    return var
+            return None
+        return variables
+    
+    def add_variable(self, comp_name, variable_config):
+        component = self.comp_config.get(comp_name)
+        state_variables = component["stateVars"]
+        prop_variables = component["propsVars"]
+        other_variables = component["otherVars"]
+        ref_variables = component["refVars"]
+
+        variables = state_variables + prop_variables + other_variables + ref_variables
+
+        for var in variables:
+            if var["name"] == variable_config["name"]:
+                raise IndexError("Variable has already been declared")
+
+        def generate_unique_id(variable_list, prefix):
+            max_id = 0
+            pattern = r'\d+$'
+            for var in variable_list:
+                match = re.search(pattern, var["$id"])
+                if match:
+                    max_id = max(max_id, int(match.group()))
+            return f"{prefix}/UUID{max_id + 1}"
+
+        new_variable = {
+            'name': variable_config["name"],
+            'type': variable_config["type"],
+            'datatype': variable_config["datatype"],
+            'defaultValue': variable_config.get("defaultValue", None),
+            'description': variable_config.get("description", "")
+        }
+
+        if variable_config["type"] == "stateVars":
+            new_id = generate_unique_id(state_variables, "STATE_VARS")
+            new_variable["$id"] = new_id
+            state_variables.append(new_variable)
+
+        elif variable_config["type"] == "propsVars":
+            new_id = generate_unique_id(prop_variables, "PROPS_VARS")
+            new_variable["$id"] = new_id
+            prop_variables.append(new_variable)
+
+        elif variable_config["type"] == "otherVars":
+            new_id = generate_unique_id(other_variables, "OTHER_VARS")
+            new_variable["$id"] = new_id
+            other_variables.append(new_variable)
+            
+        elif variable_config["type"] == "refVars":
+            new_id = generate_unique_id(ref_variables, "REF_VARS")
+            new_variable["$id"] = new_id
+            ref_variables.append(new_variable)
+
+        else:
+            raise ValueError("Invalid variable type specified")
+
+        app_editor = AppEditor(self.projectId)
+        app_editor.write_component(self.comp_config.get(comp_name))
+
+        return new_variable
+    
+    def update_variable(self, comp_name, new_variable_config):
+        component = self.comp_config.get(comp_name)
+        state_variables = component["stateVars"]
+        prop_variables = component["propsVars"]
+        other_variables = component["otherVars"]
+        ref_variables = component["refVars"]
+
+        variables = state_variables + prop_variables + other_variables + ref_variables
+
+        variable_found = False
+        for var in variables:
+            if var["$id"] == new_variable_config["$id"]:
+                var.update(new_variable_config)
+                variable_found = True
+                break
+            
+        if not variable_found:
+            raise IndexError("Variable not found")
+        
+        app_editor = AppEditor(self.projectId)
+        app_editor.write_component(component)
+
+        return new_variable_config
+    
+    def delete_variable(self, comp_name, variable_id):
+        component = self.comp_config.get(comp_name)
+        state_variables = component["stateVars"]
+        prop_variables = component["propsVars"]
+        other_variables = component["otherVars"]
+        ref_variables = component["refVars"]
+        
+
+        def delete_from_list(variable_list, variable_id):
+            for var in variable_list:
+                if var["$id"] == variable_id:
+                    variable_list.remove(var)
+                    return True
+            return False
+
+        if delete_from_list(state_variables, variable_id) or \
+           delete_from_list(prop_variables, variable_id) or \
+           delete_from_list(other_variables, variable_id) or \
+           delete_from_list(ref_variables, variable_id):
+            app_editor = AppEditor(self.projectId)
+            app_editor.write_component(component)
+            return True
+        else:
+            raise IndexError("Variable not found")
+    
+
     def add_function(self,comp_name,function_config):
         functions =  self.comp_config.get(comp_name)["functions"]
         
