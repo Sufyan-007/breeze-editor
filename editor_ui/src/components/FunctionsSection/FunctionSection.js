@@ -1,4 +1,4 @@
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import { ComponentContext } from "../ComponentConfig/ComponentConfigPage"
 import Function from "./Function"
 

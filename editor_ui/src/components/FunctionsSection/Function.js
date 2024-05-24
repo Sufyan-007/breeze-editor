@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import MonacoEditor from "../common/MonacoEditor"
 import { updateFunction } from "../../services/FunctionConfigService"
 import { useParams } from "react-router"
+import CommonConfigSidebar from "../common/CommonConfigSidebar"
 
 export default function Function({ func , updateFunctions}) {
     const [functionConfig, setFunctionConfig] = useState(func)
@@ -44,7 +45,59 @@ export default function Function({ func , updateFunctions}) {
                     </div>
                 }
             </div>
-            {(showDetails) &&
+            <CommonConfigSidebar title="Title" onClose={()=>setShowDetails(false)}>
+                {showDetails &&
+                    <>
+                    <div className="row mx-2" >
+                        <div className="col-2 ">
+                            Description
+                        </div>
+                        <div className="col">
+                            <textarea className=" w-75" value={func.description} onChange={(event)=>setFunctionConfig(state=>{return {...state,description:event.target.value}})} placeholder="Description" name="" id=""></textarea>
+                        </div>
+                    </div>
+                    <div className="row mx-2 my-1 " >
+                        <div className="col">Parameters</div>
+                    </div>
+
+                    <div className="row mx-2 " >
+                        <div className="col">
+                            <input type="checkbox" checked={functionConfig.isAnonymous} onChange={(event)=>setFunctionConfig(state=>{return {...state,isAnonymous:event.target.checked}})} className="my-2 me-2" />
+                            Anonymous 
+                        </div>
+                    </div>
+
+
+                    <div className="row mx-2 " >
+                        <div className="col">
+                            <input type="checkbox" checked={functionConfig.isAsync} onChange={(event)=>setFunctionConfig(state=>{return {...state,isAsync:event.target.checked}})}  className="my-2 me-2" />
+                            Async 
+                        </div>
+                    </div>
+                    <div className="row mx-2 mt-3">
+                        <div className="col">Function Body</div>
+                    </div>
+                    <div id={"function-body-"+func["$id"]} className="row mx-2">
+                        <MonacoEditor   
+                            onChange={(body)=>setFunctionConfig((state)=>{return {...state,body}})}
+                            defaultValue={func.body}
+                            id={func['$id']}
+                            width="90%"
+                            height="200px"
+                        />
+                    </div>
+                    <div className="row my-3">
+                        <div className=" text-end">
+                            <button className="btn me-4 btn-primary" onClick={updateFunctionConfig}>
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                </>
+
+                }
+            </CommonConfigSidebar>
+            {/* {(showDetails) &&
                 <>
                     <div className="row mx-2" >
                         <div className="col-2 ">
@@ -93,7 +146,7 @@ export default function Function({ func , updateFunctions}) {
                     </div>
                 </>
 
-            }
+            } */}
         </div>
     )
 }
