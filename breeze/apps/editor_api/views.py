@@ -624,7 +624,7 @@ class FunctionConfigWriter(APIView):
         except IndexError:
             return JsonResponse({},status=409)
         except:
-            return JsonResponse({},status=200)
+            return JsonResponse({},status=500)
         
     def put(self,request):
         try:

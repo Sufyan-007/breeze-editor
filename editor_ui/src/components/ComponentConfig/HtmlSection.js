@@ -18,10 +18,8 @@ export default function HtmlSection() {
 
     useEffect(() => {
         setTimeout( () => {
-            console.log("HtmlSection")
             const iframe = document.getElementById("iFrame")
             if (iframe) {
-                console.log("post")
                 iframe.contentWindow.postMessage({ func: '()=>{console.log(" Hello World") }'},"*")
             }
         },500)

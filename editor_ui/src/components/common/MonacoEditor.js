@@ -4,6 +4,7 @@ import * as monaco from 'monaco-editor';
 function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", language = "javascript", theme = "vs-dark", onChange, id = "monaco-editor" }) {
   const [editor, setEditor] = useState(null)
   const editorRef = useRef()
+  const [value] = useState(defaultValue)
   // const [editorDiv,setEditorDiv] = useState(document.getElementById(id));
   
   // useEffect(()=>{
@@ -29,7 +30,7 @@ function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", lan
 
       // console.log("Actual init")
       const editor = monaco.editor.create(editorDiv, {
-        value: defaultValue,
+        value: value,
         language,
         theme,
         automaticLayout: true
@@ -38,7 +39,7 @@ function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", lan
       setEditor(editor);
       return () => editor.dispose();
     }
-  }, [defaultValue,  language, theme, id]);
+  }, [value,  language, theme, id]);
 
   // const getValue = useCallback(() => {
   //   return editorRef.current ? editorRef.current.getValue() : "";
