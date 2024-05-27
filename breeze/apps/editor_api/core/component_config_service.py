@@ -174,6 +174,7 @@ class ComponentConfigService:
         function_to_update["parameters"] = function_config.get("parameters",function_to_update["parameters"])
         function_to_update["isAnonymous"] = function_config.get("isAnonymous",function_to_update["isAnonymous"])
         function_to_update["isAsync"] = function_config.get("isAsync",function_to_update["isAsync"] )
+        function_to_update["description"] = function_config.get("description","" )
         appEditor=AppEditor(self.projectId)
         appEditor.write_component(self.comp_config.get(comp_name))
         return function_to_update
