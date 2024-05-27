@@ -1,28 +1,46 @@
 import React from "react";
+import { useState } from "react";
 import { Form } from "react-bootstrap";
 import { useRef, useEffect } from "react";
+import Spinner from 'react-bootstrap/Spinner';
+
 
 const TextElement = ({
-  textValue,
-  handleTextChange,
+  
   makeSelectedElementNull,
-  handleUpdateTextClick,
+  handleUpdateClick,
+  element,
+  isLoading
 }) => {
   const textareaRef = useRef(null);
+  const [elementValue, setElementValue] = useState(null);
+  console.log(isLoading)
 
+ 
+  useEffect(() => {
+    setElementValue(element);
+  }, [element]);
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [textValue]);
+  }, [element.text]);
+ 
+  const handleTextChange = (e) => {
+    
+    console.log(elementValue)
+    const newText = e.target.value;
+    setElementValue({ ...elementValue, text: newText });
+    
+  };
   return (
-    <>
+    elementValue && (<>
       <Form.Control
         as="textarea"
         placeholder=""
         className="m-auto mt-4 mb-3 ps-3 pe-4 pt-3 pb-3"
-        value={textValue}
+        value={elementValue.text}
         onChange={handleTextChange}
         style={{
           minHeight: "150px",
@@ -51,13 +69,21 @@ const TextElement = ({
           </div>
 
           <div>
-            <button className="btn btn-primary" onClick={handleUpdateTextClick}>
-              Update
+            <button className="btn btn-primary" onClick={()=>handleUpdateClick(elementValue)}>
+            {isLoading ? (
+          <Spinner as="span" animation="border" role="status" size="sm" className="ms-3 me-3">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        ): (
+          "Update"
+        )}
+              
             </button>
           </div>
         </div>
       </div>
-    </>
+     
+    </>)
   );
 };
 

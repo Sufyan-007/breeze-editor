@@ -27,7 +27,7 @@ export default function HtmlSection() {
 
 
     return (
-        <div className="row flex-grow-1" >
+        <div className="row flex-grow-1" style={{ position:"relative"}}>
             
             <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
                 <div className="row">
@@ -55,7 +55,7 @@ export default function HtmlSection() {
                 }
             </div>
             <div className="col overflow-hidden p-0">
-                <div className=" bg-dark-subtle align-items-center d-flex justify-content-end" style={{ 'height': "2.4rem" }}>
+                <div className=" bg-dark-subtle align-items-center d-flex justify-content-start" style={{ 'height': "2.4rem" }}>
                     
                         <div className="me-3">
                         <input
