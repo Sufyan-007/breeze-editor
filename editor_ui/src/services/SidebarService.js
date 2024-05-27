@@ -1,4 +1,4 @@
-import { BehaviorSubject, Subject } from "rxjs"
+    import { BehaviorSubject, Subject } from "rxjs"
 class SidebarService{
     constructor(){
         this.selectedElemSub= new BehaviorSubject(null)
@@ -6,9 +6,9 @@ class SidebarService{
     getSelectedElem(){
         return this.selectedElemSub
     }
-    setSelectedElem(elem,component){
+    setSelectedElem(elem){
         const updateSub=new Subject()
-        this.selectedElemSub.next({elem,component,updateSub})
+        this.selectedElemSub.next({elem,updateSub})
         return updateSub
     }
 }

@@ -314,29 +314,27 @@ class RouteHandler:
         function App() {{
                 
             useEffect(() => {{
-                        const style = document.createElement('style');
-                        const cssClass = '.custom-highlight {{background-color: yellow;outline: red solid 3px ;}}';
-                        style.appendChild(document.createTextNode(cssClass));
-                        document.head.appendChild(style);
-                        const handleMessage = (event) => {{
-                            if (event.origin === 'http://localhost:3000') {{
-                            const id = event.data.id;
-                            const highlight = event.data.highlight
-                            const elements = document.querySelectorAll(`[id="${{event.data.id}}"]`);
-                            for (const elem of elements) {{
-                            if (highlight) {{
-                                elem.classList.add("custom-highlight")
-                            }}
-                            else {{
-                                elem.classList.remove("custom-highlight")
-                            }}
-                            }}
-                        }}
-                                        }};
-                        window.addEventListener('message', handleMessage);
-                        return () => {{
-                        window.removeEventListener('message', handleMessage);
-                        }};
+                const style = document.createElement("style");
+                const cssClass =
+                ".custom-highlight {{background-color: yellow;outline: red solid 3px ;}}";
+                style.appendChild(document.createTextNode(cssClass));
+                document.head.appendChild(style);
+                const handleMessage = (event) => {{
+                
+                if (event.origin === "http://localhost:3000") {{
+                    console.log(event.data)
+                    if (event.data.func){{
+                    var fn;
+                    const functionString ="fn = " + event.data.func
+                    eval(functionString)
+                    fn()
+                    }}
+                }}
+                }};
+                window.addEventListener("message", handleMessage);
+                return () => {{
+                window.removeEventListener("message", handleMessage);
+                }};
             }}, []);
             return (
             <div>

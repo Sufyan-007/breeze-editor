@@ -28,6 +28,14 @@
   color: #61dafb;
 }
 
+.loader{
+    z-index: 4;
+    background-color: #303033;
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -40,4 +48,62 @@
 .hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+
+.container-height {
+  height:  calc(100% - 56px);
+}
+
+.breadcrumb {
+  background-color: #212529 !important;  
+  padding: 8px !important;
+  border-radius: 7px !important;
+  margin-top: 8px !important;
+}
+
+.breadcrumb a {
+  color: white !important;
+  text-decoration: none;
+}
+
+.breadcrumb-item {
+  color: white !important;
+
+}
+
+.breadcrumb-item::before {
+  color: white !important;
+
+}
+
+/* can be modified later if light theme required */
+.optionListContainer {
+  z-index: 100 !important;
+  background-color: #212529 !important;
+  color: white !important;
+}
+
+
+/* scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb:window-inactive {
+  background: rgba(255, 255, 255, 0.473);
 }

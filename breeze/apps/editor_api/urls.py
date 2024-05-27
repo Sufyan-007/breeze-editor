@@ -17,6 +17,11 @@ from .views import CSSConfig
 from .views import CSSConfigReader
 from .views import CSSFileDownloadView
 from .views import CSSFileUpload
+from .views import HtmlConfigReader
+from .views import HtmlConfigWriter
+from .views import LifeCycleConfigWriter
+from .views import FunctionConfigWriter
+from .views import VariablesConfigWriter
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -48,5 +53,16 @@ urlpatterns = [
         path('delete-css-file/<str:css_name>/', CSSConfig.as_view()),
         path('get-css-file/<str:css_name>/', CSSConfigReader.as_view()),
         path('css-file-download/<str:css_name>/', CSSFileDownloadView.as_view()),
+        
+        
+        ## New APIs 
+        path('get-html-config/', HtmlConfigReader.as_view()),
+        path('update-html-config/', HtmlConfigWriter.as_view()),
+        path('lifecycle/', LifeCycleConfigWriter.as_view()),
+        path('variables/', VariablesConfigWriter.as_view()),
+        
+        
+        ##Functions 
+        path("update-function-config/",FunctionConfigWriter.as_view())
 ]
 

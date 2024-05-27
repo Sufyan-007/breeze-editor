@@ -11,27 +11,20 @@ from common.utils.formatter import format_by_prettier,format_val
 import yaml
 from common.utils.file_helper import create_parent_dir_if_not_exists
 import copy
+from .helpers.replace_variable import replace_variable
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
-    "name": "Comp",
-    "containingFile": "components/Comp.js",
+    "name": "$NAME",
+    "containingFile": "components/$NAME.js",
     "stateVars": [],
     "propsVars": [],
     "otherVars": [],
+    "refVars": [],
+    "componentType" : "CUSTOM",
     "functions": [],
-    "$id":"COMP",
-    "html": {
-      "type": "Element",
-      "elementType": "HTML",
-      "typeId": "DIV",
-      "tagName": "div",
-      "attributes": {
-        "className": { "type": "LITERAL", "value": "" },
-        "id": { "type": "LITERAL", "value": "" }
-      },
-      "children": [{ "type": "text", "text": "Hello world" }]
-    },
+    "$id":"$NAME",
+    "html": {"_id":"$NAME"},
     "wrapper_store": None,
     "imports": { "components": [], "other": [
         {
@@ -47,7 +40,44 @@ NEW_COMP_FORMAT={
           "import_type": "SINGLE"
         }] 
     },
-    "hooks": []
+    "hooks": [],
+    "html_elements":{
+        "$NAME":{
+            "type": "Element",
+            "elementType": "HTML",
+            "typeId": "DIV",
+            "tagName": "div",
+            "attributes": {
+                "className": { "type": "LITERAL", "value": "" },
+                "id": { "type": "LITERAL", "value": "$NAME" }
+            },
+            "children": [
+                {"_id":"$NAME-0"},
+                {"_id":"$NAME-1"}
+            ]
+        },
+        "$NAME-0":{
+            "type": "text", 
+            "text": "Hello world" 
+        },
+        "$NAME-1":{
+            "type":"Element",
+            "elementType":"HTML",
+            "typeId":"DIV",
+            "tagName":"div",
+            "attributes": {
+                "className": { "type": "LITERAL", "value": "" },
+                "id": { "type": "LITERAL", "value": "$NAME-1" }
+            },
+            "children":[
+                {"_id":"$NAME-1-0"}
+            ]
+        },
+        "$NAME-1-0":{
+            "type":"text",
+            "text": "BYe"
+        }
+    }
 }
 
 
@@ -160,13 +190,11 @@ class AppEditor:
     
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
-    def add_component(self,name):
+    def add_component(self,name,type):
         name=name.replace(' ',"")
         comp=NEW_COMP_FORMAT.copy()
-        comp['name'] = name
-        comp["$id"] = name.upper()
-        comp['containingFile'] = "components/"+name+".js"
-        comp["html"]["attributes"]["id"]["value"]=name
+        replace_variable(comp,"$NAME",name)
+        comp["type"] = type
         config=self.write_component(comp)
         
         return {"config":config, "comp":name}
@@ -177,14 +205,16 @@ class AppEditor:
         print(route_obj)
         if route_obj.get('path')[0]!='/':
             route_obj['path'] = "/"+route_obj.get('path')        
-        if route_obj['component']:
-            route_obj.pop('redirectTo')
+        if route_obj.get('component'):
+            route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
         elif route_obj['redirectTo']:
-            route_obj.pop('component')
+            route_obj.pop('component') if route_obj.get('component') else ''
         for i,routes in enumerate(self.routing_config["routes"]):
             if routes["path"] ==route_obj['path']:
-                self.routing_config["routes"][i] = route_obj
-                break
+                # previous code : replacing the conflicting route
+                # self.routing_config["routes"][i] = route_obj
+                # break
+                return {'error': 'can\'t have two routes with same path'}
         else:
             self.routing_config["routes"].append(route_obj)
         
@@ -195,6 +225,9 @@ class AppEditor:
     
     def set_all_routes(self, allRoutes):
         try:
+            is_unique = self.check_unique_route_paths(allRoutes)
+            if is_unique is False:
+                return {'error': 'Duplicate route paths are not allowed'}
             self.routing_config["routes"] = allRoutes
             routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
             write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
@@ -204,6 +237,13 @@ class AppEditor:
         self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
         return self.routing_config
     
+    def check_unique_route_paths(self, allRoutes):
+        allPaths = [route['path'] for route in allRoutes]
+        if len(allPaths) == len(list(set(allPaths))):
+            return True
+        else:
+            return False
+        
     def add_child_route(self, child_object):
         for route in self.routing_config['routes']:
             if route['path'] == child_object['parentPath']:

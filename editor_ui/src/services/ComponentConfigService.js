@@ -43,15 +43,21 @@ class ComponentConfigService {
     async addRoute(routeObj) {
         console.log(routeObj)
         if (routeObj.path && (routeObj.component || routeObj.redirectTo) ) {
-            const response = await (await fetch(`${this.serverURL}/editor/add-route/` + this.projectName + "/",
+            const response = await fetch(`${this.serverURL}/editor/add-route/` + this.projectName + "/",
                 { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify( routeObj ) }
-            )).json()
+            )
             console.log(response)
-            this.dispatch(setRouterConfig(response))
+            const jsonData = await response.json();
+            console.log(response.status);
+            console.log(jsonData);
+            if (response.status === 200) {
+                this.dispatch(setRouterConfig(jsonData));
+            }
+            return { body: jsonData , status: response.status}
         }
     }
 
-    async addAllRoutes(allRoutes) {
+    async saveAllRoutes(allRoutes) {
         console.log(allRoutes);
         const response = await fetch(`${this.serverURL}/editor/add-all-routes/` + this.projectName + "/",
             { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ allRoutes }) 
@@ -83,5 +89,3 @@ class ComponentConfigService {
         return { body: response , status: resPromise.status}
     }
 }
-
-export default ComponentConfigService

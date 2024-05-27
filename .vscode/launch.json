@@ -9,6 +9,7 @@
       "type": "python",
       "request": "launch",
       "program": "breeze/manage.py",
+      // "program": "/home/jap/Documents/Breeze/breezeui/breeze/manage.py",
       "args": ["runserver"],
       "django": true,
       "justMyCode": true

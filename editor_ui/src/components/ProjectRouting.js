@@ -1,58 +1,64 @@
-import { useEffect, useRef, useState } from "react";
-import { ButtonGroup, Button } from "react-bootstrap";
+import { useState, useMemo, useEffect } from "react";
+import { ButtonGroup, Button, InputGroup, Dropdown, DropdownButton } from "react-bootstrap";
 import DeleteIcon from "../assets/icons/delete-trash.svg";
 import EditIcon from "../assets/icons/edit-icon.svg";
 import ViewIcon from "../assets/icons/view-eye.svg";
-import { Link } from "react-router-dom";
-import ProjectRouteModal from "./ProjectRouteModal";
-import { useSelector } from "react-redux";
-import ProjectRouteDetails from "./ProjectRouteDetails";
+import ChildRoute from "../assets/icons/child-route-96.png"
+import { Link, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { FloatingLabel, Form } from "react-bootstrap";
+import Multiselect from "multiselect-react-dropdown";
+import ComponentConfigService from "../services/ComponentConfigService"
 import "../CSS/ProjectRouteDetails.css";
 
 export default function ProjectRouting() {
-  // const [routes, setRoutes] = useState([
-  //   { path: "/", component: "Main" },
-  //   { path: "/r1", component: "GeneralSettings" ,
-  //     childRoutes: [{ path: "/r3", component: "newSettings" }]
-  //   },
-  //   { path: "/r2", redirectTo: "https://reactrouter.com/en/main/route/route" }
-  // ]);
+  
+  // check placing multiple routes in the table and their scrolling 
+  // add toggler to see all route including child routes
+  // add the hydrate and error element in the backend
+  // apply search functionality, try to do it from backend
+  // update the addRoute and addChildRoute API such that it only changes the affected route
+  // give unique id to each and route object and create updateRoute API
 
-
-  // for off-canvas
+  const [currentOffCanvasRoute, setCurrentOffCanvasRoute] = useState(''); 
+  const [displayRoute, setDisplayRoute] = useState(''); 
+  const [selectedChildRoute, setSelectedChildRoute] = useState(''); 
+  const [childRouteOptions, setChildRouteOptions] = useState('');
+  const [parentPath, setParentPath] = useState('parent path');
   const [isRouteWithAComponent, setIsRouteWithAComponent] = useState(true);
-  const [show, setShow] = useState(false);
-  const [addRouteModalShow, setAddRouteModalShow] = useState(false);
-  const [routeObj, setRouteObj] = useState();
-  const [routeMode, setRouteMode] = useState();
+  const [routeMode, setRouteMode] = useState('');
   const [searchedRoute, setSearchedRoute] = useState("");
   const [showAllRouteObj, setShowAllRouteObj] = useState(false);
-  const saveRouteRefs = useRef({});
-  const setSaveRouteRef = (name, refs) => {
-    saveRouteRefs.current[name] = refs;
-  };
-  const callChildFunc = (compName, funcName) => {
-    if (
-      saveRouteRefs.current[compName] &&
-      saveRouteRefs.current[compName][funcName]
-    ) {
-      saveRouteRefs.current[compName][funcName]();
-    }
-  };
-  // const saveAllRouteChanges = () => {
-
-  // };
-  const handleShow = () => setShow(true);
-  const handleClose = () => {
-    setRouteMode("");
-    setShow(false);
-  };
-  const onSubmit = (data) => {
-    console.log(data);
-  };
-
+  const [showSelectedRouteObj, setShowSelectedRouteObj] = useState({});
+  const { projectName } = useParams();
+  const dispatch = useDispatch();
+  const configService = useMemo(() => {
+    if (projectName) return new ComponentConfigService(projectName, dispatch);
+  }, [projectName, dispatch]);
   
+  const [selectedProps, setSelectedProps] = useState('');
+  const optionalRouteProps = [
+    {name: 'Action'},
+    {name: 'Loader'},
+    {name: 'Lazy'},
+    {name: 'ShouldRevalidate'},
+    {name: 'ErrorElement'},
+    {name: 'HydrateElement'},
+  ]
+
+  const onSelect = (selectedList, selectedItem) => {
+    console.log(selectedList);
+    console.log(selectedItem);
+    setShowSelectedRouteObj({...showSelectedRouteObj, [selectedItem['name']] : true});
+    setSelectedProps(selectedList);
+  }
+
+  const onRemove = (selectedList, selectedItem) => {
+    console.log(selectedList);
+    setShowSelectedRouteObj({...showSelectedRouteObj, [selectedItem['name']] : false});
+    setSelectedProps(selectedList);
+  }
+
   const getFunctionFromConfig = (allRoutes) => {
     return allRoutes.map((route) => {
       let routeObjImplementationProp = {};
@@ -61,17 +67,15 @@ export default function ProjectRouting() {
         // prop[1] is its value i.e. the implementation object
         if (prop[1]?.implementation !== undefined && prop[1]?.implementation !== null) {
           let parameters = "";
-          let params = prop[1].implementation.parameters.list.map(
-            (param) => param["name"]
-          );
+          let params = prop[1].implementation.parameters.list.map((param) => param["name"]);
           if (prop[1].implementation.parameters.destructured) {
             parameters = `{${params.join()}}`;
           } else {
             parameters = `${params.join()}`;
           }
           routeObjImplementationProp[prop[0]] = `${
-            prop[1].implementation.isAsync ? "async" : " "
-          }  (${parameters}) => { ${prop[1].implementation.body} }`;
+            prop[1].implementation.isAsync ? "async " : ""
+          }(${parameters}) => { ${prop[1].implementation.body.trim()} }`;
         }
 
         if (prop[0] === 'childRoutes') {
@@ -84,15 +88,9 @@ export default function ProjectRouting() {
     });
   };
 
-
   const routerConfig = useSelector((state) => state.routerConfig);
   const [routes, setRoutes] = useState(getFunctionFromConfig(routerConfig.routes));
-
-  function handleAllRoutePropsModal(routeObj, routeMode) {
-    setAddRouteModalShow(true)
-    setRouteObj(routeObj);
-    setRouteMode(routeMode);
-  }
+  const [allFirstLayerPaths, setAllFirstLayerPaths] = useState([]);
 
   const displaySerchedRoute = (value) => {
     console.log(searchedRoute);
@@ -101,24 +99,112 @@ export default function ProjectRouting() {
     console.log(searchedRoute);
   };
 
-  function clearSearchValue() {
-    setSearchedRoute("");
-  } 
+  const handleRouteOffCanvas = (route, mode) => {
+    setDisplayRoute('');
+    setSelectedChildRoute('');
+    setIsRouteWithAComponent(true);
+    setShowAllRouteObj(false);
+    setCurrentOffCanvasRoute(route);
+    setDisplayRoute(route)
+    setRouteMode(mode);
+    if (mode === 'childView') {
+      setChildRouteOptions(route?.childRoutes ? route.childRoutes : []);
+      setDisplayRoute('')
+      setSelectedChildRoute('');
+    }
+  }
 
-  // const handleEdit = async (css_name) => {
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8000/editor/get-css-file/${css_name}/`
-  //     );
-  //     const data = await response.json();
-  //     setModalMode("edit");
-  //     setInitialData(data);
-  //     setShowModal(true);
-  //   } catch (error) {
-  //     setToastMessage("An error occurred while trying to edit the file.");
-  //     setShowToast(true);
-  //   }
-  // };
+  const addNewRoute = () => {
+    setCurrentOffCanvasRoute('');
+    setDisplayRoute('');
+    setIsRouteWithAComponent(true);
+    setShowAllRouteObj(false);
+    setRouteMode('Add');
+    setSelectedChildRoute('');
+    setParentPath('parent path')
+    setAllFirstLayerPaths(['none', ...routes.map(route =>  route.path)]);
+  }
+
+  const handleRouteObjectChange = (route, prop, event) => {
+    if (routeMode !== 'View') {
+      (setDisplayRoute({...route, [prop] : event.target.value}))
+    }
+  }
+
+  const addChildroute = () => {
+    setSelectedChildRoute(''); 
+    setDisplayRoute('');
+  }
+
+  const saveRoute = async () => {
+
+    if (displayRoute?.path) {
+      if (displayRoute.path[0] !== '/') {
+        displayRoute.path = '/' + displayRoute.path;
+      }
+    }
+
+    if (!displayRoute.path || !(displayRoute.component || displayRoute.redirectTo) ) {
+      // add a toaster
+      console.log('Incomplete Route Details');
+      return;
+    }
+
+    if (routeMode === 'Edit' || routeMode === 'Add') {
+      if (routeMode === 'Add') {
+        let res = await configService.addRoute(displayRoute);
+        if (res.status === 200) {
+          let updatedRoutes = getFunctionFromConfig(res.body.routes);
+          setRoutes(updatedRoutes);
+          setDisplayRoute('');
+        } else {
+          // add toaster
+          console.log(res.body.error);
+        }
+
+      } else if (routeMode === 'Edit') {
+        // using the saveAllRoutes API until the updateRoute API is made
+        let updatedRoutes = routes.map((route) => {
+          if (route.path === currentOffCanvasRoute.path ) {
+            route = displayRoute;
+          }
+          return route;
+        });
+        let res = await configService.saveAllRoutes(updatedRoutes);
+        if (res.status === 200) {
+          let updatedRoutes = getFunctionFromConfig(res.body.routes);
+          setRoutes(updatedRoutes);
+          setDisplayRoute('');
+        } else {
+          // add toaster
+          console.log(res.body.error);
+        }
+      }
+
+    } else if (routeMode === 'childView') {
+      // if selectedChildRoute is present and childView mode then save 
+      // 1. the edited displayRoute by replacing it with the selectedChildRoute 
+      // present in currentOffcanvas route's childRoutes array and then add the currentOffcanvas route 
+      // with the add API
+      // 2. add the new child route by saving the displayRoute object with addroute API
+      // by appending displayRoute Object to the currentOffcanvasRoute object's childRoutes array
+
+
+
+      console.log(displayRoute);
+      console.log(selectedChildRoute);
+      console.log(currentOffCanvasRoute);
+    }
+
+    // use setRoutes when get the successful API response to update the routes in the table
+    // and then clear the offcanvas form and emit the toaster
+  }
+
+  useEffect(() => {
+    // routes.map((route) => {
+
+    // });
+  }, []);
 
   return (
     <div className="container-fluid text-white hide-scrollbar">
@@ -126,15 +212,6 @@ export default function ProjectRouting() {
         <h3 className="ms-2">Project Routes:</h3>
       </div>
       <div className="d-flex justify-content-end mt-1 mb-3 mx-4">
-        <div
-          className="btn btn-info me-2"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#offcanvasRight"
-          aria-controls="offcanvasRight"
-          onClick={() => displaySerchedRoute('')}
-        >
-          Add Route offcanvas
-        </div>
         <div
           data-bs-theme="dark"
           className="me-2"
@@ -151,17 +228,12 @@ export default function ProjectRouting() {
         </div>
         <button
           className="btn btn-primary me-2"
-          onClick={() => handleAllRoutePropsModal({}, "Add")}
+          data-bs-toggle="offcanvas"
+          data-bs-target="#offcanvasRight"
+          aria-controls="offcanvasRight"
+          onClick={() => addNewRoute()}
         >
           Add Route
-        </button>
-        <button
-          className="btn btn-success me-2"
-          onClick={() => {
-            callChildFunc("ProjectRouteDetails", "saveEditedRoutes");
-          }}
-        >
-          Save All Changes
         </button>
       </div>
 
@@ -173,8 +245,14 @@ export default function ProjectRouting() {
         id="offcanvasRight"
         aria-labelledby="offcanvasRightLabel"
       >
-        <div className="offcanvas-header">
-          <h5 id="offcanvasRightLabel">Add Route</h5>
+        <div className="offcanvas-header mx-1">
+          <h5 id="offcanvasRightLabel">
+            {currentOffCanvasRoute
+              ? routeMode === "childView"
+                ? "Child Routes"
+                : `${routeMode} Route`
+              : "Add Route or Child Route"}
+          </h5>
           <button
             type="button"
             className="btn-close text-reset"
@@ -183,27 +261,111 @@ export default function ProjectRouting() {
           ></button>
         </div>
         <div className="offcanvas-body pdt">
+          {routeMode === "childView" && (
+            <div className="">
+              <div className="mb-3 mx-1">
+                {childRouteOptions && (
+                  <div className="d-flex ">
+                    <div className="flex-grow-1">
+                      <Form.Label className="ms-1" style={{color: "#ae9959"}}>
+                        Select To View/Edit Child Route
+                      </Form.Label>
+                      <Form.Select
+                        aria-label="Default select example"
+                        className={`${routeMode === "childView" ? "" : "mb-3"} `}
+                        onChange={(e) => {
+                          if (e.target.value !== "") {
+                            let macthedRoute = childRouteOptions.find(
+                              (route) => route.path === e.target.value
+                            );
+                            setSelectedChildRoute(macthedRoute);
+                            setDisplayRoute(macthedRoute);
+                          } else {
+                            setSelectedChildRoute("");
+                            setDisplayRoute("");
+                          }
+                        }}
+                        value={selectedChildRoute?.path || ""}
+                      >
+                        (<option value="">None</option>)
+                        {[
+                          ...new Set(childRouteOptions?.map((route) => route)),
+                        ].map(
+                          (route, index) =>
+                            route.path && (
+                              <option key={index} value={route.path}>
+                                {route.path +
+                                  " - " +
+                                  (route.component || route.redirectTo)}
+                              </option>
+                            )
+                        )}
+                      </Form.Select>
+                    </div>
+                    <div className={`${selectedChildRoute ? "" : "disableRouteButton"} btn btn-primary ms-3 newChildRouteButton`}>
+                      <div className="" onClick={() => addChildroute()}>Add New Route</div>
+                    </div>
+                  </div>
+                )}
+                {!childRouteOptions && (
+                  <input
+                    className="form-control"
+                    value="No child route present, add one!"
+                    disabled
+                  />
+                )}
+              </div>
+            </div>
+          )}
           <div className="mx-1 form-floating" aria-label="path-input">
-            {/* <input
-              className="form-control"
-              id="floatingInputPath"
-              placeholder="route path"
-            /> */}
-            <FloatingLabel controlId="floatingInputGrid-path" label="route path">
-              <Form.Control
-                type="text"
-                contentEditable={true}
-                className="mb-1"
-                style={{
-                  position: "relative",
-                  top: "18px",
-                  paddingBottom: "22px",
-                }}
-              />
-            </FloatingLabel>
+            <InputGroup className="">
+              {routeMode === "childView" && (
+                <InputGroup.Text className="mt-3 pb-3 pt-3" id="basic-addon1" title="parent path" role="button">
+                  {currentOffCanvasRoute.path}
+                </InputGroup.Text>
+              )}
+              {routeMode === "Add" && (
+                <DropdownButton
+                // variant="outline-secondary"
+                title={parentPath}
+                id="newRouteDropdown"
+                size="4"
+                className="mt-3 pb-3 pt-3 btn-secondary custom-parent-path-scroll"
+              >
+                <div className="custom-parent-path-scroll">
+                  {allFirstLayerPaths?.map(path => (
+                  <Dropdown.Item className="px-3" size="5" id="newRouteDropdownOptions" onClick={() => setParentPath(path)}>{path}</Dropdown.Item>
+                  ))}
+                </div>
+              </DropdownButton>
+              )}
+
+              <FloatingLabel
+                controlId="floatingInputGrid-path"
+                label="route path"
+              >
+                <Form.Control
+                  type="text"
+                  contentEditable={true}
+                  className={`${routeMode === "Add" ? 'mb-3' : 'mb-1'} py-1`}
+                  style={{
+                    position: "relative",
+                    top: (routeMode === "childView" || routeMode === "Add") ? "16px" : "18px",
+                    paddingBottom: "25px",
+                  }}
+                  value={displayRoute ? displayRoute.path : ""}
+                  onChange={(e) =>
+                    handleRouteObjectChange(displayRoute, "path", e)
+                  }
+                />
+              </FloatingLabel>
+            </InputGroup>
           </div>
-          <div className="mb-3 mt-4" aria-label="component-redirectTo radio-buttons">
-            <div className="d-flex mt-4 pt-3" aria-label="toggler">
+          <div
+            className="mb-3 mt-1"
+            aria-label="component-redirectTo radio-buttons"
+          >
+            <div className={`d-flex ${routeMode === "Add" ? 'mt-1' : 'mt-4'} pt-3`} aria-label="toggler">
               <div className="form-check mx-1">
                 <input
                   className="form-check-input"
@@ -236,79 +398,178 @@ export default function ProjectRouting() {
                 <select
                   className="form-select"
                   aria-label="Default select example"
+                  value={displayRoute.component || ""}
+                  onChange={(e) =>
+                    handleRouteObjectChange(displayRoute, "component", e)
+                  }
+                  disabled={routeMode === "View"}
                 >
-                  <option selected>Select A Component</option>
-                  <option value="0">None</option>
-                  <option value="1">Main</option>
-                  <option value="2">General</option>
+                  (<option value="">None</option>)
+                  {[...new Set(routes.map((route) => route.component))].map(
+                    (component, index) =>
+                      component && (
+                        <option key={index} value={component}>
+                          {component}
+                        </option>
+                      )
+                  )}
                 </select>
               )}
               {!isRouteWithAComponent && (
-                <input className="form-control" placeholder="redirectTo" />
+                <input
+                  className="form-control"
+                  placeholder="redirectTo"
+                  value={displayRoute.redirectTo || ""}
+                  onChange={(e) =>
+                    handleRouteObjectChange(displayRoute, "redirectTo", e)
+                  }
+                  disabled={routeMode === "View"}
+                />
               )}
             </div>
           </div>
-          <div className="form-check mx-1 my-4">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              value=""
-              id="flexCheckDisabled"
-              checked={showAllRouteObj}
-              onChange={() => setShowAllRouteObj(!showAllRouteObj)}
+          <div className=" mx-1 my-2">
+            
+            <Multiselect
+              className="form-control p-0 text-white"
+              options={optionalRouteProps}
+              selectedValues={selectedProps}
+              onSelect={onSelect}
+              onRemove={onRemove}
+              displayValue="name"
+              showCheckbox={true}
+              placeholder="Other Route Objects"
+              style={{
+                option: {
+                  backgroundColor: "#212529",
+                  padding: ".5rem 3rem .5rem .5rem",
+                  cursor: "pointer",
+                }, 
+                searchBox: { border: "none", "border-bottom": "1px solid blue", "border-radius": "0px" }  
+              }}
             />
-            <label class="form-check-label" for="flexCheckDisabled">
-              See All Route Props
-            </label>
           </div>
-          {showAllRouteObj && (
+          {!showAllRouteObj && (
             <div>
-              {isRouteWithAComponent && (
+              {/* {isRouteWithAComponent && ( */}
+              {true && (
                 <div className="d-flex">
-                  <div className="mx-1">
+                  { showSelectedRouteObj.HydrateElement && (<div className="mx-1">
+                    <label className="ms-2">Hydrate Element</label>
                     <select
                       className="form-select"
                       aria-label="Default select example"
+                      value={displayRoute.hydrateComponent || ""}
+                      onChange={(e) =>
+                        handleRouteObjectChange(
+                          displayRoute,
+                          "hydrateComponent",
+                          e
+                        )
+                      }
+                      disabled={routeMode === "View"}
                     >
-                      <option selected>Select Hydrate Element</option>
-                      <option value="0">None</option>
-                      <option value="1">Main</option>
-                      <option value="2">General</option>
+                      (<option value="">None</option>)
+                      {[...new Set(routes.map((route) => route.component))].map(
+                        (component, index) =>
+                          component && (
+                            <option key={index} value={component}>
+                              {component}
+                            </option>
+                          )
+                      )}
                     </select>
-                  </div>
-                  <div className="mx-1">
+                  </div>)}
+                  { showSelectedRouteObj.ErrorElement && (<div className="mx-1">
+                    <label className="ms-2">Error Element</label>
                     <select
                       className="form-select"
                       aria-label="Default select example"
+                      value={displayRoute.errorElement || ""}
+                      onChange={(e) =>
+                        handleRouteObjectChange(displayRoute, "errorElement", e)
+                      }
+                      disabled={routeMode === "View"}
                     >
-                      <option selected>Select Error Element</option>
-                      <option value="0">None</option>
-                      <option value="1">Main</option>
-                      <option value="2">General</option>
+                      (<option value="">None</option>)
+                      {[...new Set(routes.map((route) => route.component))].map(
+                        (component, index) =>
+                          component && (
+                            <option key={index} value={component}>
+                              {component}
+                            </option>
+                          )
+                      )}
                     </select>
-                  </div>
+                  </div>)}
                 </div>
               )}
 
+              {showSelectedRouteObj.Action && (<div className="my-3">
+                <div>
+                  <label className="ms-2">Action</label>
+                </div>
+                <textarea
+                  className="form-control mx-1 mb-1"
+                  placeholder="add action callback"
+                  value={displayRoute.action || ""}
+                  onChange={(e) =>
+                    handleRouteObjectChange(displayRoute, "action", e)
+                  }
+                  rows={3}
+                />
+              </div>)}
+              {showSelectedRouteObj.Loader && (<div className="my-3">
+                <div>
+                  <label className="ms-2">Loader</label>
+                </div>
               <textarea
-                className="form-control mx-1 my-3"
+                className="form-control mx-1 mt-1 mb-3"
                 placeholder="add loader callback"
+                value={displayRoute.loader || ""}
+                onChange={(e) =>
+                  handleRouteObjectChange(displayRoute, "loader", e)
+                }
+                rows={3}
               />
+              </div>)}
+              {showSelectedRouteObj.Lazy && (<div className="my-3">
+                <div>
+                  <label className="ms-2">Lazy</label>
+                </div>
               <textarea
-                className="form-control mx-1 my-3"
+                className="form-control mx-1 mt-1 mb-3"
                 placeholder="add lazy callback"
+                value={displayRoute.lazy || ""}
+                onChange={(e) =>
+                  handleRouteObjectChange(displayRoute, "lazy", e)
+                }
+                rows={3}
               />
+              </div>)}
+              {showSelectedRouteObj.ShouldRevalidate && (<div className="my-3">
+                <div>
+                  <label className="ms-2">ShouldRevalidate</label>
+                </div>
               <textarea
-                className="form-control mx-1 my-3"
+                className="form-control mx-1 mt-1 mb-3"
                 placeholder="add shouldRevalidate callback"
+                value={displayRoute.shouldRevalidate || ""}
+                onChange={(e) =>
+                  handleRouteObjectChange(displayRoute, "shouldRevalidate", e)
+                }
+                rows={3}
               />
-              <textarea
-                className="form-control mx-1 my-3"
-                placeholder="add action callback"
-              />
+              </div>)}
+
             </div>
           )}
-          <div className="btn btn-success mt-3 mx-1">Save Route</div>
+          {routeMode !== "View" && (
+            <div className="my-4">
+              <div className={`${displayRoute ? '' : 'disableRouteButton'} btn btn-success mx-1`} onClick={() => saveRoute()}>Save Changes</div>
+              { selectedChildRoute && (<div className={`${displayRoute ? '' : 'disableRouteButton'} btn btn-danger mx-1`}>Delete Route</div>)}
+            </div>
+          )}
         </div>
       </div>
 
@@ -318,13 +579,8 @@ export default function ProjectRouting() {
             <tr className="text-center">
               <th>Path</th>
               <th>Component</th>
-              <th>All Route Props</th>
-              <th
-                style={{ color: "transparent", userSelect: "none" }}
-                colSpan={3}
-              >
-                options
-              </th>
+              <th>Child Routes</th>
+              <th colSpan={3}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -349,28 +605,36 @@ export default function ProjectRouting() {
                 <td>
                   <Button
                     variant="dark"
-                    onClick={() => handleAllRoutePropsModal(route, "View")}
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasRight"
+                    onClick={() => handleRouteOffCanvas(route, "childView")}
                     title="View"
                   >
-                    <img src={ViewIcon} alt="" height={24} className="mx-2" />
+                    <img src={ChildRoute} alt="" height={24} className="" />
                   </Button>
                 </td>
                 <td>
                   <ButtonGroup className="d-flex justify-content-center">
                     <Button
                       variant="dark"
-                      onClick={() => handleAllRoutePropsModal(route, "Edit")}
+                      data-bs-toggle="offcanvas"
+                      data-bs-target="#offcanvasRight"
+                      onClick={() => handleRouteOffCanvas(route, "Edit")}
                       title="Edit"
                     >
-                      <img src={EditIcon} alt="" height={24} className="mx-2" />
+                      <img src={EditIcon} alt="" height={24} className="" />
+                    </Button>
+                    <Button
+                      variant="dark"
+                      data-bs-toggle="offcanvas"
+                      data-bs-target="#offcanvasRight"
+                      onClick={() => handleRouteOffCanvas(route, "View")}
+                      title="View"
+                    >
+                      <img src={ViewIcon} alt="" height={24} className="" />
                     </Button>
                     <Button variant="dark" title="Delete">
-                      <img
-                        src={DeleteIcon}
-                        alt=""
-                        height={24}
-                        className="mx-2"
-                      />
+                      <img src={DeleteIcon} alt="" height={24} className="" />
                     </Button>
                   </ButtonGroup>
                 </td>
@@ -379,35 +643,6 @@ export default function ProjectRouting() {
           </tbody>
         </table>
       </div>
-      <div>
-        <ProjectRouteDetails
-          routeMode={routeMode}
-          routeData={routeObj}
-          show={show}
-          onHide={handleClose}
-          onSubmit={onSubmit}
-          routes={routes}
-          setProjectRoutes={setRoutes}
-          compName="ProjectRouteDetails"
-          setSaveRouteRef={setSaveRouteRef}
-          searchedRoute={searchedRoute}
-          setSearchedRoute={setSearchedRoute}
-          clearSearchValue={clearSearchValue}
-          addRouteModalShow={addRouteModalShow}
-          setAddRouteModalShow={setAddRouteModalShow}
-          getFunctionFromConfig={getFunctionFromConfig}
-        />
-      </div>
-      {/* <div>
-        <ProjectRouteModal
-          routeMode={routeMode}
-          routeData={routeObj}
-          show={show}
-          onHide={handleClose}
-          onSubmit={onSubmit}
-          routes={routes}
-        />
-      </div> */}
     </div>
   );
 }

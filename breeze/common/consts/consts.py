@@ -10,6 +10,7 @@ CONFIG_FILES_PATH = {
 
 }
 
-APP_CONFIG_PATH = "configurations"
+# APP_CONFIG_PATH = "configurations"
+APP_CONFIG_PATH = "/home/jap/Documents/Breeze/breezeui/configurations"
 
 NEW_LINE_CHAR = "\n"

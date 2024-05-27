@@ -1,0 +1,182 @@
+// import React, { useState, useEffect } from "react";
+// import { fetchIntermediate } from "../services/IntermediatesService";
+// import { Table, Pagination } from "react-bootstrap";
+// import DeleteIcon from "../assets/icons/delete.svg";
+// import EditIcon from "../assets/icons/edit.svg";
+// import { current } from "@reduxjs/toolkit";
+// import Custom from "./Custom";
+// export default function ServiceLists({ apis, tagsList, onClose,}) {
+//   const [fetchedIntermediates, setFetchedIntermediates] = useState([]);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const itemsPerPage = 5;
+//   const [selectedApi, setSelectedApi] = useState(null);
+//   const [formData, setFormData] = useState([]);
+//   // const { data, filename } = apis;
+//   useEffect(() => {
+
+//     getServices();
+//     if (apis && apis.data) {
+//       setFormData(
+//         Object.entries(apis.data || {}).map(([key, value]) => ({
+//           apis: value,
+//           filename: `${value.tags[0]}Service`,
+//         }))
+//       );
+//     }
+//   }, [apis]);
+
+//   const handleSubmit = (index) => (e) => {
+//     e.preventDefault();
+//     console.log("Form submitted for API at index:", index);
+//     // console.log("Updated data:", formData[index]);
+//   };
+//   const getServices = async () => {
+//     try {
+//       const result = await fetchIntermediate("creator");
+//       setFetchedIntermediates(result.files_with_apis);
+//     } catch (error) {
+//       console.error("Error fetching intermediates:", error);
+//     }
+//   };
+//   const handleClose = () => {
+//     setSelectedApi("");
+//     getServices()
+//     if (onClose) {
+//       onClose();
+//     }
+//   };
+//   console.log("FORM DATA ", formData);
+//   // Calculate total count of APIs
+//   const totalCount = fetchedIntermediates.reduce(
+//     (total, current) => total + current.apis.length,
+//     0 // inital value of 0 for total count
+//   );
+//   // Logic to get current items based on pagination
+//   const indexOfLastItem = currentPage * itemsPerPage;
+//   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+//   const currentItems =
+//     fetchedIntermediates &&
+//     fetchedIntermediates
+//       .flatMap((service) => service.apis)
+//       .slice(indexOfFirstItem, indexOfLastItem);
+//   // Change page
+//   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+//   // console.log(fetchedIntermediates, "fetchedIntermediate");
+//   const handleEditClick = (api) => {
+//     setSelectedApi(api); //set the selected API in the state
+//   };
+//   return (
+//     <div className="m-3">
+//      { fetchedIntermediates && ( 
+//      <>
+//      <Table striped bordered hover variant="dark">
+//         <thead>
+//           <tr>
+//             <th>Function Name</th>
+//             <th>Service Name</th>
+//             <th>Actions</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {fetchedIntermediates
+//             ?.flatMap((service) => service.apis)
+//             ?.slice(indexOfFirstItem, indexOfLastItem)
+//             ?.map((api, index) => {
+//               const service = fetchedIntermediates.find((s) =>
+//                 s.apis.some((a) => a.operation_id === api.operation_id)
+//               );
+//               return (
+//                 <tr key={`${api.operation_id}-${index}`}>
+//                   <td>{api.operation_id}</td>
+//                   <td>{service?.filename}</td>
+//                   <td>
+//                     <img
+//                       className="m-1"
+//                       src={EditIcon}
+//                       alt="Edit"
+//                       style={{
+//                         cursor: "pointer",
+//                         width: "20px",
+//                         height: "20px",
+//                       }}
+//                       onClick={() => handleEditClick(api)}
+//                     />
+//                     <img
+//                       src={DeleteIcon}
+//                       alt="Delete"
+//                       style={{
+//                         cursor: "pointer",
+//                         width: "20px",
+//                         height: "20px",
+//                       }}
+//                     />
+//                   </td>
+//                 </tr>
+//               );
+//             })}
+//         </tbody>
+//       </Table>
+//        <Pagination>
+//        {Array.from(
+//          { length: Math.ceil(totalCount / itemsPerPage) },
+//          (_, i) => (
+//            <Pagination.Item
+//              key={i}
+//              active={i + 1 === currentPage}
+//              onClick={() => paginate(i + 1)}
+//            >
+//              {i + 1}
+//            </Pagination.Item>
+//          )
+//        )}
+//      </Pagination>
+//      </>
+//      )}
+//       {/* { serviceMode === "Upload"&& formData && formData.length > 0 && (
+//         <Table striped bordered hover variant="dark" className="mt-3">
+//           <thead>
+//             <tr>
+//               <th>Function Name</th>
+//               <th>File Name</th>
+//               <th>Actions</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {formData.map((item, index) => (
+//               <tr key={index}>
+//                 <td>{item.apis.operation_id}</td>
+//                 <td>{item.filename}</td>
+//                 <td>
+//                   <img
+//                     className="m-1"
+//                     src={EditIcon}
+//                     alt="Edit"
+//                     style={{
+//                       cursor: "pointer",
+//                       width: "20px",
+//                       height: "20px",
+//                     }}
+//                     onClick={() => handleEditClick(item.apis)}
+//                   />
+//                   <img
+//                     src={DeleteIcon}
+//                     alt="Delete"
+//                     style={{
+//                       cursor: "pointer",
+//                       width: "20px",
+//                       height: "20px",
+//                     }}
+//                   />
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </Table>
+//       )} */}
+//       {selectedApi && (
+//         <Custom dummyData={selectedApi} onClose={handleClose} tagsList={["tag1", "tag2"]} />
+//       )}
+     
+//     </div>
+//   );
+// }

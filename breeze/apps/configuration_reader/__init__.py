@@ -44,7 +44,6 @@ def prepare_config_map():
         # Prepare config map for custom project components
         for project_config_dir in all_projects_path:
             project_config = read_config_file(project_config_dir, CONFIG_FILES_PATH['APP_CONFIG']) 
-
             comp_config = prepare_comp_config(project_config_dir)
             COMPONENTS_CONFIG["CUSTOM"][project_config['name']] = comp_config
 
@@ -97,50 +96,141 @@ def prepare_html_comp_config():
 
     html_elements = [
         "DOCTYPE html",
-        "div",
-        "html",
+        # Metadata:
+        "base",
         "head",
-        "title",
-        "meta",
         "link",
-        "body",
-        # Text Elements
+        "meta",
+        "style",
+        "title",
+
+        # Content Sectioning:
+        "article",
+        "aside",
+        "footer",
+        "header",
+        "main",
+        "nav",
+        "section",
+
+        # Text Content:
+        "blockquote",
+        "dd",
+        "div",
+        "dl",
+        "dt",
+        "figcaption",
+        "figure",
+        "hr",
         "h1",
         "h2",
         "h3",
         "h4",
         "h5",
         "h6",
-        "p",
-        "span",
-        "a",
-        "strong",
-        "em",
-        "br",
-        "hr",
-        # Lists
-        "ul",
         "li",
-        "dl",
-        "dt",
-        "dd",
-        # Tables
+        "ol",
+        "p",
+        "pre",
+        "ul",
+
+        # Inline Text Semantics:
+        "a",
+        "abbr",
+        "b",
+        "bdi",
+        "bdo",
+        "br",
+        "cite",
+        "code",
+        "data",
+        "dfn",
+        "em",
+        "i",
+        "kbd",
+        "mark",
+        "q",
+        "rp",
+        "rt",
+        "rtc",
+        "ruby",
+        "s",
+        "samp",
+        "small",
+        "span",
+        "strong",
+        "sub",
+        "sup",
+        "time",
+        "u",
+        "var",
+        "wbr",
+
+        # Image and Multimedia:
+        "area",
+        "audio",
+        "img",
+        "map",
+        "track",
+        "video",
+
+        # Embedded Content:
+        "embed",
+        "iframe",
+        "object",
+        "param",
+        "picture",
+        "source",
+
+        # Scripting:
+        "canvas",
+        "noscript",
+        "script",
+
+        # Demarcating Edits:
+        "del",
+        "ins",
+
+        # Table Content:
+        "caption",
+        "col",
+        "colgroup",
         "table",
-        "tr",
+        "tbody",
         "td",
+        "tfoot",
         "th",
-        # Forms
+        "thead",
+        "tr",
+
+        # Forms:
+        "button",
+        "datalist",
+        "fieldset",
         "form",
         "input",
-        "textarea",
-        "button",
-        "select",
-        "option",
         "label",
-        "fieldset",
         "legend",
-        "body",
-        "img"
+        "meter",
+        "optgroup",
+        "option",
+        "output",
+        "progress",
+        "select",
+        "textarea",
+
+        # Interactive Elements:
+        "details",
+        "dialog",
+        "menu",
+        "menuitem",
+        "summary",
+
+        # Web Components:
+        "content",
+        "element",
+        "shadow",
+        "template",
     ]
     
     html_elements = sorted(html_elements)
@@ -167,7 +257,7 @@ def read_components_configs_path(project_config_path):
 
 def prepare_comp_config(project_config_path):
     comp_config = read_config_file(project_config_path, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
-
+    print(comp_config,"comp_congif ")
     comp_paths = read_components_configs_path(project_config_path)
 
     for comp_path in comp_paths:

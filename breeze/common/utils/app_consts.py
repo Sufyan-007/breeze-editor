@@ -1,8 +1,14 @@
 # Path of directory where the configuration for projects are stored
-CONFIG_PATH = "configurations"
+# CONFIG_PATH = "configurations"
 
 # Path of directory where all the config of third party libraries are stored or you want to store
-THIRD_PARTY_CONFIG_PATH = "third_party_configs"
+# THIRD_PARTY_CONFIG_PATH = "third_party_configs"
+THIRD_PARTY_CONFIG_PATH = "/home/jap/Documents/Breeze/breezeui/third_party_configs"
+
+CONFIG_PATH = "/home/jap/Documents/Breeze/breezeui/configurations"
+
+# should be used after confirming th genration path status
+PROJECT_GENERATION_PATH = "/home/jap/Documents/Breeze/breezeui/generated_projects/"
 
 DEFAULT_THIRD_PARTY_CONFIG_FOLDER_NAME = "third_party_configs"
 
@@ -24,6 +30,6 @@ NEW_LINE_CHAR = "\n"
 THIRD_PARTY_DIR = "/home/raj/Desktop/bridge/npm_libraries/react_bootstrap/react-bootstrap/src"
 
 # Path of file where the javascript parser is stored
-JS_FILE_PATH = '/home/raj/Desktop/bridge/breeze_ssh/breezeui/third_party_config_generator/index.js'
+JS_FILE_PATH = 'third_party_config_generator/index.js'
 JS_FUNCTION_NAME = 'generate_config'
 
