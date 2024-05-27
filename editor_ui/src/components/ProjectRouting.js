@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ButtonGroup, Button, InputGroup, Dropdown, DropdownButton } from "react-bootstrap";
 import DeleteIcon from "../assets/icons/delete-trash.svg";
 import EditIcon from "../assets/icons/edit-icon.svg";
@@ -8,7 +8,8 @@ import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FloatingLabel, Form } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
-import ComponentConfigService from "../services/ComponentConfigService"
+import { addRoute, saveAllRoutes} from "../services/ComponentConfigService"
+import { setRouterConfig } from '../reducers/RouterConfigReducer';
 import "../CSS/ProjectRouteDetails.css";
 
 export default function ProjectRouting() {
@@ -32,9 +33,6 @@ export default function ProjectRouting() {
   const [showSelectedRouteObj, setShowSelectedRouteObj] = useState({});
   const { projectName } = useParams();
   const dispatch = useDispatch();
-  const configService = useMemo(() => {
-    if (projectName) return new ComponentConfigService(projectName, dispatch);
-  }, [projectName, dispatch]);
   
   const [selectedProps, setSelectedProps] = useState('');
   const optionalRouteProps = [
@@ -108,7 +106,8 @@ export default function ProjectRouting() {
     setDisplayRoute(route)
     setRouteMode(mode);
     if (mode === 'childView') {
-      setChildRouteOptions(route?.childRoutes ? route.childRoutes : []);
+      console.log(route.childRoutes);
+      setChildRouteOptions(route?.childRoutes ? route.childRoutes : '');
       setDisplayRoute('')
       setSelectedChildRoute('');
     }
@@ -152,8 +151,9 @@ export default function ProjectRouting() {
 
     if (routeMode === 'Edit' || routeMode === 'Add') {
       if (routeMode === 'Add') {
-        let res = await configService.addRoute(displayRoute);
+        let res = await addRoute(displayRoute, projectName);
         if (res.status === 200) {
+          dispatch(setRouterConfig(res.body));
           let updatedRoutes = getFunctionFromConfig(res.body.routes);
           setRoutes(updatedRoutes);
           setDisplayRoute('');
@@ -170,8 +170,9 @@ export default function ProjectRouting() {
           }
           return route;
         });
-        let res = await configService.saveAllRoutes(updatedRoutes);
+        let res = await saveAllRoutes(updatedRoutes, projectName);
         if (res.status === 200) {
+          dispatch(setRouterConfig(res.body));
           let updatedRoutes = getFunctionFromConfig(res.body.routes);
           setRoutes(updatedRoutes);
           setDisplayRoute('');
@@ -307,7 +308,7 @@ export default function ProjectRouting() {
                     </div>
                   </div>
                 )}
-                {!childRouteOptions && (
+                {childRouteOptions === '' && (
                   <input
                     className="form-control"
                     value="No child route present, add one!"

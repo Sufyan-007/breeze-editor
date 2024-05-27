@@ -207,7 +207,7 @@ class AppEditor:
             route_obj['path'] = "/"+route_obj.get('path')        
         if route_obj.get('component'):
             route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
-        elif route_obj['redirectTo']:
+        elif route_obj.get('redirectTo'):
             route_obj.pop('component') if route_obj.get('component') else ''
         for i,routes in enumerate(self.routing_config["routes"]):
             if routes["path"] ==route_obj['path']:
@@ -262,7 +262,7 @@ class AppEditor:
                     formatted_code = format_by_prettier(react_code)
                     component_file.write(formatted_code)
                 return {'case': True, 'res' : self.routing_config}
-        return {'case' : False, 'res' : 'No matching rounds were present'}
+        return {'case' : False, 'res' : 'No matching routes were present'}
         
     def write_reducers(self):
         reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)
