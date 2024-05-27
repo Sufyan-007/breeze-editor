@@ -5,11 +5,13 @@ import EditIcon from "../assets/icons/edit-icon.svg";
 import ViewIcon from "../assets/icons/view-eye.svg";
 import ChildRoute from "../assets/icons/child-route-96.png"
 import { Link, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useLoaderData } from "react-router";
 import { FloatingLabel, Form } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
 import { addRoute, saveAllRoutes} from "../services/ComponentConfigService"
 import { setRouterConfig } from '../reducers/RouterConfigReducer';
+import { getRouterConfig } from '../services/ConfigService';
 import "../CSS/ProjectRouteDetails.css";
 
 export default function ProjectRouting() {
@@ -33,7 +35,7 @@ export default function ProjectRouting() {
   const [showSelectedRouteObj, setShowSelectedRouteObj] = useState({});
   const { projectName } = useParams();
   const dispatch = useDispatch();
-  
+  const routerConfig = useLoaderData();
   const [selectedProps, setSelectedProps] = useState('');
   const optionalRouteProps = [
     {name: 'Action'},
@@ -58,7 +60,7 @@ export default function ProjectRouting() {
   }
 
   const getFunctionFromConfig = (allRoutes) => {
-    return allRoutes.map((route) => {
+    return allRoutes?.map((route) => {
       let routeObjImplementationProp = {};
       Object.entries(route).forEach((prop) => {
         // prop[0] is key like --> action, loader, lazy, ...
@@ -86,7 +88,6 @@ export default function ProjectRouting() {
     });
   };
 
-  const routerConfig = useSelector((state) => state.routerConfig);
   const [routes, setRoutes] = useState(getFunctionFromConfig(routerConfig.routes));
   const [allFirstLayerPaths, setAllFirstLayerPaths] = useState([]);
 
@@ -130,10 +131,10 @@ export default function ProjectRouting() {
     }
   }
 
-  const addChildroute = () => {
-    setSelectedChildRoute(''); 
-    setDisplayRoute('');
-  }
+  // const addChildroute = () => {
+  //   setSelectedChildRoute(''); 
+  //   setDisplayRoute('');
+  // }
 
   const saveRoute = async () => {
 
@@ -201,10 +202,18 @@ export default function ProjectRouting() {
     // and then clear the offcanvas form and emit the toaster
   }
 
-  useEffect(() => {
-    // routes.map((route) => {
+  const [activeTab, setActiveTab] = useState('#editChildRoute');
+  const handleTabClick = (e, tab) => {
+    e.preventDefault();
+    setActiveTab(tab);
+    if (tab === '#addNewChildRoute') {
+      setSelectedChildRoute(''); 
+      setDisplayRoute('');
+    }
+  };
 
-    // });
+  useEffect(() => {
+
   }, []);
 
   return (
@@ -240,7 +249,7 @@ export default function ProjectRouting() {
 
       {/* offcanvas add route obj */}
       <div
-        className="offcanvas offcanvas-end offcanvas-size-xl"
+        className="offcanvas offcanvas-end"
         data-bs-theme="dark"
         tabindex="-1"
         id="offcanvasRight"
@@ -250,7 +259,7 @@ export default function ProjectRouting() {
           <h5 id="offcanvasRightLabel">
             {currentOffCanvasRoute
               ? routeMode === "childView"
-                ? "Child Routes"
+                ? "Manage Child Routes"
                 : `${routeMode} Route`
               : "Add Route or Child Route"}
           </h5>
@@ -262,216 +271,161 @@ export default function ProjectRouting() {
           ></button>
         </div>
         <div className="offcanvas-body pdt">
-          {routeMode === "childView" && (
-            <div className="">
-              <div className="mb-3 mx-1">
-                {childRouteOptions && (
-                  <div className="d-flex ">
-                    <div className="flex-grow-1">
-                      <Form.Label className="ms-1" style={{color: "#ae9959"}}>
-                        Select To View/Edit Child Route
-                      </Form.Label>
-                      <Form.Select
-                        aria-label="Default select example"
-                        className={`${routeMode === "childView" ? "" : "mb-3"} `}
-                        onChange={(e) => {
-                          if (e.target.value !== "") {
-                            let macthedRoute = childRouteOptions.find(
-                              (route) => route.path === e.target.value
-                            );
-                            setSelectedChildRoute(macthedRoute);
-                            setDisplayRoute(macthedRoute);
-                          } else {
-                            setSelectedChildRoute("");
-                            setDisplayRoute("");
-                          }
-                        }}
-                        value={selectedChildRoute?.path || ""}
-                      >
-                        (<option value="">None</option>)
-                        {[
-                          ...new Set(childRouteOptions?.map((route) => route)),
-                        ].map(
-                          (route, index) =>
-                            route.path && (
-                              <option key={index} value={route.path}>
-                                {route.path +
-                                  " - " +
-                                  (route.component || route.redirectTo)}
-                              </option>
-                            )
-                        )}
-                      </Form.Select>
-                    </div>
-                    <div className={`${selectedChildRoute ? "" : "disableRouteButton"} btn btn-primary ms-3 newChildRouteButton`}>
-                      <div className="" onClick={() => addChildroute()}>Add New Route</div>
-                    </div>
+          <div>
+            {routeMode === "childView" && (
+              <div className="">
+                <div className="childRouteForm">
+                    <ul className="tab-group">
+                      <li className={`tab ${activeTab === '#editChildRoute' ? 'active' : ''}`}>
+                        <a href="#signup" onClick={(e) => handleTabClick(e, '#editChildRoute')}>Edit Route</a>
+                      </li>
+                      <li className={`tab ${activeTab === '#addNewChildRoute' ? 'active' : ''}`}>
+                        <a href="#login" onClick={(e) => handleTabClick(e, '#addNewChildRoute')}>Add Route</a>
+                      </li>
+                    </ul>
                   </div>
-                )}
-                {childRouteOptions === '' && (
-                  <input
-                    className="form-control"
-                    value="No child route present, add one!"
-                    disabled
-                  />
-                )}
-              </div>
-            </div>
-          )}
-          <div className="mx-1 form-floating" aria-label="path-input">
-            <InputGroup className="">
-              {routeMode === "childView" && (
-                <InputGroup.Text className="mt-3 pb-3 pt-3" id="basic-addon1" title="parent path" role="button">
-                  {currentOffCanvasRoute.path}
-                </InputGroup.Text>
-              )}
-              {routeMode === "Add" && (
-                <DropdownButton
-                // variant="outline-secondary"
-                title={parentPath}
-                id="newRouteDropdown"
-                size="4"
-                className="mt-3 pb-3 pt-3 btn-secondary custom-parent-path-scroll"
-              >
-                <div className="custom-parent-path-scroll">
-                  {allFirstLayerPaths?.map(path => (
-                  <Dropdown.Item className="px-3" size="5" id="newRouteDropdownOptions" onClick={() => setParentPath(path)}>{path}</Dropdown.Item>
-                  ))}
-                </div>
-              </DropdownButton>
-              )}
-
-              <FloatingLabel
-                controlId="floatingInputGrid-path"
-                label="route path"
-              >
-                <Form.Control
-                  type="text"
-                  contentEditable={true}
-                  className={`${routeMode === "Add" ? 'mb-3' : 'mb-1'} py-1`}
-                  style={{
-                    position: "relative",
-                    top: (routeMode === "childView" || routeMode === "Add") ? "16px" : "18px",
-                    paddingBottom: "25px",
-                  }}
-                  value={displayRoute ? displayRoute.path : ""}
-                  onChange={(e) =>
-                    handleRouteObjectChange(displayRoute, "path", e)
-                  }
-                />
-              </FloatingLabel>
-            </InputGroup>
-          </div>
-          <div
-            className="mb-3 mt-1"
-            aria-label="component-redirectTo radio-buttons"
-          >
-            <div className={`d-flex ${routeMode === "Add" ? 'mt-1' : 'mt-4'} pt-3`} aria-label="toggler">
-              <div className="form-check mx-1">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="flexRadioDefault"
-                  id="flexRadioDefault1"
-                  checked={isRouteWithAComponent}
-                  onClick={() => setIsRouteWithAComponent(true)}
-                />
-                <label className="form-check-label" for="flexRadioDefault1">
-                  component
-                </label>
-              </div>
-              <div className="form-check mx-3">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="flexRadioDefault"
-                  id="flexRadioDefault2"
-                  checked={!isRouteWithAComponent}
-                  onClick={() => setIsRouteWithAComponent(false)}
-                />
-                <label className="form-check-label" for="flexRadioDefault2">
-                  redirectTo
-                </label>
-              </div>
-            </div>
-            <div className="mx-1 my-2" aria-label="dropdown-textinput">
-              {isRouteWithAComponent && (
-                <select
-                  className="form-select"
-                  aria-label="Default select example"
-                  value={displayRoute.component || ""}
-                  onChange={(e) =>
-                    handleRouteObjectChange(displayRoute, "component", e)
-                  }
-                  disabled={routeMode === "View"}
-                >
-                  (<option value="">None</option>)
-                  {[...new Set(routes.map((route) => route.component))].map(
-                    (component, index) =>
-                      component && (
-                        <option key={index} value={component}>
-                          {component}
-                        </option>
-                      )
+                { activeTab === '#editChildRoute' && (<div className="mb-3 mx-1">
+                  {childRouteOptions && (
+                    <div className="d-flex ">
+                      <div className="flex-grow-1">
+                        <Form.Label className="ms-1" style={{color: "#ae9959"}}>
+                          Select To View/Edit Child Route
+                        </Form.Label>
+                        <Form.Select
+                          aria-label="Default select example"
+                          className={`${routeMode === "childView" ? "" : "mb-3"} `}
+                          onChange={(e) => {
+                            if (e.target.value !== "") {
+                              let macthedRoute = childRouteOptions.find(
+                                (route) => route.path === e.target.value
+                              );
+                              setSelectedChildRoute(macthedRoute);
+                              setDisplayRoute(macthedRoute);
+                            } else {
+                              setSelectedChildRoute("");
+                              setDisplayRoute("");
+                            }
+                          }}
+                          value={selectedChildRoute?.path || ""}
+                        >
+                          (<option value="">None</option>)
+                          {[
+                            ...new Set(childRouteOptions?.map((route) => route)),
+                          ].map(
+                            (route, index) =>
+                              route.path && (
+                                <option key={index} value={route.path}>
+                                  {route.path +
+                                    " - " +
+                                    (route.component || route.redirectTo)}
+                                </option>
+                              )
+                          )}
+                        </Form.Select>
+                      </div>
+                      {/* <div className={`${selectedChildRoute ? "" : "disableRouteButton"} btn btn-primary ms-3 newChildRouteButton`}>
+                        <div className="" onClick={() => addChildroute()}>Add New Route</div>
+                      </div> */}
+                    </div>
                   )}
-                </select>
-              )}
-              {!isRouteWithAComponent && (
-                <input
-                  className="form-control"
-                  placeholder="redirectTo"
-                  value={displayRoute.redirectTo || ""}
-                  onChange={(e) =>
-                    handleRouteObjectChange(displayRoute, "redirectTo", e)
-                  }
-                  disabled={routeMode === "View"}
-                />
-              )}
-            </div>
-          </div>
-          <div className=" mx-1 my-2">
-            
-            <Multiselect
-              className="form-control p-0 text-white"
-              options={optionalRouteProps}
-              selectedValues={selectedProps}
-              onSelect={onSelect}
-              onRemove={onRemove}
-              displayValue="name"
-              showCheckbox={true}
-              placeholder="Other Route Objects"
-              style={{
-                option: {
-                  backgroundColor: "#212529",
-                  padding: ".5rem 3rem .5rem .5rem",
-                  cursor: "pointer",
-                }, 
-                searchBox: { border: "none", "border-bottom": "1px solid blue", "border-radius": "0px" }  
-              }}
-            />
-          </div>
-          {!showAllRouteObj && (
-            <div>
-              {/* {isRouteWithAComponent && ( */}
-              {true && (
-                <div className="d-flex">
-                  { showSelectedRouteObj.HydrateElement && (<div className="mx-1">
-                    <label className="ms-2">Hydrate Element</label>
+                  {childRouteOptions === '' && (
+                    <input
+                      className="form-control"
+                      value="No child route present, add one!"
+                      disabled
+                    />
+                  )}
+                </div>)}
+              </div>
+            )}
+            {(routeMode !== 'childView' || selectedChildRoute || activeTab === '#addNewChildRoute') && (<div>
+              <div className="mx-1 form-floating" aria-label="path-input">
+                <InputGroup className="">
+                  {routeMode === "childView" && (
+                    <InputGroup.Text className="mt-3 pb-3 pt-3" id="basic-addon1" title="parent path" role="button">
+                      {currentOffCanvasRoute.path}
+                    </InputGroup.Text>
+                  )}
+                  {routeMode === "Add" && (
+                    <DropdownButton
+                    // variant="outline-secondary"
+                    title={parentPath}
+                    id="newRouteDropdown"
+                    className="mt-3 pb-3 pt-3 btn-secondary custom-parent-path-scroll"
+                  >
+                    <div className="custom-parent-path-scroll">
+                      {allFirstLayerPaths?.map(path => (
+                      <Dropdown.Item className="px-3" size="5" id="newRouteDropdownOptions" onClick={() => setParentPath(path)}>{path}</Dropdown.Item>
+                      ))}
+                    </div>
+                  </DropdownButton>
+                  )}
+                  <FloatingLabel
+                    controlId="floatingInputGrid-path"
+                    label="route path"
+                  >
+                    <Form.Control
+                      type="text"
+                      contentEditable={true}
+                      className={`${routeMode === "Add" ? 'mb-3' : 'mb-1'} py-1`}
+                      style={{
+                        position: "relative",
+                        top: (routeMode === "childView" || routeMode === "Add") ? "16px" : "18px",
+                        paddingBottom: "25px",
+                      }}
+                      value={displayRoute ? displayRoute.path : ""}
+                      onChange={(e) =>
+                        handleRouteObjectChange(displayRoute, "path", e)
+                      }
+                    />
+                  </FloatingLabel>
+                </InputGroup>
+              </div>
+              <div
+                className="mb-3 mt-1"
+                aria-label="component-redirectTo radio-buttons"
+              >
+                <div className={`d-flex ${routeMode === "Add" ? 'mt-1' : 'mt-4'} pt-3`} aria-label="toggler">
+                  <div className="form-check mx-1">
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="flexRadioDefault"
+                      id="flexRadioDefault1"
+                      checked={isRouteWithAComponent}
+                      onClick={() => setIsRouteWithAComponent(true)}
+                    />
+                    <label className="form-check-label" for="flexRadioDefault1">
+                      component
+                    </label>
+                  </div>
+                  <div className="form-check mx-3">
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="flexRadioDefault"
+                      id="flexRadioDefault2"
+                      checked={!isRouteWithAComponent}
+                      onClick={() => setIsRouteWithAComponent(false)}
+                    />
+                    <label className="form-check-label" for="flexRadioDefault2">
+                      redirectTo
+                    </label>
+                  </div>
+                </div>
+                <div className="mx-1 my-2" aria-label="dropdown-textinput">
+                  {isRouteWithAComponent && (
                     <select
                       className="form-select"
                       aria-label="Default select example"
-                      value={displayRoute.hydrateComponent || ""}
+                      value={displayRoute.component || ""}
                       onChange={(e) =>
-                        handleRouteObjectChange(
-                          displayRoute,
-                          "hydrateComponent",
-                          e
-                        )
+                        handleRouteObjectChange(displayRoute, "component", e)
                       }
                       disabled={routeMode === "View"}
                     >
                       (<option value="">None</option>)
-                      {[...new Set(routes.map((route) => route.component))].map(
+                      {[...new Set(routes?.map((route) => route.component))].map(
                         (component, index) =>
                           component && (
                             <option key={index} value={component}>
@@ -480,97 +434,161 @@ export default function ProjectRouting() {
                           )
                       )}
                     </select>
-                  </div>)}
-                  { showSelectedRouteObj.ErrorElement && (<div className="mx-1">
-                    <label className="ms-2">Error Element</label>
-                    <select
-                      className="form-select"
-                      aria-label="Default select example"
-                      value={displayRoute.errorElement || ""}
+                  )}
+                  {!isRouteWithAComponent && (
+                    <input
+                      className="form-control"
+                      placeholder="redirectTo"
+                      value={displayRoute.redirectTo || ""}
                       onChange={(e) =>
-                        handleRouteObjectChange(displayRoute, "errorElement", e)
+                        handleRouteObjectChange(displayRoute, "redirectTo", e)
                       }
                       disabled={routeMode === "View"}
-                    >
-                      (<option value="">None</option>)
-                      {[...new Set(routes.map((route) => route.component))].map(
-                        (component, index) =>
-                          component && (
-                            <option key={index} value={component}>
-                              {component}
-                            </option>
-                          )
-                      )}
-                    </select>
+                    />
+                  )}
+                </div>
+              </div>
+              <div className=" mx-1 my-2">
+                <Multiselect
+                  className="form-control p-0 text-white"
+                  options={optionalRouteProps}
+                  selectedValues={selectedProps}
+                  onSelect={onSelect}
+                  onRemove={onRemove}
+                  displayValue="name"
+                  showCheckbox={true}
+                  placeholder="Other Route Objects"
+                  style={{
+                    option: {
+                      backgroundColor: "#212529",
+                      padding: ".5rem 3rem .5rem .5rem",
+                      cursor: "pointer",
+                    },
+                    searchBox: { border: "none", "border-bottom": "1px solid blue", "border-radius": "0px" }
+                  }}
+                />
+              </div>
+              {!showAllRouteObj && (
+                <div>
+                  {/* {isRouteWithAComponent && ( */}
+                  {true && (
+                    <div className="d-flex">
+                      { showSelectedRouteObj.HydrateElement && (<div className="mx-1">
+                        <label className="ms-2">Hydrate Element</label>
+                        <select
+                          className="form-select"
+                          aria-label="Default select example"
+                          value={displayRoute.hydrateComponent || ""}
+                          onChange={(e) =>
+                            handleRouteObjectChange(
+                              displayRoute,
+                              "hydrateComponent",
+                              e
+                            )
+                          }
+                          disabled={routeMode === "View"}
+                        >
+                          (<option value="">None</option>)
+                          {[...new Set(routes?.map((route) => route.component))].map(
+                            (component, index) =>
+                              component && (
+                                <option key={index} value={component}>
+                                  {component}
+                                </option>
+                              )
+                          )}
+                        </select>
+                      </div>)}
+                      { showSelectedRouteObj.ErrorElement && (<div className="mx-1">
+                        <label className="ms-2">Error Element</label>
+                        <select
+                          className="form-select"
+                          aria-label="Default select example"
+                          value={displayRoute.errorElement || ""}
+                          onChange={(e) =>
+                            handleRouteObjectChange(displayRoute, "errorElement", e)
+                          }
+                          disabled={routeMode === "View"}
+                        >
+                          (<option value="">None</option>)
+                          {[...new Set(routes?.map((route) => route.component))].map(
+                            (component, index) =>
+                              component && (
+                                <option key={index} value={component}>
+                                  {component}
+                                </option>
+                              )
+                          )}
+                        </select>
+                      </div>)}
+                    </div>
+                  )}
+                  {showSelectedRouteObj.Action && (<div className="my-3">
+                    <div>
+                      <label className="ms-2">Action</label>
+                    </div>
+                    <textarea
+                      className="form-control mx-1 mb-1"
+                      placeholder="add action callback"
+                      value={displayRoute.action || ""}
+                      onChange={(e) =>
+                        handleRouteObjectChange(displayRoute, "action", e)
+                      }
+                      rows={3}
+                    />
+                  </div>)}
+                  {showSelectedRouteObj.Loader && (<div className="my-3">
+                    <div>
+                      <label className="ms-2">Loader</label>
+                    </div>
+                  <textarea
+                    className="form-control mx-1 mt-1 mb-3"
+                    placeholder="add loader callback"
+                    value={displayRoute.loader || ""}
+                    onChange={(e) =>
+                      handleRouteObjectChange(displayRoute, "loader", e)
+                    }
+                    rows={3}
+                  />
+                  </div>)}
+                  {showSelectedRouteObj.Lazy && (<div className="my-3">
+                    <div>
+                      <label className="ms-2">Lazy</label>
+                    </div>
+                  <textarea
+                    className="form-control mx-1 mt-1 mb-3"
+                    placeholder="add lazy callback"
+                    value={displayRoute.lazy || ""}
+                    onChange={(e) =>
+                      handleRouteObjectChange(displayRoute, "lazy", e)
+                    }
+                    rows={3}
+                  />
+                  </div>)}
+                  {showSelectedRouteObj.ShouldRevalidate && (<div className="my-3">
+                    <div>
+                      <label className="ms-2">ShouldRevalidate</label>
+                    </div>
+                  <textarea
+                    className="form-control mx-1 mt-1 mb-3"
+                    placeholder="add shouldRevalidate callback"
+                    value={displayRoute.shouldRevalidate || ""}
+                    onChange={(e) =>
+                      handleRouteObjectChange(displayRoute, "shouldRevalidate", e)
+                    }
+                    rows={3}
+                  />
                   </div>)}
                 </div>
               )}
-
-              {showSelectedRouteObj.Action && (<div className="my-3">
-                <div>
-                  <label className="ms-2">Action</label>
+              {routeMode !== "View" && (
+                <div className="my-4">
+                  <div className={`${displayRoute ? '' : 'disableRouteButton'} btn btn-success mx-1`} onClick={() => saveRoute()}>Save Changes</div>
+                  { selectedChildRoute && (<div className={`${displayRoute ? '' : 'disableRouteButton'} btn btn-danger mx-1`}>Delete Route</div>)}
                 </div>
-                <textarea
-                  className="form-control mx-1 mb-1"
-                  placeholder="add action callback"
-                  value={displayRoute.action || ""}
-                  onChange={(e) =>
-                    handleRouteObjectChange(displayRoute, "action", e)
-                  }
-                  rows={3}
-                />
-              </div>)}
-              {showSelectedRouteObj.Loader && (<div className="my-3">
-                <div>
-                  <label className="ms-2">Loader</label>
-                </div>
-              <textarea
-                className="form-control mx-1 mt-1 mb-3"
-                placeholder="add loader callback"
-                value={displayRoute.loader || ""}
-                onChange={(e) =>
-                  handleRouteObjectChange(displayRoute, "loader", e)
-                }
-                rows={3}
-              />
-              </div>)}
-              {showSelectedRouteObj.Lazy && (<div className="my-3">
-                <div>
-                  <label className="ms-2">Lazy</label>
-                </div>
-              <textarea
-                className="form-control mx-1 mt-1 mb-3"
-                placeholder="add lazy callback"
-                value={displayRoute.lazy || ""}
-                onChange={(e) =>
-                  handleRouteObjectChange(displayRoute, "lazy", e)
-                }
-                rows={3}
-              />
-              </div>)}
-              {showSelectedRouteObj.ShouldRevalidate && (<div className="my-3">
-                <div>
-                  <label className="ms-2">ShouldRevalidate</label>
-                </div>
-              <textarea
-                className="form-control mx-1 mt-1 mb-3"
-                placeholder="add shouldRevalidate callback"
-                value={displayRoute.shouldRevalidate || ""}
-                onChange={(e) =>
-                  handleRouteObjectChange(displayRoute, "shouldRevalidate", e)
-                }
-                rows={3}
-              />
-              </div>)}
-
-            </div>
-          )}
-          {routeMode !== "View" && (
-            <div className="my-4">
-              <div className={`${displayRoute ? '' : 'disableRouteButton'} btn btn-success mx-1`} onClick={() => saveRoute()}>Save Changes</div>
-              { selectedChildRoute && (<div className={`${displayRoute ? '' : 'disableRouteButton'} btn btn-danger mx-1`}>Delete Route</div>)}
-            </div>
-          )}
+              )}
+            </div>)}
+          </div>
         </div>
       </div>
 
@@ -585,7 +603,7 @@ export default function ProjectRouting() {
             </tr>
           </thead>
           <tbody>
-            {routes.map((route) => (
+            {routes?.map((route) => (
               <tr className="text-center" key={route.path}>
                 <td>{route.path}</td>
                 <td>
@@ -646,4 +664,12 @@ export default function ProjectRouting() {
       </div>
     </div>
   );
+}
+
+export async function routerConfigLoader({ params }) {
+  const projectName = params.projectName;
+
+  console.log("Loading project ", projectName);
+  const config = await getRouterConfig(projectName);
+  return config;
 }

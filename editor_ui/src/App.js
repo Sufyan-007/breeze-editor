@@ -17,7 +17,7 @@ import ComponentConfigPage, {
 import CssEditor from "./components/CssEditor";
 import ProjectHome from "./components/ProjectHome";
 import ProjectComponents from "./components/ProjectComponents";
-import ProjectRouting from "./components/ProjectRouting";
+import ProjectRouting, { routerConfigLoader } from "./components/ProjectRouting";
 import Styles from "./components/Styles";
 import Code from "./components/Code";
 import ThirdPartyApp from "./components/ThirdPartyApp";
@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting /> },
+      { path: "routing", element: <ProjectRouting />, loader: routerConfigLoader },
       { path: "services", element: <Root/> },
       { path: "constants", element: <ReduxConfig /> },
       {
@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting /> },
+      { path: "routing", element: <ProjectRouting />,  loader: routerConfigLoader },
       { path: "services", element: <Root /> },
     ]
   },
