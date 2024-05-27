@@ -15,7 +15,9 @@ import os
 import subprocess
 
 from common.utils.app_consts import THIRD_PARTY_CONFIG_PATH, JS_FILE_PATH, JS_FUNCTION_NAME, DEFAULT_THIRD_PARTY_CONFIG_FOLDER_NAME
-
+from common.utils.path_extractor import find_parent_dir
+from common.utils.file_utils import get_dir_path_from_file
+from pathlib import Path
 
 def call_config_generator(library_name):
     with open(JS_FILE_PATH, 'r') as parse_file:
@@ -34,19 +36,27 @@ def call_config_generator(library_name):
 
 # Generate ast from the given script path
 def call_node_script(script_path, function_name, *args):
-    command = ["node", script_path, function_name,  *args]
+    # Find root of the project
+    project_root = find_parent_dir(Path(__file__).parent, 'breezeui')
+    print(f"Project Root Dir: {project_root}")
+
+    script_absolute_path = f"{project_root}/{script_path}"
+
+    print(script_path)
+    command = ["node", script_absolute_path, function_name,  *args]
     # print(command)
-    result = subprocess.run(command, capture_output=True, text=True)
+    result = subprocess.run(command, capture_output=True, text=True, cwd=get_dir_path_from_file(script_absolute_path))
     print(result)
 
 
     if result.returncode == 0:
         print("JavaScript function executed successfully.")
         print("Output:", result.stdout)
-        return result.stdout
+        return { "status" : "SUCCESS" , "msg" : result.stdout }
     else:
         print("Error executing JavaScript function.")
         print("Error:", result.stderr)
+        return { "status" : "ERROR" , "msg" : result.stderr }
 
 
 def get_path():
@@ -75,6 +85,6 @@ class GenerateTPConfigAPI:
         print("Starting Generating Config")
         lib_name = req_data['libraryName']
         lib_version = req_data.get('libraryVersion', None)
-        call_node_script(JS_FILE_PATH, JS_FUNCTION_NAME, lib_name, lib_version, get_path())
-
+        result = call_node_script(JS_FILE_PATH, JS_FUNCTION_NAME, lib_name, lib_version, get_path())
         print("Config Generation Completed")
+        return result

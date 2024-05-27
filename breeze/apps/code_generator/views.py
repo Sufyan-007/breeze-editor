@@ -17,5 +17,5 @@ class GenerateThirdPartyConfig(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
         print(data)
-        GenerateTPConfigAPI.generate_tp_config(data)
-        return JsonResponse({"msg" : "SUCCESS"}, status=201)
+        response = GenerateTPConfigAPI.generate_tp_config(data)
+        return JsonResponse(response, status=201)
