@@ -70,12 +70,14 @@ const TextElement = ({
 
           <div>
             <button className="btn btn-primary" onClick={()=>handleUpdateClick(elementValue)}>
-            {isLoading && (
-          <Spinner as="span" animation="border" role="status" size="sm" className="mr-2">
+            {isLoading ? (
+          <Spinner as="span" animation="border" role="status" size="sm" className="ms-3 me-3">
             <span className="visually-hidden">Loading...</span>
           </Spinner>
+        ): (
+          "Update"
         )}
-              Update
+              
             </button>
           </div>
         </div>

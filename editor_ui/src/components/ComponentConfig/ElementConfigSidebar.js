@@ -75,7 +75,7 @@ export default function ElementConfigSidebar({ config }) {
       <>
         <div
           style={{
-            width: "30%",
+            width: "50%",
             backgroundColor: "#303033",
             overflowY: "scroll",
             position: "absolute",

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
+import convert from "../htmlToReactAttrMap";
 
 const HtmlElementConfig = ({
   element,
@@ -8,64 +9,96 @@ const HtmlElementConfig = ({
   handleUpdateClick,
   isLoading,
 }) => {
-  const [elementValue, setElementValue] = useState(null);
-  const [availableAttributes, setAvailableAttributes] = useState([
-    "src",
-    "img",
-    "width",
-    "height",
-  ]);
-  console.log(element);
+  const [availableAttributes, setAvailableAttributes] = useState([]);
+  const [selectedAttributes, setSelectedAttributes] = useState({});
+  console.log("It is the element", element);
   useEffect(() => {
-    setElementValue(element);
+    setSelectedAttributes(element.attributes);
   }, [element]);
 
+  useEffect(() => {
+    fetchData();
+  }, [element]);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8000/config-reader/get-global-component-config/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            component_id: element.tagName,
+            component_type: element.elementType,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const attributeList = await response.json();
+      setAvailableAttributes(attributeList);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   const updateHtmlElementConfig = (e) => {
     e.preventDefault();
-
-    handleUpdateClick(elementValue);
+    console.log("update", selectedAttributes);
+    const tempElememt = { ...element, attributes: selectedAttributes };
+    console.log("tempElememt", tempElememt);
+    handleUpdateClick(tempElememt);
   };
 
   const handleSelectAttributeChange = (event) => {
     const selectedOption = event.target?.value;
-    event.target.value = "Add Attributes";
+    console.log("selected", selectedOption);
+    if (selectedOption.startsWith("on")) {
+      event.target.value = "Add Event Listener";
+    } else {
+      event.target.value = "Add Attributes";
+    }
 
     if (
       selectedOption === "Add Attributes" ||
-      Object.keys(elementValue.attributes).includes(selectedOption)
+      selectedOption === "Add Event Listener" ||
+      Object.keys(selectedAttributes).includes(selectedOption)
     ) {
       return;
     }
-    setElementValue((prevElementValue) => ({
-      ...prevElementValue,
-      attributes: {
-        ...prevElementValue.attributes,
-        [selectedOption]: { type: "LITERAL", value: "" },
-      },
+
+    setSelectedAttributes((prevSelectedAttributes) => ({
+      ...prevSelectedAttributes,
+      [selectedOption]: { type: "LITERAL", value: "" },
     }));
+    setAvailableAttributes((prevAttributes) => {
+      const updatedAttributes = { ...prevAttributes };
+      delete updatedAttributes[selectedOption];
+      return updatedAttributes;
+    });
   };
 
-  const handleDeleteAttribute = (index) => {
-    setElementValue((prevElementValue) => {
-      const updatedAttributes = { ...prevElementValue.attributes };
-      const attributeKeys = Object.keys(updatedAttributes);
-      const deletedAttributeKey = attributeKeys[index];
-      delete updatedAttributes[deletedAttributeKey];
-      return {
-        ...prevElementValue,
-        attributes: updatedAttributes,
-      };
+  const handleDeleteAttribute = (attributeKey) => {
+    setAvailableAttributes((prevAttributes) => {
+      const updatedAttributes = { ...prevAttributes };
+      updatedAttributes[attributeKey] = selectedAttributes[attributeKey].type;
+      return updatedAttributes;
+    });
+    setSelectedAttributes((prevSelectedAttributes) => {
+      const updatedAttributes = { ...prevSelectedAttributes };
+      delete updatedAttributes[attributeKey];
+      return updatedAttributes;
     });
   };
 
   const handleAttributeChange = (key, value) => {
-    console.log(elementValue);
-    setElementValue((prevElementValue) => ({
-      ...prevElementValue,
-      attributes: {
-        ...prevElementValue.attributes,
-        [key]: { type: "LITERAL", value: value },
-      },
+    setSelectedAttributes((prevSelectedAttributes) => ({
+      ...prevSelectedAttributes,
+      [key]: { type: "LITERAL", value: value },
     }));
   };
 
@@ -90,45 +123,117 @@ const HtmlElementConfig = ({
           />
         </Form.Group>
 
-        <Form.Group className="mb-4">
+        <Form.Group className="mb-5">
           <Form.Select
             aria-label="Default select example"
             onChange={handleSelectAttributeChange}
           >
             <option>Add Attributes</option>
-            {availableAttributes.map((attribute, index) => (
-              <option key={index} value={attribute}>
-                {attribute}
-              </option>
-            ))}
+            {Object.keys(availableAttributes)
+              .filter((attribute) => !attribute.startsWith("on"))
+              .sort()
+              .map((attribute, index) => (
+                <option key={index} value={attribute}>
+                  {attribute}
+                </option>
+              ))}
           </Form.Select>
           <div>
-            {elementValue &&
-              Object.keys(elementValue?.attributes).map((attribute, index) => (
-                <div key={index} className="mt-4">
-                  <Form.Label>{attribute}</Form.Label>
-                  <div className="d-flex">
-                    <Form.Control
-                      type="text"
-                      value={elementValue.attributes[attribute].value}
-                      onChange={(e) =>
-                        handleAttributeChange(attribute, e.target.value)
-                      }
-                      disabled={attribute === "id"}
-                    />
-                    {attribute !== "id" && (
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        className="ms-2"
-                        onClick={() => handleDeleteAttribute(index)}
-                      >
-                        <i className="bi bi-trash3 p-1"></i>
-                      </Button>
-                    )}
+            {selectedAttributes &&
+              Object.keys(selectedAttributes)
+                .map((attribute, index) => ({ attribute, index }))
+                .filter(({ attribute }) => !attribute.startsWith("on"))
+                .map(({ attribute, index }) => (
+                  <div key={index} className="mt-4">
+                    <Form.Label>{attribute}</Form.Label>
+                    <div className="d-flex">
+                      {selectedAttributes &&
+                        selectedAttributes[attribute] &&
+                        selectedAttributes[attribute].type !== "boolean" && (
+                          <Form.Control
+                            type={selectedAttributes[attribute].type || "text"}
+                            value={selectedAttributes[attribute].value}
+                            onChange={(e) =>
+                              handleAttributeChange(attribute, e.target.value)
+                            }
+                            disabled={attribute === "id"}
+                          />
+                        )}
+
+                      {selectedAttributes &&
+                        selectedAttributes[attribute] &&
+                        selectedAttributes[attribute].type === "boolean" && (
+                          <Form.Select
+                            onChange={(e) => {
+                              handleAttributeChange(attribute, e.target.value);
+                            }}
+                            value={selectedAttributes[attribute].value}
+                          >
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                          </Form.Select>
+                        )}
+                      {attribute !== "id" && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="ms-2"
+                          onClick={() => handleDeleteAttribute(attribute)}
+                        >
+                          <i className="bi bi-trash3 p-1"></i>
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                ))}
+          </div>
+        </Form.Group>
+        <Form.Group className="mb-4">
+          <Form.Select
+            aria-label="Default select example"
+            onChange={handleSelectAttributeChange}
+          >
+            <option>Add Event Listener</option>
+            {Object.keys(availableAttributes)
+              .filter((attribute) => attribute.startsWith("on"))
+              .sort()
+              .map((attribute, index) => (
+                <option key={index} value={attribute}>
+                  {attribute}
+                </option>
               ))}
+          </Form.Select>
+
+          <div>
+            {selectedAttributes &&
+              Object.keys(selectedAttributes)
+                .map((attribute, index) => ({ attribute, index }))
+                .filter(({ attribute }) => attribute.startsWith("on"))
+                .map(({ attribute, index }) => (
+                  <div key={index} className="mt-4">
+                    <Form.Label>{attribute}</Form.Label>
+                    <div className="d-flex">
+                      <Form.Control
+                        type="text"
+                        value={selectedAttributes.value}
+                        onChange={(e) =>
+                          handleAttributeChange(attribute, e.target.value)
+                        }
+                        disabled={attribute === "id"}
+                      />
+                      {attribute !== "id" && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="ms-2"
+                          onClick={() => handleDeleteAttribute(attribute)}
+                        >
+                          <i className="bi bi-trash3 p-1"></i>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
           </div>
         </Form.Group>
 
@@ -136,8 +241,10 @@ const HtmlElementConfig = ({
           <Form.Label>styles</Form.Label>
           <Form.Control
             as="textarea"
+            onChange={(e) => handleAttributeChange("style", e.target.value)}
             placeholder="Write your inline css here"
             style={{ resize: "none" }}
+            disabled
           />
         </Form.Group>
         <div
@@ -164,18 +271,19 @@ const HtmlElementConfig = ({
                 className="btn btn-primary"
                 onClick={updateHtmlElementConfig}
               >
-                {isLoading && (
+                {isLoading ? (
                   <Spinner
                     as="span"
                     animation="border"
                     role="status"
                     size="sm"
-                    className="mr-2"
+                    className="ms-3 me-3"
                   >
                     <span className="visually-hidden">Loading...</span>
                   </Spinner>
+                ) : (
+                  "Update"
                 )}
-                Update
               </button>
             </div>
           </div>
