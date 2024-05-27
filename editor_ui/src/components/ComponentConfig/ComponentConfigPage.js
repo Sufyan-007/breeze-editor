@@ -20,14 +20,14 @@ import {
 import { createContext, useMemo, useState } from "react";
 import ProjectSidebar from "../ProjectSidebar";
 import HtmlSection from "./HtmlSection";
-import StateVarsSection from "./StateVarsSection";
+import VariablesSection from "./VariablesSection";
 import LifeCycleSection from "./LifeCycleSection";
 import FunctionSection from "../FunctionsSection/FunctionSection";
 import SidebarService from "../../services/SidebarService";
 
 const components = [
   HtmlSection,
-  StateVarsSection,
+  VariablesSection,
   FunctionSection,
   LifeCycleSection,
 ];

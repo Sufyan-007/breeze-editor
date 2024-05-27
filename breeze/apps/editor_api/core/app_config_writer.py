@@ -35,6 +35,7 @@ class AppConfigWriter:
                 "stateVars": [],
                 "propsVars": [],
                 "otherVars" : [],
+                "refVars" : [],
                 "functions": [],
                 "html": { "_id": "Main" },
                 "wrapper_store": None,

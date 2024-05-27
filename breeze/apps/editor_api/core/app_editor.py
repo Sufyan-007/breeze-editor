@@ -20,6 +20,7 @@ NEW_COMP_FORMAT={
     "stateVars": [],
     "propsVars": [],
     "otherVars": [],
+    "refVars": [],
     "componentType" : "CUSTOM",
     "functions": [],
     "$id":"$NAME",

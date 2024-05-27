@@ -554,6 +554,57 @@ class LifeCycleConfigWriter(APIView):
             "return_body": data.get("return_body")
         }
         
+@method_decorator(csrf_exempt, name='dispatch')
+class VariablesConfigWriter(APIView):
+    
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            componentConfigService = ComponentConfigService(data["project_id"])
+            var=componentConfigService.add_variable(data["component"],data["variable_config"])
+            return JsonResponse(var,status=200,safe=False)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+    def get(self, request):
+        try:
+            project_id = request.GET.get('project_id')
+            comp_name = request.GET.get('comp_name')
+            variable_id = request.GET.get('variable_id')
+            if not project_id or not comp_name:
+                return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            componentConfigService = ComponentConfigService(project_id)
+            variables = componentConfigService.get_variables(comp_name, variable_id)
+            if variables or isinstance(variables, list):
+                return JsonResponse(variables, safe=False, status=200)
+            return JsonResponse({'error': 'Variable not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def put(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            componentConfigService = ComponentConfigService(data["project_id"])
+            var=componentConfigService.update_variable(data["component"],data["variable_config"])
+            return JsonResponse(var,status=200,safe=False)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete(self, request):
+        try:
+            project_id = request.GET.get('project_id')
+            comp_name = request.GET.get('comp_name')
+            variable_id = request.GET.get('variable_id')
+            if not project_id or not comp_name or not variable_id:
+                return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            componentConfigService = ComponentConfigService(project_id)
+            isDeleted = componentConfigService.delete_variable(comp_name, variable_id)
+            if isDeleted:
+                return JsonResponse({'msg': 'Var deleted.'}, status=200)
+            return JsonResponse({'error': 'Var not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
 @method_decorator(csrf_exempt,name="dispatch")
 class FunctionConfigReader(APIView):
     
