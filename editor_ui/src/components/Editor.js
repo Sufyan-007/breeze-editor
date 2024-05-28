@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useParams } from 'react-router';
-import ComponentConfigService from '../services/ComponentConfigService';
+import ComponentConfigService from '../services/OLD-ComponentConfigService';
 import SidebarService from "../services/SidebarService"
 import { useDispatch, useSelector } from 'react-redux'
 import { ServiceContext } from '../store/Context';

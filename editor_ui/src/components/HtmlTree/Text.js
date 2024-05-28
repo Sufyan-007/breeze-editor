@@ -8,6 +8,7 @@ export default function Text({ value,htmlId, selectElem, reference }) {
 
     const {setComponentConfig} = useContext(ComponentContext)
     const { projectName, componentName } = useParams();
+    console.log("cdkjfdkf",value)
     function removeElem() {
         removeHtmlElem(projectName, componentName, htmlId).then((res) => {
             setComponentConfig(res)

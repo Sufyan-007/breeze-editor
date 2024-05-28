@@ -1,58 +1,21 @@
-import { setConfig } from '../reducers/ConfigReducer'
-import { setRouterConfig } from '../reducers/RouterConfigReducer';
+export async function addComponent(name, type, route,projectName) {
 
-class ComponentConfigService {
-    constructor(projectName, dispatch) {
-        this.projectName = projectName;
-        this.dispatch = dispatch;
-        this.getComponentConfig();
-        this.getRouterConfig();
-
-
+    const response = await (await fetch("http://localhost:8000/editor/add-component/" + projectName + "/",
+        { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name , type }) }
+    )).json()
+    if (route) {
+        console.log("Hello there!")
+         await addRoute(route, response.comp,projectName)
     }
-
-    async getRouterConfig() {
-        const routerConfig = await (await fetch("http://localhost:8000/editor/read-router-config/" + this.projectName + "/")).json()
-        this.dispatch(setRouterConfig(routerConfig))
-    }
-
-    async getComponentConfig() {
-        const config = await (await fetch("http://localhost:8000/editor/read-config/" + this.projectName + "/")).json()
-        this.dispatch(setConfig(config))
-    }
-
-    async updateComponent(data) {
-        const config = await (await fetch("http://localhost:8000/editor/write-config/" + this.projectName + "/",
-            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
+    return response
+}
+export async function  addRoute(route, component,projectName,redirectTo=null,) {
+    console.log(route, component, redirectTo)
+    if (route && (component||redirectTo) ) {
+        const response = await (await fetch("http://localhost:8000/editor/add-route/" + projectName + "/",
+            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ route,component,redirectTo }) }
         )).json()
-        console.log(config);
-        this.dispatch(setConfig(config))
+        console.log(response)
     }
-
-    async addComponent(name, route) {
-
-        const response = await (await fetch("http://localhost:8000/editor/add-component/" + this.projectName + "/",
-            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) }
-        )).json()
-        this.dispatch(setConfig(response.config))
-        if (route) {
-            this.addRoute(route, response.comp)
-        }
-    }
-
-    async addRoute(route, component,redirectTo=null) {
-        console.log(route, component, redirectTo)
-        if (route && (component||redirectTo) ) {
-            const response = await (await fetch("http://localhost:8000/editor/add-route/" + this.projectName + "/",
-                { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ route,component,redirectTo }) }
-            )).json()
-            console.log(response)
-            this.dispatch(setRouterConfig(response))
-        }
-
-    }
-
 
 }
-
-export default ComponentConfigService

@@ -1,33 +1,112 @@
-import { useContext, useEffect, useState } from "react"
-import { ComponentContext } from "./ComponentConfigPage"
+import { useContext, useMemo,useEffect, useState } from "react";
+import { ComponentContext } from "./ComponentConfigPage";
+import { useParams } from "react-router";
 
-export default function ElementConfigSidebar({config}){
-    const {sidebarService,componentConfig} = useContext(ComponentContext)
-    console.log(sidebarService)
-    const [selectedElem, setSelectedElement] = useState(null)
-    const elem = selectedElem?.elem
-    // const update = selectedElem?.updateSub
-    // const component = selectedElem?.component
+import TextElement from "../SidebarConfigHelper/components/TextElementConfig";
+import HtmlElementConfig from "../SidebarConfigHelper/components/HtmlElementConfig";
+
+export default function ElementConfigSidebar({ config }) {
+  const { sidebarService, componentConfig, setComponentConfig } = useContext(ComponentContext);
+  console.log("sideBar",sidebarService)
+  const [selectedElement, setSelectedElement] = useState(null);
+  const { projectName, componentName } = useParams();
+  const element = useMemo(() => componentConfig?.html_elements[selectedElement?.elem], [componentConfig, selectedElement]);
+  const [isLoading, setIsLoading] = useState(false);
 
 
-    useEffect(() => {
-        sidebarService.getSelectedElem().subscribe((elem) => {
-            setSelectedElement(elem)
-        })
-    }, [sidebarService])
 
-    if (!elem){
-        return null
+
+  useEffect(() => {
+    sidebarService.getSelectedElem().subscribe((elem) => {
+      setSelectedElement(elem);
+     
+    });
+  }, [sidebarService]);
+
+  const makeSelectedElementNull = () => {
+    sidebarService.setSelectedElem(null);
+  };
+  
+
+  const handleUpdateClick = (html_config) => {
+    updateHtmlConfig(projectName, selectedElement?.elem, componentName, html_config);
+  };
+
+  async function updateHtmlConfig(project_id, html_id, component, html_config) {
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        "http://localhost:8000/editor/update-html-config/",
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ project_id, html_id, component, html_config }),
+        }
+      );
+
+      if (!response.ok) {
+        setIsLoading(false)
+        throw new Error("Failed to update HTML config");
+      }
+      else{
+        setIsLoading(false)
+
+      }
+
+      const responseData = await response.json();
+      setComponentConfig((state) => {
+        state["html_elements"][responseData["html_id"]] =
+          responseData["html_config"];
+
+        return { ...state };
+      });
+      //
+    } catch (error) {
+      console.error("Error:", error);
     }
-    else{
-        return (
-            <div className=" col-1" style={{ width: "14rem", backgroundColor: "#303033" }}>
-                <div className="row">
-                    <button className=" btn-close-white btn-close" onClick={()=>sidebarService.setSelectedElem(null)}>
+  }
 
-                    </button>
-                </div>
-            </div>
-        )
-    }
+
+  if (!selectedElement?.elem) {
+    return null;
+  } else {
+    return (
+      <>
+        <div
+          style={{
+            width: "50%",
+            backgroundColor: "#303033",
+            overflowY: "scroll",
+            position: "absolute",
+            right:0,
+            height: "100%",
+          }}
+        >
+          <div>
+            <button
+              className="btn-close-white btn-close"
+              onClick={makeSelectedElementNull}
+            ></button>
+            {element.type === "text" && (
+              <TextElement
+                makeSelectedElementNull={makeSelectedElementNull}
+                handleUpdateClick={handleUpdateClick}
+                element={element}
+                isLoading={isLoading}
+              />
+            )}
+            {element.type === "Element" && (
+              <HtmlElementConfig
+                element={element}
+                makeSelectedElementNull={makeSelectedElementNull}
+                handleUpdateClick={handleUpdateClick}
+                isLoading={isLoading}
+              />
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
 }

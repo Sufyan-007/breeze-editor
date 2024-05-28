@@ -124,6 +124,7 @@ class ComponentGenerator():
         state_vars = config['stateVars']
         other_vars = config.get('otherVars',[])
         props_vars = config['propsVars']
+        ref_vars = config.get('refVars', [])
         html_config = config['html']
         generator = HTMLGenerator(config)
         html_code = generator.generateHTML(html_config)
@@ -151,17 +152,25 @@ class ComponentGenerator():
             
             store = all_store_config[wrapper_store]
             html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
-        
         state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_raw_val(var["defaultValue"])});' for var in state_vars])
-        props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
+        ref_vars_declaration = '\n'.join([f'const {var["name"]} = React.useRef({format_raw_val(var["defaultValue"])});' for var in ref_vars])
+        # props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
+        props_vars_declaration = ', '.join([f'{var["name"]}={var["defaultValue"]}' if var["defaultValue"] else var["name"] for var in props_vars])
         
         # other vars
         other_vars_declaration = ""
-        for ovar in other_vars:
-            parameters = ""
-            if len(ovar.get("parameters",[]))> 0:
-                parameters = ",".join(ovar["parameters"])
-            other_vars_declaration = other_vars_declaration + " \n %s %s = %s(%s);"%(ovar["declarationType"],ovar.get("name"),ovar.get("className"),parameters)
+        for var in other_vars:
+            datatype = var.get("datatype")
+            default_value = var.get("defaultValue")
+            
+            if datatype == "string":
+                formatted_value = f'"{default_value}"'
+            elif datatype == "boolean":
+                formatted_value = str(default_value).lower()  # Ensure true/false is in lowercase
+            else:
+                formatted_value = f'{default_value}'
+            
+            other_vars_declaration += f"\nconst {var.get('name')} = {formatted_value};"
         
         # functions_code = '\n\n'.join()
 
@@ -200,7 +209,7 @@ class ComponentGenerator():
             import React, { useState , Fragment } from 'react';
             %s
             
-            const %s = (props) => {
+            const %s = ({ %s }) => {
                 %s
                 %s
                 %s
@@ -212,7 +221,7 @@ class ComponentGenerator():
             }
 
             export default %s;
-        """%(import_stats,name,props_vars_declaration,state_vars_declaration,other_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
+        """%(import_stats,name,props_vars_declaration,state_vars_declaration,ref_vars_declaration,other_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
 
         return react_component
 
@@ -220,41 +229,41 @@ class ComponentGenerator():
 from .helpers.function_code_generator import FunctionCodeGenerator
 class HookCodeHelper:
 
-
     @staticmethod
     def generate_hook_code(hook_conf, comp_conf):
-        if hook_conf['type'] in ['USE_EFFECT', 'USE_CALLBACK', 'USE_MEMO']:
-            return HookCodeHelper.handle_generic_hook(hook_conf, comp_conf)
+        if hook_conf['type'] == 'USE_EFFECT':
+            return HookCodeHelper.handle_use_effect(hook_conf, comp_conf)
 
     @staticmethod
-    def handle_generic_hook(hook_config, comp_config):
-        related_func_config = next(item for item in comp_config['functions'] if item["$id"] == hook_config['implementation']['$ref'])
-        dependent_vars = hook_config.get('dependantVars', [])
-        hook_name = ""
+    def handle_use_effect(hook_config, comp_config):
+        hook_body = hook_config['implementation']['body']
+        hook_return_body = hook_config['implementation'].get('returnBody', None)
 
-        if hook_config['type'] == 'USE_EFFECT':
-            hook_name = 'useEffect'
-        elif hook_config['type'] == 'USE_CALLBACK':
-            hook_name = 'useCallback'
-        elif hook_config['type'] == 'USE_MEMO':
-            hook_name = 'useMemo'
-        else:
-            raise ValueError("Unsupported hook type")
+        if 'dependentVars' in hook_config:
+            dependent_vars = hook_config.get('dependentVars', [])
+            if len(dependent_vars) == 0:
+                dependencies = "[]"
+            elif dependent_vars == "null":
+                dependencies = ""
+            else: 
+                dependencies = f"[{', '.join(dependent_vars)}]"
 
-        function_code = FunctionCodeGenerator.generate_function(related_func_config, comp_config)
-
-        if hook_config['type'] == 'USE_EFFECT':
+        if hook_return_body:
             hook_code = f"""
-            React.{hook_name}({function_code}, [{", ".join(dependent_vars)}]);
+                React.useEffect(() => {{
+                    {hook_body}
+                    return () => {{
+                        {hook_return_body}
+                    }};
+                }}{', ' + dependencies});
             """
         else:
             hook_code = f"""
-            const {hook_config['name']} = React.{hook_name}({function_code}, [{", ".join(dependent_vars)}]);
+                React.useEffect(() => {{
+                    {hook_body}
+                }}{', ' + dependencies});
             """
-
         return hook_code
-
-
 
 # def write_components():
 
