@@ -102,9 +102,10 @@ export default function ServiceLists({
         />
         <span>Add API</span>
       </Button>
+      
       {apiList && apiList.length > 0 ? (
         apiList
-          .filter((service) => service.filename !== "auth")
+          // .filter((service) => service.filename !== "auth")
           .map((service, index) => (
             <>
               <ToastContainer

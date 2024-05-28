@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Dropdown, Row, Col } from "react-bootstrap";
+import { Form, Button} from "react-bootstrap";
 import Body from "./Body.js";
 import Auth from "./Auth.js";
 import Urls from "./Urls.js";
