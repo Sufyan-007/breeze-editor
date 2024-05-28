@@ -450,6 +450,7 @@ export default function ProjectRouting() {
               </div>
               <div className=" mx-1 my-2">
                 <Multiselect
+                  id="otherRouteObjectsMultiselect"
                   className="form-control p-0 text-white"
                   options={optionalRouteProps}
                   selectedValues={selectedProps}
