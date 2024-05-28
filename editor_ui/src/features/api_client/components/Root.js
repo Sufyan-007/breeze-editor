@@ -1,14 +1,8 @@
 import React, { useState, useRef } from "react";
 import { Navbar, Nav, NavDropdown, Container, Alert } from "react-bootstrap";
-import ServiceList from "./ServiceList";
-import AuthApiList from "./AuthApiList";
-import EditAuthFunction from "./EditAuthFunction";
-import EditServiceFuntion from "./EditServiceFunction";
-import "../../css/ServiceRoot.css";
 import { useParams } from "react-router";
 import { generateIntermediates } from "../../services/IntermediatesService";
 import  MapperField  from "./MapperField";
-// import CustomFunction from "./CustomFunction";
 
 export default function Root() {
   const [view, setView] = useState("LIST_SERVICE");

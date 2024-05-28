@@ -59,3 +59,45 @@ class RetriveAppConfig:
         resp["data"] = components
         return resp        
     
+    def get_state_variables(self, app_name,component_key):
+        app_config_dir = f"{APP_CONFIG_PATH}/{app_name}"
+        comp_config = {}
+        comp_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
+        resp = {
+            "error" : False,
+            "data" : {}
+        }
+        # Read old config
+        try:
+            comp_config = read_json_file(comp_config_path)
+        except FileNotFoundError as e:
+            print(e)
+            comp_config = {}
+        config = comp_config.get(component_key,{})
+        data = config.get("stateVars",config)
+        variables = {}
+        for var in data:
+            if var.get("type") == "OBJECT":
+                variables[var.get("name")] = {
+                        "type" : var.get("type"),
+                        "root" : True,
+                        "name" : var.get("name"),
+                        "id" : var.get("$id")
+                }
+                for key,val in var.get("defaultValue",{}).items():
+                    variables[key] = {
+                        "type" : str(type(val)),
+                        "root" : False,
+                        "name" : key,
+                        "parent" : var.get("type")
+                        
+                    }
+            else:
+                variables[var.get("name")] = {
+                        "type" : var.get("type"),
+                        "root" : True,
+                        "name" : var.get("name"),
+                        "id" : var.get("$id")
+                }
+        resp["data"] = variables
+        return resp        
