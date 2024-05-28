@@ -12,6 +12,7 @@ import yaml
 from common.utils.file_helper import create_parent_dir_if_not_exists
 import copy
 from .helpers.replace_variable import replace_variable
+import copy
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
@@ -192,7 +193,7 @@ class AppEditor:
     # use write_component() to make changes
     def add_component(self,name,type):
         name=name.replace(' ',"")
-        comp=NEW_COMP_FORMAT.copy()
+        comp=copy.deepcopy(NEW_COMP_FORMAT)
         replace_variable(comp,"$NAME",name)
         comp["type"] = type
         config=self.write_component(comp)
