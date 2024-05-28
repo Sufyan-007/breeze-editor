@@ -11,3 +11,12 @@ export async function getHtml(project_id,component,html_id){
         )).json()
     return response
 }
+
+
+export async function getStateVars(project_id,component){
+    const response = await (await fetch("http://localhost:8000/config-reader/get-state-vars/" + project_id + "/"+component,
+            { method: "GET", headers: { 'Content-Type': 'application/json' } }
+        )).json()
+    return response
+}
+

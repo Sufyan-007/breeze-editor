@@ -93,7 +93,7 @@ class ApiModelLoader:
     def load_channel(data):
         return Channel(operation_id=data.get("operation_id"),
                 description=data.get("description"),
-                schema_relation=data.get("schema_relation"),
+                schema_relation=SchemaRelationEnum[data.get("schema_relation")],
                 messages=data.get("messages"),
                 schema=data.get("schema"))
     

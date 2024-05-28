@@ -3,7 +3,7 @@ import CustomTextAreaCss from "../css/CustomTextArea.css"
 
 const CustomTextArea = ({ value, onChange, placeholder,width, colWidth}) => {
   return (
-    <div className={`col-${colWidth}`}>
+    
       <textarea
         className="custom-text-area"
         value={value}
@@ -11,7 +11,7 @@ const CustomTextArea = ({ value, onChange, placeholder,width, colWidth}) => {
         placeholder={placeholder}
         style={{ width: width }}
       />
-    </div>
+   
   );
 };
 

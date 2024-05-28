@@ -63,7 +63,7 @@ class NewComponentWriter(APIView):
         data= json.loads(request.body.decode("utf-8"))
         try:
             app_component_writer= AppEditor(param)
-            res=app_component_writer.add_component(data["name"])
+            res=app_component_writer.add_component(data["name"],data["type"])
             return JsonResponse(res)
         except:
             return JsonResponse({}, status=500)
@@ -462,9 +462,9 @@ class HtmlConfigWriter(APIView):
         try:
             componentConfigService = ComponentConfigService(data["project_id"])
             componentConfigService.update_html_config(data["component"],data["html_id"],data["html_config"])
-            return JsonResponse({},status=200)
-        except:
-            return JsonResponse({},status=500)
+            return JsonResponse(data,status=200)
+        except Exception as e:
+            return JsonResponse({str(e)},status=500)
     
     def delete(self,request):
         data = json.loads(request.body.decode("utf-8"))
@@ -482,5 +482,157 @@ class HtmlConfigWriter(APIView):
             componentConfigService = ComponentConfigService(data["project_id"])
             new_child_id,child_config,parent_html=componentConfigService.add_child_html(data["component"],data["parent_html_id"],data["child"])
             return JsonResponse({"new_child_id":new_child_id,"child_config":child_config,"parent_html":parent_html},status=200)
+        except:
+            return JsonResponse({},status=500)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class LifeCycleConfigWriter(APIView):
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            componentConfigService = ComponentConfigService(data["project_id"])
+            lifecycle_data = self.extract_lifecycle_data(data)
+            new_hook = componentConfigService.add_lifecycle(lifecycle_data)
+            return JsonResponse(new_hook, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except ValueError as e:
+            return JsonResponse({'error': str(e)}, status=409)  # 409 Conflict
+
+    def get(self, request):
+        try:
+            project_id = request.GET.get('project_id')
+            comp_name = request.GET.get('comp_name')
+            hook_name = request.GET.get('hook_name')
+            if not project_id or not comp_name:
+                return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            componentConfigService = ComponentConfigService(project_id)
+            lifecycle_hooks = componentConfigService.get_lifecycle(comp_name, hook_name)
+            if lifecycle_hooks or isinstance(lifecycle_hooks, list):
+                return JsonResponse(lifecycle_hooks, safe=False, status=200)
+            return JsonResponse({'error': 'Hook not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def put(self, request):
+        try:
+            data = json.loads(request.body)
+            lifecycle_data = self.extract_lifecycle_data(data)
+            componentConfigService = ComponentConfigService(data["project_id"])
+            updated_hook = componentConfigService.update_lifecycle(lifecycle_data)
+            return JsonResponse(updated_hook, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except (KeyError, LookupError, ValueError) as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    def delete(self, request):
+        try:
+            project_id = request.GET.get('project_id')
+            comp_name = request.GET.get('comp_name')
+            hook_name = request.GET.get('hook_name')
+            if not project_id or not comp_name or not hook_name:
+                return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            componentConfigService = ComponentConfigService(project_id)
+            isDeleted = componentConfigService.delete_lifecycle(comp_name, hook_name)
+            if isDeleted:
+                return JsonResponse({'msg': 'Hook deleted.'}, status=200)
+            return JsonResponse({'error': 'Hook not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    @staticmethod
+    def extract_lifecycle_data(data):
+        return {
+            "comp_name": data["comp_name"],
+            "type": data["type"],
+            "lifecycleType": data["lifecycleType"],
+            "hook_name": data["hook_name"],
+            "dependentVars": data["dependentVars"],
+            "body": data["body"],
+            "return_body": data.get("return_body")
+        }
+        
+@method_decorator(csrf_exempt, name='dispatch')
+class VariablesConfigWriter(APIView):
+    
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            componentConfigService = ComponentConfigService(data["project_id"])
+            var=componentConfigService.add_variable(data["component"],data["variable_config"])
+            return JsonResponse(var,status=200,safe=False)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+    def get(self, request):
+        try:
+            project_id = request.GET.get('project_id')
+            comp_name = request.GET.get('comp_name')
+            variable_id = request.GET.get('variable_id')
+            if not project_id or not comp_name:
+                return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            componentConfigService = ComponentConfigService(project_id)
+            variables = componentConfigService.get_variables(comp_name, variable_id)
+            if variables or isinstance(variables, list):
+                return JsonResponse(variables, safe=False, status=200)
+            return JsonResponse({'error': 'Variable not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def put(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            componentConfigService = ComponentConfigService(data["project_id"])
+            var=componentConfigService.update_variable(data["component"],data["variable_config"])
+            return JsonResponse(var,status=200,safe=False)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete(self, request):
+        try:
+            project_id = request.GET.get('project_id')
+            comp_name = request.GET.get('comp_name')
+            variable_id = request.GET.get('variable_id')
+            if not project_id or not comp_name or not variable_id:
+                return JsonResponse({'error': 'Missing required parameters'}, status=400)
+            componentConfigService = ComponentConfigService(project_id)
+            isDeleted = componentConfigService.delete_variable(comp_name, variable_id)
+            if isDeleted:
+                return JsonResponse({'msg': 'Var deleted.'}, status=200)
+            return JsonResponse({'error': 'Var not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+@method_decorator(csrf_exempt,name="dispatch")
+class FunctionConfigReader(APIView):
+    
+    def post(self,request):
+        raise NotImplementedError()
+        return JsonResponse({},status=200)
+
+@method_decorator(csrf_exempt,name="dispatch")
+class FunctionConfigWriter(APIView):
+    
+    def post(self,request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            componentConfigService = ComponentConfigService(data["project_id"])
+            func=componentConfigService.add_function(data["component"],data["function_config"])
+            return JsonResponse(func,status=200,safe=False)
+        except IndexError:
+            return JsonResponse({},status=409)
+        except:
+            return JsonResponse({},status=500)
+        
+    def put(self,request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            componentConfigService = ComponentConfigService(data["project_id"])
+            func=componentConfigService.update_function(data["component"],data["function_config"])
+            return JsonResponse(func,status=200,safe=False)
+        except IndexError:
+            return JsonResponse({},status=404)
         except:
             return JsonResponse({},status=500)

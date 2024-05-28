@@ -16,7 +16,7 @@ const CustomFormGroup = ({ controls, inline }) => {
         {controls.map((control, index) => (
           <div key={index} className="row">
             <div className={`col-${control.labelColWidth}`}>
-              <label className="label" htmlFor={control.id}>
+              <label className="custom-label" htmlFor={control.id}>
                 {control.label}
               </label>
             </div>
@@ -54,18 +54,22 @@ const CustomFormGroup = ({ controls, inline }) => {
               <CustomButton label={control.label} onClick={control.onClick} />
             )}
             {control.type === "textarea" && (
+              <div className={`col-${control.inputColWidth}`}>
               <CustomTextArea
                 label={control.label}
                 onChange={control.onChange}
                 placeholder={control.placeholder}
               />
+              </div>
             )}
             {control.type === "checkbox" && (
+              <div className={`col-${control.inputColWidth}`}>
               <CustomCheckbox
                 checked={control.checked}
                 onChange={control.onChange}
                 id={control.id}
               />
+              </div>
             )}
           </div>
         ))}
@@ -79,7 +83,7 @@ const CustomFormGroup = ({ controls, inline }) => {
           <div key={index}>
             <div className="row">
               <div className={`col-${control.labelColWidth}`}>
-                <label className="label" htmlFor={control.id}>
+                <label className="custom-label" htmlFor={control.id}>
                   {control.label}
                 </label>
               </div>
@@ -98,9 +102,10 @@ const CustomFormGroup = ({ controls, inline }) => {
                 <div className={`col-${control.inputColWidth}`}>
                   <CustomButtonGroup
                     options={control.buttonGroupOptions}
-                    selectedButton={control.value}
+                    selectedButton={control.selectedButton}
                     onButtonClick={control.onButtonClick}
                     formId={control.formId}
+                    width={control.width}
                   />
                 </div>
               )}

@@ -11,17 +11,20 @@ from common.utils.formatter import format_by_prettier,format_val
 import yaml
 from common.utils.file_helper import create_parent_dir_if_not_exists
 import copy
+from .helpers.replace_variable import replace_variable
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
-    "name": "Comp",
-    "containingFile": "components/Comp.js",
+    "name": "$NAME",
+    "containingFile": "components/$NAME.js",
     "stateVars": [],
     "propsVars": [],
     "otherVars": [],
+    "refVars": [],
+    "componentType" : "CUSTOM",
     "functions": [],
-    "$id":"COMP",
-    "html": {"_id":"Main"},
+    "$id":"$NAME",
+    "html": {"_id":"$NAME"},
     "wrapper_store": None,
     "imports": { "components": [], "other": [
         {
@@ -39,40 +42,40 @@ NEW_COMP_FORMAT={
     },
     "hooks": [],
     "html_elements":{
-        "Main":{
+        "$NAME":{
             "type": "Element",
             "elementType": "HTML",
             "typeId": "DIV",
             "tagName": "div",
             "attributes": {
                 "className": { "type": "LITERAL", "value": "" },
-                "id": { "type": "LITERAL", "value": "" }
+                "id": { "type": "LITERAL", "value": "$NAME" }
             },
             "children": [
-                {"_id":"Main-0"},
-                {"_id":"Main-1"}
+                {"_id":"$NAME-0"},
+                {"_id":"$NAME-1"}
             ]
         },
-        "Main-0":{
+        "$NAME-0":{
             "type": "text", 
             "text": "Hello world" 
         },
-        "Main-1":{
+        "$NAME-1":{
             "type":"Element",
             "elementType":"HTML",
             "typeId":"DIV",
             "tagName":"div",
             "attributes": {
                 "className": { "type": "LITERAL", "value": "" },
-                "id": { "type": "LITERAL", "value": "" }
+                "id": { "type": "LITERAL", "value": "$NAME-1" }
             },
             "children":[
-                {"_id":"Main-1-0"}
+                {"_id":"$NAME-1-0"}
             ]
         },
-        "Main-1-0":{
+        "$NAME-1-0":{
             "type":"text",
-            "text": "Hello"
+            "text": "BYe"
         }
     }
 }
@@ -187,14 +190,11 @@ class AppEditor:
     
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
-    def add_component(self,name):
+    def add_component(self,name,type):
         name=name.replace(' ',"")
         comp=NEW_COMP_FORMAT.copy()
-        comp['name'] = name
-        comp["$id"] = name.upper()
-        comp['containingFile'] = "components/"+name+".js"
-        comp["html"]["attributes"]["id"]["value"]=name
-        comp["html"]["_id"]=name
+        replace_variable(comp,"$NAME",name)
+        comp["type"] = type
         config=self.write_component(comp)
         
         return {"config":config, "comp":name}

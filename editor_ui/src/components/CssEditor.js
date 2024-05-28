@@ -98,7 +98,7 @@ function CssEditor({ mode }) {
   return (
     <>
       <div className="container-fluid text-white">
-        <div class="row py-2">
+        <div className="row py-2">
           <h3>
             {mode === "view"
               ? "View CSS"

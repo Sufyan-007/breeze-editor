@@ -20,14 +20,14 @@ import {
 import { createContext, useMemo, useState } from "react";
 import ProjectSidebar from "../ProjectSidebar";
 import HtmlSection from "./HtmlSection";
-import StateVarsSection from "./StateVarsSection";
+import VariablesSection from "./VariablesSection";
 import LifeCycleSection from "./LifeCycleSection";
-import FunctionSection from "./FunctionSection";
+import FunctionSection from "../FunctionsSection/FunctionSection";
 import SidebarService from "../../services/SidebarService";
 
 const components = [
   HtmlSection,
-  StateVarsSection,
+  VariablesSection,
   FunctionSection,
   LifeCycleSection,
 ];
@@ -93,8 +93,8 @@ export default function ComponentConfigPage() {
             </div>
           }
         />
-        <div className="row d-flex no-wrap h-100">
-          <div className="col-auto px-0">
+        <div className="row flex-grow-1 overflow-hidden">
+          <div className="col-auto h-100 px-0">
             <ProjectSidebar
               isSidebarExpanded={isSidebarExpanded}
               sidebarItems={sidebarItems}
@@ -104,7 +104,7 @@ export default function ComponentConfigPage() {
               highlightedStyle={highlightedStyle}
             />
           </div>
-          <div className="col px-0 d-flex flex-column">
+          <div className="col px-0 d-flex flex-column h-100">
             <div className="row mx-0 bg-dark p-1">
               <div className="d-flex justify-content-start">
                 {menu.map((item, index) => (
@@ -127,8 +127,8 @@ export default function ComponentConfigPage() {
                 ))}
               </div>
             </div>
-            <div className="row mx-0 flex-grow-1">
-              <div className=" d-flex flex-column">{< SelectedElement />}</div>
+            <div className="row mx-0 flex-grow-1 overflow-y-auto">
+              <div className=" d-flex ">{< SelectedElement />}</div>
             </div>
           </div>
         </div>

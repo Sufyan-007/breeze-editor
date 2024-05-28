@@ -29,7 +29,6 @@ let authTypes = [
 ];
 
 export default function Auth({ index, onChange, auth,onRemove, loginApis, tokenApis }) {
-  console.log(auth,"auth prop in auth. look for type");
   const [authData, setAuthData] = useState(auth || {});
 
   const onValueChange = (prop, value) => {
@@ -82,21 +81,7 @@ export default function Auth({ index, onChange, auth,onRemove, loginApis, tokenA
       <div className="custom-grid-item one">
         <img src={remove} height={24} alt="remove" onClick={handleRemoveAuth} />
       </div>
-      {/* <Form.Group controlId="auth">
-        <Row>
-          <Col sm={1}>
-            <Form.Label className="">Type:</Form.Label>
-          </Col>
-          <Col sm={8}>
-            <CustomButtonGroup
-              options={authTypes}
-              selectedButton={auth["type"]}
-              onButtonClick={onValueChange}
-              formId="type"
-            ></CustomButtonGroup>
-          </Col>
-        </Row>
-      </Form.Group> */}
+     
       <CustomFormGroup
         controls={[
           {
@@ -115,38 +100,7 @@ export default function Auth({ index, onChange, auth,onRemove, loginApis, tokenA
         ]}
         inline={true}
       />
-      {/* <CustomFormGroup controls={authFields} inline={true} /> */}
-      {/* <Form.Group className=" mb-3 custom-form-group" controlId="login_api">
-        <Row>
-          <Col sm={3}>
-            <Form.Label>Login Api</Form.Label>
-          </Col>
-          <Col sm={9}>
-            <Dropdown
-              onSelect={(api) => handleAuthApiSelect(api, "login_api")}
-              className="m-2"
-            >
-              <Dropdown.Toggle variant="secondary" id="loginApiDropdown">
-                {authData["login_api"]
-                  ? loginApis.find((api) => api.id === authData["login_api"]).operation_id
-                  : "Select Login Api"}
-              </Dropdown.Toggle>
-              <Dropdown.Menu style={{ textAlign: "center" }}>
-                {loginApis &&
-                  loginApis.map((api) => (
-                    <Dropdown.Item
-                      key={api.id}
-                      eventKey={api.id}
-                      className="dropdownitem"
-                    >
-                      {api.operation_id}
-                    </Dropdown.Item>
-                  ))}
-              </Dropdown.Menu>
-            </Dropdown>
-          </Col>
-        </Row>
-      </Form.Group> */}
+    
 
       <CustomFormGroup
         controls={[

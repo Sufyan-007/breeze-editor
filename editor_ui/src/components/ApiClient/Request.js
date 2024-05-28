@@ -3,10 +3,11 @@ import { Form, Button} from "react-bootstrap";
 import Body from "./Body.js";
 import Auth from "./Auth.js";
 import Urls from "./Urls.js";
+import Parameter from "./Parameter.js"
 import add from "../../assets/icons/add.svg";
 import CustomButtonGroup from "../CustomButtonGroup.js";
-import RequestBodyCss from "../../css/RequestBody.css";
-import CustomLayoutCss from "../../css/CustomLayout.css";
+import  "../../css/RequestBody.css";
+import  "../../css/CustomLayout.css";
 import CustomFormGroup from "../CustomFormGroup.js";
 
 let methodType = [
@@ -39,7 +40,7 @@ let methodType = [
     width: "100%",
   },
 ];
-function Request({ loginApis, tokenApis, onChange, requestBody }) {
+function Request({ loginApis, tokenApis, onChange, requestBody , renderAuth}) {
   // console.log(loginApis, tokenApis, "login token");
   const [request, setRequest] = useState(requestBody || {});
   useEffect(()=>{setRequest(requestBody)},[requestBody])
@@ -70,20 +71,33 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
     });
     onChange("request", r);
   };
-
-  const addBodySection = () => {
-    const newBody = {
+  const addProperty = (name, initial_values) => {
+    const newProperty = {
+      ...initial_values,
       id: Date.now(),
-      mode: "RAW",
-      content_type: "NONE",
-      schema_name: "",
-      anonymous: false,
     };
+    console.log(newProperty, "newprop");
     setRequest({
       ...request,
-      body: request.body ? [...request.body, newBody] : [newBody],
+      [name]: request[name] ? [...request[name], newProperty] : [newProperty],
     });
+    onChange("request", request);
   };
+  // const addBodySection = () => {
+  //   const newBody = {
+  //     id: Date.now(),
+  //     mode: "RAW",
+  //     content_type: "NONE",
+  //     schema_name: "",
+  //     anonymous: false,
+  //   };
+  //   setRequest({
+  //     ...request,
+  //     body: request.body ? [...request.body, newBody] : [newBody],
+  //   });
+
+  //   setHasBody(true);
+  // };
   useEffect(() => {
     if (request.body && request.body.length > 0) {
       const updatedBody = request.body.map((body) => ({
@@ -96,19 +110,33 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
       }));
     }
   }, []);
-  const removeBodySection = (indexToRemove) => {
-    if (request.body && request.body.length > 0) {
-      const updatedBody = request.body.filter(
-        (_, index) => index !== indexToRemove
-      );
-      const updatedRequest = {
-        ...request,
-        body: updatedBody,
-      };
-      setRequest(updatedRequest);
-      onChange("request", updatedRequest);
-    }
-  };
+  // const removeBodySection = (indexToRemove) => {
+  //   if (request.body && request.body.length > 0) {
+  //     const updatedBody = request.body.filter(
+  //       (_, index) => index !== indexToRemove
+  //     );
+  //     const updatedRequest = {
+  //       ...request,
+  //       body: updatedBody,
+  //     };
+  //     setRequest(updatedRequest);
+  //     onChange("request", updatedRequest);
+  //     setHasBody(updatedBody.length > 0);
+  //   }
+  // };
+    const removeProperty = (name, indexToRemove) => {
+      if (request[name] && request[name].length > 0) {
+        const updatedProperty = request[name].filter(
+          (_, index) => index !== indexToRemove
+        );
+        const updatedRequest = {
+          ...request,
+          [name]: updatedProperty,
+        };
+        setRequest(updatedRequest);
+        onChange("request", updatedRequest);
+      }
+    };
   const removeAuthSection = (indexToRemove) => {
     if (request.auth && request.auth.length > 0) {
       const updatedAuth = [...request.auth];
@@ -130,13 +158,6 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
 
   return (
     <>
-      {/* <CustomButtonGroup
-        options={methodType}
-        selectedButton={request["method"]}
-        onButtonClick={onValueChange}
-        formId="method"
-        title="Method:"
-      /> */}
       <CustomFormGroup
         controls={[
           {
@@ -158,51 +179,108 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
       <div>
         <div className="custom-grid">
           <div className="custom-grid-item three">
-            <Form.Label className="mt-3 mx-3">URLs:</Form.Label>
+            <Form.Label className="mt-3 mx-3 label">URLs:</Form.Label>
           </div>
           <div className="custom-grid-item nine d-flex mt-3">
-            {
-              <Urls urlData={request["url"]} onChange={onUrlValueChange} />
-            }
+            {<Urls urlData={request["url"]} onChange={onUrlValueChange} />}
           </div>
         </div>
       </div>
 
-      <div>
-        <div className="custom-grid">
-          <div className="custom-grid-item three">
-            <Form.Label className="mt-3 mx-3">Auth:</Form.Label>
-            <Button variant="secondary" size="sm" onClick={addAuthSection}>
-              <img
-                width="24"
-                height="24"
-                src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
-                alt="add--v1"
-              />{" "}
-            </Button>
-          </div>
-          {
-            <div className="custom-grid-item nine  d-flex flex-wrap  mt-3">
-              {request["auth"]&& request["auth"].map((auth, index) => (
-                <Auth
-                  key={index}
-                  index={index}
-                  onChange={onListValueChange}
-                  auth={auth}
-                  tokenApis={tokenApis}
-                  loginApis={loginApis}
-                  onRemove={() => removeAuthSection(index)}
-                />
-              ))}
+      {renderAuth && (
+        <div>
+          <div className="custom-grid">
+            <div className="custom-grid-item three">
+              <Form.Label className="mt-3 mx-3 label">Auth:</Form.Label>
+              <Button variant="secondary" size="sm" onClick={addAuthSection}>
+                <img
+                  width="24"
+                  height="24"
+                  src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+                  alt="add--v1"
+                />{" "}
+              </Button>
             </div>
-          }
+            {
+              <div className="custom-grid-item nine  d-flex flex-wrap  mt-3">
+                {request["auth"] &&
+                  request["auth"].map((auth, index) => (
+                    <Auth
+                      key={index}
+                      index={index}
+                      onChange={onListValueChange}
+                      auth={auth}
+                      tokenApis={tokenApis}
+                      loginApis={loginApis}
+                      onRemove={() => removeAuthSection(index)}
+                    />
+                  ))}
+              </div>
+            }
+          </div>
         </div>
+      )}
+
+      <div className="custom-grid">
+        <div className="custom-grid-item three">
+          <Form.Label className="mt-3 mx-3 label">Parameter:</Form.Label>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              addProperty("parameters", {
+                param_in: "",
+                type: "",
+                required: false,
+                description: "",
+                name: "",
+              })
+            }
+          >
+            <img
+              width="24"
+              height="24"
+              src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+              alt="add--v1"
+            />{" "}
+          </Button>
+        </div>
+        {request["parameters"] && (
+          <div
+            className="custom-grid-item nine d-flex flex-wrap mt-3"
+            style={{
+              flexDirection: "row",
+              justifyContent: "normal",
+            }}
+          >
+            {request["parameters"].map((parameter, index) => (
+              <Parameter
+                key={parameter.id}
+                index={index}
+                onChange={onListValueChange}
+                parameterData={parameter}
+                onRemove={() => removeProperty("parameters", index)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="custom-grid">
         <div className="custom-grid-item three">
-          <Form.Label className="mt-3 mx-3">Body:</Form.Label>
-          <Button variant="secondary" size="sm" onClick={addBodySection}>
+          <Form.Label className="mt-3 mx-3 label">Body:</Form.Label>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              addProperty("body", {
+                mode: "RAW",
+                content_type: "NONE",
+                schema_name: "",
+                anonymous: false,
+              })
+            }
+          >
             <img
               width="24"
               height="24"
@@ -219,7 +297,7 @@ function Request({ loginApis, tokenApis, onChange, requestBody }) {
                 index={index}
                 onChange={onListValueChange}
                 bodyData={body}
-                onRemove={() => removeBodySection(index)}
+                onRemove={() => removeProperty("body", index)}
               />
             ))}
           </div>

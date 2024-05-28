@@ -1,7 +1,8 @@
 import React , {useEffect} from "react";
 // import { Col, Form, FormGroup, Row } from "react-bootstrap";
 import CustomFormGroup from "../CustomFormGroup";
-import UrlsCss from "../../css/Urls.css";
+import  "../../css/Urls.css";
+
 function Urls({ urlData, onChange }) {
   console.log(urlData, "urldata");
   const onValueChange = (field, fieldValue) => {

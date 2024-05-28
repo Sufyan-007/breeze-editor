@@ -1,45 +1,6 @@
 
-
-.main-container {
-  padding-left: 48px;
-}
-.main-container::-webkit-scrollbar {
-  display: none;
-}
-
-.custom-form-control {
-  max-width: 95%;
-  background-color: #303033 !important;
-  color: white;
-  font-size: 16px;
-}
-/* .form-control {
-  color: white !important;
-  font-size: 16px;
-} */
-
-.section-div {
-  padding-top: 7px;
-  padding-bottom: 7px;
-  margin-bottom: 16px;
-  max-width: 74.2vw;
-}
-.body-sec {
-  padding-left: 14px;
-}
 label.form-label {
   font-size: 16px;
-}
-.mx-1.btn.btn-secondary {
-  cursor: pointer;
-  border-color: white;
-}
-.close-button.btn.btn-secondary {
-  cursor: pointer;
-  margin-right: 38px;
-}
-.auth-api-checkbox {
-  color: white;
 }
 
 .divider-sec {
@@ -48,18 +9,18 @@ label.form-label {
   font-size: 16px;
   padding: 8px;
   position: relative;
-  z-index:999;
+  z-index: 999;
 }
 
-.divider-sec p{
+.divider-sec p {
   margin-bottom: 0px;
   padding-left: 8px;
 }
-.d-flex.mt-3{
+.d-flex.mt-3 {
   flex-direction: row;
   justify-content: normal;
-  background-color:#303033 ;
+  background-color: #303033;
   border: 1px solid grey;
   max-width: 90%;
-  padding:8px;
+  padding: 8px;
 }

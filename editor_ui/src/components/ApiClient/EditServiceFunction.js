@@ -174,66 +174,67 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
     onClose();
   }
   return (
-    <div>
-        <>
-          <div className="custom-grid d-flex justify-content-end align-items-center w-100 mb-3">
-            <div className="custom-grid-item one">
-              <Button variant="secondary" onClick={handleSubmit} label="Submit">
-                Submit
-              </Button>
-            </div>
-            <div className="custom-grid-item one">
-              <Button variant="secondary" onClick={onClose} label="Close">
-                Close
-              </Button>
-            </div>
+    <div
+      style={{
+        overflowY: "hidden",
+        overflowX: "hidden",
+      }}
+    >
+      <>
+        <div className="custom-grid d-flex justify-content-end align-items-center w-100 mb-3">
+          <div className="custom-grid-item one">
+            <Button variant="secondary" onClick={handleSubmit} label="Submit">
+              Submit
+            </Button>
           </div>
-          <Form className="mt-4">
-            <CustomFormGroup controls={controls} />
+          <div className="custom-grid-item one">
+            <Button variant="secondary" onClick={onClose} label="Close">
+              Close
+            </Button>
+          </div>
+        </div>
+        <Form className="mt-4">
+          <CustomFormGroup controls={controls} />
 
-            <section className="divider-sec">
-              <p>Request Body</p>
-            </section>
-            {
-              <Form.Group
-                className="mb-3 custom-form-group"
-                controlId="request"
-              >
-                <Request
-                  loginApis={loginApis}
-                  tokenApis={tokenApis}
-                  onChange={onApiModelChange}
-                  requestBody={apiModel.request || {"auth":[], "body":[]}}
-                />
-              </Form.Group>
-            }
+          <section className="divider-sec">
+            <p>Request Body</p>
+          </section>
+          {
+            <Form.Group className="mb-3 custom-form-group" controlId="request">
+              <Request
+                loginApis={loginApis}
+                tokenApis={tokenApis}
+                onChange={onApiModelChange}
+                requestBody={apiModel.request || { auth: [], body: [] }}
+                renderAuth={true}
+              />
+            </Form.Group>
+          }
 
-            <section className="divider-sec">
-              <p>Response Body</p>
-            </section>
+          <section className="divider-sec">
+            <p>Response Body</p>
+          </section>
 
-            {
-              <div className="custom-grid">
-                <div className="custom-grid-item three">
-                  <Form.Label className="mx-3 mt-3">Response</Form.Label>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleAddResponse}
-                  >
-                    <img
-                      width="24"
-                      height="24"
-                      src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
-                      alt="add--v1"
-                    />
-                  </Button>
-                </div>
-                <div
-                  className="custom-grid-item nine d-flex flex-wrap mt-3 p-2"
-                  
+          {
+            <div className="custom-grid">
+              <div className="custom-grid-item three">
+                <Form.Label className="mx-3 mt-3 label">Response</Form.Label>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddResponse}
                 >
-                  {apiModel["response"]&& apiModel["response"].map((res, index) => (
+                  <img
+                    width="24"
+                    height="24"
+                    src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+                    alt="add--v1"
+                  />
+                </Button>
+              </div>
+              <div className="custom-grid-item nine d-flex flex-wrap mt-3 p-2">
+                {apiModel["response"] &&
+                  apiModel["response"].map((res, index) => (
                     <Response
                       key={res.id}
                       index={index}
@@ -242,11 +243,11 @@ function EditServiceFuntion({ selectedServiceInfo, onClose }) {
                       onRemove={removeResponse}
                     />
                   ))}
-                </div>
               </div>
-            }
-          </Form>
-        </>
+            </div>
+          }
+        </Form>
+      </>
     </div>
   );
 }
