@@ -17,18 +17,25 @@ export default function HtmlSection() {
     };
 
     useEffect(() => {
-        setTimeout( () => {
-            const iframe = document.getElementById("iFrame")
-            if (iframe) {
-                iframe.contentWindow.postMessage({ func: '()=>{console.log(" Hello World") }'},"*")
+
+        window.addEventListener("message", (message) => {
+            if(message.data.source==="APP"){
+                console.log(message.data)
             }
-        },500)
+        })
+        setTimeout(async () => {
+            const iframe = document.getElementById("iFrame")
+
+            if (iframe) {
+                iframe.contentWindow.postMessage({ func: '()=>{console.log(" Hello World") }' }, "*")
+            }
+        }, 500)
     }, [])
 
 
     return (
-        <div className="row flex-grow-1" style={{ position:"relative"}}>
-            
+        <div className="row flex-grow-1" style={{ position: "relative" }}>
+
             <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
                 <div className="row">
                     <div
@@ -56,8 +63,8 @@ export default function HtmlSection() {
             </div>
             <div className="col overflow-hidden p-0">
                 <div className=" bg-dark-subtle align-items-center d-flex justify-content-start" style={{ 'height': "2.4rem" }}>
-                    
-                        <div className="me-3">
+
+                    <div className="me-3">
                         <input
                             type="text"
                             ref={srcInput}
@@ -67,7 +74,7 @@ export default function HtmlSection() {
                             className="InputBox me-2 rounded"
                         />
                         <input type="submit" id="Form_Go" className="Button bg-primary text-light rounded" value="GO" onClick={setIframeSource} />
-                        </div>
+                    </div>
                 </div>
                 <iframe ref={iFrameRef} id="iFrame" src={iframeSrc} title="Generated Project" style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} ></iframe>
             </div>
