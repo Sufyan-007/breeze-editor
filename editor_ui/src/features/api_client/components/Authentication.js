@@ -1,7 +1,8 @@
 import React from "react";
 import { Form, Table } from "react-bootstrap";
-import Delete from "../../assets/icons/delete.svg";
-function NewAuthentication({
+import Delete from "../../../assets/icons/delete.svg";
+import "../../../css/NewBody.css";
+function Authentication({
   isAuthApi,
   authApiType,
   authType,
@@ -16,9 +17,7 @@ function NewAuthentication({
   deleteAuthProps,
 }) {
   const handleChanges = (prop, value, parent = null, parent_name = null) => {
-    console.log(prop, value, parent, parent_name);
     if (prop === "is_authentication_api" && value === false) {
-      console.log("deleting......");
       deleteAuthProps([
         "auth_api_type",
         "authentication_type",
@@ -55,7 +54,6 @@ function NewAuthentication({
     onReqChange("auth", updatedAuthArray);
   };
   const handleDelete = (index, type = "auth", contentIndex) => {
-    console.log(index, type);
     if (type === "auth") {
       const updatedAuthArray = [...authArray];
       updatedAuthArray.splice(index, 1);
@@ -63,31 +61,26 @@ function NewAuthentication({
     } else if (type === "content") {
       const updatedAuthArray = [...authArray];
       updatedAuthArray[index].contents.splice(contentIndex, 1);
-      console.log(updatedAuthArray, "updatedauth");
       onReqChange("auth", updatedAuthArray);
     }
   };
   const handleContentChange = (contentIndex, prop, value, authIndex) => {
-    console.log(contentIndex, prop, value, authIndex);
     const updatedAuthArray = [...authArray];
     if (contentIndex !== null) {
-      console.log(contentIndex, "content index");
       updatedAuthArray[authIndex].contents[contentIndex][prop] = value;
     } else {
       updatedAuthArray[authIndex][prop] = value;
     }
-
-    onReqChange("auth", updatedAuthArray); // Pass the updated auth array
+    onReqChange("auth", updatedAuthArray);
   };
   return (
     <>
       <div>
-        <Form.Label className="mx-2 mt-2" style={{ color: "white" }}>
+        <Form.Label className="mx-2 mt-2 new-body-color-white">
           Is Authentication Api ?
         </Form.Label>
         <Form.Check
-          className="mx-3"
-          style={{ display: "inline-block" }}
+          className="mx-3 new-body-d-inline-block"
           type="checkbox"
           checked={isAuthApi}
           onChange={(e) =>
@@ -106,33 +99,16 @@ function NewAuthentication({
           />
         )}
       </div>
-      <div
-        style={{
-          // border: "1px solid blue",
-          height: "100%",
-          width: "100%",
-          display: "flex",
-        }}>
+      <div className="new-body-h-full new-body-w-full new-body-d-flex">
         {isAuthApi ? (
           <>
-            <div id="left" style={{ width: "50%", height: "100%" }}>
+            <div id="left" className="new-body-h-full new-body-w-50">
               <div>
-                <Form.Label
-                  className="mx-2"
-                  style={{ color: "white", width: "40%" }}>
+                <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                   Authentication Type :
                 </Form.Label>
                 <Form.Select
-                  className="mt-2"
-                  style={{
-                    height: "20%",
-                    width: "50%",
-                    borderRadius: "0%",
-                    // backgroundColor: "#303033",
-                    backgroundColor: "#212529",
-                    color: "white",
-                    display: "inline-block",
-                  }}
+                  className="mt-2 new-auth-select"
                   value={authType}
                   onChange={(e) =>
                     handleChanges("authentication_type", e.target.value)
@@ -147,22 +123,11 @@ function NewAuthentication({
               {authType && authType === "OAUTH2" && (
                 <>
                   <div id="flow-type">
-                    <Form.Label
-                      className="mx-2"
-                      style={{ color: "white", width: "40%" }}>
+                    <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                       Flow :
                     </Form.Label>
                     <Form.Select
-                      className="mt-2"
-                      style={{
-                        height: "20%",
-                        width: "50%",
-                        borderRadius: "0%",
-                        // backgroundColor: "#303033",
-                        backgroundColor: "#212529",
-                        color: "white",
-                        display: "inline-block",
-                      }}
+                      className="mt-2 new-auth-select"
                       value={flow_type}
                       onChange={(e) =>
                         handleChanges("flow_type", e.target.value)
@@ -180,23 +145,12 @@ function NewAuthentication({
 
                   {flow_type === "authorization_code" && (
                     <div id="auth-url">
-                      <Form.Label
-                        className="mx-2"
-                        style={{ color: "white", width: "40%" }}>
+                      <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                         Authorization Url:
                       </Form.Label>
                       <Form.Control
-                        className="mt-2"
+                        className="mt-2 new-auth-select"
                         type="text"
-                        style={{
-                          height: "20%",
-                          width: "50%",
-                          borderRadius: "0%",
-                          // backgroundColor: "#303033",
-                          backgroundColor: "#212529",
-                          color: "white",
-                          display: "inline-block",
-                        }}
                         value={flow ? flow.authorization_url : ""}
                         onChange={(e) =>
                           handleChanges(
@@ -210,23 +164,12 @@ function NewAuthentication({
                     </div>
                   )}
                   <div id="token-url">
-                    <Form.Label
-                      className="mx-2"
-                      style={{ color: "white", width: "40%" }}>
+                    <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                       Token Url:
                     </Form.Label>
                     <Form.Control
-                      className="mt-2"
+                      className="mt-2 new-auth-select"
                       type="text"
-                      style={{
-                        height: "20%",
-                        width: "50%",
-                        borderRadius: "0%",
-                        // backgroundColor: "#303033",
-                        backgroundColor: "#212529",
-                        color: "white",
-                        display: "inline-block",
-                      }}
                       value={flow ? flow.token_url : ""}
                       onChange={(e) =>
                         handleChanges(
@@ -239,23 +182,12 @@ function NewAuthentication({
                     />
                   </div>
                   <div id="refresh-url">
-                    <Form.Label
-                      className="mx-2"
-                      style={{ color: "white", width: "40%" }}>
+                    <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                       Refresh Url:
                     </Form.Label>
                     <Form.Control
-                      className="mt-2"
+                      className="mt-2 new-auth-select"
                       type="text"
-                      style={{
-                        height: "20%",
-                        width: "50%",
-                        borderRadius: "0%",
-                        // backgroundColor: "#303033",
-                        backgroundColor: "#212529",
-                        color: "white",
-                        display: "inline-block",
-                      }}
                       value={flow ? flow.refresh_url : ""}
                       onChange={(e) =>
                         handleChanges(
@@ -270,22 +202,11 @@ function NewAuthentication({
                 </>
               )}
               <div>
-                <Form.Label
-                  className="mx-2"
-                  style={{ color: "white", width: "40%" }}>
+                <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                   Auth Api Type :
                 </Form.Label>
                 <Form.Select
-                  className="mt-2"
-                  style={{
-                    height: "20%",
-                    width: "50%",
-                    borderRadius: "0%",
-                    // backgroundColor: "#303033",
-                    backgroundColor: "#212529",
-                    color: "white",
-                    display: "inline-block",
-                  }}
+                  className="mt-2 new-auth-select"
                   value={authApiType}
                   onChange={(e) =>
                     handleChanges("auth_api_type", e.target.value)
@@ -298,22 +219,11 @@ function NewAuthentication({
             </div>
             <div id="right" style={{ width: "50%", height: "100%" }}>
               <div>
-                <Form.Label
-                  className="mx-2"
-                  style={{ color: "white", width: "40%" }}>
+                <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                   Storage Scheme:
                 </Form.Label>
                 <Form.Select
-                  className="mt-2"
-                  style={{
-                    height: "20%",
-                    width: "50%",
-                    borderRadius: "0%",
-                    // backgroundColor: "#303033",
-                    backgroundColor: "#212529",
-                    color: "white",
-                    display: "inline-block",
-                  }}
+                  className="mt-2 new-auth-select"
                   value={tokenStore ? tokenStore.store_in : ""}
                   onChange={(e) =>
                     handleChanges(
@@ -330,23 +240,12 @@ function NewAuthentication({
               </div>
 
               <div>
-                <Form.Label
-                  className="mx-2"
-                  style={{ color: "white", width: "40%" }}>
+                <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                   Access Token Key :
                 </Form.Label>
                 <Form.Control
-                  className="mt-2"
+                  className="mt-2 new-auth-select"
                   type="text"
-                  style={{
-                    height: "20%",
-                    width: "50%",
-                    borderRadius: "0%",
-                    // backgroundColor: "#303033",
-                    backgroundColor: "#212529",
-                    color: "white",
-                    display: "inline-block",
-                  }}
                   value={tokenStore ? tokenStore.access_token_key : ""}
                   onChange={(e) =>
                     handleChanges(
@@ -360,23 +259,12 @@ function NewAuthentication({
               </div>
 
               <div>
-                <Form.Label
-                  className="mx-2"
-                  style={{ color: "white", width: "40%" }}>
+                <Form.Label className="mx-2 new-body-color-white new-body-w-40">
                   Refresh Token Key :
                 </Form.Label>
                 <Form.Control
-                  className="mt-2"
+                  className="mt-2 new-auth-select"
                   type="text"
-                  style={{
-                    height: "20%",
-                    width: "50%",
-                    borderRadius: "0%",
-                    // backgroundColor: "#303033",
-                    backgroundColor: "#212529",
-                    color: "white",
-                    display: "inline-block",
-                  }}
                   value={tokenStore ? tokenStore.refresh_token_key : ""}
                   onChange={(e) =>
                     handleChanges(
@@ -400,12 +288,9 @@ function NewAuthentication({
                       <tr key={index}>
                         <td style={{ width: "10%" }}>
                           <Form.Select
-                            className="m2"
+                            className="m2 new-body-border-radius-none new-body-color-white new-body-d-inline-block"
                             style={{
-                              borderRadius: "0%",
                               backgroundColor: "#212529",
-                              color: "white",
-                              display: "inline-block",
                             }}
                             value={auth.type}
                             onChange={(e) =>
@@ -426,13 +311,10 @@ function NewAuthentication({
                         <td style={{ width: "20%" }}>
                           {"Login Api :"}
                           <Form.Select
-                            className="mx-2"
+                            className="mx-2 new-body-border-radius-none new-body-color-white new-body-d-inline-block"
                             style={{
                               width: "60%",
-                              borderRadius: "0%",
                               backgroundColor: "#212529",
-                              color: "white",
-                              display: "inline-block",
                             }}
                             value={auth.login_api}
                             onChange={(e) =>
@@ -453,13 +335,10 @@ function NewAuthentication({
                         <td style={{ width: "20%" }}>
                           {"Token Api :"}
                           <Form.Select
-                            className="mx-2"
+                            className="mx-2 new-body-border-radius-none new-body-color-white new-body-d-inline-block"
                             style={{
                               width: "60%",
-                              borderRadius: "0%",
                               backgroundColor: "#212529",
-                              color: "white",
-                              display: "inline-block",
                             }}
                             value={auth.token_api}
                             onChange={(e) =>
@@ -497,7 +376,6 @@ function NewAuthentication({
                                     height: "20%",
                                     width: "20%",
                                     borderRadius: "0%",
-                                    // backgroundColor: "#303033",
                                     backgroundColor: "#212529",
                                     color: "white",
                                     display: "inline-block",
@@ -519,7 +397,6 @@ function NewAuthentication({
                                     height: "20%",
                                     width: "45%",
                                     borderRadius: "0%",
-                                    // backgroundColor: "#303033",
                                     backgroundColor: "#212529",
                                     color: "white",
                                     display: "inline-block",
@@ -540,7 +417,6 @@ function NewAuthentication({
                                     height: "20%",
                                     width: "20%",
                                     borderRadius: "0%",
-                                    // backgroundColor: "#303033",
                                     backgroundColor: "#212529",
                                     color: "white",
                                     display: "inline-block",
@@ -598,4 +474,4 @@ function NewAuthentication({
   );
 }
 
-export default NewAuthentication;
+export default Authentication;

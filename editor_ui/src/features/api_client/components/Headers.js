@@ -1,8 +1,8 @@
 import React from 'react'
 import { Col, Form, Row, Table } from 'react-bootstrap';
-import Delete from '../../assets/icons/delete.svg'
-import "../../css/NewBody.css"
-function NewHeaders({headerData, onChange}) {
+import Delete from '../../../assets/icons/delete.svg'
+import "../../../css/NewBody.css"
+function Headers({headerData, onChange}) {
     const handleDelete = (index) => {
         const updatedHeader = headerData.filter((_, i) => i !== index);
         onChange("headers", updatedHeader);
@@ -84,4 +84,4 @@ function NewHeaders({headerData, onChange}) {
       );
 }
 
-export default NewHeaders
+export default Headers

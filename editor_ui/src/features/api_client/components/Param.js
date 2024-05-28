@@ -1,10 +1,9 @@
 import React from "react";
 import { Table, Form, Row, Col } from "react-bootstrap";
-import Delete from "../../assets/icons/delete.svg";
-import "../../css/NewBody.css"
-import "../../css/NewParam.css"
-// import add from "../../assets/icons/add.svg";
-function NewParam({ onChange, parameterData }) {
+import Delete from "../../../assets/icons/delete.svg";
+import "../../../css/NewBody.css"
+import "../../../css/NewParam.css"
+function Param({ onChange, parameterData }) {
   const handleDelete = (index) => {
     const updatedParameters = parameterData.filter((_, i) => i !== index);
     onChange("parameters", updatedParameters);
@@ -95,4 +94,4 @@ function NewParam({ onChange, parameterData }) {
   );
 }
 
-export default NewParam;
+export default Param;

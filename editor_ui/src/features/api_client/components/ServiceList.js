@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  fetchIntermediate,
-  generateReactService,
-  transferToAuthApi,
-} from "../../services/IntermediatesService";
+
 import {
   Table,
   Accordion,
@@ -16,11 +12,15 @@ import {
   ToastContainer,
   Toast,
 } from "react-bootstrap";
-import DeleteIcon from "../../assets/icons/delete.svg";
-import EditIcon from "../../assets/icons/edit.svg";
-import transfer from "../../assets/icons/transfer.png";
-import "../../css/ServiceList.css";
+import DeleteIcon from "../../../assets/icons/delete.svg";
+import EditIcon from "../../../assets/icons/edit.svg";
+import transfer from "../../../assets/icons/transfer.png";
+import "../../../css/ServiceList.css";
 import { useParams } from "react-router";
+import { fetchIntermediate } from "../services/IntermediateService";
+import { generateReactService } from "../services/GeneratedReactAppService";
+import { transferToAuthApi } from "../services/AuthApiService";
+
 export default function ServiceLists({
   onEditService,
   errorMessage,
@@ -102,9 +102,9 @@ export default function ServiceLists({
         />
         <span>Add API</span>
       </Button>
+      
       {apiList && apiList.length > 0 ? (
         apiList
-          .filter((service) => service.filename !== "auth")
           .map((service, index) => (
             <>
               <ToastContainer
