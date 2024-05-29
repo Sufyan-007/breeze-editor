@@ -3,6 +3,7 @@ from .views import GetComponents, GetComponentConfig, ReadFromPath
 from django.views.decorators.csrf import csrf_exempt
 from .api.retrive_component import ReriveComponent
 from .api.retrive_components import ReriveComponents
+from .api.retrive_state_variables import ReriveStateVariablesComponent
 
 urlpatterns = [
         
@@ -13,6 +14,8 @@ urlpatterns = [
         ## this APIs are for project corrosponding custom components 
         path('get-components/<str:app>', csrf_exempt(ReriveComponents.as_view())),
         path('get-component-config/<str:app>/<str:comp_id>', csrf_exempt(ReriveComponent.as_view())),
+        path('get-state-vars/<str:app>/<str:comp_id>', csrf_exempt(ReriveStateVariablesComponent.as_view())),
+        path('get-schema-json/<str:app>/<str:comp_id>', csrf_exempt(ReriveStateVariablesComponent.as_view())),
 
         # path('get-components/', csrf_exempt(GetComponents.as_view())),
         # path('get-component-config/', csrf_exempt(GetComponentConfig.as_view())),
