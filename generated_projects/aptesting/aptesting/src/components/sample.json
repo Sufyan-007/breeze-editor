@@ -1,3 +1,0 @@
-{
-  "data": "[{\"operation_id\": \"Create Task\", \"tags\": [], \"request\": {\"method\": \"post\", \"auth\": null, \"headers\": [], \"parameters\": {\"param_in\": \"\", \"name\": \"\", \"type\": \"\", \"required\": false, \"description\": \"\"}, \"url\": {\"baseurl\": \"{{url}}/tasks\", \"host\": \"\", \"protocol\": \"\", \"port\": 0, \"path\": \"\"}, \"body\": {\"mode\": \"raw\", \"content_type\": null, \"required\": null, \"schema_name\": null, \"raw_content\": \"{\\n   \\\"description\\\": \\\"fourth task\\\",\\n   \\\"completed\\\" :\\\"true\\\"\\n}\", \"file\": null, \"formdata\": null}}, \"response\": [], \"summary\": \"\"}, {\"operation_id\": \"Read Task\", \"tags\": [], \"request\": [], \"response\": [], \"summary\": \"\"}]"
-}

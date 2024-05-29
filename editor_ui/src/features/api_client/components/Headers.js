@@ -1,7 +1,8 @@
 import React from 'react'
 import { Col, Form, Row, Table } from 'react-bootstrap';
 import Delete from '../../../assets/icons/delete.svg'
-import "../../../css/NewBody.css"
+// import "../../../css/NewBody.css"
+import '../api_client.css';
 function Headers({headerData, onChange}) {
     const handleDelete = (index) => {
         const updatedHeader = headerData.filter((_, i) => i !== index);
@@ -45,7 +46,7 @@ function Headers({headerData, onChange}) {
                 <tr key={index}>
                   <td>
                     <Form.Control
-                      className="new-body-form-control"
+                      className="api-client-body-form-control"
                       type="text"
                       placeholder="Key"
                       value={header.key ? header.key : ""}
@@ -55,7 +56,7 @@ function Headers({headerData, onChange}) {
                   </td>
                   <td>
                     <Form.Control
-                    className="new-body-form-control"
+                    className="api-client-body-form-control"
                       type="text"
                       placeholder="Value"
                       value={header.value ? header.value : ""}

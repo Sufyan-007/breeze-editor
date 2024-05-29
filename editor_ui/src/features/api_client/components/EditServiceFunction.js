@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, Form, Nav, Navbar } from "react-bootstrap";
 import { useParams } from "react-router";
-import "../../../css/NewTest.css";
+// import "../../../css/NewTest.css";
+import '../api_client.css';
 import { getAuthFileApis } from "../services/AuthApiService";
 import { getApiConfig, modifyApiConfig } from "../services/ApiService";
 import Param from "./Param";
@@ -16,16 +17,8 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
   const [loginApis, setLoginApis] = useState([]);
   const [tokenApis, setTokenApis] = useState([]);
   const appName = useParams();
-  useEffect(() => {
-    setAuthApis();
-    if (selectedServiceInfo["id"] && selectedServiceInfo["filename"]) {
-      fetchModelConfig(selectedServiceInfo);
-    }
-  }, []);
-  useEffect(() => {
-    console.log(apiModel, "apimodel");
-  }, [apiModel]);
-  const setAuthApis = async () => {
+
+  const setAuthApis = useCallback(async () => {
     const result = await getAuthFileApis(appName.projectName, null);
     let login_api = [];
     let token_api = [];
@@ -34,45 +27,56 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
       return;
     }
 
-    for (let i = 0; i < result["data"].length; i++) {
-      let api = result.data[i];
+    for (let api of result.data) {
       if (api.auth_api_type === "LOGIN") {
         login_api.push({
-          id: api["id"],
+          id: api.id,
           operation_id: api.operation_id,
         });
       }
       if (api.auth_api_type === "REFRESH") {
         token_api.push({
-          id: api["id"],
+          id: api.id,
           operation_id: api.operation_id,
         });
       }
     }
     setLoginApis(login_api);
     setTokenApis(token_api);
-  };
-  const fetchModelConfig = async (selectedServiceInfo) => {
-    try {
-      const result = await getApiConfig(
-        appName.projectName,
-        selectedServiceInfo["filename"],
-        selectedServiceInfo["id"]
-      );
-      const updatedModel = result["data"];
-      if (updatedModel.response && updatedModel.response.length > 0) {
-        const updatedRes = updatedModel.response.map((res) => ({
-          ...res,
-          id: Date.now() + Math.random(),
-        }));
-        updatedModel.response = updatedRes;
+  }, [appName.projectName]);
+  const fetchModelConfig = useCallback(
+    async (selectedServiceInfo) => {
+      try {
+        const result = await getApiConfig(
+          appName.projectName,
+          selectedServiceInfo.filename,
+          selectedServiceInfo.id
+        );
+        const updatedModel = result.data;
+        if (updatedModel.response && updatedModel.response.length > 0) {
+          const updatedRes = updatedModel.response.map((res) => ({
+            ...res,
+            id: Date.now() + Math.random(),
+          }));
+          updatedModel.response = updatedRes;
+        }
+        setApiModel(updatedModel);
+        setRequest(updatedModel.request);
+      } catch (error) {
+        console.error("Error generating react service:", error);
       }
-      setApiModel(updatedModel);
-      setRequest(updatedModel.request);
-    } catch (error) {
-      console.error("Error generate react service:", error);
+    },
+    [appName.projectName]
+  );
+  useEffect(() => {
+    setAuthApis();
+    if (selectedServiceInfo["id"] && selectedServiceInfo["filename"]) {
+      fetchModelConfig(selectedServiceInfo);
     }
-  };
+  }, [selectedServiceInfo, fetchModelConfig, setAuthApis]);
+  useEffect(() => {
+    console.log(apiModel, "apimodel");
+  }, [apiModel]);
   const onValueChange = (prop, value) => {
     let r = request;
     r[prop] = value;
@@ -109,12 +113,12 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
     onClose();
   }
   return (
-    <div id="main" className="test-w-full test-h-full test-d-flex">
-      <div id="left-panel" className="test-h-full test-w-80 test-border-white">
-        <div id="left-top-panel" className="test-h-70 test-w-full">
-          <div id="method-and-url" className="test-d-flex test-h-8">
+    <div id="main" className="api-client-w-full api-client-h-full api-client-d-flex">
+      <div id="left-panel" className="api-client-h-full api-client-w-80 api-client-border-white">
+        <div id="left-top-panel" className="api-client-h-70 api-client-w-full">
+          <div id="method-and-url" className="api-client-d-flex api-client-h-8">
             <Form.Select
-              className="p-1 mt-2 test-h-70 test-w-5 test-d-inline-block test-border-radius-0 test-margin-left"
+              className="p-1 mt-2 api-client-h-70 api-client-w-5 api-client-d-inline-block api-client-border-radius-0 api-client-margin-left"
               value={apiModel.request ? apiModel.request.method : ""}
               onChange={(e) => {
                 const updatedReq = { ...apiModel.request };
@@ -129,7 +133,7 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
             <Form.Control
               type="text"
               placeholder="URL"
-              className="p-1 mt-2 test-h-70 test-w-85 test-d-inline-block test-border-radius-0 "
+              className="p-1 mt-2 api-client-h-70 api-client-w-85 api-client-d-inline-block api-client-border-radius-0 "
               value={
                 apiModel.request && apiModel.request.url
                   ? apiModel.request.url.baseurl
@@ -158,13 +162,13 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
             />
             <Button
               variant="secondary"
-              className="p-1 mt-2 test-w-8 test-h-70 test-d-inline-block test-border-radius-0"
+              className="p-1 mt-2 api-client-w-8 api-client-h-70 api-client-d-inline-block api-client-border-radius-0"
               onClick={saveApi}>
               Save
             </Button>
           </div>
-          <div id="request-settings" className="test-request-settings">
-            <Navbar bg="dark" variant="dark" className="test-h-10">
+          <div id="request-settings" className="api-client-request-settings">
+            <Navbar bg="dark" variant="dark" className="api-client-h-10">
               <Nav
                 activeKey={activeTab}
                 onSelect={(selectedKey) => setActiveTab(selectedKey)}>
@@ -174,7 +178,7 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
                 <Nav.Link eventKey="authentication">Authentication</Nav.Link>
               </Nav>
             </Navbar>
-            <div className="test-h-90">
+            <div className="api-client-h-90">
               {activeTab &&
                 (activeTab === "parameters" ? (
                   <Param
@@ -226,7 +230,7 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
             </div>
           </div>
         </div>
-        <div id="left-bottom-panel" className="test-h-30 test-border-white">
+        <div id="left-bottom-panel" className="api-client-h-30 api-client-border-white">
           <Response
             responseData={apiModel.response ? apiModel.response : []}
             onChange={onApiModelChange}
@@ -236,22 +240,22 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
 
       <div
         id="right-panel"
-        className="test-border-white test-h-full test-w-20 test-color-white">
-        <Form.Label className="test-w-40 p-1">Function Name</Form.Label>
+        className="api-client-border-white api-client-h-full api-client-w-20 api-client-color-white">
+        <Form.Label className="api-client-w-40 p-1">Function Name</Form.Label>
         <Form.Control
           type="text"
           placeholder="function name"
-          className="p-1 mt-2 mx-3 test-w-50 test-d-inline-block test-border-radius-0 "
+          className="p-1 mt-2 mx-3 api-client-w-50 api-client-d-inline-block api-client-border-radius-0 "
           value={apiModel.operation_id ? apiModel.operation_id : ""}
           onChange={(e) => {
             onApiModelChange("operation_id", e.target.value);
           }}
         />
-        <Form.Label className="test-w-40 p-1">Service Name</Form.Label>
+        <Form.Label className="api-client-w-40 p-1">Service Name</Form.Label>
         <Form.Control
           type="text"
           placeholder="Service Name"
-          className="p-1 mt-2 mx-3 test-w-50 test-d-inline-block test-border-radius-0 "
+          className="p-1 mt-2 mx-3 api-client-w-50 api-client-d-inline-block api-client-border-radius-0 "
           value={apiModel.tags ? apiModel.tags : ""}
           onChange={(e) => {
             onApiModelChange("tags", e.target.value);

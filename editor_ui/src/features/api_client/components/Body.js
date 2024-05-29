@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Form, Nav, Navbar, Table } from "react-bootstrap";
 import Delete from "../../../assets/icons/delete.svg";
 import Remove from "../../../assets/icons/remove.svg";
-import "../../../css/NewBody.css";
+// import "../../../css/NewBody.css";
+import '../api_client.css';
 import * as monaco from "monaco-editor";
 
 function Body({ bodyData, onChange }) {
@@ -188,7 +189,7 @@ function Body({ bodyData, onChange }) {
                 <>
                   <td>
                     <Form.Control
-                      className="new-body-form-control"
+                      className="api-client-body-form-control"
                       as="select"
                       value={value.type}
                       onChange={(e) =>
@@ -202,7 +203,7 @@ function Body({ bodyData, onChange }) {
                   </td>
                   <td>
                     <Form.Control
-                      className="new-body-form-control"
+                      className="api-client-body-form-control"
                       type="text"
                       value={value.example}
                       onChange={(e) =>
@@ -265,11 +266,11 @@ function Body({ bodyData, onChange }) {
   };
 
   return (
-    <div className="new-body-w-full new-body-h-full">
-      <div className="new-body-h-15">
+    <div className="api-client-w-full api-client-h-full">
+      <div className="api-client-h-15">
         {hasBody ? (
           <>
-            <Navbar bg="dark" variant="dark" className="new-body-h-70">
+            <Navbar bg="dark" variant="dark" className="api-client-h-70">
               <Nav activeKey={activeTab} onSelect={handleSelect}>
                 {bodyData.map((body, index) => (
                   <Nav.Link key={index} eventKey={index}>
@@ -297,10 +298,10 @@ function Body({ bodyData, onChange }) {
               </Nav>
             </Navbar>
             <div
-              className="mt-1 new-body-d-flex new-body-border-white new-body-w-full"
+              className="mt-1 api-client-d-flex api-client-border-white api-client-w-full"
               id="select-content-type">
               <Form.Select
-                className="new-body-w-10 new-body-select"
+                className="api-client-w-10 api-client-body-select"
                 value={selectedProperty ? selectedProperty : "Schema Name"}
                 onChange={(e) => setSelectedProperty(e.target.value)}>
                 <option value="" disabled>
@@ -328,14 +329,14 @@ function Body({ bodyData, onChange }) {
           </>
         ) : (
           <>
-            <div className="new-body-d-flex">
+            <div className="api-client-d-flex">
               <h6
-                className="mt-2 mx-2 new-body-color-white"
+                className="mt-2 mx-2 api-client-color-white"
                >
                 Content-Type
               </h6>
               <Form.Select
-              className="new-body-w-15 new-body-h-full new-body-select"
+              className="api-client-w-15 api-client-h-full api-client-body-select"
                 value={selectedContentType}
                 onChange={(e) => handleFormChange(e.target.value)}>
                 <option value="" disabled>
@@ -353,7 +354,7 @@ function Body({ bodyData, onChange }) {
       {bodyData.length > 0 && (
         <>
           <div id="body-content"
-            className="mt-5 new-body-color-white new-body-w-full new-body-h-full new-body-overflow">
+            className="mt-5 api-client-color-white api-client-w-full api-client-h-full api-client-overflow">
             {bodyData[activeTab] &&
               (bodyData[activeTab].content_type === "JSON" ||
                 bodyData[activeTab].content_type === "FORMDATA" ||
@@ -378,7 +379,7 @@ function Body({ bodyData, onChange }) {
             {bodyData[activeTab] &&
               bodyData[activeTab].content_type === "TEXT" && (
                 <div
-                  className="new-body-monaco-div"
+                  className="api-client-monaco-div"
                   id="text-editor"
                   ref={editorContainerRef}
                   ></div>
