@@ -6,9 +6,7 @@ import { ComponentContext } from "../ComponentConfig/ComponentConfigPage"
 
 export default function HtmlTree({ htmlId, className }) {
     const { componentConfig, sidebarService } = useContext(ComponentContext)
-    console.log("it is the compoenent config",componentConfig)
     const value = componentConfig.html_elements[htmlId]
-    console.log("kljkfe",htmlId)
     const ref = useRef()
 
     useEffect(() => {

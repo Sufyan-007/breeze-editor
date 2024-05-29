@@ -277,6 +277,7 @@ class ComponentConfigService:
             "isAnonymous":  function_config.get("isAnonymous",False),
             "isAsync": function_config.get("isAsync",False),
             "body": function_config["body"],
+            "description":  function_config.get("description",False),
         }
         functions.append(new_func_config)
         appEditor=AppEditor(self.projectId)

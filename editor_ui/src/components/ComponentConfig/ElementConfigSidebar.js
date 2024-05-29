@@ -7,7 +7,6 @@ import HtmlElementConfig from "../SidebarConfigHelper/components/HtmlElementConf
 
 export default function ElementConfigSidebar({ config }) {
   const { sidebarService, componentConfig, setComponentConfig } = useContext(ComponentContext);
-  console.log("sideBar",sidebarService)
   const [selectedElement, setSelectedElement] = useState(null);
   const { projectName, componentName } = useParams();
   const element = useMemo(() => componentConfig?.html_elements[selectedElement?.elem], [componentConfig, selectedElement]);

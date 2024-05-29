@@ -12,6 +12,7 @@ import yaml
 from common.utils.file_helper import create_parent_dir_if_not_exists
 import copy
 from .helpers.replace_variable import replace_variable
+import copy
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
@@ -192,7 +193,7 @@ class AppEditor:
     # use write_component() to make changes
     def add_component(self,name,type):
         name=name.replace(' ',"")
-        comp=NEW_COMP_FORMAT.copy()
+        comp=copy.deepcopy(NEW_COMP_FORMAT)
         replace_variable(comp,"$NAME",name)
         comp["type"] = type
         config=self.write_component(comp)
@@ -201,27 +202,69 @@ class AppEditor:
     
     # Adds a new route to specified component,
     #!!! routes preferably placed in a new file that's imported to App.js to avoid re-writing it
-    def add_route(self,route,component,redirect_url=None):
-        if route[0]!='/':
-            route = "/"+route
-        
-        
-        if component:
-            route_={"path":route,"component":component}
-        elif redirect_url:
-            route_={"path":route,"redirectTo":redirect_url}
+    def add_route(self,route_obj):
+        print(route_obj)
+        if route_obj.get('path')[0]!='/':
+            route_obj['path'] = "/"+route_obj.get('path')        
+        if route_obj.get('component'):
+            route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
+        elif route_obj.get('redirectTo'):
+            route_obj.pop('component') if route_obj.get('component') else ''
         for i,routes in enumerate(self.routing_config["routes"]):
-            if routes["path"] ==route:
-                self.routing_config["routes"][i] = route_
-                break
+            if routes["path"] ==route_obj['path']:
+                # previous code : replacing the conflicting route
+                # self.routing_config["routes"][i] = route_obj
+                # break
+                return {'error': 'can\'t have two routes with same path'}
         else:
-            self.routing_config["routes"].append(route_)
+            self.routing_config["routes"].append(route_obj)
         
         routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
         write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
         self.modify_main_component()
         return self.routing_config
     
+    def set_all_routes(self, allRoutes):
+        try:
+            is_unique = self.check_unique_route_paths(allRoutes)
+            if is_unique is False:
+                return {'error': 'Duplicate route paths are not allowed'}
+            self.routing_config["routes"] = allRoutes
+            routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
+            write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
+        except Exception as e:
+            print("Error route config ", e)
+        self.modify_main_component()
+        self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
+        return self.routing_config
+    
+    def check_unique_route_paths(self, allRoutes):
+        allPaths = [route['path'] for route in allRoutes]
+        if len(allPaths) == len(list(set(allPaths))):
+            return True
+        else:
+            return False
+        
+    def add_child_route(self, child_object):
+        for route in self.routing_config['routes']:
+            if route['path'] == child_object['parentPath']:
+                child_object.pop('parentPath')
+                if route.get('childRoutes') is None:
+                    route['childRoutes'] = []
+                if child_object['component']:
+                    child_object.pop('redirectTo')
+                elif child_object['redirectTo']: 
+                    child_object.pop('component')
+                    
+                route['childRoutes'].append(child_object)
+                route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
+                react_code = route_handler.handle_routing_code()
+                with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
+                    formatted_code = format_by_prettier(react_code)
+                    component_file.write(formatted_code)
+                return {'case': True, 'res' : self.routing_config}
+        return {'case' : False, 'res' : 'No matching routes were present'}
+        
     def write_reducers(self):
         reducer_generator = ReducerGenerator(all_reducer_config=self.reducer_config, app_config=self.app_config)
         reducer_generator.write_all_reducers()
