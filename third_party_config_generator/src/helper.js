@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { INDEX_FILE_NAME } = require('./consts');
 
 function getAppRootDir() {
     let currentDir = __dirname
@@ -47,6 +48,31 @@ function createDirectoryIfNotExists(directory) {
     }
 }
 
+function createFileIfNotExists(filePath, initialData) {
+    if (fs.existsSync(filePath)) {
+        console.log("File exists")
+    }
+    else {
+        console.log('INITIAL DATA ', initialData);
+        fs.writeFileSync(filePath, initialData, (err) => {
+            if (err) throw err;
+            console.log('File created successfully.');
+          });
+
+        console.log("File does not exist")
+    }
+
+}
+
+function getFileContent(filePath, createIfNotExists=true, initialData = '{}') {
+    if(createIfNotExists){
+        createFileIfNotExists(filePath, initialData);
+    }
+    const content = fs.readFileSync(filePath, 'utf-8');
+    return content;
+}
+
+
 function storeInfo(info, fileInfo, storageDir) {
 
     const fileDir = `${storageDir}/others`
@@ -71,11 +97,36 @@ function storeInfo(info, fileInfo, storageDir) {
 
 }
 
+function writeJsonFile(content, filePath){
+    fs.writeFileSync(filePath, JSON.stringify(content, null, 4));
+}
+
+function getLibraryProcessStatus(libName, libVersion, storePath){
+    const indexFilePath = `${storePath}/${INDEX_FILE_NAME}`
+    let indexFile = getFileContent(indexFilePath);
+    indexFile = JSON.parse(indexFile);
+
+    const libKey = getKey(libName, libVersion)
+
+    return  indexFile[libKey]
+
+}
+
+function getKey(libName, libVersion){
+    if(!libVersion) return libName
+
+    return `${libName}@${libVersion}`
+}
+
 module.exports = {
     getAppRootDir,
     findTypeDefinitionFile,
     findTypeScriptEntryPoint,
     replaceSlashWithUnderscore,
     storeInfo,
-    sanitizeFilePath
+    sanitizeFilePath,
+    getFileContent,
+    writeJsonFile,
+    getLibraryProcessStatus,
+    getKey
 }

@@ -6,7 +6,8 @@ const { SyntaxKind } = require('typescript');
 const { HandlePropTypes } = require('./handle_prop_types');
 const { DecodePropType } = require('./decodePropTypes');
 const { handleConfigFileGeneration } = require('./store_config');
-const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint } = require('./helper');
+const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKey } = require('./helper');
+const { INDEX_FILE_NAME } = require('./consts');
 
 // Returns export variables from given file path
 function readExportsFromTypeScriptFile(project, filePath) {
@@ -60,6 +61,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libName
     // console.log(exportsConfig.length);
     // exportsConfig = exportsConfig.slice(205, 206)
     const expList = exportsConfig
+    const errors = [];
     for (const expConfig of expList) {
         try {
 
@@ -102,9 +104,16 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libName
 
         } catch (error) {
             console.log('-----ERROR_IN_PROCESS_EXPORTS-----', expConfig['name']);
+            errors.push({
+                errorLog: error,
+                name: expConfig['name'],
+                config: expConfig
+            })
             // console.log(error);
         }
     }
+
+    return errors;
 
 }
 
@@ -436,6 +445,7 @@ class PropsReader {
 
         } catch (error) {
             console.log('EEEEE', error);
+            throw error;
             // console.log(error);
         }
         // // console.log('----', prop.getTypeNode().getType().isUnion(), prop.getType().getText());
@@ -448,7 +458,7 @@ class PropsReader {
 
 }
 
-function generator_function(libraryName, storePath) {
+function generator_function(libraryName, libVersion, storePath) {
 
     const dirOfProject = getAppRootDir()
 
@@ -464,12 +474,46 @@ function generator_function(libraryName, storePath) {
     // console.log(exports);
 
     // Process exports variable and get detailed config
-    processExports(project, entryPoint, exports, libraryPath, libraryName, storePath)
+    const result = processExports(project, entryPoint, exports, libraryPath, libraryName, storePath)
     // fs.writeFileSync(`${libraryName}_exports.json`, JSON.stringify(exports));
 
     // console.log(exports);
-    // Create file for export variable config
+    // Create files for export variables with configuration
     handleConfigFileGeneration(exports, `${storePath}/${libraryName}`, libraryName)
+
+    // Store the status of the process
+    storeIndexFileInfo(libraryName, libVersion, storePath, result)
+}
+
+
+// Stores the processing status information
+function storeIndexFileInfo(libName, libVersion, storePath, errors) {
+
+    // Get the content of the processing status file
+    const indexFilePath = `${storePath}/${INDEX_FILE_NAME}`
+    let indexFile = getFileContent(indexFilePath);
+    indexFile = JSON.parse(indexFile);
+
+    // Get key using which the status is stored
+    const key = getKey(libName, libVersion);
+    
+    indexFile[key] = {}
+
+    // If there are errors while processing mark it as partial success
+    if (errors.length > 0) {
+        indexFile[key] = {
+            status: 'PARTIAL',
+            errors: errors
+        }
+    } else {
+        indexFile[key] = {
+            status: 'SUCCESS'
+        }
+    }
+
+    // Write config
+    writeJsonFile(indexFile, indexFilePath);
+
 }
 
 // const lib = 'react-bootstrap'

@@ -37,6 +37,21 @@ function installPackage(packageName, packageVersion) {
     // console.log('-------------------');
     // console.log(re);
     // return re;
+
+    return {
+        version : packageVersion ? packageVersion : getInstalledVersion(packageName) 
+    }
+}
+
+
+// Gets the installed version for given library
+function getInstalledVersion(libName){
+    const command = `npm list ${libName} --json`;
+
+    let info = execSync(command, { stdio: 'pipe' }).toString();
+    info = JSON.parse(info);
+
+    return info['dependencies'][libName]['version']; 
 }
 
 module.exports = {
