@@ -1,0 +1,132 @@
+#otherRouteObjectsMultiselect .searchWrapper {
+  border: none !important;
+}
+
+.lessen-h1-mb {
+  margin-bottom: 0px !important;
+}
+
+.routeAccordionDetails {
+  max-height: 950px;
+  overflow-y: scroll;
+  /* scrollbar-width: none; */
+}
+
+.routeAccordionDetails::-webkit-scrollbar {
+  display: none;
+  /* scrollbar-width: none; */
+}
+
+#offcanvasRight {
+  width: 600px !important;
+  /* width: min(95vw, 200px) !important; */
+}
+
+.pdt {
+  padding-top: 0px !important;
+}
+
+.pdt::-webkit-scrollbar {
+  display: none;
+}
+
+.newChildRouteButton {
+  height: 36px;
+  width: 140px;
+  margin-top: 32px;
+}
+
+.disableRouteButton {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+#newRouteDropdown {
+  background-color: gray !important;
+  margin-top: 16px;
+}
+
+#newRouteDropdownOptions {
+  color: inherit;
+  text-decoration: none;
+  font-size: 18px !important;
+}
+
+.custom-parent-path-scroll {
+  height: 150px;
+  overflow-y: scroll;
+}
+
+.custom-parent-path-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-parent-path-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.custom-parent-path-scroll::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+.custom-parent-path-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.custom-parent-path-scroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+
+
+
+
+/* only for manage child routes */
+
+.childRouteForm {
+  background: rgba(19, 35, 47, .9);
+  padding: 5px;
+  max-width: 600px;
+  margin: 5px auto;
+  border-radius: 10px;
+  box-shadow: 0 2px 3px 2px rgba(19, 35, 47, .3);
+}
+
+.tab-group {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px 0;
+}
+.tab-group:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.tab-group li a {
+  display: block;
+  text-decoration: none;
+  padding: 11px;
+  background: rgba(160, 179, 176, .25);
+  color: #a0b3b0;
+  font-size: 16px;
+  float: left;
+  width: 50%;
+  text-align: center;
+  cursor: pointer;
+  transition: .5s ease;
+}
+.tab-group li a:hover {
+  background: #159a7e;
+  color: #ffffff;
+}
+.tab-group .active a {
+  background: #1ab188;
+  color: #ffffff;
+}
+
+.tab-content > div:last-child {
+  display: none;
+}
+
+
+/* END : only for manage child routes */

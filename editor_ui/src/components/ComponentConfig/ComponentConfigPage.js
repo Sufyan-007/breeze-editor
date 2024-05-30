@@ -62,17 +62,14 @@ export const ComponentContext = createContext({
 export default function ComponentConfigPage() {
   const componentConfigInit = useLoaderData();
   const [ componentConfig, setComponentConfig] = useState(componentConfigInit)
-  console.log(componentConfig);
   const { projectName, componentName } = useParams();
   const [selectedItem, setSelectedItem] = useState(0);
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const sidebarService = useMemo(() => {
-    console.log("Created Service")
     return new SidebarService()
   }, [])
   
-  console.log(sidebarService)
   const highlightedStyle = { backgroundColor: "#303033" };
 
   const toggleSidebar = () => {
@@ -140,7 +137,6 @@ export default function ComponentConfigPage() {
 export async function configLoader({ params }) {
   const projectName = params.projectName;
   const componentName = params.componentName;
-  console.log("Loading component ", projectName, componentName);
   const config = await getComponentConfig(projectName, componentName);
   const port = await getRunningPort(projectName);
   config["port"] = port;
