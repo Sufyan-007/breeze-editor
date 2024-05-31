@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AppBasicConfigReader, ConfigReader
+from .views import AppBasicConfigReader, ConfigReader, GetAttributes
 from .views import ComponentWriter
 from .views import RoutingReader
 from .views import NewComponentWriter
@@ -63,6 +63,9 @@ urlpatterns = [
         
         
         ##Functions 
-        path("update-function-config/",FunctionConfigWriter.as_view())
+        path("update-function-config/",FunctionConfigWriter.as_view()),
+        
+        ## Attributes
+         path("get-attributes/",GetAttributes.as_view()),
 ]
 

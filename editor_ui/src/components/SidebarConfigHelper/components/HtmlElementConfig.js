@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
 import convert from "../htmlToReactAttrMap";
+import { useParams } from "react-router";
+
 
 const HtmlElementConfig = ({
   element,
@@ -11,6 +13,9 @@ const HtmlElementConfig = ({
 }) => {
   const [availableAttributes, setAvailableAttributes] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState({});
+  const { projectName } = useParams();
+  console.log("Project Name",projectName)
+
   console.log("It is the element", element);
   useEffect(() => {
     setSelectedAttributes(element.attributes);
@@ -21,18 +26,27 @@ const HtmlElementConfig = ({
   }, [element]);
 
   const fetchData = async () => {
+
     try {
+
+      const bodyData = {
+        component_id: element.tagName,
+        component_type: element.elementType,
+        project_id:projectName,
+      }
+
+      if(element.elementType === 'THIRD_PARTY'){
+          bodyData['third_party_id'] = element.library
+          bodyData["component_id"]= element.typeId
+        }
       const response = await fetch(
-        "http://localhost:8000/config-reader/get-global-component-config/",
+        "http://localhost:8000/editor/get-attributes/",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            component_id: element.tagName,
-            component_type: element.elementType,
-          }),
+          body: JSON.stringify(bodyData),
         }
       );
 
@@ -73,7 +87,7 @@ const HtmlElementConfig = ({
 
     setSelectedAttributes((prevSelectedAttributes) => ({
       ...prevSelectedAttributes,
-      [selectedOption]: { type: "LITERAL", value: "" },
+      [selectedOption]: { type: availableAttributes[selectedOption].datatype, value: "" },
     }));
     setAvailableAttributes((prevAttributes) => {
       const updatedAttributes = { ...prevAttributes };
@@ -85,7 +99,7 @@ const HtmlElementConfig = ({
   const handleDeleteAttribute = (attributeKey) => {
     setAvailableAttributes((prevAttributes) => {
       const updatedAttributes = { ...prevAttributes };
-      updatedAttributes[attributeKey] = selectedAttributes[attributeKey].type;
+      updatedAttributes[attributeKey] = selectedAttributes[attributeKey].datatype;
       return updatedAttributes;
     });
     setSelectedAttributes((prevSelectedAttributes) => {
@@ -149,7 +163,8 @@ const HtmlElementConfig = ({
                     <div className="d-flex">
                       {selectedAttributes &&
                         selectedAttributes[attribute] &&
-                        selectedAttributes[attribute].type !== "boolean" && (
+                        selectedAttributes[attribute].type !== "BOOLEAN"  && (
+                          
                           <Form.Control
                             type={selectedAttributes[attribute].type || "text"}
                             value={selectedAttributes[attribute].value}
@@ -158,11 +173,12 @@ const HtmlElementConfig = ({
                             }
                             disabled={attribute === "id"}
                           />
+                          
                         )}
 
                       {selectedAttributes &&
                         selectedAttributes[attribute] &&
-                        selectedAttributes[attribute].type === "boolean" && (
+                        selectedAttributes[attribute].type === "BOOLEAN" && (
                           <Form.Select
                             onChange={(e) => {
                               handleAttributeChange(attribute, e.target.value);
