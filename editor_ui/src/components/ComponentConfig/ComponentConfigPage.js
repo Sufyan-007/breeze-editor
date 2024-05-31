@@ -1,9 +1,6 @@
 import { useLoaderData, useParams } from "react-router";
 import Navbar from "../Navbar";
 import code from "../../assets/icons/code.svg";
-import variables from "../../assets/icons/variables.svg";
-import functions from "../../assets/icons/functions.svg";
-import cycle from "../../assets/icons/cycle.svg";
 import home from "../../assets/icons/home.svg";
 import styles from "../../assets/icons/styles.svg";
 import pages from "../../assets/icons/pages.svg";
@@ -20,17 +17,8 @@ import {
 import { createContext, useMemo, useState } from "react";
 import ProjectSidebar from "../ProjectSidebar";
 import HtmlSection from "./HtmlSection";
-import VariablesSection from "./VariablesSection";
-import LifeCycleSection from "./LifeCycleSection";
-import FunctionSection from "../FunctionsSection/FunctionSection";
 import SidebarService from "../../services/SidebarService";
 
-const components = [
-  HtmlSection,
-  VariablesSection,
-  FunctionSection,
-  LifeCycleSection,
-];
 
 const sidebarItems = [
   { id: 0, name: "Home", icon: home, path: "" },
@@ -44,14 +32,6 @@ const sidebarItems = [
   { id: 8, name: "Settings", icon: settings, path: "settings" },
 ];
 
-const menu = [
-  { id: 0, name: "Html Tree", icon: code },
-  { id: 1, name: "Variables", icon: variables },
-  { id: 2, name: "Functions", icon: functions },
-  { id: 3, name: "Life Cycle", icon: cycle },
-];
-
-
 export const ComponentContext = createContext({
   componentConfig: null,
   setComponentConfig: null,
@@ -63,8 +43,7 @@ export default function ComponentConfigPage() {
   const componentConfigInit = useLoaderData();
   const [ componentConfig, setComponentConfig] = useState(componentConfigInit)
   const { projectName, componentName } = useParams();
-  const [selectedItem, setSelectedItem] = useState(0);
-  const [selectedMenu, setSelectedMenu] = useState(0);
+  const [selectedItem, setSelectedItem] = useState(1);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const sidebarService = useMemo(() => {
     return new SidebarService()
@@ -75,7 +54,6 @@ export default function ComponentConfigPage() {
   const toggleSidebar = () => {
     setIsSidebarExpanded(!isSidebarExpanded);
   };
-  const SelectedElement =components[selectedMenu]
 
   return (
 
@@ -102,30 +80,8 @@ export default function ComponentConfigPage() {
             />
           </div>
           <div className="col px-0 d-flex flex-column h-100">
-            <div className="row mx-0 bg-dark p-1">
-              <div className="d-flex justify-content-start">
-                {menu.map((item, index) => (
-                  <button
-                    key={item.id}ServicePage
-                    className={`btn ${index === selectedMenu
-                      ? "btn-outline-secondary border-bottom btn-sm"
-                      : "btn-outline-secondary btn-sm"
-                      }`}
-                    onClick={() => setSelectedMenu(index)}
-                    style={{ marginRight: 10, borderRadius: 0 }}
-                  >
-                    <img
-                      src={item.icon}
-                      alt={item.name}
-                      style={{ height: 20, marginRight: 5 }}
-                    />
-                    {item.name}
-                  </button>
-                ))}
-              </div>
-            </div>
             <div className="row mx-0 flex-grow-1 overflow-y-auto">
-              <div className=" d-flex ">{< SelectedElement />}</div>
+              <div className=" d-flex ">{< HtmlSection />}</div>
             </div>
           </div>
         </div>

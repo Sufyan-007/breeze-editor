@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from "react"
 import HtmlTree from "../HtmlTree/HtmlTree"
 import ElementConfigSidebar from "./ElementConfigSidebar"
 import { ComponentContext } from "./ComponentConfigPage"
+import ActionsConfig from "./ActionsConfig"
 
 export default function HtmlSection() {
     const { componentName, componentConfig } = useContext(ComponentContext)
@@ -37,27 +38,29 @@ export default function HtmlSection() {
         <div className="row flex-grow-1" style={{ position: "relative" }}>
 
             <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
-                <div className="row">
-                    <div
-                        className="py-2 btn rounded-0 text-white   col"
-                        style={selected === 0 ? { backgroundColor: "#303033" } : { backgroundColor: "rgb(33, 37, 41) " }}
-                        onClick={() => setSelected(0)}
-                    >
-                        Html
-                    </div>
-                    <div
-                        className="py-2 btn rounded-0 text-white col  "
-                        style={selected === 1 ? { backgroundColor: "#303033" } : { backgroundColor: "rgb(33, 37, 41) " }}
-                        onClick={() => setSelected(1)}
-                    >
-                        Add El
-                    </div>
-                    <div
-                        className="py-2 btn rounded-0 text-white  col "
-                        style={selected === 2 ? { backgroundColor: "#303033" } : { backgroundColor: "rgb(33, 37, 41) " }}
-                        onClick={() => setSelected(2)}
-                    >
-                        Actions
+                <div className="row p-2">
+                    <div className="border border-dark px-0">
+                        <div
+                            className="py-2 btn rounded-0 text-white col-4 border-right border-dark"
+                            style={selected === 0 ? { backgroundColor: "rgb(33, 37, 41) " } : { backgroundColor: "#303033" }}
+                            onClick={() => setSelected(0)}
+                        >
+                            Html
+                        </div>
+                        <div
+                            className="py-2 btn rounded-0 text-white col-4 border-dark"
+                            style={selected === 1 ? { backgroundColor: "rgb(33, 37, 41) " } : { backgroundColor: "#303033" }}
+                            onClick={() => setSelected(1)}
+                        >
+                            Add El
+                        </div>
+                        <div
+                            className="py-2 btn rounded-0 text-white col-4 border-left border-dark"
+                            style={selected === 2 ? { backgroundColor: "rgb(33, 37, 41) " } : { backgroundColor: "#303033" }}
+                            onClick={() => setSelected(2)}
+                        >
+                            Actions
+                        </div>
                     </div>
                 </div>
                 {selected === 0 ?
@@ -66,7 +69,9 @@ export default function HtmlSection() {
                     selected===1?
                         <div>Add element</div>
                     :
-                    <div>Actions</div>  
+                    <div>
+                        <ActionsConfig />
+                    </div>  
                 }
             </div>
             <div className="col overflow-hidden p-0">
