@@ -475,7 +475,7 @@ class OpenapiConverter:
             
 
     ## complete
-    def prepare_api_models(self,json_data):
+    def prepare_api_models(self,json_data, project_name):
         api_model_loader = ApiModelLoader()
         tag_models = {}
         security_schemes_models = []
@@ -484,6 +484,8 @@ class OpenapiConverter:
                 return 
 
             openapi_data = yaml.safe_load(json_data)
+            avalilable_schemas = openapi_data.get("components").get("schemas")
+            schema_file_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json/allSchemas.json"
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
             security_schemes_models = self.handle_security_schema(security_schemes,openapi_data) #remaining
             # error_obj["auth_error"] = auth_data["auth_errors"]
@@ -501,6 +503,8 @@ class OpenapiConverter:
                             tag_models[tag] = [api_model] 
                     except Exception as e:
                         print(traceback.format_exc())
+            with open(schema_file_path, "w") as file:
+                json.dump(avalilable_schemas,file, cls=EnhancedJSONEncoder)
             return  {
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,

@@ -102,9 +102,10 @@ export default function ServiceLists({
         />
         <span>Add API</span>
       </Button>
-      
+
       {apiList && apiList.length > 0 ? (
         apiList
+          .filter((service) => service.filename !== "allSchemas")
           .map((service, index) => (
             <>
               <ToastContainer
@@ -237,9 +238,7 @@ export default function ServiceLists({
                         </tbody>
                       </Table>
                     ) : (
-                      <h5 className="no-service">
-                        No services found
-                      </h5>
+                      <h5 className="no-service">No services found</h5>
                     )}
                   </Accordion.Body>
                 </Accordion.Item>

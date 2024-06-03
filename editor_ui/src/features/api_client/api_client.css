@@ -1,1 +1,176 @@
-/* needs to be modified */
+/* Height classes */
+/***************************************************************/
+.api-client-h-full {
+  height: 100%;
+}
+.api-client-h-15 {
+  height: 15%;
+}
+.api-client-h-30 {
+  height: 30%;
+}
+.api-client-h-70 {
+  height: 70%;
+}
+.api-client-h-10 {
+  height: 10%;
+}
+.api-client-h-20 {
+  height: 20%;
+}
+.api-client-h-80 {
+  height: 80%;
+}
+.api-client-h-8 {
+  height: 8%;
+}
+.api-client-h-90 {
+  height: 90%;
+}
+/***************************************************************/
+/* Width Classes */
+/***************************************************************/
+.api-client-w-full {
+  width: 100%;
+}
+.api-client-w-10 {
+  width: 10% !important;
+}
+.api-client-w-15 {
+  width: 15% !important;
+}
+.api-client-w-50 {
+  width: 50% !important;
+}
+.api-client-w-40 {
+  width: 40% !important;
+}
+.api-client-w-5 {
+  width: 5% !important;
+}
+.api-client-w-8 {
+  width: 8%;
+}
+.api-client-w-20 {
+  width: 20% !important;
+}
+.api-client-w-80 {
+  width: 80%;
+}
+.api-client-w-85 {
+  width: 85%;
+  max-width: 85%;
+}
+.api-client-w-35 {
+  width: 35%;
+}
+/***************************************************************/
+
+/* Display Classes */
+/***************************************************************/
+.api-client-d-flex {
+  display: flex;
+}
+.api-client-d-flex-column {
+  display: flex;
+  flex-direction: column;
+}
+.api-client-d-inline-block {
+  display: inline-block !important;
+}
+.api-client-align-center {
+  align-items: center;
+}
+.api-client-content {
+  justify-content: space-around;
+}
+.api-client-dashed-border {
+  border: 1px dashed white;
+}
+.api-client-border-radius-0 {
+  border-radius: 0px !important;
+}
+.api-client-border-white {
+  border: 1px solid white;
+}
+.api-client-color-white {
+  color: white !important;
+}
+.api-client-margin-left {
+  margin-left: 10px;
+}
+.api-client-bg-dark {
+  background-color: #303033 !important;
+}
+.api-client-overflow {
+  overflow: auto;
+}
+.api-client-cursor-pointer {
+  cursor: pointer;
+}
+
+/***************************************************************/
+
+/* Component Specific */
+/***************************************************************/
+.api-client-icon {
+  width: 50px;
+  height: 50px;
+}
+.api-client-divider {
+  width: 1px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.api-client-body-form-control {
+  color: white !important;
+  border: none !important;
+  background-color: #212529 !important;
+  border-radius: 0 !important;
+}
+.api-client-body-select {
+  background-color: #303033 !important;
+  color: white !important;
+  border-radius: 0% !important;
+  border: none !important;
+  display: inline-block !important;
+}
+.api-client-auth-select {
+  height: 20% !important;
+  width: 50% !important;
+  border-radius: 0% !important;
+  background-color: #212529 !important;
+  color: white !important;
+  display: inline-block !important;
+}
+.api-client-monaco-div {
+  width: 100%;
+  height: 250px;
+}
+.api-client-img {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+.api-client-response-form-control {
+  width: 50% !important;
+  height: 100% !important;
+  border-radius: 0% !important;
+  border: none !important;
+  background-color: #212529 !important;
+  color: white !important;
+  display: inline-block !important;
+}
+.api-client-request-settings {
+  padding: 10px;
+  height: 70%;
+}
+
+/***************************************************************/
+
+/* Service-List Remaining */
+/***************************************************************/
+
+
+/***************************************************************/
