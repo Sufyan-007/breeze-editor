@@ -6,7 +6,7 @@ const { SyntaxKind } = require('typescript');
 const { HandlePropTypes } = require('./handle_prop_types');
 const { DecodePropType } = require('./decodePropTypes');
 const { handleConfigFileGeneration } = require('./store_config');
-const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKey } = require('./helper');
+const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKeyForProcessStatus, getAbsoluteStorageDirForLib } = require('./helper');
 const { INDEX_FILE_NAME } = require('./consts');
 
 // Returns export variables from given file path
@@ -56,7 +56,7 @@ function readExportsFromTypeScriptFile(project, filePath) {
 }
 
 // Process exports variable
-function processExports(project, entryPoint, exportsConfig, libraryPath, libName, storePath) {
+function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo) {
 
     // console.log(exportsConfig.length);
     // exportsConfig = exportsConfig.slice(205, 206)
@@ -89,7 +89,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libName
                 // Add props if it is component
                 if (isComponent) {
                     expConfig['props'] = []
-                    const propsList = getPropsForDefaultExportVar(sourceFile, expConfig['name'], libName, storePath)
+                    const propsList = getPropsForDefaultExportVar(sourceFile, expConfig['name'], libInfo)
                     expConfig['props'] = propsList
                 }
             }
@@ -117,10 +117,10 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libName
 
 }
 
-function getPropsForDefaultExportVar(sourceFile, componentName, libName, storePath) {
+function getPropsForDefaultExportVar(sourceFile, componentName, libInfo) {
 
-    const handlePropTypes = new HandlePropTypes(libName, storePath);
-    const propsReader = new PropsReader(libName, storePath);
+    const handlePropTypes = new HandlePropTypes(libInfo);
+    const propsReader = new PropsReader(libInfo);
 
     const defaultExportDec = sourceFile.getDefaultExportSymbol().getAliasedSymbol().getValueDeclaration()
 
@@ -344,11 +344,12 @@ function checkIfComponentType(properties) {
 }
 
 class PropsReader {
-    constructor(libraryName, storePath) {
-        this.libraryName = libraryName;
-        this.storePath = storePath;
+    constructor(libInfo) {
+        this.libraryName = libInfo.libName;
+        this.libVersion = libInfo.libVersion;
+        this.storePath = libInfo.storePath;
 
-        this.handlePropTypes = new HandlePropTypes(libraryName, storePath);
+        this.handlePropTypes = new HandlePropTypes(libInfo);
 
     }
 
@@ -458,44 +459,51 @@ class PropsReader {
 
 }
 
-function generator_function(libraryName, libVersion, storePath) {
+function generator_function(libName, libVersion, storePath) {
+
+
+    const libInfo = {
+        libName,
+        libVersion,
+        storePath
+    }
 
     const dirOfProject = getAppRootDir()
 
-    const libraryPath = path.join(dirOfProject, 'node_modules', libraryName);
+    const libSrcCodePath = path.join(dirOfProject, 'node_modules', libName);
 
     const project = new Project();
 
-    const entryPoint = findTypeScriptEntryPoint(libraryPath);
-    const entryPointPath = path.join(libraryPath, entryPoint);
+    const entryPoint = findTypeScriptEntryPoint(libSrcCodePath);
+    const entryPointPath = path.join(libSrcCodePath, entryPoint);
 
     // Get exports from the file
     const exports = readExportsFromTypeScriptFile(project, entryPointPath);
     // console.log(exports);
 
     // Process exports variable and get detailed config
-    const result = processExports(project, entryPoint, exports, libraryPath, libraryName, storePath)
+    const result = processExports(project, entryPoint, exports, libSrcCodePath, libInfo)
     // fs.writeFileSync(`${libraryName}_exports.json`, JSON.stringify(exports));
 
     // console.log(exports);
     // Create files for export variables with configuration
-    handleConfigFileGeneration(exports, `${storePath}/${libraryName}`, libraryName)
+    handleConfigFileGeneration(exports, getAbsoluteStorageDirForLib(libInfo), libName)
 
     // Store the status of the process
-    storeIndexFileInfo(libraryName, libVersion, storePath, result)
+    storeIndexFileInfo(libInfo, result)
 }
 
 
 // Stores the processing status information
-function storeIndexFileInfo(libName, libVersion, storePath, errors) {
+function storeIndexFileInfo(libInfo, errors) {
 
     // Get the content of the processing status file
-    const indexFilePath = `${storePath}/${INDEX_FILE_NAME}`
+    const indexFilePath = `${libInfo.storePath}/${INDEX_FILE_NAME}`
     let indexFile = getFileContent(indexFilePath);
     indexFile = JSON.parse(indexFile);
 
     // Get key using which the status is stored
-    const key = getKey(libName, libVersion);
+    const key = getKeyForProcessStatus(libInfo.libName, libInfo.libVersion);
     
     indexFile[key] = {}
 

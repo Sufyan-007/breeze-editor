@@ -1,6 +1,6 @@
 const { TypeFlags } = require('ts-morph');
 const { SyntaxKind } = require('typescript');
-const { sanitizeFilePath, storeInfo } = require('./helper')
+const { sanitizeFilePath, storeInfo, getAbsoluteStorageDirForLib } = require('./helper')
 
 
 let max = 0;
@@ -8,9 +8,11 @@ let max = 0;
 class HandlePropTypes {
 
 
-    constructor(libraryName, storePath){
-        this.libraryName = libraryName;
-        this.storePath = storePath;
+    constructor(libInfo){
+        this.libraryName = libInfo.libName;
+        this.libVersion = libInfo.libVersion;
+        this.storePath = libInfo.storePath;
+        this.libInfo = libInfo;
     }
 
     handleProps(prop, type, processed = [], recLevel = 0, all = []) {
@@ -132,7 +134,7 @@ class HandlePropTypes {
             storeInfo(typeInfo, {
                 refVariable : sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
                 refPath : sanitizeFilePath(alreadyProcessed.path)
-            },  `${this.storePath}/${this.libraryName}`)
+            }, getAbsoluteStorageDirForLib(this.libInfo))
             typeInfo['data'] = {
                 refVariable :sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
                 refPath : sanitizeFilePath(alreadyProcessed.path)

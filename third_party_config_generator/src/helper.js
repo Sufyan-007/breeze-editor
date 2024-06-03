@@ -106,16 +106,20 @@ function getLibraryProcessStatus(libName, libVersion, storePath){
     let indexFile = getFileContent(indexFilePath);
     indexFile = JSON.parse(indexFile);
 
-    const libKey = getKey(libName, libVersion)
+    const libKey = getKeyForProcessStatus(libName, libVersion)
 
     return  indexFile[libKey]
 
 }
 
-function getKey(libName, libVersion){
+function getKeyForProcessStatus(libName, libVersion){
     if(!libVersion) return libName
 
     return `${libName}@${libVersion}`
+}
+
+function getAbsoluteStorageDirForLib(libInfo){
+    return `${libInfo.storePath}/${libInfo.libName}_${libInfo.libVersion}` ;
 }
 
 module.exports = {
@@ -128,5 +132,6 @@ module.exports = {
     getFileContent,
     writeJsonFile,
     getLibraryProcessStatus,
-    getKey
+    getKeyForProcessStatus,
+    getAbsoluteStorageDirForLib
 }
