@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Button, Form, Nav, Navbar } from "react-bootstrap";
 import { useParams } from "react-router";
 // import "../../../css/NewTest.css";
-import '../api_client.css';
+import "../api_client.css";
 import { getAuthFileApis } from "../services/AuthApiService";
 import { getApiConfig, modifyApiConfig } from "../services/ApiService";
+import { appendToAuthApi } from "../services/AuthApiService";
 import Param from "./Param";
 import Body from "./Body";
 import Headers from "./Headers";
@@ -96,25 +97,40 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
     properties.map((prop) => apiModel[prop] && delete apiModel[prop]);
   };
   async function saveApi(e) {
+    console.log(apiModel, "befor submission");
     let operation = "ADD";
     if (apiModel.id) {
       operation = "UPDATE";
     }
-    e.preventDefault();
-    await modifyApiConfig(
-      apiModel,
-      appName.projectName,
-      selectedServiceInfo["filename"]
-        ? selectedServiceInfo["filename"]
-        : apiModel["tags"],
-      operation
-    );
+    if (apiModel.is_authentication_api) {
+      apiModel.tags = "auth";
+      e.preventDefault();
+      await appendToAuthApi(
+        apiModel,
+        operation === "UPDATE" ? true : false,
+        appName.projectName
+      );
+    } else {
+      e.preventDefault();
+      await modifyApiConfig(
+        apiModel,
+        appName.projectName,
+        selectedServiceInfo["filename"]
+          ? selectedServiceInfo["filename"]
+          : apiModel["tags"],
+        operation
+      );
+    }
     setApiModel({});
     onClose();
   }
   return (
-    <div id="main" className="api-client-w-full api-client-h-full api-client-d-flex">
-      <div id="left-panel" className="api-client-h-full api-client-w-80 api-client-border-white">
+    <div
+      id="main"
+      className="api-client-w-full api-client-h-full api-client-d-flex">
+      <div
+        id="left-panel"
+        className="api-client-h-full api-client-w-80 api-client-border-white">
         <div id="left-top-panel" className="api-client-h-70 api-client-w-full">
           <div id="method-and-url" className="api-client-d-flex api-client-h-8">
             <Form.Select
@@ -230,7 +246,9 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
             </div>
           </div>
         </div>
-        <div id="left-bottom-panel" className="api-client-h-30 api-client-border-white">
+        <div
+          id="left-bottom-panel"
+          className="api-client-h-30 api-client-border-white">
           <Response
             responseData={apiModel.response ? apiModel.response : []}
             onChange={onApiModelChange}
@@ -254,9 +272,10 @@ function EditServiceFunction({ selectedServiceInfo, onClose }) {
         <Form.Label className="api-client-w-40 p-1">Service Name</Form.Label>
         <Form.Control
           type="text"
-          placeholder="Service Name"
+          placeholder="Service File"
           className="p-1 mt-2 mx-3 api-client-w-50 api-client-d-inline-block api-client-border-radius-0 "
           value={apiModel.tags ? apiModel.tags : ""}
+          readOnly={apiModel.is_authentication_api}
           onChange={(e) => {
             onApiModelChange("tags", e.target.value);
           }}

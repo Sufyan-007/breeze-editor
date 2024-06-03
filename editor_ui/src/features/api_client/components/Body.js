@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
+import {
+  getApiSchemaDetails,
+  getApiSchemaProperties,
+} from "../services/ApiService";
+
 import { Form, Nav, Navbar, Table } from "react-bootstrap";
 import Delete from "../../../assets/icons/delete.svg";
 import Remove from "../../../assets/icons/remove.svg";
-// import "../../../css/NewBody.css";
-import '../api_client.css';
+import "../api_client.css";
 import * as monaco from "monaco-editor";
+import { useParams } from "react-router";
 
 function Body({ bodyData, onChange }) {
   const [activeTab, setActiveTab] = useState(0);
@@ -13,18 +18,9 @@ function Body({ bodyData, onChange }) {
   const [formData, setFormData] = useState({});
   const [selectedProperty, setSelectedProperty] = useState("");
   const [selectedContentType, setSelectedContentType] = useState("");
-  const [availableProperties, setAvailableProperties] = useState([
-    "id",
-    "name",
-    "Category",
-    "photoUrls",
-    "tags",
-    "status",
-  ]);
-  const [newProperty, setNewProperty] = useState({
-    type: "integer",
-    example: 10,
-  });
+  const appName = useParams();
+  const [availableProperties, setAvailableProperties] = useState([]);
+  const [newProperty, setNewProperty] = useState({});
   const editorRef = useRef(null);
   const editorContainerRef = useRef(null);
 
@@ -146,7 +142,38 @@ function Body({ bodyData, onChange }) {
     }
   }, [bodyData, activeTab, onChange]);
 
+  useEffect(() => {
+    if (bodyData[activeTab] && !bodyData[activeTab].schema_name) {
+      if (selectedProperty) {
+        bodyData[activeTab].schema_name = selectedProperty;
+      }
+    }
+    const fetchApiSchemaDetails = async () => {
+      if (bodyData[activeTab]) {
+        const schemaDetails = await getApiSchemaDetails(
+          appName.projectName,
+          bodyData[activeTab].schema_name
+        );
+        console.log(schemaDetails, "schemadetials");
+        setAvailableProperties(schemaDetails);
+      }
+    };
+    fetchApiSchemaDetails();
+    const getNewProp = async () => {
+      const newProp = await getApiSchemaProperties(
+        appName.projectName,
+        bodyData[activeTab].schema_name,
+        selectedProperty
+      );
+      setNewProperty(newProp);
+    };
+    if (selectedProperty) {
+      getNewProp();
+    }
+  }, [appName.projectName, bodyData, activeTab, selectedProperty]);
+
   const handleFormChange = (value) => {
+    setSelectedContentType(value);
     const newBody = {
       content_type: value,
       raw_content: "",
@@ -158,6 +185,7 @@ function Body({ bodyData, onChange }) {
     onChange("body", updatedBody);
     setActiveTab(updatedBody.length - 1);
     setHasBody(true);
+    setSelectedContentType("");
   };
 
   const renderNestedFields = (properties, depth = 0, prefix = "") => {
@@ -244,23 +272,10 @@ function Body({ bodyData, onChange }) {
         properties: {},
       };
     }
-    let newProp;
-    if (selectedProperty === "Category") {
-      newProp = {
-        type: "object",
-        properties: {
-          id: { type: "integer", example: 1 },
-          name: { type: "string", example: "Dogs" },
-        },
-      };
-    } else {
-      newProp = newProperty;
-    }
 
-    updatedBodyData[activeTab].schema.properties[selectedProperty] = newProp;
-
-    setNewProperty({ type: "string", example: "" });
-    setSelectedProperty(""); // Reset selected property
+    updatedBodyData[activeTab].schema.properties[selectedProperty] =
+      newProperty;
+    setSelectedProperty(""); 
     setFormData(updatedBodyData[activeTab].schema.properties);
     onChange("body", updatedBodyData);
   };
@@ -301,7 +316,7 @@ function Body({ bodyData, onChange }) {
               className="mt-1 api-client-d-flex api-client-border-white api-client-w-full"
               id="select-content-type">
               <Form.Select
-                className="api-client-w-10 api-client-body-select"
+                className="api-client-w-10 api-client-body-select api-client-color-white"
                 value={selectedProperty ? selectedProperty : "Schema Name"}
                 onChange={(e) => setSelectedProperty(e.target.value)}>
                 <option value="" disabled>
@@ -310,11 +325,12 @@ function Body({ bodyData, onChange }) {
                     : "Schema Name"}
                 </option>
 
-                {availableProperties.map((prop) => (
-                  <option key={prop} value={prop}>
-                    {prop}
-                  </option>
-                ))}
+                {availableProperties.length > 0 &&
+                  availableProperties.map((prop) => (
+                    <option key={prop} value={prop}>
+                      {prop}
+                    </option>
+                  ))}
               </Form.Select>
               <img
                 className="mx-3 mt-1"
@@ -330,13 +346,9 @@ function Body({ bodyData, onChange }) {
         ) : (
           <>
             <div className="api-client-d-flex">
-              <h6
-                className="mt-2 mx-2 api-client-color-white"
-               >
-                Content-Type
-              </h6>
+              <h6 className="mt-2 mx-2 api-client-color-white">Content-Type</h6>
               <Form.Select
-              className="api-client-w-15 api-client-h-full api-client-body-select"
+                className="api-client-w-15 api-client-h-full api-client-body-select"
                 value={selectedContentType}
                 onChange={(e) => handleFormChange(e.target.value)}>
                 <option value="" disabled>
@@ -353,18 +365,14 @@ function Body({ bodyData, onChange }) {
       </div>
       {bodyData.length > 0 && (
         <>
-          <div id="body-content"
+          <div
+            id="body-content"
             className="mt-5 api-client-color-white api-client-w-full api-client-h-full api-client-overflow">
             {bodyData[activeTab] &&
               (bodyData[activeTab].content_type === "JSON" ||
                 bodyData[activeTab].content_type === "FORMDATA" ||
                 bodyData[activeTab].content_type === "URLENCODED") && (
-                <Table
-                  striped
-                  bordered
-                  hover
-                  variant="dark"
-                  >
+                <Table striped bordered hover variant="dark">
                   <thead>
                     <tr>
                       <th>Property</th>
@@ -381,8 +389,7 @@ function Body({ bodyData, onChange }) {
                 <div
                   className="api-client-monaco-div"
                   id="text-editor"
-                  ref={editorContainerRef}
-                  ></div>
+                  ref={editorContainerRef}></div>
               )}
             {bodyData[activeTab] &&
               bodyData[activeTab].content_type === "XML" && (
