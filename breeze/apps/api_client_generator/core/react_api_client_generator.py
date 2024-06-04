@@ -359,18 +359,19 @@ class ReactApiClientGenerator:
                     {AXIOS_OBJECT_DECLARATION}
                     {INTERCEPTOR_CODE}
                     {RESPONSE_INTERCEPTOR_CODE}
-                    let resp = await api({URL})
+                    let resp = await axios.request(api)
                     {RESPONSE_CODE}
                     return resp
                 };
                 """ 
 
         axis_object_declation = """
-            const api = axios.create({
+            const api = {
                 {METHOD},
+                url : {URL},
                 {HEADERS},
                 {BODY}
-            });
+            };
         """
         # set request url
         url_obj = self.set_request_url(model,app_name)
@@ -379,6 +380,7 @@ class ReactApiClientGenerator:
         
         ## set api method
         axis_object_declation = axis_object_declation.replace('{METHOD}',"method : '"+model.request.method.value+"'")
+        axis_object_declation = axis_object_declation.replace('{URL}',url_obj.get("axios_url"))
         
         # set request headers
         headers = self.set_request_headers(model,app_name)
