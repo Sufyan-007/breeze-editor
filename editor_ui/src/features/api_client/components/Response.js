@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import "../../../css/NewResponse.css";
+// import "../../../css/NewResponse.css";
+import '../api_client.css';
 import { Form, Nav, Navbar } from "react-bootstrap";
 import Remove from "../../../assets/icons/remove.svg";
 function Response({ responseData, onChange }) {
@@ -37,13 +38,13 @@ function Response({ responseData, onChange }) {
     onChange("response", updatdResp);
   };
   return (
-    <div className="new-res-h-full new-res-w-full new-res-d-flex">
+    <div className="api-client-h-full api-client-w-full api-client-d-flex">
       <div
         id="left-response"
-        className="new-res-h-full new-res-w-50 new-res-border-white">
-        <h6 className="new-res-color-white mx-2 mt-2">Custom Response</h6>
-        <div id="top-panel" className="new-res-w-full  new-res-h-15">
-          <Navbar bg="dark" variant="dark" className="new-res-h-full">
+        className="api-client-h-full api-client-w-50 api-client-border-white">
+        <h6 className="api-client-color-white mx-2 mt-2">Custom Response</h6>
+        <div id="top-panel" className="api-client-w-full  api-client-h-15">
+          <Navbar bg="dark" variant="dark" className="api-client-h-full">
             <Nav activeKey={activeTab} onSelect={handleSelect}>
               {responseData.map((response, index) => (
                 <Nav.Link key={index} eventKey={index}>
@@ -71,19 +72,21 @@ function Response({ responseData, onChange }) {
             </Nav>
           </Navbar>
         </div>
-        <div id="response-settings" className="new-res-w-full new-res-h-80 ">
+        <div
+          id="response-settings"
+          className="api-client-w-full api-client-h-80 ">
           {activeTab && responseData.length > 0 && (
             <>
-              <div className="new-res-h-full new-res-d-flex  mt-2">
-                <div id="left" className="new-res-h-full new-res-w-50 ">
+              <div className="api-client-h-full api-client-d-flex  mt-2">
+                <div id="left" className="api-client-h-full api-client-w-50 ">
                   <div
                     id="left-first"
-                    className="new-res-w-full new-res-h-20 mt-1">
-                    <Form.Label className="new-res-color-white mt-2 mx-2 new-res-w-35">
+                    className="api-client-w-full api-client-h-20 mt-1">
+                    <Form.Label className="api-client-color-white mt-2 mx-2 api-client-w-35">
                       Status :
                     </Form.Label>
                     <Form.Select
-                      className="new-res-form-control mx-2"
+                      className="api-client-response-form-control mx-2"
                       value={
                         responseData[activeTab]
                           ? responseData[activeTab].status
@@ -101,12 +104,12 @@ function Response({ responseData, onChange }) {
                   </div>
                   <div
                     id="left-second"
-                    className="new-res-w-full new-res-h-20 mt-1">
-                    <Form.Label className="new-res-color-white mt-2 mx-2 new-res-w-35">
+                    className="api-client-w-full api-client-h-20 mt-1">
+                    <Form.Label className="api-client-color-white mt-2 mx-2 api-client-w-35">
                       Content Type :
                     </Form.Label>
                     <Form.Select
-                      className="new-res-form-control mx-2"
+                      className="api-client-response-form-control mx-2"
                       value={
                         responseData[activeTab]
                           ? responseData[activeTab].content_type
@@ -122,12 +125,12 @@ function Response({ responseData, onChange }) {
                   </div>
                   <div
                     id="left-third"
-                    className="new-res-w-full new-res-h-20 mt-1">
-                    <Form.Label className="new-res-color-white mt-2 mx-2 new-res-w-35">
+                    className="api-client-w-full api-client-h-20 mt-1">
+                    <Form.Label className="api-client-color-white mt-2 mx-2 api-client-w-35">
                       Schema Name :
                     </Form.Label>
                     <Form.Select
-                      className="new-res-form-control mx-2"
+                      className="api-client-response-form-control mx-2"
                       value={
                         responseData[activeTab]
                           ? responseData[activeTab].schema_name
@@ -143,15 +146,15 @@ function Response({ responseData, onChange }) {
                   </div>
                 </div>
 
-                <div id="right" className="new-res-h-full new-res-w-50">
+                <div id="right" className="api-client-h-full api-client-w-50">
                   <div
                     id="right-first"
-                    className="new-res-w-full new-res-h-20 mt-1">
-                    <Form.Label className="new-res-color-white mt-2 new-res-w-35">
+                    className="api-client-w-full api-client-h-20 mt-1">
+                    <Form.Label className="api-client-color-white mt-2 api-client-w-35">
                       Raw Content :
                     </Form.Label>
                     <Form.Control
-                      className="new-res-form-control"
+                      className="api-client-response-form-control"
                       type="text"
                       placeholder="Key"
                       value={
@@ -166,12 +169,12 @@ function Response({ responseData, onChange }) {
                   </div>
                   <div
                     id="right-second"
-                    className="new-res-w-full new-res-h-20 mt-1">
-                    <Form.Label className="new-res-color-white mt-2 new-res-w-35">
+                    className="api-client-w-full api-client-h-20 mt-1">
+                    <Form.Label className="api-client-color-white mt-2 api-client-w-35">
                       Description :
                     </Form.Label>
                     <Form.Control
-                      className="new-res-form-control"
+                      className="api-client-response-form-control"
                       type="text"
                       placeholder="Key"
                       value={
@@ -192,8 +195,8 @@ function Response({ responseData, onChange }) {
       </div>
       <div
         id="right-response"
-        className="new-res-h-full new-res-w-50 new-res-border-white">
-        <h6 className="new-res-color-white mx-2 mt-2">Retrieved Response</h6>
+        className="api-client-h-full api-client-w-50 api-client-border-white">
+        <h6 className="api-client-color-white mx-2 mt-2">Retrieved Response</h6>
       </div>
     </div>
   );
