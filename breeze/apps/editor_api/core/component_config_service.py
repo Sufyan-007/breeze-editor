@@ -53,7 +53,7 @@ class ComponentConfigService:
     
     def add_child_html(self,component,parent_html_id,child):
         parent_html= self.comp_config.get(component).get("html_elements").get(parent_html_id)
-        if parent_html["elementType"] =="HTML":
+        if parent_html["elementType"] =="HTML" or parent_html["elementType"] =="THIRD_PARTY" or parent_html["element"]=="CUSTOM":
             print(parent_html)
             children = parent_html["children"]
             new_elem_id = parent_html_id+"-"+ str(max([int(child["_id"].split("-")[-1]) for child in children],default=0)+1)
