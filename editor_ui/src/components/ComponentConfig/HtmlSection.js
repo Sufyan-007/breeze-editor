@@ -1,15 +1,26 @@
-import { useContext, useEffect, useRef, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import HtmlTree from "../HtmlTree/HtmlTree"
 import ElementConfigSidebar from "./ElementConfigSidebar"
 import { ComponentContext } from "./ComponentConfigPage"
+import { MessageListenerService } from "../../services/MessageListenerService"
+import { useParams } from "react-router"
+import AddElements from "./AddElements"
 import ActionsConfig from "./ActionsConfig"
 
+export const DragContext = createContext({
+    messageListener: null
+})
+
 export default function HtmlSection() {
-    const { componentName, componentConfig } = useContext(ComponentContext)
+    const { componentConfig } = useContext(ComponentContext)
     const [iframeSrc, setIframeSrc] = useState("http://localhost:" + componentConfig.port)
-    const srcInput = useRef(iframeSrc)
+    const srcInput = useRef()
     const [selected, setSelected] = useState(0)
     const iFrameRef = useRef();
+    const { projectName, componentName } = useParams()
+    const messageListener = useMemo(() => {
+        return new MessageListenerService(projectName, componentName)
+    }, [projectName, componentName])
 
 
     const setIframeSource = () => {
@@ -20,8 +31,11 @@ export default function HtmlSection() {
     useEffect(() => {
 
         window.addEventListener("message", (message) => {
-            if(message.data.source==="APP"){
+            if (message.data.source === "APP") {
                 console.log(message.data)
+                if (message.data.type === "elementDrop") {
+                    messageListener.onElementDrop(message.data)
+                }
             }
         })
         setTimeout(async () => {
@@ -31,11 +45,12 @@ export default function HtmlSection() {
                 iframe.contentWindow.postMessage({ func: '()=>{console.log(" Hello World") }' }, "*")
             }
         }, 500)
-    }, [])
+    }, [messageListener])
 
 
     return (
-        <div className="row flex-grow-1" style={{ position: "relative" }}>
+        <DragContext.Provider value={{messageListener}} >
+            <div className="row flex-grow-1" style={{ position: "relative" }}>
 
             <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
                 <div className="row p-2">
@@ -77,21 +92,22 @@ export default function HtmlSection() {
             <div className="col overflow-hidden p-0">
                 <div className=" bg-dark-subtle align-items-center d-flex justify-content-start" style={{ 'height': "2.4rem" }}>
 
-                    <div className="me-3">
-                        <input
-                            type="text"
-                            ref={srcInput}
-                            defaultValue={iframeSrc}
-                            id="Form_Search"
-                            role="searchbox"
-                            className="InputBox me-2 rounded"
-                        />
-                        <input type="submit" id="Form_Go" className="Button bg-primary text-light rounded" value="GO" onClick={setIframeSource} />
+                        <div className="me-3">
+                            <input
+                                type="text"
+                                ref={srcInput}
+                                defaultValue={iframeSrc}
+                                id="Form_Search"
+                                role="searchbox"
+                                className="InputBox me-2 rounded"
+                            />
+                            <input type="submit" id="Form_Go" className="Button bg-primary text-light rounded" value="GO" onClick={setIframeSource} />
+                        </div>
                     </div>
+                    <iframe ref={iFrameRef} id="iFrame" src={iframeSrc} title="Generated Project" style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} ></iframe>
                 </div>
-                <iframe ref={iFrameRef} id="iFrame" src={iframeSrc} title="Generated Project" style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} ></iframe>
+                <ElementConfigSidebar />
             </div>
-            <ElementConfigSidebar />
-        </div>
+        </DragContext.Provider>
     )
 }

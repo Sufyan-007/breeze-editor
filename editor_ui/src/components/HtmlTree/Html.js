@@ -20,6 +20,7 @@ export default function Html({ value, htmlId, reference, selectElem }) {
 
     function addChild(val) {
         if (val) {
+            console.log(val)
             addHtmlChild(projectName, htmlId, componentName, val).then((res) => {
                 console.log(res)
                 setComponentConfig(state => {
