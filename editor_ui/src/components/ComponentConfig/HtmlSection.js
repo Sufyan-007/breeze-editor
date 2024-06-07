@@ -35,6 +35,14 @@ export default function HtmlSection() {
                 if (message.data.type === "elementDrop") {
                     messageListener.onElementDrop(message.data)
                 }
+                if (message.data.type ==="request"){
+                    console.log("got request")
+                    const request = message.data.request
+                    if (request.type === "component"){
+                        const iframe = document.getElementById("iFrame")
+                        iframe.contentWindow.postMessage({type:"resource",resource:{type:"component",component:componentConfig}},"*")
+                    }
+                }
             }
         })
         setTimeout(async () => {
@@ -44,7 +52,7 @@ export default function HtmlSection() {
                 iframe.contentWindow.postMessage({ func: '()=>{console.log(" Hello World") }' }, "*")
             }
         }, 500)
-    }, [messageListener])
+    }, [messageListener,componentConfig])
 
 
     return (
