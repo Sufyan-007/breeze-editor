@@ -7,9 +7,11 @@ function VariableForm({ onSubmit, formData, isEditing }) {
   const [formState, setFormState] = useState({
     name: "",
     type: "",
-    datatype: "",
-    defaultValue: "",
-    description: "",
+    body: {
+      datatype: "",
+      defaultValue: "",
+      description: "",
+    },
   });
 
   useEffect(() => {
@@ -20,7 +22,14 @@ function VariableForm({ onSubmit, formData, isEditing }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormState({ ...formState, [name]: value });
+    if (name in formState.body) {
+      setFormState((prevState) => ({
+        ...prevState,
+        body: { ...prevState.body, [name]: value },
+      }));
+    } else {
+      setFormState((prevState) => ({ ...prevState, [name]: value }));
+    }
   };
 
   const handleSubmit = (e) => {
@@ -60,7 +69,7 @@ function VariableForm({ onSubmit, formData, isEditing }) {
         <Form.Control
           as="select"
           name="datatype"
-          value={formState.datatype}
+          value={formState.body.datatype}
           onChange={handleChange}
         >
           <option value="">Select a data type</option>
@@ -76,7 +85,7 @@ function VariableForm({ onSubmit, formData, isEditing }) {
         <Form.Control
           type="text"
           name="defaultValue"
-          value={formState.defaultValue}
+          value={formState.body.defaultValue}
           onChange={handleChange}
           placeholder="value"
         />
@@ -86,7 +95,7 @@ function VariableForm({ onSubmit, formData, isEditing }) {
         <Form.Control
           type="text"
           name="description"
-          value={formState.description}
+          value={formState.body.description}
           onChange={handleChange}
           placeholder="Enter description"
         />

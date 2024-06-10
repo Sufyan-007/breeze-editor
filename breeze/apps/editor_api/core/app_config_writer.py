@@ -32,20 +32,16 @@ class AppConfigWriter:
                 "name": app_config['defaultComponent'],
                 "id":app_config['defaultComponent'].upper(),
                 "containingFile": f"components/{app_config['defaultComponent']}.js",
-                "stateVars": [],
-                "propsVars": [],
-                "otherVars" : [],
-                "refVars" : [],
-                "functions": [],
-                "html": { "_id": "Main" },
-                "wrapper_store": None,
                 "imports": {
                     "components": [
                     ],
                     "other": [
                     ]
                 },
-                "hooks": [],
+                "propsVars": [],
+                "resources": [],
+                "html": { "_id": "Main" },
+                "wrapper_store": None,
                 "html_elements": {
                     "Main": {
                         "type": "Element",

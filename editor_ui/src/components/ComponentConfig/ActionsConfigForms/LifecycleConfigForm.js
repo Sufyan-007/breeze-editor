@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
-import MonacoEditor from "../common/MonacoEditor";
+import MonacoEditor from "../../common/MonacoEditor";
 
 function LifecycleForm({ onSubmit, formData, isEditing }) {
   const [formState, setFormState] = useState({
     name: "",
-    lifecycleType: "",
-    dependentVars: [],
-    body: "",
-    returnBody: "",
+    type: "lifecycle",
+    body: {
+      lifecycleType: "",
+      dependentVars: [],
+      helperData: [],
+      functionBody: "",
+      returnBody: "",
+      description: "",
+    },
   });
+
   const constantsList = ["var1", "var2", "var3", "var4"];
 
   useEffect(() => {
@@ -20,15 +26,33 @@ function LifecycleForm({ onSubmit, formData, isEditing }) {
   }, [isEditing, formData]);
 
   const handleFormChange = (key, value) => {
-    setFormState({ ...formState, [key]: value });
+    setFormState((prevState) => ({
+      ...prevState,
+      body: {
+        ...prevState.body,
+        [key]: value,
+      },
+    }));
   };
 
-  const handleSelect = (selectedList, selectedItem) => {
-    setFormState({ ...formState, dependentVars: selectedList });
+  const handleSelect = (selectedList) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      body: {
+        ...prevState.body,
+        dependentVars: selectedList,
+      },
+    }));
   };
 
-  const handleRemove = (selectedList, removedItem) => {
-    setFormState({ ...formState, dependentVars: selectedList });
+  const handleRemove = (selectedList) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      body: {
+        ...prevState.body,
+        dependentVars: selectedList,
+      },
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -40,21 +64,22 @@ function LifecycleForm({ onSubmit, formData, isEditing }) {
     <Form>
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formGridName">
-          {/* <Form.Label>Name</Form.Label> */}
           <Form.Control
             type="text"
             placeholder="Lifecycle Name"
             value={formState.name}
-            onChange={(e) => handleFormChange("name", e.target.value)}
+            onChange={(e) => setFormState((prevState) => ({
+              ...prevState,
+              name: e.target.value,
+            }))}
             required
           />
         </Form.Group>
       </Row>
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formGridType">
-          {/* <Form.Label>Type</Form.Label> */}
           <Form.Select
-            value={formState.lifecycleType}
+            value={formState.body.lifecycleType}
             onChange={(e) => handleFormChange("lifecycleType", e.target.value)}
           >
             <option value="">Lifecycle Type</option>
@@ -66,54 +91,48 @@ function LifecycleForm({ onSubmit, formData, isEditing }) {
         </Form.Group>
       </Row>
 
-      {(formState.lifecycleType === "onComponentMount" ||
-        formState.lifecycleType === "onMountAndUnmount" ||
-        formState.lifecycleType === "onUnmount") && (
+      {(formState.body.lifecycleType === "onComponentMount" ||
+        formState.body.lifecycleType === "onMountAndUnmount" ||
+        formState.body.lifecycleType === "onUnmount") && (
         <Row className="mb-3">
           <Form.Group controlId="formGridDependentVars">
-            {/* <Form.Label>Dependent Variables</Form.Label> */}
             <Multiselect
               placeholder="Dependent Variables"
               options={constantsList}
-              selectedValues={formState.dependentVars}
+              selectedValues={formState.body.dependentVars}
               onSelect={handleSelect}
               onRemove={handleRemove}
               isObject={false}
               showCheckbox={true}
-              style={{
-                optionListContainer: {
-                  background: "red",
-                },
-              }}
             />
           </Form.Group>
         </Row>
       )}
 
       <Row className="mb-3">
-        {(formState.lifecycleType === "onEveryMount" ||
-          formState.lifecycleType === "onComponentMount" ||
-          formState.lifecycleType === "onMountAndUnmount") && (
+        {(formState.body.lifecycleType === "onEveryMount" ||
+          formState.body.lifecycleType === "onComponentMount" ||
+          formState.body.lifecycleType === "onMountAndUnmount") && (
           <Form.Group as={Col} controlId="formGridFunctionBody">
             <Form.Label>Function Body</Form.Label>
             <MonacoEditor
-              defaultValue=""
-              onChange={(value) => handleFormChange("body", value)}
+              defaultValue={formState.body.functionBody}
+              onChange={(value) => handleFormChange("functionBody", value)}
               height="140px"
               width="410px"
-              id="function-body-editor"
+              id={isEditing ? `editor-${formState?.id}` : "lifecycle-form"}
               language="javascript"
             />
           </Form.Group>
         )}
       </Row>
       <Row className="mb-3">
-        {(formState.lifecycleType === "onUnmount" ||
-          formState.lifecycleType === "onMountAndUnmount") && (
+        {(formState.body.lifecycleType === "onUnmount" ||
+          formState.body.lifecycleType === "onMountAndUnmount") && (
           <Form.Group as={Col} controlId="formGridReturnBody">
             <Form.Label>Return Body</Form.Label>
             <MonacoEditor
-              defaultValue=""
+              defaultValue={formState.body.returnBody}
               onChange={(value) => handleFormChange("returnBody", value)}
               height="140px"
               width="410px"

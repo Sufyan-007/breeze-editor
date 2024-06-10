@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import MonacoEditor from "../common/MonacoEditor";
-import DeleteIcon from "../../assets/icons/delete-trash.svg"
+import MonacoEditor from "../../common/MonacoEditor";
+import DeleteIcon from "../../../assets/icons/delete-trash.svg";
 
 function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   const [formState, setFormState] = useState({
-    functionName: "",
-    description: "",
-    parameters: [],
-    isAsync: false,
-    isAnonymous: false,
-    body: "",
+    name: "",
+    type: "function",
+    body: {
+      // type: "",
+      parameters: { list: [] },
+      isAnonymous: false,
+      isAsync: false,
+      helperData: [],
+      functionBody: "",
+      description: "",
+    },
   });
 
   const [parameterInput, setParameterInput] = useState("");
@@ -22,24 +27,45 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   }, [isEditing, formData]);
 
   const handleFormChange = (key, value) => {
-    setFormState({ ...formState, [key]: value });
+    setFormState((prevState) => ({
+      ...prevState,
+      body: {
+        ...prevState.body,
+        [key]: value,
+      },
+    }));
   };
 
   const handleAddParameter = () => {
     if (parameterInput.trim() !== "") {
-      setFormState({
-        ...formState,
-        parameters: [...formState.parameters, parameterInput.trim()],
-      });
+      setFormState((prevState) => ({
+        ...prevState,
+        body: {
+          ...prevState.body,
+          parameters: {
+            list: [
+              ...prevState.body.parameters.list,
+              { name: parameterInput.trim() },
+            ],
+          },
+        },
+      }));
       setParameterInput("");
     }
   };
 
   const handleRemoveParameter = (index) => {
-    const updatedParameters = formState.parameters.filter(
-      (param, idx) => idx !== index
-    );
-    setFormState({ ...formState, parameters: updatedParameters });
+    setFormState((prevState) => ({
+      ...prevState,
+      body: {
+        ...prevState.body,
+        parameters: {
+          list: prevState.body.parameters.list.filter(
+            (_, idx) => idx !== index
+          ),
+        },
+      },
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -51,30 +77,32 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
     <Form onSubmit={handleSubmit}>
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formFunctionName">
-          {/* <Form.Label>Function Name</Form.Label> */}
           <Form.Control
             type="text"
             placeholder="Function Name"
-            value={formState.functionName}
-            onChange={(e) => handleFormChange("functionName", e.target.value)}
+            value={formState.name}
+            onChange={(e) =>
+              setFormState((prevState) => ({
+                ...prevState,
+                name: e.target.value,
+              }))
+            }
             required
           />
         </Form.Group>
       </Row>
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formDescription">
-          {/* <Form.Label>Description</Form.Label> */}
           <Form.Control
             type="text"
             placeholder="Description"
-            value={formState.description}
+            value={formState.body.description}
             onChange={(e) => handleFormChange("description", e.target.value)}
           />
         </Form.Group>
       </Row>
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formParameters">
-          {/* <Form.Label>Parameters</Form.Label> */}
           <div className="d-flex">
             <Form.Control
               type="text"
@@ -88,12 +116,19 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
             </Button>
           </div>
           <ul className="list-group mt-2">
-            {formState.parameters.map((param, index) => (
-              <li key={index} className="list-group-item d-flex justify-content-between align-items-center px-2 py-1">
-                {param}
-                <Button variant="dark" onClick={() => handleRemoveParameter(index)} title="Delete">
-                <img src={DeleteIcon} alt="" height={22} />
-              </Button>
+            {formState.body.parameters.list?.map((param, index) => (
+              <li
+                key={index}
+                className="list-group-item d-flex justify-content-between align-items-center px-2 py-1"
+              >
+                {param.name}
+                <Button
+                  variant="dark"
+                  onClick={() => handleRemoveParameter(index)}
+                  title="Delete"
+                >
+                  <img src={DeleteIcon} alt="delete" height={22} />
+                </Button>
               </li>
             ))}
           </ul>
@@ -104,7 +139,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           <Form.Check
             type="checkbox"
             label="Async"
-            checked={formState.isAsync}
+            checked={formState.body.isAsync}
             onChange={(e) => handleFormChange("isAsync", e.target.checked)}
           />
         </Form.Group>
@@ -112,7 +147,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           <Form.Check
             type="checkbox"
             label="Anonymous"
-            checked={formState.isAnonymous}
+            checked={formState.body.isAnonymous}
             onChange={(e) => handleFormChange("isAnonymous", e.target.checked)}
           />
         </Form.Group>
@@ -121,11 +156,12 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
         <Form.Group as={Col} controlId="formFunctionBody">
           <Form.Label>Function Body</Form.Label>
           <MonacoEditor
-            defaultValue={formState.body}
-            onChange={(value) => handleFormChange("body", value)}
+            defaultValue={formState.body.functionBody}
+            onChange={(value) => handleFormChange("functionBody", value)}
             height="140px"
             width="400px"
             language="javascript"
+            id={isEditing ? `editor-${formState?.id}` : "function-form"}
           />
         </Form.Group>
       </Row>

@@ -19,9 +19,10 @@ from .views import CSSFileDownloadView
 from .views import CSSFileUpload
 from .views import HtmlConfigReader
 from .views import HtmlConfigWriter
-from .views import LifeCycleConfigWriter
-from .views import FunctionConfigWriter
-from .views import VariablesConfigWriter
+# from .views import LifeCycleConfigWriter
+# from .views import FunctionConfigWriter
+# from .views import VariablesConfigWriter
+from .views import ComponentConfigWriter
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -58,11 +59,13 @@ urlpatterns = [
         ## New APIs 
         path('get-html-config/', HtmlConfigReader.as_view()),
         path('update-html-config/', HtmlConfigWriter.as_view()),
-        path('lifecycle/', LifeCycleConfigWriter.as_view()),
-        path('variables/', VariablesConfigWriter.as_view()),
+        # path('lifecycle/', LifeCycleConfigWriter.as_view()),
+        # path('variables/', VariablesConfigWriter.as_view()),
+        path('update-component-config/', ComponentConfigWriter.as_view()),
+
         
         
         ##Functions 
-        path("update-function-config/",FunctionConfigWriter.as_view())
+        # path("update-function-config/",FunctionConfigWriter.as_view())
 ]
 
