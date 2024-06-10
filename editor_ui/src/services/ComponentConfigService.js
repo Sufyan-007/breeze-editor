@@ -52,7 +52,6 @@ export async function addChildRoute(childObj, projectName) {
 }
 
 export const updateComponentConfig = async (payload) => {
-    console.log('payload::>>', payload);
   try {
     const response = await fetch('http://localhost:8000/editor/update-component-config/', {
       method: 'PUT',
@@ -73,3 +72,25 @@ export const updateComponentConfig = async (payload) => {
     throw error;
   }
 };
+
+export const reorderComponentActions = async (payload) => {
+  try {
+    const response = await fetch('http://localhost:8000/editor/reorder-component-actions/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating component config:', error);
+    throw error;
+  }
+}

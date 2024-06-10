@@ -23,6 +23,7 @@ from .views import HtmlConfigWriter
 # from .views import FunctionConfigWriter
 # from .views import VariablesConfigWriter
 from .views import ComponentConfigWriter
+from .views import ComponentConfigOrder
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -62,6 +63,7 @@ urlpatterns = [
         # path('lifecycle/', LifeCycleConfigWriter.as_view()),
         # path('variables/', VariablesConfigWriter.as_view()),
         path('update-component-config/', ComponentConfigWriter.as_view()),
+        path('reorder-component-actions/', ComponentConfigOrder.as_view())
 
         
         

@@ -8,7 +8,19 @@ import ImportConfigForm from "./ActionsConfigForms/ImportConfigForm";
 import PropConfigForm from "./ActionsConfigForms/PropConfigForm";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
-import { updateComponentConfig } from "../../services/ComponentConfigService";
+import {
+  updateComponentConfig,
+  reorderComponentActions,
+} from "../../services/ComponentConfigService";
+
+const menuItems = [
+  { key: "imports", label: "Imports" },
+  { key: "propsVars", label: "Props" },
+  { key: "stateVars", label: "Variables" },
+  { key: "function", label: "Functions" },
+  { key: "lifecycle", label: "Lifecycle" },
+  { key: "hook", label: "Hooks" },
+];
 
 function ActionsConfig() {
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
@@ -17,7 +29,6 @@ function ActionsConfig() {
   const [isEditing, setIsEditing] = useState(false);
   const { componentConfig, setComponentConfig } = useContext(ComponentContext);
   const { projectName, componentName } = useParams();
-  console.log("compo::>>", componentConfig);
 
   const handleOpen = (type) => {
     setFormType(type);
@@ -31,6 +42,47 @@ function ActionsConfig() {
     setFormType("");
     setFormData(null);
     setIsEditing(false);
+  };
+
+  const handleDragStart = (type, index) => (event) => {
+    event.dataTransfer.setData("dragIndex", index);
+    event.dataTransfer.setData("type", type);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (type, index) => (event) => {
+    event.preventDefault();
+    const dragIndex = parseInt(event.dataTransfer.getData("dragIndex"), 10);
+    const dragType = event.dataTransfer.getData("type");
+
+    if (dragType !== type || dragIndex === index) return;
+
+    const updatedItems = [...componentConfig[type]];
+    const [movedItem] = updatedItems.splice(dragIndex, 1);
+    updatedItems.splice(index, 0, movedItem);
+
+    const payload = {
+      projectId: projectName,
+      componentId: componentName,
+      body: {
+        type: type,
+        data: updatedItems,
+      },
+    };
+
+    reorderComponentActions(payload)
+      .then((response) => {
+        setComponentConfig((prevConfig) => ({
+          ...prevConfig,
+          [type]: updatedItems,
+        }));
+      })
+      .catch((error) => {
+        console.error("Error updating order", error);
+      });
   };
 
   const handleEdit = (data) => {
@@ -49,10 +101,10 @@ function ActionsConfig() {
 
     try {
       const response = await updateComponentConfig(payload);
-      console.log('Update successful:', response);
+      console.log("Update successful:", response);
       setComponentConfig(response);
     } catch (error) {
-      console.error('Error updating component config:', error);
+      console.error("Error updating component config:", error);
     }
     handleClose();
   };
@@ -128,14 +180,25 @@ function ActionsConfig() {
     }
   };
 
-  const menuItems = [
-    { key: "imports", label: "Imports" },
-    { key: "propsVars", label: "Props" },
-    { key: "stateVars", label: "Variables" },
-    { key: "function", label: "Functions" },
-    { key: "lifecycle", label: "Lifecycle" },
-    { key: "hook", label: "Hooks" },
-  ];
+  const renderDraggableList = (items, type) => (
+    <div>
+      {items.map((item, index) => (
+        <div
+          key={item.name}
+          className="d-flex"
+          style={{ marginBottom: "2px", cursor: "pointer" }}
+          draggable
+          onDragStart={handleDragStart(type, index)}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop(type, index)}
+          onClick={() => handleEdit(item)}
+        >
+          <strong>{item.name}</strong>
+          <div className="ms-2 fst-italic fw-lighter">{item.type}</div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <>
@@ -170,30 +233,8 @@ function ActionsConfig() {
         </div>
         <div>
           <div className="">
-            {componentConfig.propsVars.map((prop, index) => (
-              <div
-                className="d-flex"
-                style={{ marginBottom: "2px", cursor: "pointer" }}
-                onClick={() => {
-                  handleEdit(prop);
-                }}
-              >
-                <strong> {prop.name}</strong>
-                <div className="ms-2 fst-italic fw-lighter"> {prop.type}</div>
-              </div>
-            ))}
-            {componentConfig.resources.map((res, index) => (
-              <div
-                className="d-flex"
-                style={{ marginBottom: "2px", cursor: "pointer" }}
-                onClick={() => {
-                  handleEdit(res);
-                }}
-              >
-                <strong> {res.name}</strong>
-                <div className="ms-2 fst-italic fw-lighter"> {res.type}</div>
-              </div>
-            ))}
+            {renderDraggableList(componentConfig.propsVars, "propsVars")}
+            {renderDraggableList(componentConfig.resources, "resources")}
           </div>
         </div>
       </div>

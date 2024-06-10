@@ -173,6 +173,27 @@ class ComponentConfigService:
         appEditor.write_component(config)
 
         return config
+    
+    def reorder_component_actions(self, comp_name, config_data):
+        if "type" not in config_data or "data" not in config_data:
+            raise ValueError("Invalid config_data: 'type' and 'data' keys are required.")
+
+        config = self.comp_config.get(comp_name)
+        action_type = config_data["type"]
+        data = config_data["data"]
+
+        if action_type == 'propsVars':
+            config["propsVars"] = data
+        elif action_type == 'resources':
+            config["resources"] = data
+        else:
+            raise ValueError(f"Invalid action type '{action_type}'. Must be 'propsVars' or 'resources'.")
+        
+        self.comp_config[comp_name] = config
+
+        appEditor = AppEditor(self.projectId)
+        appEditor.write_component(config)
+        return True
 
     # def add_lifecycle(self, lifecycle_data):
     #     hooks = self.comp_config.get(lifecycle_data["comp_name"], {}).setdefault(
