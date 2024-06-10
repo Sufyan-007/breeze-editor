@@ -21,6 +21,7 @@ export default function HtmlSection() {
         return new MessageListenerService(projectName, componentName)
     }, [projectName, componentName])
 
+    const [testProps , setTestProps] = useState({prop1:"xyz"})
 
     const setIframeSource = () => {
         const newValue = srcInput.current.value;
@@ -28,23 +29,41 @@ export default function HtmlSection() {
     };
 
     useEffect(() => {
+        const handler = (message) => {
+            if (message.data.source === "APP") {
+                if (message.data.type === "request") {
+                    console.log("got request" , message.data)
+                    if (message.data.request.type === "props") {
+                        const iframe = document.getElementById("iFrame")
+                        iframe.contentWindow.postMessage({ type: "resource", resource: { type: "props", props: testProps } }, "*")
 
-        window.addEventListener("message", (message) => {
+                    }
+                }
+            }
+        }
+        window.addEventListener("message", handler)
+        return () => {
+            window.removeEventListener("message", handler)
+        }
+    }, [testProps])
+
+    useEffect(() => {
+        const handler = (message) => {
             if (message.data.source === "APP") {
                 console.log(message.data)
                 if (message.data.type === "elementDrop") {
                     messageListener.onElementDrop(message.data)
                 }
-                if (message.data.type ==="request"){
-                    console.log("got request")
+                if (message.data.type === "request") {
                     const request = message.data.request
-                    if (request.type === "component"){
+                    if (request.type === "component") {
                         const iframe = document.getElementById("iFrame")
-                        iframe.contentWindow.postMessage({type:"resource",resource:{type:"component",component:componentConfig}},"*")
+                        iframe.contentWindow.postMessage({ type: "resource", resource: { type: "component", component: componentConfig } }, "*")
                     }
                 }
             }
-        })
+        }
+        window.addEventListener("message", handler)
         setTimeout(async () => {
             const iframe = document.getElementById("iFrame")
 
@@ -52,11 +71,14 @@ export default function HtmlSection() {
                 iframe.contentWindow.postMessage({ func: '()=>{console.log(" Hello World") }' }, "*")
             }
         }, 500)
-    }, [messageListener,componentConfig])
+        return () => {
+            window.removeEventListener("message", handler)
+        }
+    }, [messageListener, componentConfig])
 
 
     return (
-        <DragContext.Provider value={{messageListener}} >
+        <DragContext.Provider value={{ messageListener }} >
             <div className="row flex-grow-1" style={{ position: "relative" }}>
 
                 <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
