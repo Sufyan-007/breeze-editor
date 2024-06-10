@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 
-const dataTypes = ["string", "number", "boolean", "date", "array", "object"];
+const dataTypes = ["string", "number", "boolean", "date", "array", "object", "function"];
 
 function PropConfigForm({ onSubmit, formData, isEditing }) {
   const [formState, setFormState] = useState({
