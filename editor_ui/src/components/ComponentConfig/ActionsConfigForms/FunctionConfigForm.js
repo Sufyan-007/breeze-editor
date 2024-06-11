@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import MonacoEditor from "../../common/MonacoEditor";
 import DeleteIcon from "../../../assets/icons/delete-trash.svg";
+import FunctionParams from "./FunctionParams";
 
 function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   const [formState, setFormState] = useState({
     name: "",
     type: "function",
     body: {
-      // type: "",
       parameters: { list: [] },
       isAnonymous: false,
       isAsync: false,
@@ -45,7 +45,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           parameters: {
             list: [
               ...prevState.body.parameters.list,
-              { name: parameterInput.trim() },
+              { name: parameterInput.trim(), dataType: "", defaultValue: "", description: "" },
             ],
           },
         },
@@ -68,8 +68,21 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
     }));
   };
 
+  const updateParams = (param, index) => {
+    const updatedParams = [...formState.body.parameters.list];
+    updatedParams[index] = param;
+    setFormState((prevState) => ({
+      ...prevState,
+      body: {
+        ...prevState.body,
+        parameters: { list: updatedParams },
+      },
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('formState::>>', formState);
     onSubmit(formState);
   };
 
@@ -90,8 +103,6 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
             required
           />
         </Form.Group>
-      </Row>
-      <Row className="mb-3">
         <Form.Group as={Col} controlId="formDescription">
           <Form.Control
             type="text"
@@ -106,7 +117,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           <div className="d-flex">
             <Form.Control
               type="text"
-              placeholder="Parameters"
+              placeholder="Add Param"
               value={parameterInput}
               onChange={(e) => setParameterInput(e.target.value)}
               className="me-2"
@@ -119,16 +130,23 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
             {formState.body.parameters.list?.map((param, index) => (
               <li
                 key={index}
-                className="list-group-item d-flex justify-content-between align-items-center px-2 py-1"
+                className="list-group-item d-flex justify-content-between align-items-center p-0 py-1"
               >
-                {param.name}
-                <Button
-                  variant="dark"
-                  onClick={() => handleRemoveParameter(index)}
-                  title="Delete"
-                >
-                  <img src={DeleteIcon} alt="delete" height={22} />
-                </Button>
+                <div className="flex-grow-1">
+                  <FunctionParams
+                    param={param}
+                    setParam={(updatedParam) => updateParams(updatedParam, index)}
+                  />
+                </div>
+                <div className="text-end">
+                  <Button
+                    variant="dark"
+                    onClick={() => handleRemoveParameter(index)}
+                    title="Delete"
+                  >
+                    <img src={DeleteIcon} alt="delete" height={22} />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
