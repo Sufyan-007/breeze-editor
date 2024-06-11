@@ -36,6 +36,24 @@ function readExportsFromTypeScriptFile(project, filePath) {
     }
 
 
+    // check for default export symbol
+    const defaultExportSymbol = sourceFile.getDefaultExportSymbol()
+
+    if (defaultExportSymbol) {
+        const expConfig = {
+            module: defaultExportSymbol.getAliasedSymbol().getValueDeclaration().getSourceFile().getFilePath(),
+            defaultExport: true,
+            importType: defaultExportSymbol.getImmediatelyAliasedSymbol().getDeclarations()[0].isTypeOnly() ? 'TYPE' :
+                defaultExportSymbol.getImmediatelyAliasedSymbol().getDeclarations()[0].getDefaultImport() ? 'DEFAULT' : 'UNKNOWN',
+            exportType: 'DEFAULT',
+            name: defaultExportSymbol.getAliasedSymbol().getName(),
+            currentFileName: defaultExportSymbol.getImmediatelyAliasedSymbol().getName()
+        }
+        exports.push(expConfig)
+
+
+    }
+
     sourceFile.forEachDescendant(node => {
         if (node.getKindName() === 'ExportDeclaration') {
             // if (node.getDefaultExportSymbol) {
@@ -65,7 +83,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
     for (const expConfig of expList) {
         try {
 
-            const typeDefinitionFile = findTypeDefinitionFile(entryPoint, expConfig['module'], libraryPath);
+            const typeDefinitionFile = expConfig['defaultExport'] ? expConfig['module'] : findTypeDefinitionFile(entryPoint, expConfig['module'], libraryPath);
 
             // If not able to find the source file for the variable, 
             // then continue processing next var
@@ -75,15 +93,37 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
 
             const sourceFile = project.addSourceFileAtPath(typeDefinitionFile);
 
+            if(checkIfReactImported(sourceFile)){
+                sourceFile.insertStatements(0, `import * as React from 'react';`);
+            }
+
             // If it is imported as default variable from file then try to read the default variable of the file
             if (expConfig['importType'] == 'DEFAULT') {
 
                 const exportVarSymbol = sourceFile.getDefaultExportSymbol().getAliasedSymbol()
 
                 const attributesOfVar = exportVarSymbol.getValueDeclaration().getType().getProperties()
+                let isComponent;
 
-                // Determine if it is component or not
-                const isComponent = checkIfComponentType(attributesOfVar)
+                // If declared Like,
+                // declare const _default: typeof DataTable;
+                // export default _default;
+                if (attributesOfVar.length == 0) {
+                    const symbol = exportVarSymbol.getValueDeclaration().getType().getSymbol()
+
+                    if (symbol) {
+                        const isFunctionDeclaration = symbol.getValueDeclaration()?.getKind() == SyntaxKind.FunctionDeclaration;
+                        if (isFunctionDeclaration) {
+                            isComponent = isReturnJSX(symbol.getValueDeclaration());
+                        }
+
+                    }
+                } else {
+
+                    // Determine if it is component or not
+                    isComponent = checkIfComponentType(attributesOfVar)
+                }
+
                 expConfig['isComponent'] = isComponent
 
                 // Add props if it is component
@@ -117,12 +157,27 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
 
 }
 
+function getDefaultExportVariableDeclaration(sourceFile) {
+    const defaultExportDec = sourceFile.getDefaultExportSymbol().getAliasedSymbol().getValueDeclaration();
+
+    if (defaultExportDec.getType().getSymbol()?.getValueDeclaration()) {
+        return defaultExportDec.getType().getSymbol().getValueDeclaration();
+    }
+
+    return defaultExportDec;
+
+}
+
+function isReturnJSX(functionDeclaration) {
+    return functionDeclaration.getReturnType().getText() == 'JSX.Element';
+}
+
 function getPropsForDefaultExportVar(sourceFile, componentName, libInfo) {
 
     const handlePropTypes = new HandlePropTypes(libInfo);
     const propsReader = new PropsReader(libInfo);
 
-    const defaultExportDec = sourceFile.getDefaultExportSymbol().getAliasedSymbol().getValueDeclaration()
+    const defaultExportDec = getDefaultExportVariableDeclaration(sourceFile);
 
     // This gets the children of default export var
     // ex. AccordionCollapse : BsPrefixRefForwardingComponent<'div', AccordionCollapseProps>
@@ -144,7 +199,10 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo) {
         // // // console.log('Getting parameter type for finding the propType variable');
         // // // console.log(defaultExportDec.getParameters()[0].getTypeNode().getText());
         propVarName = defaultExportDec.getParameters()[0].getTypeNode().getText();
-        propList = propsReader.getPropsList(propVarName, sourceFile)
+
+        const propVarRef = defaultExportDec.getParameters()[0].getTypeNode()
+        propList = propsReader.processProps(propVarRef)
+        // propList = propsReader.getPropsList(propVarName, sourceFile)
 
     }
     else {
@@ -264,6 +322,17 @@ function combineIntersectionProps(intersectionVar) {
         }
     }
 
+}
+
+function checkIfReactImported(sourceFile){
+    const reactImport = sourceFile.getImportDeclarations().find(declaration => {
+        const defaultImport = declaration.getDefaultImport();
+        const moduleSpecifier = declaration.getModuleSpecifierValue();
+        return defaultImport?.getText() === 'React' && moduleSpecifier === 'react';
+    });
+
+    
+    return !!reactImport;
 }
 
 function getTypeReferenceOfComponentVar(variableNode) {
@@ -504,7 +573,7 @@ function storeIndexFileInfo(libInfo, errors) {
 
     // Get key using which the status is stored
     const key = getKeyForProcessStatus(libInfo.libName, libInfo.libVersion);
-    
+
     indexFile[key] = {}
 
     // If there are errors while processing mark it as partial success
@@ -525,9 +594,10 @@ function storeIndexFileInfo(libInfo, errors) {
 }
 
 // const lib = 'react-bootstrap'
-// const storePath = '/home/raj/Desktop/bridge/npm_libraries/conf_generator/third_party_configs'
+// const libVersion = '2.10.2'
+// const storePath = '/home/raj/Desktop/bridge/processor/third_party_configs'
 
-// generator_function(lib, storePath);
+// generator_function(lib, libVersion, storePath);
 
 // Todo:
 

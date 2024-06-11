@@ -75,6 +75,8 @@ class HandlePropTypes {
                 return { 'type': 'DATA_TYPE', 'data': 'any' };
             case type.isVoid():
                 return { 'type': 'DATA_TYPE', 'data': 'void' };
+            case type.isEnum():
+                return this.decodeEnumType(prop, type, processed, recLevel, all);
             case type.isTypeParameter():
                 return { 'type': 'TYPE_PARAMETER', 'data': this.handleProps(prop, type.getDefault(), processed, recLevel, all) };
             case type.isInterface():
@@ -91,6 +93,22 @@ class HandlePropTypes {
 
 
         return typeInfo;
+    }
+
+    decodeEnumType(prop, type, processed, recLevel, all){
+        const typeInfo = {}
+        typeInfo['type'] = 'CUSTOM_ENUM'
+        typeInfo['name'] = type.getText()
+
+        typeInfo['data'] = type.getSymbol().getValueDeclaration().getMembers().map(member => {
+            return {
+                'name' : member.getName(),
+                'value' : member.getValue()
+            }
+        })
+
+        return typeInfo;
+
     }
 
     // Handle Interface Type

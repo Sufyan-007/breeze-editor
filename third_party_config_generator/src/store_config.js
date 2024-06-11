@@ -22,6 +22,7 @@ function getDefaultConfig(config, libName) {
         "$id": `${libName}.${config['name']}`,
         "library": libName,
         "importName": config['name'],
+        "exportType" : config['exportType'],
         "containingFile": config['module'],
         "stateVars": [],
         "propsVars": config['props'],

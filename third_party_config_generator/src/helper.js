@@ -19,7 +19,13 @@ function findTypeScriptEntryPoint(libraryPath) {
 
 function findTypeDefinitionFile(entryPoint, moduleSpecifier, libraryPath) {
     const modulePath = path.join(libraryPath, path.dirname(entryPoint), moduleSpecifier);
-    const typeDefinitionFile = `${modulePath}.d.ts`;
+    
+    let typeDefinitionFile;
+    if(fs.existsSync(modulePath) && fs.lstatSync(modulePath).isDirectory()){
+        typeDefinitionFile = `${modulePath}/index.d.ts`; 
+    }else{
+        typeDefinitionFile = `${modulePath}.d.ts`;
+    }
     // // console.log(typeDefinitionFile);
     return fs.existsSync(typeDefinitionFile) ? typeDefinitionFile : null;
 }
