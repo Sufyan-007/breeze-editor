@@ -7,7 +7,8 @@ const Offcanvas = ({
   title, 
   children, 
   width, 
-  height 
+  height,
+  margin
 }) => {
   return (
     <div 
@@ -16,6 +17,7 @@ const Offcanvas = ({
         visibility: isOpen ? 'visible' : 'hidden',
         width: width,
         height: height,
+        margin: margin,
       }} 
       tabIndex="-1"
       data-bs-theme="dark"
@@ -41,11 +43,13 @@ Offcanvas.propTypes = {
   children: PropTypes.node.isRequired,
   width: PropTypes.string,
   height: PropTypes.string,
+  margin: PropTypes.string,
 };
 
 Offcanvas.defaultProps = {
   width: '400px',
   height: '100vh',
+  margin : '0px'
 };
 
 export default Offcanvas;

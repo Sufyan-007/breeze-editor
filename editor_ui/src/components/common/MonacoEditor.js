@@ -12,6 +12,13 @@ function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", lan
   // })
 
   useEffect(() => {
+    // editor.setValue("Changed value")
+    if (editor && editor.getValue() !== defaultValue) {
+      editor.setValue(defaultValue)
+    }
+  }, [editor, defaultValue]);
+
+  useEffect(() => {
     // console.log("setChange")
     if (editor && onChange) {
       editor.onDidChangeModelContent(() => {
