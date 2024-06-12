@@ -20,7 +20,7 @@ function Styles() {
   const getAllCSSFiles = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/editor/all-css-files/"
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}:8000/editor/all-css-files/`
       );
       const data = await response.json();
       setFiles(data.files);
@@ -32,7 +32,7 @@ function Styles() {
   const handleDelete = async (css_name) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/editor/delete-css-file/${css_name}/`,
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/delete-css-file/${css_name}/`,
         {
           method: "DELETE",
         }
@@ -53,7 +53,7 @@ function Styles() {
   };
 
   const handleDownload = (css_name) => {
-    const downloadUrl = `http://localhost:8000/editor/css-file-download/${css_name}/`;
+    const downloadUrl = `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/css-file-download/${css_name}/`;
     window.location.href = downloadUrl;
   };
 
@@ -72,7 +72,7 @@ function Styles() {
 
   const handleUpload = async (formData) => {
     try {
-      const response = await fetch("http://localhost:8000/editor/upload-css-file/", {
+      const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/upload-css-file/`, {
         method: "POST",
         body: formData,
       });

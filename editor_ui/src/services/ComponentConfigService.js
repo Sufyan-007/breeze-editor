@@ -1,6 +1,6 @@
 export async function addComponent(name, type, route,projectName) {
 
-    const response = await (await fetch("http://localhost:8000/editor/add-component/" + projectName + "/",
+    const response = await (await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/add-component/` + projectName + "/",
         { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name , type }) }
     )).json()
     // this.dispatch(setConfig(response.config)) : need to handle this in the component itself now
@@ -14,7 +14,7 @@ export async function addComponent(name, type, route,projectName) {
 export async function addRoute(routeObj, projectName) {
     console.log(routeObj)
     if (routeObj.path && (routeObj.component || routeObj.redirectTo) ) {
-        const response = await fetch(`http://localhost:8000/editor/add-route/` + projectName + "/",
+        const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/add-route/` + projectName + "/",
             { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify( routeObj ) }
         )
         console.log(response)
@@ -27,7 +27,7 @@ export async function addRoute(routeObj, projectName) {
 
 export async function saveAllRoutes(allRoutes, projectName) {
     console.log(allRoutes);
-    const response = await fetch(`http://localhost:8000/editor/add-all-routes/` + projectName + "/",
+    const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/add-all-routes/` + projectName + "/",
         { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ allRoutes }) 
     })
     const jsonData = await response.json();
@@ -39,7 +39,7 @@ export async function saveAllRoutes(allRoutes, projectName) {
 export async function addChildRoute(childObj, projectName) {
     if (!childObj.path || (!childObj.component && !childObj.redirectTo)) 
         return {body: 'incomplete data provided', status: 400}
-    const resPromise = await fetch(`http://localhost:8000/editor/add-child-route/${projectName}/`,
+    const resPromise = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/add-child-route/${projectName}/`,
         {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
@@ -53,7 +53,7 @@ export async function addChildRoute(childObj, projectName) {
 
 export const updateComponentConfig = async (payload) => {
   try {
-    const response = await fetch('http://localhost:8000/editor/update-component-config/', {
+    const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/update-component-config/`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export const updateComponentConfig = async (payload) => {
 
 export const reorderComponentActions = async (payload) => {
   try {
-    const response = await fetch('http://localhost:8000/editor/reorder-component-actions/', {
+    const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/reorder-component-actions/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

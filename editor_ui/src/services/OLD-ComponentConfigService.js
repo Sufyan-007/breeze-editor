@@ -5,7 +5,7 @@ class ComponentConfigService {
     constructor(projectName, dispatch) {
         this.projectName = projectName;
         this.dispatch = dispatch;
-        this.serverURL = "http://localhost:8000";
+        this.serverURL = `${process.env.REACT_APP_BREEZE_BACKEND_HOST}`;
         this.getComponentConfig();
         this.getRouterConfig();
     }
