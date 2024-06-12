@@ -1,4 +1,4 @@
-const HOST="http://localhost:8000"
+const HOST=`${process.env.REACT_APP_BREEZE_BACKEND_HOST}`
 
 export async function getAppBasicConfig(projectName) {
     const config = await (await fetch(HOST+"/editor/read-app-basic-config/" + projectName + "/")).json()

@@ -7,6 +7,9 @@ export default function HtmlSection() {
     const { componentName, componentConfig } = useContext(ComponentContext)
     const [iframeSrc, setIframeSrc] = useState("http://localhost:" + componentConfig.port)
     const srcInput = useRef(iframeSrc)
+    const { componentConfig } = useContext(ComponentContext)
+    const [iframeSrc, setIframeSrc] = useState(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}` + componentConfig.port)
+    const srcInput = useRef()
     const [selected, setSelected] = useState(0)
     const iFrameRef = useRef();
 
