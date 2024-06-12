@@ -40,7 +40,7 @@ const HtmlElementConfig = ({
           bodyData["component_id"]= element.typeId
         }
       const response = await fetch(
-        "http://localhost:8000/editor/get-attributes/",
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/get-attributes/`,
         {
           method: "POST",
           headers: {

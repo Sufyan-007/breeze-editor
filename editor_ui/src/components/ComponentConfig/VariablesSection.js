@@ -12,7 +12,7 @@ import DeleteIcon from "../../assets/icons/delete-trash.svg";
 import { useParams } from "react-router";
 import Offcanvas from "../common/Offcanvas";
 
-const API_URL = "http://localhost:8000/editor/variables/";
+const API_URL = `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/variables/`;
 const dataTypes = ["string", "number", "boolean", "date", "array", "object"];
 
 export default function VariablesSection({ config }) {

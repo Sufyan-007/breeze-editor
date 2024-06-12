@@ -17,7 +17,7 @@ export default function Wrapper({ comp, updateWrapper, ...props }) {
     useEffect(()=>{
         const load= async ()=>{
             const reduxStore = await (
-                await fetch("http://localhost:8000/editor/read-redux-store/" + projectName + "/")
+                await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/read-redux-store/` + projectName + "/")
             ).json();
             setReduxStores(reduxStore)
         }

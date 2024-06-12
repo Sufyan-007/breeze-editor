@@ -27,7 +27,7 @@ function LifeCycleSection() {
   const fetchLifecycle = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/editor/lifecycle/?project_id=${projectName}&comp_name=${componentName}`
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/lifecycle/?project_id=${projectName}&comp_name=${componentName}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -81,7 +81,7 @@ function LifeCycleSection() {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/editor/lifecycle/", {
+      const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/lifecycle/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +103,7 @@ function LifeCycleSection() {
   const handleDelete = async (name) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/editor/lifecycle/?project_id=${projectName}&comp_name=${componentName}&hook_name=${name}`,
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/lifecycle/?project_id=${projectName}&comp_name=${componentName}&hook_name=${name}`,
         {
           method: "DELETE",
         }
@@ -139,7 +139,7 @@ function LifeCycleSection() {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/editor/lifecycle/", {
+      const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/lifecycle/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
