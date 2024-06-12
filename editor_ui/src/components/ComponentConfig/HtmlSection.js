@@ -5,6 +5,7 @@ import { ComponentContext } from "./ComponentConfigPage"
 import { MessageListenerService } from "../../services/MessageListenerService"
 import { useParams } from "react-router"
 import AddElements from "./AddElements"
+import PropTesting from "./PropTesting"
 
 export const DragContext = createContext({
     messageListener: null
@@ -21,7 +22,7 @@ export default function HtmlSection() {
         return new MessageListenerService(projectName, componentName)
     }, [projectName, componentName])
 
-    const [testProps , setTestProps] = useState({prop1:"xyz"})
+    const [testProps, setTestProps] = useState({ prop1: "xyz" })
 
     const setIframeSource = () => {
         const newValue = srcInput.current.value;
@@ -32,7 +33,7 @@ export default function HtmlSection() {
         const handler = (message) => {
             if (message.data.source === "APP") {
                 if (message.data.type === "request") {
-                    console.log("got request" , message.data)
+                    console.log("got request", message.data)
                     if (message.data.request.type === "props") {
                         const iframe = document.getElementById("iFrame")
                         iframe.contentWindow.postMessage({ type: "resource", resource: { type: "props", props: testProps } }, "*")
@@ -79,9 +80,10 @@ export default function HtmlSection() {
 
     return (
         <DragContext.Provider value={{ messageListener }} >
+
             <div className="row flex-grow-1" style={{ position: "relative" }}>
 
-                <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
+                <div className="text-white d-flex flex-column col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
                     <div className="row">
                         <div
                             className="py-2 btn rounded-0 text-white   col"
@@ -106,12 +108,32 @@ export default function HtmlSection() {
                         </div>
                     </div>
                     {selected === 0 ?
-                        <HtmlTree htmlId={componentName} config={componentConfig} className="row my-1" />
+                        <>
+                            <div className=" row flex-grow-1">
+                                <div className=" d-flex h-50">
+                                    <div className="col">
+                                        <HtmlTree htmlId={componentName} config={componentConfig} className="row my-1" />
+                                    </div>
+                                </div>
+                                <div className=" d-flex h-50">
+                                    <div className="col">
+                                        <div className="row border-top border-3 border-black">
+                                            Add Elements
+                                        </div>
+                                        <AddElements />
+                                    </div>
+                                </div>
+                            </div>
+
+                        </>
                         :
                         selected === 1 ?
                             <AddElements />
                             :
-                            <div>Actions</div>
+                            <div>
+                                Actions
+                                <PropTesting />
+                            </div>
                     }
                 </div>
                 <div className="col overflow-hidden p-0">
