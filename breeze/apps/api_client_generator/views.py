@@ -51,16 +51,15 @@ class ApiClientGenerator(View):
                 ## for other models
                 tag_models = converted_data.get("tag_models")
                 resultant_filename = []
-                
+                model_dict = {}
                 for tag, api_models in tag_models.items():
-                    model_dict = {}
                     filename = tag+".json"
                     full_file_path = os.path.join(folder_path, filename)
                     resultant_filename.append(filename)
                     for model in api_models:
                         model_dict[model.id] = model.as_dict()
                     append_to_dict_file(full_file_path,model_dict)
-                return JsonResponse({"data": model_dict, "filename": resultant_filename,"error_obj" : error_obj}, status=201)
+                return JsonResponse({"data": model_dict, "filename": resultant_filename}, status=201)
             elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
                 converted_data = WebsocketConverter.prepare_api_models(json_data)
                 error_obj = converted_data.get("error_obj",{})
