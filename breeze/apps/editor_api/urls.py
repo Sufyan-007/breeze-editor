@@ -22,6 +22,7 @@ from .views import HtmlConfigWriter
 from .views import LifeCycleConfigWriter
 from .views import FunctionConfigWriter
 from .views import VariablesConfigWriter
+from .views import AddPackage
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -63,6 +64,12 @@ urlpatterns = [
         
         
         ##Functions 
-        path("update-function-config/",FunctionConfigWriter.as_view())
+        path("update-function-config/",FunctionConfigWriter.as_view()),
+
+        ##Package json
+        path('add-package/<str:projectName>', AddPackage.as_view()),
+        path('list-dependencies/<str:projectName>', AddPackage.as_view()),
+        path('edit-dependency/<str:projectName>', AddPackage.as_view()),
+        path('delete-dependency/<str:projectName>', AddPackage.as_view())
 ]
 

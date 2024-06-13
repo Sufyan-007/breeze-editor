@@ -1,0 +1,46 @@
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.close-button,
+.submit-button {
+  width: 48%;
+  cursor: pointer;
+}
+
+.suggestion-container {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+#suggestions {
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.suggestion div {
+  display: inline-block;
+  width: 48%;
+  padding: 0 1%;
+}
+
+.read-only-input {
+  background-color: #343a40 !important; /* Extra dark background */
+  color: #6c757d; /* Gray text */
+  pointer-events: none; /* Disable click events */
+}
+
+.read-only-input:focus {
+  outline: none; /* Remove focus outline */
+  box-shadow: none; /* Remove focus glow */
+}

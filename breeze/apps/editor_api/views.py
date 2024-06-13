@@ -19,6 +19,81 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
 @method_decorator(csrf_exempt,name="dispatch")
+class AddPackage(APIView):
+    def post(self, request, projectName):
+        try:
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            package_name = data.get('name')
+            package_version = data.get('version')
+            
+            # Check if both package name and version are provided
+            if not package_name or not package_version:
+                return JsonResponse({'error': 'Both package name and version are required'}, status=400)
+            
+            # Initialize the AppEditor with the project name
+            app_editor = AppEditor(projectName)
+            
+            # Add the package and version to the app_basic_config.json file
+            app_editor.add_package_to_dependencies(package_name, package_version)
+            
+            return JsonResponse({'message': 'Package added successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def get(self, request, projectName):
+        try:
+           # Initialize the AppEditor with the project name
+           app_editor = AppEditor(projectName)
+           dependencies = app_editor.get_dependencies()
+           return JsonResponse(dependencies, status=200)
+        except:
+           return JsonResponse({},status=500)
+        
+    
+    def put(self, request, projectName):
+        try:
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            package_name = data.get('name')
+            package_version = data.get('version')
+            
+            # Check if both package name and version are provided
+            if not package_name or not package_version:
+                return JsonResponse({'error': 'Both package name and version are required'}, status=400)
+            
+            # Initialize the AppEditor with the project name
+            app_editor = AppEditor(projectName)
+            
+            # Update the package version in the app_basic_config.json file
+            app_editor.update_package_in_dependencies(package_name, package_version)
+            
+            return JsonResponse({'message': 'Package updated successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    def delete(self, request, projectName):
+        try:
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            package_name = data.get('name')
+            
+            # Check if both package name and version are provided
+            if not package_name:
+                return JsonResponse({'error': 'Package name is required'}, status=400)
+            
+            # Initialize the AppEditor with the project name
+            app_editor = AppEditor(projectName)
+            
+            # Update the package version in the app_basic_config.json file
+            app_editor.delete_package_in_dependencies(package_name)
+            
+            return JsonResponse({'message': 'Package deleted successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+
+@method_decorator(csrf_exempt,name="dispatch")
 class ConfigReader(APIView):
     def get(self, request,param):
         try:

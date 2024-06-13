@@ -13,6 +13,11 @@ from common.utils.file_helper import create_parent_dir_if_not_exists
 import copy
 from .helpers.replace_variable import replace_variable
 import copy
+import subprocess
+from .project_generation_progress import ProjectGenerationProgress
+from .helpers.dependencies_manager import DependencyManager
+
+
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
@@ -98,7 +103,88 @@ class AppEditor:
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{project_name}"
         self.read_config()
         
+    def get_dependencies(self):
+        return self.app_config.get('dependencies', {})
+
+    def add_package_to_dependencies(self, package_name, package_version):
+        # Check if dependencies key exists
+        if 'dependencies' not in self.app_config:
+            self.app_config['dependencies'] = {}
+        
+        # Add or update the package with its version
+        self.app_config['dependencies'][package_name] = package_version
+        
+        # Write the updated configuration to the file
+        write_file(f"{self.app_config_dir}/app_basic_config.json", json.dumps(self.app_config))
+         
+        # Install dependencies after adding the package
+        self.install_dependencies()
+        
+        # Return the updated configuration
+        return self.app_config
     
+    def install_dependencies(self):
+       project_name = self.app_config['name']
+       app_dependencies = self.app_config['dependencies']
+       package_json = read_file_json(f"{self.app_config['path']}/{self.app_config['name']}/package.json")
+       print(package_json)
+       for dep in app_dependencies:
+           package_json['dependencies'][dep] = app_dependencies[dep]
+       package_json['devDependencies'] = {}
+       package_json['devDependencies']['web-vitals'] = "^3.5.0"
+       write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
+       process = subprocess.Popen(
+           ["npm", "install"],
+           cwd=f"{self.app_config['path']}/{self.app_config['name']}",
+           stdout=subprocess.PIPE,
+           stderr=subprocess.PIPE,
+           universal_newlines=True,
+           text=True, 
+       )
+       ProjectGenerationProgress.store_process(project_name, process, "installing_dependencies")
+       process.wait()
+       if package_json['dependencies'].get('bootstrap') is not None:
+           DependencyManager().handle_bootstrap(app_config=self.app_config)
+
+    def update_package_in_dependencies(self, package_name, package_version):
+        # Check if dependencies key exists
+        if 'dependencies' not in self.app_config:
+            raise ValueError('Dependencies not found in configuration.')    
+        
+        # Update the package version if exists, otherwise raise error
+        if package_name in self.app_config['dependencies']:
+            self.app_config['dependencies'][package_name] = package_version
+        else:
+            raise ValueError(f'Package {package_name} not found in dependencies.')
+        
+        # Write the updated configuration to the file
+        write_file(f"{self.app_config_dir}/app_basic_config.json", json.dumps(self.app_config))
+
+        # Run npm install again to install dependencies
+        self.install_dependencies()
+         
+        # Return the updated configuration
+        return self.app_config
+    
+    def delete_package_in_dependencies(self, package_name):
+       try:
+           # Check if dependencies key exists
+           if 'dependencies' not in self.app_config:
+               raise ValueError('Dependencies not found in configuration.')
+           # Delete the package if it exists, otherwise raise error
+           if package_name in self.app_config['dependencies']:
+               del self.app_config['dependencies'][package_name]
+           else:
+               raise ValueError(f'Package {package_name} not found in dependencies.')
+           # Write the updated configuration to the file
+           write_file(f"{self.app_config_dir}/app_basic_config.json", json.dumps(self.app_config))
+           # Run npm install again to update dependencies
+           self.install_dependencies()
+           # Return the updated configuration
+           return self.app_config
+       except Exception as e:
+           raise ValueError(f'Error deleting package in dependencies: {str(e)}')
+        
     def read_config(self):
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
