@@ -1,244 +1,294 @@
-import React from "react";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
-import { useState, useEffect } from "react";
-import Accordion from "react-bootstrap/Accordion";
+import React, { useState, useEffect } from "react";
+import { Form, Button } from "react-bootstrap";
+import Spinner from "react-bootstrap/Spinner";
+import convert from "../htmlToReactAttrMap";
 
 const HtmlElementConfig = ({
-  selectedElement,
-  componentConfig,
+  element,
   makeSelectedElementNull,
-  handleUpdateHtmlClick,
+  handleUpdateClick,
+  isLoading,
 }) => {
-  const [selectedAttributes, setSelectedAttributes] = useState([]);
-  const [selectedEventListeners, setSelectedEventListeners] = useState([]);
-  const [attributes, setAttributes] = useState([]);
-  const [eventListeners, setEventListners] = useState([
-    "onClick",
-    "onMousehover",
-  ]);
-  const [htmlElementConfig, setHtmlElementConfig] = useState(null);
+  const [availableAttributes, setAvailableAttributes] = useState([]);
+  const [selectedAttributes, setSelectedAttributes] = useState({});
+  console.log("It is the element", element);
+  useEffect(() => {
+    setSelectedAttributes(element.attributes);
+  }, [element]);
 
-  const handleFormSubmit = (e) => {
+  useEffect(() => {
+    fetchData();
+  }, [element]);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/config-reader/get-global-component-config/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            component_id: element.tagName,
+            component_type: element.elementType,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const attributeList = await response.json();
+      setAvailableAttributes(attributeList);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  const updateHtmlElementConfig = (e) => {
     e.preventDefault();
+    console.log("update", selectedAttributes);
+    const tempElememt = { ...element, attributes: selectedAttributes };
+    console.log("tempElememt", tempElememt);
+    handleUpdateClick(tempElememt);
   };
-
-  const updateHtmlElementConfig = () => {
-    handleUpdateHtmlClick(htmlElementConfig);
-  };
-  useEffect(() => {
-    const attributesValue =
-      componentConfig.html_elements[selectedElement.elem].attributes;
-    const keysArray = Object.keys(attributesValue);
-    setAttributes(keysArray);
-  }, []);
-  useEffect(() => {
-    setHtmlElementConfig({
-      ...componentConfig.html_elements[selectedElement.elem],
-    });
-  }, [selectedElement, componentConfig]);
 
   const handleSelectAttributeChange = (event) => {
-    const selectedOption = event.target.value;
-    event.target.value = "Add Attributes";
+    const selectedOption = event.target?.value;
+    console.log("selected", selectedOption);
+    if (selectedOption.startsWith("on")) {
+      event.target.value = "Add Event Listener";
+    } else {
+      event.target.value = "Add Attributes";
+    }
 
     if (
       selectedOption === "Add Attributes" ||
-      selectedAttributes.includes(selectedOption)
-    ) {
-      return;
-    }
-
-    // Add selected option to the array
-    setSelectedAttributes([...selectedAttributes, selectedOption]);
-  };
-
-  const handleSelectedEventListenersChange = (event) => {
-    const selectedOption = event.target.value;
-    event.target.value = "Add Event Listener";
-
-    // Prevent adding the "Attributes" option
-    if (
       selectedOption === "Add Event Listener" ||
-      selectedEventListeners.includes(selectedOption)
+      Object.keys(selectedAttributes).includes(selectedOption)
     ) {
       return;
     }
 
-    // Add selected option to the array
-    setSelectedEventListeners([...selectedEventListeners, selectedOption]);
+    setSelectedAttributes((prevSelectedAttributes) => ({
+      ...prevSelectedAttributes,
+      [selectedOption]: { type: "LITERAL", value: "" },
+    }));
+    setAvailableAttributes((prevAttributes) => {
+      const updatedAttributes = { ...prevAttributes };
+      delete updatedAttributes[selectedOption];
+      return updatedAttributes;
+    });
   };
-  const handleDeleteAttribute = (index) => {
-    setSelectedAttributes((prevSelectedAttributes) =>
-      prevSelectedAttributes.filter((_, i) => i !== index)
-    );
+
+  const handleDeleteAttribute = (attributeKey) => {
+    setAvailableAttributes((prevAttributes) => {
+      const updatedAttributes = { ...prevAttributes };
+      updatedAttributes[attributeKey] = selectedAttributes[attributeKey].type;
+      return updatedAttributes;
+    });
+    setSelectedAttributes((prevSelectedAttributes) => {
+      const updatedAttributes = { ...prevSelectedAttributes };
+      delete updatedAttributes[attributeKey];
+      return updatedAttributes;
+    });
   };
-  const handleDeleteEventListener = (index) => {
-    setSelectedEventListeners((prevSelectedEventListeners) =>
-      prevSelectedEventListeners.filter((_, i) => i !== index)
-    );
-  };
+
   const handleAttributeChange = (key, value) => {
-    setHtmlElementConfig((prevConfig) => ({
-      ...prevConfig,
-      attributes: {
-        ...prevConfig.attributes,
-        [key]: {
-          type: "LITERAL",
-          value: value,
-        },
-      },
+    setSelectedAttributes((prevSelectedAttributes) => ({
+      ...prevSelectedAttributes,
+      [key]: { type: "LITERAL", value: value },
     }));
   };
 
   return (
     <div className="mt-3 ps-4 pe-4">
-      <Form onSubmit={handleFormSubmit} className="text-light">
-        <Form.Group className="mb-3">
-          <Form.Label>Element</Form.Label>
+      <Form className="text-light">
+        <Form.Group className="mb-5">
+          {element.elementType === "HTML" ? (
+            <label>Element</label>
+          ) : element.elementType === "THIRD_PARTY" ? (
+            <label>{`${
+              element.library.charAt(0).toUpperCase() + element.library.slice(1)
+            } Component`}</label>
+          ) : element.elementType === "CUSTOM" ? (
+            <label>Custom Component</label>
+          ) : null}
           <Form.Control
             type="text"
-            value={componentConfig.html_elements[selectedElement?.elem].tagName}
-            readOnly={true}
-            className="p-3"
+            value={element.tagName}
+            className="mt-2"
+            readOnly
           />
+        </Form.Group>
+
+        <Form.Group className="mb-5">
+          <Form.Select
+            aria-label="Default select example"
+            onChange={handleSelectAttributeChange}
+          >
+            <option>Add Attributes</option>
+            {Object.keys(availableAttributes)
+              .filter((attribute) => !attribute.startsWith("on"))
+              .sort()
+              .map((attribute, index) => (
+                <option key={index} value={attribute}>
+                  {attribute}
+                </option>
+              ))}
+          </Form.Select>
+          <div>
+            {selectedAttributes &&
+              Object.keys(selectedAttributes)
+                .map((attribute, index) => ({ attribute, index }))
+                .filter(({ attribute }) => !attribute.startsWith("on"))
+                .map(({ attribute, index }) => (
+                  <div key={index} className="mt-4">
+                    <Form.Label>{attribute}</Form.Label>
+                    <div className="d-flex">
+                      {selectedAttributes &&
+                        selectedAttributes[attribute] &&
+                        selectedAttributes[attribute].type !== "boolean" && (
+                          <Form.Control
+                            type={selectedAttributes[attribute].type || "text"}
+                            value={selectedAttributes[attribute].value}
+                            onChange={(e) =>
+                              handleAttributeChange(attribute, e.target.value)
+                            }
+                            disabled={attribute === "id"}
+                          />
+                        )}
+
+                      {selectedAttributes &&
+                        selectedAttributes[attribute] &&
+                        selectedAttributes[attribute].type === "boolean" && (
+                          <Form.Select
+                            onChange={(e) => {
+                              handleAttributeChange(attribute, e.target.value);
+                            }}
+                            value={selectedAttributes[attribute].value}
+                          >
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                          </Form.Select>
+                        )}
+                      {attribute !== "id" && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="ms-2"
+                          onClick={() => handleDeleteAttribute(attribute)}
+                        >
+                          <i className="bi bi-trash3 p-1"></i>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+          </div>
+        </Form.Group>
+        <Form.Group className="mb-4">
+          <Form.Select
+            aria-label="Default select example"
+            onChange={handleSelectAttributeChange}
+          >
+            <option>Add Event Listener</option>
+            {Object.keys(availableAttributes)
+              .filter((attribute) => attribute.startsWith("on"))
+              .sort()
+              .map((attribute, index) => (
+                <option key={index} value={attribute}>
+                  {attribute}
+                </option>
+              ))}
+          </Form.Select>
+
+          <div>
+            {selectedAttributes &&
+              Object.keys(selectedAttributes)
+                .map((attribute, index) => ({ attribute, index }))
+                .filter(({ attribute }) => attribute.startsWith("on"))
+                .map(({ attribute, index }) => (
+                  <div key={index} className="mt-4">
+                    <Form.Label>{attribute}</Form.Label>
+                    <div className="d-flex">
+                      <Form.Control
+                        type="text"
+                        value={selectedAttributes.value}
+                        onChange={(e) =>
+                          handleAttributeChange(attribute, e.target.value)
+                        }
+                        disabled={attribute === "id"}
+                      />
+                      {attribute !== "id" && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="ms-2"
+                          onClick={() => handleDeleteAttribute(attribute)}
+                        >
+                          <i className="bi bi-trash3 p-1"></i>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+          </div>
         </Form.Group>
 
         <Form.Group className="mb-4">
-          <Form.Label>Id</Form.Label>
+          <Form.Label>styles</Form.Label>
           <Form.Control
-            type="text"
-            value={selectedElement?.elem}
-            className="p-3"
-            readOnly={true}
+            as="textarea"
+            onChange={(e) => handleAttributeChange("style", e.target.value)}
+            placeholder="Write your inline css here"
+            style={{ resize: "none" }}
+            disabled
           />
         </Form.Group>
+        <div
+          className="pt-1   mt-3  w-100"
+          style={{
+            position: "sticky",
+            bottom: "0",
+            marginBottom: "0",
+            backgroundColor: "#303033",
+          }}
+        >
+          <div className="d-flex justify-content-between pb-3 pt-2">
+            <div>
+              <button
+                className="btn btn-secondary"
+                onClick={makeSelectedElementNull}
+              >
+                Cancel
+              </button>
+            </div>
 
-        <Accordion>
-          <Accordion.Item eventKey="0" className="mt-5">
-            <Accordion.Header>Attributes</Accordion.Header>
-            <Accordion.Body>
-              <Form.Group className="mb-4">
-                {/* <Form.Label>Attributes</Form.Label> */}
-                <Form.Select
-                  aria-label="Default select example"
-                  onChange={handleSelectAttributeChange}
-                >
-                  <option> Add Attributes</option>
-                  {attributes.map((attribute, index) => (
-                    <option key={index} value={attribute}>
-                      {attribute}
-                    </option>
-                  ))}
-                </Form.Select>
-                <div>
-                  {selectedAttributes.map((option, index) => (
-                    <div key={index} className="mt-2">
-                      <Form.Label>{option}</Form.Label>
-                      <div className="d-flex">
-                        <Form.Control
-                          type="text"
-                          value={htmlElementConfig.attributes[option].value}
-                          onChange={(e) =>
-                            handleAttributeChange(option, e.target.value)
-                          }
-                        />
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          className="ms-2"
-                          onClick={() => handleDeleteAttribute(index)}
-                        >
-                          <i class="bi bi-trash3 p-1"></i>
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Form.Group>
-            </Accordion.Body>
-          </Accordion.Item>
-
-          <Accordion.Item eventKey="1" className="mt-5">
-            <Accordion.Header>Styles</Accordion.Header>
-            <Accordion.Body>
-              <Form.Group className="mb-4">
-                <Form.Label>Style</Form.Label>
-                <Button variant="secondary" className="d-block">
-                  Secondary
-                </Button>
-              </Form.Group>
-            </Accordion.Body>
-          </Accordion.Item>
-
-          <Accordion.Item eventKey="2" className="mt-5">
-            <Accordion.Header>Event Listeners</Accordion.Header>
-            <Accordion.Body>
-              <Form.Group className="mb-4">
-                <Form.Label>Event Listeners</Form.Label>
-                <Form.Select
-                  aria-label="Default select example"
-                  onChange={handleSelectedEventListenersChange}
-                >
-                  <option> Add Event Listener</option>
-                  {eventListeners.map((eventListener, index) => (
-                    <option key={index} value={eventListener}>
-                      {eventListener}
-                    </option>
-                  ))}
-                </Form.Select>
-                <div>
-                  {selectedEventListeners.map((option, index) => (
-                    <div key={index} className="mt-2">
-                      <Form.Label>{option}</Form.Label>
-                      <div className="d-flex">
-                        <Form.Control type="text" />
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          className="ms-2"
-                          onClick={() => handleDeleteEventListener(index)}
-                        >
-                          <i class="bi bi-trash3 p-1"></i>
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Form.Group>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-      </Form>
-      <div
-        className="pt-1  mb-0 mt-3  w-100"
-        style={{
-          position: "sticky",
-          bottom: "0",
-          marginBottom: "0",
-          backgroundColor: "#303033",
-        }}
-      >
-        <div className="d-flex justify-content-between pb-3">
-          <div>
-            <button
-              className="btn btn-secondary"
-              onClick={makeSelectedElementNull}
-            >
-              Cancel
-            </button>
-          </div>
-
-          <div>
-            <button
-              className="btn btn-primary"
-              onClick={updateHtmlElementConfig}
-            >
-              Update
-            </button>
+            <div>
+              <button
+                className="btn btn-primary"
+                onClick={updateHtmlElementConfig}
+              >
+                {isLoading ? (
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    role="status"
+                    size="sm"
+                    className="ms-3 me-3"
+                  >
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                ) : (
+                  "Update"
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </Form>
     </div>
   );
 };

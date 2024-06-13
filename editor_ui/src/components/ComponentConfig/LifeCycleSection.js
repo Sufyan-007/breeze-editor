@@ -1,16 +1,10 @@
 import React, { useState } from "react";
-import {
-  Container,
-  Button,
-  Form,
-  Row,
-  Col,
-  Toast,
-} from "react-bootstrap";
+import { Container, Button, Form, Row, Col, Toast } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
 import MonacoEditor from "../common/MonacoEditor";
 import { useParams } from "react-router";
 import LifeCycleCard from "./LifeCycleCard";
+import Offcanvas from "../common/Offcanvas";
 
 function LifeCycleSection() {
   const { projectName, componentName } = useParams();
@@ -24,13 +18,16 @@ function LifeCycleSection() {
     body: "",
     returnBody: "",
   });
-  const offcanvasRef = React.useRef(null);
   const constantsList = ["var1", "var2", "var3", "var4"];
+  const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
+
+  const handleOpen = () => setIsOffcanvasOpen(true);
+  const handleClose = () => setIsOffcanvasOpen(false);
 
   const fetchLifecycle = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/editor/lifecycle/?project_id=${projectName}&comp_name=${componentName}`
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/lifecycle/?project_id=${projectName}&comp_name=${componentName}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,7 +81,7 @@ function LifeCycleSection() {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/editor/lifecycle/", {
+      const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/lifecycle/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -106,7 +103,7 @@ function LifeCycleSection() {
   const handleDelete = async (name) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/editor/lifecycle/?project_id=${projectName}&comp_name=${componentName}&hook_name=${name}`,
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/lifecycle/?project_id=${projectName}&comp_name=${componentName}&hook_name=${name}`,
         {
           method: "DELETE",
         }
@@ -142,7 +139,7 @@ function LifeCycleSection() {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/editor/lifecycle/", {
+      const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/lifecycle/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -150,13 +147,11 @@ function LifeCycleSection() {
         body: JSON.stringify(newHook),
       });
       const data = await response.json();
-      console.log("data POST response::>>", data.error);
       fetchLifecycle();
-      if (data?.error){
+      if (data?.error) {
         setToastMessage(data.error);
-      }
-      else {
-        setToastMessage("Lifecycle created !")
+      } else {
+        setToastMessage("Lifecycle created !");
       }
       setShowToast(true);
     } catch (error) {
@@ -166,10 +161,7 @@ function LifeCycleSection() {
     }
 
     handleCancel();
-    if (offcanvasRef.current) {
-      const offcanvas = window.bootstrap.Offcanvas.getInstance(offcanvasRef.current);
-      offcanvas.hide();
-    }
+    handleClose();
   };
 
   const handleCancel = () => {
@@ -197,144 +189,119 @@ function LifeCycleSection() {
               <button
                 className="btn btn-secondary"
                 type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#createLifecycle"
-                aria-controls="createLifecycle"
+                onClick={handleOpen}
               >
                 Add Lifecycle
               </button>
             </div>
           </div>
-          <div
-            class="offcanvas offcanvas-end"
-            tabindex="-1"
-            id="createLifecycle"
-            data-bs-theme="dark"
-            aria-labelledby="offcanvasRightLabel"
-            style={{ width: "500px"}}
-            ref={offcanvasRef}
+          <Offcanvas
+            isOpen={isOffcanvasOpen}
+            onClose={handleClose}
+            title="New Lifecycle"
+            width="500px"
           >
-            <div class="offcanvas-header pb-0">
-              <h5 id="offcanvasRightLabel">Add Lifecycle</h5>
-              <button
-                type="button"
-                class="btn-close text-reset"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="offcanvas-body">
-              <Form>
+            <Form>
+              <Row className="mb-3">
+                <Form.Group as={Col} controlId="formGridName">
+                  <Form.Label>Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Lifecycle Name"
+                    value={formState.name}
+                    onChange={(e) => handleFormChange("name", e.target.value)}
+                    required
+                  />
+                </Form.Group>
+              </Row>
+              <Row className="mb-3">
+                <Form.Group as={Col} controlId="formGridType">
+                  <Form.Label>Type</Form.Label>
+                  <Form.Select
+                    value={formState.lifecycleType}
+                    onChange={(e) =>
+                      handleFormChange("lifecycleType", e.target.value)
+                    }
+                  >
+                    <option value="">Select Type</option>
+                    <option value="onEveryMount">onEveryMount</option>
+                    <option value="onComponentMount">onComponentMount</option>
+                    <option value="onMountAndUnmount">onMountAndUnmount</option>
+                    <option value="onUnmount">onUnmount</option>
+                  </Form.Select>
+                </Form.Group>
+              </Row>
+
+              {(formState.lifecycleType === "onComponentMount" ||
+                formState.lifecycleType === "onMountAndUnmount" ||
+                formState.lifecycleType === "onUnmount") && (
                 <Row className="mb-3">
-                  <Form.Group as={Col} controlId="formGridName">
-                    <Form.Label>Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Lifecycle Name"
-                      value={formState.name}
-                      onChange={(e) => handleFormChange("name", e.target.value)}
-                      required
+                  <Form.Group controlId="formGridDependentVars">
+                    <Form.Label>Dependent Variables</Form.Label>
+                    <Multiselect
+                      options={constantsList}
+                      selectedValues={formState.dependentVars}
+                      onSelect={handleSelect}
+                      onRemove={handleRemove}
+                      isObject={false}
+                      showCheckbox={true}
+                      style={{
+                        optionListContainer: {
+                          background: "red",
+                        },
+                      }}
                     />
                   </Form.Group>
                 </Row>
-                <Row className="mb-3">
-                  <Form.Group as={Col} controlId="formGridType">
-                    <Form.Label>Type</Form.Label>
-                    <Form.Select
-                      value={formState.lifecycleType}
-                      onChange={(e) =>
-                        handleFormChange("lifecycleType", e.target.value)
-                      }
-                    >
-                      <option value="">Select Type</option>
-                      <option value="onEveryMount">onEveryMount</option>
-                      <option value="onComponentMount">onComponentMount</option>
-                      <option value="onMountAndUnmount">
-                        onMountAndUnmount
-                      </option>
-                      <option value="onUnmount">onUnmount</option>
-                    </Form.Select>
+              )}
+
+              <Row className="mb-3">
+                {(formState.lifecycleType === "onEveryMount" ||
+                  formState.lifecycleType === "onComponentMount" ||
+                  formState.lifecycleType === "onMountAndUnmount") && (
+                  <Form.Group as={Col} controlId="formGridFunctionBody">
+                    <Form.Label>Function Body</Form.Label>
+                    <MonacoEditor
+                      defaultValue=""
+                      onChange={(value) => handleFormChange("body", value)}
+                      height="140px"
+                      width="450px"
+                      id="function-body-editor"
+                      language="javascript"
+                    />
                   </Form.Group>
-                </Row>
-
-                {(formState.lifecycleType === "onComponentMount" ||
-                  formState.lifecycleType === "onMountAndUnmount" ||
-                  formState.lifecycleType === "onUnmount") && (
-                  <Row className="mb-3">
-                    <Form.Group
-                      controlId="formGridDependentVars"
-                    >
-                      <Form.Label>Dependent Variables</Form.Label>
-                      <Multiselect
-                        options={constantsList}
-                        selectedValues={formState.dependentVars}
-                        onSelect={handleSelect}
-                        onRemove={handleRemove}
-                        isObject={false}
-                        showCheckbox={true}
-                        style={{
-                          optionListContainer: {
-                            background: "red"
-                          }
-                        }}
-                      />
-                    </Form.Group>
-                  </Row>
                 )}
+              </Row>
+              <Row className="mb-3">
+                {(formState.lifecycleType === "onUnmount" ||
+                  formState.lifecycleType === "onMountAndUnmount") && (
+                  <Form.Group as={Col} controlId="formGridReturnBody">
+                    <Form.Label>Return Body</Form.Label>
+                    <MonacoEditor
+                      defaultValue=""
+                      onChange={(value) =>
+                        handleFormChange("returnBody", value)
+                      }
+                      height="140px"
+                      width="450px"
+                      id="return-body-editor"
+                      language="javascript"
+                    />
+                  </Form.Group>
+                )}
+              </Row>
+              <div className="d-flex">
+                <Button
+                  variant="secondary"
+                  className="me-3"
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </Button>
+              </div>
+            </Form>
+          </Offcanvas>
 
-                <Row className="mb-3">
-                  {(formState.lifecycleType === "onEveryMount" ||
-                    formState.lifecycleType === "onComponentMount" ||
-                    formState.lifecycleType === "onMountAndUnmount") && (
-                    <Form.Group
-                      as={Col}
-                      controlId="formGridFunctionBody"
-                    >
-                      <Form.Label>Function Body</Form.Label>
-                      <MonacoEditor
-                        defaultValue=""
-                        onChange={(value) => handleFormChange("body", value)}
-                        height="150px"
-                        width="450px"
-                        id="function-body-editor"
-                        language="javascript"
-                      />
-                    </Form.Group>
-                  )}
-                </Row>
-                <Row className="mb-3">
-                  {(formState.lifecycleType === "onUnmount" ||
-                    formState.lifecycleType === "onMountAndUnmount") && (
-                    <Form.Group
-                      as={Col}
-                      controlId="formGridReturnBody"
-                    >
-                      <Form.Label>Return Body</Form.Label>
-                      <MonacoEditor
-                        defaultValue=""
-                        onChange={(value) =>
-                          handleFormChange("returnBody", value)
-                        }
-                        height="150px"
-                        width="450px"
-                        id="return-body-editor"
-                        language="javascript"
-                      />
-                    </Form.Group>
-                  )}
-                </Row>
-                <div className="d-flex">
-                  <Button
-                    variant="secondary"
-                    className="me-3"
-                    onClick={handleSubmit}
-                  >
-                    Submit
-                  </Button>
-                </div>
-              </Form>
-            </div>
-          </div>
           <div>
             {lifecycle.map((lifecycle, index) => (
               <div className="m-2">

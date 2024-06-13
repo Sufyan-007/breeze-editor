@@ -12,17 +12,15 @@ import yaml
 from common.utils.file_helper import create_parent_dir_if_not_exists
 import copy
 from .helpers.replace_variable import replace_variable
+import copy
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
     "name": "$NAME",
     "containingFile": "components/$NAME.js",
-    "stateVars": [],
     "propsVars": [],
-    "otherVars": [],
-    "refVars": [],
+    "resources": [],
     "componentType" : "CUSTOM",
-    "functions": [],
     "$id":"$NAME",
     "html": {"_id":"$NAME"},
     "wrapper_store": None,
@@ -40,7 +38,6 @@ NEW_COMP_FORMAT={
           "import_type": "SINGLE"
         }] 
     },
-    "hooks": [],
     "html_elements":{
         "$NAME":{
             "type": "Element",
@@ -192,7 +189,7 @@ class AppEditor:
     # use write_component() to make changes
     def add_component(self,name,type):
         name=name.replace(' ',"")
-        comp=NEW_COMP_FORMAT.copy()
+        comp=copy.deepcopy(NEW_COMP_FORMAT)
         replace_variable(comp,"$NAME",name)
         comp["type"] = type
         config=self.write_component(comp)
@@ -285,7 +282,7 @@ class AppEditor:
         routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
         write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
         self.modify_main_component()
-        return self.routing_config
+        return {'case': True, 'res': self.routing_config}
     
     def handle_route_path_change_in_child(self, route_obj, prev_path, new_path, parent_path, initial_parent_path):
         if route_obj.get('childRoutes'):

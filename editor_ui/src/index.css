@@ -16,19 +16,15 @@ code {
   
 }
 
-.offcanvas.offcanvas-end{
-  width: 50% !important;
-}
-
 .dropdown-item {
-  padding: 0px 0px !important;
+  padding: 2px 4px !important;
   font-size: 14px !important;
   
 }
 
-.btn{
+/* .btn{
   border: 0 !important;
-}
+} */
 
 .card-overlay{
   position: absolute;

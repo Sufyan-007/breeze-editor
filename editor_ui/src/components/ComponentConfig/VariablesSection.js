@@ -10,12 +10,12 @@ import {
 import EditIcon from "../../assets/icons/edit-icon.svg";
 import DeleteIcon from "../../assets/icons/delete-trash.svg";
 import { useParams } from "react-router";
+import Offcanvas from "../common/Offcanvas";
 
-const API_URL = "http://localhost:8000/editor/variables/";
+const API_URL = `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/variables/`;
 const dataTypes = ["string", "number", "boolean", "date", "array", "object"];
 
 export default function VariablesSection({ config }) {
-  const offcanvasRef = useRef(null);
   const { projectName, componentName } = useParams();
   const [formData, setFormData] = useState({
     name: "",
@@ -28,11 +28,15 @@ export default function VariablesSection({ config }) {
   const [variables, setVariables] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [editId, setEditId] = useState(null); // To track the id of the variable being edited
-
+  const [editId, setEditId] = useState(null);
+  const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
+  
   useEffect(() => {
     fetchVariables();
   }, []);
+  
+  const handleOpen = () => setIsOffcanvasOpen(true);
+  const handleClose = () => setIsOffcanvasOpen(false);
 
   const fetchVariables = async () => {
     try {
@@ -76,8 +80,6 @@ export default function VariablesSection({ config }) {
       },
     };
 
-    console.log("payload::>>", payload);
-
     try {
       const response = await fetch(API_URL, {
         method: method,
@@ -112,7 +114,7 @@ export default function VariablesSection({ config }) {
     const variable = variables.find((item) => item.$id === id);
     setFormData(variable);
     setEditId(id);
-    openOffcanvas();
+    handleOpen();
   };
 
   const handleDelete = async (id) => {
@@ -136,12 +138,8 @@ export default function VariablesSection({ config }) {
     }
   };
 
-  const openOffcanvas = () => {
-    offcanvasRef.current.classList.add("show");
-  };
-
   const handleCloseOffcanvas = () => {
-    offcanvasRef.current.classList.remove("show");
+    handleClose();
     setFormData({
       name: "",
       type: "",
@@ -176,7 +174,7 @@ export default function VariablesSection({ config }) {
               <button
                 className="btn btn-secondary"
                 type="button"
-                onClick={openOffcanvas}
+                onClick={handleOpen}
               >
                 Add Variable
               </button>
@@ -185,97 +183,86 @@ export default function VariablesSection({ config }) {
 
           {error && <Alert variant="danger">{error}</Alert>}
 
-          <div
-            className="offcanvas offcanvas-end"
-            tabIndex="-1"
-            style={{ width: "400px" }}
-            ref={offcanvasRef}
-            data-bs-theme="dark"
+          <Offcanvas
+            isOpen={isOffcanvasOpen}
+            onClose={handleClose}
+            title="New Variable"
+            width="450px"
           >
-            <div className="offcanvas-header pb-0">
-              <h5>{editId ? "Edit Variable" : "Add Variable"}</h5>
-              <button
-                type="button"
-                className="btn-close text-reset"
-                onClick={handleCloseOffcanvas}
-              ></button>
-            </div>
-            <div className="offcanvas-body">
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3" controlId="formVariableName">
-                  <Form.Label>Variable Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="name"
-                    value={formData?.name}
-                    onChange={handleChange}
-                    placeholder="var"
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3" controlId="formVariableType">
-                  <Form.Label>Variable Type</Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="type"
-                    value={formData?.type}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select...</option>
-                    <option value="stateVars">State</option>
-                    <option value="propsVars">Prop</option>
-                    <option value="otherVars">Other</option>
-                    <option value="refVars">Ref</option>
-                  </Form.Control>
-                </Form.Group>
-                <Form.Group className="mb-3" controlId="formDataType">
-                  <Form.Label>Data Type</Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="datatype"
-                    value={formData.datatype}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select a data type</option>
-                    {dataTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-                <Form.Group className="mb-3" controlId="formDefaultValue">
-                  <Form.Label>Default Value</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="defaultValue"
-                    value={getDefaultAsString(formData.defaultValue)}
-                    onChange={handleChange}
-                    placeholder="value"
-                  />
-                </Form.Group>
-                <Form.Group className="mb-3" controlId="formDescription">
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Enter description"
-                  />
-                </Form.Group>
-                <div className="d-flex">
-                  <Button
-                    variant="secondary"
-                    className="me-3"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {editId ? "Update" : "Submit"}
-                  </Button>
-                </div>
-              </Form>
-            </div>
-          </div>
+            <Form onSubmit={handleSubmit}>
+              <Form.Group className="mb-3" controlId="formVariableName">
+                <Form.Label>Variable Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  value={formData?.name}
+                  onChange={handleChange}
+                  placeholder="var"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="formVariableType">
+                <Form.Label>Variable Type</Form.Label>
+                <Form.Control
+                  as="select"
+                  name="type"
+                  value={formData?.type}
+                  onChange={handleChange}
+                >
+                  <option value="">Select...</option>
+                  <option value="stateVars">State</option>
+                  <option value="propsVars">Prop</option>
+                  <option value="otherVars">Other</option>
+                  <option value="refVars">Ref</option>
+                </Form.Control>
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="formDataType">
+                <Form.Label>Data Type</Form.Label>
+                <Form.Control
+                  as="select"
+                  name="datatype"
+                  value={formData.datatype}
+                  onChange={handleChange}
+                >
+                  <option value="">Select a data type</option>
+                  {dataTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="formDefaultValue">
+                <Form.Label>Default Value</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="defaultValue"
+                  value={getDefaultAsString(formData.defaultValue)}
+                  onChange={handleChange}
+                  placeholder="value"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="formDescription">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Enter description"
+                />
+              </Form.Group>
+              <div className="d-flex">
+                <Button
+                  variant="secondary"
+                  className="me-3"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {editId ? "Update" : "Submit"}
+                </Button>
+              </div>
+            </Form>
+          </Offcanvas>
 
           <Table striped bordered hover variant="dark" className="mt-4">
             <thead>
@@ -295,7 +282,14 @@ export default function VariablesSection({ config }) {
                   <td>{index + 1}</td>
                   <td>{item.name}</td>
                   <td>{item.type}</td>
-                  <td><span class="badge badge-light" style={{backgroundColor: '#6d00cc'}}>{item.datatype}</span></td>
+                  <td>
+                    <span
+                      class="badge badge-light"
+                      style={{ backgroundColor: "#6d00cc" }}
+                    >
+                      {item.datatype}
+                    </span>
+                  </td>
                   <td>{getDefaultAsString(item.defaultValue)}</td>
                   <td>{item.description}</td>
                   <td>

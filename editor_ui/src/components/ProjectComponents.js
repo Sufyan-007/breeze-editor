@@ -3,14 +3,18 @@ import { useSelector } from "react-redux";
 import page_ss from "../assets/icons/page_ss.png";
 import custom_ss from "../assets/icons/custom-component.png";
 import { router } from "../App";
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
+import Offcanvas from "./common/Offcanvas";
 import AddNewComponent from "./AddNewComponent";
 
 export default function ProjectComponents(props) {
   const config = useSelector((state) => state.config);
   const [selected, setSelected] = useState(0);
   const { projectName } = useParams();
+  const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
+  const handleOpen = () => setIsOffcanvasOpen(true);
+  const handleClose = () => setIsOffcanvasOpen(false);
 
   const handleClick = (key) => {
     const path = `/project/${projectName}/component/${key}`;
@@ -37,10 +41,32 @@ export default function ProjectComponents(props) {
           </div>
         </div>
       </div>
-      <div className="row p-1">
-        <AddNewComponent />
+      <div>
+        <div className="d-flex align-items-center justify-content-between my-2 mx-3">
+          <div className="text-left mt-2">
+            <h4>Components</h4>
+          </div>
+          <div>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={handleOpen}
+            >
+              Add Component
+            </button>
+          </div>
+        </div>
+        <Offcanvas
+          isOpen={isOffcanvasOpen}
+          onClose={handleClose}
+          title="New Component"
+          width="400px"
+        >
+          <AddNewComponent />
+        </Offcanvas>
       </div>
-      <div className="row p-2 my-3 flex-grow-1">
+
+      <div className="row p-2 flex-grow-1">
         {selected === 0
           ? (config.pages) && Object.entries(config.pages).map(([key, value]) => (
             <div className="col-sm-6 col-lg-4 col-xl-3 my-3">

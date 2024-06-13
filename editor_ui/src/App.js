@@ -9,7 +9,7 @@ import Sidebar from "./components/Sidebar";
 import DetailedComponent from "./components/DetailedComponent";
 import ReduxConfig from "./components/ReduxConfig";
 import CreateApp from "./components/CreateApp";
-import  Root  from "./components/ApiClient/Root";
+import ApiClientRoot from "./features/api_client/index";
 import ProjectPage, { projectLoader } from "./components/ProjectPage";
 import ComponentConfigPage, {
   configLoader,
@@ -32,7 +32,7 @@ export const router = createBrowserRouter([
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
       { path: "routing", element: <ProjectRouting />, loader: routerConfigLoader },
-      { path: "services", element: <Root/> },
+      { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
       {
         path: "styles",
@@ -56,8 +56,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting />,  loader: routerConfigLoader },
-      { path: "services", element: <Root /> },
+      { path: "routing", element: <ProjectRouting />, loader: routerConfigLoader },
+      { path: "services", element: <ApiClientRoot /> },
     ]
   },
   {
@@ -88,7 +88,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "editor/:projectName/service",
-    element: <Root />,
+    element: <ApiClientRoot />,
   },
 ]);
 

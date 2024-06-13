@@ -3,7 +3,6 @@ import { ButtonGroup, Button, InputGroup } from "react-bootstrap";
 import DeleteIcon from "../assets/icons/delete-trash.svg";
 import EditIcon from "../assets/icons/edit-icon.svg";
 import ViewIcon from "../assets/icons/view-eye.svg";
-import ChildRoute from "../assets/icons/child-route-96.png"
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLoaderData } from "react-router";
@@ -25,7 +24,6 @@ export default function ProjectRouting() {
   const [currentOffCanvasRoute, setCurrentOffCanvasRoute] = useState(''); 
   const [displayRoute, setDisplayRoute] = useState(''); 
   const [selectedChildRoute, setSelectedChildRoute] = useState('');
-  const [childRouteOptions, setChildRouteOptions] = useState('');
   const [selectedParentPathRoute, setSelectedParentPathRoute] = useState('');
   const [isRouteWithAComponent, setIsRouteWithAComponent] = useState(true);
   const [routeMode, setRouteMode] = useState('');
@@ -112,21 +110,14 @@ export default function ProjectRouting() {
             prop[1].implementation.isAsync ? "async " : ""
           }(${parameters}) => { ${prop[1].implementation.body.trim()} }`;
         }
-
-        // below part for the time being is not required
-        // if (prop[0] === 'childRoutes') {
-        //   let newChildRoutes = getFunctionFromConfig(prop[1]);
-        //   routeObjImplementationProp[prop[0]] = newChildRoutes;
-        // }
-
       });
       return { ...route, ...routeObjImplementationProp };
     });
   };
 
   const allRoutes = useMemo(
-    () => getFunctionFromConfig(routerConfig.routes || initialRouterConfig.routes),
-    [routerConfig.routes, initialRouterConfig.routes]
+    () => getFunctionFromConfig(routerConfig?.routes || initialRouterConfig?.routes),
+    [routerConfig?.routes, initialRouterConfig?.routes]
   );
   const [routes, setRoutes] = useState([...allRoutes]);
   const [parentRouteOptions, setParentRouteOptions] = useState(
@@ -155,20 +146,6 @@ export default function ProjectRouting() {
     setSelectedProps('');
     setShowSelectedRouteObj('');
     route.component ? setIsRouteWithAComponent(true) : setIsRouteWithAComponent(false);
-    // if (mode === 'childView') {
-    //   if (route.childRoutes) {
-    //     let allChildRoutesOfSelectedRoute = routes.filter(eachRoute => 
-    //       Object.keys(route.childRoutes).find(key => key === eachRoute.fullPath)
-    //     );
-    //     setChildRouteOptions(
-    //       allChildRoutesOfSelectedRoute
-    //     );
-    //   } else {
-    //     setChildRouteOptions('');
-    //   }
-    //   setDisplayRoute('')
-    //   setSelectedChildRoute('');
-    // }
   }
 
   const addNewRoute = () => {
@@ -272,14 +249,6 @@ export default function ProjectRouting() {
           setTheRouteResponse(res);
       }
 
-    } else if (routeMode === 'childView') {
-        // let childObj = {
-        //   fullParentPath: currentOffCanvasRoute.fullPath,
-        //   prevPath: selectedChildRoute.path,
-        //   ...displayRoute
-        // }
-        // let res = await editChildRoute(childObj, projectName);
-        // setTheRouteResponse(res);
     }
   }
 
@@ -389,58 +358,6 @@ export default function ProjectRouting() {
         </div>
         <div className="offcanvas-body pdt text-muted">
           <div>
-            {routeMode === "childView" && (
-              <div className="">
-                <div className="mb-3 mx-1">
-                  {childRouteOptions && (
-                    <div className="d-flex ">
-                      <div className="flex-grow-1">
-                        <Form.Label className="ms-1" style={{color: "#ae9959"}}>
-                          Select To View/Edit/Delete Child Route
-                        </Form.Label>
-                        <Form.Select
-                          aria-label="Default select example"
-                          className={`${routeMode === "childView" ? "" : "mb-3"} `}
-                          onChange={(e) => {
-                            if (e.target.value !== "") {
-                              let macthedRoute = childRouteOptions.find(
-                                (route) => route.path === e.target.value
-                              );
-                              setSelectedChildRoute(macthedRoute);
-                              setDisplayRoute(macthedRoute);
-                            } else {
-                              setSelectedChildRoute("");
-                              setDisplayRoute("");
-                            }
-                          }}
-                          value={selectedChildRoute?.path || ""}
-                        >
-                          (<option value="">None</option>)
-                          {
-                            childRouteOptions.map(
-                            (route, index) =>
-                              route.path && (
-                                <option key={index} value={route.path}>
-                                  {route.path +
-                                    " - " +
-                                    (route.component || route.redirectTo)}
-                                </option>
-                              )
-                          )}
-                        </Form.Select>
-                      </div>
-                    </div>
-                  )}
-                  {childRouteOptions === '' && (
-                    <input
-                      className="form-control"
-                      value="No child route present, add one!"
-                      disabled
-                    />
-                  )}
-                </div>
-              </div>
-            )}
             {(routeMode !== 'childView' || selectedChildRoute) && (<div>
               <div className="mx-1 form-floating" aria-label="path-input">
                 <InputGroup className="">
@@ -611,6 +528,7 @@ export default function ProjectRouting() {
               </div>
               <div className=" mx-1 my-2">
                 <Multiselect
+                  id="otherRouteObjectsMultiselect"
                   className="form-control p-0 text-white"
                   options={optionalRouteProps}
                   selectedValues={selectedProps}
@@ -781,7 +699,6 @@ export default function ProjectRouting() {
               <th>Full Path</th>
               <th>Relative Path</th>
               <th>Component / redirectURL</th>
-              {/* <th>Child Routes</th> */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -805,17 +722,6 @@ export default function ProjectRouting() {
                     </Link>
                   )}
                 </td>
-                {/* <td width={"10%"}>
-                  <Button
-                    variant="dark"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#projectRoutingOffcanvasRight"
-                    onClick={() => handleRouteOffCanvas(route, "childView")}
-                    title="View"
-                  >
-                    <img src={ChildRoute} alt="" height={24} className="" />
-                  </Button>
-                </td> */}
                 <td width={"20%"}>
                   <ButtonGroup className="d-flex justify-content-center">
                     <Button

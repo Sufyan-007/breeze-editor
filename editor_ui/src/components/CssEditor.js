@@ -14,7 +14,7 @@ function CssEditor({ mode }) {
   const editorRef = useRef(null);
 
   const handleView = useCallback(() => {
-    fetch(`http://localhost:8000/editor/get-css-file/${css_name}/`)
+    fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/get-css-file/${css_name}/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -62,8 +62,8 @@ function CssEditor({ mode }) {
     console.log("editorRef.current.value::>>", editorRef.current.getValue());
     const url =
       mode === "add"
-        ? `http://localhost:8000/editor/add-css-content/`
-        : `http://localhost:8000/editor/update-css-file/`;
+        ? `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/add-css-content/`
+        : `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/update-css-file/`;
     const method = mode === "add" ? "POST" : "PUT";
     const payload = JSON.stringify({
       css_name: cssName,

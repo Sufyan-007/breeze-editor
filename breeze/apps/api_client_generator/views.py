@@ -37,7 +37,7 @@ class ApiClientGenerator(View):
 
             elif collectionType.lower() == 'openapi' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
                 open_api_converter = OpenapiConverter()
-                converted_data = open_api_converter.prepare_api_models(json_data)
+                converted_data = open_api_converter.prepare_api_models(json_data, project_name)
                 
                 ## for auth.json
                 security_schemes_models = converted_data.get("security_schemes_models")
@@ -60,7 +60,7 @@ class ApiClientGenerator(View):
                     for model in api_models:
                         model_dict[model.id] = model.as_dict()
                     append_to_dict_file(full_file_path,model_dict)
-                return JsonResponse({"data": model_dict, "filename": resultant_filename,"error_obj" : error_obj}, status=201)
+                return JsonResponse({"data": model_dict, "filename": resultant_filename}, status=201)
             elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
                 converted_data = WebsocketConverter.prepare_api_models(json_data)
                 error_obj = converted_data.get("error_obj",{})

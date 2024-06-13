@@ -20,7 +20,7 @@ class AppConfigWriter:
                     }
                 },
             "baseRoutes": {
-                f"{app_config['defaultComponent']}": {},
+                "/": {},
             }
         }
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG']}.json", json.dumps({}))
