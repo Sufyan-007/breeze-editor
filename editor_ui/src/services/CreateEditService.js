@@ -1,7 +1,7 @@
 export async function handleServiceData(data) {
   const response = await (
     await fetch(
-      "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/",
+      `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/api-client-generator/modified-intermediate-json/`,
       {
         method: "POST",
         headers: {
