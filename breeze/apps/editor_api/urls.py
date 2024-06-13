@@ -63,7 +63,7 @@ urlpatterns = [
         # path('lifecycle/', LifeCycleConfigWriter.as_view()),
         # path('variables/', VariablesConfigWriter.as_view()),
         path('update-component-config/', ComponentConfigWriter.as_view()),
-        path('reorder-component-actions/', ComponentConfigOrder.as_view())
+        path('reorder-component-actions/', ComponentConfigOrder.as_view()),
 
         
         
