@@ -13,7 +13,7 @@ export const DragContext = createContext({
 
 export default function HtmlSection() {
     const { componentConfig } = useContext(ComponentContext)
-    const [iframeSrc, setIframeSrc] = useState(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}` + componentConfig.port)
+    const [iframeSrc, setIframeSrc] = useState(`${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port)
     const srcInput = useRef()
     const [selected, setSelected] = useState(0)
     const iFrameRef = useRef();
