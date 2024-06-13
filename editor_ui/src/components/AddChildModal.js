@@ -59,7 +59,7 @@ export default function AddChildModal({ show, update }) {
                                 <option key={component} value={component}>{component}</option>
                             )}
                         </Form.Select>
-                    </Form.Group >
+                    </Form.Group>
                     {newChild.elementType ?
                         <Fragment>
                             {newChild.elementType === "THIRD_PARTY" ?

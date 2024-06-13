@@ -4,12 +4,11 @@ import rightArrow from "../../assets/icons/arrow_right_icon.svg"
 import downArrow from "../../assets/icons/arrow_down_icon.svg"
 import threeDots from "../../assets/icons/three_dots_icon.svg"
 import HtmlTree from "./HtmlTree"
-import { Fragment, useContext, useEffect, useState } from "react"
+import { Fragment, useContext, useState } from "react"
 import AddChildModal from "../AddChildModal"
 import { addHtmlChild, removeHtmlElem } from "../../services/HtmlConfigService"
 import { useParams } from "react-router"
 import { ComponentContext } from "../ComponentConfig/ComponentConfigPage"
-import { timeout } from "rxjs"
 
 export default function Html({ value, htmlId, reference, selectElem }) {
     const [showChild, setShowChild] = useState(false)
@@ -17,22 +16,6 @@ export default function Html({ value, htmlId, reference, selectElem }) {
     const { projectName, componentName } = useParams();
     const hasChildren = value.children?.length > 0
     const [showAdd, setShowAdd] = useState(false)
-    const [isHovered, setIsHovered] = useState(false)
-
-
-    useEffect(() => {
-        var timeout;
-        if (isHovered) {
-            timeout = setTimeout(() => {
-                setShowChild(true)
-            }, 500)
-        }
-        return () => {
-            if (timeout) {
-                clearTimeout(timeout)
-            }
-        }
-    }, [isHovered])
 
 
     function addChild(val) {
@@ -46,7 +29,6 @@ export default function Html({ value, htmlId, reference, selectElem }) {
                     console.log(state)
                     return { ...state }
                 })
-                setShowChild(true)
             })
         }
         setShowAdd(false)
@@ -69,19 +51,10 @@ export default function Html({ value, htmlId, reference, selectElem }) {
         })
     }
 
-    function handleDrop(event) {
-        const data = event.dataTransfer.getData("text/plain")
-        const droppedElem = JSON.parse(data)
-        if (droppedElem.elementType) {
-            addChild(droppedElem)
-        }
-
-    }
-
     return (
         <Fragment>
             <AddChildModal show={showAdd} update={addChild} />
-            <div ref={reference} className=" p-0 d-flex justify-content-between " draggable onDrop={handleDrop} onDragEnter={() => setIsHovered(true)} onDragLeave={() => setIsHovered(false)} onDragOver={(event) => { event.preventDefault(); }}>
+            <div ref={reference} className=" p-0 d-flex justify-content-between " draggable >
                 <div className="d-flex w-100 ">
                     {hasChildren ?
                         <button className="btn p-0 m-0 shadow-none" onClick={toggleShowChild} >

@@ -19,8 +19,8 @@ export default function AddElements(){
     return (
         <div className="row">
             <div className="col">
-                {components.HTML?.slice(0,10).map(component=>
-                    <DragableElements elem={{elementType: "HTML", component }} />
+                {components.HTML?.slice(0,10).map(elem=>
+                    <DragableElements elem={elem} />
                 )
 
                 }

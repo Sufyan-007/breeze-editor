@@ -18,12 +18,9 @@ import copy
 NEW_COMP_FORMAT={
     "name": "$NAME",
     "containingFile": "components/$NAME.js",
-    "stateVars": [],
     "propsVars": [],
-    "otherVars": [],
-    "refVars": [],
+    "resources": [],
     "componentType" : "CUSTOM",
-    "functions": [],
     "$id":"$NAME",
     "html": {"_id":"$NAME"},
     "wrapper_store": None,
@@ -41,7 +38,6 @@ NEW_COMP_FORMAT={
           "import_type": "SINGLE"
         }] 
     },
-    "hooks": [],
     "html_elements":{
         "$NAME":{
             "type": "Element",
