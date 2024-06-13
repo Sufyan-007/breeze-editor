@@ -17,11 +17,14 @@
   /* scrollbar-width: none; */
 }
 
-#offcanvasRight {
-  width: 600px !important;
+#projectRoutingOffcanvasRight.addModeWidth {
+  width: 700px !important;
   /* width: min(95vw, 200px) !important; */
 }
 
+#projectRoutingOffcanvasRight.normalWidth {
+  width: 600px !important;
+}
 .pdt {
   padding-top: 0px !important;
 }
@@ -43,7 +46,7 @@
 
 #newRouteDropdown {
   background-color: gray !important;
-  margin-top: 16px;
+  color: '#dee2e6bf';
 }
 
 #newRouteDropdownOptions {
@@ -53,7 +56,8 @@
 }
 
 .custom-parent-path-scroll {
-  height: 150px;
+  height: 130px;
+  width: 130px;
   overflow-y: scroll;
 }
 
@@ -77,9 +81,10 @@
   display: none;
 }
 
-
-
-
+.noRoutesPresent {
+  font-size: x-large;
+  text-align: center;
+}
 
 /* only for manage child routes */
 
@@ -92,17 +97,17 @@
   box-shadow: 0 2px 3px 2px rgba(19, 35, 47, .3);
 }
 
-.tab-group {
+.childRouteFormGroup {
   list-style: none;
   padding: 0;
   margin: 0 0 15px 0;
 }
-.tab-group:after {
+.childRouteFormGroup:after {
   content: "";
   display: table;
   clear: both;
 }
-.tab-group li a {
+.childRouteFormGroup li a {
   display: block;
   text-decoration: none;
   padding: 11px;
@@ -115,18 +120,13 @@
   cursor: pointer;
   transition: .5s ease;
 }
-.tab-group li a:hover {
+.childRouteFormGroup li a:hover {
   background: #159a7e;
   color: #ffffff;
 }
-.tab-group .active a {
+.childRouteFormGroup .active a {
   background: #1ab188;
   color: #ffffff;
 }
-
-.tab-content > div:last-child {
-  display: none;
-}
-
 
 /* END : only for manage child routes */
