@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import "./DependencyConfig.css";
-import PackageModal from "./PackageModal";
+import PackageForm from "./PackageForm";
 import DependencyFileCard from "./DependencyFileCard";
-import { Form, Spinner } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import Offcanvas from "../common/Offcanvas";
+import { useParams } from "react-router";
 
 const DependencyConfig = () => {
   const [dependencies, setDependencies] = useState([]);
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [deletingPackage, setDeletingPackage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
-  const [editingPackage, setEditingPackage] = useState(null); // State for editing
+  const [isLoading, setIsLoading] = useState(false);
+  const [editingPackage, setEditingPackage] = useState(null);
+
+  const { projectName } = useParams();
 
   useEffect(() => {
     fetchDependencies();
@@ -19,7 +22,7 @@ const DependencyConfig = () => {
   const fetchDependencies = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/editor/list-dependencies/test"
+        `http://localhost:8000/editor/list-dependencies/${projectName}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -40,7 +43,7 @@ const DependencyConfig = () => {
 
   const handleModalSubmit = async (selectedPackage) => {
     console.log(selectedPackage);
-    setIsLoading(true); // Set loading to true when form is submitted
+    setIsLoading(true);
 
     try {
       if (selectedPackage && selectedPackage.name && selectedPackage.version) {
@@ -53,27 +56,23 @@ const DependencyConfig = () => {
 
         if (editingPackage) {
           response = await fetch(
-            "http://localhost:8000/editor/edit-dependency/test",
+            `http://localhost:8000/editor/edit-dependency/${projectName}`,
             {
               method: "PUT",
-
               headers: {
                 "Content-Type": "application/json",
               },
-
               body: JSON.stringify(packageData),
             }
           );
         } else {
           response = await fetch(
-            "http://localhost:8000/editor/add-package/test",
+            `http://localhost:8000/editor/add-package/${projectName}`,
             {
               method: "POST",
-
               headers: {
                 "Content-Type": "application/json",
               },
-
               body: JSON.stringify(packageData),
             }
           );
@@ -92,19 +91,16 @@ const DependencyConfig = () => {
     } catch (error) {
       console.error("Error adding package:", error);
     } finally {
-      setIsLoading(false); // Set loading to false once operation is complete
-      setIsOffcanvasOpen(false); // Close the offcanvas
+      setIsLoading(false);
+      setIsOffcanvasOpen(false);
     }
-  };
-  const handleDownload = (css_name) => {
-    console.log("frw");
   };
 
   const handleDelete = async (packageName) => {
     setDeletingPackage(packageName);
     try {
       const response = await fetch(
-        `http://localhost:8000/editor/delete-dependency/test`,
+        `http://localhost:8000/editor/delete-dependency/${projectName}`,
         {
           method: "DELETE",
           headers: {
@@ -153,7 +149,6 @@ const DependencyConfig = () => {
             </button>
           </div>
         </div>
-
         {dependencies.map(([name, version], index) => (
           <div key={index} className="col-12 px-3">
             <DependencyFileCard
@@ -172,7 +167,7 @@ const DependencyConfig = () => {
         width="450px"
         onClose={handleOffcanvasClose}
       >
-        <PackageModal
+        <PackageForm
           onSubmit={handleModalSubmit}
           onClose={handleOffcanvasClose}
           editingPackage={editingPackage}

@@ -35,12 +35,11 @@
 }
 
 .read-only-input {
-  background-color: #343a40 !important; /* Extra dark background */
-  color: #6c757d; /* Gray text */
-  pointer-events: none; /* Disable click events */
-}
+  background-color: #343a40 !important; 
+  color: #6c757d; pointer-events: none; 
+  pointer-events: none;}
 
 .read-only-input:focus {
-  outline: none; /* Remove focus outline */
-  box-shadow: none; /* Remove focus glow */
+  outline: none; 
+  box-shadow: none; 
 }

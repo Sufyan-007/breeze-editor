@@ -17,7 +17,7 @@ const DependencyFileCard = ({
           {packageName}: {packageVersion}
         </div>
         <ButtonGroup>
-        <Button variant="dark" title="Edit" onClick={onEdit}> {/* Handle edit click */}
+          <Button variant="dark" title="Edit" onClick={onEdit}>
             <img src={EditIcon} alt="" height={24} className="mx-2" />
           </Button>
           <Button

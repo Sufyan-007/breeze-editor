@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Form, Button, Spinner, Alert } from "react-bootstrap";
-import "./PackageModal.css";
+import { Form, Button, Spinner } from "react-bootstrap";
+import "./PackageForm.css";
 
-const PackageModal = ({ onSubmit, onClose, editingPackage }) => {
+const PackageForm = ({ onSubmit, onClose, editingPackage }) => {
   const [query, setQuery] = useState({ name: "", version: "" });
   const [useLatest, setUseLatest] = useState(true);
   const [suggestions, setSuggestions] = useState([]);
   const [versions, setVersions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showVersionWarning, setShowVersionWarning] = useState(false);
   const debounceTimeoutRef = useRef(null);
-  const isSubmitDisabled = !query.name || (!useLatest && !query.version);
+  const isSubmitDisabled =
+    !query.name ||
+    (!useLatest && !query.version) ||
+    query.version === "Select version";
   const isSuggestionSelected =
     query.name.length > 0 && suggestions.length === 0;
 
@@ -26,12 +28,9 @@ const PackageModal = ({ onSubmit, onClose, editingPackage }) => {
   useEffect(() => {
     if (editingPackage) {
       setQuery({ name: editingPackage.name, version: editingPackage.version });
-
       setUseLatest(editingPackage.version === "*");
-
       fetchVersions(editingPackage.name).then((allVersions) => {
         const sortedVersions = allVersions.sort((a, b) => (b > a ? 1 : -1));
-
         setVersions(sortedVersions);
       });
     }
@@ -85,11 +84,9 @@ const PackageModal = ({ onSubmit, onClose, editingPackage }) => {
     setIsLoading(true);
     try {
       if (!useLatest && !query.version) {
-        setShowVersionWarning(true); // Show version warning if version is not selected
         setIsLoading(false);
         return;
       }
-
       if (useLatest) {
         query.version = "*";
       }
@@ -113,7 +110,6 @@ const PackageModal = ({ onSubmit, onClose, editingPackage }) => {
     setUseLatest(value === "latest");
     if (value === "latest") {
       setQuery({ ...query, version: "*" });
-      setShowVersionWarning(false);
     } else {
       setQuery({ ...query, version: "Select version" });
     }
@@ -129,7 +125,8 @@ const PackageModal = ({ onSubmit, onClose, editingPackage }) => {
           onChange={handleInputChange}
           placeholder="Search NPM packages..."
           autoComplete="off"
-          readOnly={!!editingPackage} null
+          readOnly={!!editingPackage}
+          null
           className={editingPackage ? "read-only-input" : ""}
         />
       </Form.Group>
@@ -183,11 +180,6 @@ const PackageModal = ({ onSubmit, onClose, editingPackage }) => {
               ))}
             </Form.Control>
           )}
-            {showVersionWarning && (
-            <Alert variant="warning" className="mt-2">
-              Please select a version.
-            </Alert>
-          )}
         </Form.Group>
       )}
       <div className="button-container">
@@ -217,4 +209,4 @@ const PackageModal = ({ onSubmit, onClose, editingPackage }) => {
   );
 };
 
-export default PackageModal;
+export default PackageForm;
