@@ -8,7 +8,7 @@ let max = 0;
 class HandlePropTypes {
 
 
-    constructor(libInfo){
+    constructor(libInfo) {
         this.libraryName = libInfo.libName;
         this.libVersion = libInfo.libVersion;
         this.storePath = libInfo.storePath;
@@ -95,15 +95,15 @@ class HandlePropTypes {
         return typeInfo;
     }
 
-    decodeEnumType(prop, type, processed, recLevel, all){
+    decodeEnumType(prop, type, processed, recLevel, all) {
         const typeInfo = {}
         typeInfo['type'] = 'CUSTOM_ENUM'
         typeInfo['name'] = type.getText()
 
         typeInfo['data'] = type.getSymbol().getValueDeclaration().getMembers().map(member => {
             return {
-                'name' : member.getName(),
-                'value' : member.getValue()
+                'name': member.getName(),
+                'value': member.getValue()
             }
         })
 
@@ -139,24 +139,39 @@ class HandlePropTypes {
         }
 
         // Go through all the properties of the interface and decode them
+
+
         typeInfo['data'] = type.getProperties().map(p => {
+            let declaration = p.getValueDeclaration();
+            if (p.getDeclarations().length != 0) {
+                declaration = p.getDeclarations()[0]
+            }
+
+            if (!declaration) {
+                return {
+                    name: p.getName(),
+                    type: 'NO_DECLARATION_FOUND'
+                }
+            }
+
             return {
                 name: p.getName(),
-                type: this.handleProps(prop, p.getValueDeclaration().getType(), processed, recLevel, all)
+                type: this.handleProps(prop, declaration.getType(), processed, recLevel, all)
             }
         })
 
+
         // We store the interface details to seperate file
         // So we store the details and give only ref
-        if(alreadyProcessed.path){
+        if (alreadyProcessed.path) {
             storeInfo(typeInfo, {
-                refVariable : sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
-                refPath : sanitizeFilePath(alreadyProcessed.path)
+                refVariable: sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
+                refPath: sanitizeFilePath(alreadyProcessed.path)
             }, getAbsoluteStorageDirForLib(this.libInfo))
             typeInfo['data'] = {
-                refVariable :sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
-                refPath : sanitizeFilePath(alreadyProcessed.path)
-             
+                refVariable: sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
+                refPath: sanitizeFilePath(alreadyProcessed.path)
+
             }
 
         }
@@ -326,8 +341,8 @@ function checkAlreadyProcessed(type, declaration, processedArr) {
 
     return {
         isAlreadyProcessed: false,
-        path : path,
-        objectPath : objectPath
+        path: path,
+        objectPath: objectPath
     }
 
 }

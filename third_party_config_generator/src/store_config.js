@@ -3,7 +3,7 @@ const fs = require('fs');
 function handleConfigFileGeneration(exports, storePath, libraryName) {
     const folderPath = storePath;
     if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath);
+        fs.mkdirSync(folderPath, {recursive:true});
     }
 
     exports.forEach(item => {

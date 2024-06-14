@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { Project } = require('ts-morph');
+const { Project, Node, Symbol, TypeParameter } = require('ts-morph');
 const { SyntaxKind } = require('typescript');
 // Use this (handlePropTypes) for original code, decodePropType is only for easy debugging
 const { HandlePropTypes } = require('./handle_prop_types');
@@ -43,6 +43,7 @@ function readExportsFromTypeScriptFile(project, filePath) {
         const expConfig = {
             module: defaultExportSymbol.getAliasedSymbol().getValueDeclaration().getSourceFile().getFilePath(),
             defaultExport: true,
+            isAbsoluteModulePath: true,
             importType: defaultExportSymbol.getImmediatelyAliasedSymbol().getDeclarations()[0].isTypeOnly() ? 'TYPE' :
                 defaultExportSymbol.getImmediatelyAliasedSymbol().getDeclarations()[0].getDefaultImport() ? 'DEFAULT' : 'UNKNOWN',
             exportType: 'DEFAULT',
@@ -54,23 +55,49 @@ function readExportsFromTypeScriptFile(project, filePath) {
 
     }
 
-    sourceFile.forEachDescendant(node => {
-        if (node.getKindName() === 'ExportDeclaration') {
-            // if (node.getDefaultExportSymbol) {
-            //     const namedExports = node.getNamedExports();
-            //     namedExports.forEach(namedExport => {
-            //         exports.push(namedExport.getText());
-            //     });
-            // } else if (node.isDefaultExport()) {
-            //     const defaultExport = node.getDefaultExportSymbol();
-            //     if (defaultExport) {
-            //         exports.push(defaultExport.getName());
-            //     }
-            // }
+    const exportedKeys = exports.map(exp => exp.name);
+
+    for (let [expKey, exportedVar] of sourceFile.getExportedDeclarations()) {
+        if (isAlreadyInExpList(exportedKeys, expKey)) {
+            continue;
         }
-    });
+
+        const expConfig = {
+            module: exportedVar[0].getSourceFile().getFilePath(),
+            defaultExport: expKey === 'default',
+            isAbsoluteModulePath: true,
+            importType: exportedVar[0].isDefaultExport() ? 'DEFAULT' : 'UNKNOWN',
+            exportType: 'UNKNOWN',
+            name: exportedVar[0].getName(),
+            exportedName: expKey,
+            currentFileName: sourceFile.getFilePath()
+        }
+        exports.push(expConfig)
+
+    }
+
+    // sourceFile.forEachDescendant(node => {
+    //     if (node.getKindName() === 'ExportDeclaration') {
+    //         console.log('Ers');
+    //         // if (node.getDefaultExportSymbol) {
+    //         //     const namedExports = node.getNamedExports();
+    //         //     namedExports.forEach(namedExport => {
+    //         //         exports.push(namedExport.getText());
+    //         //     });
+    //         // } else if (node.isDefaultExport()) {
+    //         //     const defaultExport = node.getDefaultExportSymbol();
+    //         //     if (defaultExport) {
+    //         //         exports.push(defaultExport.getName());
+    //         //     }
+    //         // }
+    //     }
+    // });
 
     return exports;
+}
+
+function isAlreadyInExpList(exports, expKey) {
+    return exports.includes(expKey);
 }
 
 // Process exports variable
@@ -83,7 +110,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
     for (const expConfig of expList) {
         try {
 
-            const typeDefinitionFile = expConfig['defaultExport'] ? expConfig['module'] : findTypeDefinitionFile(entryPoint, expConfig['module'], libraryPath);
+            const typeDefinitionFile = expConfig['isAbsoluteModulePath'] ? expConfig['module'] : findTypeDefinitionFile(entryPoint, expConfig['module'], libraryPath);
 
             // If not able to find the source file for the variable, 
             // then continue processing next var
@@ -93,46 +120,56 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
 
             const sourceFile = project.addSourceFileAtPath(typeDefinitionFile);
 
-            if(checkIfReactImported(sourceFile)){
+            if (checkIfReactImported(sourceFile)) {
                 sourceFile.insertStatements(0, `import * as React from 'react';`);
             }
 
             // If it is imported as default variable from file then try to read the default variable of the file
+            // if (expConfig['importType'] == 'DEFAULT') {
+            let exportVarSymbol;
+
             if (expConfig['importType'] == 'DEFAULT') {
 
-                const exportVarSymbol = sourceFile.getDefaultExportSymbol().getAliasedSymbol()
+                exportVarSymbol = sourceFile.getDefaultExportSymbol().getAliasedSymbol()
+            } else {
+                exportVarSymbol = getDeclarationOfProps(expConfig['name'], sourceFile)
+                exportVarSymbol = exportVarSymbol.getSymbol() || exportVarSymbol;
 
-                const attributesOfVar = exportVarSymbol.getValueDeclaration().getType().getProperties()
-                let isComponent;
-
-                // If declared Like,
-                // declare const _default: typeof DataTable;
-                // export default _default;
-                if (attributesOfVar.length == 0) {
-                    const symbol = exportVarSymbol.getValueDeclaration().getType().getSymbol()
-
-                    if (symbol) {
-                        const isFunctionDeclaration = symbol.getValueDeclaration()?.getKind() == SyntaxKind.FunctionDeclaration;
-                        if (isFunctionDeclaration) {
-                            isComponent = isReturnJSX(symbol.getValueDeclaration());
-                        }
-
-                    }
-                } else {
-
-                    // Determine if it is component or not
-                    isComponent = checkIfComponentType(attributesOfVar)
-                }
-
-                expConfig['isComponent'] = isComponent
-
-                // Add props if it is component
-                if (isComponent) {
-                    expConfig['props'] = []
-                    const propsList = getPropsForDefaultExportVar(sourceFile, expConfig['name'], libInfo)
-                    expConfig['props'] = propsList
-                }
             }
+
+            // Need to think about this, maybe change the approach of reading attributes
+            const attributesOfVar = getDeclaration(exportVarSymbol)?.getType().getProperties() ?? exportVarSymbol.getType().getProperties();
+            let isComponent;
+
+            // If declared Like,
+            // declare const _default: typeof DataTable;
+            // export default _default;
+            if (attributesOfVar.length == 0 && (exportVarSymbol instanceof Symbol)) {
+                const symbol = getDeclaration(exportVarSymbol).getType().getSymbol()
+
+                if (symbol) {
+                    const isFunctionDeclaration = symbol.getValueDeclaration()?.getKind() == SyntaxKind.FunctionDeclaration;
+                    if (isFunctionDeclaration) {
+                        isComponent = isReturnJSX(symbol.getValueDeclaration());
+                    }
+
+                }
+            } else {
+
+                // Determine if it is component or not
+                isComponent = checkIfComponentType(attributesOfVar)
+            }
+
+            expConfig['isComponent'] = isComponent
+
+            // Add props if it is component
+            if (isComponent) {
+                expConfig['props'] = []
+                let propsList;
+                propsList = getPropsForDefaultExportVar(sourceFile, expConfig['name'], libInfo, expConfig['importType'] == 'DEFAULT')
+                expConfig['props'] = propsList
+            }
+            // }
 
             // const varOfFile = sourceFile.getExportAssignments()
             // // // console.log(sourceFile.getDefaultExportSymbol().getEscapedName());
@@ -145,7 +182,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
         } catch (error) {
             console.log('-----ERROR_IN_PROCESS_EXPORTS-----', expConfig['name']);
             errors.push({
-                errorLog: error,
+                errorLog: error.stack,
                 name: expConfig['name'],
                 config: expConfig
             })
@@ -168,16 +205,51 @@ function getDefaultExportVariableDeclaration(sourceFile) {
 
 }
 
+function getDeclaration(symbol) {
+
+
+    if (!(symbol instanceof Symbol)) {
+        return;
+    }
+
+    if (symbol.getValueDeclaration()) return symbol.getValueDeclaration()
+
+    if (symbol.getDeclarations().length > 0) {
+        return symbol.getDeclarations()[0]
+    }
+}
+
+function getVariableDeclarationForExport(sourceFile, name) {
+    const dec = getDeclarationOfProps(name, sourceFile);
+
+    if (dec.getType().getSymbol()?.getValueDeclaration()) {
+        return dec.getType().getSymbol().getValueDeclaration();
+    }
+
+    return dec;
+
+
+
+}
+
 function isReturnJSX(functionDeclaration) {
+    // Add this to also check if it is return type jsx, react_jsx_runtime.JSX.Element
     return functionDeclaration.getReturnType().getText() == 'JSX.Element';
 }
 
-function getPropsForDefaultExportVar(sourceFile, componentName, libInfo) {
+function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefaultExport = true) {
 
     const handlePropTypes = new HandlePropTypes(libInfo);
     const propsReader = new PropsReader(libInfo);
 
-    const defaultExportDec = getDefaultExportVariableDeclaration(sourceFile);
+    let defaultExportDec;
+
+    if (isDefaultExport) {
+        defaultExportDec = getDefaultExportVariableDeclaration(sourceFile);
+    } else {
+        // Handle case for the exports that are not default exported
+        defaultExportDec = getVariableDeclarationForExport(sourceFile, componentName);
+    }
 
     // This gets the children of default export var
     // ex. AccordionCollapse : BsPrefixRefForwardingComponent<'div', AccordionCollapseProps>
@@ -198,10 +270,15 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo) {
         // declare function ThemeProvider({ prefixes, children, }: ThemeProviderProps): JSX.Element;
         // // // console.log('Getting parameter type for finding the propType variable');
         // // // console.log(defaultExportDec.getParameters()[0].getTypeNode().getText());
-        propVarName = defaultExportDec.getParameters()[0].getTypeNode().getText();
+        if (defaultExportDec.getParameters().length > 0) {
 
-        const propVarRef = defaultExportDec.getParameters()[0].getTypeNode()
-        propList = propsReader.processProps(propVarRef)
+            propVarName = defaultExportDec.getParameters()[0].getTypeNode().getText();
+
+            const propVarRef = defaultExportDec.getParameters()[0].getTypeNode()
+            propList = propsReader.processProps(propVarRef)
+        } else {
+            propList = [];
+        }
         // propList = propsReader.getPropsList(propVarName, sourceFile)
 
     }
@@ -324,14 +401,14 @@ function combineIntersectionProps(intersectionVar) {
 
 }
 
-function checkIfReactImported(sourceFile){
+function checkIfReactImported(sourceFile) {
     const reactImport = sourceFile.getImportDeclarations().find(declaration => {
         const defaultImport = declaration.getDefaultImport();
         const moduleSpecifier = declaration.getModuleSpecifierValue();
         return defaultImport?.getText() === 'React' && moduleSpecifier === 'react';
     });
 
-    
+
     return !!reactImport;
 }
 
@@ -368,9 +445,28 @@ function getDeclarationOfProps(propName, sourceFile) {
                 // console.log(typeNode.getTypeNodes().map(t => t.getText()));
                 // NEED to handle all the type of union type : REFER FORM LABEL
                 // Temporarily returing one 
-                if (typeNode.getTypeNodes()[0].getTypeArguments().length > 0) {
-                    return getDeclarationOfProps(typeNode.getTypeNodes()[0].getTypeName().getText(), sourceFile)
+
+                if ((typeof typeNode.getTypeNodes()[0].getTypeArguments == 'function') && typeNode.getTypeNodes()[0].getTypeArguments().length > 0) {
+
+                    if (typeNode.getTypeNodes()[0].getTypeArguments().length > 0) {
+                        return getDeclarationOfProps(typeNode.getTypeNodes()[0].getTypeName().getText(), sourceFile)
+                    } else {
+                        return typeNode.getTypeNodes()
+                    }
+                } else if (
+                    Node.isLiteralTypeNode(typeNode.getTypeNodes()[0]) ||
+                    Node.isExpression(typeNode.getTypeNodes()[0]) ||
+                    Node.isArrayTypeNode(typeNode.getTypeNodes()[0]) ||
+                    Node.isParenthesizedTypeNode(typeNode.getTypeNodes()[0]
+                    )) {
+                    return typeNode.getTypeNodes()[0]
+                } else if ((typeof typeNode.getTypeNodes()[0].getType == 'function' &&
+                    typeNode.getTypeNodes()[0].getType() instanceof TypeParameter) || 
+                    typeNode.getTypeNodes()[0].getKind() == SyntaxKind.IndexedAccessType
+                ) {
+                        return typeNode.getTypeNodes()[0]
                 }
+                // else if(typeNode.getTypeNodes()[0].getKind() == SyntaxKind.IndexedAccessType)
                 // console.log(typeNode.getTypeNodes()[0].getTypeName())
                 return getDeclarationOfProps(typeNode.getTypeNodes()[0].getText(), sourceFile)
             }
@@ -394,6 +490,11 @@ function getDeclarationOfProps(propName, sourceFile) {
 
         propVar = relatedExportDeclaration?.getNamedExports().find(n => n.getName() === propName).getNameNode().getDefinitionNodes()[0]
 
+    }
+
+    // Check if it is function
+    if (!propVar) {
+        propVar = sourceFile.getFunctions().find(f => f.getName() === propName);
     }
 
     // // // console.log('FINAL', propVar);
@@ -491,7 +592,7 @@ class PropsReader {
                 return this.handleSymbolProps(prop)
             }
 
-            if (prop.getKind() == SyntaxKind.MethodSignature) {
+            if (prop.getKind() == SyntaxKind.MethodSignature || (!prop.getTypeNode())) {
                 typeConfig = prop.getType()
                 isTypeNodeAvailable = false;
             } else {

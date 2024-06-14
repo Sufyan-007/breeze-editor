@@ -23,6 +23,14 @@ function findTypeDefinitionFile(entryPoint, moduleSpecifier, libraryPath) {
     let typeDefinitionFile;
     if(fs.existsSync(modulePath) && fs.lstatSync(modulePath).isDirectory()){
         typeDefinitionFile = `${modulePath}/index.d.ts`; 
+
+
+        // Check if it is referencing /dist/index.d.ts file if index.d.ts doesn't 
+        // exists directly
+        if(!fs.existsSync(typeDefinitionFile) && fs.existsSync(`${modulePath}/dist`) && fs.lstatSync(`${modulePath}/dist`).isDirectory()){
+            typeDefinitionFile = `${modulePath}/dist/index.d.ts`;
+        }
+        
     }else{
         typeDefinitionFile = `${modulePath}.d.ts`;
     }
