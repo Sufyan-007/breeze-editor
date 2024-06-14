@@ -21,7 +21,7 @@ export async function getApiConfig(projectName, filename, apiId) {
 export async function modifyApiConfig(data, projectName, filename, operation) {
   filename = filename.replace(/\.json$/, "");
   const apiUrl =
-    "http://127.0.0.1:8000/api-client-generator/modified-intermediate-json/" +
+    `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/api-client-generator/modified-intermediate-json/` +
     projectName +
     "/" +
     filename +

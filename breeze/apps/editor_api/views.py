@@ -69,27 +69,44 @@ class NewComponentWriter(APIView):
 
 @method_decorator(csrf_exempt,name='dispatch')
 class RoutingWriter(APIView):
+    # here need to handle case like add edit delete for 
+    # default component currently named 'Main'
+    def get(self, param):
+        pass
+   
     def post(self,request,param):
-        data= json.loads(request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         try:
-            app_editor= AppEditor(param)
-            if 'allRoutes' in data:
-                res = app_editor.set_all_routes(data['allRoutes'])
-                if res.get('error'):
-                    return JsonResponse(res, status=400)
-                return JsonResponse(res, status=200)
-            res= app_editor.add_route(data)
-            if res.get('error'):
-                return JsonResponse(res, status=400)
-            return JsonResponse(res, status=200)
+            app_editor = AppEditor(param)
+            res = app_editor.add_edit_base_route(data)
+            if res['case']:
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400, safe=False)
         except Exception as e:
             print("Error ", e)
             return JsonResponse({e}, status=500)
+    
+    def delete(self, request, param):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            app_editor= AppEditor(param);
+            res = app_editor.delete_base_route(data)
+            if res['case']:
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400, safe=False)
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse(e, status=500)  
     
     
         
 @method_decorator(csrf_exempt,name='dispatch')
 class ChildRouteHandler(APIView):
+    def get(self, param):
+        pass
+    
     def post(self,request,param):
         try:
             data = json.loads(request.body.decode("utf-8"))
@@ -98,10 +115,36 @@ class ChildRouteHandler(APIView):
             if res['case']:
                 return JsonResponse(res['res'], status=200)
             else:
-                return JsonResponse(res['res'], status=400)
+                return JsonResponse(res['res'], status=400, safe=False)
         except Exception as e:
             print("Error ", e)
             return JsonResponse(e, status=500)
+    
+    def put(self, request, param):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            app_editor= AppEditor(param);
+            res = app_editor.edit_child_route(data)
+            if res['case']:
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400, safe=False)
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse(e, status=500) 
+    
+    def delete(self, request, param):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            app_editor= AppEditor(param);
+            res = app_editor.delete_child_route(data)
+            if res['case']:
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400, safe=False)
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse(e, status=500) 
     
 @method_decorator(csrf_exempt,name='dispatch')
 class ReducerConfig(APIView):
