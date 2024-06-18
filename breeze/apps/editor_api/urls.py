@@ -76,7 +76,7 @@ urlpatterns = [
         path('add-package/<str:projectName>', AddPackage.as_view()),
         path('list-dependencies/<str:projectName>', AddPackage.as_view()),
         path('edit-dependency/<str:projectName>', AddPackage.as_view()),
-        path('delete-dependency/<str:projectName>', AddPackage.as_view())
+        path('delete-dependency/<str:projectName>', AddPackage.as_view()),
         # path("update-function-config/",FunctionConfigWriter.as_view()),
         
         ## Attributes
