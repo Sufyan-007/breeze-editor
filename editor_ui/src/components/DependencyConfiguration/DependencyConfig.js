@@ -22,7 +22,7 @@ const DependencyConfig = () => {
   const fetchDependencies = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/editor/list-dependencies/${projectName}`
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/list-dependencies/${projectName}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -56,7 +56,7 @@ const DependencyConfig = () => {
 
         if (editingPackage) {
           response = await fetch(
-            `http://localhost:8000/editor/edit-dependency/${projectName}`,
+            `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/edit-dependency/${projectName}`,
             {
               method: "PUT",
               headers: {
@@ -67,7 +67,7 @@ const DependencyConfig = () => {
           );
         } else {
           response = await fetch(
-            `http://localhost:8000/editor/add-package/${projectName}`,
+            `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/add-package/${projectName}`,
             {
               method: "POST",
               headers: {
@@ -100,7 +100,7 @@ const DependencyConfig = () => {
     setDeletingPackage(packageName);
     try {
       const response = await fetch(
-        `http://localhost:8000/editor/delete-dependency/${projectName}`,
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/delete-dependency/${projectName}`,
         {
           method: "DELETE",
           headers: {
