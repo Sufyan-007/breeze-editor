@@ -24,6 +24,7 @@ from .views import HtmlConfigWriter
 # from .views import VariablesConfigWriter
 from .views import ComponentConfigWriter
 from .views import ComponentConfigOrder
+from .views import GetResources
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -71,6 +72,8 @@ urlpatterns = [
         # path("update-function-config/",FunctionConfigWriter.as_view()),
         
         ## Attributes
-         path("get-attributes/",GetAttributes.as_view()),
+        path("get-attributes/",GetAttributes.as_view()),
+         
+        path("get-resources/",GetResources.as_view()),
 ]
 

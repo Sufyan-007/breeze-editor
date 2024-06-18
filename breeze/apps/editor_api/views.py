@@ -744,3 +744,13 @@ class GetAttributes(APIView):
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+        
+@method_decorator(csrf_exempt,name="dispatch")  
+class GetResources(APIView):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            app_editor = ComponentConfigService(data["project_id"])
+            return JsonResponse(app_editor.get_resource(data["component"],data.get("resource_id")),status=200)
+        except IndexError:
+            return JsonResponse({},status=404)

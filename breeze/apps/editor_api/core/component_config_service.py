@@ -195,6 +195,17 @@ class ComponentConfigService:
         appEditor.write_component(config)
         return True
 
+    def get_resource(self , comp_name, resource_id):
+        print("get_resource")
+        if resource_id:
+            for resource in self.comp_config[comp_name].get("resources"):
+                if resource.get("id") == resource_id:
+                    return resource
+            else:
+                raise IndexError("Resource %s not found" % resource_id)
+        else:
+            return {"resoureces":self.comp_config[comp_name].get("resources")}
+
     # def add_lifecycle(self, lifecycle_data):
     #     hooks = self.comp_config.get(lifecycle_data["comp_name"], {}).setdefault(
     #         "hooks", []
