@@ -20,8 +20,8 @@ import ProjectComponents from "./components/ProjectComponents";
 import ProjectRouting, { routerConfigLoader } from "./components/ProjectRouting";
 import Styles from "./components/Styles";
 import Code from "./components/Code";
-import ThirdPartyApp from "./components/ThirdPartyApp";
 import Settings from "./components/Settings";
+import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
 
 export const router = createBrowserRouter([
   {
@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
         ],
       },
       { path: "code", element: <Code /> },
-      { path: "apps", element: <ThirdPartyApp /> },
+      { path: "apps", element: <DependencyConfig /> },
       { path: "settings", element: <Settings /> },
     ],
   },

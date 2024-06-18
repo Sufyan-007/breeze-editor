@@ -22,6 +22,7 @@ from .views import HtmlConfigWriter
 # from .views import LifeCycleConfigWriter
 # from .views import FunctionConfigWriter
 # from .views import VariablesConfigWriter
+from .views import AddPackage
 from .views import ComponentConfigWriter
 from .views import ComponentConfigOrder
 
@@ -62,11 +63,17 @@ urlpatterns = [
         # path('lifecycle/', LifeCycleConfigWriter.as_view()),
         # path('variables/', VariablesConfigWriter.as_view()),
         path('update-component-config/', ComponentConfigWriter.as_view()),
-        path('reorder-component-actions/', ComponentConfigOrder.as_view())
+        path('reorder-component-actions/', ComponentConfigOrder.as_view()),
 
         
         
         ##Functions 
-        # path("update-function-config/",FunctionConfigWriter.as_view())
+        # path("update-function-config/",FunctionConfigWriter.as_view()),
+
+        ##Package json
+        path('add-package/<str:projectName>', AddPackage.as_view()),
+        path('list-dependencies/<str:projectName>', AddPackage.as_view()),
+        path('edit-dependency/<str:projectName>', AddPackage.as_view()),
+        path('delete-dependency/<str:projectName>', AddPackage.as_view())
 ]
 
