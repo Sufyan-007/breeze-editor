@@ -43,12 +43,19 @@ class HandlePropTypes {
 
         const typeInfo = {};
 
-        if (typeof type.getKind === 'function' && type.getKind() === SyntaxKind.UnionType) {
-            typeInfo['type'] = 'UNION_TYPE'
-            typeInfo['name'] = type.getText()
-            typeInfo['data'] = type.getTypeNodes().map(tn => this.handleProps(prop, tn.getType(), processed, recLevel, all))
+        if (typeof type.getKind === 'function') {
+            if(type.getKind() === SyntaxKind.UnionType){
 
-            return typeInfo;
+                typeInfo['type'] = 'UNION_TYPE'
+                typeInfo['name'] = type.getText()
+                typeInfo['data'] = type.getTypeNodes().map(tn => this.handleProps(prop, tn.getType(), processed, recLevel, all))
+    
+                return typeInfo;
+            }else if(type.getKind() == SyntaxKind.TypeReference || type.getKind() == SyntaxKind.FunctionType){
+                return this.handleProps(prop, type.getType(), processed, recLevel, all);
+            }
+
+            return this.handleProps(prop, type.getType(), processed, recLevel, all);
         }
 
         // Handle all the cases
@@ -199,9 +206,12 @@ class HandlePropTypes {
             parameters: {
                 destructured: false,
                 list: params.map(p => {
+                    if(!p.getValueDeclaration()){
+                        console.log('No Declaration Found, Check it later, Maybe need to fix this!!');
+                    }
                     return {
                         name: p.getName(),
-                        type: this.handleProps(prop, p.getValueDeclaration().getType(), processed, recLevel, all)
+                        type: this.handleProps(prop, p.getValueDeclaration()?.getType() || p.getDeclaredType(), processed, recLevel, all)
                     }
                 }
                 )
