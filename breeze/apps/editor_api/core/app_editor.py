@@ -298,15 +298,13 @@ class AppEditor:
         print(route_obj)
         if route_obj.get('path')[0]!='/':
             route_obj['path'] = "/"+route_obj.get('path')
-        if route_obj['path'][-1]=='/':
+        if route_obj['path'][-1]=='/' and route_obj['path'][0] != '/':
             route_obj['path'] = route_obj['path'][:-1]      
         if route_obj.get('component'):
             route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
         elif route_obj.get('redirectTo'):
             route_obj.pop('component') if route_obj.get('component') else ''
         
-        route_obj['path'] = route_obj['path'] if route_obj['path'][0]=='/' else '/'+route_obj['path']
-        route_obj['path'] = route_obj['path'][:-1] if route_obj['path'][-1]=='/' else route_obj['path']
         if route_obj.get("prevPath"):
             prev_path = route_obj.pop('prevPath')
             route_obj.pop('fullPath')                
