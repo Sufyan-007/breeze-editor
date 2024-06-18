@@ -10,7 +10,7 @@ class FunctionCodeGenerator:
 
             {func_name} {"" if function_def['isAsync'] is not True else "async"} {FunctionCodeGenerator.get_parameters_code(function_def)} => {{
                 
-                {function_def['body']}
+                {function_def['functionBody']}
 
             }}
 
