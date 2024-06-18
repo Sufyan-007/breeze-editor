@@ -19,10 +19,12 @@ from .views import CSSFileDownloadView
 from .views import CSSFileUpload
 from .views import HtmlConfigReader
 from .views import HtmlConfigWriter
-from .views import LifeCycleConfigWriter
-from .views import FunctionConfigWriter
-from .views import VariablesConfigWriter
+# from .views import LifeCycleConfigWriter
+# from .views import FunctionConfigWriter
+# from .views import VariablesConfigWriter
 from .views import AddPackage
+from .views import ComponentConfigWriter
+from .views import ComponentConfigOrder
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -30,9 +32,8 @@ urlpatterns = [
         path('write-config/<str:param>/',ComponentWriter.as_view()),
         path('read-router-config/<str:param>/',RoutingReader.as_view()),
         path('add-component/<str:param>/',NewComponentWriter.as_view()),
-        path('add-route/<str:param>/',RoutingWriter.as_view()),
-        path('add-child-route/<str:param>/',ChildRouteHandler.as_view()),
-        path('add-all-routes/<str:param>/',RoutingWriter.as_view()),
+        path('handle-base-route/<str:param>/',RoutingWriter.as_view()),
+        path('handle-child-route/<str:param>/',ChildRouteHandler.as_view()),
         path('read-reducers/<str:param>/',ReducerConfig.as_view()),
         path('write-reducers/<str:param>/',ReducerConfig.as_view()),
         path('read-redux-store/<str:param>/',StoreConfig.as_view()),
@@ -59,12 +60,15 @@ urlpatterns = [
         ## New APIs 
         path('get-html-config/', HtmlConfigReader.as_view()),
         path('update-html-config/', HtmlConfigWriter.as_view()),
-        path('lifecycle/', LifeCycleConfigWriter.as_view()),
-        path('variables/', VariablesConfigWriter.as_view()),
+        # path('lifecycle/', LifeCycleConfigWriter.as_view()),
+        # path('variables/', VariablesConfigWriter.as_view()),
+        path('update-component-config/', ComponentConfigWriter.as_view()),
+        path('reorder-component-actions/', ComponentConfigOrder.as_view())
+
         
         
         ##Functions 
-        path("update-function-config/",FunctionConfigWriter.as_view()),
+        # path("update-function-config/",FunctionConfigWriter.as_view()),
 
         ##Package json
         path('add-package/<str:projectName>', AddPackage.as_view()),

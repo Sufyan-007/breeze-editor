@@ -5,6 +5,7 @@ import { ComponentContext } from "./ComponentConfigPage"
 import { MessageListenerService } from "../../services/MessageListenerService"
 import { useParams } from "react-router"
 import AddElements from "./AddElements"
+import ActionsConfig from "./ActionsConfig"
 
 export const DragContext = createContext({
     messageListener: null
@@ -12,7 +13,7 @@ export const DragContext = createContext({
 
 export default function HtmlSection() {
     const { componentConfig } = useContext(ComponentContext)
-    const [iframeSrc, setIframeSrc] = useState("http://localhost:" + componentConfig.port)
+    const [iframeSrc, setIframeSrc] = useState(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}` + componentConfig.port)
     const srcInput = useRef()
     const [selected, setSelected] = useState(0)
     const iFrameRef = useRef();
@@ -51,41 +52,45 @@ export default function HtmlSection() {
         <DragContext.Provider value={{messageListener}} >
             <div className="row flex-grow-1" style={{ position: "relative" }}>
 
-                <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
-                    <div className="row">
+            <div className="text-white col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
+                <div className="row p-2">
+                    <div className="border border-dark px-0">
                         <div
-                            className="py-2 btn rounded-0 text-white   col"
-                            style={selected === 0 ? { backgroundColor: "#303033" } : { backgroundColor: "rgb(33, 37, 41) " }}
+                            className="py-2 btn rounded-0 text-white col-4 border-right border-dark"
+                            style={selected === 0 ? { backgroundColor: "rgb(33, 37, 41) " } : { backgroundColor: "#303033" }}
                             onClick={() => setSelected(0)}
                         >
                             Html
                         </div>
                         <div
-                            className="py-2 btn rounded-0 text-white col  "
-                            style={selected === 1 ? { backgroundColor: "#303033" } : { backgroundColor: "rgb(33, 37, 41) " }}
+                            className="py-2 btn rounded-0 text-white col-4 border-dark"
+                            style={selected === 1 ? { backgroundColor: "rgb(33, 37, 41) " } : { backgroundColor: "#303033" }}
                             onClick={() => setSelected(1)}
                         >
                             Add El
                         </div>
                         <div
-                            className="py-2 btn rounded-0 text-white  col "
-                            style={selected === 2 ? { backgroundColor: "#303033" } : { backgroundColor: "rgb(33, 37, 41) " }}
+                            className="py-2 btn rounded-0 text-white col-4 border-left border-dark"
+                            style={selected === 2 ? { backgroundColor: "rgb(33, 37, 41) " } : { backgroundColor: "#303033" }}
                             onClick={() => setSelected(2)}
                         >
                             Actions
                         </div>
                     </div>
-                    {selected === 0 ?
-                        <HtmlTree htmlId={componentName} config={componentConfig} className="row my-1" />
-                        :
-                        selected === 1 ?
-                            <AddElements />
-                            :
-                            <div>Actions</div>
-                    }
                 </div>
-                <div className="col overflow-hidden p-0">
-                    <div className=" bg-dark-subtle align-items-center d-flex justify-content-start" style={{ 'height': "2.4rem" }}>
+                {selected === 0 ?
+                    <HtmlTree htmlId={componentName} config={componentConfig} className="row my-1" />
+                    :
+                    selected===1?
+                        <div>Add element</div>
+                    :
+                    <div>
+                        <ActionsConfig />
+                    </div>  
+                }
+            </div>
+            <div className="col overflow-hidden p-0">
+                <div className=" bg-dark-subtle align-items-center d-flex justify-content-start" style={{ 'height': "2.4rem" }}>
 
                         <div className="me-3">
                             <input

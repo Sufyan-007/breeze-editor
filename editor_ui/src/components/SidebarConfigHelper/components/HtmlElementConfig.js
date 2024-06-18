@@ -23,7 +23,7 @@ const HtmlElementConfig = ({
   const fetchData = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/config-reader/get-global-component-config/",
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/config-reader/get-global-component-config/`,
         {
           method: "POST",
           headers: {

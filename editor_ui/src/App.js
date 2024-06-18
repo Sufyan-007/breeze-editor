@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting /> },
+      { path: "routing", element: <ProjectRouting />, loader: routerConfigLoader },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
       {
@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting /> },
+      { path: "routing", element: <ProjectRouting />, loader: routerConfigLoader },
       { path: "services", element: <ApiClientRoot /> },
     ]
   },

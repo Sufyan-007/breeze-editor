@@ -9,8 +9,9 @@ export default function Main() {
 
     useEffect(() => {
         const loadProjects = async () => {
+            console.log(process.env)
             const projects = await (
-                await fetch("http://localhost:8000/editor/all-projects/")
+                await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/all-projects/`)
             ).json();
             setProjects(projects)
         }

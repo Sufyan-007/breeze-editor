@@ -4,7 +4,7 @@ const BASE_URL =
     ? `http://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}`
     : `http://${process.env.REACT_APP_PROD_HOST}:${process.env.REACT_APP_PROD_PORT}`;
 export async function generateIntermediates(fileType, appName, formData) {
-  let apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/${fileType}/${appName}`;
+  let apiUrl = `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/api-client-generator/convert-standard-json/${fileType}/${appName}`;
   const response = await callApiClientGenerator(
     apiUrl,
     "POST",

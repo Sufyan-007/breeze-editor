@@ -36,7 +36,7 @@ export default function ElementConfigSidebar({ config }) {
     try {
       setIsLoading(true);
       const response = await fetch(
-        "http://localhost:8000/editor/update-html-config/",
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/update-html-config/`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

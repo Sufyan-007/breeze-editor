@@ -20,7 +20,7 @@ export default function ReduxConfig() {
         setReduxeduxStoreConfig((state) => {
             const config = { ...state, [selected.key]: storeConfig }
 
-            fetch("http://localhost:8000/editor/write-redux-store/" + projectName + "/",
+            fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/write-redux-store/` + projectName + "/",
                 { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) }
             ).then((response) => response.json()).then((response) => console.log(response))
 
@@ -33,7 +33,7 @@ export default function ReduxConfig() {
         setReducerConfig((state) => {
             const config = { ...state, [selected.key]: reducerConfig }
 
-            fetch("http://localhost:8000/editor/write-reducers/" + projectName + "/",
+            fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/write-reducers/` + projectName + "/",
                 { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) }
             ).then((response) => response.json()).then((response) => console.log(response))
 

@@ -33,14 +33,21 @@ export default function ProjectPage() {
   const dispatch = useDispatch();
   const { projectName } = useParams();
 
-  useEffect(() => {
-    console.log(allConfig);
-    dispatch(setReducerConfig(allConfig.reducerConfig));
-    dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
-    dispatch(setServiceConfig(allConfig.serviceConfig));
-    dispatch(setRouterConfig(allConfig.routerConfig));
-    dispatch(setConfig({ ...allConfig.componentConfig, port: allConfig.port }));
-  }, [allConfig, dispatch]);
+  console.log(allConfig);
+  dispatch(setReducerConfig(allConfig.reducerConfig));
+  dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
+  dispatch(setServiceConfig(allConfig.serviceConfig));
+  dispatch(setRouterConfig(allConfig.routerConfig));
+  dispatch(setConfig({ ...allConfig.componentConfig, port: allConfig.port }));
+
+  // useEffect(() => {
+  //   console.log(allConfig);
+  //   dispatch(setReducerConfig(allConfig.reducerConfig));
+  //   dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
+  //   dispatch(setServiceConfig(allConfig.serviceConfig));
+  //   dispatch(setRouterConfig(allConfig.routerConfig));
+  //   dispatch(setConfig({ ...allConfig.componentConfig, port: allConfig.port }));
+  // }, [allConfig, dispatch]);
 
   const sidebarItems = [
     { id: 0, name: "Home", icon: home, path: "" },

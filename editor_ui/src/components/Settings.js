@@ -1,4 +1,4 @@
-import "../CSS/Settings.css";
+import "../css/Settings.css";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { updateProject } from "../services/ProjectService";
