@@ -57,20 +57,6 @@ class ComponentConfigService {
         }
     }
 
-    async saveAllRoutes(allRoutes) {
-        console.log(allRoutes);
-        const response = await fetch(`${this.serverURL}/editor/add-all-routes/` + this.projectName + "/",
-            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ allRoutes }) 
-        })
-        const jsonData = await response.json();
-        console.log(response.status);
-        console.log(jsonData);
-        if (response.status === 200) {
-            this.dispatch(setRouterConfig(jsonData));
-        }
-        return { body: jsonData , status: response.status}
-    }
-
     async addChildRoute(childObj) {
         if (!childObj.path || (!childObj.component && !childObj.redirectTo)) 
             return {body: 'incomplete data provided', status: 400}

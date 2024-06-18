@@ -20,7 +20,7 @@ function Styles() {
   const getAllCSSFiles = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}:8000/editor/all-css-files/`
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/all-css-files/`
       );
       const data = await response.json();
       setFiles(data.files);

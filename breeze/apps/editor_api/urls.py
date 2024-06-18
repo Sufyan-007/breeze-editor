@@ -22,6 +22,7 @@ from .views import HtmlConfigWriter
 # from .views import LifeCycleConfigWriter
 # from .views import FunctionConfigWriter
 # from .views import VariablesConfigWriter
+from .views import AddPackage
 from .views import ComponentConfigWriter
 from .views import ComponentConfigOrder
 from .views import GetResources
@@ -32,9 +33,8 @@ urlpatterns = [
         path('write-config/<str:param>/',ComponentWriter.as_view()),
         path('read-router-config/<str:param>/',RoutingReader.as_view()),
         path('add-component/<str:param>/',NewComponentWriter.as_view()),
-        path('add-route/<str:param>/',RoutingWriter.as_view()),
-        path('add-child-route/<str:param>/',ChildRouteHandler.as_view()),
-        path('add-all-routes/<str:param>/',RoutingWriter.as_view()),
+        path('handle-base-route/<str:param>/',RoutingWriter.as_view()),
+        path('handle-child-route/<str:param>/',ChildRouteHandler.as_view()),
         path('read-reducers/<str:param>/',ReducerConfig.as_view()),
         path('write-reducers/<str:param>/',ReducerConfig.as_view()),
         path('read-redux-store/<str:param>/',StoreConfig.as_view()),
@@ -65,10 +65,18 @@ urlpatterns = [
         # path('variables/', VariablesConfigWriter.as_view()),
         path('update-component-config/', ComponentConfigWriter.as_view()),
         path('reorder-component-actions/', ComponentConfigOrder.as_view()),
+        path('reorder-component-actions/', ComponentConfigOrder.as_view()),
 
         
         
         ##Functions 
+        # path("update-function-config/",FunctionConfigWriter.as_view()),
+
+        ##Package json
+        path('add-package/<str:projectName>', AddPackage.as_view()),
+        path('list-dependencies/<str:projectName>', AddPackage.as_view()),
+        path('edit-dependency/<str:projectName>', AddPackage.as_view()),
+        path('delete-dependency/<str:projectName>', AddPackage.as_view())
         # path("update-function-config/",FunctionConfigWriter.as_view()),
         
         ## Attributes
