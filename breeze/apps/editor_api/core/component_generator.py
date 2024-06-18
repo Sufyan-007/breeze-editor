@@ -188,6 +188,8 @@ class ComponentGenerator():
         #need to modify generate_function_code function as per function type and cover mapper function.
         
         def generate_function_code(func):
+            if func["body"]["isAnonymous"]:
+                return ""
             params = ', '.join([p['name'] for p in func['body']['parameters']['list']])
             async_keyword = 'async ' if func['body']['isAsync'] else ''
             return f'\n{async_keyword}function {func["name"]}({params}) {{\n{func["body"]["functionBody"]}\n}}'
