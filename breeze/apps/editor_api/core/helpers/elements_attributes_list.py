@@ -399,6 +399,12 @@ ELEMENT_ATTRIBUTES = {
         "align": {
             "datatype":    "STRING"
         },
+        "onClick": {
+            "datatype": "FUNCTION"
+        },
+        "onChange": {
+            "datatype": "FUNCTION"
+        }
 
     },
     "dl": {

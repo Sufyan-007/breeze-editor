@@ -18,6 +18,7 @@ from .core.app_startup_manager import start_app
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from .core.helpers.get_attributes_utils import get_attributes_logic
+from .core.helpers.get_component_list import update_components
 
 
 @method_decorator(csrf_exempt,name="dispatch")
@@ -145,6 +146,9 @@ class NewComponentWriter(APIView):
             app_component_writer = AppEditor(param)
             res = app_component_writer.add_component(
                 data["name"], data["type"])
+            print("djfvnskjvnsri",res)
+            update_components()
+
             return JsonResponse(res)
         except:
             return JsonResponse({}, status=500)

@@ -17,26 +17,26 @@ const FunctionSelectionConfig = ({
       [attribute]: type,
     }));
   };
-  const addFunctionAttribute = (functionType,value,attribute) => {
-      if(functionType === 'predefined') {
-        setSelectedAttributes((prev) => ({
-          ...prev,
-          [attribute]:{type:"FUNCTION",$ref:value.target.value} 
-        }));       
-      }
-      else{
-        const functionConfig = {
-          "isAnonymous": true,
-          "isAsync": false,
-          "body": value,
-        }
-        setSelectedAttributes((prev) => ({
-          ...prev,
-          [attribute]:{type:"FUNCTION",value:functionConfig} 
-        }));       
-      }
-      }
-  
+  const addFunctionAttribute = (functionType, value, attribute) => {
+    if (functionType === "predefined") {
+      setSelectedAttributes((prev) => ({
+        ...prev,
+        [attribute]: { type: "FUNCTION", $ref: value.target.value },
+      }));
+    } else {
+      const functionConfig = {
+        "parameters": { "list": [{name:"event"}] },
+        "isAnonymous": true,
+        "isAsync": false,
+        "body": value,
+      };
+      setSelectedAttributes((prev) => ({
+        ...prev,
+        [attribute]: { type: "FUNCTION", value: functionConfig },
+      }));
+    }
+  };
+
   return (
     <div>
       <div className="d-flex justify-content-end">
@@ -48,9 +48,12 @@ const FunctionSelectionConfig = ({
               .map(({ attribute, index }) => (
                 <div key={index} className="mt-4">
                   <div className="">
-                  {attribute}
+                    {attribute}
 
-                    <div className="d-flex justify-content-between" style={{width:"95%"}}>
+                    <div
+                      className="d-flex justify-content-between"
+                      style={{ width: "95%" }}
+                    >
                       <div>
                         <Form.Check
                           type="radio"
@@ -59,6 +62,7 @@ const FunctionSelectionConfig = ({
                           onChange={() =>
                             handleFunctionTypeChange(attribute, "predefined")
                           }
+                          disabled={availableFunctions === undefined}
                         />
                         <Form.Check
                           type="radio"
@@ -84,19 +88,26 @@ const FunctionSelectionConfig = ({
                     <div className="mt-2">
                       {functionType[attribute]}
                       {functionType[attribute] === "predefined" && (
-                        <Form.Select onChange={(event)=>addFunctionAttribute("predefined",event,attribute)} >
-                          {availableFunctions.map((functions, index) => (
-                            <option key={index} value={functions.$id}>
-                              {functions.name}
-                            </option>
-                          ))}
+                        <Form.Select
+                          onChange={(event) =>
+                            addFunctionAttribute("predefined", event, attribute)
+                          }
+                        >
+                          {availableFunctions &&
+                            availableFunctions.map((functions, index) => (
+                              <option key={index} value={functions.id}>
+                                {functions.name}
+                              </option>
+                            ))}
                         </Form.Select>
                       )}
                       {functionType[attribute] === "custom" && (
                         <div>
                           <MonacoEditor
                             height="200px"
-                            onChange={(body)=>addFunctionAttribute("custom",body,attribute)}
+                            onChange={(body) =>
+                              addFunctionAttribute("custom", body, attribute)
+                            }
                             id={`functionEditor-${attribute}`}
                           ></MonacoEditor>
                         </div>
