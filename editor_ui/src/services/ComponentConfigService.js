@@ -6,15 +6,16 @@ export async function addComponent(name, type, route,projectName) {
     // this.dispatch(setConfig(response.config)) : need to handle this in the component itself now
     if (route) {
         console.log("Hello there!")
-         await saveRoute({route, component: response.comp}, projectName)
+         await saveRoute({path:route, component: response.comp}, projectName)
     }
     return response
 }
 
 export async function saveRoute(routeObj, projectName) {
-    console.log(routeObj)
+    
     if (routeObj.path && (routeObj.component || routeObj.redirectTo) ) {
-        const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/handle-base-route/` + projectName + "/",
+      console.log(routeObj)  
+      const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/handle-base-route/` + projectName + "/",
             { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify( routeObj ) }
         )
         console.log(response)

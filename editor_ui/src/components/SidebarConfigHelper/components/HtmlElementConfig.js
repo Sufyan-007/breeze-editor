@@ -104,7 +104,7 @@ const HtmlElementConfig = ({
     e.preventDefault();
     console.log("Updating",selectedAttributes);
     const tempElememt = { ...element, attributes: selectedAttributes };
-    // handleUpdateClick(tempElememt);
+    handleUpdateClick(tempElememt);
   };
 
   const handleSelectAttributeChange = (event) => {
