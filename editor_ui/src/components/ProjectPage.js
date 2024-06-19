@@ -66,7 +66,7 @@ export default function ProjectPage() {
   };
 
   return (
-    <div className="container-fluid vh-100">
+    <div className="container-fluid vh-100 flex-column d-flex">
       <Navbar
         leftContent={
           <div className="d-flex">
@@ -82,7 +82,7 @@ export default function ProjectPage() {
           </div>
         }
       />
-      <div className="row d-flex no-wrap container-height">
+      <div className="row d-flex no-wrap flex-grow-1">
         <div className="col-auto px-0">
         <ProjectSidebar
           isSidebarExpanded={isSidebarExpanded}
