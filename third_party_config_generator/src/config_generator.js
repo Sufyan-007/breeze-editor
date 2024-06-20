@@ -308,7 +308,7 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                 // This gets the type reference to the props type
                 // // // console.log(relatedCallSign.getParameters()[0].getTypeNode().getText());
                 propVarName = relatedCallSign.getParameters()[0].getTypeNode().getText();
-                propList = propsReader.getPropsList(propVarName, sourceFile)
+                propList = propsReader.processProps(relatedCallSign.getParameters()[0].getTypeNode())
 
                 // // // console.log(relatedCallSign.getSignature().getParameters().map(t => t.getStructure()));
                 // // // console.log(ch.getCallSignatures().map(cs => cs.getReturnTypeNode().getText()));
@@ -383,7 +383,7 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                             const subTypeRef = getPropRef(subType)
                             // If true then its simple interface like ImageProps
                             if (subTypeRef.getTypeArguments().length == 0) {
-                                propList = propList.concat(propsReader.getPropsList(subTypeRef.getText(), sourceFile))
+                                // propList = propList.concat(propsReader.getPropsList(subTypeRef.getText(), sourceFile))
                                 propList = propList.concat(propsReader.processProps(subTypeRef))
 
                             } else { // Else it is like React.RefAttributes<HTMLElement> so it has type arugments
@@ -615,14 +615,10 @@ class PropsReader {
         // // console.log(propsList.length);
         for (const pr of props) {
 
-            const declaration = pr.getValueDeclaration() || pr.getDeclarations()[0]
+            const declaration = getDeclaration(pr);
 
-            propsList.push(this.getSinglePropObject(declaration || pr))
+            propsList.push(this.getSinglePropObject(declaration || pr));
 
-            if (pr.getName() == 'onSelect') {
-
-                // console.log(pr.getName(), pr);
-            }
         }
 
         return propsList;
