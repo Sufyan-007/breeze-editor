@@ -16,7 +16,7 @@ function readExportsFromTypeScriptFile(project, filePath) {
     const exports = [];
 
     const exportDeclarations = sourceFile.getExportDeclarations();
-    // // // console.log(sourceFile.getExport);
+    // // // console.log(sourceFile.getExport);P
 
     for (const exportDec of exportDeclarations) {
 
@@ -709,10 +709,22 @@ class PropsReader {
     }
 
     processProps(referenceVar) {
-        // // console.log(referenceVar.getType().getProperties());
-        const props = referenceVar.getType().getProperties();
+        // console.log(referenceVar)
+        let props = referenceVar.getType().getProperties();
+        try 
+        {
+            props = props.concat(referenceVar.getType().getBaseTypes()[0].getBaseTypes()[0].getAliasTypeArguments()[0].getProperties());
+            return this.getAllProps(props);
+        }    
+        catch{
+
+            return this.getAllProps(props)
+        }
+
+    }
+    // to get all the list of props
+    getAllProps(props){
         const propsList = [];
-        // // console.log(propsList.length);
         for (const pr of props) {
 
             const declaration = getDeclaration(pr);
@@ -720,9 +732,7 @@ class PropsReader {
             propsList.push(this.getSinglePropObject(declaration || pr));
 
         }
-
         return propsList;
-
     }
 
 
@@ -733,8 +743,12 @@ class PropsReader {
 
         const propsList = []
 
+        //to got all props
+        const props = propVar.getType().getProperties();
+
         if (propVar) {
-            for (const prop of propVar.getProperties()) {
+            for (const prop of props) {
+                // console.log("at propList",prop.getName())
                 propsList.push(this.getSinglePropObject(prop))
             }
         }
