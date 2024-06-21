@@ -72,6 +72,7 @@ class HTMLGenerator:
             children = config.get('children', [])
 
             attribute_str = ' '.join([f'{self.generateAttributeCode(attr, value)}' for attr, value in attributes.items()])
+            attribute_str = attribute_str+f" data-brz-id='{config_id['_id']}'"
             open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
             close_tag = f'</{tag_name}>'
 

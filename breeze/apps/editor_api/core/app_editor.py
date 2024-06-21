@@ -50,8 +50,7 @@ NEW_COMP_FORMAT={
             "typeId": "DIV",
             "tagName": "div",
             "attributes": {
-                "className": { "type": "LITERAL", "value": "" },
-                "id": { "type": "LITERAL", "value": "$NAME" }
+                "className": { "type": "LITERAL", "value": "" }
             },
             "children": [
                 {"_id":"$NAME-0"},
@@ -68,8 +67,7 @@ NEW_COMP_FORMAT={
             "typeId":"DIV",
             "tagName":"div",
             "attributes": {
-                "className": { "type": "LITERAL", "value": "" },
-                "id": { "type": "LITERAL", "value": "$NAME-1" }
+                "className": { "type": "LITERAL", "value": "" }
             },
             "children":[
                 {"_id":"$NAME-1-0"}
