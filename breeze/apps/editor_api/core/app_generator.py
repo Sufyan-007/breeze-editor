@@ -108,6 +108,8 @@ class AppGenerator:
 
         # Write All reducer
         self.write_reducers()
+        
+        self.create_styles_file()
         # # Write All reducer
         # self.write_redux_store()
 
@@ -286,5 +288,9 @@ class AppGenerator:
     def write_redux_store(self):
         redux_store_generator = ReduxStoreGenerator(all_redux_store_config=self.redux_store_config,all_reducer_config=self.reducer_config, app_config=self.app_config,all_comp_config=self.comp_config)
         redux_store_generator.write_all_store()
+        
+    def create_styles_file(self):
+        write_file(self.app_config["APP_SOURCE_DIR"] + "/styles.js", '')
+        
 
 

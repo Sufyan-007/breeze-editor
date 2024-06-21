@@ -8,6 +8,10 @@ def create_parent_dir_if_not_exists(full_path, is_dir = False):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
+def create_dir_if_not_exists(full_path):
+    if not os.path.exists(full_path):
+        os.makedirs(full_path)
+
 def is_dir_exists(dir_path):
     return os.path.isdir(dir_path)
 
