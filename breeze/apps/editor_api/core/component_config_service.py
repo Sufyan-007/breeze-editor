@@ -10,6 +10,7 @@ class ComponentConfigService:
         self.app_config_dir = f"{CONFIG_PATH}/{projectId}"
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
+        self.css_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CSS_CONFIG'])
         
     def get_html_by_id(self,component,id):
         html= self.comp_config.get(component).get("html_elements").get(id)

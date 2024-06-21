@@ -1,4 +1,4 @@
-
+from .helpers.style_handler import StyleHandler
 from .api_client_generator import GenerateAPIClient
 from .reducer_generator import ReducerGenerator
 from .redux_store_generator import ReduxStoreGenerator
@@ -619,3 +619,6 @@ class AppEditor:
             yaml.dump(service_config, file,default_flow_style=False)
         self.write_services()
         return service_config
+    
+    def write_style_files(self):
+        StyleHandler.generate_styles_code(self.app_config)
