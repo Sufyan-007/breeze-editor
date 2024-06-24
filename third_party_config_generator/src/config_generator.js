@@ -122,9 +122,11 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
 
             const sourceFile = project.addSourceFileAtPath(typeDefinitionFile);
 
-            if (checkIfReactImported(sourceFile)) {
-                sourceFile.insertStatements(0, `import * as React from 'react';`);
+            for(const rsf of sourceFile.getReferencedSourceFiles()){
+                sanitizeReactImport(rsf);
             }
+
+            sanitizeReactImport(sourceFile);
 
             // If it is imported as default variable from file then try to read the default variable of the file
             // if (expConfig['importType'] == 'DEFAULT') {
@@ -138,7 +140,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
                 if(exportVarSymbol){
                     exportVarSymbol = exportVarSymbol.getSymbol() || exportVarSymbol;
                 }
-
+                
             }
 
             if(!exportVarSymbol) {
@@ -226,6 +228,14 @@ function getDeclaration(symbol) {
 
     if (symbol.getDeclarations().length > 0) {
         return symbol.getDeclarations()[0]
+    }
+}
+
+function sanitizeReactImport(sourceFile){
+    if (checkIfReactImported(sourceFile)) {
+        if(!sourceFile.getText().includes(`import * as React from 'react';`)){
+            sourceFile.insertStatements(0, `import * as React from 'react';`);
+        }
     }
 }
 
