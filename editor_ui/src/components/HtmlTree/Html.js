@@ -132,7 +132,7 @@ export default function Html({ value, htmlId, reference, selectElem }) {
                 hasChildren && showChild ?
                     <div className="col ms-2 m-0  border-start border-1 border-black ">
                         {value.children.map((child, index) =>
-                            <HtmlTree htmlId={child["_id"]} className="row" />
+                            <HtmlTree key={index} htmlId={child["_id"]} className="row" />
                         )
                         }
                     </div> :

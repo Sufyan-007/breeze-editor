@@ -6,6 +6,8 @@ import { MessageListenerService } from "../../services/MessageListenerService"
 import { useParams } from "react-router"
 import AddElements from "./AddElements"
 import ActionsConfig from "./ActionsConfig"
+import { useWindowDimension } from '../CustomHooks/useWindowDimension'
+import Filter from "../../assets/icons/filter.svg";
 
 export const DragContext = createContext({
     messageListener: null
@@ -28,6 +30,16 @@ export default function HtmlSection() {
         const newValue = srcInput.current.value;
         setIframeSrc(newValue);
     };
+
+    const [chosenElementFilter, setChosenElementFilter] = useState('FYE');
+    const elementFilterOptions = [
+      {label: 'All', value: 'All'},
+      {label: 'HTML', value: 'HTML'},
+      {label: 'Custom', value: 'CUSTOM'},
+      {label: 'Third Party', value: 'THRID_PARTY'},
+      {label: 'Frequently used', value: 'FYE'}
+    ]
+    const [windowWidth, windowHeight] = useWindowDimension();
 
     useEffect(() => {
         const handler = (message) => {
@@ -79,72 +91,132 @@ export default function HtmlSection() {
 
 
     return (
-        <DragContext.Provider value={{ messageListener }} >
-            <div className="row flex-grow-1" style={{ position: "relative" }}>
-
-                <div className="text-white  d-flex flex-column col-3 h-100" style={{ width: "18rem", backgroundColor: "#303033" }}>
-                    <div className="row p-2">
-                        <div className="border border-dark px-0">
-                            <div
-                                className="py-2 btn rounded-0 text-white col-6 border-right border-dark"
-                                style={selected === 0 ? { backgroundColor: "rgb(33, 37, 41) " } : { backgroundColor: "#303033" }}
-                                onClick={() => setSelected(0)}
-                            >
-                                Html
-                            </div>
-                            <div
-                                className="py-2 btn rounded-0 text-white col-6 border-left border-dark"
-                                style={selected === 1 ? { backgroundColor: "rgb(33, 37, 41) " } : { backgroundColor: "#303033" }}
-                                onClick={() => setSelected(1)}
-                            >
-                                Actions
-                            </div>
-                        </div>
-                    </div>
-                    {selected === 0 ?
-                        <>
-                            <div className=" row flex-grow-1">
-                                <div className=" d-flex h-50">
-                                    <div className="col">
-                                        <HtmlTree htmlId={componentName} config={componentConfig} className="row my-1" />
-                                    </div>
-                                </div>
-                                <div className=" d-flex h-50">
-                                    <div className="col">
-                                        <div className="row border-top border-3 border-black">
-                                            Add Elements
-                                        </div>
-                                        <AddElements />
-                                    </div>
-                                </div>
-                            </div>
-
-                        </>
-                        :
-                        <div>
-                            <ActionsConfig />
-                        </div>
-                    }
+      <DragContext.Provider value={{ messageListener }}>
+        <div className="row flex-grow-1" style={{ position: "relative" }}>
+          <div
+            className="text-white  d-flex flex-column col-3 h-100"
+            style={{ width: "18rem", backgroundColor: "#303033" }}
+          >
+            <div className="row p-2">
+              <div className="border border-dark px-0">
+                <div
+                  className="py-2 btn rounded-0 text-white col-6 border-right border-dark"
+                  style={
+                    selected === 0
+                      ? { backgroundColor: "rgb(33, 37, 41) " }
+                      : { backgroundColor: "#303033" }
+                  }
+                  onClick={() => setSelected(0)}
+                >
+                  Html
                 </div>
-                <div className="col overflow-hidden p-0">
-                    <div className=" bg-dark-subtle align-items-center d-flex justify-content-start" style={{ 'height': "2.4rem" }}>
-
-                        <div className="me-3">
-                            <input
-                                type="text"
-                                ref={srcInput}
-                                defaultValue={iframeSrc}
-                                id="Form_Search"
-                                role="searchbox"
-                                className="InputBox me-2 rounded"
-                            />
-                            <input type="submit" id="Form_Go" className="Button bg-primary text-light rounded" value="GO" onClick={setIframeSource} />
-                        </div>
-                    </div>
-                    <iframe ref={iFrameRef} id="iFrame" src={iframeSrc} title="Generated Project" style={{ 'transform': 'scale(0.8)', 'width': '125%', 'height': '125%', 'transformOrigin': '0 0' }} ></iframe>
+                <div
+                  className="py-2 btn rounded-0 text-white col-6 border-left border-dark"
+                  style={
+                    selected === 1
+                      ? { backgroundColor: "rgb(33, 37, 41) " }
+                      : { backgroundColor: "#303033" }
+                  }
+                  onClick={() => setSelected(1)}
+                >
+                  Actions
                 </div>
-                <ElementConfigSidebar />
+              </div>
             </div>
-        </DragContext.Provider>
-    )
+            {selected === 0 && windowWidth ? (
+              <>
+                <div className="row">
+                  <div className=" d-flex" style={{overflowY: 'auto', height: `${(windowHeight - 154)/2}px`}}>
+                    <div className="col" style={{}}>
+                      <HtmlTree
+                        htmlId={componentName}
+                        config={componentConfig}
+                        className="row my-1"
+                        
+                      />
+                    </div>
+                  </div>
+                  <div className=" d-flex border-top border-3 border-black" style={{height: `${(windowHeight - 74)/2}px`}}>
+                    <div className="col">
+                      <div className="d-flex mt-1">
+                        <i className="ms-2 me-auto" style={{color: "#dee2e6"}}>Add Elements</i>
+                        
+                        <div className="dropdown me-2">
+                            <img
+                                className="dropdown-toggle"
+                                id="dropdownMenuButton1" data-bs-toggle="dropdown" 
+                                src={Filter}
+                                alt="Delete"
+                                style={{
+                                    cursor: "pointer",
+                                    width: "24px",
+                                    height: "24px",
+                                }}
+                            />
+                          <ul className="dropdown-menu" data-bs-theme="dark" aria-labelledby="dropdownMenuButton1">
+                            {elementFilterOptions.map(obj => (
+                              <li 
+                                className={`${chosenElementFilter === obj.value ? 'active' : ''} dropdown-item`} 
+                                onClick={() => setChosenElementFilter(obj.value)}
+                              >
+                                {obj.label}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                      </div>
+                      <div className="m-1 h-75" >
+                        <AddElements chosenType={chosenElementFilter} elementFilterOptions={elementFilterOptions}/>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div>
+                <ActionsConfig />
+              </div>
+            )}
+          </div>
+          <div className="col overflow-hidden p-0">
+            <div
+              className=" bg-dark-subtle align-items-center d-flex justify-content-start"
+              style={{ height: "2.4rem" }}
+            >
+              <div className="me-3">
+                <input
+                  type="text"
+                  ref={srcInput}
+                  defaultValue={iframeSrc}
+                  id="Form_Search"
+                  role="searchbox"
+                  className="InputBox me-2 rounded"
+                />
+                <input
+                  type="submit"
+                  id="Form_Go"
+                  className="Button bg-primary text-light rounded"
+                  value="GO"
+                  onClick={setIframeSource}
+                />
+              </div>
+            </div>
+            <iframe
+              ref={iFrameRef}
+              id="iFrame"
+              src={iframeSrc}
+              title="Generated Project"
+              style={{
+                transform: "scale(0.8)",
+                width: "125%",
+                height: "125%",
+                transformOrigin: "0 0",
+              }}
+            ></iframe>
+          </div>
+          <ElementConfigSidebar />
+        </div>
+      </DragContext.Provider>
+    );
 }

@@ -5,12 +5,10 @@ import EditIcon from "../assets/icons/edit-icon.svg";
 import ViewIcon from "../assets/icons/view-eye.svg";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useLoaderData } from "react-router";
 import { FloatingLabel, Form } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
 import { saveRoute, addChildRoute, editChildRoute, deleteChildRoute, deleteBaseRoute} from "../services/ComponentConfigService"
 import { setRouterConfig } from '../reducers/RouterConfigReducer';
-import { getRouterConfig } from '../services/ConfigService';
 import Select from 'react-select';
 import ToasterComponent from "../common/display/d.toast"
 import ModalComponent from "../common/display/d.modal"
@@ -29,8 +27,8 @@ export default function ProjectRouting() {
   const [showSelectedRouteObj, setShowSelectedRouteObj] = useState({});
   const { projectName } = useParams();
   const dispatch = useDispatch();
-  const initialRouterConfig = useLoaderData();
   const routerConfig = useSelector(state => state.routerConfig);
+  const compConfig = useSelector(state => Object.entries(state.config.pages).map(obj => obj[0]));
   const [selectedProps, setSelectedProps] = useState('');
   const selectRef = useRef(null);
   const optionalRouteProps = [
@@ -138,8 +136,8 @@ export default function ProjectRouting() {
   };
 
   const allRoutes = useMemo(
-    () => getFunctionFromConfig(routerConfig?.routes || initialRouterConfig?.routes),
-    [routerConfig?.routes, initialRouterConfig?.routes]
+    () => getFunctionFromConfig(routerConfig?.routes ),
+    [routerConfig?.routes]
   );
 
   const [routes, setRoutes] = useState([...allRoutes]);
@@ -435,6 +433,10 @@ export default function ProjectRouting() {
                             height: '100%',
                             color: '#dee2e6bf'
                           }),
+                          menu: (base) => ({
+                            ...base,
+                            backgroundColor: "#212529",
+                          })
                         }}
                       />
                     </div>
@@ -530,10 +532,10 @@ export default function ProjectRouting() {
                       disabled={routeMode === "View"}
                     >
                       (<option value="">None</option>)
-                      {[...new Set(routes?.map((route) => route.component))].map(
-                        (component, index) =>
+                      {compConfig?.map(
+                        (component) =>
                           component && (
-                            <option key={index} value={component}>
+                            <option key={component} value={component}>
                               {component}
                             </option>
                           )
@@ -590,10 +592,10 @@ export default function ProjectRouting() {
                           disabled={routeMode === "View"}
                         >
                           (<option value="">None</option>)
-                          {[...new Set(routes?.map((route) => route.component))].map(
-                            (component, index) =>
+                          {compConfig?.map(
+                            (component) =>
                               component && (
-                                <option key={index} value={component}>
+                                <option key={component} value={component}>
                                   {component}
                                 </option>
                               )
@@ -612,10 +614,10 @@ export default function ProjectRouting() {
                           disabled={routeMode === "View"}
                         >
                           (<option value="">None</option>)
-                          {[...new Set(routes?.map((route) => route.component))].map(
-                            (component, index) =>
+                          {compConfig?.map(
+                            (component) =>
                               component && (
-                                <option key={index} value={component}>
+                                <option key={component} value={component}>
                                   {component}
                                 </option>
                               )
@@ -830,8 +832,3 @@ export default function ProjectRouting() {
   );
 }
 
-export async function routerConfigLoader({ params }) {
-  const projectName = params.projectName;
-  const config = await getRouterConfig(projectName);
-  return config;
-}
