@@ -22,13 +22,7 @@ import Styles from "./components/Styles";
 import Code from "./components/Code";
 import ThirdPartyApp from "./components/ThirdPartyApp";
 import Settings from "./components/Settings";
-import RootCustomFunction from "./components/Custom_functions/RootCustomFunction";
-import TreeComponent from "./components/FolderStructure/TreeComponent";
-import FolderTreeView from "./components/FolderStructure/FolderTreeView";
-// import ServiceTest from "./components/sampletest/ServiceTest";
-// import data from "./components/FolderStructure/data"
-
-
+import FolderStruArborist from "./components/FolderStructure/FolderStruArborist";
 
 export const router = createBrowserRouter([
   {
@@ -40,11 +34,8 @@ export const router = createBrowserRouter([
       { path: "pages", element: <ProjectComponents /> },
       { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <Root/> },
-      {path:"customFunction",element:<RootCustomFunction />},
       { path: "constants", element: <ReduxConfig /> },
-      // {path:"serviceTest", element:<ServiceTest/>},
-      // {path:"treeComp",element:<TreeComponent data={data}/>},
-      {path:"treeComp", element:<FolderTreeView/>},
+      {path:"folderConfig", element:<FolderStruArborist />},
       {
         path: "styles",
         element: <Outlet />,

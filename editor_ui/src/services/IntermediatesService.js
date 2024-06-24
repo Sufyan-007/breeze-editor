@@ -1,9 +1,10 @@
 import Blocker from "./LoaderService";
 
-const HOST = "http://localhost:8000";
+const HOST = process.env.REACT_APP_BREEZE_BACKEND_HOST;
+
 
 export async function generateIntermediates(fileType, appName, formData) {
-  let apiUrl = `http://127.0.0.1:8000/api-client-generator/convert-standard-json/${fileType}/${appName}`;
+  let apiUrl = `${HOST}/api-client-generator/convert-standard-json/${fileType}/${appName}`;
   const response = await callApiClientGenerator(
     apiUrl,
     "POST",

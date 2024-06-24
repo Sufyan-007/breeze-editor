@@ -23,7 +23,7 @@ class AddNode(View):
             # Create the new node
             new_node = {
                 "name": "New Folder" if node_type == "DIRECTORY" else "New File",
-                "lineage": lineage,
+                "lineage": new_lineage,
                 "id": new_id,
                 "tag": tag.upper(),
                 "type": node_type.upper(),

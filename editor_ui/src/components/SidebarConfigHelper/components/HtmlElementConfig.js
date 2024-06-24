@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
-import convert from "../htmlToReactAttrMap";
+// import convert from "../htmlToReactAttrMap";
 
 const HtmlElementConfig = ({
   element,

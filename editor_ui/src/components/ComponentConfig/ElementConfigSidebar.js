@@ -1,32 +1,41 @@
-import { useContext, useEffect, useState } from "react"
-import { ComponentContext } from "./ComponentConfigPage"
+import { useContext, useMemo, useEffect, useState } from "react";
+import { ComponentContext } from "./ComponentConfigPage";
+import { useParams } from "react-router";
 
-export default function ElementConfigSidebar({config}){
-    const {sidebarService,componentConfig} = useContext(ComponentContext)
-    console.log(sidebarService)
-    const [selectedElem, setSelectedElement] = useState(null)
-    const elem = selectedElem?.elem
-    // const update = selectedElem?.updateSub
-    // const component = selectedElem?.component
+// import TextElement from "../SidebarConfigHelper/components/TextElementConfig";
+import HtmlElementConfig from "../SidebarConfigHelper/components/HtmlElementConfig";
 
+export default function ElementConfigSidebar({ config }) {
+  const { sidebarService, componentConfig, setComponentConfig } =
+    useContext(ComponentContext);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const { projectName, componentName } = useParams();
+  const element = useMemo(
+    () => componentConfig?.html_elements[selectedElement?.elem],
+    [componentConfig, selectedElement]
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        sidebarService.getSelectedElem().subscribe((elem) => {
-            setSelectedElement(elem)
-        })
-    }, [sidebarService])
+  useEffect(() => {
+    sidebarService.getSelectedElem().subscribe((elem) => {
+      setSelectedElement(elem);
+    });
+  }, [sidebarService]);
 
   const makeSelectedElementNull = () => {
     sidebarService.setSelectedElem(null);
   };
-  
 
   const handleUpdateClick = (html_config) => {
-    updateHtmlConfig(projectName, selectedElement?.elem, componentName, html_config);
+    updateHtmlConfig(
+      projectName,
+      selectedElement?.elem,
+      componentName,
+      html_config
+    );
   };
 
   async function updateHtmlConfig(project_id, html_id, component, html_config) {
-    
     try {
       setIsLoading(true);
       const response = await fetch(
@@ -39,12 +48,10 @@ export default function ElementConfigSidebar({config}){
       );
 
       if (!response.ok) {
-        setIsLoading(false)
+        setIsLoading(false);
         throw new Error("Failed to update HTML config");
-      }
-      else{
-        setIsLoading(false)
-
+      } else {
+        setIsLoading(false);
       }
 
       const responseData = await response.json();
@@ -60,7 +67,6 @@ export default function ElementConfigSidebar({config}){
     }
   }
 
-
   if (!selectedElement?.elem) {
     return null;
   } else {
@@ -72,7 +78,7 @@ export default function ElementConfigSidebar({config}){
             backgroundColor: "#303033",
             overflowY: "scroll",
             position: "absolute",
-            right:0,
+            right: 0,
             height: "100%",
           }}
         >
@@ -81,14 +87,14 @@ export default function ElementConfigSidebar({config}){
               className="btn-close-white btn-close"
               onClick={makeSelectedElementNull}
             ></button>
-            {element.type === "text" && (
+            {/* {element.type === "text" && (
               <TextElement
                 makeSelectedElementNull={makeSelectedElementNull}
                 handleUpdateClick={handleUpdateClick}
                 element={element}
                 isLoading={isLoading}
               />
-            )}
+            )} */}
             {element.type === "Element" && (
               <HtmlElementConfig
                 element={element}

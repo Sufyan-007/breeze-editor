@@ -47,15 +47,17 @@ INSTALLED_APPS = [
     "corsheaders",
                       # Yet Another Swagger generator
 ]
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = [
-    "127.0.0.1", 
-    "localhost"
+    "127.0.0.1",
+    "localhost",
+    "192.1.150.148"
 ]
 CSRF_COOKIE_SECURE = True
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1", 
-    "http://localhost"
+    "http://127.0.0.1",
+    "http://localhost",
+    "http://192.1.150.148:8000"
 ]
 CORS_ALLOW_CREDENTIALS = False
 

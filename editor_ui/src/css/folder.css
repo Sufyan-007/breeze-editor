@@ -1,0 +1,23 @@
+.tree-node {
+  margin-left: 10px;
+  color: white;
+}
+.add-icons button {
+  background-color: #303033;
+  color: white;
+  border: none;
+  margin-left: 5px; 
+  cursor: pointer;
+  padding: 3px;
+  font-size: 12px;
+}
+.icon-button {
+  background-color: #303033;
+  color: white;
+  padding: 3px;
+  margin-left: 5px; 
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  font-size: 12px;
+}
