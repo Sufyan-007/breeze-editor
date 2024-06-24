@@ -8,6 +8,7 @@ const { DecodePropType } = require('./decodePropTypes');
 const { handleConfigFileGeneration } = require('./store_config');
 const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKeyForProcessStatus, getAbsoluteStorageDirForLib } = require('./helper');
 const { INDEX_FILE_NAME } = require('./consts');
+const { FindDeclaration } = require('./declarationFinder');
 
 // Returns export variables from given file path
 function readExportsFromTypeScriptFile(project, filePath) {
@@ -485,105 +486,10 @@ function getTypeReferenceOfComponentVar(variableNode) {
 
 // This function returns InterfaceDeclaration type of object
 function getDeclarationOfProps(propName, sourceFile) {
-    let propVar = sourceFile.getInterface(propName)
 
-    // console.log(propName);
-    // console.log(propVar);
+    const findDeclaration = new FindDeclaration();
+    return findDeclaration.getDeclaration(propName, sourceFile); 
 
-    // Get declared type variable
-    if (!propVar) {
-        // // // console.log(sourceFile.getTypeAlias(propName).getTypeNode());
-        const typeNode = sourceFile.getTypeAlias(propName)?.getTypeNode()
-        if (typeNode) {
-            if (typeNode.getKind() == SyntaxKind.UnionType) {
-                // console.log('UNION TYPE NODE');
-                // console.log(typeNode.getTypeNodes().map(t => t.getText()));
-                // NEED to handle all the type of union type : REFER FORM LABEL
-                // Temporarily returing one 
-
-                const relatedSourceFile = typeNode.getTypeNodes()[0].getSourceFile() || sourceFile;
-
-                if ((typeof typeNode.getTypeNodes()[0].getTypeArguments == 'function') && typeNode.getTypeNodes()[0].getTypeArguments().length > 0) {
-
-                    if (typeNode.getTypeNodes()[0].getTypeArguments().length > 0) {
-                        return getDeclarationOfProps(typeNode.getTypeNodes()[0].getTypeName().getText(), sourceFile)
-                    } else {
-                        return typeNode.getTypeNodes()
-                    }
-                } else if (
-                    Node.isLiteralTypeNode(typeNode.getTypeNodes()[0]) ||
-                    Node.isExpression(typeNode.getTypeNodes()[0]) ||
-                    Node.isArrayTypeNode(typeNode.getTypeNodes()[0]) ||
-                    Node.isParenthesizedTypeNode(typeNode.getTypeNodes()[0]
-                    )) {
-                    return typeNode.getTypeNodes()[0]
-                } else if ((typeof typeNode.getTypeNodes()[0].getType == 'function' &&
-                    typeNode.getTypeNodes()[0].getType() instanceof TypeParameter) ||
-                    typeNode.getTypeNodes()[0].getKind() == SyntaxKind.IndexedAccessType
-                ) {
-                    return typeNode.getTypeNodes()[0]
-                }
-                // else if(typeNode.getTypeNodes()[0].getKind() == SyntaxKind.IndexedAccessType)
-                // console.log(typeNode.getTypeNodes()[0].getTypeName())
-                return getDeclarationOfProps(typeNode.getTypeNodes()[0].getText(),  relatedSourceFile)
-            } else if (typeNode.getKind() == SyntaxKind.IntersectionType) {
-                return typeNode;
-            } else if (typeNode.getKind() == SyntaxKind.TupleType) {
-                return typeNode;
-            } else {
-                return typeNode;
-            }
-        }
-    }
-
-    // Check if the the imported from another file
-    if (!propVar) {
-        // // // console.log('000000000000');
-        // // // // console.log(sourceFile.getImportDeclarations()[1].getStructure().namedImports);
-        const relatedImport = sourceFile.getImportDeclaration(i => i.getNamedImports().find(n => n.getName() === propName))
-        // // // // console.log(relatedImport.getNamedImports().find(n => n.getName() === propName).getNameNode().getDefinitionNodes()[0]);
-        propVar = relatedImport?.getNamedImports().find(n => n.getName() === propName)?.getNameNode().getDefinitionNodes()[0];
-    }
-
-    // Check if the variable is in import like, import * as colors from 'module'
-    if (!propVar){
-        const relatedImport = sourceFile.getImportDeclaration(i => i.getStructure().namespaceImport === propName);
-        propVar = relatedImport?.getNamespaceImport();
-    }
-
-
-    if (!propVar) {
-        // Try to find the variable which is written like
-        // export type { AnchorProps }; and it's imported from other file
-        // Other way can be we can search for imports
-        const relatedExportDeclaration = sourceFile.getExportDeclaration(d => d.getNamedExports().find(n => n.getName() === propName));
-
-        propVar = relatedExportDeclaration?.getNamedExports().find(n => n.getName() === propName).getNameNode().getDefinitionNodes()[0]
-
-    }
-
-    // Check if it is function
-    if (!propVar) {
-        propVar = sourceFile.getFunctions().find(f => f.getName() === propName);
-    }
-
-    // Check for namespaces or modules declared
-    if (!propVar) {
-        propVar = sourceFile.getModule(propName);
-    }
-
-    if(!propVar){
-        propVar = sourceFile.getClass(propName);
-    }
-
-    if (!propVar) {
-        propVar = sourceFile.getVariableDeclaration(propName);
-    }
-
-
-
-    // // // console.log('FINAL', propVar);
-    return propVar
 }
 
 // Check if it is component by going through all the properties of the variable or class or object
