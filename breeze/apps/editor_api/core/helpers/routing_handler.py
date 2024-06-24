@@ -16,28 +16,16 @@ class RouteHandler:
         self.route_config = route_config
         self.comp_config = comp_config
         
-    def generate_new_route_config(self, new_route_config):
-        required_route_config = [
-            {key: val for key, val in route.items() if val is not None and val != []} 
-            for route in new_route_config['routes']
-        ]
+    def rewrite_clean_route_config(self, updated_route_config):
         
-        for route in required_route_config:
-            self.remove_empty_child_route_keys(route.get('childRoutes', []))
-            
-        print("=================required_route_config============================")
-        print(required_route_config)
-        routing_config_path = f"{CONFIG_PATH}/{self.app_config['name']}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
-        write_file(f"{routing_config_path}.json", json.dumps({ 'routes': required_route_config}))
-
-    def remove_empty_child_route_keys(self, routes_array):
-        for route in routes_array:
+        for route in list(updated_route_config.get('routes').values()):
             keys_to_remove = [key for key, val in route.items() if val is None or val == []]
             for key in keys_to_remove:
                 del route[key]
-            for child_route in route.get('childRoutes', []):
-                self.remove_empty_child_route_keys(child_route.get('childRoutes', []))
-    
+            
+        routing_config_path = f"{CONFIG_PATH}/{self.app_config['name']}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
+        write_file(f"{routing_config_path}.json", json.dumps(updated_route_config))
+        
     def extract_function_details(self, js_function, id):
         function_pattern = r'(async\s+)?(?:function\s+(\w+)\s*)?\(([^)]*)\)\s*{([^}]*)}'
         match_function = re.search(function_pattern, js_function, re.DOTALL)
@@ -119,12 +107,12 @@ class RouteHandler:
                 'body': body
             }
         }
-
         
     def create_route_property_sub_config(self, function, id):
         if function == None or function == '':
             return None
         elif isinstance(function, dict) and function['implementation']:
+            print("===========function===========")
             print(function)
             return function
         else:
@@ -137,71 +125,32 @@ class RouteHandler:
                 print('function: ', function, 'id: ', id)
             return None
     
-    def transform_child_route(self, child_route):
-        for route in child_route:
-            child_route_path = route['path']
-            route["action"] = self.create_route_property_sub_config(route.get("action", None), child_route_path+'-action')
-            route["loader"] = self.create_route_property_sub_config(route.get("loader", None), child_route_path+'-loader')
-            route["lazy"] = self.create_route_property_sub_config(route.get("lazy", None), child_route_path+'-lazy')
-            route["shouldRevalidate"] = self.create_route_property_sub_config(route.get("shouldRevalidate", None), child_route_path+'-shouldRevalidate')
-            if route.get("childRoutes"):
-                route["childRoutes"] = self.transform_child_route(route["childRoutes"])
-    
     def transform_route_config(self, original_config):
-
-        route_config_with_nested = {"routes": []}
-
-        # Create a dictionary to map paths to their respective configurations
-        path_to_config = {}
-        # Populate path_to_config with initial configurations
-        for route in original_config["routes"]:
-            path = route["path"]
-            path_to_config[path] = {
-                "path": path,
-                "component": route.get("component"),
-                "childRoutes": route.get("childRoutes", []),
-                "redirectTo" : route.get("redirectTo", None),
-                "action" : self.create_route_property_sub_config(route.get("action", None), path+'-action'),
-                "loader" : self.create_route_property_sub_config(route.get("loader", None), path+'-loader'),
-                "lazy" : self.create_route_property_sub_config(route.get("lazy", None), path+'-lazy'),
-                "shouldRevalidate" : self.create_route_property_sub_config(route.get("shouldRevalidate", None), path+'-shouldRevalidate')
-            }
-            
-            if route.get("childRoutes"):
-                self.transform_child_route(route.get("childRoutes", []))
-
-        # Iterate through the routes to add child routes
-        for route in original_config["routes"]:
-            path = route["path"]
-            parent_path = "/".join(path.split("/")[:-1])
-
-            if parent_path in path_to_config:
-                path_to_config[parent_path]["childRoutes"].append(path_to_config[path])
-            else:
-                route_config_with_nested["routes"].append(path_to_config[path])
-    
-        return route_config_with_nested
+        for route in list(original_config.get('routes').values()):
+            print("==========transform_route_config============")
+            print(route)
+            route["action"] = self.create_route_property_sub_config(route.get("action", None), route['path']+'-action')
+            route["loader"] = self.create_route_property_sub_config(route.get("loader", None), route['path']+'-loader')
+            route["lazy"] = self.create_route_property_sub_config(route.get("lazy", None), route['path']+'-lazy')
+            route["shouldRevalidate"] = self.create_route_property_sub_config(route.get("shouldRevalidate", None), route['path']+'-shouldRevalidate')
 
     def get_comp_name_by_id(self, cmp_id):
         return self.comp_config[cmp_id]['name']
     
-    # def generate_routing_code(self):
-    #     converted_route_config = self.transform_route_config(self.route_config)
-
-    #     routing_code = self.generate_routing_code(converted_route_config['routes'])
-
     def handle_routing_code(self):
-        converted_route_config = self.transform_route_config(self.route_config)
+        self.transform_route_config(self.route_config)
         # write the implementation object in the routing_config
-        self.generate_new_route_config(converted_route_config)
-        print("--------------converted_route_config-----------------")
-        print(converted_route_config)
+        self.rewrite_clean_route_config(self.route_config)
         imported_components = []
         print("-----------------route_config--------------------")
         print(self.route_config)
-        for rt in self.route_config['routes']:
+        for rt in list(self.route_config['routes'].values()):
             if rt.get('component') is not None and rt['component'] not in imported_components:
                 imported_components.append(rt['component'])
+            if rt.get('errorElement') is not None and rt['errorElement'] not in imported_components:
+                imported_components.append(rt['errorElement'])
+            if rt.get('hydrateFallbackElement') is not None and rt['hydrateFallbackElement'] not in imported_components:
+                imported_components.append(rt['hydrateFallbackElement'])
 
         import_statements = []
 
@@ -215,11 +164,13 @@ class RouteHandler:
 
         print(import_statements)
 
-        routing_code = self.generate_routing_code(converted_route_config['routes'])
+        routing_code = self.generate_routing_code(list(self.route_config['baseRoutes'].keys()))
+        print("---------routing_code---------")
+        print(routing_code)
         
         generated_code = self.get_app_routing_code(routing_code)
 
-        print("--------")
+        print("---------generated_code---------")
         print(generated_code)
         generated_code =  f'''
             {NEW_LINE_CHAR.join(import_statements)}
@@ -228,15 +179,13 @@ class RouteHandler:
         '''
 
         return generated_code
+    
+    def generate_routing_code(self, route_ids):
 
-    def generate_routing_code(self, routes):
-
-        # print(routes)
         code = ""
-        for route in routes:
-            # print(route)
+        for route_id in route_ids:
+            route=self.route_config['routes'][route_id]
             props_code = self.generate_route_props(route)
-            print(props_code)
             if route.get('redirectTo'):
                 code += f'''<Route path="{route['path']}" element={{<Navigate to='{route['redirectTo']}' />}} {props_code} />'''
             else:
@@ -246,9 +195,9 @@ class RouteHandler:
                 <Route path="{route['path']}" element={{<{self.get_comp_name_by_id(route['component'])} />}} {props_code} {route_end}>
                 '''
                 if route.get('childRoutes', None):
-                    for childRoute in route['childRoutes']:
+                    for child_route_id in list(route['childRoutes'].keys()):
                         code += f'''
-                        {"".join(self.generate_routing_code([childRoute]) )}
+                        {"".join(self.generate_routing_code([child_route_id]) )}
                         '''
                     code += '</Route>'
             
@@ -301,6 +250,7 @@ class RouteHandler:
 
     def get_app_routing_code(self, routing_code):
         react_code = f'''
+        import './styles.js';
         import React, {{useEffect}} from 'react';
         import {{ Routes, Route, Navigate, BrowserRouter, createBrowserRouter, createRoutesFromElements, RouterProvider }} from "react-router-dom";
         
@@ -345,8 +295,6 @@ class RouteHandler:
 
         export default App;
         '''
-
-        # print(react_code)
-
+        
         return react_code
 

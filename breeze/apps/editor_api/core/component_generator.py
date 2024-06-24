@@ -121,16 +121,13 @@ class ComponentGenerator():
         all_reducer_config = self.all_reducer_config
 
         name = config['name']
-        state_vars = config['stateVars']
-        other_vars = config.get('otherVars',[])
         props_vars = config['propsVars']
-        ref_vars = config.get('refVars', [])
+        resources = config['resources']
         html_config = config['html']
         generator = HTMLGenerator(config)
         html_code = generator.generateHTML(html_config)
 
-        print(html_code)
-        functions = config['functions']
+        # print(html_code)
 
         wrapper_store = config.get("wrapper_store",None)
         if not wrapper_store :
@@ -152,16 +149,16 @@ class ComponentGenerator():
             
             store = all_store_config[wrapper_store]
             html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
-        state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_raw_val(var["defaultValue"])});' for var in state_vars])
-        ref_vars_declaration = '\n'.join([f'const {var["name"]} = React.useRef({format_raw_val(var["defaultValue"])});' for var in ref_vars])
-        # props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
-        props_vars_declaration = ', '.join([f'{var["name"]}={var["defaultValue"]}' if var["defaultValue"] else var["name"] for var in props_vars])
+            
+        def generate_state_var_code(var):
+            return f'const [{var["name"]}, set{var["name"].capitalize()}] = useState({format_raw_val(var["body"]["defaultValue"])});'
+
+        def generate_ref_var_code(var):
+            return f'const {var["name"]} = React.useRef({format_raw_val(var["body"]["defaultValue"])});'
         
-        # other vars
-        other_vars_declaration = ""
-        for var in other_vars:
-            datatype = var.get("datatype")
-            default_value = var.get("defaultValue")
+        def generate_other_var_code(var):
+            datatype = var["body"].get("datatype")
+            default_value = var["body"].get("defaultValue")
             
             if datatype == "string":
                 formatted_value = f'"{default_value}"'
@@ -170,105 +167,122 @@ class ComponentGenerator():
             else:
                 formatted_value = f'{default_value}'
             
-            other_vars_declaration += f"\nconst {var.get('name')} = {formatted_value};"
+            return f'const {var.get("name")} = {formatted_value};'
+                    
+        props_vars_declaration = ', '.join([f'{var["name"]}={var["body"]["defaultValue"]}' if var["body"].get("defaultValue") else var["name"] for var in props_vars])
         
-        # functions_code = '\n\n'.join()
-
-
         import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
-        # import_stats = generate_imports_code(config, all_config,all_store_config,all_reducer_config)
-
-        # functions_definition = '\n\n'.join([f'def {func["name"]}(event):' for func in functions])
-        # functions_body = '\n'.join([f'    {func["body"]}' for func in functions])
-
-        functions_code = []
-        api_parameters_mapping = APIParametersMapping(app_config=self.app_config)
         
-        for func_conf in config['functions']:
-            if func_conf.get("func_type") == "MAPPER_FUNC":
-                func = api_parameters_mapping.generate_mapping_function(func_conf["name"],func_conf)
-                functions_code.append(func)
-
-            else:
-                if func_conf['isAnonymous'] is not True:
-                    functions_code.append(FunctionCodeGenerator.generate_function(func_conf, config))
-
-        hooks = []
-        for hook_conf in config['hooks']:
-            hooks.append(HookCodeHelper.generate_hook_code(hook_conf, config))
-        
+        # functions_code = []
         # api_parameters_mapping = APIParametersMapping(app_config=self.app_config)
-        # for mapping in config.get("mapping_func",[]):
-        #     api_mappings = self.mapping_config[mapping["id"]]["mapping_config"]
-        #     func = api_parameters_mapping.generate_mapping_function(mapping["name"],api_mappings)
-        #     print("===============================================")
-        #     functions_code.append(func)
+        
+        # for func_conf in config['functions']:
+        #     if func_conf.get("func_type") == "MAPPER_FUNC":
+        #         func = api_parameters_mapping.generate_mapping_function(func_conf["name"],func_conf)
+        #         functions_code.append(func)
 
-
-        react_component = """
-            import React, { useState , Fragment } from 'react';
-            %s
+        #     else:
+        #         if func_conf['isAnonymous'] is not True:
+        #             functions_code.append(FunctionCodeGenerator.generate_function(func_conf, config))
+        
+        #need to modify generate_function_code function as per function type and cover mapper function.
+        
+        def generate_function_code(func):
+            if func["body"]["isAnonymous"]:
+                return ""
+            params = ', '.join([p['name'] for p in func['body']['parameters']['list']])
+            async_keyword = 'async ' if func['body']['isAsync'] else ''
+            return f'\n{async_keyword}function {func["name"]}({params}) {{\n{func["body"]["functionBody"]}\n}}'
+        
+        def generate_lifecycle_code(lifecycle):
+            lifecycle_type = lifecycle['body']['lifecycleType']
+            function_body = lifecycle['body'].get('functionBody', '')
+            return_body = lifecycle['body'].get('returnBody', '')
+            dependent_vars = lifecycle['body'].get('dependentVars', [])
+            dependencies = ', '.join(dependent_vars) if dependent_vars else ''
             
-            const %s = ({ %s }) => {
-                %s
-                %s
-                %s
-                %s
-                %s
-                return (
-                    %s
-                );
-            }
+            if lifecycle_type == 'onEveryMount':
+                return f"""
+                    React.useEffect(() => {{
+                        {lifecycle['body']['functionBody']}
+                    }});
+                """
+            elif lifecycle_type == 'onComponentMount':
+                return f"""
+                    React.useEffect(() => {{
+                        {function_body}
+                    }}, [{dependencies}]);
+                    """
+            elif lifecycle_type == 'onMountAndUnmount':
+                return f"""
+                    React.useEffect(() => {{
+                        {function_body}
+                        return () => {{
+                           {return_body}
+                        }};
+                    }}, [{dependencies}]);
+                """
+            elif lifecycle_type == 'onUnmount':
+                return f"""
+                    React.useEffect(() => {{
+                        return () => {{
+                           {return_body}
+                        }};
+                    }}, [{dependencies}]);
+                """
+            else:
+                raise ValueError(f"Unknown lifecycle type: {lifecycle_type}")
+        
+        def generate_hook_code(hook):
+            hook_name = hook['name']
+            hook_type = hook['body']['type']
+            hook_body = hook['body']['hookBody']
+            hook_params = hook['body'].get('hookParams', []) if hook_type == 'useCallback' else ''
+            params = ', '.join(hook_params) if hook_params else ''
+            dependent_vars = hook['body'].get('dependentVars', [])
+            dependencies = ', '.join(dependent_vars) if dependent_vars else ''
 
-            export default %s;
-        """%(import_stats,name,props_vars_declaration,state_vars_declaration,ref_vars_declaration,other_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
+            hook_code = f"""
+                const {hook_name} = React.{hook_type}(({params}) => {{
+                    {hook_body}
+                }}, [{dependencies}]);
+            """
+
+            return hook_code
+    
+        def generate_resources_code(resources):
+            resources_code = []
+            for resource in resources:
+                if resource['type'] == 'stateVars':
+                    resources_code.append(generate_state_var_code(resource))
+                elif resource['type'] == 'refVars':
+                    resources_code.append(generate_ref_var_code(resource))
+                elif resource['type'] == 'otherVars':
+                    resources_code.append(generate_other_var_code(resource))
+                elif resource['type'] == 'function':
+                    resources_code.append(generate_function_code(resource))
+                elif resource['type'] == 'lifecycle':
+                    resources_code.append(generate_lifecycle_code(resource))
+                elif resource['type'] == 'hook':
+                    resources_code.append(generate_hook_code(resource))
+                # Add more resource types if needed
+
+            return '\n'.join(resources_code)
+        
+        resources_code = generate_resources_code(resources)
+        
+        react_component = f"""
+            import React, {{ useState, Fragment }} from 'react';
+            {import_stats}
+
+            const {name} = ({{ {props_vars_declaration} }}) => {{
+                {resources_code}
+                return (
+                    {html_code}
+                );
+            }}
+
+            export default {name};
+            """
 
         return react_component
-
-
-from .helpers.function_code_generator import FunctionCodeGenerator
-class HookCodeHelper:
-
-    @staticmethod
-    def generate_hook_code(hook_conf, comp_conf):
-        if hook_conf['type'] == 'USE_EFFECT':
-            return HookCodeHelper.handle_use_effect(hook_conf, comp_conf)
-
-    @staticmethod
-    def handle_use_effect(hook_config, comp_config):
-        hook_body = hook_config['implementation']['body']
-        hook_return_body = hook_config['implementation'].get('returnBody', None)
-
-        if 'dependentVars' in hook_config:
-            dependent_vars = hook_config.get('dependentVars', [])
-            if len(dependent_vars) == 0:
-                dependencies = "[]"
-            elif dependent_vars == "null":
-                dependencies = ""
-            else: 
-                dependencies = f"[{', '.join(dependent_vars)}]"
-
-        if hook_return_body:
-            hook_code = f"""
-                React.useEffect(() => {{
-                    {hook_body}
-                    return () => {{
-                        {hook_return_body}
-                    }};
-                }}{', ' + dependencies});
-            """
-        else:
-            hook_code = f"""
-                React.useEffect(() => {{
-                    {hook_body}
-                }}{', ' + dependencies});
-            """
-        return hook_code
-
-# def write_components():
-
-#     all_comp_config = read_all_component_config()
-#     app_config = read_app_config()
-#     comps = list(all_comp_config.values())
-
-#     generate_components(comps, app_config)

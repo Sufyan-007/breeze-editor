@@ -5,7 +5,7 @@ class ComponentConfigService {
     constructor(projectName, dispatch) {
         this.projectName = projectName;
         this.dispatch = dispatch;
-        this.serverURL = "http://localhost:8000";
+        this.serverURL = `${process.env.REACT_APP_BREEZE_BACKEND_HOST}`;
         this.getComponentConfig();
         this.getRouterConfig();
     }
@@ -55,20 +55,6 @@ class ComponentConfigService {
             }
             return { body: jsonData , status: response.status}
         }
-    }
-
-    async saveAllRoutes(allRoutes) {
-        console.log(allRoutes);
-        const response = await fetch(`${this.serverURL}/editor/add-all-routes/` + this.projectName + "/",
-            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ allRoutes }) 
-        })
-        const jsonData = await response.json();
-        console.log(response.status);
-        console.log(jsonData);
-        if (response.status === 200) {
-            this.dispatch(setRouterConfig(jsonData));
-        }
-        return { body: jsonData , status: response.status}
     }
 
     async addChildRoute(childObj) {

@@ -1,4 +1,4 @@
-import { useContext, useMemo,useEffect, useState } from "react";
+import { useContext, useMemo, useEffect, useState } from "react";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
 
@@ -6,37 +6,42 @@ import TextElement from "../SidebarConfigHelper/components/TextElementConfig";
 import HtmlElementConfig from "../SidebarConfigHelper/components/HtmlElementConfig";
 
 export default function ElementConfigSidebar({ config }) {
-  const { sidebarService, componentConfig, setComponentConfig } = useContext(ComponentContext);
+  const { sidebarService, componentConfig, setComponentConfig } =
+    useContext(ComponentContext);
   const [selectedElement, setSelectedElement] = useState(null);
   const { projectName, componentName } = useParams();
-  const element = useMemo(() => componentConfig?.html_elements[selectedElement?.elem], [componentConfig, selectedElement]);
+  const element = useMemo(
+    () => componentConfig?.html_elements[selectedElement?.elem],
+    [componentConfig, selectedElement]
+  );
   const [isLoading, setIsLoading] = useState(false);
-
-
+  const availableFunctions = componentConfig.resources;
 
 
   useEffect(() => {
     sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
-     
     });
   }, [sidebarService]);
 
   const makeSelectedElementNull = () => {
     sidebarService.setSelectedElem(null);
   };
-  
 
   const handleUpdateClick = (html_config) => {
-    updateHtmlConfig(projectName, selectedElement?.elem, componentName, html_config);
+    updateHtmlConfig(
+      projectName,
+      selectedElement?.elem,
+      componentName,
+      html_config
+    );
   };
 
   async function updateHtmlConfig(project_id, html_id, component, html_config) {
-    
     try {
       setIsLoading(true);
       const response = await fetch(
-        "http://localhost:8000/editor/update-html-config/",
+        `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/update-html-config/`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -45,12 +50,10 @@ export default function ElementConfigSidebar({ config }) {
       );
 
       if (!response.ok) {
-        setIsLoading(false)
+        setIsLoading(false);
         throw new Error("Failed to update HTML config");
-      }
-      else{
-        setIsLoading(false)
-
+      } else {
+        setIsLoading(false);
       }
 
       const responseData = await response.json();
@@ -66,7 +69,6 @@ export default function ElementConfigSidebar({ config }) {
     }
   }
 
-
   if (!selectedElement?.elem) {
     return null;
   } else {
@@ -78,7 +80,7 @@ export default function ElementConfigSidebar({ config }) {
             backgroundColor: "#303033",
             overflowY: "scroll",
             position: "absolute",
-            right:0,
+            right: 0,
             height: "100%",
           }}
         >
@@ -101,6 +103,7 @@ export default function ElementConfigSidebar({ config }) {
                 makeSelectedElementNull={makeSelectedElementNull}
                 handleUpdateClick={handleUpdateClick}
                 isLoading={isLoading}
+                availableFunctions={availableFunctions}
               />
             )}
           </div>

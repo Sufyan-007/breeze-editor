@@ -45,7 +45,7 @@ export default function CreateApp({ ...props }) {
   }, [])
 
   React.useEffect(() => {
-    ws.current = new WebSocket("ws://127.0.0.1:8000/ws/project-progress/");
+    ws.current = new WebSocket(`ws://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}/ws/project-progress/`);
     ws.current.onopen = () => {
       console.log("Connected to the WebSocket");
     };
@@ -211,7 +211,7 @@ export default function CreateApp({ ...props }) {
                         className="form-control"
                         {...register("framework", { required: true })}
                       >
-                        <option value="" selected disabled>
+                        <option value="" disabled>
                           Technology
                         </option>
                         <option value="react">React</option>
@@ -233,7 +233,7 @@ export default function CreateApp({ ...props }) {
                         className="form-control"
                         {...register("language", { required: true })}
                       >
-                        <option value="" selected disabled>
+                        <option value="" disabled>
                           Language
                         </option>
                         <option value="javascript">Javascript</option>
@@ -271,7 +271,7 @@ export default function CreateApp({ ...props }) {
                         className="form-control"
                         {...register("buildTool", { required: true })}
                       >
-                        <option value="" selected disabled>
+                        <option value="" disabled>
                           Build Tool
                         </option>
                         <option value="create-react-app">

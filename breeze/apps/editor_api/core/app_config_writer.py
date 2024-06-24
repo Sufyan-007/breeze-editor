@@ -10,14 +10,17 @@ class AppConfigWriter:
     
     def write_basic_config_files(self, app_config):
         app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
-
         basic_routing_config = {
-            "routes": [
+            "routes":
                 {
-                    "path": "/",
-                    "component": f"{app_config['defaultComponent']}"
-                }
-            ]
+                    "/" : {
+                        "path": "/",
+                        "component": f"{app_config['defaultComponent']}"
+                    }
+                },
+            "baseRoutes": {
+                "/": {},
+            }
         }
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", json.dumps(basic_routing_config))
@@ -32,20 +35,16 @@ class AppConfigWriter:
                 "name": app_config['defaultComponent'],
                 "id":app_config['defaultComponent'].upper(),
                 "containingFile": f"components/{app_config['defaultComponent']}.js",
-                "stateVars": [],
-                "propsVars": [],
-                "otherVars" : [],
-                "refVars" : [],
-                "functions": [],
-                "html": { "_id": "Main" },
-                "wrapper_store": None,
                 "imports": {
                     "components": [
                     ],
                     "other": [
                     ]
                 },
-                "hooks": [],
+                "propsVars": [],
+                "resources": [],
+                "html": { "_id": "Main" },
+                "wrapper_store": None,
                 "html_elements": {
                     "Main": {
                         "type": "Element",
