@@ -16,7 +16,7 @@ function readExportsFromTypeScriptFile(project, filePath) {
     const exports = [];
 
     const exportDeclarations = sourceFile.getExportDeclarations();
-    // // // console.log(sourceFile.getExport);P
+    // // // console.log(sourceFile.getExport);
 
     for (const exportDec of exportDeclarations) {
 
@@ -159,7 +159,6 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
                 const symbol =  getSymbolOrAliasSymbol(getDeclaration(exportVarSymbol).getType())
                 isComponent = isComponentBySymbol(symbol);
             } else {
-
                 // Determine if it is component or not
                 isComponent = checkIfComponentType(attributesOfVar)
 
@@ -167,6 +166,28 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
                     isComponent = isComponentBySymbol(exportVarSymbol);                    
                 }
             }
+                isComponent = checkIfComponentType(attributesOfVar);
+
+                // If declared Like,
+                // declare function Portal(props: PortalProps): JSX.Element;
+                // declare namespace Portal {
+                //    var className: string;
+                //    var selector: string;
+                //    var displayName: string;
+                // }
+
+
+                if(!isComponent && exportVarSymbol instanceof Symbol){
+                    const symbol = getDeclaration(exportVarSymbol).getType().getSymbol();
+                    if (symbol) {
+                        const isFunctionDeclaration = symbol.getValueDeclaration()?.getKind() == SyntaxKind.FunctionDeclaration;
+                        if (isFunctionDeclaration) {
+                            isComponent = isReturnJSX(symbol.getValueDeclaration());
+                        }
+    
+                    }
+                }
+                }
 
             expConfig['isComponent'] = isComponent
 
@@ -708,19 +729,24 @@ class PropsReader {
 
     }
 
+    getNestedProps(types){
+        
+        // console.log(types.getBaseTypes())
+         if(types.getBaseTypes().length == 0){
+            // console.log(types.getAliasTypeArguments())
+            if(types.getAliasTypeArguments().length !== 0){
+               return types.getAliasTypeArguments()[0].getProperties();
+            }
+            else
+               return [];
+         }
+         return this.getNestedProps(types.getBaseTypes()[0]);
+    }
+
     processProps(referenceVar) {
-        // console.log(referenceVar)
-        let props = referenceVar.getType().getProperties();
-        try 
-        {
-            props = props.concat(referenceVar.getType().getBaseTypes()[0].getBaseTypes()[0].getAliasTypeArguments()[0].getProperties());
-            return this.getAllProps(props);
-        }    
-        catch{
-
-            return this.getAllProps(props)
-        }
-
+        let props  = referenceVar.getType().getProperties();
+        props = props.concat(this.getNestedProps(referenceVar.getType()));
+        return this.getAllProps(props);
     }
     // to get all the list of props
     getAllProps(props){
