@@ -14,11 +14,11 @@ import ProjectPage, { projectLoader } from "./components/ProjectPage";
 import ComponentConfigPage, {
   configLoader,
 } from "./components/ComponentConfig/ComponentConfigPage";
-import CssEditor from "./components/CssEditor";
+import CssEditor from "./components/StylesConfiguration/CssEditor";
 import ProjectHome from "./components/ProjectHome";
 import ProjectComponents from "./components/ProjectComponents";
-import ProjectRouting, { routerConfigLoader } from "./components/ProjectRouting";
-import Styles from "./components/Styles";
+import ProjectRouting from "./components/ProjectRouting";
+import Styles from "./components/StylesConfiguration/Styles";
 import Code from "./components/Code";
 import Settings from "./components/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting />, loader: routerConfigLoader },
+      { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
       {
@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting />, loader: routerConfigLoader },
+      { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <ApiClientRoot /> },
     ]
   },

@@ -1,4 +1,4 @@
-
+from .helpers.style_handler import StyleHandler
 from .api_client_generator import GenerateAPIClient
 from .reducer_generator import ReducerGenerator
 from .redux_store_generator import ReduxStoreGenerator
@@ -296,15 +296,13 @@ class AppEditor:
         print(route_obj)
         if route_obj.get('path')[0]!='/':
             route_obj['path'] = "/"+route_obj.get('path')
-        if route_obj['path'][-1]=='/':
+        if route_obj['path'][-1]=='/' and route_obj['path'][0] != '/':
             route_obj['path'] = route_obj['path'][:-1]      
         if route_obj.get('component'):
             route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
         elif route_obj.get('redirectTo'):
             route_obj.pop('component') if route_obj.get('component') else ''
         
-        route_obj['path'] = route_obj['path'] if route_obj['path'][0]=='/' else '/'+route_obj['path']
-        route_obj['path'] = route_obj['path'][:-1] if route_obj['path'][-1]=='/' else route_obj['path']
         if route_obj.get("prevPath"):
             prev_path = route_obj.pop('prevPath')
             route_obj.pop('fullPath')                
@@ -619,3 +617,6 @@ class AppEditor:
             yaml.dump(service_config, file,default_flow_style=False)
         self.write_services()
         return service_config
+    
+    def write_style_files(self):
+        StyleHandler.generate_styles_code(self.app_config)

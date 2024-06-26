@@ -5,25 +5,20 @@ import EditIcon from "../assets/icons/edit-icon.svg";
 import ViewIcon from "../assets/icons/view-eye.svg";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useLoaderData } from "react-router";
 import { FloatingLabel, Form } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
 import { saveRoute, addChildRoute, editChildRoute, deleteChildRoute, deleteBaseRoute} from "../services/ComponentConfigService"
 import { setRouterConfig } from '../reducers/RouterConfigReducer';
-import { getRouterConfig } from '../services/ConfigService';
 import Select from 'react-select';
+import ToasterComponent from "../common/display/d.toast"
+import ModalComponent from "../common/display/d.modal"
 import MonacoEditor from "./common/MonacoEditor";
 import "../css/ProjectRouting.css";
 
 export default function ProjectRouting() {
 
-  // TODO:
-  // handle all the cases: (give warning dialog box with info for each one)
-  // add a common component for toaster and modal after merging developer
-
   const [currentOffCanvasRoute, setCurrentOffCanvasRoute] = useState(''); 
   const [displayRoute, setDisplayRoute] = useState(''); 
-  const [selectedChildRoute, setSelectedChildRoute] = useState('');
   const [selectedParentPathRoute, setSelectedParentPathRoute] = useState('');
   const [isRouteWithAComponent, setIsRouteWithAComponent] = useState(true);
   const [routeMode, setRouteMode] = useState('');
@@ -32,8 +27,8 @@ export default function ProjectRouting() {
   const [showSelectedRouteObj, setShowSelectedRouteObj] = useState({});
   const { projectName } = useParams();
   const dispatch = useDispatch();
-  const initialRouterConfig = useLoaderData();
   const routerConfig = useSelector(state => state.routerConfig);
+  const compConfig = useSelector(state => Object.entries(state.config.pages).map(obj => obj[0]));
   const [selectedProps, setSelectedProps] = useState('');
   const selectRef = useRef(null);
   const optionalRouteProps = [
@@ -45,6 +40,31 @@ export default function ProjectRouting() {
     {name: 'ErrorElement'},
     {name: 'HydrateElement'},
   ]
+  
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('test');
+  const [modalBody, setModalBody] = useState('testBody');
+  const [modalSubmitHandler, setModalSubmitHandler] = useState(null);
+  const [isSubmitButtonPresent, setIsSubmitButtonPresent] = useState(false);
+  
+  const loadDeleteRouteModal = (submitHandler) => {
+    setModalTitle('Delete Route');
+    setModalBody('All the related routes will be affected, are you sure you want to delete it?');
+    setIsSubmitButtonPresent(true);
+    setModalSubmitHandler(() => () => {
+      submitHandler();
+      setIsModalVisible(false);
+    });
+    setIsModalVisible(true);
+  }
+
+  const [toasterObject, setToasterObject] = useState({});
+  const [showToaster, setShowToaster] = useState(false);
+
+  const closeToaster = () => {
+    setShowToaster(false);
+    setToasterObject({})
+  }
 
   const onSelect = (selectedList, selectedItem) => {
     if (selectedItem['name'] === 'All') {
@@ -116,14 +136,14 @@ export default function ProjectRouting() {
   };
 
   const allRoutes = useMemo(
-    () => getFunctionFromConfig(routerConfig?.routes || initialRouterConfig?.routes),
-    [routerConfig?.routes, initialRouterConfig?.routes]
+    () => getFunctionFromConfig(routerConfig?.routes ),
+    [routerConfig?.routes]
   );
+
   const [routes, setRoutes] = useState([...allRoutes]);
   const [parentRouteOptions, setParentRouteOptions] = useState(
     [{value: 'none', label: 'None'}, ...allRoutes.map(route => ({value: route, label: route.fullPath}))]
   );
-
 
   const displaySearchedRoute = (value) => {
     setSearchedRoute(value);
@@ -138,7 +158,6 @@ export default function ProjectRouting() {
   };
 
   const handleRouteOffCanvas = (route, mode) => {
-    setSelectedChildRoute('');
     setShowAllRouteObj(false);
     setCurrentOffCanvasRoute({...route});
     setDisplayRoute(route)
@@ -154,7 +173,6 @@ export default function ProjectRouting() {
     setIsRouteWithAComponent(true);
     setShowAllRouteObj(false);
     setRouteMode('Add');
-    setSelectedChildRoute('');
     if (selectRef.current)
       selectRef.current.clearValue();
     setSelectedParentPathRoute('')
@@ -189,13 +207,15 @@ export default function ProjectRouting() {
       setDisplayRoute('');
       setSearchedRoute('');
     } else {
-      // TODO: add toaster
-      if (res.body.error) {
-        console.log(res.body.error);
-      } else {
         console.log(res.body);
+        setShowToaster(true);
+        setToasterObject({
+          'toastTitle': 'Oops found an error!',
+          'toastBody': `${res.body}`,
+          'variant': 'warning',
+          'closeButton': false
+        });
       }
-    }
   }
 
   const saveTheRoute = async () => {
@@ -207,8 +227,13 @@ export default function ProjectRouting() {
     }
 
     if (!displayRoute.path || !(displayRoute.component || displayRoute.redirectTo) ) {
-      // TODO: add a toaster
       console.log('Incomplete Route Details');
+      setShowToaster(true);
+      setToasterObject({
+        'toastTitle': 'Oops found an error!',
+        'toastBody': 'Incomplete Route Details',
+        'closeButton': false
+      });
       return;
     }
 
@@ -358,7 +383,7 @@ export default function ProjectRouting() {
         </div>
         <div className="offcanvas-body pdt text-muted">
           <div>
-            {(routeMode !== 'childView' || selectedChildRoute) && (<div>
+            <div>
               <div className="mx-1 form-floating" aria-label="path-input">
                 <InputGroup className="">
                   {routeMode === "childView" && (
@@ -408,6 +433,10 @@ export default function ProjectRouting() {
                             height: '100%',
                             color: '#dee2e6bf'
                           }),
+                          menu: (base) => ({
+                            ...base,
+                            backgroundColor: "#212529",
+                          })
                         }}
                       />
                     </div>
@@ -503,10 +532,10 @@ export default function ProjectRouting() {
                       disabled={routeMode === "View"}
                     >
                       (<option value="">None</option>)
-                      {[...new Set(routes?.map((route) => route.component))].map(
-                        (component, index) =>
+                      {compConfig?.map(
+                        (component) =>
                           component && (
-                            <option key={index} value={component}>
+                            <option key={component} value={component}>
                               {component}
                             </option>
                           )
@@ -563,10 +592,10 @@ export default function ProjectRouting() {
                           disabled={routeMode === "View"}
                         >
                           (<option value="">None</option>)
-                          {[...new Set(routes?.map((route) => route.component))].map(
-                            (component, index) =>
+                          {compConfig?.map(
+                            (component) =>
                               component && (
-                                <option key={index} value={component}>
+                                <option key={component} value={component}>
                                   {component}
                                 </option>
                               )
@@ -585,10 +614,10 @@ export default function ProjectRouting() {
                           disabled={routeMode === "View"}
                         >
                           (<option value="">None</option>)
-                          {[...new Set(routes?.map((route) => route.component))].map(
-                            (component, index) =>
+                          {compConfig?.map(
+                            (component) =>
                               component && (
-                                <option key={index} value={component}>
+                                <option key={component} value={component}>
                                   {component}
                                 </option>
                               )
@@ -676,16 +705,22 @@ export default function ProjectRouting() {
                   >
                     {routeMode === 'Add' ? 'Save Route' : 'Save Changes'}
                   </div>
-                  { selectedChildRoute && (
-                    <div 
-                      className={`${displayRoute ? '' : 'disableRouteButton'} btn btn-danger mx-1`}
-                      onClick={() => deleteTheRoute(selectedChildRoute)}
-                    >
-                      Delete Route
-                    </div>)}
+                  
+                  <div 
+                    className={`${displayRoute ? '' : 'disableRouteButton'} btn btn-danger mx-1`}
+                    data-bs-dismiss="offcanvas"
+                    onClick={() => {
+                        loadDeleteRouteModal(() => {
+                          deleteTheRoute(currentOffCanvasRoute)
+                        }
+                      )}
+                    }
+                  >
+                    Delete Route
+                  </div>
                 </div>
               )}
-            </div>)}
+            </div>
           </div>
         </div>
       </div>
@@ -745,7 +780,11 @@ export default function ProjectRouting() {
                     <Button 
                       variant="dark"
                       title="Delete"
-                      onClick={() => deleteTheRoute(route)}
+                      onClick={() => {
+                        loadDeleteRouteModal(() => {
+                          deleteTheRoute(route)
+                        })
+                      }}
                     >
                       <img src={DeleteIcon} alt="" height={24} className="" />
                     </Button>
@@ -762,12 +801,34 @@ export default function ProjectRouting() {
         </div>
       </div>}
       {/* Route table ends */}
+
+      {/* Modal */}
+      <div>
+        <ModalComponent
+          showModal={isModalVisible}
+          modalTitle={modalTitle}
+          modalBody={modalBody}
+          handleClose={() => setIsModalVisible(false)}
+          submitText={'Delete Route'}
+          submitHandler={modalSubmitHandler}
+          isSubmitButtonPresent={isSubmitButtonPresent}
+          submitVariant={'danger'}
+        />
+      </div>
+
+      {/* toaster */}
+      <ToasterComponent
+        showToaster={showToaster}
+        toastTitle={toasterObject.toastTitle || ''}
+        toastBody={toasterObject.toastBody || ''}
+        variant={toasterObject.variant}
+        position={toasterObject.position}
+        delay={toasterObject.delay}
+        autohide={toasterObject.autohide}
+        closeButton={toasterObject.closeButton}
+        onClose={() => closeToaster()}
+      />
     </div>
   );
 }
 
-export async function routerConfigLoader({ params }) {
-  const projectName = params.projectName;
-  const config = await getRouterConfig(projectName);
-  return config;
-}
