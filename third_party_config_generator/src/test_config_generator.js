@@ -32,10 +32,20 @@ const allLibraries = [
         lib: 'react-data-table-component',
         libVersion: '7.6.2',
         storePath: storePath
+    },
+    {
+        lib : '@headlessui/react',
+        libVersion : '2.1.0',
+        storePath : storePath
+    },
+    {
+        lib : 'grommet',
+        libVersion : '2.38.0',
+        storePath : storePath
     }
 ]
 
-const libraries = [...allLibraries];
+const libraries = [allLibraries[7]];
 
 const tester_function = () => {
     for (const lib of libraries) {
