@@ -343,9 +343,9 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                     const variableName = referenceToPropsVar.getType().getText();
 
                     // console.log(variableName);
-                    if (sourceFile.getTypeAlias(variableName)) {
+                    if (referenceToPropsVar.getSourceFile().getTypeAlias(variableName)) {
 
-                        referenceToPropsVar = sourceFile.getTypeAlias(variableName).getTypeNode();
+                        referenceToPropsVar = referenceToPropsVar.getSourceFile().getTypeAlias(variableName).getTypeNode();
                         referenceToPropsVar = getPropRef(referenceToPropsVar) ;
                         // console.log(referenceToPropsVar);
                     }

@@ -14,7 +14,7 @@ function findTypeScriptEntryPoint(libraryPath) {
     const packageJsonPath = path.join(libraryPath, 'package.json');
     const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
     const packageJson = JSON.parse(packageJsonContent);
-    return packageJson.types || packageJson.typings;
+    return packageJson.types || packageJson.typings || changeExtToTs(packageJson.main);
 }
 
 function findTypeDefinitionFile(entryPoint, moduleSpecifier, libraryPath) {
@@ -48,6 +48,11 @@ function sanitizeFilePath(filepath) {
 
 function removePathTillNodeModule(str) {
     return str.replace(/.*\/node_modules\//, "");
+}
+
+function changeExtToTs(filePath){
+    if(!filePath) return filePath;
+    return filePath.replace(/\.js$/, '.d.ts');
 }
 
 const fileDir = "/home/raj/Desktop/bridge/npm_libraries/conf_generator/third_party_configs/react-bootstrap/others"
