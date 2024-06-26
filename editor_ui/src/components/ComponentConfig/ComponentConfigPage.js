@@ -80,8 +80,8 @@ export default function ComponentConfigPage() {
             />
           </div>
           <div className="col px-0 d-flex flex-column h-100">
-            <div className="row mx-0 flex-grow-1 overflow-y-auto">
-              <div className=" d-flex ">{< HtmlSection />}</div>
+            <div className="row mx-0 flex-grow-1">
+              <div className="d-flex">{< HtmlSection />}</div>
             </div>
           </div>
         </div>

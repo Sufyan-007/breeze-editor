@@ -6,7 +6,7 @@ export async function addComponent(name, type, route,projectName) {
     // this.dispatch(setConfig(response.config)) : need to handle this in the component itself now
     if (route) {
         console.log("Hello there!")
-         await saveRoute({path:route, component: response.comp}, projectName)
+         await saveRoute({path: route, component: response.comp}, projectName)
     }
     return response
 }

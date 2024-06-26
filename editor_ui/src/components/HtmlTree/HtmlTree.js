@@ -31,7 +31,7 @@ export default function HtmlTree({ htmlId, className }) {
     }
 
     return (
-        <div className={className} >
+        <div className={className}>
             {value.type === "Element" ?
                 <Html value={value} htmlId={htmlId} selectElem={selectElem} reference={ref} />
                 :
