@@ -303,7 +303,12 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
 
     }
     else {
-        for (const ch of childrenOfDefaultExportVar) {
+        for (let ch of childrenOfDefaultExportVar) {
+
+            if(ch.getKind() == SyntaxKind.SyntaxList){
+                ch = ch.getParent() ; 
+            }
+
             // // // console.log(ch);
             // // // console.log(ch.getKind() == SyntaxKind.IntersectionType);
             // // // console.log(ch.getText());
@@ -331,6 +336,9 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                 // This is the variable which is reference to the props variable for this component
                 // Which will be generally the last children in above for loop 
                 let referenceToPropsVar = getTypeReferenceOfComponentVar(ch)
+
+                if(isFunctionExists(referenceToPropsVar, 'getTypeArguments')){
+
                 // Here this also can be used for checking if its component or not
                 // console.log(subProp.getTypeName().getText());
 
@@ -358,15 +366,22 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
 
 
                     if(ta instanceof Type){
-                        const tempListOfProps = ta.getProperties();
 
-                        propList = propList.concat(tempListOfProps.map(prop => ({
-                            name: prop.getName(),
-                            type: getDeclaration(prop).getType().getText(),
-                            raw: getDeclaration(prop).getType().getText(),
-                            isOptional: prop.isOptional(),
-                            fullData: handlePropTypes.handleProps(prop, getDeclaration(prop).getTypeNode())
-                        })));
+                        // const tempListOfProps = ta.getProperties();
+                        propList = propList.concat(getAllProperties(ta, libInfo));
+                        // propList = propList.concat(tempListOfProps.map(prop => {
+
+                        //     const propDeclaration = getDeclaration(prop)
+                        //     return {
+                        //         name: prop.getName(),
+                        //         type: propDeclaration.getType().getText(),
+                        //         raw: propDeclaration.getType().getText(),
+                        //         isOptional: prop.isOptional(),
+                        //         fullData: handlePropTypes.handleProps(prop,
+                        //             isFunctionExists(propDeclaration, 'getTypeNode') ?
+                        //                 propDeclaration.getTypeNode() : propDeclaration.getType())
+                        //     }
+                        // }));
                     }
                     else if (ta.getKind() == SyntaxKind.TypeReference) {
                         // console.log(ta.getType().getProperties());
@@ -398,20 +413,44 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                                 propList = propList.concat(propsReader.processProps(subTypeRef))
 
                             } else { // Else it is like React.RefAttributes<HTMLElement> so it has type arugments
-                                const tempListOfProps = subType.getType().getProperties();
+                                // const tempListOfProps = subType.getType().getProperties();
+                                propList = propList.concat(getAllProperties(subType.getType(), libInfo));
 
-                                propList = propList.concat(tempListOfProps.map(prop => ({
-                                    name: prop.getName(),
-                                    type: prop.getValueDeclaration().getType().getText(),
-                                    raw: prop.getValueDeclaration().getType().getText(),
-                                    isOptional: prop.isOptional(),
-                                    fullData: handlePropTypes.handleProps(prop, prop.getValueDeclaration().getTypeNode())
-                                })));
+                                // propList = propList.concat(tempListOfProps.map(prop => ({
+                                //     name: prop.getName(),
+                                //     type: prop.getValueDeclaration().getType().getText(),
+                                //     raw: prop.getValueDeclaration().getType().getText(),
+                                //     isOptional: prop.isOptional(),
+                                //     fullData: handlePropTypes.handleProps(prop, prop.getValueDeclaration().getTypeNode())
+                                // })));
                             }
                         }
 
                     }
                 }
+
+            }
+            else{
+
+                // const tempListOfProps = referenceToPropsVar.getType().getProperties();
+                propList = propList.concat(getAllProperties(referenceToPropsVar.getType(), libInfo));
+                // propList = propList.concat(tempListOfProps.map(prop => {
+
+                //     const propDeclaration = getDeclaration(prop)
+                //     return {
+                //         name: prop.getName(),
+                //         type: propDeclaration.getType().getText(),
+                //         raw: propDeclaration.getType().getText(),
+                //         isOptional: prop.isOptional(),
+                //         fullData: handlePropTypes.handleProps(prop,
+                //             isFunctionExists(propDeclaration, 'getTypeNode') ?
+                //                 propDeclaration.getTypeNode() : propDeclaration.getType())
+                //     }
+                // }));
+
+            }
+
+
             }
         }
     }
@@ -419,6 +458,31 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
     // console.log('----------List of Props-----------\n', propList);
 
     return propList;
+
+}
+
+
+function getAllProperties(type, libInfo){
+
+    const handlePropTypes = new HandlePropTypes(libInfo);
+
+    const tempListOfProps = type.getProperties();
+
+    const fullList = tempListOfProps.map(prop => {
+
+        const propDeclaration = getDeclaration(prop)
+        return {
+            name: prop.getName(),
+            type: propDeclaration.getType().getText(),
+            raw: propDeclaration.getType().getText(),
+            isOptional: prop.isOptional(),
+            fullData: handlePropTypes.handleProps(prop,
+                isFunctionExists(propDeclaration, 'getTypeNode') ?
+                    propDeclaration.getTypeNode() : propDeclaration.getType())
+        }
+    });
+
+    return fullList;
 
 }
 
@@ -474,25 +538,74 @@ function checkIfReactImported(sourceFile) {
     return !!reactImport;
 }
 
-function getTypeReferenceOfComponentVar(variableNode) {
+function getTypeReferenceOfComponentVar(variableNode, rootNode) {
     if (variableNode.getKind() == SyntaxKind.IntersectionType) {
         for (const subProp of variableNode.getTypeNodes()) {
 
             if (subProp.getKind() == SyntaxKind.TypeReference) {
-                return subProp;
+                return subProp.getType();
             }else if(subProp.getKind() == SyntaxKind.TypeQuery){
-                return subProp;
+                return subProp.getType();
             }else if(subProp.getKind() == SyntaxKind.ImportType){
                 return subProp.getType();
             }
         }
-
+        // variableNode.getBaseTypes()[0].getAliasTypeArguments()[0].getAliasSymbol().getDeclarations()[0].getTypeNode().getTypeNodes()[0].getType().getTypeArguments()[0].getProperties()
     } else if (variableNode.getKind() == SyntaxKind.TypeReference) {
+
+        if(variableNode.getTypeArguments().length > 0){
+            if(variableNode.getTypeArguments()[0].getType().getText() != 'any') {
+                return variableNode
+            }
+            // for(const ta of variableNode.getTypeArguments()){
+            //     if(ta.getType().getText() != 'any'){
+            //         return ta ;
+            //     }
+            // }
+        }
+
+        const nodeSymbol = variableNode.getType()?.getSymbol() || variableNode.getType()?.getAliasSymbol();
+        if(nodeSymbol) {
+            const declaration = getDeclaration(nodeSymbol);
+            if(declaration){ 
+                if(isFunctionExists(declaration, 'getProperties') && checkIfComponentType(declaration.getProperties())){
+                    return variableNode.getType();
+                }
+                return getTypeReferenceOfComponentVar(declaration, rootNode) ;
+            }
+        }
         return variableNode
+    }else if(variableNode.getKind() == SyntaxKind.InterfaceDeclaration){
+        
+
+        for(const baseType of variableNode.getBaseTypes()){
+            if(checkIfComponentType(baseType.getProperties())){
+
+                if(baseType.getAliasTypeArguments().length > 0){
+                    const type = baseType.getAliasTypeArguments()[0];
+                    const dec = getDeclarationOfTypeBySymbol(type);
+                    return getTypeReferenceOfComponentVar(dec);
+                }
+                return baseType;
+            }
+        }
+    }else if(variableNode.getKind() == SyntaxKind.TypeAliasDeclaration){
+        return getTypeReferenceOfComponentVar(variableNode.getTypeNode())
     }
 
     return variableNode
 }
+
+function getDeclarationOfTypeBySymbol(type){
+    const symbol = type.getSymbol() || type.getAliasSymbol();
+
+    if(symbol)  return getDeclaration(symbol);
+}
+
+function isFunctionExists(obj, fun_name){
+    return typeof obj[fun_name] == 'function';
+}
+
 
 // This function returns InterfaceDeclaration type of object
 function getDeclarationOfProps(propName, sourceFile) {
