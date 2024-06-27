@@ -8,6 +8,7 @@ import ImportConfigForm from "./ActionsConfigForms/ImportConfigForm";
 import PropConfigForm from "./ActionsConfigForms/PropConfigForm";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
+import PropTesting from "./PropTesting";
 import {
   updateComponentConfig,
   reorderComponentActions,
@@ -231,6 +232,7 @@ function ActionsConfig() {
             </ul>
           </div>
         </div>
+        <PropTesting />
         <div>
           <div className="">
             {renderDraggableList(componentConfig.propsVars, "propsVars")}

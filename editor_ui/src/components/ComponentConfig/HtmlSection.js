@@ -10,21 +10,25 @@ import { useWindowDimension } from '../CustomHooks/useWindowDimension'
 import Filter from "../../assets/icons/filter.svg";
 
 export const DragContext = createContext({
-    messageListener: null
-})
+  messageListener: null,
+});
+
+export const TestPropsContext = createContext({});
 
 export default function HtmlSection() {
-    const { componentConfig } = useContext(ComponentContext)
-    const [iframeSrc, setIframeSrc] = useState(`${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port)
-    const srcInput = useRef()
-    const [selected, setSelected] = useState(0)
-    const iFrameRef = useRef();
-    const { projectName, componentName } = useParams()
-    const messageListener = useMemo(() => {
-        return new MessageListenerService(projectName, componentName)
-    }, [projectName, componentName])
+  const { componentConfig } = useContext(ComponentContext);
+  const [iframeSrc, setIframeSrc] = useState(
+    `${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port
+  );
+  const srcInput = useRef();
+  const [selected, setSelected] = useState(0);
+  const iFrameRef = useRef();
+  const { projectName, componentName } = useParams();
+  const messageListener = useMemo(() => {
+    return new MessageListenerService(projectName, componentName);
+  }, [projectName, componentName]);
 
-    const [testProps, setTestProps] = useState({ prop1: "xyz" })
+  const [testProps, setTestProps] = useState({ prop1: "xyz" });
 
     const setIframeSource = () => {
         const newValue = srcInput.current.value;
@@ -41,54 +45,67 @@ export default function HtmlSection() {
     ]
     const [windowWidth, windowHeight] = useWindowDimension();
 
-    useEffect(() => {
-        const handler = (message) => {
-            if (message.data.source === "APP") {
-                if (message.data.type === "request") {
-                    console.log("got request", message.data)
-                    if (message.data.request.type === "props") {
-                        const iframe = document.getElementById("iFrame")
-                        iframe.contentWindow.postMessage({ type: "resource", resource: { type: "props", props: testProps } }, "*")
-
-                    }
-                }
-            }
+  useEffect(() => {
+    const handler = (message) => {
+      if (message.data.source === "APP") {
+        if (message.data.type === "request") {
+          console.log("got request", message.data);
+          if (message.data.request.type === "props") {
+            const iframe = document.getElementById("iFrame");
+            iframe.contentWindow.postMessage(
+              {
+                type: "resource",
+                resource: { type: "props", props: testProps },
+              },
+              "*"
+            );
+          }
         }
-        window.addEventListener("message", handler)
-        return () => {
-            window.removeEventListener("message", handler)
-        }
-    }, [testProps])
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => {
+      window.removeEventListener("message", handler);
+    };
+  }, [testProps]);
 
-    useEffect(() => {
-        const handler = (message) => {
-            if (message.data.source === "APP") {
-                console.log(message.data)
-                if (message.data.type === "elementDrop") {
-                    messageListener.onElementDrop(message.data)
-                }
-                if (message.data.type === "request") {
-                    const request = message.data.request
-                    if (request.type === "component") {
-                        const iframe = document.getElementById("iFrame")
-                        iframe.contentWindow.postMessage({ type: "resource", resource: { type: "component", component: componentConfig } }, "*")
-                    }
-                }
-            }
+  useEffect(() => {
+    const handler = (message) => {
+      if (message.data.source === "APP") {
+        console.log(message.data);
+        if (message.data.type === "elementDrop") {
+          messageListener.onElementDrop(message.data);
         }
-        window.addEventListener("message", handler)
-        setTimeout(async () => {
-            const iframe = document.getElementById("iFrame")
-
-            if (iframe) {
-                iframe.contentWindow.postMessage({ func: '()=>{console.log(" Hello World") }' }, "*")
-            }
-        }, 500)
-        return () => {
-            window.removeEventListener("message", handler)
+        if (message.data.type === "request") {
+          const request = message.data.request;
+          if (request.type === "component") {
+            const iframe = document.getElementById("iFrame");
+            iframe.contentWindow.postMessage(
+              {
+                type: "resource",
+                resource: { type: "component", component: componentConfig },
+              },
+              "*"
+            );
+          }
         }
-    }, [messageListener, componentConfig])
+      }
+    };
+    window.addEventListener("message", handler);
+    setTimeout(async () => {
+      const iframe = document.getElementById("iFrame");
 
+      if (iframe) {
+        iframe.contentWindow.postMessage(
+          { func: '()=>{console.log(" Hello World") }' },
+          "*"
+        );
+      }
+    }, 500);
+    return () => {
+      window.removeEventListener("message", handler);
+    };
+  }, [messageListener, componentConfig]);
 
     return (
       <DragContext.Provider value={{ messageListener }}>
