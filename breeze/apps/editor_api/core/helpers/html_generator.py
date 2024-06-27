@@ -43,7 +43,10 @@ class HTMLGenerator:
 
     def generateHTML(self,config_id):
         # print("---", config)
-        config=self.config["html_elements"][config_id["_id"]]
+        try:
+            config=self.config["html_elements"][config_id["_id"]]
+        except:
+            return ""
         if config.get('type') == 'Element':
             # print(config)
             if config.get('elementType',"") == 'CUSTOM':
@@ -86,22 +89,22 @@ class HTMLGenerator:
         elif config.get('type') == 'text':
             return config['text']
         
-        elif config.get("type") == "Expression":
+        # elif config.get("type") == "Expression":
 
-            children_code = "\n".join(self.generateHTML(child) for child in config.get("children", []))
-            return f"""
-                {{  {children_code} }}
-            """
+        #     children_code = "\n".join(self.generateHTML(child) for child in config.get("children", []))
+        #     return f"""
+        #         {{  {children_code} }}
+        #     """
 
         elif config.get("type") in   ["map", "forEach"]:
             callback_params = config.get("callbackParams", ["item", "index"])
             children_code = "\n".join(self.generateHTML(child) for child in config.get("children", []))
 
             return f"""
-                    {config["variable"]}.{config.get("type")}( ({", ".join(callback_params)}) => {{
+                    {{{config["variable"]}.{config.get("type")}( ({", ".join(callback_params)}) => {{
                         {config.get("code", "")} 
-                        return {children_code}
-                    }})
+                        return <>{children_code}</>
+                    }})}}
                 """
 
         elif config.get('type') == 'condition':
@@ -110,14 +113,14 @@ class HTMLGenerator:
                 false_case_code = self.generateHTML(config.get("falseCase", {}))
 
                 return f"""
-                    {config["variable"]} ? 
-                        {true_case_code if 'trueCase' in config else ''}
+                    {{{config["variable"]} ? 
+                        <>{true_case_code if 'trueCase' in config else ''}</>
                     :
-                        {false_case_code if 'falseCase' in config else ''}
-                    
+                        <>{false_case_code if 'falseCase' in config else ''}</>
+                    }}
                 """
 
         elif config.get('type') == "code":
-                return f""" {config['code']} """
+                return f"""{{ {config['code']} }}"""
         
         return ""
