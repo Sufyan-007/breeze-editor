@@ -3,7 +3,7 @@ import { Container, Button, Form, Row, Col, Toast } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
 import MonacoEditor from "../common/MonacoEditor";
 import { useParams } from "react-router";
-// import LifeCycleCard from "./LifeCycleCard";
+import LifeCycleCard from "./LifeCycleCard";
 import Offcanvas from "../common/Offcanvas";
 
 function LifeCycleSection() {
@@ -305,7 +305,7 @@ function LifeCycleSection() {
           <div>
             {lifecycle.map((lifecycle, index) => (
               <div className="m-2">
-                {/* <LifeCycleCard
+                <LifeCycleCard
                   lifeCycleObj={lifecycle}
                   onEdit={() => {}}
                   onDelete={() => {
@@ -313,7 +313,7 @@ function LifeCycleSection() {
                   }}
                   constantsList={constantsList}
                   updateLifeCycle={(value) => handleEditLifecycle(index, value)}
-                /> */}
+                />
               </div>
             ))}
           </div>

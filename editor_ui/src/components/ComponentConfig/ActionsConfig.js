@@ -1,11 +1,11 @@
 import React, { useState, useContext } from "react";
-// import Offcanvas from "../common/Offcanvas";
-// import VariableForm from "./ActionsConfigForms/VariablesConfigForm";
-// import FunctionConfigForm from "./ActionsConfigForms/FunctionConfigForm";
-// import LifecycleConfigForm from "./ActionsConfigForms/LifecycleConfigForm";
-// import HookConfigForm from "./ActionsConfigForms/HookConfigForm";
-// import ImportConfigForm from "./ActionsConfigForms/ImportConfigForm";
-// import PropConfigForm from "./ActionsConfigForms/PropConfigForm";
+import Offcanvas from "../common/Offcanvas";
+import VariableForm from "./ActionsConfigForms/VariablesConfigForm";
+import FunctionConfigForm from "./ActionsConfigForms/FunctionConfigForm";
+import LifecycleConfigForm from "./ActionsConfigForms/LifecycleConfigForm";
+import HookConfigForm from "./ActionsConfigForms/HookConfigForm";
+import ImportConfigForm from "./ActionsConfigForms/ImportConfigForm";
+import PropConfigForm from "./ActionsConfigForms/PropConfigForm";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
 import {
@@ -109,76 +109,76 @@ function ActionsConfig() {
     handleClose();
   };
 
-//   const renderForm = () => {
-//     switch (formType) {
-//       case "stateVars":
-//         return (
-//           <VariableForm
-//             onSubmit={handleFormSubmit}
-//             formData={formData}
-//             isEditing={isEditing}
-//           />
-//         );
-//       case "refVars":
-//         return (
-//           <VariableForm
-//             onSubmit={handleFormSubmit}
-//             formData={formData}
-//             isEditing={isEditing}
-//           />
-//         );
-//       case "otherVars":
-//         return (
-//           <VariableForm
-//             onSubmit={handleFormSubmit}
-//             formData={formData}
-//             isEditing={isEditing}
-//           />
-//         );
-//       case "function":
-//         return (
-//           <FunctionConfigForm
-//             onSubmit={handleFormSubmit}
-//             formData={formData}
-//             isEditing={isEditing}
-//           />
-//         );
-//       case "lifecycle":
-//         return (
-//           <LifecycleConfigForm
-//             onSubmit={handleFormSubmit}
-//             formData={formData}
-//             isEditing={isEditing}
-//           />
-//         );
-//       case "hook":
-//         return (
-//           <HookConfigForm
-//             onSubmit={handleFormSubmit}
-//             formData={formData}
-//             isEditing={isEditing}
-//           />
-//         );
-//       case "imports":
-//         return (
-//           <ImportConfigForm
-//             onSubmit={handleFormSubmit}
-//             formData={formData}
-//             isEditing={isEditing}
-//           />
-//         );
-//       case "propsVars":
-//         return (
-//           <PropConfigForm
-//             onSubmit={handleFormSubmit}
-//             formData={formData}
-//             isEditing={isEditing}
-//           />
-//         );
-//       default:
-//         return null;
-//     }
-//   };
+  const renderForm = () => {
+    switch (formType) {
+      case "stateVars":
+        return (
+          <VariableForm
+            onSubmit={handleFormSubmit}
+            formData={formData}
+            isEditing={isEditing}
+          />
+        );
+      case "refVars":
+        return (
+          <VariableForm
+            onSubmit={handleFormSubmit}
+            formData={formData}
+            isEditing={isEditing}
+          />
+        );
+      case "otherVars":
+        return (
+          <VariableForm
+            onSubmit={handleFormSubmit}
+            formData={formData}
+            isEditing={isEditing}
+          />
+        );
+      case "function":
+        return (
+          <FunctionConfigForm
+            onSubmit={handleFormSubmit}
+            formData={formData}
+            isEditing={isEditing}
+          />
+        );
+      case "lifecycle":
+        return (
+          <LifecycleConfigForm
+            onSubmit={handleFormSubmit}
+            formData={formData}
+            isEditing={isEditing}
+          />
+        );
+      case "hook":
+        return (
+          <HookConfigForm
+            onSubmit={handleFormSubmit}
+            formData={formData}
+            isEditing={isEditing}
+          />
+        );
+      case "imports":
+        return (
+          <ImportConfigForm
+            onSubmit={handleFormSubmit}
+            formData={formData}
+            isEditing={isEditing}
+          />
+        );
+      case "propsVars":
+        return (
+          <PropConfigForm
+            onSubmit={handleFormSubmit}
+            formData={formData}
+            isEditing={isEditing}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   const renderDraggableList = (items, type) => (
     <div>
@@ -239,14 +239,14 @@ function ActionsConfig() {
         </div>
       </div>
 
-      {/* <Offcanvas
+      <Offcanvas
         isOpen={isOffcanvasOpen}
         onClose={handleClose}
         title="Action Configuration"
         width="450px"
       >
         <div className="px-1">{renderForm()}</div>
-      </Offcanvas> */}
+      </Offcanvas>
     </>
   );
 }

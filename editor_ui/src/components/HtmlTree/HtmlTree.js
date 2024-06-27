@@ -6,7 +6,6 @@ import { ComponentContext } from "../ComponentConfig/ComponentConfigPage"
 
 export default function HtmlTree({ htmlId, className }) {
     const { componentConfig, sidebarService } = useContext(ComponentContext)
-    
     const value = componentConfig.html_elements[htmlId]
     const ref = useRef()
 
@@ -25,14 +24,14 @@ export default function HtmlTree({ htmlId, className }) {
             sub.unsubscribe()
             updateSub?.unsubscribe()
         }
-    }, [])
+    }, [sidebarService,htmlId])
 
     function selectElem(){
         sidebarService.setSelectedElem(htmlId)
     }
 
     return (
-        <div className={className} >
+        <div className={className}>
             {value.type === "Element" ?
                 <Html value={value} htmlId={htmlId} selectElem={selectElem} reference={ref} />
                 :

@@ -6,7 +6,6 @@ export async function getAppBasicConfig(projectName) {
 }
 
 export async function getComponentConfig(projectName,componentName) {
-    console.log(projectName,componentName)
     const config = await (await fetch(HOST+"/editor/get-components/" + projectName+"/",{
         method:"POST",
         headers: { 'Content-Type': 'application/json' },

@@ -2,7 +2,7 @@ import { useContext, useMemo, useEffect, useState } from "react";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
 
-// import TextElement from "../SidebarConfigHelper/components/TextElementConfig";
+import TextElement from "../SidebarConfigHelper/components/TextElementConfig";
 import HtmlElementConfig from "../SidebarConfigHelper/components/HtmlElementConfig";
 
 export default function ElementConfigSidebar({ config }) {
@@ -15,6 +15,8 @@ export default function ElementConfigSidebar({ config }) {
     [componentConfig, selectedElement]
   );
   const [isLoading, setIsLoading] = useState(false);
+  const availableFunctions = componentConfig.resources;
+
 
   useEffect(() => {
     sidebarService.getSelectedElem().subscribe((elem) => {
@@ -87,20 +89,21 @@ export default function ElementConfigSidebar({ config }) {
               className="btn-close-white btn-close"
               onClick={makeSelectedElementNull}
             ></button>
-            {/* {element.type === "text" && (
+            {element.type === "text" && (
               <TextElement
                 makeSelectedElementNull={makeSelectedElementNull}
                 handleUpdateClick={handleUpdateClick}
                 element={element}
                 isLoading={isLoading}
               />
-            )} */}
+            )}
             {element.type === "Element" && (
               <HtmlElementConfig
                 element={element}
                 makeSelectedElementNull={makeSelectedElementNull}
                 handleUpdateClick={handleUpdateClick}
                 isLoading={isLoading}
+                availableFunctions={availableFunctions}
               />
             )}
           </div>

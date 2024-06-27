@@ -5,14 +5,12 @@ class FunctionCodeGenerator:
         func_name = ""
         if function_def['isAnonymous'] is False:
             func_name = f"const {function_def['name']} = "
-
         
-        # print(function_def)
         function_code = f"""
 
             {func_name} {"" if function_def['isAsync'] is not True else "async"} {FunctionCodeGenerator.get_parameters_code(function_def)} => {{
                 
-                {function_def['body']}
+                {function_def['functionBody']}
 
             }}
 

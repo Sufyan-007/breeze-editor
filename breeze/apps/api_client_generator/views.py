@@ -37,7 +37,7 @@ class ApiClientGenerator(View):
 
             elif collectionType.lower() == 'openapi' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
                 open_api_converter = OpenapiConverter()
-                converted_data = open_api_converter.prepare_api_models(json_data)
+                converted_data = open_api_converter.prepare_api_models(json_data, project_name)
                 
                 ## for auth.json
                 security_schemes_models = converted_data.get("security_schemes_models")

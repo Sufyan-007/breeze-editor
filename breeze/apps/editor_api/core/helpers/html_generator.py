@@ -25,22 +25,20 @@ class HTMLGenerator:
             #  print(FunctionCodeGenerator.generate_function(value.get('value'), {}))
             ref = value.get("$ref",None)
             if ref:
-                for func in self.config["functions"]:
-                    if func["$id"]==ref:
-                        related_func_config=func
+                for resource in self.config["resources"]:
+                    if resource["id"]==ref:
+                        related_func_config=resource["body"]
+                        related_func_config["name"]=resource["name"]
                         break
                 else:
-                    related_func_config={
-                        "parameters": { "list": [] },
-                        "isAnonymous": True,
-                        "isAsync": False,
-                        "body": "alert(\"Function reference not defined\")"
-                    }
+                    raise IndexError("Could not find %s" % ref)
             else:
                 related_func_config = value.get('value')
-            related_func_config = copy.deepcopy(related_func_config)
-            related_func_config["isAnonymous"]=True
-            val= f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
+                related_func_config["isAnonymous"]=True
+            if related_func_config["isAnonymous"]:
+                val= f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
+            else:
+                val = "{%s}" % related_func_config["name"]
         return f"{attr}={val}"
 
     def generateHTML(self,config_id):
