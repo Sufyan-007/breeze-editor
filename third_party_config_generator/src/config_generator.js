@@ -6,7 +6,7 @@ const { SyntaxKind } = require('typescript');
 const { HandlePropTypes } = require('./handle_prop_types');
 const { DecodePropType } = require('./decodePropTypes');
 const { handleConfigFileGeneration } = require('./store_config');
-const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKeyForProcessStatus, getAbsoluteStorageDirForLib } = require('./helper');
+const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKeyForProcessStatus, getAbsoluteStorageDirForLib, filterReturnType } = require('./helper');
 const { INDEX_FILE_NAME } = require('./consts');
 const { FindDeclaration } = require('./declarationFinder');
 
@@ -102,6 +102,18 @@ function isAlreadyInExpList(exports, expKey) {
     return exports.includes(expKey);
 }
 
+function checkComponentForFunctionDeclaration(exportVarSymbol){
+    const symbol = getDeclaration(exportVarSymbol).getType().getSymbol()
+
+    if (symbol) {
+        const isFunctionDeclaration = symbol.getValueDeclaration()?.getKind() == SyntaxKind.FunctionDeclaration;
+        if (isFunctionDeclaration) {
+                return isReturnJSX(symbol.getValueDeclaration());
+            }
+
+        }
+}
+
 // Process exports variable
 function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo) {
 
@@ -156,16 +168,9 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
             // declare const _default: typeof DataTable;
             // export default _default;
             if (attributesOfVar.length == 0 && (exportVarSymbol instanceof Symbol)) {
-                const symbol =  getSymbolOrAliasSymbol(getDeclaration(exportVarSymbol).getType())
-                isComponent = isComponentBySymbol(symbol);
+                isComponent = checkComponentForFunctionDeclaration(exportVarSymbol);
             } else {
                 // Determine if it is component or not
-                isComponent = checkIfComponentType(attributesOfVar)
-
-                if (!isComponent) {
-                    isComponent = isComponentBySymbol(exportVarSymbol);                    
-                }
-            }
                 isComponent = checkIfComponentType(attributesOfVar);
 
                 // If declared Like,
@@ -178,14 +183,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
 
 
                 if(!isComponent && exportVarSymbol instanceof Symbol){
-                    const symbol = getDeclaration(exportVarSymbol).getType().getSymbol();
-                    if (symbol) {
-                        const isFunctionDeclaration = symbol.getValueDeclaration()?.getKind() == SyntaxKind.FunctionDeclaration;
-                        if (isFunctionDeclaration) {
-                            isComponent = isReturnJSX(symbol.getValueDeclaration());
-                        }
-    
-                    }
+                    isComponent = checkComponentForFunctionDeclaration(exportVarSymbol);
                 }
                 }
 

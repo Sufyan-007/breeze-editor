@@ -141,6 +141,12 @@ function getAbsoluteStorageDirForLib(libInfo){
     return `${libInfo.storePath}/${libInfo.libName}_${libInfo.libVersion}` ;
 }
 
+function filterReturnType(text){
+    let pattern = /import\(.*?\)\./
+    return text.replace(pattern,"");
+    // return text.match(pattern) === null ? false : true ;
+}
+
 module.exports = {
     getAppRootDir,
     findTypeDefinitionFile,
@@ -152,5 +158,6 @@ module.exports = {
     writeJsonFile,
     getLibraryProcessStatus,
     getKeyForProcessStatus,
-    getAbsoluteStorageDirForLib
+    getAbsoluteStorageDirForLib,
+    filterReturnType
 }
