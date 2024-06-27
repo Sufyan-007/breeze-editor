@@ -1,11 +1,10 @@
 import React from "react";
 import { Card, ButtonGroup, Button } from "react-bootstrap";
-import DeleteIcon from "../assets/icons/delete-trash.svg";
-import EditIcon from "../assets/icons/edit-icon.svg";
-import ExportIcon from "../assets/icons/export.svg";
-import ViewIcon from "../assets/icons/view-eye.svg";
+import DeleteIcon from "../../assets/icons/delete-trash.svg";
+import EditIcon from "../../assets/icons/edit-icon.svg";
+import ViewIcon from "../../assets/icons/view-eye.svg";
 
-const CssFileCard = ({ fileName, onEdit, onDelete, onView, onDownload }) => {
+const CssFileCard = ({ fileName, onEdit, onDelete, onView }) => {
   return (
     <Card className="mb-2 bg-dark">
       <Card.Body className="p-2">
@@ -17,13 +16,6 @@ const CssFileCard = ({ fileName, onEdit, onDelete, onView, onDownload }) => {
             </Button>
             <Button variant="dark" onClick={onEdit} title="Edit">
               <img src={EditIcon} alt="" height={24} className="mx-2" />
-            </Button>
-            <Button
-              variant="dark"
-              onClick={onDownload}
-              title="Download"
-            >
-              <img src={ExportIcon} alt="" height={24} className="mx-2" />
             </Button>
             <Button variant="dark" onClick={onDelete} title="Delete">
               <img src={DeleteIcon} alt="" height={24} className="mx-2" />
