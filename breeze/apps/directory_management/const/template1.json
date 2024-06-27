@@ -1,0 +1,72 @@
+{
+  "18aea09e_651e_4cc5_9a15_ad35b0132896": {
+    "name": "src",
+    "lineage": [],
+    "id": "18aea09e_651e_4cc5_9a15_ad35b0132896",
+    "tag": "ROOT",
+    "type": "DIRECTORY"
+  },
+  "c3fda74c_5ae2_434a_aec8_7aa5a57e3124": {
+    "name": "components",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896"],
+    "id": "c3fda74c_5ae2_434a_aec8_7aa5a57e3124",
+    "tag": "COMPONENTS",
+    "type": "DIRECTORY"
+  },
+  "25fbcc3a_415e_4e29_9226_70ece7691883": {
+    "name": "com1.js",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896", "c3fda74c_5ae2_434a_aec8_7aa5a57e3124"],
+    "id": "25fbcc3a_415e_4e29_9226_70ece7691883",
+    "tag": "COMPONENTS",
+    "type": "FILE"
+  },
+  "38017151_4c6a_4b82_b251_b3a6a34aa532": {
+    "name": "com2.js",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896", "c3fda74c_5ae2_434a_aec8_7aa5a57e3124"],
+    "id": "38017151_4c6a_4b82_b251_b3a6a34aa532",
+    "tag": "COMPONENTS",
+    "type": "FILE"
+  },
+  "139c0099_f26b_4959_be78_cb746760ff4b": {
+    "name": "services",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896"],
+    "id":"139c0099_f26b_4959_be78_cb746760ff4b",
+    "tag": "SERVICES",
+    "type": "DIRECTORY"
+  },
+  "405a7a0a_c1bf_4ce8_ac11_db1acafeeb26": {
+    "name": "ser1.js",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896", "139c0099_f26b_4959_be78_cb746760ff4b"],
+    "id": "405a7a0a_c1bf_4ce8_ac11_db1acafeeb26",
+    "tag": "SERVICES",
+    "type": "FILE"
+  },
+  "59d4c6c8_a9c5_4975_ae2a_9b482f20258c": {
+    "name": "ser2.js",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896", "139c0099_f26b_4959_be78_cb746760ff4b"],
+    "id": "59d4c6c8_a9c5_4975_ae2a_9b482f20258c",
+    "tag": "SERVICES",
+    "type": "FILE"
+  },
+  "f67b4c9c_9eed_4a8b_b2a9_ce9e8024617f": {
+    "name": "index.js",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896"],
+    "id": "f67b4c9c_9eed_4a8b_b2a9_ce9e8024617f",
+    "tag": "ROOT",
+    "type": "FILE"
+  },
+  "3169a97e_f496_4b61_93bb_f4307a5e85dc": {
+    "name": "App.js",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896"],
+    "id": "3169a97e_f496_4b61_93bb_f4307a5e85dc",
+    "tag": "ROOT",
+    "type": "FILE"
+  },
+  "7136751f_7057_4ce9_996c_f2139b4be73d": {
+    "name": "App.css",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132896"],
+    "id": "7136751f_7057_4ce9_996c_f2139b4be73d",
+    "tag": "ROOT",
+    "type": "FILE"
+  }
+}

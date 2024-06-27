@@ -23,6 +23,7 @@ import Code from "./components/Code";
 import ThirdPartyApp from "./components/ThirdPartyApp";
 import Settings from "./components/Settings";
 import FolderStruArborist from "./components/FolderStructure/FolderStruArborist";
+import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
 
 export const router = createBrowserRouter([
   {
@@ -35,7 +36,8 @@ export const router = createBrowserRouter([
       { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <Root/> },
       { path: "constants", element: <ReduxConfig /> },
-      {path:"folderConfig", element:<FolderStruArborist />},
+      {path:"folderconfig", element:<FolderStruArborist />},
+      {path: "foldertemplate", element:<FolderTemplate/>},
       {
         path: "styles",
         element: <Outlet />,

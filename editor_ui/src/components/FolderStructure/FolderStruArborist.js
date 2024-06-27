@@ -58,8 +58,9 @@ const FolderStruArborist = () => {
     console.log(
       parentId,
       type,
-      lineage,
-      tag
+      lineage,"tag",
+      tag,
+      "look for tag"
     );
     try {
       const response = await fetch(
