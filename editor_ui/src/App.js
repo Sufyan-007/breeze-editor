@@ -9,7 +9,7 @@ import Sidebar from "./components/Sidebar";
 import DetailedComponent from "./components/DetailedComponent";
 import ReduxConfig from "./components/ReduxConfig";
 import CreateApp from "./components/CreateApp";
-import ApiClientRoot from "./features/api_client/index";
+import ApiClientRoot from "./features/api_client/components/Test";
 import ProjectPage, { projectLoader } from "./components/ProjectPage";
 import ComponentConfigPage, {
   configLoader,

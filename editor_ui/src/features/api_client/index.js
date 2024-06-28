@@ -6,9 +6,10 @@ import { useParams } from "react-router";
 import EditServiceFunction from "./components/EditServiceFunction";
 import ImportApi from "./components/ImportApi";
 import { generateIntermediates } from "./services/IntermediateService";
+import Test from "./components/Test";
 
 export default function ApiClient() {
-  const [view, setView] = useState("LIST_SERVICE");
+  const [view, setView] = useState("TEST");
   const [selectedServiceInfo, setSelectedServiceInfo] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -64,7 +65,7 @@ export default function ApiClient() {
       <div
         className="container-fluid d-flex flex-column"
         style={{ height: "100%" }}>
-        <Navbar variant="dark" className="justify-content-end">
+        {/* <Navbar variant="dark" className="justify-content-end" >
           <Container className="mx-0">
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse
@@ -85,10 +86,17 @@ export default function ApiClient() {
                   className="mx-3">
                   Import Api
                 </Nav.Link>
+                <Nav.Link
+                  onClick={() => {
+                    setView("TEST");
+                  }}
+                  className="mx-3">
+                  TEST
+                </Nav.Link>
               </Nav>
             </Navbar.Collapse>
           </Container>
-        </Navbar>
+        </Navbar> */}
         <div
           className="row flex-grow-1 overflow-hidden"
           style={{ height: "100%" }}>
@@ -111,6 +119,8 @@ export default function ApiClient() {
                 setView("LIST_SERVICE");
                 setShow(!show);
               }}></ImportApi>
+          ) : view === "TEST" ? (
+            <Test />
           ) : null}
         </div>
       </div>
