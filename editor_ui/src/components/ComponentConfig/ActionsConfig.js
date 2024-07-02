@@ -15,8 +15,6 @@ import {
 import { Toast } from "react-bootstrap";
 
 const menuItems = [
-  { key: "imports", label: "Imports" },
-  { key: "propsVars", label: "Props" },
   { key: "stateVars", label: "Variables" },
   { key: "function", label: "Functions" },
   { key: "lifecycle", label: "Lifecycle" },
@@ -43,6 +41,16 @@ function ActionsConfig() {
   const { projectName, componentName } = useParams();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [configOpen, setConfigOpen] = useState(true);
+  const [logicOpen, setLogicOpen] = useState(true);
+
+  const toggleConfigAccordion = () => {
+    setConfigOpen(!configOpen);
+  };
+
+  const toggleLogicAccordion = () => {
+    setLogicOpen(!logicOpen);
+  };
 
   const handleOpen = (type) => {
     setFormType(type);
@@ -194,57 +202,185 @@ function ActionsConfig() {
       {items.map((item, index) => (
         <div
           key={item.name}
-          className="d-flex"
-          style={{ marginBottom: "2px", cursor: "pointer" }}
+          className="d-flex justify-content-between"
+          style={{ marginBottom: "2px", fontSize: "14px" }}
           draggable
           onDragStart={handleDragStart(type, index)}
           onDragOver={handleDragOver}
           onDrop={handleDrop(type, index)}
-          onClick={() => handleEdit(item)}
         >
-          <strong>{item.name}</strong>
-          <div className="ms-2 fst-italic fw-lighter">{item.type}</div>
+          <div className="d-flex">
+            <strong>{item.name}</strong>
+            <div className="ms-2 fst-italic fw-lighter">{item.type}</div>
+          </div>
+          <div
+            style={{ cursor: "pointer", marginRight: "1px" }}
+            onClick={() => handleEdit(item)}
+          >
+            <i className="bi bi-pencil-square text-primary"></i>
+          </div>
         </div>
       ))}
+      {items.length === 0 && <div style={{ fontSize: "14px" }}>No actions found</div>}
     </div>
   );
 
   return (
     <>
       <div>
-        <div className="text-end">
-          <div className="dropdown">
-            <button
-              className="btn btn-secondary btn-sm"
-              type="button"
-              id="dropdownMenuButton1"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
+        {/* Props Accordion */}
+        {componentConfig.type && componentConfig.type === "CUSTOM" && (
+          <div className="accordion mb-1">
+            <div
+              className="accordion-header d-flex justify-content-between bg-secondary text-white p-1"
+              onClick={toggleConfigAccordion}
             >
-              Add
-            </button>
-            <ul
-              className="dropdown-menu"
-              aria-labelledby="dropdownMenuButton1"
-              data-bs-theme="dark"
-            >
-              {menuItems.map((item) => (
-                <li
-                  key={item.key}
-                  className="dropdown-item"
-                  onClick={() => handleOpen(item.key)}
+              <div>Component Configuration</div>
+              <div>
+                {configOpen ? (
+                  <i className="bi bi-dash"></i>
+                ) : (
+                  <i className="bi bi-plus"></i>
+                )}
+              </div>
+            </div>
+            {configOpen && (
+              <div className="accordion-content p-1">
+                <div className="d-flex justify-content-between">
+                  <strong className="mb-0 text-decoration-underline">
+                    Props
+                  </strong>
+                  <div
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleOpen("propsVars")}
+                  >
+                    <i className="bi bi-plus-circle"></i>
+                  </div>
+                </div>
+                <div>
+                  <div>
+                    {componentConfig.propsVars &&
+                      componentConfig.propsVars.map((item) => (
+                        <div
+                          key={item.name}
+                          className="d-flex justify-content-between"
+                          style={{ marginBottom: "2px", fontSize: "14px" }}
+                        >
+                          <>{item.name}</>
+                          <div
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleEdit(item)}
+                          >
+                            <i className="bi bi-pencil-square text-primary"></i>
+                          </div>
+                        </div>
+                      ))}
+                    {componentConfig.propsVars.length === 0 && (
+                      <div style={{ fontSize: "14px" }}>No Props Added</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {/* Logic Accordion */}
+        <div className="accordion mb-1">
+          <div
+            className="accordion-header d-flex justify-content-between bg-secondary text-white p-1"
+            onClick={toggleLogicAccordion}
+          >
+            <div>Logic</div>
+            <div>
+              {logicOpen ? (
+                <i className="bi bi-dash"></i>
+              ) : (
+                <i className="bi bi-plus"></i>
+              )}
+            </div>
+          </div>
+          {logicOpen && (
+            <div className="accordion-content p-1">
+              {/* Imports */}
+              <div className="d-flex justify-content-between">
+                <strong className="mb-0 text-decoration-underline">
+                  Imports
+                </strong>
+                <div
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleOpen("imports")}
                 >
-                  {item.label}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        <div>
-          <div className="">
-            {renderDraggableList(componentConfig.propsVars, "propsVars")}
-            {renderDraggableList(componentConfig.resources, "resources")}
-          </div>
+                  <i className="bi bi-plus-circle"></i>
+                </div>
+              </div>
+              <div>
+                {componentConfig.imports.other &&
+                  componentConfig.imports.other.map((item) => (
+                    <div
+                      key={item.import_entity}
+                      className="d-flex justify-content-between"
+                      style={{ marginBottom: "2px", fontSize: "14px" }}
+                    >
+                      <div className="d-flex">
+                        <strong>{item.import_entity}</strong>
+                        <div className="ms-2 fst-italic fw-lighter">
+                          {item.from}
+                        </div>
+                      </div>
+                      {/* <div
+                        style={{ cursor: "pointer" }}
+                        onClick={() => handleEdit({type : 'imports', body: {...item}})}
+                      >
+                        <i className="bi bi-pencil-square text-primary"></i>
+                      </div> */}
+                    </div>
+                  ))}
+                {componentConfig.imports.other &&
+                  componentConfig.imports.other.length === 0 && (
+                    <div style={{ fontSize: "14px" }}> No imports found</div>
+                  )}
+              </div>
+              {/* Actions */}
+              <div className="d-flex justify-content-between mt-2">
+                <strong className="mb-0 text-decoration-underline">
+                  Actions
+                </strong>
+                <div className="dropdown">
+                  <div
+                    id="dropdownMenuButton1"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    style={{ cursor: "pointer" }}
+                  >
+                    <i className="bi bi-plus-circle"></i>
+                  </div>
+                  <ul
+                    className="dropdown-menu"
+                    aria-labelledby="dropdownMenuButton1"
+                    data-bs-theme="dark"
+                  >
+                    {menuItems.map((item) => (
+                      <li
+                        key={item.key}
+                        className="dropdown-item"
+                        onClick={() => handleOpen(item.key)}
+                      >
+                        {item.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* <div
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleOpen("imports")}
+                >
+                  <i className="bi bi-plus-circle"></i>
+                </div> */}
+              </div>
+              {renderDraggableList(componentConfig.resources, "resources")}
+            </div>
+          )}
         </div>
       </div>
 
