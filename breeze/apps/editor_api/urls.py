@@ -27,6 +27,7 @@ from .views import ComponentConfigWriter
 from .views import ComponentConfigOrder
 from .views import GetResources
 from .views import StylesConfig
+from .views import ASTParser
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -67,6 +68,9 @@ urlpatterns = [
         ## Attributes
         path("get-attributes/",GetAttributes.as_view()),
         path("get-resources/",GetResources.as_view()),
+        
+        # FUNCTION GENERATION TESTING
+        path("ast-parser/",ASTParser.as_view())
         
         #old apis
         # path('add-css-content/', CSSConfig.as_view()),

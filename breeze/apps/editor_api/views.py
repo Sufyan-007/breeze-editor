@@ -1,4 +1,5 @@
 
+import subprocess
 from django.http import JsonResponse, Http404, HttpResponse
 import json
 from .core.app_editor import AppEditor
@@ -20,6 +21,7 @@ from django.core.files.base import ContentFile
 from .core.helpers.get_attributes_utils import get_attributes_logic
 from .core.helpers.get_component_list import update_components
 
+from .core.helpers.function_ast_parser import FunctionParser
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -915,3 +917,24 @@ class GetResources(APIView):
             return JsonResponse(app_editor.get_resource(data["component"],data.get("resource_id")),status=200)
         except IndexError:
             return JsonResponse({},status=404)
+        
+@method_decorator(csrf_exempt,name="dispatch")
+class ASTParser(APIView):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            function_generator = FunctionParser()
+            function_code = function_generator.generate_function_code(data)
+            try:
+                function_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=function_code, text=True)
+
+                with open(
+                    "/home/sufyan/Documents/Projects/Breeze_editor_repo/generated_projects/temps/app_generated_function.js", 'w'
+                    ) as file:
+                    file.write(function_code)
+                pass
+            except:
+                pass
+            return JsonResponse({"function": function_code},status=200)
+        except:
+            return JsonResponse({}, status=500)

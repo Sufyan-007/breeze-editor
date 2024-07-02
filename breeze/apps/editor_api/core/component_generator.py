@@ -101,8 +101,9 @@ class ComponentGenerator():
         # print("REACTCOMPONENT")
         # print(react_component_code)
 
-        formatted_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=react_component_code, text=True)
-
+        # formatted_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=react_component_code, text=True)
+        formatted_code = react_component_code
+        
         # Create parent dir if not exists
         create_parent_dir_if_not_exists(output_file)
 
