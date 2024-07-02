@@ -1,6 +1,13 @@
-export const fetchFolderConfig = async () => {
+export const fetchFolderConfig = async (projectName) => {
   try {
-    const response = await fetch("http://127.0.0.1:8000/directory-management/folder-config");
+    const response = await fetch(
+      "http://127.0.0.1:8000/directory-management/folder-config/",
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectName }),
+      }
+    );
     if (!response.ok) {
       throw new Error(`Network response was not ok: ${response.statusText}`);
     }

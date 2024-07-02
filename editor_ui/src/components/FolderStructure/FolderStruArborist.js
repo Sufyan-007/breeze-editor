@@ -2,18 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Tree } from "react-arborist";
 import { fetchFolderConfig } from "../../services/DirectoryManagementService";
 import "../../css/folder.css";
+import { useParams } from "react-router-dom";
 import Node from "../FolderStructure/Node";
 
 const FolderStruArborist = () => {
   const [treeData, setTreeData] = useState(null);
+  const { projectName } = useParams();
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(projectName);
+  }, [projectName]);
 
-    const fetchData = async () => {
+    const fetchData = async (projectName) => {
       try {
-        const data = await fetchFolderConfig();
+        const data = await fetchFolderConfig(projectName);
         console.log("Fetched data:", data);
         const convertedTreeData = transformData(data);
         console.log("Converted tree data:", convertedTreeData);

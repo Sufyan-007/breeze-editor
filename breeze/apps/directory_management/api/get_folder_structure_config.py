@@ -4,7 +4,10 @@ import json, uuid , os
 
 class GetFolderConfig(View):
     def get(self , request):
-        config_path = "/home/varanpreet/Desktop/breezeui/configurations/creator/directory_management.json"
+        print("hi")
+        data=json.loads(request.body)
+        print(data,"data")
+        config_path = "/home/varanpreet/Desktop/breezeui/configurations/test3/directory_management.json"
         try:
             with open(config_path,'r') as file:
                 data = json.load(file)

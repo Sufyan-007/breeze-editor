@@ -1,7 +1,15 @@
-import React from 'react';
+import React from "react";
+import { createNewProject } from "../../services/ProjectService";
 import "../../css/FolderTemplate.css";
 
-function FolderTemplate() {
+const FolderTemplate = ({ onTemplateSelect }) => {
+  async function selectTemplate(template) {
+    const templateNumber = template.replace(/[^\d]/g, ""); // This removes all non-numeric character
+    alert(`Template ${templateNumber} selected!`);
+    onTemplateSelect(template); //call the parent callback with the selected template 
+
+  }
+
   return (
     <>
       <div className="container">
@@ -21,7 +29,12 @@ function FolderTemplate() {
               <div className="level-2">App.js</div>
               <div className="level-2">App.css</div>
             </div>
-            <button onClick={() => selectTemplate("temp1")}>Select</button>
+            <button
+              type="button"
+              onClick={() => selectTemplate("temp1")}
+            >
+              Select
+            </button>
           </div>
           <div className="card">
             <h2>Template 2</h2>
@@ -44,7 +57,12 @@ function FolderTemplate() {
               <div className="level-2">App.js</div>
               <div className="level-2">App.css</div>
             </div>
-            <button onClick={() => selectTemplate("temp2")}>Select</button>
+            <button
+              type="button"
+              onClick={() => selectTemplate("temp2")}
+            >
+              Select
+            </button>
           </div>
           <div className="card">
             <h2>Template 3</h2>
@@ -69,18 +87,17 @@ function FolderTemplate() {
               <div className="level-2">App.js</div>
               <div className="level-2">App.css</div>
             </div>
-            <button onClick={() => selectTemplate("temp3")}>Select</button>
+            <button
+              type="button"
+              onClick={() => selectTemplate("temp3")}
+            >
+              Select
+            </button>
           </div>
         </div>
       </div>
     </>
   );
-
-  function selectTemplate(template) {
-    alert(`Selected template: ${template}`);
-    // Implement the logic to handle the template selection
-    // For example, you can navigate to a different page or send a request to the backend
-  }
-}
+};
 
 export default FolderTemplate;

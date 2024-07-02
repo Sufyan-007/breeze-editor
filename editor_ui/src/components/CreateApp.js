@@ -6,6 +6,7 @@ import Multiselect from "multiselect-react-dropdown";
 import { useForm } from "react-hook-form";
 import Modal from "react-bootstrap/Modal";
 import { ToastContainer, Toast } from "react-bootstrap";
+import FolderTemplate from "./FolderTemplateSelect/FolderTemplate";
 
 export default function CreateApp({ ...props }) {
   const {
@@ -30,9 +31,11 @@ export default function CreateApp({ ...props }) {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Uploading...");
   const [showModal, setModalShow] = useState(false);
+  const [showFolderTemplate, setShowFolderTemplate] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const ws = useRef(null);
   const intervalId = useRef(null);
-  
+
   const progressMessages = useMemo(() => {
     return {
       5: "Initializing your project",
@@ -40,12 +43,14 @@ export default function CreateApp({ ...props }) {
       50: "Configuring Services",
       60: "Setting up your project",
       80: "This might take a while",
-      90: "Almost there.."
+      90: "Almost there..",
     };
-  }, [])
+  }, []);
 
   React.useEffect(() => {
-    ws.current = new WebSocket(`ws://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}/ws/project-progress/`);
+    ws.current = new WebSocket(
+      `ws://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}/ws/project-progress/`
+    );
     ws.current.onopen = () => {
       console.log("Connected to the WebSocket");
     };
@@ -53,7 +58,7 @@ export default function CreateApp({ ...props }) {
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       const progress = message?.progress;
-      
+
       if (progress === 20 && intervalId.current === null) {
         incrementProgress();
       } else if (progress === 50) {
@@ -120,14 +125,33 @@ export default function CreateApp({ ...props }) {
     setValue("styling", selectedList);
   };
 
+  const handleNext = () => {
+    setShowFolderTemplate(true);
+  };
+
+  const handleBack = () => {
+    setShowFolderTemplate(false);
+  };
+
   const onSubmit = (data) => {
+    console.log(data, "data on clicking create app ");
     data.styling = selectedValues.map((option) => option.name);
+     const formData = {
+       ...data,
+       selectedTemplate, // Spread the selectedTemplate value here
+     };
+     console.log(formData,"see the template value");
     setLoading(true);
     setModalShow(true);
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify({ command: "start", project_id: data.name.toLowerCase().replace(/ /g, "_") }));
+      ws.current.send(
+        JSON.stringify({
+          command: "start",
+          project_id: data.name.toLowerCase().replace(/ /g, "_"),
+        })
+      );
     }
-    createNewProject(data)
+    createNewProject(formData)
       .then((response) => {
         if (response.error) {
           throw new Error(response.error);
@@ -152,6 +176,11 @@ export default function CreateApp({ ...props }) {
       });
   };
 
+   const handleTemplateSelect = (template) => {
+     setSelectedTemplate(template);
+     console.log("Selected Template:", template);
+    
+   };
   return (
     <>
       <div
@@ -161,7 +190,7 @@ export default function CreateApp({ ...props }) {
       >
         <div className="row mt-md-4 mt-3" id="Main-0">
           <div
-            className="card col-md-6 col-11 m-auto px-4 py-3"
+            className={`card col-11 m-auto px-4 py-3 ${!showFolderTemplate ? "col-md-6" : ""}`}
             id="Main-0-0"
             style={{
               backgroundColor: "#36454F",
@@ -169,189 +198,270 @@ export default function CreateApp({ ...props }) {
             }}
           >
             <div className="card-body" id="Main-0-0-0">
-              <h3 className="card-title mb-3 text-white" id="Main-0-0-0-1">
-                Create New Project
-              </h3>
-              <div className="row" id="Main-0-0-0-0">
-                <div className="col-12" id="Main-0-0-0-0-0">
-                  <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-0">
-                      <input
-                        className="form-control"
-                        type="text"
-                        placeholder="Application Name"
-                        {...register("name", {
-                          required: "This field is required",
-                        })}
-                      />
-                      {errors.name && (
-                        <div className="text-danger mt-1">
-                          {errors.name.message}
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-1">
-                      <input
-                        className="form-control"
-                        type="text"
-                        placeholder="Author"
-                        {...register("author")}
-                      />
-                    </div>
-                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-2">
-                      <input
-                        className="form-control"
-                        type="text"
-                        placeholder="Description"
-                        {...register("description")}
-                      />
-                    </div>
-                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-3">
-                      <select
-                        className="form-control"
-                        {...register("framework", { required: true })}
-                      >
-                        <option value="" disabled>
-                          Technology
-                        </option>
-                        <option value="react">React</option>
-                        <option value="vue" disabled>
-                          Vue
-                        </option>
-                        <option value="angular" disabled>
-                          Angular
-                        </option>
-                      </select>
-                      {errors.framework && (
-                        <div className="text-danger mt-1">
-                          This field is required.
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
-                      <select
-                        className="form-control"
-                        {...register("language", { required: true })}
-                      >
-                        <option value="" disabled>
-                          Language
-                        </option>
-                        <option value="javascript">Javascript</option>
-                        <option value="typescript" disabled>
-                          TypeScript
-                        </option>
-                      </select>
-                      {errors.language && (
-                        <div className="text-danger mt-1">
-                          This field is required.
-                        </div>
-                      )}
-                    </div>
+              {!showFolderTemplate && (
+                <h3 className="card-title mb-3 text-white" id="Main-0-0-0-1">
+                  Create New Project
+                </h3>
+              )}
+              <form onSubmit={handleSubmit(onSubmit)}>
+                {!showFolderTemplate && (
+                  <div className="row" id="Main-0-0-0-0">
+                    <div className="col-12" id="Main-0-0-0-0-0">
+                      <div className="form-group mb-3" id="Main-0-0-0-0-0-0-0">
+                        <input
+                          className="form-control"
+                          type="text"
+                          placeholder="Application Name"
+                          {...register("name", {
+                            required: "This field is required",
+                          })}
+                        />
+                        {errors.name && (
+                          <div className="text-danger mt-1">
+                            {errors.name.message}
+                          </div>
+                        )}
+                      </div>
+                      <div className="form-group mb-3" id="Main-0-0-0-0-0-0-1">
+                        <input
+                          className="form-control"
+                          type="text"
+                          placeholder="Author"
+                          {...register("author")}
+                        />
+                      </div>
+                      <div className="form-group mb-3" id="Main-0-0-0-0-0-0-2">
+                        <input
+                          className="form-control"
+                          type="text"
+                          placeholder="Description"
+                          {...register("description")}
+                        />
+                      </div>
+                      <div className="form-group mb-3" id="Main-0-0-0-0-0-0-3">
+                        <select
+                          className="form-control"
+                          {...register("framework", { required: true })}
+                        >
+                          <option value="" disabled>
+                            Technology
+                          </option>
+                          <option value="react">React</option>
+                          <option value="vue" disabled>
+                            Vue
+                          </option>
+                          <option value="angular" disabled>
+                            Angular
+                          </option>
+                        </select>
+                        {errors.framework && (
+                          <div className="text-danger mt-1">
+                            This field is required.
+                          </div>
+                        )}
+                      </div>
+                      <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
+                        <select
+                          className="form-control"
+                          {...register("language", { required: true })}
+                        >
+                          <option value="" disabled>
+                            Language
+                          </option>
+                          <option value="javascript">Javascript</option>
+                          <option value="typescript" disabled>
+                            TypeScript
+                          </option>
+                        </select>
+                        {errors.language && (
+                          <div className="text-danger mt-1">
+                            This field is required.
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-5">
-                      <Multiselect
-                        className="form-control p-0 text-gray"
-                        options={stylingComponents}
-                        selectedValues={selectedValues}
-                        onSelect={onSelect}
-                        onRemove={onRemove}
-                        displayValue="name"
-                        showCheckbox={true}
-                        placeholder="Styling Components"
-                        style={{}}
-                      />
-                      {errors.styling && (
-                        <div className="text-danger mt-1">
-                          This field is required.
-                        </div>
+                      <div className="form-group mb-3" id="Main-0-0-0-0-0-0-5">
+                        <Multiselect
+                          className="form-control p-0 text-gray"
+                          options={stylingComponents}
+                          selectedValues={selectedValues}
+                          onSelect={onSelect}
+                          onRemove={onRemove}
+                          displayValue="name"
+                          showCheckbox={true}
+                          placeholder="Styling Components"
+                          style={{}}
+                        />
+                        {errors.styling && (
+                          <div className="text-danger mt-1">
+                            This field is required.
+                          </div>
+                        )}
+                      </div>
+                      <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
+                        <select
+                          className="form-control"
+                          {...register("buildTool", { required: true })}
+                        >
+                          <option value="" disabled>
+                            Build Tool
+                          </option>
+                          <option value="create-react-app">
+                            Create React App
+                          </option>
+                          <option value="vite" disabled>
+                            Vite
+                          </option>
+                        </select>
+                        {errors.buildTool && (
+                          <div className="text-danger mt-1">
+                            This field is required.
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        className="d-flex justify-content-center align-items-center"
+                        id="Main-0-0-0-0-0-0-6"
+                      ></div>
+
+                      {loading && (
+                        <Modal
+                          show={showModal}
+                          size="lg"
+                          aria-labelledby="contained-modal-title-vcenter"
+                          centered
+                        >
+                          <Modal.Header>
+                            <Modal.Title id="contained-modal-title-vcenter">
+                              Creating your project
+                            </Modal.Title>
+                          </Modal.Header>
+                          <Modal.Body>
+                            <div className="text-center mt-3">
+                              <div className="progress">
+                                <div
+                                  className="progress-bar"
+                                  role="progressbar"
+                                  aria-valuenow={{ progress }}
+                                  aria-valuemin="0"
+                                  aria-valuemax="100"
+                                  style={{ width: `${progress}%` }}
+                                  aria-label="project completion bar"
+                                >
+                                  {progress}%
+                                </div>
+                              </div>
+                              <div className="d-flex justify-content-center text center">
+                                <div
+                                  className="loader-wheel"
+                                  style={{ marginTop: "13px" }}
+                                >
+                                  <img
+                                    height={20}
+                                    src={loadingIcon}
+                                    alt="loading"
+                                  />
+                                </div>
+                                <div
+                                  className="progress-text mt-3"
+                                  style={{ marginLeft: "10px" }}
+                                >
+                                  {message}
+                                </div>
+                              </div>
+                            </div>
+                          </Modal.Body>
+                        </Modal>
                       )}
                     </div>
-                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-4">
-                      <select
-                        className="form-control"
-                        {...register("buildTool", { required: true })}
-                      >
-                        <option value="" disabled>
-                          Build Tool
-                        </option>
-                        <option value="create-react-app">
-                          Create React App
-                        </option>
-                        <option value="vite" disabled>
-                          Vite
-                        </option>
-                      </select>
-                      {errors.buildTool && (
-                        <div className="text-danger mt-1">
-                          This field is required.
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      className="d-flex justify-content-center align-items-center"
-                      id="Main-0-0-0-0-0-0-6"
-                    >
-                      <button
-                        type="submit"
-                        // onClick={createNewApp}
-                        className="btn btn-primary bg-white"
-                        style={{ color: "#152733" }}
-                      >
-                        Create App
-                      </button>
-                    </div>
-                  </form>
-                  {loading && (
-                    <Modal
-                      show={showModal}
-                      size="lg"
-                      aria-labelledby="contained-modal-title-vcenter"
-                      centered
-                    >
-                      <Modal.Header>
-                        <Modal.Title id="contained-modal-title-vcenter">
-                          Creating your project
-                        </Modal.Title>
-                      </Modal.Header>
-                      <Modal.Body>
-                        <div className="text-center mt-3">
-                          <div className="progress">
-                            <div
-                              className="progress-bar"
-                              role="progressbar"
-                              aria-valuenow={{ progress }}
-                              aria-valuemin="0"
-                              aria-valuemax="100"
-                              style={{ width: `${progress}%` }}
-                              aria-label="project completion bar"
-                            >
-                              {progress}%
-                            </div>
-                          </div>
-                          <div className="d-flex justify-content-center text center">
-                            <div
-                              className="loader-wheel"
-                              style={{ marginTop: "13px" }}
-                            >
-                              <img
-                                height={20}
-                                src={loadingIcon}
-                                alt="loading"
-                              />
-                            </div>
-                            <div
-                              className="progress-text mt-3"
-                              style={{ marginLeft: "10px" }}
-                            >
-                              {message}
-                            </div>
+                  </div>
+                )}
+                {loading && (
+                  <Modal
+                    show={showModal}
+                    size="lg"
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                  >
+                    <Modal.Header>
+                      <Modal.Title id="contained-modal-title-vcenter">
+                        Creating your project
+                      </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <div className="text-center mt-3">
+                        <div className="progress">
+                          <div
+                            className="progress-bar"
+                            role="progressbar"
+                            aria-valuenow={{ progress }}
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            style={{ width: `${progress}%` }}
+                            aria-label="project completion bar"
+                          >
+                            {progress}%
                           </div>
                         </div>
-                      </Modal.Body>
-                    </Modal>
-                  )}
-                </div>
-              </div>
+                        <div className="d-flex justify-content-center text center">
+                          <div
+                            className="loader-wheel"
+                            style={{ marginTop: "13px" }}
+                          >
+                            <img height={20} src={loadingIcon} alt="loading" />
+                          </div>
+                          <div
+                            className="progress-text mt-3"
+                            style={{ marginLeft: "10px" }}
+                          >
+                            {message}
+                          </div>
+                        </div>
+                      </div>
+                    </Modal.Body>
+                  </Modal>
+                )}
+                {showFolderTemplate && (
+                  <FolderTemplate onTemplateSelect={handleTemplateSelect} />
+                )}
+
+                {showFolderTemplate && (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginTop: "5px",
+                    }}
+                  >
+                    <button
+                      onClick={handleBack}
+                      className="btn btn-primary bg-white"
+                      style={{ color: "#152733", margin: "5px" }}
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      // onClick={createNewApp}
+                      className="btn btn-primary bg-white"
+                      style={{ color: "#152733", margin: "5px" }}
+                    >
+                      Create App
+                    </button>
+                  </div>
+                )}
+                {!showFolderTemplate && (
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <button
+                      className="btn btn-primary bg-white"
+                      style={{ color: "#152733" }}
+                      onClick={handleNext}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </form>
             </div>
           </div>
         </div>

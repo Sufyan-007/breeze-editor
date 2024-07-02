@@ -1,6 +1,6 @@
 # from component_generator import write_components
 import subprocess
-import json
+import json, os
 from common.utils.formatter import format_by_prettier,format_val
 import pathlib
 
@@ -82,7 +82,9 @@ class AppGenerator:
 
         # Install dependecies
         self.install_dependencies()
-
+       
+       #create directory
+        self.create_directory_management_file()
         # Set base path for the components
         self.setup_base_path_for_comps()
 
@@ -292,5 +294,24 @@ class AppGenerator:
     def create_styles_file(self):
         write_file(self.app_config["APP_SOURCE_DIR"] + "/styles.js", '')
         
+    def create_directory_management_file(self):
+        selected_template = self.app_config.get('selectedTemplate')
+        if not selected_template:
+            raise ValueError("Selected template not found in app_config")
+
+        templates_path = f"/home/varanpreet/Desktop/breezeui/breeze/apps/directory_management/const/{selected_template}.json"
+        
+        if not os.path.exists(templates_path):
+            raise FileNotFoundError(f"Template file {templates_path} does not exist")
+
+        with open(templates_path, 'r') as template_file:
+            template_content = json.load(template_file)
+
+        directory_management_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "directory_management.json")
+
+        with open(directory_management_path, 'w') as dir_mgmt_file:
+            json.dump(template_content, dir_mgmt_file, indent=4)
+
+        print(f"directory_management.json created with content from {templates_path}")
 
 

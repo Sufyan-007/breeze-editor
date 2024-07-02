@@ -1,14 +1,4 @@
-/* body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  overflow: auto; 
-} */
+
 .heading{
   color:white;
   padding: 10px;
@@ -58,7 +48,8 @@
   background-color: #f4f4f4;
   padding: 10px;
   border-radius: 5px;
-  overflow-x: auto; /* Only allow horizontal scrolling if needed */
+  overflow-x: auto; 
+  height: 100%;
 }
 
 button {
