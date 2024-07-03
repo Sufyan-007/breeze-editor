@@ -151,7 +151,7 @@ class ComponentGenerator():
             html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
             
         def generate_state_var_code(var):
-            return f'const [{var["name"]}, set{var["name"].capitalize()}] = useState({format_raw_val(var["body"]["defaultValue"])});'
+            return f'const [{var["name"]}, set{var["name"][0].upper()+var["name"][1:]}] = useState({format_raw_val(var["body"]["defaultValue"])});'
 
         def generate_ref_var_code(var):
             return f'const {var["name"]} = React.useRef({format_raw_val(var["body"]["defaultValue"])});'

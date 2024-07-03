@@ -10,87 +10,97 @@ import { useWindowDimension } from '../CustomHooks/useWindowDimension'
 import Filter from "../../assets/icons/filter.svg";
 
 export const DragContext = createContext({
-    messageListener: null
-})
+  messageListener: null,
+});
+
+export const TestPropsContext = createContext({});
 
 export default function HtmlSection() {
-    const { componentConfig } = useContext(ComponentContext)
-    const [iframeSrc, setIframeSrc] = useState(`${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port)
-    const srcInput = useRef()
-    const [selected, setSelected] = useState(0)
-    const iFrameRef = useRef();
-    const { projectName, componentName } = useParams()
-    const messageListener = useMemo(() => {
-        return new MessageListenerService(projectName, componentName)
-    }, [projectName, componentName])
+  const { componentConfig } = useContext(ComponentContext);
+  const [iframeSrc, setIframeSrc] = useState(
+    `${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port
+  );
+  const srcInput = useRef();
+  const [selected, setSelected] = useState(0);
+  const iFrameRef = useRef();
+  const { projectName, componentName } = useParams();
+  const messageListener = useMemo(() => {
+    return new MessageListenerService(projectName, componentName);
+  }, [projectName, componentName]);
 
-    const [testProps, setTestProps] = useState({ prop1: "xyz" })
+  const [testProps, setTestProps] = useState({ prop1: "xyz" });
 
-    const setIframeSource = () => {
-        const newValue = srcInput.current.value;
-        setIframeSrc(newValue);
+  const setIframeSource = () => {
+    const newValue = srcInput.current.value;
+    setIframeSrc(newValue);
+  };
+
+  const [windowWidth, windowHeight] = useWindowDimension();
+
+  useEffect(() => {
+    const handler = (message) => {
+      if (message.data.source === "APP") {
+        if (message.data.type === "request") {
+          console.log("got request", message.data);
+          if (message.data.request.type === "props") {
+            const iframe = document.getElementById("iFrame");
+            iframe.contentWindow.postMessage(
+              {
+                type: "resource",
+                resource: { type: "props", props: testProps },
+              },
+              "*"
+            );
+          }
+        }
+      }
     };
+    window.addEventListener("message", handler);
+    return () => {
+      window.removeEventListener("message", handler);
+    };
+  }, [testProps]);
 
-    const [chosenElementFilter, setChosenElementFilter] = useState('FYE');
-    const elementFilterOptions = [
-      {label: 'All', value: 'All'},
-      {label: 'HTML', value: 'HTML'},
-      {label: 'Custom', value: 'CUSTOM'},
-      {label: 'Third Party', value: 'THRID_PARTY'},
-      {label: 'Frequently used', value: 'FYE'}
-    ]
-    const [windowWidth, windowHeight] = useWindowDimension();
-
-    useEffect(() => {
-        const handler = (message) => {
-            if (message.data.source === "APP") {
-                if (message.data.type === "request") {
-                    console.log("got request", message.data)
-                    if (message.data.request.type === "props") {
-                        const iframe = document.getElementById("iFrame")
-                        iframe.contentWindow.postMessage({ type: "resource", resource: { type: "props", props: testProps } }, "*")
-
-                    }
-                }
-            }
+  useEffect(() => {
+    const handler = (message) => {
+      if (message.data.source === "APP") {
+        console.log(message.data);
+        if (message.data.type === "elementDrop") {
+          messageListener.onElementDrop(message.data);
         }
-        window.addEventListener("message", handler)
-        return () => {
-            window.removeEventListener("message", handler)
+        if (message.data.type === "request") {
+          const request = message.data.request;
+          if (request.type === "component") {
+            const iframe = document.getElementById("iFrame");
+            iframe.contentWindow.postMessage(
+              {
+                type: "resource",
+                resource: { type: "component", component: componentConfig },
+              },
+              "*"
+            );
+          }
         }
-    }, [testProps])
+      }
+    };
+    window.addEventListener("message", handler);
+    setTimeout(async () => {
+      const iframe = document.getElementById("iFrame");
 
-    useEffect(() => {
-        const handler = (message) => {
-            if (message.data.source === "APP") {
-                console.log(message.data)
-                if (message.data.type === "elementDrop") {
-                    messageListener.onElementDrop(message.data)
-                }
-                if (message.data.type === "request") {
-                    const request = message.data.request
-                    if (request.type === "component") {
-                        const iframe = document.getElementById("iFrame")
-                        iframe.contentWindow.postMessage({ type: "resource", resource: { type: "component", component: componentConfig } }, "*")
-                    }
-                }
-            }
-        }
-        window.addEventListener("message", handler)
-        setTimeout(async () => {
-            const iframe = document.getElementById("iFrame")
+      if (iframe) {
+        iframe.contentWindow.postMessage(
+          { func: '()=>{console.log(" Hello World") }' },
+          "*"
+        );
+      }
+    }, 500);
+    return () => {
+      window.removeEventListener("message", handler);
+    };
+  }, [messageListener, componentConfig]);
 
-            if (iframe) {
-                iframe.contentWindow.postMessage({ func: '()=>{console.log(" Hello World") }' }, "*")
-            }
-        }, 500)
-        return () => {
-            window.removeEventListener("message", handler)
-        }
-    }, [messageListener, componentConfig])
-
-
-    return (
+  return (
+    <TestPropsContext.Provider value={{ testProps, setTestProps }}>
       <DragContext.Provider value={{ messageListener }}>
         <div className="row flex-grow-1" style={{ position: "relative" }}>
           <div
@@ -126,49 +136,20 @@ export default function HtmlSection() {
             {selected === 0 && windowWidth ? (
               <>
                 <div className="row">
-                  <div className=" d-flex" style={{overflowY: 'auto', height: `${(windowHeight - 154)/2}px`}}>
+                  <div className=" d-flex" style={{ overflowY: 'auto', height: `${(windowHeight - 154) / 2}px` }}>
                     <div className="col" style={{}}>
                       <HtmlTree
                         htmlId={componentName}
                         config={componentConfig}
                         className="row my-1"
-                        
+
                       />
                     </div>
                   </div>
-                  <div className=" d-flex border-top border-3 border-black" style={{height: `${(windowHeight - 74)/2}px`}}>
+                  <div className=" d-flex border-top border-3 border-black" style={{ height: `${(windowHeight - 74) / 2}px` }}>
                     <div className="col">
-                      <div className="d-flex mt-1">
-                        <i className="ms-2 me-auto" style={{color: "#dee2e6"}}>Add Elements</i>
-                        
-                        <div className="dropdown me-2">
-                            <img
-                                className="dropdown-toggle"
-                                id="dropdownMenuButton1" data-bs-toggle="dropdown" 
-                                src={Filter}
-                                alt="Delete"
-                                style={{
-                                    cursor: "pointer",
-                                    width: "24px",
-                                    height: "24px",
-                                }}
-                            />
-                          <ul className="dropdown-menu" data-bs-theme="dark" aria-labelledby="dropdownMenuButton1">
-                            {elementFilterOptions.map(obj => (
-                              <li 
-                                className={`${chosenElementFilter === obj.value ? 'active' : ''} dropdown-item`} 
-                                onClick={() => setChosenElementFilter(obj.value)}
-                              >
-                                {obj.label}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
 
-                      </div>
-                      <div className="m-1 h-75" >
-                        <AddElements chosenType={chosenElementFilter} elementFilterOptions={elementFilterOptions}/>
-                      </div>
+                      <AddElements />
                     </div>
                   </div>
                 </div>
@@ -218,5 +199,6 @@ export default function HtmlSection() {
           <ElementConfigSidebar />
         </div>
       </DragContext.Provider>
-    );
+    </TestPropsContext.Provider>
+  );
 }

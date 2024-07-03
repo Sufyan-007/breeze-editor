@@ -11,8 +11,7 @@ class HtmlConfigGenerator():
                 "typeId": elem_details["component"]["id"],
                 "tagName": elem_details["component"]["name"],
                 "attributes": {
-                "className": { "type": "LITERAL", "value": "" },
-                "id": { "type": "LITERAL", "value": id }
+                "className": { "type": "LITERAL", "value": "" }
                 },
                 "children": []
             }
@@ -26,8 +25,7 @@ class HtmlConfigGenerator():
                 "typeId": elem_details["component"]["id"],
                 "tagName": elem_details["component"]["name"],
                 "attributes": {
-                "className": { "type": "LITERAL", "value": "" },
-                "id": { "type": "LITERAL", "value": id }
+                "className": { "type": "LITERAL", "value": "" }
                 },
                 "children": []
             }
@@ -40,8 +38,7 @@ class HtmlConfigGenerator():
                 "tagName": elem_details["component"]["name"],
                 "library": elem_details["library"],
                 "attributes": {
-                "className": { "type": "LITERAL", "value": "" },
-                "id": { "type": "LITERAL", "value": id }
+                "className": { "type": "LITERAL", "value": "" }
                 },
                 "children": []
             }
