@@ -30,20 +30,12 @@ export default function HtmlSection() {
 
   const [testProps, setTestProps] = useState({ prop1: "xyz" });
 
-    const setIframeSource = () => {
-        const newValue = srcInput.current.value;
-        setIframeSrc(newValue);
-    };
+  const setIframeSource = () => {
+    const newValue = srcInput.current.value;
+    setIframeSrc(newValue);
+  };
 
-    const [chosenElementFilter, setChosenElementFilter] = useState('FYE');
-    const elementFilterOptions = [
-      {label: 'All', value: 'All'},
-      {label: 'HTML', value: 'HTML'},
-      {label: 'Custom', value: 'CUSTOM'},
-      {label: 'Third Party', value: 'THRID_PARTY'},
-      {label: 'Frequently used', value: 'FYE'}
-    ]
-    const [windowWidth, windowHeight] = useWindowDimension();
+  const [windowWidth, windowHeight] = useWindowDimension();
 
   useEffect(() => {
     const handler = (message) => {
@@ -107,7 +99,8 @@ export default function HtmlSection() {
     };
   }, [messageListener, componentConfig]);
 
-    return (
+  return (
+    <TestPropsContext.Provider value={{ testProps, setTestProps }}>
       <DragContext.Provider value={{ messageListener }}>
         <div className="row flex-grow-1" style={{ position: "relative" }}>
           <div
@@ -143,49 +136,20 @@ export default function HtmlSection() {
             {selected === 0 && windowWidth ? (
               <>
                 <div className="row">
-                  <div className=" d-flex" style={{overflowY: 'auto', height: `${(windowHeight - 154)/2}px`}}>
+                  <div className=" d-flex" style={{ overflowY: 'auto', height: `${(windowHeight - 154) / 2}px` }}>
                     <div className="col" style={{}}>
                       <HtmlTree
                         htmlId={componentName}
                         config={componentConfig}
                         className="row my-1"
-                        
+
                       />
                     </div>
                   </div>
-                  <div className=" d-flex border-top border-3 border-black" style={{height: `${(windowHeight - 74)/2}px`}}>
+                  <div className=" d-flex border-top border-3 border-black" style={{ height: `${(windowHeight - 74) / 2}px` }}>
                     <div className="col">
-                      <div className="d-flex mt-1">
-                        <i className="ms-2 me-auto" style={{color: "#dee2e6"}}>Add Elements</i>
-                        
-                        <div className="dropdown me-2">
-                            <img
-                                className="dropdown-toggle"
-                                id="dropdownMenuButton1" data-bs-toggle="dropdown" 
-                                src={Filter}
-                                alt="Delete"
-                                style={{
-                                    cursor: "pointer",
-                                    width: "24px",
-                                    height: "24px",
-                                }}
-                            />
-                          <ul className="dropdown-menu" data-bs-theme="dark" aria-labelledby="dropdownMenuButton1">
-                            {elementFilterOptions.map(obj => (
-                              <li 
-                                className={`${chosenElementFilter === obj.value ? 'active' : ''} dropdown-item`} 
-                                onClick={() => setChosenElementFilter(obj.value)}
-                              >
-                                {obj.label}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
 
-                      </div>
-                      <div className="m-1 h-75" >
-                        <AddElements chosenType={chosenElementFilter} elementFilterOptions={elementFilterOptions}/>
-                      </div>
+                      <AddElements />
                     </div>
                   </div>
                 </div>
@@ -235,5 +199,6 @@ export default function HtmlSection() {
           <ElementConfigSidebar />
         </div>
       </DragContext.Provider>
-    );
+    </TestPropsContext.Provider>
+  );
 }
