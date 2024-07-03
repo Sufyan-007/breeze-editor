@@ -59,7 +59,6 @@ function VariableForm({ onSubmit, formData, isEditing }) {
         >
           <option value="">Select...</option>
           <option value="stateVars">State</option>
-          <option value="propsVars">Prop</option>
           <option value="otherVars">Other</option>
           <option value="refVars">Ref</option>
         </Form.Control>
