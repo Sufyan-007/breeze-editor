@@ -314,4 +314,28 @@ class AppGenerator:
 
         print(f"directory_management.json created with content from {templates_path}")
 
+        # Create directories and files based on the template
+        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
+        self.create_structure(project_path, template_content)
+        
+    def create_structure(self, base_path, structure):
+        # Create a map of ID to path
+        id_to_path = {}
 
+        for item_id, item in structure.items():
+            # Create the path based on lineage
+            path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
+            current_path = os.path.join(*path_parts)
+            print(current_path,"current path")
+
+            if item['type'] == 'DIRECTORY':
+                os.makedirs(current_path, exist_ok=True)
+            elif item['type'] == 'FILE':
+                # Create a file 
+                with open(current_path, 'w') as file:
+                    file.write(f"// {item['name']} content")
+
+            # Map the ID to the created path
+            id_to_path[item_id] = current_path
+
+        print("Project structure created successfully.")
