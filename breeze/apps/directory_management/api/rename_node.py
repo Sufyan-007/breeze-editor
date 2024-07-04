@@ -6,7 +6,6 @@ class RenameNode(View):
     def post(self, request, node_id,projectName):
         try:
             data = json.loads(request.body)
-            print(data,"data received")
             new_name = data
             print(new_name,"new name")
 
@@ -14,7 +13,7 @@ class RenameNode(View):
                 return JsonResponse({'status': 'error', 'message': 'New name not provided'}, status=400)
 
             config_path = f"/home/varanpreet/Desktop/breezeui/configurations/{projectName}/directory_management.json"
-
+            component_config_path = f"/home/varanpreet/Desktop/breezeui/configurations/{projectName}/component_config.json"
             # Load the current folder configuration from the JSON file
             with open(config_path, 'r') as file:
                 config_data = json.load(file)
@@ -26,6 +25,22 @@ class RenameNode(View):
                 # Save the updated configuration back to the JSON file
                 with open(config_path, 'w') as file:
                     json.dump(config_data, file, indent=4)
+                
+                 
+                # Load component configuration from component_config.json
+                try:
+                    with open(component_config_path, 'r') as component_file:
+                        component_data = json.load(component_file)
+                except FileNotFoundError:
+                    component_data = {}
+
+                # Update the name in component_config.json if the node is a component
+                if str(node_id) in component_data:
+                    component_data[str(node_id)]['name'] = new_name
+
+                    # Save the updated component configuration back to the JSON file
+                    with open(component_config_path, 'w') as component_file:
+                        json.dump(component_data, component_file, indent=4)
 
                 return JsonResponse({'status': 'success', 'message': 'Node renamed successfully', 'config':config_data})
             else:
