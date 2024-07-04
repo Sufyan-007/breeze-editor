@@ -3,7 +3,7 @@ from django.http import JsonResponse
 import json
 
 class MoveNode(View):
-    def post(self, request):
+    def post(self, request,projectName):
         try:
             data = json.loads(request.body)
             drag_id = data.get("dragId")
@@ -12,7 +12,7 @@ class MoveNode(View):
             if not drag_id or not destination_id:
                 return JsonResponse({'status': 'error', 'message': 'Missing required parameters'}, status=400)
 
-            config_path = "/home/varanpreet/Desktop/breezeui/configurations/creator/directory_management.json"
+            config_path = f"/home/varanpreet/Desktop/breezeui/configurations/{projectName}/directory_management.json"
 
           
             with open(config_path, 'r') as file:

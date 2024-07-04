@@ -3,11 +3,11 @@ from django.http import JsonResponse
 import json, uuid , os
 
 class GetFolderConfig(View):
-    def get(self , request):
-        print("hi")
-        data=json.loads(request.body)
-        print(data,"data")
-        config_path = "/home/varanpreet/Desktop/breezeui/configurations/test3/directory_management.json"
+    def get(self , request, projectName):
+        if not projectName:
+            return JsonResponse({'error': 'projectname query parameter is required'}, status=400)
+
+        config_path = f"/home/varanpreet/Desktop/breezeui/configurations/{projectName}/directory_management.json"
         try:
             with open(config_path,'r') as file:
                 data = json.load(file)

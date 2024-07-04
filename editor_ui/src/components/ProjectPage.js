@@ -21,6 +21,7 @@ import routing from "../assets/icons/routing.svg";
 import settings from "../assets/icons/settings.svg";
 import services from "../assets/icons/services.svg";
 import constants from "../assets/icons/constants.svg";
+import folder from "../assets/icons/folder.svg";
 import apps from "../assets/icons/apps.svg";
 import ProjectSidebar from "./ProjectSidebar";
 import { router } from "../App";
@@ -59,6 +60,7 @@ export default function ProjectPage() {
     { id: 6, name: "Code", icon: code, path: "code" },
     { id: 7, name: "Third-party App", icon: apps, path: "apps" },
     { id: 8, name: "Settings", icon: settings, path: "settings" },
+    { id: 9, name: "Folder Structure", icon: folder , path:"folderstructure"} 
   ];
 
   const toggleSidebar = () => {

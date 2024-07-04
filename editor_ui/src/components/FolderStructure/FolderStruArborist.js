@@ -10,10 +10,10 @@ const FolderStruArborist = () => {
   const { projectName } = useParams();
 
   useEffect(() => {
-    fetchData(projectName);
+    fetchData();
   }, [projectName]);
 
-    const fetchData = async (projectName) => {
+    const fetchData = async () => {
       try {
         const data = await fetchFolderConfig(projectName);
         console.log("Fetched data:", data);
@@ -57,20 +57,18 @@ const FolderStruArborist = () => {
   };
 
   const onCreate = async (parentId, type, lineage, tag) => {
-    console.log(
-      parentId,
-      type,
-      lineage,"tag",
-      tag,
-      "look for tag"
-    );
     try {
+
+      //ask user for name using prompt dialog
+
+      const name = prompt(`Enter name for the new ${type.toLowerCase()}`);
+
       const response = await fetch(
-        "http://127.0.0.1:8000/directory-management/add-node",
+        `http://127.0.0.1:8000/directory-management/add-node/${projectName}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ parentId, type, lineage, tag }),
+          body: JSON.stringify({ parentId, type, lineage, tag, name }),
         }
       );
       const newItem = await response.json();
@@ -105,7 +103,7 @@ const FolderStruArborist = () => {
     console.log(id , name , "id and name");
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/directory-management/rename-node/${id}`,
+        `http://127.0.0.1:8000/directory-management/rename-node/${id}/${projectName}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -128,7 +126,7 @@ const FolderStruArborist = () => {
   const onMove = async ({ dragIds, parentId }) => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/directory-management/move-node",
+        `http://127.0.0.1:8000/directory-management/move-node/${projectName}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -189,7 +187,7 @@ const FolderStruArborist = () => {
   const onDelete = async (id) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/directory-management/delete-node/${id}`,
+        `http://127.0.0.1:8000/directory-management/delete-node/${id}/${projectName}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },

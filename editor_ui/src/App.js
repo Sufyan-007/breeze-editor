@@ -36,7 +36,7 @@ export const router = createBrowserRouter([
       { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
-      {path:"folderconfig", element:<FolderStruArborist />},
+      {path:"folderstructure", element:<FolderStruArborist />},
       {path: "foldertemplate", element:<FolderTemplate/>},
       {
         path: "styles",

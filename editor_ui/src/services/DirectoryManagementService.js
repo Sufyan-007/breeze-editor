@@ -1,11 +1,10 @@
 export const fetchFolderConfig = async (projectName) => {
   try {
     const response = await fetch(
-      "http://127.0.0.1:8000/directory-management/folder-config/",
+      `http://127.0.0.1:8000/directory-management/folder-config/${projectName}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectName }),
       }
     );
     if (!response.ok) {

@@ -3,7 +3,7 @@ from django.http import JsonResponse
 import json, os
 
 class RenameNode(View):
-    def post(self, request, node_id):
+    def post(self, request, node_id,projectName):
         try:
             data = json.loads(request.body)
             print(data,"data received")
@@ -13,7 +13,7 @@ class RenameNode(View):
             if not new_name:
                 return JsonResponse({'status': 'error', 'message': 'New name not provided'}, status=400)
 
-            config_path = "/home/varanpreet/Desktop/breezeui/configurations/creator/directory_management.json"
+            config_path = f"/home/varanpreet/Desktop/breezeui/configurations/{projectName}/directory_management.json"
 
             # Load the current folder configuration from the JSON file
             with open(config_path, 'r') as file:
