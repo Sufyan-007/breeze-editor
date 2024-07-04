@@ -1,14 +1,13 @@
 import React, { useState, useContext } from "react";
 import Offcanvas from "../common/Offcanvas";
 import VariableForm from "./ActionsConfigForms/VariablesConfigForm";
-import FunctionConfigForm from "./ActionsConfigForms/FunctionConfigForm";
+import FunctionConfigForm from "./ActionsConfigForms/FunctionConfigForm/FunctionConfigForm";
 import LifecycleConfigForm from "./ActionsConfigForms/LifecycleConfigForm";
 import HookConfigForm from "./ActionsConfigForms/HookConfigForm";
 import ImportConfigForm from "./ActionsConfigForms/ImportConfigForm";
 import PropConfigForm from "./ActionsConfigForms/PropConfigForm";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
-import PropTesting from "./PropTesting";
 import {
   updateComponentConfig,
   reorderComponentActions,

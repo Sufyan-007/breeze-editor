@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Form, Row, Col } from "react-bootstrap";
-import rightArrow from "../../../assets/icons/arrow_right_icon.svg";
-import downArrow from "../../../assets/icons/arrow_down_icon.svg";
+import rightArrow from "../../../../assets/icons/arrow_right_icon.svg";
+import downArrow from "../../../../assets/icons/arrow_down_icon.svg";
 
 const dataTypes = [
   "string",
@@ -25,7 +25,7 @@ export default function FunctionParams({ param, setParam }) {
     <div className="container">
       <div className="row">
         <div
-          className="d-flex fs-5"
+          className="d-flex"
           onClick={() => setShowDetails((state) => !state)}
         >
           <button type="button" className="btn p-0 m-0 shadow-none">
@@ -55,7 +55,7 @@ export default function FunctionParams({ param, setParam }) {
                 </Form.Group>
               </Col>
               <Col className="px-1 ">
-                <Form.Group className="mb-3" controlId="formDataType">
+                <Form.Group className="mb-2" controlId="formDataType">
                   <Form.Control
                     as="select"
                     size="sm"
