@@ -9,6 +9,7 @@ const { handleConfigFileGeneration } = require('./store_config');
 const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKeyForProcessStatus, getAbsoluteStorageDirForLib, filterReturnType } = require('./helper');
 const { INDEX_FILE_NAME } = require('./consts');
 const { FindDeclaration } = require('./declarationFinder');
+const { processFiles,createPropsNameFile } = require('./tester2');
 
 // Returns export variables from given file path
 function readExportsFromTypeScriptFile(project, filePath) {
@@ -879,7 +880,28 @@ function generator_function(libName, libVersion, storePath) {
     handleConfigFileGeneration(exports, getAbsoluteStorageDirForLib(libInfo), libName)
 
     // Store the status of the process
+    
     storeIndexFileInfo(libInfo, result)
+    
+    const source = getAbsoluteStorageDirForLib(libInfo);
+    const targetFolder=`${libInfo.libName}_${libInfo.libVersion}_tester`;
+    const target = path.join(storePath,targetFolder)
+    // const source = path.join('/home/smit/Desktop/bridge/processor/third_party_configs/', 'react-bootstrap_2.10.2');
+    // const target = path.join('/home/smit/Desktop/bridge/processor/third_party_configs/', 'react-bootstrap_2.10.2_tester');
+
+    createPropsNameFile(source, target)
+        .then(() => {
+            console.log('createPropsNameFile completed.');
+            return processFiles(target,targetFolder);
+        })
+        .then(() => {
+            console.log('processFiles completed.');
+        })
+        .catch(error => {
+            console.error('Error in configGenerator:', error);
+        });
+    
+    
 }
 
 
