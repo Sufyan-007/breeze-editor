@@ -156,19 +156,16 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
             // declare const _default: typeof DataTable;
             // export default _default;
             if (attributesOfVar.length == 0 && (exportVarSymbol instanceof Symbol)) {
-                const symbol = getDeclaration(exportVarSymbol).getType().getSymbol()
-
-                if (symbol) {
-                    const isFunctionDeclaration = symbol.getValueDeclaration()?.getKind() == SyntaxKind.FunctionDeclaration;
-                    if (isFunctionDeclaration) {
-                        isComponent = isReturnJSX(symbol.getValueDeclaration());
-                    }
-
-                }
+                const symbol =  getSymbolOrAliasSymbol(getDeclaration(exportVarSymbol).getType())
+                isComponent = isComponentBySymbol(symbol);
             } else {
 
                 // Determine if it is component or not
                 isComponent = checkIfComponentType(attributesOfVar)
+
+                if (!isComponent) {
+                    isComponent = isComponentBySymbol(exportVarSymbol);                    
+                }
             }
 
             expConfig['isComponent'] = isComponent
@@ -202,6 +199,54 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
 
     return errors;
 
+}
+
+function isComponentDeclaration(varDeclaration) {
+
+    if (!varDeclaration) return;
+
+    let isComponent;
+
+    let varKind = varDeclaration.getKind();
+
+    if (varKind == SyntaxKind.IntersectionType) {
+        for (const tn of varDeclaration.getTypeNodes()) {
+            isComponent = isComponentDeclaration(tn);
+            if (isComponent) break;
+        }
+    }
+    else if (varKind == SyntaxKind.FunctionDeclaration || varKind == SyntaxKind.FunctionType) {
+        isComponent = isReturnJSX(varDeclaration);
+    }
+    else if (varKind == SyntaxKind.ParenthesizedType) {
+        return isComponentDeclaration(varDeclaration.getTypeNode());
+    }
+    else if (varKind == SyntaxKind.InterfaceDeclaration) {
+        for (const callSign of varDeclaration.getCallSignatures()) {
+            isComponent = isReturnJSX(callSign)
+            if (isComponent) break;
+        }
+    } else if (varKind == SyntaxKind.TypeAliasDeclaration) {
+        return isComponentDeclaration(varDeclaration.getTypeNode());
+    } else if (varKind == SyntaxKind.TypeReference) {
+        const symbol = getSymbolOrAliasSymbol(varDeclaration.getType())
+        const dec = getDeclaration(symbol);
+
+        return isComponentDeclaration(dec);
+    } else if (varKind == SyntaxKind.VariableDeclaration) {
+        return isComponentDeclaration(varDeclaration.getTypeNode())
+    }
+
+    return isComponent;
+}
+
+function isComponentBySymbol(symbol) {
+    
+    if (!symbol) return;
+
+    const varDeclaration = getDeclaration(symbol);
+
+    return isComponentDeclaration(varDeclaration);
 }
 
 function getDefaultExportVariableDeclaration(sourceFile) {
@@ -254,7 +299,12 @@ function getVariableDeclarationForExport(sourceFile, name) {
 
 function isReturnJSX(functionDeclaration) {
     // Add this to also check if it is return type jsx, react_jsx_runtime.JSX.Element
-    return functionDeclaration.getReturnType().getText() == 'JSX.Element';
+
+    const JSX_ELEMENTS_TYPES = ['React.ReactElement', 'JSX.Element'];
+    if(functionDeclaration.getReturnTypeNode().getKind() == SyntaxKind.UnionType){
+        return functionDeclaration.getReturnTypeNode().getTypeNodes().filter(tp => JSX_ELEMENTS_TYPES.includes(tp.getText())).length != 0 ;
+    }
+    return JSX_ELEMENTS_TYPES.includes(functionDeclaration.getReturnTypeNode().getText()) ;
 }
 
 function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefaultExport = true) {
@@ -600,6 +650,10 @@ function getDeclarationOfTypeBySymbol(type){
     const symbol = type.getSymbol() || type.getAliasSymbol();
 
     if(symbol)  return getDeclaration(symbol);
+}
+
+function getSymbolOrAliasSymbol(type){
+    return type.getSymbol() || type.getAliasSymbol() ;
 }
 
 function isFunctionExists(obj, fun_name){
