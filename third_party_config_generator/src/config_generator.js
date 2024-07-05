@@ -398,7 +398,12 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                 // It's not directly like DropdownToggle: BsPrefixComponent<'div', PropsVar> 
                 if (referenceToPropsVar.getTypeArguments().length == 0) {
                     // console.log(referenceToPropsVar.getTypeAlias().getTypeNode().getText());
-                    const variableName = referenceToPropsVar.getType().getText();
+                    
+                    if(referenceToPropsVar instanceof Type){
+                        referenceToPropsVar = getDeclaration(getSymbolOrAliasSymbol(referenceToPropsVar))
+                    }
+
+                    const variableName = filterReturnType(referenceToPropsVar.getType().getText());
 
                     // console.log(variableName);
                     if (referenceToPropsVar.getSourceFile().getTypeAlias(variableName)) {
@@ -410,72 +415,77 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                     // console.log(variableDeclaration.getType().getTypeArguments().map(t => t.getSymbol()?.getName()));
                 }
 
+                if(isFunctionExists(referenceToPropsVar, 'getKind') && referenceToPropsVar.getKind() == SyntaxKind.FunctionType){
+                    propList = propList.concat(getAllProperties(referenceToPropsVar.getParameters()[0].getType(), libInfo));
+                }
+                else{
 
-                for (const ta of referenceToPropsVar.getTypeArguments()) {
-                    // console.log(ta.getText());
-
-
-                    if(ta instanceof Type){
-
-                        // const tempListOfProps = ta.getProperties();
-                        propList = propList.concat(getAllProperties(ta, libInfo));
-                        // propList = propList.concat(tempListOfProps.map(prop => {
-
-                        //     const propDeclaration = getDeclaration(prop)
-                        //     return {
-                        //         name: prop.getName(),
-                        //         type: propDeclaration.getType().getText(),
-                        //         raw: propDeclaration.getType().getText(),
-                        //         isOptional: prop.isOptional(),
-                        //         fullData: handlePropTypes.handleProps(prop,
-                        //             isFunctionExists(propDeclaration, 'getTypeNode') ?
-                        //                 propDeclaration.getTypeNode() : propDeclaration.getType())
-                        //     }
-                        // }));
-                    }
-                    else if (ta.getKind() == SyntaxKind.TypeReference) {
-                        // console.log(ta.getType().getProperties());
-                        // // console.log('ssss',ta.getTypeName().getText());
-                        // if (ta.getTypeArguments().length > 0) {
-                        //     propVarName = ta.getTypeName().getText();
-                        // } else {
-
-                        //     propVarName = ta.getText();
-                        // }
-
-                        // // console.log('sdf', propVarName);
-                        // if (!propVarName) {
-                        //     propVarName = `${componentName}Props`
-                        // }
-
-                        // propList = propsReader.getPropsList(propVarName, sourceFile)
-
-                        propList = propsReader.processProps(ta)
-                        break;
-                    }
-                    else if (ta.getKind() == SyntaxKind.IntersectionType) {
-                        for (const subType of ta.getTypeNodes()) {
-
-                            const subTypeRef = getPropRef(subType)
-                            // If true then its simple interface like ImageProps
-                            if (subTypeRef.getTypeArguments().length == 0) {
-                                // propList = propList.concat(propsReader.getPropsList(subTypeRef.getText(), sourceFile))
-                                propList = propList.concat(propsReader.processProps(subTypeRef))
-
-                            } else { // Else it is like React.RefAttributes<HTMLElement> so it has type arugments
-                                // const tempListOfProps = subType.getType().getProperties();
-                                propList = propList.concat(getAllProperties(subType.getType(), libInfo));
-
-                                // propList = propList.concat(tempListOfProps.map(prop => ({
-                                //     name: prop.getName(),
-                                //     type: prop.getValueDeclaration().getType().getText(),
-                                //     raw: prop.getValueDeclaration().getType().getText(),
-                                //     isOptional: prop.isOptional(),
-                                //     fullData: handlePropTypes.handleProps(prop, prop.getValueDeclaration().getTypeNode())
-                                // })));
-                            }
+                    for (const ta of referenceToPropsVar.getTypeArguments()) {
+                        // console.log(ta.getText());
+    
+    
+                        if(ta instanceof Type){
+    
+                            // const tempListOfProps = ta.getProperties();
+                            propList = propList.concat(getAllProperties(ta, libInfo));
+                            // propList = propList.concat(tempListOfProps.map(prop => {
+    
+                            //     const propDeclaration = getDeclaration(prop)
+                            //     return {
+                            //         name: prop.getName(),
+                            //         type: propDeclaration.getType().getText(),
+                            //         raw: propDeclaration.getType().getText(),
+                            //         isOptional: prop.isOptional(),
+                            //         fullData: handlePropTypes.handleProps(prop,
+                            //             isFunctionExists(propDeclaration, 'getTypeNode') ?
+                            //                 propDeclaration.getTypeNode() : propDeclaration.getType())
+                            //     }
+                            // }));
                         }
-
+                        else if (ta.getKind() == SyntaxKind.TypeReference) {
+                            // console.log(ta.getType().getProperties());
+                            // // console.log('ssss',ta.getTypeName().getText());
+                            // if (ta.getTypeArguments().length > 0) {
+                            //     propVarName = ta.getTypeName().getText();
+                            // } else {
+    
+                            //     propVarName = ta.getText();
+                            // }
+    
+                            // // console.log('sdf', propVarName);
+                            // if (!propVarName) {
+                            //     propVarName = `${componentName}Props`
+                            // }
+    
+                            // propList = propsReader.getPropsList(propVarName, sourceFile)
+    
+                            propList = propsReader.processProps(ta)
+                            break;
+                        }
+                        else if (ta.getKind() == SyntaxKind.IntersectionType) {
+                            for (const subType of ta.getTypeNodes()) {
+    
+                                const subTypeRef = getPropRef(subType)
+                                // If true then its simple interface like ImageProps
+                                if (subTypeRef.getTypeArguments().length == 0) {
+                                    // propList = propList.concat(propsReader.getPropsList(subTypeRef.getText(), sourceFile))
+                                    propList = propList.concat(propsReader.processProps(subTypeRef))
+    
+                                } else { // Else it is like React.RefAttributes<HTMLElement> so it has type arugments
+                                    // const tempListOfProps = subType.getType().getProperties();
+                                    propList = propList.concat(getAllProperties(subType.getType(), libInfo));
+    
+                                    // propList = propList.concat(tempListOfProps.map(prop => ({
+                                    //     name: prop.getName(),
+                                    //     type: prop.getValueDeclaration().getType().getText(),
+                                    //     raw: prop.getValueDeclaration().getType().getText(),
+                                    //     isOptional: prop.isOptional(),
+                                    //     fullData: handlePropTypes.handleProps(prop, prop.getValueDeclaration().getTypeNode())
+                                    // })));
+                                }
+                            }
+    
+                        }
                     }
                 }
 
@@ -561,6 +571,13 @@ function getPropRef(typeNodeReference){
 
     return typeNodeReference;
 }
+
+function filterReturnType(text){
+    let pattern = /import\(.*?\)\./
+    return text.replace(pattern,"");
+    // return text.match(pattern) === null ? false : true ;
+}
+
 
 function combineIntersectionProps(intersectionVar) {
 
@@ -653,7 +670,7 @@ function getDeclarationOfTypeBySymbol(type){
 }
 
 function getSymbolOrAliasSymbol(type){
-    return type.getSymbol() || type.getAliasSymbol() ;
+    return type.getAliasSymbol() || type.getSymbol()  ;
 }
 
 function isFunctionExists(obj, fun_name){
