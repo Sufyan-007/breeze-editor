@@ -3,7 +3,6 @@ import TreeNode from "./TreeNode";
 
 const FunctionTree = ({ initialBodyConfig, onEditNode, onAddChild }) => {
   const [bodyConfig, setBodyConfig] = useState(initialBodyConfig);
-  console.log("bodyConfig::>>", bodyConfig);
   const addNode = (parentId, nodeName) => {
     const newTree = addNodeRecursively(bodyConfig, parentId, nodeName);
     setBodyConfig(newTree);

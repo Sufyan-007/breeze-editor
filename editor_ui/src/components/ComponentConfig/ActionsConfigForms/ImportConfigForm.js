@@ -7,7 +7,7 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
     body: {
       import_entity: "",
       from: "",
-      import_type: "SINGLE", // default to SINGLE if checkbox is not checked
+      import_type: "SINGLE",
       TYPE: "",
     },
   });
