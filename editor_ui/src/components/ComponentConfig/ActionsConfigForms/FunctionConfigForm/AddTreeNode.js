@@ -28,7 +28,7 @@ const AddTreeNode = ({ parentNode, onSave, onCancel }) => {
             </div>
             <div className="row align-items-center">
               <div className="col-4">
-                <label for="declaration_type" className="col-form-label">
+                <label htmlFor="declaration_type" className="col-form-label">
                   Declaration Type
                 </label>
               </div>
@@ -37,7 +37,7 @@ const AddTreeNode = ({ parentNode, onSave, onCancel }) => {
                   className="form-select form-select-sm"
                   aria-label=".form-select-sm example"
                 >
-                  <option selected>Select</option>
+                  <option>Select</option>
                   <option value="const">Const</option>
                   <option value="var">Var</option>
                   <option value="let">Let</option>
@@ -46,7 +46,7 @@ const AddTreeNode = ({ parentNode, onSave, onCancel }) => {
             </div>
             <div className="row align-items-center">
               <div className="col-4">
-                <label for="var_name" className="col-form-label">
+                <label htmlFor="var_name" className="col-form-label">
                   Variable Name
                 </label>
               </div>
@@ -60,7 +60,7 @@ const AddTreeNode = ({ parentNode, onSave, onCancel }) => {
             </div>
             <div className="row align-items-center">
               <div className="col-4">
-                <label for="var_value" className="col-form-label">
+                <label htmlFor="var_value" className="col-form-label">
                   Value
                 </label>
               </div>
@@ -119,7 +119,7 @@ const AddTreeNode = ({ parentNode, onSave, onCancel }) => {
                   className="form-select form-select-sm"
                   aria-label=".form-select-sm example"
                 >
-                  <option selected>Select</option>
+                  <option>Select</option>
                   <option value="if_else">IF ELSE</option>
                   <option value="switch_case">SWITCH CASE</option>
                   <option value="while">WHILE</option>
