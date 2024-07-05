@@ -10,18 +10,20 @@ class RetrieveSchemaDetails(View):
     try:
         schema_file_path = os.path.join(CONFIG_PATH, projectName, "generated_intermediate_json", "allSchemas.json")
         schema_list = []
+        schema_details = {}
         with open(schema_file_path, "r") as file:
             try:
                 schema_data = json.load(file)
             except json.JSONDecodeError:
                 return JsonResponse({"data": []}, status=200)
             if schemaName and schemaName in schema_data:
-                properties = schema_data[schemaName].get("properties", {})
-                schema_list = list(properties.keys())
+                schema_details = schema_data[schemaName]
             else:
                 schema_list = list(schema_data.keys())
-
-        return JsonResponse({"data": schema_list}, status=200)
+        if len(schema_list)>0:
+            return JsonResponse({"data": schema_list}, status=200)
+        else:
+            return JsonResponse({"data": schema_details}, status = 200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)

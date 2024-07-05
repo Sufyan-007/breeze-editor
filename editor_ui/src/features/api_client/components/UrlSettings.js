@@ -1,16 +1,14 @@
 import React from 'react';
 import { Form } from 'react-bootstrap';
-import Delete from '../../../assets/icons/delete-trash.svg';
-
-function UrlSettings({ urlData }) {
-  const { baseurl, path, url_env } = urlData;
+function UrlSettings({ urlData, onChange }) {
+  const { baseurl, path, url_env } = urlData ? urlData : {};
 
   return (
-    <div className="mt-2 rounded-0 text-white" bg="dark">
-      <div className="d-flex justify-content-between align-items-center">
-        <div className="d-flex justify-content-between" style={{ width: "90%" }}>
+    <div className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
+        <div className="mx-1" style={{ width: "30%" }}>
+          <Form.Label className="text-white mb-1">Base URL:</Form.Label>
           <Form.Control
-            className="text-white mb-2 mx-1"
+            className="text-white"
             size="sm"
             type="text"
             placeholder="Base URL"
@@ -20,8 +18,11 @@ function UrlSettings({ urlData }) {
             }}
             value={baseurl || ''}
           />
+        </div>
+        <div className="mx-1" style={{ width: "30%" }}>
+          <Form.Label className="text-white mb-1">Path:</Form.Label>
           <Form.Control
-            className="text-white mb-2 mx-1"
+            className="text-white"
             size="sm"
             type="text"
             placeholder="Path"
@@ -29,10 +30,13 @@ function UrlSettings({ urlData }) {
               backgroundColor: "#212529",
               border: "1px solid rgba(128, 128, 128, 0.5)",
             }}
-            value={path ? path.join(',') : ''}
+            value={path ? path.join('/') : ''}
           />
+        </div>
+        <div className='mx-1' style={{ width: "30%" }} >
+          <Form.Label className="text-white mb-1">URL Environment:</Form.Label>
           <Form.Control
-            className="text-white mb-2 mx-1"
+            className="text-white"
             size="sm"
             type="text"
             placeholder="URL Environment"
@@ -43,16 +47,6 @@ function UrlSettings({ urlData }) {
             value={url_env}
           />
         </div>
-        <div className="d-flex align-items-center">
-          <img
-            alt="delete"
-            className="mb-2 mx-2"
-            height={25}
-            width={25}
-            src={Delete}
-          />
-        </div>
-      </div>
     </div>
   );
 }

@@ -484,7 +484,7 @@ class OpenapiConverter:
                 return 
 
             openapi_data = yaml.safe_load(json_data)
-            avalilable_schemas = openapi_data.get("components").get("schemas")
+            avalilable_schemas = openapi_data.get("components").get("schemas", {})
             schema_file_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json/allSchemas.json"
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
             security_schemes_models = self.handle_security_schema(security_schemes,openapi_data) #remaining
