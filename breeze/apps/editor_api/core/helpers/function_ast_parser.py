@@ -29,12 +29,26 @@ class FunctionParser:
             if not config.get('isAnonymous'):
                 func_name = f"const {config['name']} = "
             
-            return f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ({self.get_function_params()}) => {self.generate_function_code(config.get('bodyConfig',{}))}"""
+            return f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {", ".join([
+                    self.get_function_param(p) for p in config.get("parameters",[])
+                ])} ) => {self.generate_function_code(config.get('bodyConfig',{}))}"""
+        
+        
         elif config["type"] == "DECLARATION":
-            declaration_type = config.get("DECLARATION_TYPE","const") 
+            declaration_type = config.get("declarationType","const") 
+            varName = config["varName"]
+            if declaration_type == "const" or config.get("value",False):
+                value = self.get_value_code(config["value"])
+                return f"""{declaration_type} {varName} = {value}"""
+            else:
+                return f"""{declaration_type} {varName} """
+            
+        elif config["type"] == "ASSIGNMENT": 
             varName = config["varName"]
             value = self.get_value_code(config["value"])
-            return f"""{declaration_type} {varName} = {value}"""
+            return f"""{varName} = {value}"""
+        
+        
         
         elif config['type'] == "FUNCTION_CALL":
             return self.get_function_call_code(config)
@@ -55,6 +69,11 @@ class FunctionParser:
             return f""" while ({self.get_value_code(config["condition"])}) {self.generate_function_code(config.get('bodyConfig',{}))} 
         """
         
+        elif config['type'] == "DO_WHILE_BLOCK":
+            return f"""do  {self.generate_function_code(config.get('bodyConfig',{}))} while ({self.get_value_code(config["condition"])}) 
+        """
+        
+        
         elif config['type'] == "RETURN":
             return f""" return {self.get_value_code(config.get("value",{}))}
         """
@@ -68,8 +87,14 @@ class FunctionParser:
         return "true"
     
     
-    def get_function_params(self):
-        return ""
+    def get_function_param(self,param):
+        if param.get('type',"ANY") != "OBJECT" or not param.get('properties',False) or not param.get("destructured",False) :
+            return param["name"]
+        else:
+            return f"""{{ {", ".join([
+                self.get_function_param(p) for p in param["properties"]
+                ])} }}"""
+        
     
     def get_value_code(self,value):
         ref = value.get("$ref")
@@ -80,7 +105,7 @@ class FunctionParser:
             if type == "STRING":
                 return f" '{value['value']}' "
             
-            if type == "NUMERIC":
+            if type == "NUMERIC" or type == "TOKEN":
                 return value["value"]
             
             if type == "OBJECT":
@@ -117,16 +142,23 @@ class FunctionParser:
     
     def get_operation_code(self,config):
         if config["operationType"] == "UNARY":
-            operand = f" ( {self.get_value_code(config['operand'] )} ) "
-            return f" {config['operation']} {operand} "
+            return f" {config['operation']}{self.get_operand_code(config['operand'] )}"
 
         elif config["operationType"] == "BINARY":
-            operand1 = f" ( {self.get_value_code(config['operand1'] )} ) "
-            operand2 = f" ( {self.get_value_code(config['operand2'] )} ) "
-            return f" {operand1} {config['operation']} {operand2} "
-            return
+            operand1 = self.get_operand_code(config['operand1'] )
+            operand2 = self.get_operand_code(config['operand2'] )
+            return f" {operand1}{config['operation']}{operand2} "
+            
         
         elif config["operationType"] == "TERNARY":
-            pass
-        
+            operand1 = self.get_operand_code(config['operand1'] )
+            operand2 = self.get_operand_code(config['operand2'] )
+            operand3 = self.get_operand_code(config['operand3'] )
+            return f" {operand1} ? {operand2} : {operand3} "
+            
+    def get_operand_code(self, operand):
+        if operand.get("type") == "OPERATION":
+            return f" ( {self.get_value_code(operand )} ) "
+        else:
+            return self.get_value_code(operand)
         
