@@ -129,7 +129,7 @@ export default function HtmlSection() {
                   }
                   onClick={() => setSelected(1)}
                 >
-                  Actions
+                  Config
                 </div>
               </div>
             </div>

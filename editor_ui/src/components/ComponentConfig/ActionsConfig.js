@@ -221,166 +221,129 @@ function ActionsConfig() {
           </div>
         </div>
       ))}
-      {items.length === 0 && <div style={{ fontSize: "14px" }}>No actions found</div>}
+      {items.length === 0 && (
+        <div style={{ fontSize: "14px" }}>No actions found</div>
+      )}
     </div>
   );
 
   return (
     <>
       <div>
-        {/* Props Accordion */}
-        {componentConfig.type && componentConfig.type === "CUSTOM" && (
-          <div className="accordion mb-1">
-            <div
-              className="accordion-header d-flex justify-content-between bg-secondary text-white p-1"
-              onClick={toggleConfigAccordion}
-            >
-              <div>Component Configuration</div>
-              <div>
-                {configOpen ? (
-                  <i className="bi bi-dash"></i>
-                ) : (
-                  <i className="bi bi-plus"></i>
-                )}
-              </div>
-            </div>
-            {configOpen && (
-              <div className="accordion-content p-1">
-                <div className="d-flex justify-content-between">
-                  <strong className="mb-0 text-decoration-underline">
-                    Props
-                  </strong>
-                  <div
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleOpen("propsVars")}
-                  >
-                    <i className="bi bi-plus-circle"></i>
-                  </div>
-                </div>
-                <div>
-                  <div>
-                    {componentConfig.propsVars &&
-                      componentConfig.propsVars.map((item) => (
-                        <div
-                          key={item.name}
-                          className="d-flex justify-content-between"
-                          style={{ marginBottom: "2px", fontSize: "14px" }}
-                        >
-                          <>{item.name}</>
-                          <div
-                            style={{ cursor: "pointer" }}
-                            onClick={() => handleEdit(item)}
-                          >
-                            <i className="bi bi-pencil-square text-primary"></i>
-                          </div>
-                        </div>
-                      ))}
-                    {componentConfig.propsVars.length === 0 && (
-                      <div style={{ fontSize: "14px" }}>No Props Added</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        {/* Logic Accordion */}
-        <div className="accordion mb-1">
-          <div
-            className="accordion-header d-flex justify-content-between bg-secondary text-white p-1"
-            onClick={toggleLogicAccordion}
-          >
-            <div>Logic</div>
-            <div>
-              {logicOpen ? (
-                <i className="bi bi-dash"></i>
-              ) : (
-                <i className="bi bi-plus"></i>
-              )}
-            </div>
-          </div>
-          {logicOpen && (
-            <div className="accordion-content p-1">
-              {/* Imports */}
+        <div className="p-1">
+          {/* Props  */}
+          {componentConfig.type && componentConfig.type === "CUSTOM" && (
+            <>
               <div className="d-flex justify-content-between">
                 <strong className="mb-0 text-decoration-underline">
-                  Imports
+                  Props
                 </strong>
                 <div
                   style={{ cursor: "pointer" }}
-                  onClick={() => handleOpen("imports")}
+                  onClick={() => handleOpen("propsVars")}
                 >
                   <i className="bi bi-plus-circle"></i>
                 </div>
               </div>
               <div>
-                {componentConfig.imports.other &&
-                  componentConfig.imports.other.map((item) => (
-                    <div
-                      key={item.import_entity}
-                      className="d-flex justify-content-between"
-                      style={{ marginBottom: "2px", fontSize: "14px" }}
-                    >
-                      <div className="d-flex">
-                        <strong>{item.import_entity}</strong>
-                        <div className="ms-2 fst-italic fw-lighter">
-                          {item.from}
+                <div>
+                  {componentConfig.propsVars &&
+                    componentConfig.propsVars.map((item) => (
+                      <div
+                        key={item.name}
+                        className="d-flex justify-content-between"
+                        style={{ marginBottom: "2px", fontSize: "14px" }}
+                      >
+                        <>{item.name}</>
+                        <div
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleEdit(item)}
+                        >
+                          <i className="bi bi-pencil-square text-primary"></i>
                         </div>
                       </div>
-                      {/* <div
+                    ))}
+                  {componentConfig.propsVars.length === 0 && (
+                    <div style={{ fontSize: "14px" }}>No Props Added</div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+          {/* Imports */}
+          <div className="d-flex justify-content-between mt-2">
+            <strong className="mb-0 text-decoration-underline">Imports</strong>
+            <div
+              style={{ cursor: "pointer" }}
+              onClick={() => handleOpen("imports")}
+            >
+              <i className="bi bi-plus-circle"></i>
+            </div>
+          </div>
+          <div>
+            {componentConfig.imports.other &&
+              componentConfig.imports.other.map((item) => (
+                <div
+                  key={item.import_entity}
+                  className="d-flex justify-content-between"
+                  style={{ marginBottom: "2px", fontSize: "14px" }}
+                >
+                  <div className="d-flex">
+                    <strong>{item.import_entity}</strong>
+                    <div className="ms-2 fst-italic fw-lighter">
+                      {item.from}
+                    </div>
+                  </div>
+                  {/* <div
                         style={{ cursor: "pointer" }}
                         onClick={() => handleEdit({type : 'imports', body: {...item}})}
                       >
                         <i className="bi bi-pencil-square text-primary"></i>
                       </div> */}
-                    </div>
-                  ))}
-                {componentConfig.imports.other &&
-                  componentConfig.imports.other.length === 0 && (
-                    <div style={{ fontSize: "14px" }}> No imports found</div>
-                  )}
-              </div>
-              {/* Actions */}
-              <div className="d-flex justify-content-between mt-2">
-                <strong className="mb-0 text-decoration-underline">
-                  Actions
-                </strong>
-                <div className="dropdown">
-                  <div
-                    id="dropdownMenuButton1"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <i className="bi bi-plus-circle"></i>
-                  </div>
-                  <ul
-                    className="dropdown-menu"
-                    aria-labelledby="dropdownMenuButton1"
-                    data-bs-theme="dark"
-                  >
-                    {menuItems.map((item) => (
-                      <li
-                        key={item.key}
-                        className="dropdown-item"
-                        onClick={() => handleOpen(item.key)}
-                      >
-                        {item.label}
-                      </li>
-                    ))}
-                  </ul>
                 </div>
+              ))}
+            {componentConfig.imports.other &&
+              componentConfig.imports.other.length === 0 && (
+                <div style={{ fontSize: "14px" }}> No imports found</div>
+              )}
+          </div>
+          {/* Actions */}
+          <div className="d-flex justify-content-between mt-2">
+            <strong className="mb-0 text-decoration-underline">Actions</strong>
+            <div className="dropdown">
+              <div
+                id="dropdownMenuButton1"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                style={{ cursor: "pointer" }}
+              >
+                <i className="bi bi-plus-circle"></i>
+              </div>
+              <ul
+                className="dropdown-menu"
+                aria-labelledby="dropdownMenuButton1"
+                data-bs-theme="dark"
+              >
+                {menuItems.map((item) => (
+                  <li
+                    key={item.key}
+                    className="dropdown-item"
+                    onClick={() => handleOpen(item.key)}
+                  >
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-                {/* <div
+            {/* <div
                   style={{ cursor: "pointer" }}
                   onClick={() => handleOpen("imports")}
                 >
                   <i className="bi bi-plus-circle"></i>
                 </div> */}
-              </div>
-              {renderDraggableList(componentConfig.resources, "resources")}
-            </div>
-          )}
+          </div>
+          {renderDraggableList(componentConfig.resources, "resources")}
         </div>
       </div>
 
