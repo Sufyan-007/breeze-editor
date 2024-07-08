@@ -58,7 +58,7 @@ const FolderStruArborist = () => {
 
   const onCreate = async (parentId, type, lineage, tag) => {
     try {
-
+      console.log(tag,"see the tag of the file added");
       //ask user for name using prompt dialog
 
       const name = prompt(`Enter name for the new ${type.toLowerCase()}`);

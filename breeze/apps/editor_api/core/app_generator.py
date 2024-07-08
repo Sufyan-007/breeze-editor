@@ -1,6 +1,6 @@
 # from component_generator import write_components
 import subprocess
-import json, os
+import json, os , uuid
 from common.utils.formatter import format_by_prettier,format_val
 import pathlib
 
@@ -311,13 +311,75 @@ class AppGenerator:
 
         with open(directory_management_path, 'w') as dir_mgmt_file:
             json.dump(template_content, dir_mgmt_file, indent=4)
-
-        print(f"directory_management.json created with content from {templates_path}")
-
+        
+        #call the function to update component_config.json
+        self.update_component_config(selected_template, template_content)
+        
         # Create directories and files based on the template
         project_path = os.path.join(self.app_config['path'], self.app_config['name'])
         self.create_structure(project_path, template_content)
+     
+   
+    def update_component_config(self, selected_template, template_content):
+        components_config_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "component_config.json")
+        print(selected_template, template_content ,"hiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+        # Initialize an empty list to store component config
+        component_configs = []
         
+        # Iterate over the template_content dictionary to find files tagged as COMPONENTS
+        for file_id, file_info in template_content.items():
+            print("inside for lopppppppppppppppp")
+            new_id = str(uuid.uuid4())
+            if file_info['type'] == 'FILE' and file_info['tag'] == 'COMPONENTS':
+                # Extract the component name from the file name (without the .js extension)
+                component_name = os.path.splitext(file_info['name'])[0]
+                print(component_name,"component name ")
+                component_config = {
+                    new_id: {
+                        "name": component_name,
+                        "id": component_name.upper(),
+                        "file_id":new_id,
+                        "imports": {
+                            "components": [],
+                            "other": []
+                        },
+                        "propsVars": [],
+                        "resources": [],
+                        "html": {"_id": component_name},
+                        "wrapper_store": None,
+                        "html_elements": {
+                            component_name: {
+                                "type": "Element",
+                                "elementType": "HTML",
+                                "typeId": "DIV",
+                                "tagName": "div",
+                                "attributes": {
+                                    "className": {"type": "LITERAL", "value": ""},
+                                    "id": {"type": "LITERAL", "value": ""}
+                                },
+                                "children": [{"_id": f"{new_id}-0"}]
+                            },
+                            f"{new_id}-0": {"type": "text", "text": "Hello world"}
+                        }
+                    }
+                }
+                component_configs.append(component_config)
+                print(component_configs,"combined configs")
+        
+        # Load existing component_config.json if it exists
+        existing_config = {}
+        if os.path.exists(components_config_path):
+            with open(components_config_path, 'r') as comp_config_file:
+                existing_config = json.load(comp_config_file)
+
+        # Update existing_config with new component_configs
+        for config in component_configs:
+            existing_config.update(config)
+
+        # Write updated component_config.json
+        with open(components_config_path, 'w') as comp_config_file:
+            json.dump(existing_config, comp_config_file, indent=4)
+       
     def create_structure(self, base_path, structure):
         # Create a map of ID to path
         id_to_path = {}
@@ -326,7 +388,6 @@ class AppGenerator:
             # Create the path based on lineage
             path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
             current_path = os.path.join(*path_parts)
-            print(current_path,"current path")
 
             if item['type'] == 'DIRECTORY':
                 os.makedirs(current_path, exist_ok=True)
