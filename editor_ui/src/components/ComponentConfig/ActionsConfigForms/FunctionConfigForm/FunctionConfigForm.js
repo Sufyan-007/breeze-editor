@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, FormGroup } from "react-bootstrap";
 import MonacoEditor from "../../../common/MonacoEditor";
 import FunctionParams from "./FunctionParams";
+import FunctionConfigStack from "./FunctionConfigStack";
 
 const dataTypes = [
   "string",
@@ -20,12 +21,85 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
       parameters: { list: [] },
       isAnonymous: false,
       isAsync: false,
-      helperData: [],
+      functionConfig: {
+        type: "BLOCK",
+        statements: [
+          // {
+          //   type: "DECLARATION",
+          //   declarationType: "var",
+          //   varName: "user",
+          //   value: { type: "STRING", value: "John Doe" },
+          // },
+          // {
+          //   type: "ASSIGNMENT",
+          //   varName: "user",
+          //   value: { type: "STRING", value: "Jane Doe" },
+          // },
+          // {
+          //   type: "FUNCTION_CALL",
+          //   functionName: "greetUser",
+          //   parameters: [{ type: "STRING", value: "Hello, World!" }],
+          // },
+          // {
+          //   type: "IF_BLOCK",
+          //   condition: {
+          //     type: "OPERATION",
+          //     operationType: "BINARY",
+          //     operation: "===",
+          //     operand1: { type: "STRING", value: "user" },
+          //     operand2: { type: "STRING", value: "admin" },
+          //   },
+          //   bodyConfig: {
+          //     type: "BLOCK",
+          //     statements: [
+          //       {
+          //         type: "FUNCTION_CALL",
+          //         functionName: "console.log",
+          //         parameters: [{ type: "STRING", value: "User is admin" }],
+          //       },
+          //     ],
+          //   },
+          //   elseBody: {
+          //     type: "BLOCK",
+          //     statements: [
+          //       {
+          //         type: "FUNCTION_CALL",
+          //         functionName: "console.log",
+          //         parameters: [{ type: "STRING", value: "User is not admin" }],
+          //       },
+          //     ],
+          //   },
+          // },
+          // {
+          //   type: "WHILE_BLOCK",
+          //   condition: {
+          //     type: "OPERATION",
+          //     operationType: "BINARY",
+          //     operation: "<",
+          //     operand1: { type: "NUMERIC", value: 1 },
+          //     operand2: { type: "NUMERIC", value: 5 },
+          //   },
+          //   bodyConfig: {
+          //     type: "BLOCK",
+          //     statements: [
+          //       {
+          //         type: "FUNCTION_CALL",
+          //         functionName: "console.log",
+          //         parameters: [{ type: "STRING", value: "In loop" }],
+          //       },
+          //     ],
+          //   },
+          // },
+          // {
+          //   type: "RETURN",
+          //   value: { type: "TOKEN", value: "user" },
+          // },
+        ],
+      },
       functionBody: "",
       description: "",
     },
   });
-
   const [parameterDetails, setParameterDetails] = useState({
     name: "",
     dataType: "",
@@ -33,7 +107,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
     description: "",
   });
   const [paramsConfigOpen, setParamsConfigOpen] = useState(false);
-  const [functionConfigOpen, setFunctionConfigOpen] = useState(true);
+  const [functionConfigOpen, setFunctionConfigOpen] = useState(false);
 
   const toggleParamConfigAccordion = () => {
     setParamsConfigOpen(!paramsConfigOpen);
@@ -209,7 +283,6 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
                     />
                     <Form.Control
                       className="me-2 form-control-sm"
-
                       as="select"
                       size="sm"
                       name="datatype"
@@ -309,7 +382,9 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
             </div>
           </div>
           {functionConfigOpen && (
-            <div className="accordion-content px-2 pt-2">function tree</div>
+            <div className="accordion-content px-2 pt-1">
+              <FunctionConfigStack config={formState.body.functionConfig} />
+            </div>
           )}
         </div>
         <Row className="mb-2">

@@ -41,16 +41,6 @@ function ActionsConfig() {
   const { projectName, componentName } = useParams();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [configOpen, setConfigOpen] = useState(true);
-  const [logicOpen, setLogicOpen] = useState(true);
-
-  const toggleConfigAccordion = () => {
-    setConfigOpen(!configOpen);
-  };
-
-  const toggleLogicAccordion = () => {
-    setLogicOpen(!logicOpen);
-  };
 
   const handleOpen = (type) => {
     setFormType(type);
@@ -351,7 +341,7 @@ function ActionsConfig() {
         isOpen={isOffcanvasOpen}
         onClose={handleClose}
         title={formTitles[formType] || "Action Configuration"}
-        width="600px"
+        width={formTitles[formType] === "Function Configuration" ? "80%" : "600px"}
       >
         <div className="px-1">{renderForm()}</div>
       </Offcanvas>

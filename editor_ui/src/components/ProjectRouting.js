@@ -426,12 +426,14 @@ export default function ProjectRouting() {
                             borderColor: '#495057',
                             color: 'white',
                           }),
-                          option: (base) => ({
+                          option: (base, { isFocused }) => ({
                             ...base,
-                            backgroundColor: "#212529",
+                            backgroundColor: isFocused ? '#343a40' : '#212529',
                             width: '100%',
                             height: '100%',
-                            color: '#dee2e6bf'
+                            color: '#dee2e6bf',
+                            cursor: "pointer",
+                            border: isFocused ? '1px solid #495057' : 'none',
                           }),
                           menu: (base) => ({
                             ...base,
