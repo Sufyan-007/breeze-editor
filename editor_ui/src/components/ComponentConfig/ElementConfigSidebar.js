@@ -5,9 +5,42 @@ import { useParams } from "react-router";
 import TextElement from "../SidebarConfigHelper/components/TextElementConfig";
 import HtmlElementConfig from "../SidebarConfigHelper/components/HtmlElementConfig";
 
+
+
+
+const getAvailableFunctions = (componentConfig) => {
+  const functionsList = [];
+
+  const { resources, propsVars } = componentConfig;
+  
+  const namedFunctions = resources.filter(resource => resource.type === "function");
+  const propFunctions = propsVars.filter(propsVar => propsVar.body.datatype === "function");
+  const stateAsFunction = resources.filter(resource => resource.body.datatype === "function");
+  const hookFunction = resources.filter(resource => ["useMemo", "useCallback"].includes(resource.body.type));
+  // const setterFunctions = resources.filter(resource => resource.type === "stateVars")
+  
+  functionsList.push(...namedFunctions, ...propFunctions, ...stateAsFunction, ...hookFunction);
+  
+  return functionsList;
+  
+};
+
+const getAllVariables = (componentConfig) => {
+  const variablesList = [];
+
+  const { resources, propsVars } = componentConfig;
+
+  const variables = resources.filter(resource => resource.type !== "function" && resource.type.datatype !== "function");
+  const propVariables = propsVars.filter(propsVar => propsVar.body.datatype !== "function");
+  
+  variablesList.push(...variables,...propVariables);
+  
+  return variablesList;
+}
+
+
 export default function ElementConfigSidebar({ config }) {
-  const { sidebarService, componentConfig, setComponentConfig } =
-    useContext(ComponentContext);
+  const { sidebarService, componentConfig, setComponentConfig } = useContext(ComponentContext);
   const [selectedElement, setSelectedElement] = useState(null);
   const { projectName, componentName } = useParams();
   const element = useMemo(
@@ -15,9 +48,9 @@ export default function ElementConfigSidebar({ config }) {
     [componentConfig, selectedElement]
   );
   const [isLoading, setIsLoading] = useState(false);
-  const availableFunctions = componentConfig.resources;
-
-
+  const availableFunctions = getAvailableFunctions(componentConfig)
+  const allVariables = getAllVariables(componentConfig);
+ 
   useEffect(() => {
     sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
@@ -76,7 +109,7 @@ export default function ElementConfigSidebar({ config }) {
       <>
         <div
           style={{
-            width: "50%",
+            width: "35rem",
             backgroundColor: "#303033",
             overflowY: "scroll",
             position: "absolute",
@@ -85,10 +118,19 @@ export default function ElementConfigSidebar({ config }) {
           }}
         >
           <div>
-            <button
-              className="btn-close-white btn-close"
-              onClick={makeSelectedElementNull}
-            ></button>
+            <div className="d-flex align-items-center justify-content-between mb-4 text-light mt-2 ps-3 pe-3">
+              <div>
+                <h5 className="tag-name  mt-2 text-capitalize">
+                  {element.tagName}
+                </h5>
+              </div>
+              <div>
+                <button
+                  className="btn-close-white btn-close ms-3 flex-grow-1"
+                  onClick={makeSelectedElementNull}
+                ></button>
+              </div>
+            </div>
             {element.type === "text" && (
               <TextElement
                 makeSelectedElementNull={makeSelectedElementNull}
@@ -104,6 +146,7 @@ export default function ElementConfigSidebar({ config }) {
                 handleUpdateClick={handleUpdateClick}
                 isLoading={isLoading}
                 availableFunctions={availableFunctions}
+                allVariables={allVariables}
               />
             )}
           </div>

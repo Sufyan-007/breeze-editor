@@ -38,11 +38,11 @@ def convert_attributes(new_attributes, IsCustom):
     for attr in new_attributes:
         name = attr['name']
         if IsCustom:
-            attr_type = attr['datatype']
+            attr_type = attr['body']['datatype']
             if (attr_type == 'bool'):
               attr_type = 'Boolean'; 
     
-            default_value = attr.get('defaultValue', None)  # Get default value if present, otherwise None
+            default_value = attr['body'].get('defaultValue', None)  # Get default value if present, otherwise None
             old_attributes[name] = {
                 'datatype': attr_type.upper(),
                 'defaultValue': default_value
@@ -66,6 +66,8 @@ def get_attributes_logic(request_body):
     component_type = data.get('component_type')
     project_id = data.get('project_id')
     third_party_id = data.get('third_party_id', None)
+    print('-----------------------------')
+    print(component_id, component_type, project_id, third_party_id)
     responseData = None
     if not component_id or not component_type or not project_id:
         return JsonResponse({'error': 'Missing Parameters '}, status=400)
@@ -83,7 +85,7 @@ def get_attributes_logic(request_body):
         
         new_attributes = prepare_tp_comp_config(project_id, component_id)
         responseData = convert_attributes(new_attributes,True)
-
+        print("-------------------------------------------------",new_attributes)
         
 
     #    return JsonResponse({"attributes": responseData}, status=200)
