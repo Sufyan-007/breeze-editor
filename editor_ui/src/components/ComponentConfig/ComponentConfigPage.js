@@ -30,6 +30,7 @@ const sidebarItems = [
   { id: 6, name: "Code", icon: code, path: "code" },
   { id: 7, name: "Third-party App", icon: apps, path: "apps" },
   { id: 8, name: "Settings", icon: settings, path: "settings" },
+  { id: 9, name: "Resources", icon: apps, path: "resources" },
 ];
 
 export const ComponentContext = createContext({
