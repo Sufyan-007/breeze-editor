@@ -41,16 +41,6 @@ function ActionsConfig() {
   const { projectName, componentName } = useParams();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [configOpen, setConfigOpen] = useState(true);
-  const [logicOpen, setLogicOpen] = useState(true);
-
-  const toggleConfigAccordion = () => {
-    setConfigOpen(!configOpen);
-  };
-
-  const toggleLogicAccordion = () => {
-    setLogicOpen(!logicOpen);
-  };
 
   const handleOpen = (type) => {
     setFormType(type);
@@ -232,44 +222,38 @@ function ActionsConfig() {
       <div>
         <div className="p-1">
           {/* Props  */}
-          {componentConfig.type && componentConfig.type === "CUSTOM" && (
-            <>
-              <div className="d-flex justify-content-between">
-                <strong className="mb-0 text-decoration-underline">
-                  Props
-                </strong>
-                <div
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleOpen("propsVars")}
-                >
-                  <i className="bi bi-plus-circle"></i>
-                </div>
-              </div>
-              <div>
-                <div>
-                  {componentConfig.propsVars &&
-                    componentConfig.propsVars.map((item) => (
-                      <div
-                        key={item.name}
-                        className="d-flex justify-content-between"
-                        style={{ marginBottom: "2px", fontSize: "14px" }}
-                      >
-                        <>{item.name}</>
-                        <div
-                          style={{ cursor: "pointer" }}
-                          onClick={() => handleEdit(item)}
-                        >
-                          <i className="bi bi-pencil-square text-primary"></i>
-                        </div>
-                      </div>
-                    ))}
-                  {componentConfig.propsVars.length === 0 && (
-                    <div style={{ fontSize: "14px" }}>No Props Added</div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
+          <div className="d-flex justify-content-between">
+            <strong className="mb-0 text-decoration-underline">Props</strong>
+            <div
+              style={{ cursor: "pointer" }}
+              onClick={() => handleOpen("propsVars")}
+            >
+              <i className="bi bi-plus-circle"></i>
+            </div>
+          </div>
+          <div>
+            <div>
+              {componentConfig.propsVars &&
+                componentConfig.propsVars.map((item) => (
+                  <div
+                    key={item.name}
+                    className="d-flex justify-content-between"
+                    style={{ marginBottom: "2px", fontSize: "14px" }}
+                  >
+                    <>{item.name}</>
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleEdit(item)}
+                    >
+                      <i className="bi bi-pencil-square text-primary"></i>
+                    </div>
+                  </div>
+                ))}
+              {componentConfig.propsVars.length === 0 && (
+                <div style={{ fontSize: "14px" }}>No Props Added</div>
+              )}
+            </div>
+          </div>
           {/* Imports */}
           <div className="d-flex justify-content-between mt-2">
             <strong className="mb-0 text-decoration-underline">Imports</strong>
@@ -309,7 +293,14 @@ function ActionsConfig() {
           </div>
           {/* Actions */}
           <div className="d-flex justify-content-between mt-2">
-            <strong className="mb-0 text-decoration-underline">Actions</strong>
+            <div className="d-flex">
+              <strong className="mb-0 text-decoration-underline">
+                Actions
+              </strong>
+              <div className="ms-2" title="Drag and reorder items">
+                <i className="bi bi-info-circle-fill" style={{fontSize: '14px', cursor: "pointer"}}></i>
+              </div>
+            </div>
             <div className="dropdown">
               <div
                 id="dropdownMenuButton1"
@@ -353,7 +344,7 @@ function ActionsConfig() {
         title={formTitles[formType] || "Action Configuration"}
         width="600px"
       >
-        <div className="px-1">{renderForm()}</div>
+        <div className="px-1 h-100">{renderForm()}</div>
       </Offcanvas>
 
       <Toast
