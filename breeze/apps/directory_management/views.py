@@ -8,6 +8,7 @@ class AddNode(View):
       if request.method == 'POST':
         try:
             data=json.loads(request.body)
+           
             parentId = data["parentId"]
             node_type=data["type"]
             lineage= data["lineage"]

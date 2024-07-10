@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Tree } from "react-arborist";
-import { fetchFolderConfig } from "../../services/DirectoryManagementService";
+import { fetchFolderConfig, onAdd , onRenameNode, onMoveNode, onDeleteNode } from "../../services/DirectoryManagementService";
 import "../../css/folder.css";
 import { useParams } from "react-router-dom";
 import Node from "../FolderStructure/Node";
+
 
 const FolderStruArborist = () => {
   const [treeData, setTreeData] = useState(null);
@@ -13,17 +14,15 @@ const FolderStruArborist = () => {
     fetchData();
   }, [projectName]);
 
-    const fetchData = async () => {
-      try {
-        const data = await fetchFolderConfig(projectName);
-        console.log("Fetched data:", data);
-        const convertedTreeData = transformData(data);
-        console.log("Converted tree data:", convertedTreeData);
-        setTreeData(convertedTreeData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const data = await fetchFolderConfig(projectName);
+      const convertedTreeData = transformData(data);
+      setTreeData(convertedTreeData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   const transformData = (data) => {
     const idMap = {};
@@ -58,20 +57,15 @@ const FolderStruArborist = () => {
 
   const onCreate = async (parentId, type, lineage, tag) => {
     try {
-      console.log(tag,"see the tag of the file added");
-      //ask user for name using prompt dialog
-
-      const name = prompt(`Enter name for the new ${type.toLowerCase()}`);
-
-      const response = await fetch(
-        `http://127.0.0.1:8000/directory-management/add-node/${projectName}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ parentId, type, lineage, tag, name }),
-        }
-      );
-      const newItem = await response.json();
+      console.log("Creating new item with details:", {
+        parentId,
+        type,
+        lineage,
+        tag,
+        projectName,
+      });
+      const newItem = await onAdd(parentId, type, lineage, tag, projectName);
+        console.log("New item created:", newItem);
       updateTreeData(parentId, newItem);
     } catch (error) {
       console.log("Failed to add item:", error);
@@ -100,24 +94,13 @@ const FolderStruArborist = () => {
   };
 
   const onRename = async (id, name) => {
-    console.log(id , name , "id and name");
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/directory-management/rename-node/${id}/${projectName}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(name),
-        }
-      );
+      const data = await onRenameNode(id, name, projectName);
 
-      const data = await response.json();
-  
       console.log("Rename successful", data);
-    if (data.status === "success") {
-
-      fetchData();
-    }
+      if (data.status === "success") {
+        fetchData();
+      }
     } catch (error) {
       console.log("Failed to rename node:", error);
     }
@@ -125,16 +108,7 @@ const FolderStruArborist = () => {
 
   const onMove = async ({ dragIds, parentId }) => {
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/directory-management/move-node/${projectName}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ dragId: dragIds[0], destinationId: parentId, }),
-        }
-      );
-
-      const data = await response.json();
+      const data = await onMoveNode(dragIds, parentId , projectName);
       if (data.status === "success") {
         console.log("move successful");
         updateTreeDataAfterMove(dragIds[0], parentId);
@@ -186,19 +160,10 @@ const FolderStruArborist = () => {
 
   const onDelete = async (id) => {
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/directory-management/delete-node/${id}/${projectName}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (response.ok) {
-        removeNode(id);
-      } else {
-        throw new Error(`Failed to delete item: ${response.statusText}`);
-      }
+       const result = await onDeleteNode(id, projectName);
+       if (result.status === "success") {
+         removeNode(id);
+       }
     } catch (error) {
       console.error("Error deleting item:", error);
     }
@@ -212,7 +177,7 @@ const FolderStruArborist = () => {
         } else if (node.children) {
           node.children = deleteNode(node.children);
         }
-        return true; 
+        return true;
       });
     };
 

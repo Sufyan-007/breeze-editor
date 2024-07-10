@@ -21,3 +21,17 @@
   border-radius: 3px;
   font-size: 12px;
 }
+.edit-button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  width: 15px;
+  background-color: #303033;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+.edit-button img{
+  margin: 0;
+}
