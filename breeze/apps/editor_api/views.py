@@ -924,7 +924,7 @@ class ASTParser(APIView):
         try:
             data = json.loads(request.body.decode("utf-8"))
             function_generator = FunctionParser()
-            function_code = function_generator.generate_function_code(data)
+            function_code = function_generator.generate_statement_code(data)
             try:
                 function_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=function_code, text=True)
 

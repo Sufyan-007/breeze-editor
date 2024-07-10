@@ -12,14 +12,14 @@ class FunctionParser:
     def __init__(self):
         pass
     
-    def generate_function_code(self,config):
+    def generate_statement_code(self,config):
         
         if not config.get('type'):
             return ""
         
         
         elif config["type"] == "BLOCK":
-            statements = "\n".join([ self.generate_function_code(code) for code in config['statements']])
+            statements = "\n".join([ self.generate_statement_code(code) for code in config['statements']])
             return f"""{{ 
                 {statements}
             }}"""
@@ -31,7 +31,7 @@ class FunctionParser:
             
             return f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {", ".join([
                     self.get_function_param(p) for p in config.get("parameters",[])
-                ])} ) => {self.generate_function_code(config.get('bodyConfig',{}))}"""
+                ])} ) => {self.generate_statement_code(config.get('bodyConfig',{}))}"""
         
         
         elif config["type"] == "DECLARATION":
@@ -57,20 +57,33 @@ class FunctionParser:
             return config.get("body","")
         
         elif config['type'] == "IF_BLOCK":
-            code = f""" if ({self.get_value_code(config["condition"])}) {self.generate_function_code(config.get('bodyConfig',{}))} 
+            code = f""" if ({self.get_value_code(config["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
             """
             if config.get('elseBody', False):
-                code += f"""else  {self.generate_function_code(config.get('bodyConfig',{}))}
+                code += f"""else  {self.generate_statement_code(config.get('elseBody',{}))}
             """
             return code
         
+        elif config['type'] == "FOR_BLOCK":
+            if config.get('loopType', "STANDARD") == "STANDARD":
+                initializer = self.generate_statement_code(config["initializer"])
+                configiton = self.generate_statement_code(config["initializer"])
+                
+            else:
+                iterator = f"""{config["iterator"].get("declarationType","const ")} {config["iterator"]["name"]}"""
+                iterate = "in" if config.get('loopType')=="FOR_IN" else "of"
+                iterable = self.get_value_code(config["iterable"])
+                return f""" for ( {iterator} {iterate} {iterable})
+                    {self.generate_statement_code(config.get('bodyConfig'))}
+                """
+            pass
         
         elif config['type'] == "WHILE_BLOCK":
-            return f""" while ({self.get_value_code(config["condition"])}) {self.generate_function_code(config.get('bodyConfig',{}))} 
+            return f""" while ({self.get_value_code(config["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
         """
         
         elif config['type'] == "DO_WHILE_BLOCK":
-            return f"""do  {self.generate_function_code(config.get('bodyConfig',{}))} while ({self.get_value_code(config["condition"])}) 
+            return f"""do  {self.generate_statement_code(config.get('bodyConfig',{}))} while ({self.get_value_code(config["condition"])}) 
         """
         
         
@@ -114,8 +127,8 @@ class FunctionParser:
             if type == "OPERATION":
                 return self.get_operation_code(value)
             
-            if type == "FUNCTION":
-                return self.generate_function_code(value)
+            if type == "FUNCTION" or type == "CUSTOM":
+                return self.generate_statement_code(value)
             
         return ""
         
