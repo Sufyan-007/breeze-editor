@@ -27,6 +27,8 @@ from .views import ComponentConfigWriter
 from .views import ComponentConfigOrder
 from .views import GetResources
 from .views import StylesConfig
+from .views import FileUpload
+from .views import ResourceConfig
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -57,7 +59,7 @@ urlpatterns = [
         path('update-component-config/', ComponentConfigWriter.as_view()),
         path('reorder-component-actions/', ComponentConfigOrder.as_view()),
         path('project-styles/', StylesConfig.as_view()),
-
+        
         ##Package json
         path('add-package/<str:projectName>', AddPackage.as_view()),
         path('list-dependencies/<str:projectName>', AddPackage.as_view()),
@@ -79,5 +81,12 @@ urlpatterns = [
         # path('lifecycle/', LifeCycleConfigWriter.as_view()),
         # path("update-function-config/",FunctionConfigWriter.as_view()),
         # path('variables/', VariablesConfigWriter.as_view()),
+
+
+        # Resources 
+        path('file-upload/', FileUpload.as_view()),
+        path('file-upload/<str:projectName>', FileUpload.as_view()),
+
+        path('resource-config/<str:projectName>',ResourceConfig.as_view()),
 ]
 

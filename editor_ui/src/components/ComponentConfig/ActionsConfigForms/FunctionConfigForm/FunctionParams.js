@@ -35,7 +35,7 @@ export default function FunctionParams({ param, setParam }) {
               <img src={rightArrow} height={20} alt="Expand" />
             )}
           </button>
-          {param.name}
+          <div className="mt-1">{param.name}</div>
         </div>
       </div>
       {showDetails && (
