@@ -1,18 +1,20 @@
 import React, { useState } from "react";
 import CreateVariable from "../../FunctionItemComponents/CreateVariable";
-import ConditionalBlock from "../../FunctionItemComponents/ConditionalBlock";
-import FunctionCall from "../../FunctionItemComponents/FunctionCall";
 import CustomCode from "../../FunctionItemComponents/CustomCode";
+import UpdateVariable from "../../FunctionItemComponents/UpdateVariable";
 import Select from "react-select";
+import IfBlock from "../../FunctionItemComponents/IfBlock";
+import ReturnValue from "../../FunctionItemComponents/ReturnValue";
 
 const options = [
   { value: "createVariable", label: "Create Variable" },
-  { value: "conditionalBlock", label: "Conditional Block" },
-  { value: "functionCall", label: "Function Call" },
+  { value: "updateVariable", label: "Update Variable" },
+  { value: "ifBlock", label: "If Else Block" },
   { value: "customCode", label: "Custom Code" },
+  { value: "return", label: "Return Value" },
 ];
 
-function AddFunctionItem({onChange}) {
+function AddFunctionItem({ onChange }) {
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleChange = (selectedOption) => {
@@ -23,12 +25,14 @@ function AddFunctionItem({onChange}) {
     switch (selectedOption?.value) {
       case "createVariable":
         return <CreateVariable onChange={onChange} />;
-      case "conditionalBlock":
-        return <ConditionalBlock />;
-      case "functionCall":
-        return <FunctionCall />;
+      case "updateVariable":
+        return <UpdateVariable onChange={onChange} />;
+      case "ifBlock":
+        return <IfBlock onChange={onChange} />;
       case "customCode":
-      return <CustomCode />
+        return <CustomCode onChange={onChange} />;
+      case "return":
+        return <ReturnValue onChange={onChange} />;
       default:
         return null;
     }
@@ -64,7 +68,7 @@ function AddFunctionItem({onChange}) {
           }),
           option: (base, { isFocused }) => ({
             ...base,
-            backgroundColor: isFocused ? "#343a40" : "#212529",
+            backgroundColor: isFocused ? "#212529" : "#343a40",
             width: "100%",
             height: "100%",
             color: "#dee2e6bf",
@@ -73,7 +77,8 @@ function AddFunctionItem({onChange}) {
           }),
           menu: (base) => ({
             ...base,
-            backgroundColor: "#212529",
+            backgroundColor: "#343a40",
+            zIndex: "100",
           }),
         }}
       />

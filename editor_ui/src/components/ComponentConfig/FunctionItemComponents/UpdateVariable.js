@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-const CreateVariable = ({ onChange }) => {
+const UpdateVariable = ({ onChange }) => {
   const [variableInfo, setVariableInfo] = useState({
-    declarationType: "const",
     variableName: "",
     dataType: "STRING",
     value: "",
@@ -53,33 +52,24 @@ const CreateVariable = ({ onChange }) => {
       valueObject = { $ref: variableInfo.refId };
     }
 
-    const declaration = {
-      type: "DECLARATION",
-      declarationType: variableInfo.declarationType,
+    const assignment = {
+      type: "ASSIGNMENT",
       varName: variableInfo.variableName,
       value: valueObject,
     };
 
-    onChange(declaration);
+    onChange(assignment);
+    // setVariableInfo({
+    //   variableName: "",
+    //   dataType: "STRING",
+    //   value: "",
+    //   refId: "",
+    // });
   }, [variableInfo, isCustomValue, onChange]);
 
   return (
     <div className="px-1 py-2">
-      <form className="variable-declaration-form">
-        <div className="form-group mb-2">
-          <label htmlFor="declarationType">Declaration Type</label>
-          <select
-            id="declarationType"
-            name="declarationType"
-            value={variableInfo.declarationType}
-            onChange={handleChange}
-            className="form-control form-control-sm mt-1"
-          >
-            <option value="const">const</option>
-            <option value="let">let</option>
-            <option value="var">var</option>
-          </select>
-        </div>
+      <form className="variable-assignment-form">
         <div className="form-group mb-2">
           <label htmlFor="variableName">Variable Name</label>
           <input
@@ -170,4 +160,4 @@ const CreateVariable = ({ onChange }) => {
   );
 };
 
-export default CreateVariable;
+export default UpdateVariable;

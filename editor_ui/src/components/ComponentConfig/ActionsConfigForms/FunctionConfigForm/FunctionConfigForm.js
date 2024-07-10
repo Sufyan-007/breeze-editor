@@ -36,11 +36,6 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           //   value: { type: "STRING", value: "Jane Doe" },
           // },
           // {
-          //   type: "FUNCTION_CALL",
-          //   functionName: "greetUser",
-          //   parameters: [{ type: "STRING", value: "Hello, World!" }],
-          // },
-          // {
           //   type: "IF_BLOCK",
           //   condition: {
           //     type: "OPERATION",
@@ -53,9 +48,8 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           //     type: "BLOCK",
           //     statements: [
           //       {
-          //         type: "FUNCTION_CALL",
-          //         functionName: "console.log",
-          //         parameters: [{ type: "STRING", value: "User is admin" }],
+          //         type: "CUSTOM",
+          //         value: 'console.log("User is admin")',
           //       },
           //     ],
           //   },
@@ -63,29 +57,8 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           //     type: "BLOCK",
           //     statements: [
           //       {
-          //         type: "FUNCTION_CALL",
-          //         functionName: "console.log",
-          //         parameters: [{ type: "STRING", value: "User is not admin" }],
-          //       },
-          //     ],
-          //   },
-          // },
-          // {
-          //   type: "WHILE_BLOCK",
-          //   condition: {
-          //     type: "OPERATION",
-          //     operationType: "BINARY",
-          //     operation: "<",
-          //     operand1: { type: "NUMERIC", value: 1 },
-          //     operand2: { type: "NUMERIC", value: 5 },
-          //   },
-          //   bodyConfig: {
-          //     type: "BLOCK",
-          //     statements: [
-          //       {
-          //         type: "FUNCTION_CALL",
-          //         functionName: "console.log",
-          //         parameters: [{ type: "STRING", value: "In loop" }],
+          //         type: "CUSTOM",
+          //         value: 'console.log("User is not admin")',
           //       },
           //     ],
           //   },
@@ -383,20 +356,21 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           </div>
           {functionConfigOpen && (
             <div className="accordion-content px-2 pt-1">
-              <FunctionConfigStack config={formState.body.functionConfig} />
+              <FunctionConfigStack config={formState.body.functionConfig} updateConfig={handleFormChange} />
             </div>
           )}
         </div>
         <Row className="mb-2">
           <Form.Group as={Col} controlId="formFunctionBody">
-            <Form.Label>Function Body</Form.Label>
+            <Form.Label>Preview</Form.Label>
             <MonacoEditor
               defaultValue={formState.body.functionBody}
               onChange={(value) => handleFormChange("functionBody", value)}
-              height="140px"
-              width="550px"
+              height="150px"
+              width="100%"
               language="javascript"
               id={isEditing ? `editor-${formState?.id}` : "function-form"}
+              readOnlyMode={true}
             />
           </Form.Group>
         </Row>

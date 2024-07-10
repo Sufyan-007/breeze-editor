@@ -3,7 +3,7 @@ import Offcanvas from "../../../common/Offcanvas";
 import AddFunctionItem from "./AddFunctionItem";
 import { Button } from "react-bootstrap";
 
-function FunctionConfigStack({ config }) {
+function FunctionConfigStack({ config, updateConfig }) {
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [formResponse, setFormResponse] = useState(null);
 
@@ -49,19 +49,15 @@ function FunctionConfigStack({ config }) {
     return (
       <div className="if-block border border-light px-2 py-1">
         <strong>If:</strong>{" "}
-        {condition.operand1.value +
-          " " +
-          condition.operation +
-          " " +
-          condition.operand2.value}
+        {condition.value}
         <div className="px-3">
-          <FunctionConfigStack config={bodyConfig} />
+          <FunctionConfigStack config={bodyConfig} updateConfig={updateConfig}/>
         </div>
         {elseBody && (
           <>
             <strong>Else:</strong>
             <div className="px-3">
-              <FunctionConfigStack config={elseBody} />
+              <FunctionConfigStack config={elseBody} updateConfig={updateConfig} />
             </div>
           </>
         )}
@@ -80,7 +76,7 @@ function FunctionConfigStack({ config }) {
           " " +
           condition.operand2.value}
         <div className="px-3">
-          <FunctionConfigStack config={bodyConfig} />
+          <FunctionConfigStack config={bodyConfig} updateConfig={updateConfig}/>
         </div>
       </div>
     );
@@ -90,7 +86,22 @@ function FunctionConfigStack({ config }) {
   function Return({ value }) {
     return (
       <div className="return border border-light px-2 py-1">
-        <strong>Return:</strong> {JSON.stringify(value)}
+        <strong>Return:</strong> {value?.value}
+      </div>
+    );
+  }
+
+  function CustomCode({ value }) {
+    return (
+      <div className="custom-code border border-light px-2 py-1">
+        <div className="d-flex justify-content-between">
+          <div>
+            <strong>Custom:</strong> {value}
+          </div>
+          <div style={{ cursor: "pointer" }} onClick={() => {}}>
+            <i className="bi bi-pencil-square text-primary"></i>
+          </div>
+        </div>
       </div>
     );
   }
@@ -102,10 +113,10 @@ function FunctionConfigStack({ config }) {
     IF_BLOCK: IfBlock,
     WHILE_BLOCK: WhileBlock,
     RETURN: Return,
+    CUSTOM: CustomCode,
   };
 
   const renderStatements = (statements) => {
-    
     return statements.map((statement, index) => {
       const Component = componentMap[statement.type];
       if (Component) {
@@ -120,11 +131,18 @@ function FunctionConfigStack({ config }) {
   }, []);
 
   const handleSubmit = () => {
-    console.log("data::>>", formResponse);
+    console.log('formResponse::>>', formResponse);
+    if (formResponse) {
+      updateConfig('functionConfig', {
+        ...config,
+        statements: [...config.statements, formResponse],
+      });
+    }
+    setFormResponse(null);
     handleClose();
   };
 
-  // console.log("config::>>", config);
+  console.log('config::>>', config);
 
   return (
     <div>
@@ -156,7 +174,12 @@ function FunctionConfigStack({ config }) {
             >
               Save
             </Button>
-            <Button variant="danger" size="sm" className="ml-auto" onClick={handleClose}>
+            <Button
+              variant="danger"
+              size="sm"
+              className="ml-auto"
+              onClick={handleClose}
+            >
               Cancel
             </Button>
           </div>
