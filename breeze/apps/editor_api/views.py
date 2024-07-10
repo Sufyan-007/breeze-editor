@@ -11,7 +11,6 @@ from rest_framework.views import APIView
 from .core.app_config_writer import AppConfigWriter
 from common.utils.app_consts import CONFIG_PATH
 import os
-import tinycss2
 import shutil
 from .core.styles_config_service import StylesConfigService
 from .core.app_startup_manager import start_app
@@ -19,7 +18,8 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from .core.helpers.get_attributes_utils import get_attributes_logic
 from .core.helpers.get_component_list import update_components
-
+from .core.files_upload_service import FileService
+from .core.resource_config_service import ResourceConfigGenerator
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -502,6 +502,103 @@ class StylesConfig(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     
+@method_decorator(csrf_exempt, name='dispatch')
+class FileUpload(APIView):
+    def post(self, request, projectName= None):
+        try:
+            file = request.FILES.get('file')
+            fileName = request.POST.get('filename')
+            if not file:
+                return JsonResponse({'error': 'No file provided.'}, status=400)
+
+            if projectName is not None:
+                resource_config = ResourceConfigGenerator(projectName)
+                if resource_config.file_duplicacy(fileName):
+                    return JsonResponse({'error': 'File with the same name already exists.'}, status=400)
+                    
+            fileId = FileService.upload_file(file, projectName)
+
+            return JsonResponse({
+                'message': 'File uploaded successfully',
+                'fileId': fileId
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+        
+    def delete(self, request,projectName= None):
+        try:
+            data = json.loads(request.body) 
+            file_id = data.get('file_id')
+
+            if not projectName:
+                return JsonResponse({'error': 'Project ID is required.'}, status=400)
+
+            if not file_id:
+                return JsonResponse({'error': 'File name is required.'}, status=400)
+
+            file_service = FileService()
+            file_service.delete_file(file_id, projectName)
+
+            return JsonResponse({
+                'message': 'File deleted successfully'
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ResourceConfig(APIView):
+    def post(self, request, projectName):
+        try:
+            data = json.loads(request.body) 
+            file_name = data.get('fileName')
+            file_path = data.get('filePath')
+            description = data.get('description')
+            fileId = data.get('fileId')
+
+            resource_config = ResourceConfigGenerator(projectName)
+            config_data = resource_config.update_config(file_name, file_path, description, fileId)
+
+            return JsonResponse({
+                'message': 'Configuration created successfully',
+                'config_data': config_data
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+    def get(self, request, projectName):
+        try:
+            if not projectName:
+                return JsonResponse({'error': 'Project ID is required.'}, status=400)
+
+            resource_config = ResourceConfigGenerator(projectName)
+            config_data = resource_config.get_uploaded_files()
+
+            if config_data is None:
+                return JsonResponse({'error': 'Configuration file not found.'}, status=404)
+
+            return JsonResponse({"data":config_data}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    def delete(self, request, projectName):
+        try:            
+            data = json.loads(request.body)
+            file_name = data.get('name')
+            file_id = data.get('id')
+
+            if not projectName:
+                return JsonResponse({'error': 'Project ID is required.'}, status=400)
+            if not file_name:
+                return JsonResponse({'error': 'File name is required.'}, status=400)
+                
+            resource_config = ResourceConfigGenerator(projectName)
+            resource_config.delete_config(file_id, file_name)
+            return JsonResponse({
+                'message': 'File deleted successfully'
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
 # @method_decorator(csrf_exempt, name='dispatch')
 # class CSSConfig(APIView):
 #     def post(self, request):
