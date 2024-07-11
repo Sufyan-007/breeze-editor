@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
+    "@mui/material": "^5.15.20",
+    "antd": "^5.18.0",
     "react-bootstrap": "^2.10.2",
     "ts-morph": "^22.0.0",
     "typescript": "^5.4.3"

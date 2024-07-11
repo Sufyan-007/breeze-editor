@@ -60,7 +60,7 @@ function createPropsNameFile(source, target) {
 }
 
 function processFiles(source,targetFolder) {
-    const target = path.join('/home/smit/Documents/project/library/',targetFolder);
+    const target = path.join('/home/subham/Documents/bridge/processor/',targetFolder);
     return new Promise((resolve, reject) => {
         fs.readdir(source, (err, files) => {
             if (err) {

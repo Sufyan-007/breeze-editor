@@ -6,7 +6,7 @@ const { SyntaxKind } = require('typescript');
 const { HandlePropTypes } = require('./handle_prop_types');
 const { DecodePropType } = require('./decodePropTypes');
 const { handleConfigFileGeneration } = require('./store_config');
-const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKeyForProcessStatus, getAbsoluteStorageDirForLib, filterReturnType } = require('./helper');
+const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFileContent, writeJsonFile, getKeyForProcessStatus, getAbsoluteStorageDirForLib } = require('./helper');
 const { INDEX_FILE_NAME } = require('./consts');
 const { FindDeclaration } = require('./declarationFinder');
 const { processFiles,createPropsNameFile } = require('./tester2');
@@ -169,22 +169,14 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
             // declare const _default: typeof DataTable;
             // export default _default;
             if (attributesOfVar.length == 0 && (exportVarSymbol instanceof Symbol)) {
-                isComponent = checkComponentForFunctionDeclaration(exportVarSymbol);
+                const symbol =  getSymbolOrAliasSymbol(getDeclaration(exportVarSymbol).getType())
+                isComponent = isComponentBySymbol(symbol,sourceFile);
             } else {
                 // Determine if it is component or not
                 isComponent = checkIfComponentType(attributesOfVar);
 
-                // If declared Like,
-                // declare function Portal(props: PortalProps): JSX.Element;
-                // declare namespace Portal {
-                //    var className: string;
-                //    var selector: string;
-                //    var displayName: string;
-                // }
-
-
-                if(!isComponent && exportVarSymbol instanceof Symbol){
-                    isComponent = checkComponentForFunctionDeclaration(exportVarSymbol);
+                if (!isComponent) {
+                    isComponent = isComponentBySymbol(exportVarSymbol,sourceFile);                    
                 }
                 }
 
@@ -221,17 +213,18 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
 
 }
 
-function isComponentDeclaration(varDeclaration) {
+function isComponentDeclaration(varDeclaration,sourceFile,callStack) {
 
-    if (!varDeclaration) return;
+    if (!varDeclaration  || callStack.includes(varDeclaration.getText())) return;
 
     let isComponent;
+    callStack.push(varDeclaration.getText());
 
     let varKind = varDeclaration.getKind();
 
     if (varKind == SyntaxKind.IntersectionType) {
         for (const tn of varDeclaration.getTypeNodes()) {
-            isComponent = isComponentDeclaration(tn);
+            isComponent = isComponentDeclaration(tn,sourceFile,callStack);
             if (isComponent) break;
         }
     }
@@ -239,7 +232,7 @@ function isComponentDeclaration(varDeclaration) {
         isComponent = isReturnJSX(varDeclaration);
     }
     else if (varKind == SyntaxKind.ParenthesizedType) {
-        return isComponentDeclaration(varDeclaration.getTypeNode());
+        return isComponentDeclaration(varDeclaration.getTypeNode(),sourceFile,callStack);
     }
     else if (varKind == SyntaxKind.InterfaceDeclaration) {
         for (const callSign of varDeclaration.getCallSignatures()) {
@@ -247,26 +240,38 @@ function isComponentDeclaration(varDeclaration) {
             if (isComponent) break;
         }
     } else if (varKind == SyntaxKind.TypeAliasDeclaration) {
-        return isComponentDeclaration(varDeclaration.getTypeNode());
+        return isComponentDeclaration(varDeclaration.getTypeNode(),sourceFile,callStack);
     } else if (varKind == SyntaxKind.TypeReference) {
         const symbol = getSymbolOrAliasSymbol(varDeclaration.getType())
         const dec = getDeclaration(symbol);
 
-        return isComponentDeclaration(dec);
+        return isComponentDeclaration(dec,sourceFile,callStack);
     } else if (varKind == SyntaxKind.VariableDeclaration) {
-        return isComponentDeclaration(varDeclaration.getTypeNode())
+        return isComponentDeclaration(varDeclaration.getTypeNode(), sourceFile,callStack)
     }
-
+    // typeof DatePicker
+    else if (varKind == SyntaxKind.TypeQuery){
+        
+        
+        return isComponentDeclaration(sourceFile.getVariableDeclaration(varDeclaration.getText().split(" ")[1]),sourceFile,callStack);
+    }
+    else if (varKind == SyntaxKind.TypeLiteral){
+        for (const callSign of varDeclaration.getCallSignatures()) {
+            isComponent = isReturnJSX(callSign)
+            if (isComponent) break;
+        }
+    }
     return isComponent;
 }
 
-function isComponentBySymbol(symbol) {
+function isComponentBySymbol(symbol,sourceFile) {
     
     if (!symbol) return;
 
     const varDeclaration = getDeclaration(symbol);
+    const callStack = [];
 
-    return isComponentDeclaration(varDeclaration);
+    return isComponentDeclaration(varDeclaration,sourceFile,callStack);
 }
 
 function getDefaultExportVariableDeclaration(sourceFile) {
@@ -320,11 +325,17 @@ function getVariableDeclarationForExport(sourceFile, name) {
 function isReturnJSX(functionDeclaration) {
     // Add this to also check if it is return type jsx, react_jsx_runtime.JSX.Element
 
-    const JSX_ELEMENTS_TYPES = ['React.ReactElement', 'JSX.Element'];
+    const JSX_ELEMENTS_TYPES = ['React.ReactElement', 'JSX.Element', 'react_jsx_runtime.JSX.Element','react.DetailedReactHTMLElement','import("react").ReactElement'];
     if(functionDeclaration.getReturnTypeNode().getKind() == SyntaxKind.UnionType){
         return functionDeclaration.getReturnTypeNode().getTypeNodes().filter(tp => JSX_ELEMENTS_TYPES.includes(tp.getText())).length != 0 ;
     }
-    return JSX_ELEMENTS_TYPES.includes(functionDeclaration.getReturnTypeNode().getText()) ;
+    const strings  = functionDeclaration.getReturnTypeNode().getText();
+    for (let substring of JSX_ELEMENTS_TYPES ){
+        if(strings.includes(substring))
+            return true
+    }
+    return false;
+    // return JSX_ELEMENTS_TYPES.includes(functionDeclaration.getReturnTypeNode().getText()) ||  JSX_ELEMENTS_TYPES.includes(functionDeclaration.getReturnTypeNode().getTypeName().getText());
 }
 
 function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefaultExport = true) {
@@ -389,7 +400,9 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
             if (ch.getKind() == SyntaxKind.TypeLiteral) {
                 // // // console.log('TYPE LITERAL FOUND');
                 // // // console.log(ch.getCallSignature(cs => cs.getReturnType().getText() == 'JSX.Element'));
-                const relatedCallSign = ch.getCallSignature(cs => cs.getReturnType().getText() == 'JSX.Element')
+                // const relatedCallSign = ch.getCallSignature(cs => cs.getReturnType().getText() == 'JSX.Element')
+                const relatedCallSign = ch.getCallSignature(cs => isReturnJSX(cs))
+
                 // // // console.log(relatedCallSign.getParameters().map(p => p.getStructure().type));
                 // This gets the type reference to the props type
                 // // // console.log(relatedCallSign.getParameters()[0].getTypeNode().getText());
@@ -420,7 +433,7 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                     // console.log(referenceToPropsVar.getTypeAlias().getTypeNode().getText());
                     
                     if(referenceToPropsVar instanceof Type){
-                        referenceToPropsVar = getDeclaration(getSymbolOrAliasSymbol(referenceToPropsVar))
+                        referenceToPropsVar = getDeclaration(getSymbolOrAliasSymbol(referenceToPropsVar)) ?? referenceToPropsVar
                     }
 
                     const variableName = filterReturnType(referenceToPropsVar.getType().getText());
@@ -630,7 +643,7 @@ function getTypeReferenceOfComponentVar(variableNode, rootNode) {
         for (const subProp of variableNode.getTypeNodes()) {
 
             if (subProp.getKind() == SyntaxKind.TypeReference) {
-                return subProp.getType();
+                return subProp;
             }else if(subProp.getKind() == SyntaxKind.TypeQuery){
                 return subProp.getType();
             }else if(subProp.getKind() == SyntaxKind.ImportType){
