@@ -1,6 +1,7 @@
 from django.views import View
 from django.http import JsonResponse
-import json
+import json,os
+from common.utils.app_consts import CONFIG_PATH
 
 class MoveNode(View):
     def post(self, request,projectName):
@@ -12,7 +13,7 @@ class MoveNode(View):
             if not drag_id or not destination_id:
                 return JsonResponse({'status': 'error', 'message': 'Missing required parameters'}, status=400)
 
-            config_path = f"/home/varanpreet/Desktop/breezeui/configurations/{projectName}/directory_management.json"
+            config_path = os.path.join(CONFIG_PATH, projectName, 'directory_management.json')
 
           
             with open(config_path, 'r') as file:

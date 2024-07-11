@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Tree } from "react-arborist";
-import { fetchFolderConfig, onAdd , onRenameNode, onMoveNode, onDeleteNode } from "../../services/DirectoryManagementService";
+import {
+  fetchFolderConfig,
+  onAdd,
+  onRenameNode,
+  onMoveNode,
+  onDeleteNode,
+} from "../../services/DirectoryManagementService";
 import "../../css/folder.css";
 import { useParams } from "react-router-dom";
-import Node from "../FolderStructure/Node";
+import Node from "./Node";
 
-
-const FolderStruArborist = () => {
+const FolderStructureConfig
+ = () => {
   const [treeData, setTreeData] = useState(null);
   const { projectName } = useParams();
 
@@ -57,15 +63,8 @@ const FolderStruArborist = () => {
 
   const onCreate = async (parentId, type, lineage, tag) => {
     try {
-      console.log("Creating new item with details:", {
-        parentId,
-        type,
-        lineage,
-        tag,
-        projectName,
-      });
       const newItem = await onAdd(parentId, type, lineage, tag, projectName);
-        console.log("New item created:", newItem);
+      console.log("New item created:", newItem);
       updateTreeData(parentId, newItem);
     } catch (error) {
       console.log("Failed to add item:", error);
@@ -108,7 +107,7 @@ const FolderStruArborist = () => {
 
   const onMove = async ({ dragIds, parentId }) => {
     try {
-      const data = await onMoveNode(dragIds, parentId , projectName);
+      const data = await onMoveNode(dragIds, parentId, projectName);
       if (data.status === "success") {
         console.log("move successful");
         updateTreeDataAfterMove(dragIds[0], parentId);
@@ -160,10 +159,10 @@ const FolderStruArborist = () => {
 
   const onDelete = async (id) => {
     try {
-       const result = await onDeleteNode(id, projectName);
-       if (result.status === "success") {
-         removeNode(id);
-       }
+      const result = await onDeleteNode(id, projectName);
+      if (result.status === "success") {
+        removeNode(id);
+      }
     } catch (error) {
       console.error("Error deleting item:", error);
     }
@@ -218,4 +217,5 @@ const FolderStruArborist = () => {
   );
 };
 
-export default FolderStruArborist;
+export default FolderStructureConfig
+;

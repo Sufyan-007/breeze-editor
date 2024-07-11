@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import "../../css/folder.css";
+import axios from "axios";
 import pencilIcon from "../../assets/icons/edit.svg";
 import deleteIcon from "../../assets/icons/delete.svg";
 import crossIcon from "../../assets/icons/close-button.svg";
 import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
+import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal";
 
 const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
    const nodeName =
@@ -13,7 +16,11 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
        : JSON.stringify(node.data.name);
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(node.data.name);
+  const [newName, setNewName] = useState(nodeName);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const {projectName} = useParams();
+  const[currentFolderPath,setCurrentFolderPath] = useState("")
+
   const handleHover = (hoverState) => setIsHovered(hoverState);
 
   const getIcon = (type) => {
@@ -57,10 +64,42 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
     }
   };
 
-  const handleUpload = () => {
-    console.log("upload file");
+const handleUploadClick = async () => {
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:8000/directory-management/get-folder-path/${projectName}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nodeId: node.id }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(data, "response for folder path");
+
+    setCurrentFolderPath(data.folderPath);
+    console.log(data.folderPath, "current folder path");
+    setIsModalVisible(true);
+  } catch (error) {
+    console.error("Error fetching folder path:", error);
   }
-// console.log(typeof node.data.name, "node.data.name");
+};
+
+ const handleCloseModal = () => {
+   setIsModalVisible(false);
+ };
+
+   const handleSubmit = (formData) => {
+     // Handle your form submission logic here
+     console.log("Form submitted:", formData);
+     setIsModalVisible(false);
+   };
+
   return (
     <div
       style={style}
@@ -140,14 +179,15 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
               <img src={pencilIcon} alt="Edit" width="15" height="20" />
             </button>
             <button
-              onClick=
-              {(e) => {
+              onClick={(e) => {
                 e.stopPropagation();
-                handleUpload();
+                handleUploadClick();
               }}
-              className="icon-button" >
+              className="icon-button"
+            >
               <img src={uploadIcon} alt="Upload" width="15" height="20" />
             </button>
+
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -160,6 +200,14 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
           </span>
         )}
       </div>
+      {isModalVisible && (
+        <ResourcesUploadModal
+          show={isModalVisible}
+          onHide={handleCloseModal}
+          onSubmit={handleSubmit}
+          initialPath={setCurrentFolderPath}
+        />
+      )}
     </div>
   );
 };

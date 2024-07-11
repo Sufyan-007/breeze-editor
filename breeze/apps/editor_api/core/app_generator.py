@@ -299,7 +299,8 @@ class AppGenerator:
         if not selected_template:
             raise ValueError("Selected template not found in app_config")
 
-        templates_path = f"/home/varanpreet/Desktop/breezeui/breeze/apps/directory_management/const/{selected_template}.json"
+        templates_path = f"breeze/apps/directory_management/const/{selected_template}.json"
+   
         
         if not os.path.exists(templates_path):
             raise FileNotFoundError(f"Template file {templates_path} does not exist")
@@ -322,18 +323,17 @@ class AppGenerator:
    
     def update_component_config(self, selected_template, template_content):
         components_config_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "component_config.json")
-        print(selected_template, template_content ,"hiiiiiiiiiiiiiiiiiiiiiiiiiiii")
         # Initialize an empty list to store component config
         component_configs = []
         
         # Iterate over the template_content dictionary to find files tagged as COMPONENTS
         for file_id, file_info in template_content.items():
-            print("inside for lopppppppppppppppp")
+
             new_id = str(uuid.uuid4())
             if file_info['type'] == 'FILE' and file_info['tag'] == 'COMPONENTS':
                 # Extract the component name from the file name (without the .js extension)
                 component_name = os.path.splitext(file_info['name'])[0]
-                print(component_name,"component name ")
+              
                 component_config = {
                     new_id: {
                         "name": component_name,
@@ -360,7 +360,8 @@ class AppGenerator:
                                 "children": [{"_id": f"{new_id}-0"}]
                             },
                             f"{new_id}-0": {"type": "text", "text": "Hello world"}
-                        }
+                        },
+                        
                     }
                 }
                 component_configs.append(component_config)
