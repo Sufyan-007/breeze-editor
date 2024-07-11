@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
 import MonacoEditor from "../../common/MonacoEditor";
 import DeleteIcon from "../../../assets/icons/delete-trash.svg";
+import { ComponentContext } from "../ComponentConfigPage";
 
 const hookTypes = ["useCallback", "useMemo"];
 
@@ -18,9 +19,18 @@ function HookConfigForm({ onSubmit, formData, isEditing }) {
       description: "",
     },
   });
+  const { componentConfig } = useContext(ComponentContext);
+  const { propsVars, resources } = componentConfig;
 
   const [parameterInput, setParameterInput] = useState("");
-  const constantsList = ["var1", "var2", "var3", "var4"];
+  const [constants, setConstants] = useState([]);
+
+  useEffect(() => {
+    const filteredResources = resources.filter(resource => resource.type !== 'lifecycle');
+    const combinedVariables = [...propsVars, ...filteredResources];
+    const varList = combinedVariables.map(variable => variable.name);
+    setConstants(varList);
+  }, [propsVars, resources]);
 
   useEffect(() => {
     if (isEditing && formData) {
@@ -174,7 +184,7 @@ function HookConfigForm({ onSubmit, formData, isEditing }) {
         <Form.Group controlId="formGridDependentVars">
           <Multiselect
             placeholder="Dependent Variables"
-            options={constantsList}
+            options={constants}
             selectedValues={formState.body.dependentVars}
             onSelect={handleSelect}
             onRemove={handleRemove}

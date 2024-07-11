@@ -52,8 +52,7 @@ class AppConfigWriter:
                         "typeId": "DIV",
                         "tagName": "div",
                         "attributes": {
-                        "className": { "type": "LITERAL", "value": "" },
-                        "id": { "type": "LITERAL", "value": "" }
+                        "className": { "type": "LITERAL", "value": "" }
                         },
                         "children": [{ "_id": "Main-0" }]
                     },

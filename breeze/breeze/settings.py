@@ -53,6 +53,8 @@ ALLOWED_HOSTS = [
     "localhost",
     "192.1.150.148"
 ]
+ALLOWED_CIDR_NETS = ['192.1.0.0/16']
+
 CSRF_COOKIE_SECURE = True
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1",
@@ -70,7 +72,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware'
+    'django.middleware.common.CommonMiddleware',
+    'allow_cidr.middleware.AllowCIDRMiddleware'
 ]
 
 ROOT_URLCONF = 'breeze.urls'

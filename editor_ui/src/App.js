@@ -24,6 +24,7 @@ import Settings from "./components/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
 import FolderStruArborist from "./components/FolderStructure/FolderStruArborist";
 import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
+import Resources from "./components/ResourcesConfiguration/Resources";
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +52,7 @@ export const router = createBrowserRouter([
       { path: "code", element: <Code /> },
       { path: "apps", element: <DependencyConfig /> },
       { path: "settings", element: <Settings /> },
+      { path: "resources", element: <Resources /> },
     ],
   },
   {

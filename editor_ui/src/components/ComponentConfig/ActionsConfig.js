@@ -8,10 +8,12 @@ import ImportConfigForm from "./ActionsConfigForms/ImportConfigForm";
 import PropConfigForm from "./ActionsConfigForms/PropConfigForm";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
+import PropTesting from "./PropTesting";
 import {
   updateComponentConfig,
   reorderComponentActions,
 } from "../../services/ComponentConfigService";
+import { Toast } from "react-bootstrap";
 
 const menuItems = [
   { key: "imports", label: "Imports" },
@@ -22,6 +24,17 @@ const menuItems = [
   { key: "hook", label: "Hooks" },
 ];
 
+const formTitles = {
+  stateVars: "Variable Configuration",
+  refVars: "Variable Configuration",
+  otherVars: "Variable Configuration",
+  function: "Function Configuration",
+  lifecycle: "Lifecycle Configuration",
+  hook: "Hook Configuration",
+  imports: "Imports Configuration",
+  propsVars: "Prop Configuration",
+};
+
 function ActionsConfig() {
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [formType, setFormType] = useState("Variables");
@@ -29,6 +42,8 @@ function ActionsConfig() {
   const [isEditing, setIsEditing] = useState(false);
   const { componentConfig, setComponentConfig } = useContext(ComponentContext);
   const { projectName, componentName } = useParams();
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const handleOpen = (type) => {
     setFormType(type);
@@ -79,9 +94,13 @@ function ActionsConfig() {
           ...prevConfig,
           [type]: updatedItems,
         }));
+        setToastMessage("Reordered Successfully");
+        setShowToast(true);
       })
       .catch((error) => {
         console.error("Error updating order", error);
+        setToastMessage("Error updating order");
+        setShowToast(true);
       });
   };
 
@@ -103,30 +122,21 @@ function ActionsConfig() {
       const response = await updateComponentConfig(payload);
       console.log("Update successful:", response);
       setComponentConfig(response);
+      setToastMessage("Action Successful");
+      setShowToast(true);
     } catch (error) {
       console.error("Error updating component config:", error);
+      setToastMessage("Error updating component config");
+      setShowToast(true);
     }
+
     handleClose();
   };
 
   const renderForm = () => {
     switch (formType) {
       case "stateVars":
-        return (
-          <VariableForm
-            onSubmit={handleFormSubmit}
-            formData={formData}
-            isEditing={isEditing}
-          />
-        );
       case "refVars":
-        return (
-          <VariableForm
-            onSubmit={handleFormSubmit}
-            formData={formData}
-            isEditing={isEditing}
-          />
-        );
       case "otherVars":
         return (
           <VariableForm
@@ -231,6 +241,7 @@ function ActionsConfig() {
             </ul>
           </div>
         </div>
+        <PropTesting />
         <div>
           <div className="">
             {renderDraggableList(componentConfig.propsVars, "propsVars")}
@@ -242,11 +253,27 @@ function ActionsConfig() {
       <Offcanvas
         isOpen={isOffcanvasOpen}
         onClose={handleClose}
-        title="Action Configuration"
-        width="450px"
+        title={formTitles[formType] || "Action Configuration"}
+        width="600px"
       >
         <div className="px-1">{renderForm()}</div>
       </Offcanvas>
+
+      <Toast
+        onClose={() => setShowToast(false)}
+        show={showToast}
+        delay={3000}
+        autohide
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+        }}
+      >
+        <Toast.Header>
+          <strong className="me-auto">{toastMessage}</strong>
+        </Toast.Header>
+      </Toast>
     </>
   );
 }
