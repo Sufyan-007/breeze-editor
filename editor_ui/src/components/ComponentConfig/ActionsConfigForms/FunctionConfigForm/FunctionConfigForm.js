@@ -365,7 +365,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
               <div className="accordion-content px-2 pt-1">
                 <FunctionConfigStack
                   config={formState.body.functionConfig}
-                  updateConfig={console.log}
+                  updateParent={val=>console.log(val)}
                 />
               </div>
             )}
