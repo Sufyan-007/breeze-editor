@@ -10,16 +10,17 @@ import uploadIcon from "../../assets/icons/upload.svg";
 import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal";
 
 const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
-   const nodeName =
-     typeof node.data.name === "string"
-       ? node.data.name
-       : JSON.stringify(node.data.name);
+  // console.log(node,"node");
+  const nodeName =
+    typeof node.data.name === "string"
+      ? node.data.name
+      : JSON.stringify(node.data.name);
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(nodeName);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const {projectName} = useParams();
-  const[currentFolderPath,setCurrentFolderPath] = useState("")
+  const { projectName } = useParams();
+  const [currentFolderPath, setCurrentFolderPath] = useState("");
 
   const handleHover = (hoverState) => setIsHovered(hoverState);
 
@@ -64,41 +65,35 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
     }
   };
 
-const handleUploadClick = async () => {
-  try {
-    const response = await fetch(
-      `http://127.0.0.1:8000/directory-management/get-folder-path/${projectName}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nodeId: node.id }),
-      }
-    );
+ const constructFolderPath = (node) => {
+   let path = [];
+   let currentNode = node;
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
+   while (
+     currentNode){
+     path.unshift(currentNode.data.name);
+     currentNode = currentNode.parent;
+   }
 
-    const data = await response.json();
-    console.log(data, "response for folder path");
-
-    setCurrentFolderPath(data.folderPath);
-    console.log(data.folderPath, "current folder path");
-    setIsModalVisible(true);
-  } catch (error) {
-    console.error("Error fetching folder path:", error);
-  }
-};
-
- const handleCloseModal = () => {
-   setIsModalVisible(false);
+   return path.join("/").slice(1);
  };
 
-   const handleSubmit = (formData) => {
-     // Handle your form submission logic here
-     console.log("Form submitted:", formData);
-     setIsModalVisible(false);
-   };
+  const handleUploadClick = () => {
+    const folderPath = constructFolderPath(node);
+    console.log(folderPath,"folder path");
+    setCurrentFolderPath(folderPath);
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleSubmit = (formData) => {
+    // Handle your form submission logic here
+    console.log("Form submitted:", formData);
+    setIsModalVisible(false);
+  };
 
   return (
     <div
@@ -167,6 +162,16 @@ const handleUploadClick = async () => {
                 >
                   📄+
                 </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUploadClick();
+                  }}
+                  className="icon-button"
+                >
+                  <img src={uploadIcon} alt="Upload" width="15" height="20" />
+                </button>
               </>
             )}
             <button
@@ -177,15 +182,6 @@ const handleUploadClick = async () => {
               className="icon-button"
             >
               <img src={pencilIcon} alt="Edit" width="15" height="20" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUploadClick();
-              }}
-              className="icon-button"
-            >
-              <img src={uploadIcon} alt="Upload" width="15" height="20" />
             </button>
 
             <button
@@ -205,7 +201,7 @@ const handleUploadClick = async () => {
           show={isModalVisible}
           onHide={handleCloseModal}
           onSubmit={handleSubmit}
-          initialPath={setCurrentFolderPath}
+          path={currentFolderPath}
         />
       )}
     </div>

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Col, Row } from "react-bootstrap";
 
-function ResourcesUploadModal({ show, onHide, onSubmit }) {
+function ResourcesUploadModal({ show, onHide, onSubmit, path }) {
   const [formData, setFormData] = useState({
     filename: "",
-    file_path: "assets",
+    file_path: path ,
     description: "",
     file: null,
   });
@@ -36,7 +36,7 @@ function ResourcesUploadModal({ show, onHide, onSubmit }) {
   const resetForm = () => {
     setFormData({
       filename: "",
-      file_path: "assets",
+      file_path: path,
       description: "",
       file: null,
     });
