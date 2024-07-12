@@ -74,23 +74,9 @@ urlpatterns = [
         # FUNCTION GENERATION TESTING
         path("ast-parser/",ASTParser.as_view()),
         
-        #old apis
-        # path('add-css-content/', CSSConfig.as_view()),
-        # path('all-css-files/', CSSConfig.as_view()),
-        # path('update-css-file/', CSSConfig.as_view()),
-        # path('delete-css-file/<str:css_name>/', CSSConfig.as_view()),
-        # path('get-css-file/<str:css_name>/', CSSConfigReader.as_view()),
-        # path('upload-css-file/', CSSFileUpload.as_view()),
-        # path('css-file-download/<str:css_name>/', CSSFileDownloadView.as_view()),
-        # path('lifecycle/', LifeCycleConfigWriter.as_view()),
-        # path("update-function-config/",FunctionConfigWriter.as_view()),
-        # path('variables/', VariablesConfigWriter.as_view()),
-
-
         # Resources 
         path('file-upload/', FileUpload.as_view()),
         path('file-upload/<str:projectName>', FileUpload.as_view()),
-
         path('resource-config/<str:projectName>',ResourceConfig.as_view()),
 ]
 
