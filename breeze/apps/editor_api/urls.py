@@ -72,7 +72,7 @@ urlpatterns = [
         path("get-resources/",GetResources.as_view()),
         
         # FUNCTION GENERATION TESTING
-        path("ast-parser/",ASTParser.as_view())
+        path("ast-parser/",ASTParser.as_view()),
         
         #old apis
         # path('add-css-content/', CSSConfig.as_view()),
