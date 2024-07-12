@@ -1,14 +1,13 @@
 import React, { useState, useContext } from "react";
 import Offcanvas from "../common/Offcanvas";
 import VariableForm from "./ActionsConfigForms/VariablesConfigForm";
-import FunctionConfigForm from "./ActionsConfigForms/FunctionConfigForm";
+import FunctionConfigForm from "./ActionsConfigForms/FunctionConfigForm/FunctionConfigForm";
 import LifecycleConfigForm from "./ActionsConfigForms/LifecycleConfigForm";
 import HookConfigForm from "./ActionsConfigForms/HookConfigForm";
 import ImportConfigForm from "./ActionsConfigForms/ImportConfigForm";
 import PropConfigForm from "./ActionsConfigForms/PropConfigForm";
 import { ComponentContext } from "./ComponentConfigPage";
 import { useParams } from "react-router";
-import PropTesting from "./PropTesting";
 import {
   updateComponentConfig,
   reorderComponentActions,
@@ -16,8 +15,6 @@ import {
 import { Toast } from "react-bootstrap";
 
 const menuItems = [
-  { key: "imports", label: "Imports" },
-  { key: "propsVars", label: "Props" },
   { key: "stateVars", label: "Variables" },
   { key: "function", label: "Functions" },
   { key: "lifecycle", label: "Lifecycle" },
@@ -195,58 +192,149 @@ function ActionsConfig() {
       {items.map((item, index) => (
         <div
           key={item.name}
-          className="d-flex"
-          style={{ marginBottom: "2px", cursor: "pointer" }}
+          className="d-flex justify-content-between"
+          style={{ marginBottom: "2px", fontSize: "14px" }}
           draggable
           onDragStart={handleDragStart(type, index)}
           onDragOver={handleDragOver}
           onDrop={handleDrop(type, index)}
-          onClick={() => handleEdit(item)}
         >
-          <strong>{item.name}</strong>
-          <div className="ms-2 fst-italic fw-lighter">{item.type}</div>
+          <div className="d-flex">
+            <strong>{item.name}</strong>
+            <div className="ms-2 fst-italic fw-lighter">{item.type}</div>
+          </div>
+          <div
+            style={{ cursor: "pointer", marginRight: "1px" }}
+            onClick={() => handleEdit(item)}
+          >
+            <i className="bi bi-pencil-square text-primary"></i>
+          </div>
         </div>
       ))}
+      {items.length === 0 && (
+        <div style={{ fontSize: "14px" }}>No actions found</div>
+      )}
     </div>
   );
 
   return (
     <>
       <div>
-        <div className="text-end">
-          <div className="dropdown">
-            <button
-              className="btn btn-secondary btn-sm"
-              type="button"
-              id="dropdownMenuButton1"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
+        <div className="p-1">
+          {/* Props  */}
+          <div className="d-flex justify-content-between">
+            <strong className="mb-0 text-decoration-underline">Props</strong>
+            <div
+              style={{ cursor: "pointer" }}
+              onClick={() => handleOpen("propsVars")}
             >
-              Add
-            </button>
-            <ul
-              className="dropdown-menu"
-              aria-labelledby="dropdownMenuButton1"
-              data-bs-theme="dark"
+              <i className="bi bi-plus-circle"></i>
+            </div>
+          </div>
+          <div>
+            <div>
+              {componentConfig.propsVars &&
+                componentConfig.propsVars.map((item) => (
+                  <div
+                    key={item.name}
+                    className="d-flex justify-content-between"
+                    style={{ marginBottom: "2px", fontSize: "14px" }}
+                  >
+                    <>{item.name}</>
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleEdit(item)}
+                    >
+                      <i className="bi bi-pencil-square text-primary"></i>
+                    </div>
+                  </div>
+                ))}
+              {componentConfig.propsVars.length === 0 && (
+                <div style={{ fontSize: "14px" }}>No Props Added</div>
+              )}
+            </div>
+          </div>
+          {/* Imports */}
+          <div className="d-flex justify-content-between mt-2">
+            <strong className="mb-0 text-decoration-underline">Imports</strong>
+            <div
+              style={{ cursor: "pointer" }}
+              onClick={() => handleOpen("imports")}
             >
-              {menuItems.map((item) => (
-                <li
-                  key={item.key}
-                  className="dropdown-item"
-                  onClick={() => handleOpen(item.key)}
+              <i className="bi bi-plus-circle"></i>
+            </div>
+          </div>
+          <div>
+            {componentConfig.imports.other &&
+              componentConfig.imports.other.map((item) => (
+                <div
+                  key={item.import_entity}
+                  className="d-flex justify-content-between"
+                  style={{ marginBottom: "2px", fontSize: "14px" }}
                 >
-                  {item.label}
-                </li>
+                  <div className="d-flex">
+                    <strong>{item.import_entity}</strong>
+                    <div className="ms-2 fst-italic fw-lighter">
+                      {item.from}
+                    </div>
+                  </div>
+                  {/* <div
+                        style={{ cursor: "pointer" }}
+                        onClick={() => handleEdit({type : 'imports', body: {...item}})}
+                      >
+                        <i className="bi bi-pencil-square text-primary"></i>
+                      </div> */}
+                </div>
               ))}
-            </ul>
+            {componentConfig.imports.other &&
+              componentConfig.imports.other.length === 0 && (
+                <div style={{ fontSize: "14px" }}> No imports found</div>
+              )}
           </div>
-        </div>
-        <PropTesting />
-        <div>
-          <div className="">
-            {renderDraggableList(componentConfig.propsVars, "propsVars")}
-            {renderDraggableList(componentConfig.resources, "resources")}
+          {/* Actions */}
+          <div className="d-flex justify-content-between mt-2">
+            <div className="d-flex">
+              <strong className="mb-0 text-decoration-underline">
+                Actions
+              </strong>
+              <div className="ms-2" title="Drag and reorder items">
+                <i className="bi bi-info-circle-fill" style={{fontSize: '14px', cursor: "pointer"}}></i>
+              </div>
+            </div>
+            <div className="dropdown">
+              <div
+                id="dropdownMenuButton1"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                style={{ cursor: "pointer" }}
+              >
+                <i className="bi bi-plus-circle"></i>
+              </div>
+              <ul
+                className="dropdown-menu"
+                aria-labelledby="dropdownMenuButton1"
+                data-bs-theme="dark"
+              >
+                {menuItems.map((item) => (
+                  <li
+                    key={item.key}
+                    className="dropdown-item"
+                    onClick={() => handleOpen(item.key)}
+                  >
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* <div
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleOpen("imports")}
+                >
+                  <i className="bi bi-plus-circle"></i>
+                </div> */}
           </div>
+          {renderDraggableList(componentConfig.resources, "resources")}
         </div>
       </div>
 
@@ -256,7 +344,7 @@ function ActionsConfig() {
         title={formTitles[formType] || "Action Configuration"}
         width="600px"
       >
-        <div className="px-1">{renderForm()}</div>
+        <div className="px-1 h-100">{renderForm()}</div>
       </Offcanvas>
 
       <Toast
