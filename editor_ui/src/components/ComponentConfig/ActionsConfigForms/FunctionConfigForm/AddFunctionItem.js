@@ -5,6 +5,7 @@ import UpdateVariable from "../../FunctionItemComponents/UpdateVariable";
 import Select from "react-select";
 import IfBlock from "../../FunctionItemComponents/IfBlock";
 import ReturnValue from "../../FunctionItemComponents/ReturnValue";
+import FunctionCall from "../../FunctionItemComponents/FunctionCall";
 
 const options = [
   { value: "createVariable", label: "Create Variable" },
@@ -12,6 +13,7 @@ const options = [
   { value: "ifBlock", label: "If Else Block" },
   { value: "customCode", label: "Custom Code" },
   { value: "return", label: "Return Value" },
+  { value: "functionCall", label: "Function Call" },
 ];
 
 function AddFunctionItem({ onChange }) {
@@ -33,6 +35,8 @@ function AddFunctionItem({ onChange }) {
         return <CustomCode onChange={onChange} />;
       case "return":
         return <ReturnValue onChange={onChange} />;
+      case "functionCall":
+        return <FunctionCall onChange={onChange} />;
       default:
         return null;
     }
