@@ -4,7 +4,7 @@ import ResourcesUploadModal from "./ResourcesUploadModal.js";
 import { useParams } from "react-router";
 import ResourcesFileCard from "./ResourcesFileCard.js";
 import { getAllUploadedFiles, uploadFile, deleteFile } from "../../services/ResourceUploadService.js";
-import FolderStructureConfig from "../FolderStructure/FolderStructureConfig.js";
+import FolderStructureConfig from "../FolderStructureSection/FolderStructureConfig.js";
 
 const Resources = () => {
   const [showToast, setShowToast] = useState(false);
