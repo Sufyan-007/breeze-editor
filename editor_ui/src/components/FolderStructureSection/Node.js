@@ -8,6 +8,12 @@ import crossIcon from "../../assets/icons/close-button.svg";
 import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
 import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal";
+import {
+  uploadFile
+} from "../../services/ResourceUploadService.js";
+import {
+  fetchFolderConfig
+} from "../../services/DirectoryManagementService";
 
 const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
   // console.log(node,"node");
@@ -19,6 +25,8 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(nodeName);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const { projectName } = useParams();
   const [currentFolderPath, setCurrentFolderPath] = useState("");
 
@@ -65,22 +73,20 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
     }
   };
 
- const constructFolderPath = (node) => {
-   let path = [];
-   let currentNode = node;
+  const constructFolderPath = (node) => {
+    let path = [];
+    let currentNode = node;
 
-   while (
-     currentNode){
-     path.unshift(currentNode.data.name);
-     currentNode = currentNode.parent;
-   }
+    while (currentNode) {
+      path.unshift(currentNode.data.name);
+      currentNode = currentNode.parent;
+    }
 
-   return path.join("/").slice(1);
- };
+    return path.join("/").slice(1);
+  };
 
   const handleUploadClick = () => {
     const folderPath = constructFolderPath(node);
-    console.log(folderPath,"folder path");
     setCurrentFolderPath(folderPath);
     setIsModalVisible(true);
   };
@@ -89,10 +95,21 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
     setIsModalVisible(false);
   };
 
-  const handleSubmit = (formData) => {
-    // Handle your form submission logic here
-    console.log("Form submitted:", formData);
-    setIsModalVisible(false);
+  const handleUpload = async (formData) => {
+    try {
+      const result = await uploadFile(formData, projectName);
+      if (result.message) {
+        setToastMessage("File uploaded successfully");
+      } else {
+        setToastMessage(result.error || "Upload failed.");
+      }
+      setShowToast(true);
+      setIsModalVisible(false);
+      fetchFolderConfig(projectName);
+    } catch (error) {
+      setToastMessage("An error occurred while adding the File.");
+      setShowToast(true);
+    }
   };
 
   return (
@@ -200,7 +217,7 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
         <ResourcesUploadModal
           show={isModalVisible}
           onHide={handleCloseModal}
-          onSubmit={handleSubmit}
+          onSubmit={handleUpload}
           path={currentFolderPath}
         />
       )}

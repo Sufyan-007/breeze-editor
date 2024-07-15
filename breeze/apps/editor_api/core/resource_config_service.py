@@ -1,5 +1,5 @@
 import os
-import json
+import json, uuid
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import read_config_file
 from common.utils.file_helper import create_parent_dir_if_not_exists
@@ -16,7 +16,8 @@ class ResourceConfigGenerator:
         self.base_dir = os.path.join('configurations', project_name)
         self.config_file_path = os.path.join(self.base_dir, 'uploaded_resources_config.json')
         self.assets_dir = os.path.join(self.app_config['APP_SOURCE_DIR'], 'assets')
-
+        self.directory_management_path = os.path.join(self.base_dir, 'directory_management.json')
+        
     def save_file(self, file_id, file_name, path):
         create_parent_dir_if_not_exists(self.assets_dir)
 
@@ -40,6 +41,42 @@ class ResourceConfigGenerator:
         with open(path, 'w') as file:
             json.dump(data, file, indent=4)
 
+    def generate_unique_id(self):
+        return str(uuid.uuid4())
+    
+    def determine_lineage(self, file_path):
+        directory_management = self.read_config_file(self.directory_management_path)
+        
+        path_components = file_path.split('/')  #Split file path into components
+        lineage = []
+        
+        for part in path_components:
+            for key,value in directory_management.items():
+                if value['name'] == part and value['type'] == 'DIRECTORY':
+                    lineage.append(key)
+                    break
+        print(lineage,"lineage for the new uploaded resource")    
+          
+        return lineage
+            
+    def update_directory_management(self, file_name, file_path, file_type):
+        unique_id = self.generate_unique_id()
+        lineage = self.determine_lineage(file_path)
+        new_resource = {
+            unique_id: {
+                "name": file_name,
+                "lineage": lineage,
+                "id": unique_id,
+                "tag": file_type.upper(),
+                "type": "FILE"
+            }
+        }
+     
+        
+        directory_management = self.read_config_file(self.directory_management_path)
+        directory_management.update(new_resource)
+        self.write_config_file(self.directory_management_path, directory_management)
+
     def update_config(self, file_name, file_path, description, file_id):
         existing_config = self.read_config_file(self.config_file_path)
         
@@ -59,6 +96,8 @@ class ResourceConfigGenerator:
         self.write_config_file(self.config_file_path, existing_config)
 
         self.save_file(file_id, file_name, self.assets_dir)
+        
+        self.update_directory_management(file_name,file_path,file_type)
         
         return config_data
 
