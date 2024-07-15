@@ -1,7 +1,6 @@
 import React from "react";
 import { createNewProject } from "../../services/ProjectService";
 import "react-toastify/dist/ReactToastify.css";
-import "react-toastify/dist/ReactToastify.css";
 import "../../css/FolderTemplate.css";
 import { ToastContainer, toast } from "react-toastify";
 const FolderTemplate = ({ onTemplateSelect }) => {
@@ -9,18 +8,9 @@ const FolderTemplate = ({ onTemplateSelect }) => {
     const templateNumber = template.replace(/[^\d]/g, ""); // This removes all non-numeric character
     toast.success(`Template ${templateNumber} selected!`);
     onTemplateSelect(template); //call the parent callback with the selected template
-    toast.success(`Template ${templateNumber} selected!`);
-    onTemplateSelect(template); //call the parent callback with the selected template
   }
   return (
     <>
-      <div className="folder-template-container">
-        <ToastContainer />
-        <h3 className="folder-template-heading">
-          Select a Project Folder Structure Template
-        </h3>
-        <div className="folder-template-card-grid">
-          <div className="folder-template-card ">
       <div className="folder-template-container">
         <ToastContainer />
         <h3 className="folder-template-heading">
@@ -44,13 +34,11 @@ const FolderTemplate = ({ onTemplateSelect }) => {
             <button
               type="button"
               className="folder-template-button"
-              className="folder-template-button"
               onClick={() => selectTemplate("temp1")}
             >
               Select
             </button>
           </div>
-          <div className="folder-template-card">
           <div className="folder-template-card">
             <h2>Template 2</h2>
             <div className="template-description">
@@ -75,13 +63,11 @@ const FolderTemplate = ({ onTemplateSelect }) => {
             <button
               type="button"
               className="folder-template-button"
-              className="folder-template-button"
               onClick={() => selectTemplate("temp2")}
             >
               Select
             </button>
           </div>
-          <div className="folder-template-card">
           <div className="folder-template-card">
             <h2>Template 3</h2>
             <div className="template-description">
