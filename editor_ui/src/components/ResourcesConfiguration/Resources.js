@@ -4,7 +4,7 @@ import ResourcesUploadModal from "./ResourcesUploadModal.js";
 import { useParams } from "react-router";
 import ResourcesFileCard from "./ResourcesFileCard.js";
 import { getAllUploadedFiles, uploadFile, deleteFile } from "../../services/ResourceUploadService.js";
-import FolderStruArborist from "../FolderStructure/FolderStruArborist.js";
+import FolderStructureConfig from "../FolderStructure/FolderStructureConfig.js";
 
 const Resources = () => {
   const [showToast, setShowToast] = useState(false);
@@ -100,7 +100,7 @@ const Resources = () => {
         <Modal.Title>Select file location</Modal.Title>
       </Modal.Header>
       <Modal.Body style={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}>
-        <FolderStruArborist
+        <FolderStructureConfig
          onHide={() => {
           setShowModal(false);
           setShowUploadModal(true); // Show ResourcesUploadModal after selecting path

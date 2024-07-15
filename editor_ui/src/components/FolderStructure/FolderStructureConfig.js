@@ -9,9 +9,9 @@ import {
 } from "../../services/DirectoryManagementService";
 import "../../css/folder.css";
 import { useParams } from "react-router-dom";
-import Node from "../FolderStructure/Node";
+import Node from "./Node";
 
-const FolderStruArborist = ({ onHide, onSelectPath, resourceUpload }) => {
+const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
   const [treeData, setTreeData] = useState(null);
   const [selectedPath, setSelectedPath] = useState("");
   const { projectName } = useParams();
@@ -249,4 +249,4 @@ const FolderStruArborist = ({ onHide, onSelectPath, resourceUpload }) => {
         </>)
 };
 
-export default FolderStruArborist;
+export default FolderStructureConfig;
