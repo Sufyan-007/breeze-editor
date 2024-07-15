@@ -8,39 +8,48 @@ import ReturnValue from "../../FunctionItemComponents/ReturnValue";
 import FunctionCall from "../../FunctionItemComponents/FunctionCall";
 
 const options = [
-  { value: "createVariable", label: "Create Variable" },
-  { value: "updateVariable", label: "Update Variable" },
+  // { value: "createVariable", label: "Create Variable" },
+  // { value: "updateVariable", label: "Update Variable" },
   { value: "ifBlock", label: "If Else Block" },
-  { value: "customCode", label: "Custom Code" },
-  { value: "return", label: "Return Value" },
-  { value: "functionCall", label: "Function Call" },
+  // { value: "customCode", label: "Custom Code" },
+  // { value: "return", label: "Return Value" },
+  // { value: "functionCall", label: "Function Call" },
 ];
 
-function AddFunctionItem({ onChange }) {
+const templates = {
+  "ifBlock": {
+    type: "IF_BLOCK",
+    condition: {
+      type: "CUSTOM",
+      value: "true",
+    },
+    bodyConfig: {
+      type: "BLOCK",
+      statements: [],
+    },
+    elseBody: {
+      type: "BLOCK",
+      statements: [],
+    },
+  }
+}
+
+const statementTypes = {
+  "createVariable": CreateVariable,
+  "updateVariable": UpdateVariable,
+  "ifBlock": IfBlock,
+  "customCode": CustomCode,
+  "return": ReturnValue,
+  "functionCall": FunctionCall,
+};
+
+function AddFunctionItem({  update }) {
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleChange = (selectedOption) => {
     setSelectedOption(selectedOption);
   };
-
-  const renderComponent = () => {
-    switch (selectedOption?.value) {
-      case "createVariable":
-        return <CreateVariable onChange={onChange} />;
-      case "updateVariable":
-        return <UpdateVariable onChange={onChange} />;
-      case "ifBlock":
-        return <IfBlock onChange={onChange} />;
-      case "customCode":
-        return <CustomCode onChange={onChange} />;
-      case "return":
-        return <ReturnValue onChange={onChange} />;
-      case "functionCall":
-        return <FunctionCall onChange={onChange} />;
-      default:
-        return null;
-    }
-  };
+  const SelectedComponent = statementTypes[selectedOption?.value]
   return (
     <div>
       <Select
@@ -86,7 +95,9 @@ function AddFunctionItem({ onChange }) {
           }),
         }}
       />
-      <div>{renderComponent()}</div>
+      <div>
+        {SelectedComponent ? <SelectedComponent config={ JSON.parse(JSON.stringify( templates[selectedOption?.value]))} update={(val)=>{setSelectedOption(null);console.log("In addfunc");update(val)}} /> : null}
+      </div>
     </div>
   );
 }

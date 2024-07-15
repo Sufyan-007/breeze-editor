@@ -161,14 +161,14 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    
     console.log("formState::>>", formState);
     onSubmit(formState);
   };
 
   return (
     <Form
-      onSubmit={handleSubmit}
+      onSubmit={(e)=>e.preventDefault()}
       style={{ fontSize: "14px" }}
       className="h-100"
     >
@@ -385,7 +385,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
           </Row>
         </div>
         <div className="d-flex">
-          <Button variant="success" className="my-3 btn btn-sm" type="submit">
+          <Button variant="success" className="my-3 btn btn-sm" type="submit" onClick={handleSubmit}>
             {isEditing ? "Update" : "Submit"}
           </Button>
         </div>

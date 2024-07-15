@@ -1,29 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Col } from "react-bootstrap";
 
-function IfBlock({ onChange }) {
-  const [condition, setCondition] = useState("");
+function IfBlock({ config,update }) {
+  const [conf, setConf] = useState({...config});
+  
 
-  const handleConditionChange = (e) => {
-    const newCondition = e.target.value;
-    setCondition(newCondition);
-    const config = {
-      type: "IF_BLOCK",
-      condition: {
-        type: "CUSTOM",
-        value: newCondition,
-      },
-      bodyConfig: {
-        type: "BLOCK",
-        statements: [],
-      },
-      elseBody: {
-        type: "BLOCK",
-        statements: [],
-      },
-    };
-    onChange(config);
-  };
+  useEffect(()=>{
+    setConf({...config})
+  },[config])
+
+  function updateCondition(value){
+    setConf((state)=>{
+      state.condition.value = value
+      return {...state}
+    })
+  }
 
   return (
     <div className="mt-3">
@@ -33,11 +24,14 @@ function IfBlock({ onChange }) {
           className="form-control-sm"
           type="text"
           placeholder="condition"
-          value={condition}
-          onChange={handleConditionChange}
+          value={conf?.condition.value}
+          onChange={(event)=>updateCondition(event.target.value)}
           required
         />
       </Form.Group>
+      <button onClick={()=>update(conf)}>
+        Update
+      </button>
     </div>
   );
 }
