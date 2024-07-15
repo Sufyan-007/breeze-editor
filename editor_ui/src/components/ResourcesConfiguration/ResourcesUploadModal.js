@@ -65,20 +65,20 @@ function ResourcesUploadModal({ show, onHide, path, onSubmit }) {
       >
         <Form onSubmit={handleSubmit}>
           <Row>
-            <Col>
-              <Form.Group>
-                <Form.Label>File Name</Form.Label>
-                <div className="mb-3">
-                  <Form.Control
-                    placeholder="file"
-                    type="text"
-                    name="filename"
-                    value={formData.filename}
-                    onChange={handleChange}
-                    required
-                  />
+          <Col>
+            <Form.Group>
+              <Form.Label>Choose File</Form.Label>
+              <div className="mb-3">
+
+              <Form.Control
+                type="file"
+                name="file"
+                required
+                onChange={handleChange}
+              />
                 </div>
-              </Form.Group>
+
+            </Form.Group>
             </Col>
           </Row>
           <Row>
@@ -112,14 +112,20 @@ function ResourcesUploadModal({ show, onHide, path, onSubmit }) {
               </Form.Group>
             </Col>
           </Row>
-          <Form.Group>
-            <Form.Control
-              type="file"
-              name="file"
-              required
-              onChange={handleChange}
-            />
-          </Form.Group>
+          {formData.filename && (
+            <Form.Group>
+              <Form.Label>File Name</Form.Label>
+              <div className="mb-3">
+                <Form.Control
+                  placeholder="file"
+                  type="text"
+                  name="filename"
+                  value={formData.filename}
+                  readOnly
+                />
+              </div>
+            </Form.Group>
+          )}
         </Form>
       </Modal.Body>
       <Modal.Footer>
