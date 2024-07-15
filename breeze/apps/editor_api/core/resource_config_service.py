@@ -15,10 +15,9 @@ class ResourceConfigGenerator:
 
         self.base_dir = os.path.join('configurations', project_name)
         self.config_file_path = os.path.join(self.base_dir, 'uploaded_resources_config.json')
-        self.assets_dir = os.path.join(self.app_config['APP_SOURCE_DIR'], 'assets')
 
     def save_file(self, file_id, file_name, path):
-        create_parent_dir_if_not_exists(self.assets_dir)
+        # create_parent_dir_if_not_exists(self.assets_dir)
 
         file_path_full = os.path.join(CONFIG_PATH, self.project_name, 'uploaded_assets', file_id)
         
@@ -58,7 +57,14 @@ class ResourceConfigGenerator:
         existing_config.update(config_data)
         self.write_config_file(self.config_file_path, existing_config)
 
-        self.save_file(file_id, file_name, self.assets_dir)
+        # Remove leading 'src/' if present
+        if file_path.startswith('/src/'):
+            file_path = file_path[len('/src/'):]
+
+        # Combine the base source directory with the dynamic file path
+        full_path = os.path.join(self.app_config['APP_SOURCE_DIR'], file_path)
+        self.save_file(file_id, file_name, full_path)
+
         
         return config_data
 
@@ -70,12 +76,18 @@ class ResourceConfigGenerator:
         config_data = self.read_config_file(self.config_file_path)
 
         if file_id in config_data:
+            file_path = config_data[file_id]['path']
             del config_data[file_id]
             self.write_config_file(self.config_file_path, config_data)
 
-            asset_file_path = os.path.join(self.assets_dir, file_name)
-            if os.path.exists(asset_file_path):
-                os.remove(asset_file_path)
+            # Remove leading 'src/' if present
+            if file_path.startswith('/src/'):
+                file_path = file_path[len('/src/'):]
+
+            full_path = os.path.join(self.app_config['APP_SOURCE_DIR'], file_path, file_name)
+
+            if os.path.exists(full_path):
+                os.remove(full_path)
     
     def file_duplicacy(self, file_name):
         existing_config = self.read_config_file(self.config_file_path)

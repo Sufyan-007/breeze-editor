@@ -299,8 +299,8 @@ class AppGenerator:
         if not selected_template:
             raise ValueError("Selected template not found in app_config")
 
-        templates_path = f"/home/varanpreet/Desktop/breezeui/breeze/apps/directory_management/const/{selected_template}.json"
-        
+        templates_path = f"breeze/apps/directory_management/const/{selected_template}.json"
+
         if not os.path.exists(templates_path):
             raise FileNotFoundError(f"Template file {templates_path} does not exist")
 
@@ -322,7 +322,6 @@ class AppGenerator:
    
     def update_component_config(self, selected_template, template_content):
         components_config_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "component_config.json")
-        print(selected_template, template_content ,"hiiiiiiiiiiiiiiiiiiiiiiiiiiii")
         # Initialize an empty list to store component config
         component_configs = []
         

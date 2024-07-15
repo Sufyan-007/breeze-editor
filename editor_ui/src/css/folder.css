@@ -35,3 +35,7 @@
 .edit-button img{
   margin: 0;
 }
+
+.selected-node {
+  background-color: #a8b3ff;/* Example background color */
+}

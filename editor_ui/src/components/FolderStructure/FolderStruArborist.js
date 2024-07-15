@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Tree } from "react-arborist";
-import { fetchFolderConfig, onAdd , onRenameNode, onMoveNode, onDeleteNode } from "../../services/DirectoryManagementService";
+import {
+  fetchFolderConfig,
+  onAdd,
+  onRenameNode,
+  onMoveNode,
+  onDeleteNode,
+} from "../../services/DirectoryManagementService";
 import "../../css/folder.css";
 import { useParams } from "react-router-dom";
 import Node from "../FolderStructure/Node";
 
-
-const FolderStruArborist = () => {
+const FolderStruArborist = ({ onHide, onSelectPath, resourceUpload }) => {
   const [treeData, setTreeData] = useState(null);
+  const [selectedPath, setSelectedPath] = useState("");
   const { projectName } = useParams();
 
   useEffect(() => {
@@ -184,38 +190,63 @@ const FolderStruArborist = () => {
     setTreeData((prevData) => deleteNode(prevData));
   };
 
+  const handleSelectPath = (node) => {
+    if (node.data.type === "DIRECTORY") {
+      const pathParts = [];
+      let currentNode = node;
+      while (currentNode) {
+        pathParts.unshift(currentNode.data.name);
+        currentNode = currentNode.parent;
+      }
+      const fullPath = pathParts.join("/");
+      onSelectPath(fullPath); // Pass selected path to parent component
+      setSelectedPath(fullPath);
+    }
+  };
+
   if (!treeData) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div>
-      <Tree
-        className="tree-node"
-        data={treeData}
-        openByDefault={true}
-        width={600}
-        height={1000}
-        indent={20}
-        padding={25}
-        onCreate={onCreate}
-        onRename={onRename}
-        onMove={onMove}
-        onDelete={onDelete}
-      >
-        {({ node, style, dragHandle }) => (
-          <Node
-            node={node}
-            style={style}
-            dragHandle={dragHandle}
+   <>
+        <div>
+          <Tree
+            className="tree-node"
+            data={treeData}
+            openByDefault={true}
+            width={600}
+            indent={20}
+            padding={25}
             onCreate={onCreate}
             onRename={onRename}
+            onMove={onMove}
             onDelete={onDelete}
-          />
-        )}
-      </Tree>
-    </div>
-  );
+          >
+            {({ node, style, dragHandle }) => (
+              <Node
+                node={node}
+                style={style}
+                dragHandle={dragHandle}
+                onCreate={onCreate}
+                onRename={onRename}
+                onDelete={onDelete}
+                onSelectPath={handleSelectPath} // Handle selecting path
+                resourceUpload={resourceUpload}
+              />
+            )}
+          </Tree>
+        </div>
+        <button
+          className="btn btn-secondary mx-2"
+          onClick={() => {
+            onHide(); 
+          }}
+          disabled={!selectedPath} 
+        >
+        Select as path 
+        </button>
+        </>)
 };
 
 export default FolderStruArborist;

@@ -5,15 +5,23 @@ import deleteIcon from "../../assets/icons/delete.svg";
 import crossIcon from "../../assets/icons/close-button.svg";
 import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
-
-const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
-   const nodeName =
-     typeof node.data.name === "string"
-       ? node.data.name
-       : JSON.stringify(node.data.name);
+const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete, onSelectPath, resourceUpload }) => {
+  const nodeName = typeof node.data.name === "string" ? node.data.name : JSON.stringify(node.data.name);
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(node.data.name);
+  const [show, setShow] = useState(false);
+  const [path, setPath] = useState("");
+  const [isSelected, setIsSelected] = useState(false); // State to track if node is selected
+  useEffect(()=>{
+    if(!isSelected) {
+      // onSelectPath({})
+
+    }
+    
+    console.log(isSelected)
+  },[isSelected])
+
   const handleHover = (hoverState) => setIsHovered(hoverState);
 
   const getIcon = (type) => {
@@ -61,11 +69,19 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
     console.log("upload file");
   }
 // console.log(typeof node.data.name, "node.data.name");
+
+  const handlePath = () => {
+    if (node.data.type === "DIRECTORY") {
+      setIsSelected(true); // Set node as selected
+      onSelectPath(node); // Pass selected node to FolderStruArborist
+    }
+  };
+
   return (
     <div
       style={style}
       ref={dragHandle}
-      onClick={() => node.toggle()}
+      // onClick={() => node.toggle()}
       onMouseEnter={() => handleHover(true)}
       onMouseLeave={() => handleHover(false)}
     >
@@ -99,14 +115,16 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
             </button>
           </div>
         ) : (
+        <div className={`${isSelected ? "selected-node" : ""}`} style={{ display: "inline-block" }}>
           <span
             onClick={(e) => {
               e.stopPropagation(); // Prevent propagation to parent div
-              node.toggle();
+              handlePath(); // Handle path selection
             }}
           >
             {getIcon(node.data.type)} {nodeName}
           </span>
+        </div>
         )}
         {isHovered && !isEditing && (
           <span className="add-icons">
@@ -120,14 +138,17 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete }) => {
                 >
                   📁+
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddFile();
-                  }}
-                >
-                  📄+
-                </button>
+                {!resourceUpload ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddFile();
+                    }}
+                  >
+                    📄+
+                  </button>
+                ):null
+                }
               </>
             )}
             <button

@@ -1,13 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Col, Row } from "react-bootstrap";
 
-function ResourcesUploadModal({ show, onHide, onSubmit }) {
+function ResourcesUploadModal({ show, onHide, path, onSubmit }) {
   const [formData, setFormData] = useState({
     filename: "",
-    file_path: "assets",
+    file_path: path,
     description: "",
     file: null,
   });
+
+  useEffect(() => {
+    setFormData((prevData) => ({
+      ...prevData,
+      file_path: path,
+    }));
+  }, [path]);
 
   const handleChange = (event) => {
     const { name, value, files } = event.target;
@@ -58,7 +65,6 @@ function ResourcesUploadModal({ show, onHide, onSubmit }) {
       >
         <Form onSubmit={handleSubmit}>
           <Row>
-          
             <Col>
               <Form.Group>
                 <Form.Label>File Name</Form.Label>
@@ -85,8 +91,7 @@ function ResourcesUploadModal({ show, onHide, onSubmit }) {
                     type="text"
                     name="file_path"
                     value={formData.file_path}
-                    onChange={handleChange}
-                    required
+                    readOnly
                   />
                 </div>
               </Form.Group>

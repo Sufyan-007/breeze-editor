@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Toast } from "react-bootstrap";
+import { Modal, Toast } from "react-bootstrap";
 import ResourcesUploadModal from "./ResourcesUploadModal.js";
 import { useParams } from "react-router";
 import ResourcesFileCard from "./ResourcesFileCard.js";
 import { getAllUploadedFiles, uploadFile, deleteFile } from "../../services/ResourceUploadService.js";
+import FolderStruArborist from "../FolderStructure/FolderStruArborist.js";
 
 const Resources = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false); // State for ResourcesUploadModal
   const [files, setFiles] = useState([]);
+  const [selectedPath, setSelectedPath] = useState(""); // State to store selected path
   const { projectName } = useParams();
+  const resourceUpload = true;
 
   useEffect(() => {
     fetchFiles();
@@ -34,7 +38,7 @@ const Resources = () => {
         setToastMessage(result.error || "Upload failed.");
       }
       setShowToast(true);
-      setShowModal(false);
+      setShowUploadModal(false); // Close ResourcesUploadModal after upload
       fetchFiles();
     } catch (error) {
       setToastMessage("An error occurred while adding the File.");
@@ -67,10 +71,10 @@ const Resources = () => {
             <button
               className="btn btn-secondary mx-2"
               onClick={() => {
-                setShowModal(true);
+                setShowModal(true); // Open FolderStruArborist modal
               }}
             >
-              Upload File
+              Add Resource
             </button>
           </div>
         </div>
@@ -83,6 +87,39 @@ const Resources = () => {
           </div>
         ))}
       </div>
+      <Modal
+      className="text-white"
+      show={showModal}
+      onHide={() => {
+        setShowModal(false);
+      }}
+      size="lg"
+      data-bs-theme="dark"
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>Select file location</Modal.Title>
+      </Modal.Header>
+      <Modal.Body style={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}>
+        <FolderStruArborist
+         onHide={() => {
+          setShowModal(false);
+          setShowUploadModal(true); // Show ResourcesUploadModal after selecting path
+        }}
+        onSelectPath={(path) => {
+          setSelectedPath(path); // Store selected path
+        }}
+        resourceUpload={resourceUpload}
+        />
+      </Modal.Body>
+      </Modal>
+      <ResourcesUploadModal
+        show={showUploadModal}
+        onHide={() => {
+          setShowUploadModal(false);
+        }}
+        path={selectedPath} // Pass selected path to ResourcesUploadModal
+        onSubmit={handleUpload} // Optionally handle form submission within ResourcesUploadModal
+      />
       <Toast
         onClose={() => setShowToast(false)}
         show={showToast}
@@ -98,13 +135,6 @@ const Resources = () => {
           <strong className="me-auto">{toastMessage}</strong>
         </Toast.Header>
       </Toast>
-      <ResourcesUploadModal
-        show={showModal}
-        onHide={() => {
-          setShowModal(false);
-        }}
-        onSubmit={handleUpload}
-      />
     </>
   );
 };

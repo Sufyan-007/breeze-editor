@@ -1,26 +1,23 @@
-
-.heading{
+.folder-template-heading{
   color:white;
   padding: 10px;
 }
-.container {
+.folder-template-container {
   text-align: center;
   width: 80%;
   margin: auto;
 }
-
-.card-grid {
+.folder-template-card-grid {
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
   gap: 20px; /* Add gap between cards */
 }
-
-.card {
+.folder-template-card {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 18px;
   box-sizing: border-box;
   transition: transform 0.2s;
   min-width: 250px;
@@ -28,63 +25,52 @@
   flex: 1 1 auto; /* Allow the card to grow based on content */
   overflow: auto;
 }
-
-.card:hover {
+.folder-template-card:hover {
   transform: scale(1.05);
 }
-
-.card h2 {
+.folder-template-card h2 {
   margin: 0 0 10px;
 }
-
-.card p {
+.folder-template-card p {
   margin: 0 0 20px;
 }
-
 .template-description {
   text-align: left;
   white-space: pre;
   font-family: monospace;
-  background-color: #f4f4f4;
+  background-color: #F4F4F4;
   padding: 10px;
   border-radius: 5px;
-  overflow-x: auto; 
-  height: 100%;
+  overflow-x: auto;
+  height: 84%;
 }
-
-button {
-  background-color: #007bff;
+.folder-template-button {
+  background-color: #007BFF;
   color: white;
-  padding: 10px 20px;
+  padding: 7px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-top: 5px;
 }
-
-button:hover {
-  background-color: #0056b3;
+.folder-template-button:hover {
+  background-color: #0056B3;
 }
-
 .selected-template {
   margin-top: 20px;
 }
-
 .template-description .level-1 {
   margin-left: 0;
 }
-
 .template-description .level-2 {
-  margin-left: 20px; 
+  margin-left: 20px;
 }
-
 .template-description .level-3 {
-  margin-left: 60px; 
+  margin-left: 60px;
 }
-
 .template-description .level-4 {
   margin-left: 100px;
 }
-
 .template-description .level-5 {
   margin-left: 140px;
 }
