@@ -1,8 +1,7 @@
 from django.views import View
 from django.http import JsonResponse
-import json
-from common.utils.app_consts import CONFIG_PATH 
-import os
+import json,os
+from common.utils.app_consts import CONFIG_PATH
 
 class MoveNode(View):
     def post(self, request,projectName):

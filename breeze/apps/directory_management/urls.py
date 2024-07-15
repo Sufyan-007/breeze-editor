@@ -13,5 +13,5 @@ urlpatterns = [
     path("rename-node/<str:node_id>/<str:projectName>",csrf_exempt(RenameNode.as_view())),
     path("folder-config/<str:projectName>",csrf_exempt(GetFolderConfig.as_view())),
     path("move-node/<str:projectName>",csrf_exempt(MoveNode.as_view())),
-    
+
 ]

@@ -7,7 +7,7 @@ class DeleteNode(View):
     def delete(self, request, node_id,projectName):
 
         config_path = os.path.join(CONFIG_PATH, projectName, 'directory_management.json')
-        component_config_path = f"/home/varanpreet/Desktop/breezeui/configurations/{projectName}/component_config.json"
+        component_config_path =os.path.join(CONFIG_PATH, projectName, 'component_config.json')
         
         # Load the current folder configuration from the JSON file
         with open(config_path, 'r') as file:

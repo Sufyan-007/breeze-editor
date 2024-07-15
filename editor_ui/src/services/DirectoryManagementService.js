@@ -25,14 +25,7 @@ export const onAdd = async (parentId, type, lineage, tag, projectName) => {
        console.error("No name provided. Operation canceled.");
        return; // Exit if no name is provided
      }
-     console.log("Adding node with details:", {
-       parentId,
-       type,
-       lineage,
-       tag,
-       name,
-       projectName,
-     });
+     
 
     const response = await fetch(
       `http://127.0.0.1:8000/directory-management/add-node/${projectName}`,

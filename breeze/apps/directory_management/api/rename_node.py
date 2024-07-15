@@ -2,7 +2,6 @@ from django.views import View
 from django.http import JsonResponse
 import json, os
 from common.utils.app_consts import CONFIG_PATH
-
 class RenameNode(View):
     def post(self, request, node_id,projectName):
         try:
@@ -14,7 +13,7 @@ class RenameNode(View):
                 return JsonResponse({'status': 'error', 'message': 'New name not provided'}, status=400)
 
             config_path = os.path.join(CONFIG_PATH, projectName, 'directory_management.json')
-            component_config_path = os.path.join(CONFIG_PATH, projectName,' component_config.json')
+            component_config_path =os.path.join(CONFIG_PATH, projectName, 'component_config.json')
             # Load the current folder configuration from the JSON file
             with open(config_path, 'r') as file:
                 config_data = json.load(file)

@@ -15,6 +15,7 @@ class AddNode(View):
             lineage= data["lineage"]
             tag=data["tag"]
             config_path = os.path.join(CONFIG_PATH, projectName, 'directory_management.json')
+            config_path = os.path.join(CONFIG_PATH, projectName, 'directory_management.json')
             with open(config_path,"r") as file:
                 config = json.load(file)
             
@@ -42,7 +43,7 @@ class AddNode(View):
                 json.dump(config, file, indent=2)
         #update component_config.json
             if tag.lower() == "components":
-                component_config_path = f"/home/varanpreet/Desktop/breezeui/configurations/{projectName}/component_config.json"
+                component_config_path =os.path.join(CONFIG_PATH, projectName, 'component_config.json')
                 with open(component_config_path, "r") as component_file:
                     component_config = json.load(component_file)
                         

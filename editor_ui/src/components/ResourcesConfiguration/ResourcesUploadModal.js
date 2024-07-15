@@ -43,7 +43,7 @@ function ResourcesUploadModal({ show, onHide, path, onSubmit }) {
   const resetForm = () => {
     setFormData({
       filename: "",
-      file_path: "assets",
+      file_path: path,
       description: "",
       file: null,
     });

@@ -22,7 +22,7 @@ import Styles from "./components/StylesConfiguration/Styles";
 import Code from "./components/Code";
 import Settings from "./components/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
-import FolderStruArborist from "./components/FolderStructure/FolderStruArborist";
+import FolderStructureConfig from "./components/FolderStructureSection/FolderStructureConfig";
 import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
 import Resources from "./components/ResourcesConfiguration/Resources";
 
@@ -37,8 +37,8 @@ export const router = createBrowserRouter([
       { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
-      {path:"folderstructure", element:<FolderStruArborist />},
-      {path: "foldertemplate", element:<FolderTemplate/>},
+      { path: "folderstructure", element: <FolderStructureConfig /> },
+      { path: "foldertemplate", element: <FolderTemplate /> },
       {
         path: "styles",
         element: <Outlet />,
@@ -64,7 +64,7 @@ export const router = createBrowserRouter([
       { path: "pages", element: <ProjectComponents /> },
       { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <ApiClientRoot /> },
-    ]
+    ],
   },
   {
     path: "/editor/:projectName",
