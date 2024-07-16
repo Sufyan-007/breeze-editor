@@ -7,7 +7,6 @@ import { useParams } from "react-router"
 import AddElements from "./AddElements"
 import ActionsConfig from "./ActionsConfig"
 import { useWindowDimension } from '../CustomHooks/useWindowDimension'
-import Filter from "../../assets/icons/filter.svg";
 
 export const DragContext = createContext({
   messageListener: null,
@@ -148,8 +147,9 @@ export default function HtmlSection() {
                   </div>
                   <div className=" d-flex border-top border-3 border-black" style={{ height: `${(windowHeight - 74) / 2}px` }}>
                     <div className="col">
-
-                      <AddElements />
+                      <div className="m-1 h-75" >
+                        <AddElements />
+                      </div>
                     </div>
                   </div>
                 </div>

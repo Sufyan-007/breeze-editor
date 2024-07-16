@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as monaco from 'monaco-editor';
 
-function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", language = "javascript", theme = "vs-dark", onChange, id = "monaco-editor" }) {
+function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", language = "javascript", theme = "vs-dark", onChange, id = "monaco-editor", isEditable = true }) {
   const [editor, setEditor] = useState(null)
   const editorRef = useRef()
   const [value] = useState(defaultValue)
@@ -40,13 +40,14 @@ function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", lan
         value: value,
         language,
         theme,
+        readOnly: !isEditable,
         automaticLayout: true
       });
       editorRef.current = editor;
       setEditor(editor);
       return () => editor.dispose();
     }
-  }, [value,  language, theme, id]);
+  }, [value,  language, theme, id, isEditable]);
 
   // const getValue = useCallback(() => {
   //   return editorRef.current ? editorRef.current.getValue() : "";
