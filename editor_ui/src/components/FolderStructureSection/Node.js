@@ -5,6 +5,14 @@ import deleteIcon from "../../assets/icons/delete.svg";
 import crossIcon from "../../assets/icons/close-button.svg";
 import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
+import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal";
+import {
+  uploadFile
+} from "../../services/ResourceUploadService.js";
+import {
+  fetchFolderConfig
+} from "../../services/DirectoryManagementService";
+import { useParams } from "react-router";
 const Node = ({
   node,
   style,
@@ -21,10 +29,16 @@ const Node = ({
       : JSON.stringify(node.data.name);
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(node.data.name);
+  const [newName, setNewName] = useState(nodeName);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [currentFolderPath, setCurrentFolderPath] = useState("");
   const [show, setShow] = useState(false);
   const [path, setPath] = useState("");
   const [isSelected, setIsSelected] = useState(false); // State to track if node is selected
+  const [toastMessage, setToastMessage] = useState("");
+
+  const { projectName } = useParams();
   useEffect(() => {
     if (!isSelected) {
       // onSelectPath({})
@@ -76,15 +90,49 @@ const Node = ({
     }
   };
 
-  const handleUpload = () => {
-    console.log("upload file");
+  const constructFolderPath = (node) => {
+    let path = [];
+    let currentNode = node;
+    while (currentNode) {
+      path.unshift(currentNode.data.name);
+      currentNode = currentNode.parent;
+    }
+    return path.join("/").slice(1);
   };
-  // console.log(typeof node.data.name, "node.data.name");
+
+  const handleUploadClick = () => {
+    const folderPath = constructFolderPath(node);
+    setCurrentFolderPath(folderPath);
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+
+    setIsModalVisible(false);
+
+  };
 
   const handlePath = () => {
     if (node.data.type === "DIRECTORY") {
       setIsSelected(true); // Set node as selected
       onSelectPath(node); // Pass selected node to FolderStruArborist
+    }
+  };
+
+  const handleUpload = async (formData) => {
+    try {
+      const result = await uploadFile(formData, projectName);
+      if (result.message) {
+        setToastMessage("File uploaded successfully");
+      } else {
+        setToastMessage(result.error || "Upload failed.");
+      }
+      setShowToast(true);
+      setIsModalVisible(false);
+      fetchFolderConfig(projectName);
+    } catch (error) {
+      setToastMessage("An error occurred while adding the File.");
+      setShowToast(true);
     }
   };
 
@@ -194,7 +242,7 @@ const Node = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleUpload();
+                handleUploadClick();
               }}
               className="icon-button"
             >
@@ -212,6 +260,14 @@ const Node = ({
           </span>
         )}
       </div>
+      {isModalVisible && (
+        <ResourcesUploadModal
+          show={isModalVisible}
+          onHide={handleCloseModal}
+          onSubmit={handleUpload}
+          path={currentFolderPath}
+        />
+      )}
     </div>
   );
 };
