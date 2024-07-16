@@ -71,7 +71,7 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
         projectName,
       });
       const newItem = await onAdd(parentId, type, lineage, tag, projectName);
-        console.log("New item created:", newItem);
+      console.log("New item created:", newItem);
       updateTreeData(parentId, newItem);
     } catch (error) {
       console.log("Failed to add item:", error);
@@ -114,7 +114,7 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
 
   const onMove = async ({ dragIds, parentId }) => {
     try {
-      const data = await onMoveNode(dragIds, parentId , projectName);
+      const data = await onMoveNode(dragIds, parentId, projectName);
       if (data.status === "success") {
         console.log("move successful");
         updateTreeDataAfterMove(dragIds[0], parentId);
@@ -166,10 +166,10 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
 
   const onDelete = async (id) => {
     try {
-       const result = await onDeleteNode(id, projectName);
-       if (result.status === "success") {
-         removeNode(id);
-       }
+      const result = await onDeleteNode(id, projectName);
+      if (result.status === "success") {
+        removeNode(id);
+      }
     } catch (error) {
       console.error("Error deleting item:", error);
     }
@@ -209,44 +209,48 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
   }
 
   return (
-   <>
-        <div>
-          <Tree
-            className="tree-node"
-            data={treeData}
-            openByDefault={true}
-            width={600}
-            indent={20}
-            padding={25}
-            onCreate={onCreate}
-            onRename={onRename}
-            onMove={onMove}
-            onDelete={onDelete}
-          >
-            {({ node, style, dragHandle }) => (
-              <Node
-                node={node}
-                style={style}
-                dragHandle={dragHandle}
-                onCreate={onCreate}
-                onRename={onRename}
-                onDelete={onDelete}
-                onSelectPath={handleSelectPath} // Handle selecting path
-                resourceUpload={resourceUpload}
-              />
-            )}
-          </Tree>
-        </div>
+    <>
+      <div>
+        <Tree
+          className="tree-node"
+          data={treeData}
+          openByDefault={true}
+          width={600}
+          height={resourceUpload ? null : 600}
+          indent={20}
+          padding={25}
+          onCreate={onCreate}
+          onRename={onRename}
+          onMove={onMove}
+          onDelete={onDelete}
+        >
+          {({ node, style, dragHandle }) => (
+            <Node
+              node={node}
+              style={style}
+              dragHandle={dragHandle}
+              onCreate={onCreate}
+              onRename={onRename}
+              onDelete={onDelete}
+              onSelectPath={handleSelectPath} // Handle selecting path
+              resourceUpload={resourceUpload}
+            />
+          )}
+        </Tree>
+      </div>
+      {resourceUpload ? (
         <button
           className="btn btn-secondary mx-2"
           onClick={() => {
-            onHide(); 
+            onHide();
           }}
-          disabled={!selectedPath} 
+          disabled={!selectedPath}
         >
-        Select as path 
+          Select as path
         </button>
-        </>)
+      ) : null}
+    </>
+  );
 };
 
 export default FolderStructureConfig;
