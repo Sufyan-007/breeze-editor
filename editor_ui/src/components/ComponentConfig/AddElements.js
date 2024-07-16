@@ -12,7 +12,7 @@ const elementFilterOptions = [
   { label: 'Frequently used', value: 'FYE' }
 ]
 
-export default function AddElements({ }) {
+export default function AddElements() {
 
   const { projectName } = useParams()
   const [components, setComponents] = useState({});
@@ -64,7 +64,7 @@ export default function AddElements({ }) {
             className="dropdown-toggle"
             id="dropdownMenuButton1" data-bs-toggle="dropdown"
             src={Filter}
-            alt="Delete"
+            alt="filter"
             style={{
               cursor: "pointer",
               width: "24px",

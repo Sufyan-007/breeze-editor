@@ -86,6 +86,14 @@
   text-align: center;
 }
 
+.routePropAccordian {
+  padding: 12px !important;
+}
+
+#componentsProp {
+  --bs-accordion-btn-focus-box-shadow: none !important
+}
+
 /* only for manage child routes */
 
 .childRouteForm {

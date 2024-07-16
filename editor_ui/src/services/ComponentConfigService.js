@@ -42,7 +42,7 @@ export async function deleteBaseRoute(route, projectName) {
 export async function addChildRoute(childObj, projectName) {
     if (!childObj.path || (!childObj.component && !childObj.redirectTo)) 
         return {body: 'incomplete data provided', status: 400}
-    const resPromise = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/handle-child-routee/${projectName}/`,
+    const resPromise = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/handle-child-route/${projectName}/`,
         {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
