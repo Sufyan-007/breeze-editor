@@ -5,22 +5,33 @@ import deleteIcon from "../../assets/icons/delete.svg";
 import crossIcon from "../../assets/icons/close-button.svg";
 import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
-const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete, onSelectPath, resourceUpload }) => {
-  const nodeName = typeof node.data.name === "string" ? node.data.name : JSON.stringify(node.data.name);
+const Node = ({
+  node,
+  style,
+  dragHandle,
+  onCreate,
+  onRename,
+  onDelete,
+  onSelectPath,
+  resourceUpload,
+}) => {
+  const nodeName =
+    typeof node.data.name === "string"
+      ? node.data.name
+      : JSON.stringify(node.data.name);
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(node.data.name);
   const [show, setShow] = useState(false);
   const [path, setPath] = useState("");
   const [isSelected, setIsSelected] = useState(false); // State to track if node is selected
-  useEffect(()=>{
-    if(!isSelected) {
+  useEffect(() => {
+    if (!isSelected) {
       // onSelectPath({})
-
     }
-    
-    console.log(isSelected)
-  },[isSelected])
+
+    console.log(isSelected);
+  }, [isSelected]);
 
   const handleHover = (hoverState) => setIsHovered(hoverState);
 
@@ -67,8 +78,8 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete, onSelectP
 
   const handleUpload = () => {
     console.log("upload file");
-  }
-// console.log(typeof node.data.name, "node.data.name");
+  };
+  // console.log(typeof node.data.name, "node.data.name");
 
   const handlePath = () => {
     if (node.data.type === "DIRECTORY") {
@@ -115,16 +126,37 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete, onSelectP
             </button>
           </div>
         ) : (
-        <div className={`${isSelected ? "selected-node" : ""}`} style={{ display: "inline-block" }}>
-          <span
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent propagation to parent div
-              handlePath(); // Handle path selection
-            }}
-          >
-            {getIcon(node.data.type)} {nodeName}
-          </span>
-        </div>
+          <>
+            {resourceUpload ? (
+              <div
+                className={`${isSelected ? "selected-node" : ""}`}
+                style={{ display: "inline-block" }}
+              >
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent propagation to parent div
+                    handlePath(node);
+                  }}
+                >
+                  {getIcon(node.data.type)} {nodeName}
+                </span>
+              </div>
+            ) : (
+              <div
+                className={`${isSelected ? "selected-node" : ""}`}
+                style={{ display: "inline-block" }}
+              >
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent propagation to parent div
+                    node.toggle();
+                  }}
+                >
+                  {getIcon(node.data.type)} {nodeName}
+                </span>
+              </div>
+            )}
+          </>
         )}
         {isHovered && !isEditing && (
           <span className="add-icons">
@@ -147,8 +179,7 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete, onSelectP
                   >
                     📄+
                   </button>
-                ):null
-                }
+                ) : null}
               </>
             )}
             <button
@@ -161,12 +192,12 @@ const Node = ({ node, style, dragHandle, onCreate, onRename, onDelete, onSelectP
               <img src={pencilIcon} alt="Edit" width="15" height="20" />
             </button>
             <button
-              onClick=
-              {(e) => {
+              onClick={(e) => {
                 e.stopPropagation();
                 handleUpload();
               }}
-              className="icon-button" >
+              className="icon-button"
+            >
               <img src={uploadIcon} alt="Upload" width="15" height="20" />
             </button>
             <button
