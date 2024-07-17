@@ -44,7 +44,7 @@ export default function CustomCode({ config, updateParent }) {
       <Offcanvas
         isOpen={isOffcanvasOpen}
         onClose={() => handleClose(false)}
-        title={"Add Function"}
+        title={"Edit Custom Code"}
         width="40%"
       >
         <div className="px-1">

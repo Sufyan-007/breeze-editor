@@ -104,7 +104,7 @@ function AddFunctionItem({ update }) {
           }),
         }}
       />
-      <div className="row flex-grow-1">
+      <div className="row flex-grow-1 mt-3">
         {SelectedComponent ? (
           <SelectedComponent
             config={JSON.parse(

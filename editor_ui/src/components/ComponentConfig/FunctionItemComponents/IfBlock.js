@@ -16,7 +16,7 @@ function IfBlock({ config, update }) {
   }
 
   return (
-    <div className="mt-3 d-flex flex-column justify-content-between">
+    <div className="d-flex flex-column justify-content-between">
       <div>
         <Form.Label htmlFor="ifCondition">If Condition</Form.Label>
         <Form.Group as={Col} controlId="ifCondition">

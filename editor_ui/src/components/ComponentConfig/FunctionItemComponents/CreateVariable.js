@@ -28,12 +28,13 @@ function CreateVariable({ config, update }) {
   }, []);
 
   return (
-    <div className="mt-3 d-flex flex-column justify-content-between">
+    <div className="d-flex flex-column justify-content-between">
       <Form>
         <Form.Group controlId="declarationType">
           <Form.Label>Declaration Type</Form.Label>
           <Form.Control
             as="select"
+            className="form-select form-select-sm"
             value={conf.declarationType}
             onChange={(e) => updateConfig("declarationType", e.target.value)}
           >
@@ -48,22 +49,23 @@ function CreateVariable({ config, update }) {
           <Form.Label>Variable Name</Form.Label>
           <Form.Control
             type="text"
+            className="form-control-sm"
             value={conf.varName}
             onChange={(e) => updateConfig("varName", e.target.value)}
           />
         </Form.Group>
+        <div className="mt-3">
+          <Form.Label>Value</Form.Label>
+          <MonacoEditor
+            defaultValue={conf.value ? conf.value.value : ""}
+            onChange={(value) => updateConfig("value.value", value)}
+            height="100px"
+            width="100%"
+            language="json"
+            id={generateUniqueId}
+          />
+        </div>
       </Form>
-
-      <div className="mt-3">
-        <MonacoEditor
-          defaultValue={conf.value ? conf.value.value : ""}
-          onChange={(value) => updateConfig("value.value", value)}
-          height="100px"
-          width="100%"
-          language="json"
-          id={generateUniqueId}
-        />
-      </div>
 
       <div className="my-3 d-flex justify-content-between">
         <Button

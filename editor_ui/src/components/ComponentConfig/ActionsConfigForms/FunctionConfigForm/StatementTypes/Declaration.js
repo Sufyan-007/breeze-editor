@@ -45,7 +45,7 @@ export default function Declaration({ config, updateParent }) {
       <Offcanvas
         isOpen={isOffcanvasOpen}
         onClose={() => handleClose(false)}
-        title={"Add Function"}
+        title={"Edit Variable"}
         width="40%"
       >
         <div className="px-1">

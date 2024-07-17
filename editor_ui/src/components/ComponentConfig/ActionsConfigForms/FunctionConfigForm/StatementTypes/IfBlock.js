@@ -72,7 +72,7 @@ export default function IfBlock({ config, updateParent }) {
       <Offcanvas
         isOpen={isOffcanvasOpen}
         onClose={() => handleClose(false)}
-        title={"Add Function"}
+        title={"Edit If Block"}
         width="40%"
       >
         <div className="px-1">

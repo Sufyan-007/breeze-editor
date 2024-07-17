@@ -21,14 +21,14 @@ function CustomCode({ config, update }) {
   }, []);
 
   return (
-    <div className="mt-3 d-flex flex-column justify-content-between">
+    <div className="d-flex flex-column justify-content-between">
       <div>
         <MonacoEditor
           defaultValue={config.body}
           onChange={(value) => {
             updateCode(value);
           }}
-          height="200px"
+          height="400px"
           width="100%"
           language="javascript"
           id={generateUniqueId}
