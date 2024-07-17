@@ -54,13 +54,7 @@ export const router = createBrowserRouter([
   {
     path: "/project/:projectName/component/:componentName",
     element: <ComponentConfigPage />,
-    loader: configLoader,
-    children: [
-      { index: true, element: <ProjectHome /> },
-      { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting /> },
-      { path: "services", element: <ApiClientRoot /> },
-    ]
+    loader: configLoader
   },
   {
     path: "/editor/:projectName",

@@ -37,7 +37,7 @@ export default function ProjectComponents(props) {
             style={selected === 1 ? { backgroundColor: "#303033" } : null}
             onClick={() => setSelected(1)}
           >
-            All components
+            Components
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@ export default function ProjectComponents(props) {
               type="button"
               onClick={handleOpen}
             >
-              Add Component
+              { selected === 0 ? "Add Page" : "Add Component"}
             </button>
           </div>
         </div>

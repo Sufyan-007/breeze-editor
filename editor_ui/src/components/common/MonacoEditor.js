@@ -38,8 +38,8 @@ function MonacoEditor({ defaultValue = "", height = "500px", width = "100%", lan
         value: value,
         language,
         theme,
-        automaticLayout: true,
-        readOnly: readOnlyMode
+        readOnly: readOnlyMode,
+        automaticLayout: true
       });
       editorRef.current = editor;
       setEditor(editor);

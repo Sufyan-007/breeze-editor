@@ -7,9 +7,9 @@ export function useWindowDimension() {
   ]);
   useEffect(() => {
     const debouncedResizeHandler = debounce(() => {
-      console.log('***** debounced resize');
+      // console.log('***** debounced resize');
       setDimension([window.innerWidth, window.innerHeight]);
-    }, 100); // 100ms
+    }, 100); // will work after 100ms
     window.addEventListener('resize', debouncedResizeHandler);
     return () => window.removeEventListener('resize', debouncedResizeHandler);
   }, []); // Note this empty array. this effect should run only on mount and unmount
