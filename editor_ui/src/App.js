@@ -23,7 +23,7 @@ import Code from "./components/Code";
 import Settings from "./components/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
 import FolderStructureConfig from "./components/FolderStructureSection/FolderStructureConfig";
-import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
+// import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
 import Resources from "./components/ResourcesConfiguration/Resources";
 
 export const router = createBrowserRouter([
@@ -38,7 +38,7 @@ export const router = createBrowserRouter([
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
       { path: "folderstructure", element: <FolderStructureConfig /> },
-      { path: "foldertemplate", element: <FolderTemplate /> },
+      // { path: "foldertemplate", element: <FolderTemplate /> },
       {
         path: "styles",
         element: <Outlet />,

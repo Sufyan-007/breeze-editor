@@ -295,13 +295,10 @@ class AppGenerator:
         write_file(self.app_config["APP_SOURCE_DIR"] + "/styles.js", '')
         
     def create_directory_management_file(self):
-        selected_template = self.app_config.get('selectedTemplate')
-        if not selected_template:
-            raise ValueError("Selected template not found in app_config")
+        selected_template = "temp2.json"
 
-        templates_path = f"breeze/apps/directory_management/const/{selected_template}.json"
+        templates_path = f"breeze/apps/directory_management/const/{selected_template}"
    
-        
         if not os.path.exists(templates_path):
             raise FileNotFoundError(f"Template file {templates_path} does not exist")
 

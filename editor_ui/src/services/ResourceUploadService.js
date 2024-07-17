@@ -44,7 +44,7 @@ const uploadFile = async (formData, projectName) => {
           description: formData.description,
           fileId: result.fileId,
         };
-
+        console.log(specificParams,"see the file path");
         await fetch(`${BASE_URL}/editor/resource-config/${projectName}`, {
           method: "POST",
           headers: {

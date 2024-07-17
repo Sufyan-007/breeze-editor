@@ -157,6 +157,7 @@ const Node = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
+
                 handleSave();
               }}
               className="edit-button"

@@ -1,5 +1,4 @@
 export async function createNewProject(projectDetails){
-    console.log(projectDetails,"see the template");
     const response = await (await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/new-project/`,
             { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(projectDetails) }
         )).json()

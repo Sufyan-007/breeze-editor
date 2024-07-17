@@ -60,8 +60,23 @@ class ResourceConfigGenerator:
         return lineage
             
     def update_directory_management(self, file_name, file_path, file_type):
+        print("Updating directory management...")
+        print(file_name, file_path, file_type, "parameters")
+
+        # Read existing directory management configuration
+        directory_management = self.read_config_file(self.directory_management_path)
+        if not directory_management:
+            print(f"No existing directory management configuration found at {self.directory_management_path}")
+
+        # Generate unique ID for the new resource
         unique_id = self.generate_unique_id()
+        
+        # Determine the lineage for the new resource based on the file path
         lineage = self.determine_lineage(file_path)
+        if not lineage:
+            print(f"Warning: No lineage found for the file path {file_path}")
+
+        # Create a new resource entry
         new_resource = {
             unique_id: {
                 "name": file_name,
@@ -71,11 +86,16 @@ class ResourceConfigGenerator:
                 "type": "FILE"
             }
         }
-     
-        
-        directory_management = self.read_config_file(self.directory_management_path)
+
+        # Update the directory management configuration with the new resource
         directory_management.update(new_resource)
-        self.write_config_file(self.directory_management_path, directory_management)
+
+        # Write the updated configuration back to the file
+        try:
+            self.write_config_file(self.directory_management_path, directory_management)
+            print(f"Successfully updated directory management configuration at {self.directory_management_path}")
+        except IOError as e:
+            print(f"Error writing to {self.directory_management_path}: {e}")
 
     def update_config(self, file_name, file_path, description, file_id):
         existing_config = self.read_config_file(self.config_file_path)
@@ -103,7 +123,7 @@ class ResourceConfigGenerator:
         full_path = os.path.join(self.app_config['APP_SOURCE_DIR'], file_path)
         self.save_file(file_id, file_name, full_path)
 
-        
+        self.update_directory_management(file_name, file_path, file_type)
         return config_data
 
     def get_uploaded_files(self):
