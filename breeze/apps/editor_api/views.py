@@ -1,5 +1,5 @@
 
-from django.http import JsonResponse, Http404, HttpResponse
+from django.http import JsonResponse, Http404, FileResponse
 import json
 from .core.app_editor import AppEditor
 from .core.config_service import ConfigService
@@ -504,8 +504,8 @@ class StylesConfig(APIView):
             return JsonResponse({"error": str(e)}, status=500)
     
 @method_decorator(csrf_exempt, name='dispatch')
-class FileUpload(APIView):
-    def post(self, request, projectName= None):
+class FileHandle(APIView):
+    def post(self, request, projectName = None):
         try:
             file = request.FILES.get('file')
             fileName = request.POST.get('filename')
@@ -527,7 +527,7 @@ class FileUpload(APIView):
             return JsonResponse({'error': str(e)}, status=500)
 
         
-    def delete(self, request,projectName= None):
+    def delete(self, request, projectName = None):
         try:
             data = json.loads(request.body) 
             file_id = data.get('file_id')
@@ -544,6 +544,25 @@ class FileUpload(APIView):
             return JsonResponse({
                 'message': 'File deleted successfully'
             }, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+    def get(self, request, projectName, fileId):
+        try:
+            if not projectName:
+                return JsonResponse({'error': 'Project ID is required.'}, status=400)
+
+            if not fileId:
+                return JsonResponse({'error': 'File ID is required.'}, status=400)
+
+            file_service = FileService()
+            file_path = file_service.download_file(fileId, projectName)
+
+            if file_path is None:
+                return JsonResponse({'error': 'File not found.'}, status=404)
+
+            response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+            return response
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 

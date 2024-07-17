@@ -53,7 +53,10 @@ function ResourcesUploadModal({ show, onHide, path, onSubmit }) {
     <Modal
       className="text-white"
       show={show}
-      onHide={onHide}
+      onHide={() => {
+        resetForm(); 
+        onHide();
+      }}
       size="lg"
       data-bs-theme="dark"
     >
@@ -121,7 +124,7 @@ function ResourcesUploadModal({ show, onHide, path, onSubmit }) {
                   type="text"
                   name="filename"
                   value={formData.filename}
-                  readOnly
+                  onChange={handleChange}
                 />
               </div>
             </Form.Group>
@@ -132,7 +135,10 @@ function ResourcesUploadModal({ show, onHide, path, onSubmit }) {
         <Button variant="success" onClick={handleSubmit}>
           Upload
         </Button>
-        <Button variant="secondary" onClick={onHide}>
+        <Button variant="secondary" onClick={() => {
+            resetForm();
+            onHide();
+          }}>
           Cancel
         </Button>
       </Modal.Footer>

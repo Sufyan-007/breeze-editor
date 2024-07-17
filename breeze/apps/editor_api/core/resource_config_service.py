@@ -128,7 +128,7 @@ class ResourceConfigGenerator:
 
     def get_uploaded_files(self):
         file_data = self.read_config_file(self.config_file_path)
-        return [{"id": key, "name": value.get("name")} for key, value in file_data.items()]
+        return [{"id": key, "name": value.get("name"), "path": value.get("path")} for key, value in file_data.items()]
 
     def delete_config(self, file_id, file_name):
         config_data = self.read_config_file(self.config_file_path)

@@ -2,12 +2,15 @@ const BASE_URL = process.env.REACT_APP_BREEZE_BACKEND_HOST;
 
 const getAllUploadedFiles = async (projectName) => {
   try {
-    const response = await fetch(`${BASE_URL}/editor/resource-config/${projectName}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${BASE_URL}/editor/resource-config/${projectName}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const result = await response.json();
     return result.data;
   } catch (error) {
@@ -32,10 +35,13 @@ const uploadFile = async (formData, projectName) => {
     submitData.append("file", formData.file);
 
     try {
-      const response = await fetch(`${BASE_URL}/editor/file-upload/${projectName}`, {
-        method: "POST",
-        body: submitData,
-      });
+      const response = await fetch(
+        `${BASE_URL}/editor/file-upload/${projectName}`,
+        {
+          method: "POST",
+          body: submitData,
+        }
+      );
       const result = await response.json();
       if (result.fileId) {
         const specificParams = {
@@ -64,28 +70,36 @@ const uploadFile = async (formData, projectName) => {
 const deleteFile = async (file, projectName) => {
   const file_id = file.id;
   try {
-    const response = await fetch(`${BASE_URL}/editor/file-upload/${projectName}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ file_id }),
-    });
-
-    if (response.ok) {
-      const deleteResourceResponse = await fetch(`${BASE_URL}/editor/resource-config/${projectName}`, {
+    const response = await fetch(
+      `${BASE_URL}/editor/file-upload/${projectName}`,
+      {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(file),
-      });
+        body: JSON.stringify({ file_id }),
+      }
+    );
+
+    if (response.ok) {
+      const deleteResourceResponse = await fetch(
+        `${BASE_URL}/editor/resource-config/${projectName}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(file),
+        }
+      );
 
       if (deleteResourceResponse.ok) {
         return { message: "File deleted successfully!" };
       } else {
         const result = await deleteResourceResponse.json();
-        throw new Error(result.error || "Failed to delete the resource configuration.");
+        throw new Error(
+          result.error || "Failed to delete the resource configuration."
+        );
       }
     } else {
       const result = await response.json();
@@ -97,4 +111,42 @@ const deleteFile = async (file, projectName) => {
   }
 };
 
-export { getAllUploadedFiles, uploadFile, deleteFile };
+const donwloadFile = async (file, projectName) => {
+  const fileId = file.id;
+  const fileName = file.name;
+  try {
+    const response = await fetch(
+      `${BASE_URL}/editor/file-upload/${projectName}/${fileId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error || "Failed to download the file.");
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    // Create a link element to trigger the download
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    if (response.status) {
+      return { message: "File downloaded successfully!" };
+    }
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    throw error;
+  }
+};
+
+export { getAllUploadedFiles, uploadFile, deleteFile, donwloadFile };

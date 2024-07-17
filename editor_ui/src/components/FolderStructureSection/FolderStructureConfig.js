@@ -14,6 +14,7 @@ import Node from "./Node";
 const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
   const [treeData, setTreeData] = useState(null);
   const [selectedPath, setSelectedPath] = useState("");
+  const [selectedNode, setSelectedNode] = useState(null);
   const { projectName } = useParams();
 
   useEffect(() => {
@@ -209,8 +210,8 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
   }
 
   return (
-    <>
-      <div>
+    <div id="folderStructureConfig">
+      <div className="overflow-auto mb-2">
         <Tree
           className="tree-node"
           data={treeData}
@@ -221,7 +222,6 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
           padding={25}
           onCreate={onCreate}
           onRename={onRename}
-          onMove={onMove}
           onDelete={onDelete}
         >
           {({ node, style, dragHandle }) => (
@@ -234,22 +234,24 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
               onDelete={onDelete}
               onSelectPath={handleSelectPath} // Handle selecting path
               resourceUpload={resourceUpload}
+              selectedNode={selectedNode}
+              setSelectedNode={setSelectedNode}
             />
           )}
         </Tree>
       </div>
-      {resourceUpload ? (
-        <button
-          className="btn btn-secondary mx-2"
-          onClick={() => {
-            onHide();
-          }}
-          disabled={!selectedPath}
-        >
-          Select as path
-        </button>
-      ) : null}
-    </>
+      {resourceUpload && (
+        <div className="button-container">
+          <button
+            className="btn btn-secondary"
+            onClick={onHide}
+            disabled={!selectedNode}
+          >
+            Select as path
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 
