@@ -760,7 +760,7 @@ export default function ProjectRouting() {
                                               id={obj.name}
                                               width="80%"
                                               language="json"
-                                              isEditable={routeMode === 'View' ? false : true}
+                                              readOnlyMode={routeMode === 'View' ? true : false}
                                             />
                                           </div>
                                         </div>
