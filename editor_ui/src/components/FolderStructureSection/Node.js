@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../../css/folder.css";
 import pencilIcon from "../../assets/icons/edit.svg";
 import deleteIcon from "../../assets/icons/delete.svg";
@@ -6,12 +6,8 @@ import crossIcon from "../../assets/icons/close-button.svg";
 import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
 import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal";
-import {
-  uploadFile
-} from "../../services/ResourceUploadService.js";
-import {
-  fetchFolderConfig
-} from "../../services/DirectoryManagementService";
+import { uploadFile } from "../../services/ResourceUploadService.js";
+import { fetchFolderConfig } from "../../services/DirectoryManagementService";
 import { useParams } from "react-router";
 const Node = ({
   node,
@@ -22,6 +18,8 @@ const Node = ({
   onDelete,
   onSelectPath,
   resourceUpload,
+  selectedNode,
+  setSelectedNode,
 }) => {
   const nodeName =
     typeof node.data.name === "string"
@@ -37,26 +35,19 @@ const Node = ({
   const [path, setPath] = useState("");
   const [isSelected, setIsSelected] = useState(false); // State to track if node is selected
   const [toastMessage, setToastMessage] = useState("");
-
+  const [expanded, setIsExpanded] = useState("");
   const { projectName } = useParams();
-  useEffect(() => {
-    if (!isSelected) {
-      // onSelectPath({})
-    }
-
-    console.log(isSelected);
-  }, [isSelected]);
 
   const handleHover = (hoverState) => setIsHovered(hoverState);
 
   const getIcon = (type) => {
     switch (type) {
       case "DIRECTORY":
-        return <span style={{ fontSize: "12px" }}>📁</span>;
+        return <span style={{ fontSize: "16px" }}>📁</span>;
       case "FILE":
-        return <span style={{ fontSize: "12px" }}>📄</span>;
+        return <span style={{ fontSize: "16px" }}>📄</span>;
       default:
-        return <span style={{ fontSize: "12px" }}>📃</span>;
+        return <span style={{ fontSize: "16px" }}>📃</span>;
     }
   };
   const handleAddFolder = () => {
@@ -107,14 +98,12 @@ const Node = ({
   };
 
   const handleCloseModal = () => {
-
     setIsModalVisible(false);
-
   };
 
   const handlePath = () => {
     if (node.data.type === "DIRECTORY") {
-      setIsSelected(true); // Set node as selected
+      setSelectedNode(node); // Set node as selected
       onSelectPath(node); // Pass selected node to FolderStruArborist
     }
   };
@@ -135,7 +124,10 @@ const Node = ({
       setShowToast(true);
     }
   };
-
+  const handleToggle = () => {
+    node.toggle();
+    setIsExpanded(!expanded);
+  };
   return (
     <div
       style={style}
@@ -175,42 +167,53 @@ const Node = ({
           </div>
         ) : (
           <>
-            {resourceUpload ? (
-              <div
-                className={`${isSelected ? "selected-node" : ""}`}
-                style={{ display: "inline-block" }}
-              >
+            {node.data.type === "DIRECTORY" ? (
+              <>
                 <span
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent propagation to parent div
-                    handlePath(node);
-                  }}
+                  type="button"
+                  className="btn"
+                  onClick={handleToggle}
+                  style={{ paddingLeft: "0", paddingRight: "1px" }}
                 >
-                  {getIcon(node.data.type)} {nodeName}
+                  {expanded ? (
+                    <i className="bi bi-chevron-down"></i>
+                  ) : (
+                    <i className="bi bi-chevron-right"></i>
+                  )}
                 </span>
-              </div>
+              </>
             ) : (
-              <div
-                className={`${isSelected ? "selected-node" : ""}`}
-                style={{ display: "inline-block" }}
-              >
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent propagation to parent div
-                    node.toggle();
-                  }}
-                >
-                  {getIcon(node.data.type)} {nodeName}
-                </span>
-              </div>
+              <span style={{ paddingLeft: "19px" }}></span>
             )}
+            <div
+              className={`${
+                selectedNode && selectedNode.id === node.id
+                  ? "selected-node"
+                  : ""
+              }`}
+              style={{ display: "inline-block", cursor: "pointer" }}
+            >
+              <span
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent propagation to parent div
+                  if (resourceUpload) {
+                    handlePath();
+                  }
+                }}
+                style={{ fontSize: "18px" }}
+              >
+                {getIcon(node.data.type)} {nodeName}
+              </span>
+            </div>
           </>
         )}
         {isHovered && !isEditing && (
           <span className="add-icons">
-            {node.data.type === "DIRECTORY" && (
+            {node.data.type === "DIRECTORY" ? (
               <>
                 <button
+                  type="button"
+                  className="icon-button"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAddFolder();
@@ -218,45 +221,72 @@ const Node = ({
                 >
                   📁+
                 </button>
-                {!resourceUpload ? (
+                <button
+                  type="button"
+                  className="icon-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRename();
+                  }}
+                >
+                  <img src={pencilIcon} alt="Edit" width="15" height="20" />
+                </button>
+
+                {!resourceUpload && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleAddFile();
+                      handleUploadClick();
                     }}
+                    className="icon-button"
                   >
-                    📄+
+                    <img src={uploadIcon} alt="Upload" width="15" height="20" />
                   </button>
-                ) : null}
+                )}
+                <button
+                  type="button"
+                  className="icon-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete();
+                  }}
+                >
+                  <img src={deleteIcon} alt="Delete" width="15" height="20" />
+                </button>
+              </>
+            ) : (
+              <>
+                {!resourceUpload && (
+                  <>
+                    <button
+                      type="button"
+                      className="icon-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddFile();
+                      }}
+                    >
+                      📄+
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete();
+                      }}
+                    >
+                      <img
+                        src={deleteIcon}
+                        alt="Delete"
+                        width="15"
+                        height="20"
+                      />
+                    </button>
+                  </>
+                )}
               </>
             )}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRename();
-              }}
-              className="icon-button"
-            >
-              <img src={pencilIcon} alt="Edit" width="15" height="20" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUploadClick();
-              }}
-              className="icon-button"
-            >
-              <img src={uploadIcon} alt="Upload" width="15" height="20" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
-              className="icon-button"
-            >
-              <img src={deleteIcon} alt="Delete" width="15" height="20" />
-            </button>
           </span>
         )}
       </div>
