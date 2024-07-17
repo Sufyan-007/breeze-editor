@@ -19,7 +19,6 @@ const typeMapping = {
 export default function FunctionConfigStack({ config, updateParent }) {
   
   const Type = typeMapping[config.type]
-  // console.log(config)
   
   return (
     <Type config={config} updateParent={updateParent} />

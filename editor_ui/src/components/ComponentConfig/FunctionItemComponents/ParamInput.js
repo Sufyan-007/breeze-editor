@@ -17,7 +17,7 @@ const ParameterInput = ({ param, value, onChange }) => {
             <Form.Label className="mb-0">{param.name}</Form.Label>
           </div>
           <div className="col-2 d-flex justify-content-center align-items-center">
-            <i class="bi bi-arrow-right"></i>
+            <i className="bi bi-arrow-right"></i>
           </div>
           <div className="col-7">
             <Form.Control
@@ -61,7 +61,7 @@ const ParameterInput = ({ param, value, onChange }) => {
             className="ms-2"
             onClick={() => onChange([...(value || []), ""])}
           >
-            <i class="bi bi-plus-circle"></i>
+            <i className="bi bi-plus-circle"></i>
           </div>
         </div>
         {(value || []).map((val, idx) => (
