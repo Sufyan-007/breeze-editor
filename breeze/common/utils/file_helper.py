@@ -143,35 +143,3 @@ def write_file(file_path, content, mode="w"):
     with open(file_path, mode) as jsconfig_file:
 
         jsconfig_file.write(content)
-
-c1 = {
-        "A": {
-            "a1" : 8,
-            "a2" : 5
-        },
-        "B": {
-              "b1" : {
-                  "e1" : 39,
-                  "e2" : 45
-              },
-              "b2" : {
-                  "x1" : 2,
-                  "x2" : 0
-              },
-              "b3" : [{
-                  "key" : "test442",
-                  "value" : 45 
-              },
-                      {
-                  "key" : "yash2",
-                  "value" : 43
-              }]
-              },
-        "C": "testin3g2"
-        
-    }       
-        
-# write_json_file("configurations/folder","components","posts",c1)
-
-r = read_json_file("/home/yash/Documents/Projects/breezeui/configurations/folder","components","posts",".json",1)
-print(r)

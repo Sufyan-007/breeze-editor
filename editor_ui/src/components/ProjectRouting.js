@@ -554,12 +554,14 @@ export default function ProjectRouting() {
                             borderColor: "#495057",
                             color: "white",
                           }),
-                          option: (base) => ({
+                          option: (base, { isFocused }) => ({
                             ...base,
-                            backgroundColor: "#212529",
-                            width: "100%",
-                            height: "100%",
-                            color: "#dee2e6bf",
+                            backgroundColor: isFocused ? '#343a40' : '#212529',
+                            width: '100%',
+                            height: '100%',
+                            color: '#dee2e6bf',
+                            cursor: "pointer",
+                            border: isFocused ? '1px solid #495057' : 'none',
                           }),
                           menu: (base) => ({
                             ...base,
@@ -758,7 +760,7 @@ export default function ProjectRouting() {
                                               id={obj.name}
                                               width="80%"
                                               language="json"
-                                              isEditable={routeMode === 'View' ? false : true}
+                                              readOnlyMode={routeMode === 'View' ? true : false}
                                             />
                                           </div>
                                         </div>

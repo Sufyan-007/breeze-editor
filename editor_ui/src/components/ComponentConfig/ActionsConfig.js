@@ -342,7 +342,7 @@ function ActionsConfig() {
         isOpen={isOffcanvasOpen}
         onClose={handleClose}
         title={formTitles[formType] || "Action Configuration"}
-        width="600px"
+        width={formTitles[formType] === "Function Configuration" ? "80%" : "600px"}
       >
         <div className="px-1 h-100">{renderForm()}</div>
       </Offcanvas>

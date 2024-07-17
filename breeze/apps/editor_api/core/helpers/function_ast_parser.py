@@ -24,7 +24,7 @@ class FunctionParser:
                 {statements}
             }}"""
         
-        elif config['type'] == "FUNCTION":
+        elif config['type'].upper() == "FUNCTION":
             func_name = ""
             if not config.get('isAnonymous'):
                 func_name = f"const {config['name']} = "
@@ -127,8 +127,11 @@ class FunctionParser:
             if type == "OPERATION":
                 return self.get_operation_code(value)
             
-            if type == "FUNCTION" or type == "CUSTOM":
+            if type == "FUNCTION":
                 return self.generate_statement_code(value)
+            
+            if type == "CUSTOM":
+                return value['value']          
             
         return ""
         
