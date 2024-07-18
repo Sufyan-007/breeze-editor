@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import CreateVariable from "../FunctionItemComponents/CreateVariable";
 import CustomCode from "../FunctionItemComponents/CustomCode";
 import UpdateVariable from "../FunctionItemComponents/UpdateVariable";
-import Select from "react-select";
 import IfBlock from "../FunctionItemComponents/IfBlock";
 import ReturnValue from "../FunctionItemComponents/ReturnValue";
 import FunctionCall from "../FunctionItemComponents/FunctionCall";
+import Select from "react-select";
 
 const options = [
-  // { value: "createVariable", label: "Create Variable" },
+  { value: "createVariable", label: "Create Variable" },
   // { value: "updateVariable", label: "Update Variable" },
   { value: "ifBlock", label: "If Else Block" },
-  // { value: "customCode", label: "Custom Code" },
+  { value: "customCode", label: "Custom Code" },
   // { value: "return", label: "Return Value" },
   // { value: "functionCall", label: "Function Call" },
 ];
@@ -21,7 +21,7 @@ const templates = {
     type: "IF_BLOCK",
     condition: {
       type: "CUSTOM",
-      value: "true",
+      value: "",
     },
     bodyConfig: {
       type: "BLOCK",
@@ -31,6 +31,15 @@ const templates = {
       type: "BLOCK",
       statements: [],
     },
+  },
+  createVariable: {
+    type: "DECLARATION",
+    declarationType: "",
+    varName: "",
+  },
+  customCode: {
+    type: "CUSTOM",
+    body: "",
   },
 };
 
@@ -51,7 +60,7 @@ function AddFunctionItem({ update }) {
   };
   const SelectedComponent = statementTypes[selectedOption?.value];
   return (
-    <div className="h-100">
+    <div className="h-100 container px-0 d-flex flex-column">
       <Select
         value={selectedOption}
         onChange={handleChange}
@@ -95,7 +104,7 @@ function AddFunctionItem({ update }) {
           }),
         }}
       />
-      <div>
+      <div className="row flex-grow-1 mt-3">
         {SelectedComponent ? (
           <SelectedComponent
             config={JSON.parse(

@@ -18,7 +18,7 @@ import {
 } from "../../services/ConfigService";
 import { createContext, useMemo, useState } from "react";
 import ProjectSidebar from "../ProjectSidebar";
-import HtmlSection from "./HtmlSection";
+import HtmlSection from "./HtmlSection/HtmlSection";
 import SidebarService from "../../services/SidebarService";
 
 
