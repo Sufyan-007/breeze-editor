@@ -709,16 +709,7 @@ class ASTParser(APIView):
             data = json.loads(request.body.decode("utf-8"))
             function_generator = FunctionParser()
             function_code = function_generator.generate_statement_code(data)
-            try:
-                function_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=function_code, text=True)
-
-                with open(
-                    "/home/sufyan/Documents/Projects/Breeze_editor_repo/generated_projects/temps/app_generated_function.js", 'w'
-                    ) as file:
-                    file.write(function_code)
-                pass
-            except:
-                pass
-            return JsonResponse({"function": function_code},status=200)
+            formatted_function_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=function_code, text=True)
+            return JsonResponse({"function": formatted_function_code},status=200)
         except:
             return JsonResponse({}, status=500)

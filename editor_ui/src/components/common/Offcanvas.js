@@ -8,7 +8,8 @@ const Offcanvas = ({
   children, 
   width, 
   height,
-  margin
+  margin,
+  footer,
 }) => {
   return (
     <div 
@@ -29,9 +30,11 @@ const Offcanvas = ({
       <div className="offcanvas-body px-3 py-1">
         {children}
       </div>
-      {/* <div className="offcanvas-footer p-3">
-        <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
-      </div> */}
+      {footer && (
+        <div className="offcanvas-footer p-3">
+          {footer}
+        </div>
+      )}
     </div>
   );
 };
@@ -44,6 +47,7 @@ Offcanvas.propTypes = {
   width: PropTypes.string,
   height: PropTypes.string,
   margin: PropTypes.string,
+  footer: PropTypes.node
 };
 
 Offcanvas.defaultProps = {
