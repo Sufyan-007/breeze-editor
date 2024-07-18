@@ -109,12 +109,15 @@ export default function ElementConfigSidebar({ config }) {
       <>
         <div
           style={{
-            width: "35rem",
+            width: "42rem",
             backgroundColor: "#303033",
             overflowY: "scroll",
             position: "absolute",
             right: 0,
             height: "100%",
+            paddingLeft:".4rem",
+            paddingRight:".4rem"
+
           }}
         >
           <div>
@@ -141,6 +144,7 @@ export default function ElementConfigSidebar({ config }) {
             )}
             {element.type === "Element" && (
               <HtmlElementConfig
+                key={element.tagName}
                 element={element}
                 makeSelectedElementNull={makeSelectedElementNull}
                 handleUpdateClick={handleUpdateClick}
