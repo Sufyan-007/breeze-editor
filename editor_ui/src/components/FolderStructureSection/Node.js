@@ -5,6 +5,8 @@ import deleteIcon from "../../assets/icons/delete.svg";
 import crossIcon from "../../assets/icons/close-button.svg";
 import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
+import addFolder from "../../assets/icons/addFolder.svg";
+import addFile from "../../assets/icons/addFile.svg";
 import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal";
 import { uploadFile } from "../../services/ResourceUploadService.js";
 import { fetchFolderConfig } from "../../services/DirectoryManagementService";
@@ -43,11 +45,11 @@ const Node = ({
   const getIcon = (type) => {
     switch (type) {
       case "DIRECTORY":
-        return <span style={{ fontSize: "16px" }}>📁</span>;
+        return <span style={{ fontSize: "14px" }}>📁</span>;
       case "FILE":
-        return <span style={{ fontSize: "16px" }}>📄</span>;
+        return <span style={{ fontSize: "14px" }}>📄</span>;
       default:
-        return <span style={{ fontSize: "16px" }}>📃</span>;
+        return <span style={{ fontSize: "14px" }}>📃</span>;
     }
   };
   const handleAddFolder = () => {
@@ -220,8 +222,14 @@ const Node = ({
                     handleAddFolder();
                   }}
                 >
-                  📁+
+                  <img
+                    src={addFolder}
+                    alt="Add Folder"
+                    width="15"
+                    height="20"
+                  />
                 </button>
+               
                 <button
                   type="button"
                   className="icon-button"
@@ -234,6 +242,17 @@ const Node = ({
                 </button>
 
                 {!resourceUpload && (
+                  <>
+                   <button
+                  type="button"
+                  className="icon-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddFile();
+                  }}
+                >
+                  <img src={addFile} alt="Add Folder" width="15" height="20" />
+                </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -243,6 +262,7 @@ const Node = ({
                   >
                     <img src={uploadIcon} alt="Upload" width="15" height="20" />
                   </button>
+                  </>
                 )}
                 <button
                   type="button"
@@ -264,10 +284,10 @@ const Node = ({
                       className="icon-button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleAddFile();
+                        handleRename();
                       }}
                     >
-                      📄+
+                      <img src={pencilIcon} alt="Edit" width="15" height="20" />
                     </button>
                     <button
                       type="button"
