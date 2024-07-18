@@ -30,8 +30,8 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
     value: "",
     description: "",
   });
-  const [paramsConfigOpen, setParamsConfigOpen] = useState(false);
-  const [functionConfigOpen, setFunctionConfigOpen] = useState(false);
+  const [paramsConfigOpen, setParamsConfigOpen] = useState(true);
+  const [functionConfigOpen, setFunctionConfigOpen] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
