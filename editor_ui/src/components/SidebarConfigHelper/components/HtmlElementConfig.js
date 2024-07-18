@@ -1,29 +1,69 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, FormGroup } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
 import convert from "../htmlToReactAttrMap";
 import { useParams } from "react-router";
-import Creatable from "react-select/creatable";
-import FunctionSelectionConfig from "./FunctionSelectionConfig";
-import CreateApp from "../../CreateApp";
-
+import CustomComponentConfig from "./CustomComponentConfig";
+import HtmlAttributeConfig from "./HtmlAttributeConfig";
 const customStyles = {
-  control: (base) => ({
+  control: (base,state) => ({
     ...base,
-    backgroundColor: "white",
-    color: "black",
+    // width: '50%',
+    backgroundColor: "dark",
+    color: "white",
+    minHeight:10,
+    borderColor:"rgb(73, 80, 87)",
+    border: state.isFocused && "none"
+
+    
+
+  }),
+  option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+    // const color = chroma(data.color);
+    return {
+      ...styles,
+      backgroundColor: isFocused ? "#4B9CD3" : null,
+      color: "white",
+      "&:hover": {
+        backgroundColor: "#4B9CD3"
+      }
+    };
+  },
+  input: (base, state) => ({
+    ...base,
+    '[type="text"]': {
+      fontFamily: "Helvetica, sans-serif !important",
+      fontSize: 13,
+      fontWeight: 900,
+      
+      color: "white !important",
+    },
   }),
   menu: (base) => ({
     ...base,
-    backgroundColor: "white",
-    color: "black",
+    // width: "auto",
+
+    backgroundColor: "rgb(48, 48, 51)",
+    color: "white",
+    zIndex: "100",
+    border: "2px solid rgb(100, 100, 100)",
+
+    
   }),
   placeholder: (defaultStyles) => {
     return {
       ...defaultStyles,
-      color: "#2C3539", // Customize placeholder color here
+      color: "white", // Customize placeholder color here
+      fontSize: 14,
+      
     };
   },
+  dropdownIndicator: styles => ({ 
+    ...styles, 
+    paddingLeft:"0", 
+    backgroundColor:'red'
+
+  })
 };
 const HtmlElementConfig = ({
   element,
@@ -31,11 +71,12 @@ const HtmlElementConfig = ({
   handleUpdateClick,
   isLoading,
   availableFunctions,
+  allVariables,
 }) => {
   const [availableAttributes, setAvailableAttributes] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const { projectName } = useParams();
-  const [functionType, setFunctionType] = useState("");
+
   useEffect(() => {
     setSelectedAttributes(element.attributes);
   }, [element]);
@@ -49,15 +90,24 @@ const HtmlElementConfig = ({
       label: key,
     }));
 
+  // const attributeOptions = Object.keys(availableAttributes)
+  //   .filter(
+  //     (key) => !key.startsWith("on") && !selectedAttributes.hasOwnProperty(key)
+  //   )
+  //   .sort()
+  //   .map((key) => ({
+  //     value: key,
+  //     label: key,
+  //   }));
   const attributeOptions = Object.keys(availableAttributes)
-    .filter(
-      (key) => !key.startsWith("on") && !selectedAttributes.hasOwnProperty(key)
-    )
-    .sort()
-    .map((key) => ({
-      value: key,
-      label: key,
-    }));
+  .filter(
+    (key) => !selectedAttributes.hasOwnProperty(key)
+  )
+  .sort()
+  .map((key) => ({
+    value: key,
+    label: key,
+  }));
 
   useEffect(() => {
     fetchData();
@@ -94,7 +144,13 @@ const HtmlElementConfig = ({
         }
       } else {
         const attributeList = await response.json();
-        setAvailableAttributes(attributeList);
+        const convertedAttributes = {};
+
+        for (let key in attributeList) {
+          const convertedKey = convert(key);
+          convertedAttributes[convertedKey] = attributeList[key];
+        }
+        setAvailableAttributes(convertedAttributes);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -102,24 +158,19 @@ const HtmlElementConfig = ({
   };
   const updateHtmlElementConfig = (e) => {
     e.preventDefault();
-    console.log("Updating",selectedAttributes);
     const tempElememt = { ...element, attributes: selectedAttributes };
-    handleUpdateClick(tempElememt);
+    console.log("tempELe",tempElememt)
+
+    // handleUpdateClick(tempElememt);
   };
 
   const handleSelectAttributeChange = (event) => {
     const selectedOption = event.value;
 
-    // if (Object.keys(selectedAttributes).includes(selectedOption)) {
-    //   return;
-    // }
-
     let type = availableAttributes[selectedOption]?.datatype || "LITERAL";
-    if(type==="STRING")
-      type = "LITERAL"
-    else if(type==="NUMBER")
-      type = "VARIABLE"
-      
+    if (type === "STRING") type = "LITERAL";
+    else if (type === "NUMBER") type = "VARIABLE";
+
     setSelectedAttributes((prevSelectedAttributes) => ({
       ...prevSelectedAttributes,
       [selectedOption]: {
@@ -130,14 +181,12 @@ const HtmlElementConfig = ({
   };
 
   const handleDeleteAttribute = (attributeKey) => {
-
     setSelectedAttributes((prevSelectedAttributes) => {
       const updatedAttributes = { ...prevSelectedAttributes };
       delete updatedAttributes[attributeKey];
       return updatedAttributes;
     });
   };
- 
 
   const handleAttributeChange = (key, value) => {
     setSelectedAttributes((prevSelectedAttributes) => {
@@ -153,118 +202,62 @@ const HtmlElementConfig = ({
       };
     });
   };
-
-  const handleFunctionTypeChange = (type) => {
-    if (type === "predefined") {
-      setFunctionType("predefined");
+  const addRefToAttribute = (functionType, value, attribute,attributeType = '') => {
+    if (functionType === "predefined") {
+      if(attributeType === 'VARIABLE'){
+        setSelectedAttributes((prev) => ({
+         ...prev,
+          [attribute]: { type: "VARIABLE", $ref: value.target.value  },
+        }));
+      }
+      else{
+      setSelectedAttributes((prev) => ({
+        ...prev,
+        [attribute]: { type: "FUNCTION", $ref: value.target.value },
+      }))};
     } else {
-      setFunctionType("custom");
+      const functionConfig = {
+        parameters: { list: [{ name: "event" }] },
+        isAnonymous: true,
+        isAsync: false,
+        functionBody: value,
+      };
+      setSelectedAttributes((prev) => ({
+        ...prev,
+        [attribute]: { type: "FUNCTION", value: functionConfig },
+      }));
     }
   };
 
   return (
-    <div className="mt-3 ps-4 pe-4">
+    <div className="mt-3 ps-1 pe-1">
       <Form className="text-light">
-        <Form.Group className="mb-5">
-          {element.elementType === "HTML" ? (
-            <label>Element</label>
-          ) : element.elementType === "THIRD_PARTY" ? (
-            <label>{`${
-              element.library.charAt(0).toUpperCase() + element.library.slice(1)
-            } Component`}</label>
-          ) : element.elementType === "CUSTOM" ? (
-            <label>Custom Component</label>
-          ) : null}
-          <Form.Control
-            type="text"
-            value={element.tagName}
-            className="mt-2"
-            readOnly
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-5">
-          <Creatable
-            options={attributeOptions}
-            onChange={handleSelectAttributeChange}
-            placeholder="Add Attributes"
-            styles={customStyles}
-            value={null}
-          />
-          <div className="d-flex justify-content-end">
-            <div style={{ width: "95%" }}>
-              {selectedAttributes &&
-                Object.keys(selectedAttributes)
-                  .map((attribute, index) => ({ attribute, index }))
-                  .filter(({ attribute }) => !attribute.startsWith("on"))
-                  .map(({ attribute, index }) => (
-                    <div key={index} className="mt-4">
-                      <Form.Label>{attribute}</Form.Label>
-                      <div className="d-flex">
-                        {selectedAttributes &&
-                          selectedAttributes[attribute] &&
-                          selectedAttributes[attribute].type !== "BOOLEAN" && (
-                            <Form.Control
-                              type={
-                                selectedAttributes[attribute].type || "text"
-                              }
-                              value={selectedAttributes[attribute].value}
-                              onChange={(e) =>
-                                handleAttributeChange(attribute, e.target.value)
-                              }
-                              disabled={attribute === "id"}
-                            />
-                          )}
-
-                        {selectedAttributes &&
-                          selectedAttributes[attribute] &&
-                          selectedAttributes[attribute].type === "BOOLEAN" && (
-                            <Form.Select
-                              onChange={(e) => {
-                                handleAttributeChange(
-                                  attribute,
-                                  e.target.value
-                                );
-                              }}
-                              value={selectedAttributes[attribute].value}
-                            >
-                              <option value="true">true</option>
-                              <option value="false">false</option>
-                            </Form.Select>
-                          )}
-                        {attribute !== "id" && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            className="ms-2"
-                            onClick={() => handleDeleteAttribute(attribute)}
-                          >
-                            <i className="bi bi-trash3 p-1"></i>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-            </div>
-          </div>
-        </Form.Group>
-        <Form.Group className="mb-4">
-          <Creatable
-            options={eventListnerOptions}
-            onChange={handleSelectAttributeChange}
-            placeholder="Add Attributes"
-            styles={customStyles}
-            value={null}
-          />
-          <FunctionSelectionConfig
+        {element.elementType === "CUSTOM" ? (
+          <CustomComponentConfig
+            element={element}
+            makeSelectedElementNull={makeSelectedElementNull}
+            handleUpdateClick={handleUpdateClick}
+            attributeOptions={attributeOptions}
+            availableAttributes={availableAttributes}
             selectedAttributes={selectedAttributes}
             setSelectedAttributes={setSelectedAttributes}
-            handleDeleteAttribute={handleDeleteAttribute}
             availableFunctions={availableFunctions}
-          ></FunctionSelectionConfig>
-        </Form.Group>
-
-        <Form.Group className="mb-4">
+            allVariables={allVariables}
+          />
+        ) : (
+          
+            <HtmlAttributeConfig
+             attributeOptions={attributeOptions}
+             handleSelectAttributeChange={handleSelectAttributeChange}
+             customStyles={customStyles}
+             selectedAttributes={selectedAttributes}
+             handleAttributeChange={handleAttributeChange}
+             handleDeleteAttribute={handleDeleteAttribute}
+             availableFunctions={availableFunctions}
+             addRefToAttribute={addRefToAttribute}
+            ></HtmlAttributeConfig>
+            )}
+        {/* <Form.Group className="mb-4">
           <Form.Label>styles</Form.Label>
           <Form.Control
             as="textarea"
@@ -273,7 +266,7 @@ const HtmlElementConfig = ({
             style={{ resize: "none" }}
             disabled
           />
-        </Form.Group>
+        </Form.Group> */}
         <div
           className="pt-1   mt-3  w-100"
           style={{
@@ -314,7 +307,7 @@ const HtmlElementConfig = ({
                 )}
               </button>
             </div>
-          </div>
+         </div>
         </div>
       </Form>
     </div>
