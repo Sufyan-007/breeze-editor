@@ -28,7 +28,7 @@ function CreateVariable({ config, update }) {
   }, []);
 
   return (
-    <div className="d-flex flex-column justify-content-between">
+    <div className="d-flex h-100 flex-column justify-content-between">
       <Form>
         <Form.Group controlId="declarationType">
           <Form.Label>Declaration Type</Form.Label>

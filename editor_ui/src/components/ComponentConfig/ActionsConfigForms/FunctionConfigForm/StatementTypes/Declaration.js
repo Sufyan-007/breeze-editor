@@ -48,7 +48,7 @@ export default function Declaration({ config, updateParent }) {
         title={"Edit Variable"}
         width="40%"
       >
-        <div className="px-1">
+        <div className="px-1 h-100 container">
           <CreateVariable config={config} update={(val) => handleClose(val)} />
         </div>
       </Offcanvas>

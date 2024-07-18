@@ -47,7 +47,7 @@ export default function CustomCode({ config, updateParent }) {
         title={"Edit Custom Code"}
         width="40%"
       >
-        <div className="px-1">
+        <div className="px-1 h-100 container">
           <CustomCodeEdit config={config} update={(val) => handleClose(val)} />
         </div>
       </Offcanvas>

@@ -21,7 +21,7 @@ function CustomCode({ config, update }) {
   }, []);
 
   return (
-    <div className="d-flex flex-column justify-content-between">
+    <div className="d-flex h-100 flex-column justify-content-between">
       <div>
         <MonacoEditor
           defaultValue={config.body}

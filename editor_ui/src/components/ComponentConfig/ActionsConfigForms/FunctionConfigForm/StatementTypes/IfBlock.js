@@ -75,7 +75,7 @@ export default function IfBlock({ config, updateParent }) {
         title={"Edit If Block"}
         width="40%"
       >
-        <div className="px-1">
+        <div className="px-1 h-100 container">
           <IfBlockEdit config={config} update={(val) => handleClose(val)} />
         </div>
       </Offcanvas>
