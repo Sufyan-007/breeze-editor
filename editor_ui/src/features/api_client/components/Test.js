@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Col, Row } from "react-bootstrap";
+import { Button, Col, Row, Toast, ToastContainer } from "react-bootstrap";
 import { useParams } from "react-router";
 import file from "../../../assets/icons/file.svg";
 import edit from "../../../assets/icons/edit-icon.svg";
@@ -10,11 +10,13 @@ import {
 } from "../services/IntermediateService";
 import { getApiSchemaDetails } from "../services/ApiService";
 import ImportApi from "./ImportApi";
-import GeneralSettingsCard from "./GeneralSettingsCard";
+import GeneralSettingsCard from "./views/EditView/GeneralSettingsCard";
 import EditServiceFunction from "./EditServiceFunction";
-import RequestSettings from "./RequestSettings";
-import ResponseSettings from "./ResponseSettings";
-import SchemaSettings from "./SchemaSettings";
+import RequestSettings from "./views/EditView/RequestSettings";
+import ResponseSettings from "./views/EditView/ResponseSettings";
+import SchemaSettings from "../components/views/EditView/SchemaSettings";
+import { addSchema, deleteSchema, editSchema } from "../services/SchemaService";
+import { generateReactService } from "../services/GeneratedReactAppService";
 function Test() {
   const [apiList, setApiList] = useState([]);
   const [schemaList, setSchemaList] = useState([]);
@@ -25,6 +27,7 @@ function Test() {
   const [expandedFilenames, setExpandedFilenames] = useState([]);
   const [view, setView] = useState("TEST");
   const [show, setShow] = useState(true);
+  const [showToast, setShowToast] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const fetchServiceList = useCallback(async () => {
@@ -35,6 +38,7 @@ function Test() {
       console.error("Error generating react service:", error);
     }
   }, [projectName]);
+
   const fetchSchemasList = useCallback(
     async (schemaName) => {
       try {
@@ -52,6 +56,14 @@ function Test() {
     },
     [projectName]
   );
+  const generateService = async (filename) => {
+    try {
+      const result = await generateReactService(projectName, filename);
+      console.log(result, "result");
+    } catch (error) {
+      console.error("Error generate react service:", error);
+    }
+  };
   const onApiModelChange = (prop, value) => {
     let model = { ...selectedApi };
     model[prop] = value;
@@ -85,7 +97,36 @@ function Test() {
       setErrorMessage(error.message);
     }
   };
-
+  const onSubmit = () => {
+    
+    console.log(selectedApi, "selected api");
+  };
+  const handleSchemaChanges = async (operation, data) => {
+    console.log(operation);
+    if (operation === "add") {
+      const result = await addSchema(projectName, data);
+      if (result.data) {
+        setShowToast(true)
+        setErrorMessage(result.data);
+        fetchSchemasList(null);
+      } else {
+        setErrorMessage(result.error);
+      }
+    } else if (operation === "edit") {
+      const result = await editSchema(
+        projectName,
+        data,
+        selectedSchemaDetails.name
+      );
+      if (result.data) {
+        setShowToast(true)
+        setErrorMessage(result.data);
+        fetchSchemasList(null);
+      } else {
+        setErrorMessage(result.error);
+      }
+    }
+  };
   useEffect(() => {
     fetchServiceList();
     fetchSchemasList(null);
@@ -101,19 +142,36 @@ function Test() {
   const handleSchemaOperations = async (operation, schema, index) => {
     if (operation === "edit") {
       const details = await fetchSchemasList(schema);
-      console.log(details, "details");
+      // console.log(details, "details");
       setSelectedSchemaDetails((state) => {
         state.name = schema;
+        state.type = "object";
         state.details = details;
         return { ...state };
       });
       setView("SCHEMA");
     } else if (operation === "delete") {
+      console.log(schema, index, "schema and index");
+      const result = await deleteSchema(projectName, schema);
+      if (result.message) {
+        setShowToast(true);
+        setErrorMessage(result.message);
+        fetchSchemasList(null);
+      }
     }
   };
 
   return (
     <div className="container-fluid h-100">
+        <ToastContainer
+          position="top-end"
+          className="p-3"
+          style={{ zIndex: 1 }}>
+          <Toast onClose={() => setShowToast(false)} show={showToast} autohide>
+            <Toast.Header>Message</Toast.Header>
+            <Toast.Body>{errorMessage}</Toast.Body>
+          </Toast>
+        </ToastContainer>
       <Row className="h-100">
         <Col
           sm={2}
@@ -127,10 +185,10 @@ function Test() {
             className="h-50 overflow-auto mb-1"
             style={{ borderBottom: "1px solid gray" }}>
             <div className="d-flex justify-content-between mb-2">
-              <span style={{ color: "white" }} className="mt-4">
+              <span style={{ color: "white" }} className="mt-4 overflow-auto">
                 <strong> Services</strong>
               </span>
-              <div>
+              <div className="d-flex">
                 <img
                   width="25"
                   height="25"
@@ -138,6 +196,10 @@ function Test() {
                   src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
                   alt="add--v1"
                   style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    setSelectedApi({});
+                    setView("TEST");
+                  }}
                 />
                 <img
                   width="25"
@@ -150,7 +212,7 @@ function Test() {
                 />
               </div>
             </div>
-            {apiList.length > 0 ? (
+            {apiList && apiList.length > 0 ? (
               apiList
                 .filter((service) => service.filename !== "allSchemas")
                 .map((service, index) => (
@@ -169,27 +231,42 @@ function Test() {
                           ? "white"
                           : "white",
                       }}>
-                      <img src={file} height={15} width={15} alt="file" />
-                      <span className="mx-2">{service.filename}</span>
+                      <div className="d-flex justify-content-between">
+                        <div>
+                          <img src={file} height={15} width={15} alt="file" />
+                          <span className="mx-2">{service.filename}</span>
+                        </div>
+                        <img
+                          onClick={() => generateService(service.filename)}
+                          className="mt-1"
+                          width="15"
+                          height="15"
+                          src="https://img.icons8.com/ios-filled/50/FFFFFF/mechanistic-analysis.png"
+                          alt="mechanistic-analysis"
+                        />
+                      </div>
                     </div>
                     {expandedFilenames.includes(service.filename) && (
                       <div
-                        className="text-white mx-4"
+                        className="text-white"
                         style={{
                           cursor: "pointer",
                           backgroundColor: "#212529",
+                          marginLeft: "15px",
                         }}>
                         {Object.keys(service.apis).length > 0 ? (
                           Object.entries(service.apis).map(([key, value]) => (
                             <div
                               key={key}
-                              className="m-2 d-flex justify-content-between">
-                              {value.operation_id}
+                              className="m-1 d-flex justify-content-between">
+                              <span className="overflow-auto">
+                                {value.operation_id}
+                              </span>
                               <div id="actions-div" className="d-flex">
                                 <img
                                   className="mx-1"
-                                  width="15"
-                                  height="15"
+                                  width="20"
+                                  height="20"
                                   src="https://img.icons8.com/ios-filled/50/FFFFFF/test-passed.png"
                                   alt="test-passed"
                                   onClick={() => {
@@ -202,14 +279,21 @@ function Test() {
                                 />
                                 <img
                                   className="mx-1"
-                                  width={15}
-                                  height={15}
+                                  width={20}
+                                  height={20}
                                   src={edit}
                                   alt="edit"
                                   onClick={() => {
                                     setSelectedApi(value);
                                     setView("TEST");
                                   }}
+                                />
+                                <img
+                                  src={Delete}
+                                  alt="delete"
+                                  height={20}
+                                  width={20}
+                                  style={{ cursor: "pointer" }}
                                 />
                               </div>
                             </div>
@@ -237,8 +321,14 @@ function Test() {
                 style={{ cursor: "pointer" }}
                 onClick={() => {
                   setSelectedSchemaDetails({
-                    name: "",
-                    details: { type: "object", properties: {}, required: [] },
+                    id: "",
+                    type: "",
+                    details: {
+                      type: "object",
+                      properties: {},
+                      required: [],
+                      name: "",
+                    },
                   });
                   setView("SCHEMA");
                 }}
@@ -250,8 +340,8 @@ function Test() {
                   <div
                     key={index}
                     className="text-white mt-2 d-flex justify-content-between">
-                    <span>{schema}</span>
-                    <div>
+                    <span className="overflow-auto">{schema.name}</span>
+                    <div className="d-flex">
                       <img
                         src={edit}
                         alt="edit"
@@ -260,7 +350,7 @@ function Test() {
                         style={{ cursor: "pointer" }}
                         className="mx-1"
                         onClick={() =>
-                          handleSchemaOperations("edit", schema, null)
+                          handleSchemaOperations("edit", schema.id, null)
                         }
                       />
                       <img
@@ -270,6 +360,9 @@ function Test() {
                         width={20}
                         style={{ cursor: "pointer" }}
                         className="mx-1"
+                        onClick={() =>
+                          handleSchemaOperations("delete", schema.id, index)
+                        }
                       />
                     </div>
                   </div>
@@ -288,7 +381,10 @@ function Test() {
                   Service Function Configuration
                 </h5>
                 <div>
-                  <Button variant="secondary" className="mt-3 rounded-0">
+                  <Button
+                    variant="secondary"
+                    className="mt-3 rounded-0"
+                    onClick={onSubmit}>
                     Submit
                   </Button>
                 </div>
@@ -304,6 +400,7 @@ function Test() {
               <ResponseSettings
                 responseData={selectedApi.response ? selectedApi.response : []}
                 onChange={onApiModelChange}
+                schemaList={schemaList}
               />
             </>
           ) : view === "IMPORT_API" ? (
@@ -319,11 +416,16 @@ function Test() {
           ) : view === "TEST_API" ? (
             <EditServiceFunction selectedServiceInfo={selectedServiceInfo} />
           ) : view === "SCHEMA" ? (
-            <SchemaSettings
-              schemaName={selectedSchemaDetails.name}
-              // isEditing={true}
-              schemaData={selectedSchemaDetails.details}
-            />
+            <>
+              {console.log(selectedSchemaDetails)}
+              <SchemaSettings
+                key={selectedSchemaDetails.name}
+                schemaId={selectedSchemaDetails.name}
+                schemaData={selectedSchemaDetails.details}
+                onChange={handleSchemaChanges}
+                availableSchemas={schemaList}
+              />
+            </>
           ) : null}
         </Col>
       </Row>

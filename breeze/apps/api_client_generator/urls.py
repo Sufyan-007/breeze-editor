@@ -7,7 +7,7 @@ from .api.append_auth_api import AppendAuthApi
 from .api.transfer_to_auth_api import TransferToAuthApi
 from .api.retrieve_auth_file import RetrieveAuthFile
 from .api.retrive_api_config import RetrieveApiConfig
-from .api.retrieve_schema_details import RetrieveSchemaDetails, RetrieveSchemaProperties
+from .api.retrieve_schema_details import RetrieveSchemaDetails, RetrieveSchemaProperties, SchemaSettings
 urlpatterns = [
         path('generate-react-api-client/<str:type>', csrf_exempt(GenerateReactApiClient.as_view())),
         path('convert-standard-json/<str:collectionType>/<str:appName>', csrf_exempt(ApiClientGenerator.as_view())),
@@ -19,4 +19,7 @@ urlpatterns = [
         path('fetch-auth-file/<str:projectName>/<str:apiId>', csrf_exempt(RetrieveAuthFile.as_view())),
         path('fetch-schema-details/<str:projectName>/<str:schemaName>', csrf_exempt(RetrieveSchemaDetails.as_view())),
         path('fetch-schema-properties/<str:projectName>/<str:schemaName>/<str:property>', csrf_exempt(RetrieveSchemaProperties.as_view())),
+        path('add-schema/<str:projectName>', csrf_exempt(SchemaSettings.as_view())),
+        path('edit-schema/<str:projectName>/<str:schemaId>', csrf_exempt(SchemaSettings.as_view())),
+        path('delete-schema/<str:projectName>/<str:schemaId>', csrf_exempt(SchemaSettings.as_view())),
 ]

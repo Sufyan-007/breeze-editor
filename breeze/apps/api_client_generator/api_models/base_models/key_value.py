@@ -6,7 +6,10 @@ class KeyValue:
     key: str = CustomizedAttr((str),[required_validator])
     value: str = CustomizedAttr((str),[required_validator])
     # errors = {}
+    type: str = CustomizedAttr((str),[])
+    storage_key: str = CustomizedAttr((str))
     errors : dict = CustomizedAttr((dict), [])
+    
 
 
     def add_error(self, attribute, error_message):
@@ -19,5 +22,7 @@ class KeyValue:
         return {
             'key': self.key,
             'value': self.value,
+            'type': self.type if self.type else None, 
+            'storage_key': self.storage_key,
             'errors': self.errors if self.errors else None
         }

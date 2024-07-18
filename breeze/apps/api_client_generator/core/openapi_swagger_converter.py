@@ -485,6 +485,12 @@ class OpenapiConverter:
 
             openapi_data = yaml.safe_load(json_data)
             avalilable_schemas = openapi_data.get("components").get("schemas", {})
+            structured_schema_data = {}
+            for key, val in avalilable_schemas.items():
+                id = generate_uuid_as_key()
+                val["name"]= key
+                structured_schema_data[id] = val
+            print(structured_schema_data, "structured_schema_data")
             schema_file_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json/allSchemas.json"
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
             security_schemes_models = self.handle_security_schema(security_schemes,openapi_data) #remaining
@@ -504,7 +510,7 @@ class OpenapiConverter:
                     except Exception as e:
                         print(traceback.format_exc())
             with open(schema_file_path, "w") as file:
-                json.dump(avalilable_schemas,file, cls=EnhancedJSONEncoder)
+                json.dump(structured_schema_data,file, cls=EnhancedJSONEncoder)
             return  {
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,
@@ -549,6 +555,8 @@ class OpenapiConverter:
         for tag, tag_operations in tags_map.items():
             for path, operation, operation_data in tag_operations:
                 try:
+                    # from here we need to handle the single generation
+                    # if operation_data.get("requestBody").get("content")
                     request_obj = self.create_request_json(
                         path=path,
                         path_data=operation_data,
@@ -560,8 +568,12 @@ class OpenapiConverter:
                         path_data=operation_data,
                         meta_data=meta_data
                     )
+                    # parameters = self.create_function_parameters_json(request_obj)
                     id = generate_uuid_as_key()
                     api_model_obj = {
+                        "type": "FUNCTION",
+                        "isAsync": True,
+                        "parameters": [],
                         "id" : id,
                         "operation_id":operation_data.get("operationId","function_name"),
                         "tags" :tag,
@@ -592,6 +604,13 @@ class OpenapiConverter:
                         # self.errors["path_errors"][f"{path}-{operation}"].append(str(e))
                     print(traceback.format_exc())
         return tag_mappings
+    
+    # def create_function_parameters_json(self, request_data):
+    #     parameters = request_data.get('parameters')
+    #     headers = request_data.get('headers')
+    #     url = request_data.get('url')
+        
+        
 
 
 

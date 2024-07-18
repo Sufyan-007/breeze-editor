@@ -107,6 +107,9 @@ class ApiModelLoader:
                     name=param.get("name"),
                     type=param.get("type"),
                     required=param.get("required"),
+                    param_type=param.get("param_type", "STATIC"),
+                    value=param.get("value"),
+                    storage_key=param.get("storage_key"),
                     description=param.get("description"),
                     errors= {}
                 )
@@ -167,7 +170,7 @@ class ApiModelLoader:
         headers = []
         for item in header_data:
             new_headers = KeyValue(key=item.get(
-                "key"), value=item.get("value"),errors={})
+                "key"), value=item.get("value"),type=item.get("type"),errors={},storage_key=item.get("storage_key"))
             headers.append(new_headers)
         return headers
 
@@ -179,6 +182,9 @@ class ApiModelLoader:
         request_obj = api_model_loader.load_request(request_data=request_data)
         response_obj = api_model_loader.load_response(response_data=response_data)
         api_model = ApiModel(
+            type="FUNCTION",
+            isAsync=True,
+            parameters=model_json.get("parameters",[]),
             id=model_json.get("id"),
             operation_id=model_json.get("operation_id"),
             tags=model_json.get("tags"),  # Tags remaining

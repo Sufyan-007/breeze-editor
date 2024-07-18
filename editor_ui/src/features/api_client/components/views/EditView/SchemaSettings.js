@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
-import RenderObject from "./RenderObject";
+import RenderObject from "../EditView/RenderObject";
 
-function SchemaSettings({ schemaName, isEditing, schemaData }) {
+function SchemaSettings({ schemaId, schemaData, onChange, availableSchemas }) {
   const [defaultSchemaObj, setDefaultSchemaObj] = useState(schemaData);
+  const [id, setId] = useState(schemaId);
+  useEffect(() => {
+    setId(schemaId);
+  }, [schemaId]);
 
   useEffect(() => {
     setDefaultSchemaObj(schemaData);
@@ -50,8 +54,18 @@ function SchemaSettings({ schemaName, isEditing, schemaData }) {
       });
     }
   };
-  const onSubmit = () => {
-    console.log(defaultSchemaObj, "default");
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    // console.log(id, "iddddd");
+    const finalSchema = { id, details: defaultSchemaObj };
+    const operation = id ? "edit" : "add";
+    console.log(operation, "operation");
+    if (operation === "add") {
+      onChange("add", finalSchema);
+    }
+    else{
+        onChange("edit", finalSchema);
+    }
   };
   return (
     defaultSchemaObj && (
@@ -62,7 +76,7 @@ function SchemaSettings({ schemaName, isEditing, schemaData }) {
             <Button
               variant="secondary"
               className="rounded-0 mt-4"
-              onClick={onSubmit}>
+              onClick={(e) => onSubmit(e)}>
               Submit
             </Button>
           </div>
@@ -84,11 +98,11 @@ function SchemaSettings({ schemaName, isEditing, schemaData }) {
               size="sm"
               type="text"
               placeholder="Value"
-              value={schemaName}
+              value={defaultSchemaObj.name}
               onChange={(e) =>
                 setDefaultSchemaObj({
                   ...defaultSchemaObj,
-                  type: e.target.value,
+                  name: e.target.value,
                 })
               }
               style={{
@@ -96,33 +110,6 @@ function SchemaSettings({ schemaName, isEditing, schemaData }) {
                 border: "1px solid rgba(128, 128, 128, 0.5)",
               }}
             />
-          </Col>
-        </Row>
-        <Row className="mb-2">
-          <Col sm={3} className="text-white">
-            Type:
-          </Col>
-          <Col sm={9}>
-            <Form.Control
-              as="select"
-              className="text-white"
-              size="sm"
-              style={{
-                backgroundColor: "#212529",
-                border: "1px solid rgba(128, 128, 128, 0.5)",
-              }}
-              value={defaultSchemaObj.type}
-              onChange={(e) =>
-                setDefaultSchemaObj({
-                  ...defaultSchemaObj,
-                  type: e.target.value,
-                })
-              }>
-              <option value="">Select</option>
-              <option value="object">Object</option>
-              <option value="string">String</option>
-              <option value="integer">Integer</option>
-            </Form.Control>
           </Col>
         </Row>
         <Row className="mb-2 mt-2 d-flex ">
@@ -142,15 +129,19 @@ function SchemaSettings({ schemaName, isEditing, schemaData }) {
           </div>
         </Row>
         {defaultSchemaObj.properties &&
-          Object.entries(defaultSchemaObj.properties).map(([key, value]) => (
-            <RenderObject
-              propertyName={key}
-              value={value}
-              updateParent={(value, newKey = null) =>
-                editProperty(key, value, newKey)
-              }
-            />
-          ))}
+          Object.entries(defaultSchemaObj.properties).map(([key, value]) => {
+            return (
+              <RenderObject
+                key={key}
+                propertyName={key}
+                value={value}
+                updateParent={(value, newKey = null) =>
+                  editProperty(key, value, newKey)
+                }
+                schemaList={availableSchemas}
+              />
+            );
+          })}
       </div>
     )
   );
