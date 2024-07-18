@@ -6,7 +6,7 @@ import { MessageListenerService } from "../../services/MessageListenerService"
 import { useParams } from "react-router"
 import AddElements from "./AddElements"
 import ActionsConfig from "./ActionsConfig"
-import { useWindowDimension } from '../CustomHooks/useWindowDimension'
+import { useWindowDimension } from '../../hooks/useWindowDimension'
 
 export const DragContext = createContext({
   messageListener: null,
