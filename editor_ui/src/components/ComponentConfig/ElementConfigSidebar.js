@@ -14,9 +14,9 @@ const getAvailableFunctions = (componentConfig) => {
   const { resources, propsVars } = componentConfig;
   
   const namedFunctions = resources.filter(resource => resource.type === "function");
-  const propFunctions = propsVars.filter(propsVar => propsVar.body.datatype === "function");
-  const stateAsFunction = resources.filter(resource => resource.body.datatype === "function");
-  const hookFunction = resources.filter(resource => ["useMemo", "useCallback"].includes(resource.body.type));
+  const propFunctions = propsVars.filter(propsVar => propsVar.body?.datatype === "function");
+  const stateAsFunction = resources.filter(resource => resource.body?.datatype === "function");
+  const hookFunction = resources.filter(resource => ["useMemo", "useCallback"].includes(resource.body?.type));
   // const setterFunctions = resources.filter(resource => resource.type === "stateVars")
   
   functionsList.push(...namedFunctions, ...propFunctions, ...stateAsFunction, ...hookFunction);
