@@ -145,7 +145,7 @@ export default function AddElements() {
                   >
                     {" "}
                     <DragableElements
-                      elem={{ elementType: "HTML", component }}
+                      elem={{ elementType: component.type, component }}
                     />{" "}
                   </li>
                 ))}
@@ -162,7 +162,7 @@ export default function AddElements() {
                   <li key={index} className="list-group-item">
                     {" "}
                     <DragableElements
-                      elem={{ elementType: "HTML", component }}
+                      elem={{ elementType: component.type, component }}
                     />{" "}
                   </li>
                 ))}
@@ -185,7 +185,7 @@ export default function AddElements() {
                   >
                     {" "}
                     <DragableElements
-                      elem={{ elementType: "HTML", component }}
+                      elem={{ elementType: component.type, component }}
                     />{" "}
                   </li>
                 ))}
