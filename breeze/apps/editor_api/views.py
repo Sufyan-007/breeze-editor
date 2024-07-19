@@ -282,7 +282,6 @@ class ProjectConfig(APIView):
         data = json.loads(request.body.decode("utf-8"))
         data['defaultComponent'] = "Main"
         data["projectName"] = data["name"]
-        # data["selectedTemplate"]= data["selectedTemplate"]
         data["name"] = data['name'].lower().replace(" ", "_")
         generated_paths = os.path.join(
             os.path.dirname(os.getcwd()), "generated_projects")
