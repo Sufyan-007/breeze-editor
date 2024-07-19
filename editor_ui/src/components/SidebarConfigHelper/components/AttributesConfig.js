@@ -43,6 +43,8 @@ const AttributesConfig = ({
           {inputField.key === "" ? (
             <Creatable
               options={attributeOptions}
+              form="_none"
+
               onChange={handleSelectAttributeChange}
               placeholder="Select Attribute"
               styles={{

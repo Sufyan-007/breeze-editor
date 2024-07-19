@@ -234,15 +234,23 @@ const HtmlElementConfig = ({
       <Form className="text-light">
         {element.elementType === "CUSTOM" ? (
           <CustomComponentConfig
-            element={element}
-            makeSelectedElementNull={makeSelectedElementNull}
-            handleUpdateClick={handleUpdateClick}
+            // element={element}
+            // makeSelectedElementNull={makeSelectedElementNull}
+            // handleUpdateClick={handleUpdateClick}
+            // attributeOptions={attributeOptions}
+            // availableAttributes={availableAttributes}
+            // selectedAttributes={selectedAttributes}
+            // setSelectedAttributes={setSelectedAttributes}
+            // availableFunctions={availableFunctions}
+            // allVariables={allVariables}
             attributeOptions={attributeOptions}
-            availableAttributes={availableAttributes}
-            selectedAttributes={selectedAttributes}
-            setSelectedAttributes={setSelectedAttributes}
-            availableFunctions={availableFunctions}
-            allVariables={allVariables}
+             handleSelectAttributeChange={handleSelectAttributeChange}
+             customStyles={customStyles}
+             selectedAttributes={selectedAttributes}
+             handleAttributeChange={handleAttributeChange}
+             handleDeleteAttribute={handleDeleteAttribute}
+             availableFunctions={availableFunctions}
+             addRefToAttribute={addRefToAttribute}
           />
         ) : (
           

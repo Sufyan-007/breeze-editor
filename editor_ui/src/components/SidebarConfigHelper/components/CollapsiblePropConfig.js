@@ -3,154 +3,310 @@ import rightArrow from "../../../assets/icons/arrow_right_icon.svg";
 import downArrow from "../../../assets/icons/arrow_down_icon.svg";
 import { Form, FormGroup, Button } from "react-bootstrap";
 import MonacoEditor from "../../common/MonacoEditor";
+import CreatableSelect from "react-select/creatable";
+import Creatable from "react-select/creatable";
+
 
 const CollapsiblePropConfig = ({
-  title,
-  handleDeleteAttribute,
-  value,
-  addFunctionAttribute,
+  index,
+  key,
+  inputField,
+  selectedAttributes,
+  handleAttributeChange,
+  handleRemoveInputAttribute,
   availableFunctions,
-  allVariables,
+  addRefToAttribute,
+  attributeOptions,
+  handleSelectAttributeChange,
+  customStyles,
 }) => {
-  console.log("value: " , value);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const bindingVariable = [...availableFunctions, ...allVariables];
-  const toggleOpen = () => {
-    setIsOpen(!isOpen);
-  };
-
+  const [checkbox, setCheckbox] = useState(false);
+  console.log("inputField", inputField);
   useEffect(() => {
-    if (value.$ref === undefined) setSelectedOption("customValue");
-    else {
-      setSelectedOption("bindValue");
+    if (
+      inputField.type === "FUNCTION" &&
+      inputField.$ref === undefined &&
+      inputField.value !== ""
+    ) {
+      setCheckbox(true);
+    } else if (
+      inputField.type !== "FUNCTION" &&
+      inputField.$ref !== undefined
+    ) {
+      setCheckbox(true);
     }
-  }, []);
-
-  const handleRadioChange = (event) => {
-   
-    setSelectedOption(event.target.value);
-  };
+  }, [inputField]);
 
   return (
-    <div className="border rounded mb-1" style={{ width: "90%" }}>
-      <div
-        className="d-flex justify-content-between align-items-center "
-        onClick={toggleOpen}
-        style={{ cursor: "pointer" }}
-      >
-        <div>
-          <button
-            type="button"
-            className="btn p-0 m-0 shadow-none"
-            onClick={toggleOpen}
-          >
-            {isOpen ? (
-              <img src={downArrow} height={20} alt="Collapse" />
-            ) : (
-              <img src={rightArrow} height={20} alt="Expand" />
-            )}
-          </button>
+    <>
+      {" "}
+      <div className="d-flex justify-content-between  mb-1">
+        <div style={{ width: "23%", fontSize: ".9rem" }}>
+          {inputField.key === "" ? (
+            <Creatable
+            form="_none"
 
-          <span className="font-weight-bold text-light">{title}</span>
+              options={attributeOptions}
+              onChange={handleSelectAttributeChange}
+              placeholder="Select Attribute"
+              styles={{
+                ...customStyles,
+                valueContainer: (deafult) => {
+                  return {
+                    ...deafult,
+                    borderColor: "rgb(73, 80, 87)",
+                    backgroundColor: "#303033",
+                    color: "white",
+                    paddingRight: "0px",
+                  };
+                },
+
+                dropdownIndicator: (styles) => ({
+                  ...styles,
+                  marginRight: "5px",
+                  paddingLeft: "0px",
+                }),
+              }}
+              components={{
+                IndicatorSeparator: () => null,
+              }}
+              value={null}
+            />
+          ) : (
+            inputField.key
+          )}
         </div>
-        <Button
-          variant="outline-danger"
-          className="ms-2"
-          style={{ border: "none" }}
-          onClick={() => handleDeleteAttribute(title)}
+
+        <Form.Group
+          className=""
+          controlId="exampleForm.ControlInput1"
+          style={{ width: "66%", marginRight: "10px" }}
         >
-          <i className="bi bi-trash3 p-1"></i>
-        </Button>
-      </div>
-      {isOpen && (
-        <div className="p-2 text-light">
-          <Form>
-            <Form.Check
-              type="radio"
-              label="Bind"
-              name="customRadio"
-              value="bindValue"
-              onChange={handleRadioChange}
-              checked={selectedOption === "bindValue"}
-            />
-            <Form.Check
-              type="radio"
-              label="Custom Value"
-              name="customRadio"
-              value="customValue"
-              onChange={handleRadioChange}
-              checked={selectedOption === "customValue"}
-            />
-          </Form>
+          {inputField.type === "VARIABLE" && (
+            <Form.Select
+              size="sm"
+              style={{
+                borderColor: "rgb(73, 80, 87)",
+                backgroundColor: "rgb(37 39 42) ",
+                color: "white",
+              }}
+              onChange={(event) => {
+                addRefToAttribute(
+                  "predefined",
+                  event,
+                  inputField.key,
+                  "VARIABLE"
+                );
+              }}
+              value={inputField.$ref}
+            >
+              <option value="" disabled selected hidden>
+                Select a binding
+              </option>
 
-          <div>
-            {selectedOption === "bindValue" && (
-              <div>
-                <FormGroup className="d-flex align-items-center justify-content-between">
-                  <Form.Label>Bind</Form.Label>
-                  <Form.Select
-                    style={{
-                      backgroundColor: "#303033",
-                      color: "white",
-                      width: "23rem",
-                    }}
-                    value={value.$ref}
-                    onChange={(event) => {
-                      addFunctionAttribute("bindValue", event, title);
-                    }}
-                  >
-                    <option value="" disabled selected hidden>
-                      Select a binding
+              {availableFunctions &&
+                availableFunctions.map((functions, index) => (
+                  <option key={index} value={functions.id}>
+                    {functions.name}
+                  </option>
+                ))}
+            </Form.Select>
+          )}
+          {inputField.type === "LITERAL" &&
+            (checkbox === true ? (
+              <Form.Select
+                size="sm"
+                style={{
+                  borderColor: "rgb(73, 80, 87)",
+                  backgroundColor: "rgb(37 39 42) ",
+                  color: "white",
+                }}
+                onChange={(event) => {
+                  addRefToAttribute(
+                    "predefined",
+                    event,
+                    inputField.key,
+                    "VARIABLE"
+                  );
+                }}
+                value={inputField.$ref}
+              >
+                <option value="" disabled selected hidden>
+                  Select a binding
+                </option>
+
+                {availableFunctions &&
+                  availableFunctions.map((functions, index) => (
+                    <option key={index} value={functions.id}>
+                      {functions.name}
                     </option>
+                  ))}
+              </Form.Select>
+            ) : inputField.key === "className" ? (
+              <CreatableSelect
+                isMulti
+                form="_none"
+                placeholder="Select className"
+                value={
+                  selectedAttributes?.className?.value
+                    ? selectedAttributes.className.value
+                        .split(" ")
+                        .map((elem) => ({
+                          label: elem,
+                          value: elem,
+                        }))
+                    : ""
+                }
+                components={{
+                  DropdownIndicator: () => null,
+                  IndicatorSeparator: () => null,
+                }}
+                onChange={(e) => {
+                  const valuesString = e.map((item) => item.value).join(" ");
 
-                    {bindingVariable &&
-                      bindingVariable.map((variable, index) => (
-                        <option key={index} value={variable.id}>
-                          {variable.name}
-                        </option>
-                      ))}
-                  </Form.Select>
-                </FormGroup>
-              </div>
-            )}
-            {selectedOption === "customValue" && (
-              <div>
-                {value.type === "FUNCTION" ? (
-                  <MonacoEditor
-                    defaultValue={value?.value?.functionBody || ""}
-                    height="200px"
-                    onChange={(body) =>
-                      addFunctionAttribute("functionValue", body, title)
-                    }
-                    id={`functionEditor-${title}`}
-                  ></MonacoEditor>
-                ) : (
-                  <FormGroup className="d-flex align-items-center justify-content-between mt-1">
-                    <Form.Label> Value</Form.Label>
-                    <Form.Control
-                      type="text"
-                      id="inputText"
-                      value={value?.value || ""}
-                      style={{
-                        backgroundColor: "#303033",
-                        color: "white",
-                        width: "23rem",
-                      }}
-                      onChange={(e) => {
+                  handleAttributeChange(inputField.key, valuesString);
+                }}
+                styles={{
+                  container: (provided) => ({
+                    ...provided,
+                    width: "100%",
+                  }),
+                  ...customStyles,
+                  multiValue: (provided) => ({
+                    ...provided,
+                    backgroundColor: "#0e98ba",
+                  }),
+                }}
+              />
+            ) : (
+              <Form.Control
+                type="text"
+                size="sm"
+                style={{ borderColor: "rgb(73, 80, 87)" }}
+                placeholder="value"
+                className="bg-dark text-light "
+                onChange={(e) => {
+                  e.preventDefault();
+                  handleAttributeChange(inputField.key, e.target.value);
+                }}
+              />
+            ))}
+          {inputField.type === "BOOLEAN" &&
+            (checkbox === false ? (
+              <Form.Select
+                size="sm"
+                onChange={(e) => {
+                  handleAttributeChange(inputField.key, e.target.value);
+                }}
+                style={{ borderColor: "rgb(73, 80, 87)" }}
+                defaultValue={true}
+                value={inputField.value || "false"}
+                //   value={selectedAttributes[attribute].value}
+                className="bg-dark text-light "
+              >
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </Form.Select>
+            ) : (
+              <Form.Select
+                style={{
+                  backgroundColor: "rgb(37 39 42) ",
+                  borderColor: "rgb(73, 80, 87)",
+                  color: "white",
+                }}
+                onChange={(event) => {
+                  addRefToAttribute(
+                    "predefined",
+                    event,
+                    inputField.key,
+                    "VARIABLE"
+                  );
+                }}
+                value={inputField.$ref}
+                size="sm"
+              >
+                <option value="" disabled selected hidden>
+                  Select a binding
+                </option>
 
-                        addFunctionAttribute("customValue", e, title);
-                      }}
-                    />
-                  </FormGroup>
-                )}
-              </div>
-            )}
+                {availableFunctions &&
+                  availableFunctions.map((functions, index) => (
+                    <option key={index} value={functions.id}>
+                      {functions.name}
+                    </option>
+                  ))}
+              </Form.Select>
+            ))}
+
+          {inputField.type === "FUNCTION" && checkbox === true && (
+            <MonacoEditor
+              defaultValue={inputField?.value?.functionBody || ""}
+              height="150px"
+              onChange={(body) => {
+                console.log("monaco", body);
+                addRefToAttribute("functionValue", body, inputField.key);
+              }}
+              id={`functionEditor-${inputField.key}`}
+            ></MonacoEditor>
+          )}
+          {inputField.type === "FUNCTION" && checkbox === false && (
+            <Form.Select
+              size="sm"
+              style={{
+                backgroundColor: "rgb(37 39 42) ",
+                borderColor: "rgb(73, 80, 87)",
+                color: "white",
+              }}
+              onChange={(event) => {
+                addRefToAttribute("predefined", event, inputField.key);
+              }}
+              value={inputField.value}
+            >
+              <option value="" disabled hidden>
+                Select a function
+              </option>
+
+              {availableFunctions &&
+                availableFunctions.map((functions, index) => (
+                  <option key={index} value={functions.id}>
+                    {functions.name}
+                  </option>
+                ))}
+            </Form.Select>
+          )}
+        </Form.Group>
+        <div className="d-flex me-1">
+          <Form.Check
+            inline
+            type="checkbox"
+            style={{ marginRight: ".6rem" }}
+            checked={checkbox}
+            disabled={inputField.key === ""}
+            custom
+            className="attribute-config-checkbox"
+            onChange={() => {
+              const attributeValue  = {
+                value: inputField.key
+              }
+              handleSelectAttributeChange(attributeValue)
+              setCheckbox(!checkbox);
+            }}
+          />
+          <div
+            className=""
+            style={{
+              height: "2.5rem",
+              border: "none",
+              color: "red",
+              padding: ".1rem",
+            }}
+            onClick={() => handleRemoveInputAttribute(index, inputField.key)}
+          >
+            <i className="bi bi-trash3 "></i>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 };
-
 export default CollapsiblePropConfig;
