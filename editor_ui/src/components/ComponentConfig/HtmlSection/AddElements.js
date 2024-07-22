@@ -8,8 +8,7 @@ const elementFilterOptions = [
   { label: "All", value: "All" },
   { label: "HTML", value: "HTML" },
   { label: "Custom", value: "CUSTOM" },
-  { label: "Third Party", value: "THRID_PARTY" },
-  { label: "Frequently used", value: "FYE" },
+  { label: "Third Party", value: "THIRD_PARTY" },
 ];
 
 export default function AddElements() {
@@ -17,8 +16,7 @@ export default function AddElements() {
   const [components, setComponents] = useState({});
   const [searchedElement, setSearchedElement] = useState("");
   const frequentlyUsedElements = ["div", "addAllOtherTagsLater"];
-  console.log(elementFilterOptions);
-  const [chosenType, setchosenType] = useState("FYE");
+  const [chosenType, setchosenType] = useState("All");
 
   useEffect(() => {
     const load = async () => {
@@ -80,7 +78,6 @@ export default function AddElements() {
           >
             {elementFilterOptions.map((obj) => (
               <li
-                key={obj.label}
                 className={`${
                   chosenType === obj.value ? "active" : ""
                 } dropdown-item`}
@@ -93,16 +90,16 @@ export default function AddElements() {
         </div>
       </div>
       <div>
-        <div data-bs-theme="dark" className="me-2" type="button">
+        <div
+          data-bs-theme="dark"
+          className="me-2"
+          type="button"
+          onChange={(e) => setSearchedElement(e.target.value)}
+        >
           <input
             className="form-control me-2"
             type="search"
-            placeholder={
-              chosenType !== "FYE"
-                ? "Search from " + chosenType + " tags"
-                : "Search"
-            }
-            onChange={(e) => setSearchedElement(e.target.value)}
+            placeholder={"Search from " + chosenType + " tags"}
             aria-label="Search"
             value={searchedElement}
           />
@@ -137,10 +134,9 @@ export default function AddElements() {
                     key={index}
                     className="list-group-item"
                     title={
-                      "Tag type: " +
-                      (component.type === "THIRD_PARTY"
-                        ? component.type + " --> " + component.libraryName
-                        : component.type)
+                      component.type === "THIRD_PARTY"
+                        ? "lib... --> " + component.libraryName
+                        : ""
                     }
                   >
                     {" "}
@@ -177,10 +173,9 @@ export default function AddElements() {
                     key={index}
                     className="list-group-item"
                     title={
-                      "Tag type: " +
-                      (component.type === "THIRD_PARTY"
-                        ? component.type + " --> " + component.libraryName
-                        : component.type)
+                      component.type === "THIRD_PARTY"
+                        ? "lib... --> " + component.libraryName
+                        : ""
                     }
                   >
                     {" "}

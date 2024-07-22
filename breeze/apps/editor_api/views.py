@@ -147,7 +147,7 @@ class NewComponentWriter(APIView):
         try:
             app_component_writer = AppEditor(param)
             res = app_component_writer.add_component(
-                data["name"], data["type"])
+                data["name"], data["type"], data['route'])
             print("djfvnskjvnsri",res)
             update_components()
 
