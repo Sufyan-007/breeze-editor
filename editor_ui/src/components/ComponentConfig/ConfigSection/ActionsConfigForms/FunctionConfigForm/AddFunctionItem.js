@@ -11,7 +11,7 @@ import DoWhileBlock from "../FunctionItemComponents/DoWhileLoop";
 
 const options = [
   { value: "createVariable", label: "Create Variable" },
-  // { value: "updateVariable", label: "Update Variable" },
+  { value: "updateVariable", label: "Update Variable" },
   { value: "ifBlock", label: "If Else Block" },
   { value: "whileBlock", label: "While Block" },
   { value: "doWhileBlock", label: "Do While Block" },
@@ -40,6 +40,10 @@ const templates = {
   createVariable: {
     type: "DECLARATION",
     declarationType: "",
+    varName: "",
+  },
+  updateVariable: {
+    type: "ASSIGNMENT",
     varName: "",
   },
   customCode: {
