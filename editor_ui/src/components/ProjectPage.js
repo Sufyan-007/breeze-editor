@@ -24,6 +24,7 @@ import constants from "../assets/icons/constants.svg";
 import folder from "../assets/icons/folder.svg";
 import apps from "../assets/icons/apps.svg";
 import upload from "../assets/icons/upload.svg";
+import upload from "../assets/icons/upload.svg";
 import ProjectSidebar from "./ProjectSidebar";
 import { router } from "../App";
 

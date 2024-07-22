@@ -3,7 +3,7 @@ import HtmlTree from "./HtmlTree"
 import rightArrow from "../assets/icons/arrow_right_icon.svg"
 import downArrow from "../assets/icons/arrow_down_icon.svg"
 import threeDots from "../assets/icons/three_dots_icon.svg"
-import AddChildModal from "./AddChildModal"
+import AddChildModal from "./ComponentConfig/HtmlSection/AddChildModal"
 export default function Html({ value, selecteElement, config, reference, component, setValue, changeParent, sidebarService, selected }) {
 
 

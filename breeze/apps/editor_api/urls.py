@@ -29,6 +29,7 @@ from .views import GetResources
 from .views import StylesConfig
 from .views import FileHandle
 from .views import ResourceConfig
+from .views import ASTParser
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -70,19 +71,9 @@ urlpatterns = [
         path("get-attributes/",GetAttributes.as_view()),
         path("get-resources/",GetResources.as_view()),
         
-        #old apis
-        # path('add-css-content/', CSSConfig.as_view()),
-        # path('all-css-files/', CSSConfig.as_view()),
-        # path('update-css-file/', CSSConfig.as_view()),
-        # path('delete-css-file/<str:css_name>/', CSSConfig.as_view()),
-        # path('get-css-file/<str:css_name>/', CSSConfigReader.as_view()),
-        # path('upload-css-file/', CSSFileUpload.as_view()),
-        # path('css-file-download/<str:css_name>/', CSSFileDownloadView.as_view()),
-        # path('lifecycle/', LifeCycleConfigWriter.as_view()),
-        # path("update-function-config/",FunctionConfigWriter.as_view()),
-        # path('variables/', VariablesConfigWriter.as_view()),
-
-
+        # FUNCTION GENERATION TESTING
+        path("ast-parser/",ASTParser.as_view()),
+        
         # Resources 
         path('file-upload/', FileHandle.as_view()),
         path('file-upload/<str:projectName>', FileHandle.as_view()),
