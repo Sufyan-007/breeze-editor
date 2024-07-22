@@ -12,7 +12,7 @@ const options = [
   // { value: "updateVariable", label: "Update Variable" },
   { value: "ifBlock", label: "If Else Block" },
   { value: "customCode", label: "Custom Code" },
-  // { value: "return", label: "Return Value" },
+  { value: "return", label: "Return Value" },
   // { value: "functionCall", label: "Function Call" },
 ];
 
@@ -40,6 +40,10 @@ const templates = {
   customCode: {
     type: "CUSTOM",
     body: "",
+  },
+  return: {
+    type: "RETURN",
+    value: {},
   },
 };
 
