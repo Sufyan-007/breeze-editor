@@ -78,6 +78,16 @@ class FunctionParser:
                 """
             pass
         
+        elif config['type'] == 'TRY_CATCH':
+            tryBody = f"""try {self.generate_statement_code(config["tryBody"])}"""
+            catchBody = f"""catch (err) {self.generate_statement_code(config["catchBody"])}"""
+            
+            finallyBody = ""
+            if config.get('finallyBody'):
+                finallyBody = f"""finally {self.generate_statement_code(config["finallyBody"])}"""
+            
+            return " ".join([tryBody,catchBody,finallyBody])
+        
         elif config['type'] == "WHILE_BLOCK":
             return f""" while ({self.get_value_code(config["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
         """
