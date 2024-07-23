@@ -17,6 +17,12 @@ function LifecycleForm({ onSubmit, formData, isEditing }) {
       description: "",
     },
   });
+
+  const [errors, setErrors] = useState({
+    name: "",
+    lifecycleType: "",
+  });
+
   const { componentConfig } = useContext(ComponentContext);
   const { propsVars, resources } = componentConfig;
 
@@ -67,9 +73,29 @@ function LifecycleForm({ onSubmit, formData, isEditing }) {
     }));
   };
 
+  const validate = () => {
+    let isValid = true;
+    let newErrors = {};
+
+    if (!formState.name) {
+      newErrors.name = "required";
+      isValid = false;
+    }
+
+    if (!formState.body.lifecycleType) {
+      newErrors.lifecycleType = "required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formState);
+    if (validate()) {
+      onSubmit(formState);
+    }
   };
 
   return (
@@ -91,10 +117,15 @@ function LifecycleForm({ onSubmit, formData, isEditing }) {
                 }
                 required
               />
+              {errors.name && (
+                <p className="mb-0" style={{ color: "#EA868F" }}>
+                  {errors.name}
+                </p>
+              )}
             </Form.Group>
           </Row>
           <Row className="mb-2">
-            <Form.Group  controlId="formGridType">
+            <Form.Group controlId="formGridType">
               <Form.Select
                 value={formState.body.lifecycleType}
                 onChange={(e) =>
@@ -108,6 +139,11 @@ function LifecycleForm({ onSubmit, formData, isEditing }) {
                 <option value="onMountAndUnmount">onMountAndUnmount</option>
                 <option value="onUnmount">onUnmount</option>
               </Form.Select>
+              {errors.lifecycleType && (
+                <p className="mb-0" style={{ color: "#EA868F" }}>
+                  {errors.lifecycleType}
+                </p>
+              )}
             </Form.Group>
           </Row>
 
@@ -164,8 +200,12 @@ function LifecycleForm({ onSubmit, formData, isEditing }) {
           </Row>
         </div>
         <div className="d-flex">
-          <Button variant="success" className="my-3 btn btn-sm" onClick={handleSubmit}>
-            Submit
+          <Button
+            variant="success"
+            className="my-3 btn btn-sm"
+            onClick={handleSubmit}
+          >
+            {isEditing ? "Update" : "Submit"}
           </Button>
         </div>
       </div>
