@@ -52,6 +52,12 @@ class FunctionParser:
         
         elif config['type'] == "FUNCTION_CALL":
             return self.get_function_call_code(config)
+        elif config['type']== "CHAINED_FUNCTIONS":
+            function_calls = [ self.get_function_call_code(func,True) for func in config["functions"] ]
+            isAwaited = ""
+            if config["isAwaited"]:
+                isAwaited = "await "
+            return isAwaited+".".join(function_calls)
         
         elif config['type'] == "CUSTOM":
             return config.get("body","")
@@ -145,20 +151,20 @@ class FunctionParser:
             
         return ""
         
-    def get_function_call_code(self,config):
+    def get_function_call_code(self,config,disableAwait = False):
         callType = config.get("callType", "SIMPLE")
-        
         if callType == "SIMPLE":
             ref = config.get("$ref",None)
             if ref:
                 functionName = RESOURCES[config["$ref"]]["functionName"]
             else:
                 functionName = config['functionName']
-            return f"""{functionName}({self.get_parameter_mapping(config)})
+            isAwait = ""
+            if config.get("isAwaited") and not disableAwait:
+                isAwait = "await "
+            return f"""{isAwait}{functionName}({self.get_parameter_mapping(config)})
             """
-        elif callType== "CHAINED":
-            function_calls = [ self.get_function_call_code(func) for func in config["functions"] ]
-            return ".".join(function_calls)
+        
         
     def get_parameter_mapping(self,config):
         param_list =[]
