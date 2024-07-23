@@ -19,6 +19,12 @@ function HookConfigForm({ onSubmit, formData, isEditing }) {
       description: "",
     },
   });
+
+  const [errors, setErrors] = useState({
+    name: "",
+    type: "",
+  });
+
   const { componentConfig } = useContext(ComponentContext);
   const { propsVars, resources } = componentConfig;
 
@@ -40,12 +46,26 @@ function HookConfigForm({ onSubmit, formData, isEditing }) {
     }
   }, [isEditing, formData]);
 
+  const validateField = (name, value) => {
+    let error = "";
+
+    if ((name === "name" || name === "type") && !value) {
+      error = "Required";
+    }
+
+    return error;
+  };
+
   const handleFormChange = (key, value) => {
+    let error = validateField(key, value);
+    setErrors((prevErrors) => ({ ...prevErrors, [key]: error }));
+
     setFormState((prevState) => ({
       ...prevState,
+      ...(key === "name" ? { name: value } : {}),
       body: {
         ...prevState.body,
-        [key]: value,
+        ...(key !== "name" ? { [key]: value } : {}),
       },
     }));
   };
@@ -96,9 +116,26 @@ function HookConfigForm({ onSubmit, formData, isEditing }) {
     }));
   };
 
+  const validate = () => {
+    let isValid = true;
+    let newErrors = {};
+
+    newErrors.name = validateField("name", formState.name);
+    newErrors.type = validateField("type", formState.body.type);
+
+    if (newErrors.name || newErrors.type) {
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formState);
+    if (validate()) {
+      onSubmit(formState);
+    }
   };
 
   return (
@@ -116,14 +153,13 @@ function HookConfigForm({ onSubmit, formData, isEditing }) {
                 type="text"
                 placeholder="Hook Name"
                 value={formState.name}
-                onChange={(e) =>
-                  setFormState((prevState) => ({
-                    ...prevState,
-                    name: e.target.value,
-                  }))
-                }
-                required
+                onChange={(e) => handleFormChange("name", e.target.value)}
               />
+              {errors.name && (
+                <p className="mb-0" style={{ color: "#EA868F" }}>
+                  {errors.name}
+                </p>
+              )}
             </Form.Group>
           </Row>
           <Row className="mb-2">
@@ -154,6 +190,11 @@ function HookConfigForm({ onSubmit, formData, isEditing }) {
                   </option>
                 ))}
               </Form.Select>
+              {errors.type && (
+                <p className="mb-0" style={{ color: "#EA868F" }}>
+                  {errors.type}
+                </p>
+              )}
             </Form.Group>
           </Row>
 
