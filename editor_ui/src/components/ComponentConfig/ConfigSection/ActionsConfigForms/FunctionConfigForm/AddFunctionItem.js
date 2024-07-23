@@ -18,7 +18,8 @@ const options = [
 
   { value: "customCode", label: "Custom Code" },
   { value: "return", label: "Return Value" },
-  // { value: "functionCall", label: "Function Call" },
+  { value: "functionCall", label: "Function Call" },
+  { value: "serviceCall", label: "Service Call" },
 ];
 
 const templates = {
@@ -76,6 +77,18 @@ const templates = {
       value: "",
     },
   },
+  functionCall: {
+    case: "functionCall",
+    type: "FUNCTION_CALL",
+    functionName: "",
+    parameters: [],
+  },
+  serviceCall: {
+    case: "serviceCall",
+    type: "FUNCTION_CALL",
+    functionName: "",
+    parameters: [],
+  },
 };
 
 const statementTypes = {
@@ -87,6 +100,7 @@ const statementTypes = {
   functionCall: FunctionCall,
   whileBlock: WhileBlock,
   doWhileBlock: DoWhileBlock,
+  serviceCall: FunctionCall,
 };
 
 function AddFunctionItem({ update }) {

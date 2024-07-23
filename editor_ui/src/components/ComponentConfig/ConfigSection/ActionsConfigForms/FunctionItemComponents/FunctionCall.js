@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Row, Col, Form, Button } from "react-bootstrap";
-import ParameterInput from "./ParamInput";
+import { ComponentContext } from "../../../ComponentConfigPage";
+import ParamInput from "./ParamInput";
 
 const staticServiceList = {
   userService: {
@@ -49,20 +50,104 @@ const staticServiceList = {
   },
 };
 
-function FunctionCall({ onChange }) {
-  const [option, setOption] = useState("");
-  const [functionList] = useState(["getUser", "createUser"]);
-  const [selectedFunction, setSelectedFunction] = useState("");
+function FunctionCall({ config, update }) {
+  const [conf, setConf] = useState({ ...config });
+  const [functionList, setFunctionList] = useState([]);
+  const [selectedFunction, setSelectedFunction] = useState(
+    config.functionName || ""
+  );
   const [selectedService, setSelectedService] = useState("");
   const [selectedServiceFunction, setSelectedServiceFunction] = useState(null);
   const [paramValues, setParamValues] = useState({});
-  
-  const handleOptionChange = (e) => {
-    setOption(e.target.value);
-    setSelectedFunction("");
-    setSelectedService("");
-    setSelectedServiceFunction(null);
-    setParamValues({});
+  const { componentConfig } = useContext(ComponentContext);
+  const { resources } = componentConfig;
+  const [checkedItems, setCheckedItems] = useState({
+    thenCatch: { checked: false, disabled: false },
+    declarationCall: { checked: false, disabled: false },
+    awaitCall: { checked: false, disabled: false },
+    tryCatch: { checked: false, disabled: false },
+  });
+
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+
+    const updatedCheckedItems = {
+      thenCatch: { checked: false, disabled: false },
+      declarationCall: { checked: false, disabled: false },
+      awaitCall: { checked: false, disabled: false },
+      tryCatch: { checked: false, disabled: false },
+    };
+
+    switch (name) {
+      case "thenCatch":
+        if (checked) {
+          updatedCheckedItems.thenCatch.checked = true;
+          updatedCheckedItems.declarationCall.disabled = true;
+          updatedCheckedItems.awaitCall.disabled = true;
+          updatedCheckedItems.tryCatch.disabled = true;
+        }
+        break;
+      case "declarationCall":
+        if (checked) {
+          updatedCheckedItems.declarationCall.checked = true;
+          updatedCheckedItems.thenCatch.disabled = true;
+        }
+        break;
+      case "awaitCall":
+        if (checked) {
+          updatedCheckedItems.awaitCall.checked = true;
+          updatedCheckedItems.thenCatch.disabled = true;
+        }
+        break;
+      case "tryCatch":
+        if (checked) {
+          updatedCheckedItems.tryCatch.checked = true;
+          updatedCheckedItems.thenCatch.disabled = true;
+        }
+        break;
+      default:
+        break;
+    }
+
+    setCheckedItems(updatedCheckedItems);
+  };
+
+  useEffect(() => {
+    setConf({ ...config });
+    setSelectedFunction(config.functionName || "");
+  }, [config]);
+
+  useEffect(() => {
+    const functions = resources.filter(
+      (resource) => resource.type === "function"
+    );
+    setFunctionList(functions);
+  }, [resources]);
+
+  useEffect(() => {
+    const selectedFunc = functionList.find(
+      (func) => func.name === selectedFunction
+    );
+    if (selectedFunc) {
+      setConf((prevState) => ({
+        ...prevState,
+        functionName: selectedFunc.name,
+        parameters: selectedFunc.parameters.map((param) => ({
+          ...param,
+          value:
+            param.type === "OBJECT" ? {} : param.type === "ARRAY" ? [] : "",
+        })),
+      }));
+    }
+  }, [selectedFunction, functionList]);
+
+  const handleUpdate = (index, value) => {
+    setConf((prevState) => {
+      const newParams = [...prevState.parameters];
+      newParams[index].value = value;
+      console.log("newParams::>>", newParams);
+      return { ...prevState, parameters: newParams };
+    });
   };
 
   const handleParamChange = (path, value) => {
@@ -80,141 +165,255 @@ function FunctionCall({ onChange }) {
     });
   };
 
-  const mapParameters = (params, values) => {
-    return params.map((param) => {
-      if (param.type === "OBJECT") {
-        const mappedProperties = param.properties.reduce((acc, prop) => {
-          const propValue = mapParameters([prop], values[param.name] || {})[0];
-          return { ...acc, [prop.name]: propValue };
-        }, {});
-        return { type: param.type, properties: mappedProperties };
-      }
-      if (param.type === "ARRAY") {
-        const mappedValues = (Array.isArray(values[param.name]) ? values[param.name] : []).map((val, idx) => ({
-          type: param.values[idx] ? param.values[idx].type : param.type,
-          value: val,
-        }));
-        return { type: param.type, values: mappedValues };
-      }
-  
-      return { type: param.type, value: values[param.name] || "" };
-    });
-  };
-  
-  const generateConfig = () => {
-    if (selectedServiceFunction) {
-      const config = {
-        type: "BLOCK",
-        statements: [
-          {
-            type: "FUNCTION_CALL",
-            functionName: selectedServiceFunction.name,
-            parameters: mapParameters(
-              selectedServiceFunction.parameters,
-              paramValues
-            ),
-          },
-        ],
-      };
-      console.log("Generated Config: ", config);
+  const handleSave = () => {
+    const updatedConf = { ...conf };
+
+    if (conf.case === "serviceCall" && selectedServiceFunction) {
+      updatedConf.functionName = selectedServiceFunction.name;
+      updatedConf.parameters = selectedServiceFunction.parameters.map(
+        (param) => ({
+          ...param,
+          value: paramValues[param.name],
+        })
+      );
     }
+
+    update(updatedConf);
   };
 
   return (
-    <div className="mt-3">
-      <Row className="mb-3">
-        <Col sm={12}>
-          <Form.Select
-            className="form-select-sm"
-            value={option}
-            onChange={handleOptionChange}
-          >
-            <option disabled value="">
-              Select Type
-            </option>
-            <option value="functionCall">Functions</option>
-            <option value="serviceCall">Services</option>
-          </Form.Select>
-        </Col>
-      </Row>
-
-      {option === "functionCall" && (
-        <Row className="mb-3">
-          <Col sm={12}>
-            <Form.Select
-              className="form-select-sm"
-              value={selectedFunction}
-              onChange={(e) => setSelectedFunction(e.target.value)}
-            >
-              <option disabled value="">
-                Select function
-              </option>
-              {functionList.map((func, index) => (
-                <option key={index} value={func}>
-                  {func}
-                </option>
-              ))}
-            </Form.Select>
-          </Col>
-        </Row>
-      )}
-
-      {option === "serviceCall" && (
-        <Row className="mb-3">
-          <Col sm={6}>
-            <Form.Select
-              className="form-select-sm"
-              value={selectedService || ""}
-              onChange={(e) => setSelectedService(e.target.value)}
-            >
-              <option disabled value="">
-                Services
-              </option>
-              {Object.keys(staticServiceList).map((service) => (
-                <option key={service} value={service}>
-                  {service}
-                </option>
-              ))}
-            </Form.Select>
-          </Col>
-          <Col sm={6}>
-            <Form.Select
-              defaultValue=""
-              className="form-select-sm"
-              onChange={(e) => {
-                setSelectedServiceFunction(
-                  staticServiceList[selectedService][e.target.value]
-                );
-              }}
-            >
-              <option value="">Service Functions</option>
-              {Object.keys(staticServiceList[selectedService] || {}).map(
-                (func) => (
-                  <option key={func} value={func}>
-                    {staticServiceList[selectedService][func]["name"]}
-                  </option>
-                )
-              )}
-            </Form.Select>
-          </Col>
-        </Row>
-      )}
-
-      {selectedServiceFunction && (
+    <div className="d-flex h-100 flex-column justify-content-between">
+      {conf?.case === "functionCall" && (
         <div>
-          <h5>Parameter Mapping</h5>
-          {selectedServiceFunction.parameters.map((param, index) => (
-            <div className="mb-2 border border-gray p-2" key={index}>
-              <ParameterInput
-                param={param}
-                value={paramValues[param.name]}
-                onChange={(value) => handleParamChange([param.name], value)}
-              />
+          <Row className="mb-2">
+            <Col sm={12}>
+              <Form.Select
+                className="form-select-sm"
+                value={selectedFunction}
+                onChange={(e) => setSelectedFunction(e.target.value)}
+              >
+                <option disabled value="">
+                  Select function
+                </option>
+                {functionList.map((func, index) => (
+                  <option key={index} value={func.name}>
+                    {func.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+          </Row>
+          <Row className="mb-2 px-1">
+            <Form.Label>
+              <strong>Configurations</strong>
+            </Form.Label>
+            <div className="d-flex">
+              <div className="form-check me-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="thenCatch"
+                  id="thenCatch"
+                  checked={checkedItems.thenCatch.checked}
+                  onChange={handleCheckboxChange}
+                  disabled={checkedItems.thenCatch.disabled}
+                />
+                <label className="form-check-label" htmlFor="thenCatch">
+                  Then catch
+                </label>
+              </div>
+              <div className="form-check me-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="declarationCall"
+                  id="declarationCall"
+                  checked={checkedItems.declarationCall.checked}
+                  onChange={handleCheckboxChange}
+                  disabled={checkedItems.declarationCall.disabled}
+                />
+                <label className="form-check-label" htmlFor="declarationCall">
+                  Declaration
+                </label>
+              </div>
+              <div className="form-check me-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="awaitCall"
+                  id="awaitCall"
+                  checked={checkedItems.awaitCall.checked}
+                  onChange={handleCheckboxChange}
+                  disabled={checkedItems.awaitCall.disabled}
+                />
+                <label className="form-check-label" htmlFor="awaitCall">
+                  Await
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="tryCatch"
+                  id="tryCatch"
+                  checked={checkedItems.tryCatch.checked}
+                  onChange={handleCheckboxChange}
+                  disabled={checkedItems.tryCatch.disabled}
+                />
+                <label className="form-check-label" htmlFor="tryCatch">
+                  Try catch
+                </label>
+              </div>
             </div>
-          ))}
-          {/* <Button onClick={generateConfig}>Generate Config</Button> */}
+          </Row>
+
+          {selectedFunction && (
+            <div>
+              <strong>Parameter Mapping</strong>
+              {conf.parameters &&
+                conf.parameters.map((param, index) => (
+                  <div className="mb-2 border border-gray p-2" key={index}>
+                    <ParamInput
+                      param={param}
+                      value={param.value}
+                      onChange={(value) => handleUpdate(index, value)}
+                    />
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       )}
+
+      {conf?.case === "serviceCall" && (
+        <div>
+          <Row className="mb-2">
+            <Col sm={6}>
+              <Form.Select
+                className="form-select-sm"
+                value={selectedService || ""}
+                onChange={(e) => setSelectedService(e.target.value)}
+              >
+                <option disabled value="">
+                  Services
+                </option>
+                {Object.keys(staticServiceList).map((service) => (
+                  <option key={service} value={service}>
+                    {service}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+            <Col sm={6}>
+              <Form.Select
+                defaultValue=""
+                className="form-select-sm"
+                onChange={(e) => {
+                  setSelectedServiceFunction(
+                    staticServiceList[selectedService][e.target.value]
+                  );
+                }}
+              >
+                <option value="">Service Functions</option>
+                {Object.keys(staticServiceList[selectedService] || {}).map(
+                  (func) => (
+                    <option key={func} value={func}>
+                      {staticServiceList[selectedService][func]["name"]}
+                    </option>
+                  )
+                )}
+              </Form.Select>
+            </Col>
+          </Row>
+          <Row className="mb-2 px-1">
+            <Form.Label>
+              <strong>Configurations</strong>
+            </Form.Label>
+            <div className="d-flex">
+              <div className="form-check me-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="thenCatch"
+                  id="thenCatch"
+                  checked={checkedItems.thenCatch.checked}
+                  onChange={handleCheckboxChange}
+                  disabled={checkedItems.thenCatch.disabled}
+                />
+                <label className="form-check-label" htmlFor="thenCatch">
+                  Then catch
+                </label>
+              </div>
+              <div className="form-check me-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="declarationCall"
+                  id="declarationCall"
+                  checked={checkedItems.declarationCall.checked}
+                  onChange={handleCheckboxChange}
+                  disabled={checkedItems.declarationCall.disabled}
+                />
+                <label className="form-check-label" htmlFor="declarationCall">
+                  Declaration
+                </label>
+              </div>
+              <div className="form-check me-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="awaitCall"
+                  id="awaitCall"
+                  checked={checkedItems.awaitCall.checked}
+                  onChange={handleCheckboxChange}
+                  disabled={checkedItems.awaitCall.disabled}
+                />
+                <label className="form-check-label" htmlFor="awaitCall">
+                  Await
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="tryCatch"
+                  id="tryCatch"
+                  checked={checkedItems.tryCatch.checked}
+                  onChange={handleCheckboxChange}
+                  disabled={checkedItems.tryCatch.disabled}
+                />
+                <label className="form-check-label" htmlFor="tryCatch">
+                  Try catch
+                </label>
+              </div>
+            </div>
+          </Row>
+
+          {selectedServiceFunction && (
+            <div>
+              <strong>Parameter Mapping</strong>
+              {selectedServiceFunction.parameters.length > 0 &&
+                selectedServiceFunction.parameters.map((param, index) => (
+                  <div className="mb-2 border border-gray p-2" key={index}>
+                    <ParamInput
+                      param={param}
+                      value={paramValues[param.name]}
+                      onChange={(value) =>
+                        handleParamChange([param.name], value)
+                      }
+                    />
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="my-3 d-flex justify-content-between">
+        <Button variant="success" className="btn btn-sm" onClick={handleSave}>
+          Save
+        </Button>
+      </div>
     </div>
   );
 }

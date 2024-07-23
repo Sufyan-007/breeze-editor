@@ -93,15 +93,14 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   };
 
   const handleSubmit = (e) => {
-    console.log("formState::>>", formState);
     onSubmit(formState);
   };
 
   const generatePreview = async (val) => {
     try {
-      console.log("val-------------------------::>>", val);
+      // console.log("val-------------------------::>>", val);
       const response = await generatePreviewCode(val);
-      console.log("response::>>", response);
+      // console.log("response::>>", response);
       if (response.status === 200) {
         if (response.body.function === "{\n}\n") {
           setPreviewCode("");

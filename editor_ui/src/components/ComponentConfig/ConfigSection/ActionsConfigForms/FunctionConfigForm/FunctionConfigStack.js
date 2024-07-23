@@ -6,6 +6,7 @@ import Return from "./StatementTypes/Return";
 import WhileBlock from "./StatementTypes/WhileBlock";
 import Block from "./StatementTypes/Block";
 import DoWhileBlock from "./StatementTypes/DoWhileBlock";
+import FunctionCall from "./StatementTypes/FunctionCall";
 
 const typeMapping = {
   BLOCK: Block,
@@ -16,6 +17,7 @@ const typeMapping = {
   CUSTOM: CustomCode,
   ASSIGNMENT: Assignment,
   DO_WHILE_BLOCK: DoWhileBlock,
+  FUNCTION_CALL: FunctionCall,
 };
 
 export default function FunctionConfigStack({ config, updateParent }) {
