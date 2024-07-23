@@ -3,7 +3,8 @@ import subprocess
 import json, os , uuid
 from common.utils.formatter import format_by_prettier,format_val
 import pathlib
-
+import shutil
+from .files_upload_service import FileService
 # JSON input with custom configurations and default component name
 config_input = '''
 {
@@ -49,11 +50,11 @@ class AppGenerator:
     redux_store_config = None
 
 
-    def __init__(self, app_config_dir):
+    def __init__(self, app_config_dir, logo=None):
         self.app_config_dir = f"{CONFIG_PATH}/{app_config_dir}"
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{app_config_dir}"
         self.read_configs()
-
+        self.logo = logo
     def read_configs(self):
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
@@ -122,8 +123,11 @@ class AppGenerator:
             print("----------------------")
             print("No YAML file")
 
+        self.modify_index_html_with_project_name()
 
-
+        # Conditionally modify index.html with logo
+        if self.logo:
+            self.modify_index_html_with_logo()
 
     def write_services(self):
         # imp_helper = ImportHelper()
@@ -398,3 +402,52 @@ class AppGenerator:
             id_to_path[item_id] = current_path
 
         print("Project structure created successfully.")
+
+    def modify_index_html_with_project_name(self):
+        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
+        index_html_path = os.path.join(project_path, 'public', 'index.html')
+
+        # Modify the index.html to reference the new project name
+        with open(index_html_path, 'r') as index_file:
+            index_content = index_file.read()
+
+        modified_content = index_content.replace(
+                '<title>React App</title>',
+                f'<title>{self.app_config["projectName"]}</title>'
+            )
+        
+        with open(index_html_path, 'w') as index_file:
+            index_file.write(modified_content)
+
+    def modify_index_html_with_logo(self):
+        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
+        index_html_path = os.path.join(project_path, 'public', 'index.html')
+
+        logo_id = self.app_config.get('logo', 'default_logo_id')
+        project_name = self.app_config['name']
+        
+        # Download the file
+        downloaded_file_path = FileService.download_file(logo_id, project_name)
+
+        if downloaded_file_path:
+            # Determine the public path for the logo
+            public_logo_path = os.path.join(project_path, 'public', 'favicon.ico')
+
+            # Copy the downloaded file to the public folder with a .ico extension
+            shutil.copy(downloaded_file_path, public_logo_path)
+            
+            # Modify the index.html to reference the new favicon
+            with open(index_html_path, 'r') as index_file:
+                index_content = index_file.read()
+
+            modified_content = index_content.replace(
+                '<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />',
+                '<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />'
+            )
+
+            with open(index_html_path, 'w') as index_file:
+                index_file.write(modified_content)
+
+            print(f"Modified {index_html_path} to include logo from {public_logo_path}")
+        else:
+            print(f"Failed to download the logo with ID {logo_id}")

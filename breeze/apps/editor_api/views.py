@@ -281,7 +281,9 @@ class ProjectConfig(APIView):
         return JsonResponse(projects, status=200)
 
     def post(self, request):
-        data = json.loads(request.body.decode("utf-8"))
+        data = request.POST.copy()
+        logo_file = request.FILES.get('logo')
+
         data['defaultComponent'] = "Main"
         data["projectName"] = data["name"]
         # data["selectedTemplate"]= data["selectedTemplate"]
@@ -292,8 +294,17 @@ class ProjectConfig(APIView):
         data["path"] = os.path.join(generated_paths, data["name"])
         if (data["name"] in GenerateProject.get_projects().keys()):
             return JsonResponse({"error": "Application name should be unique."}, status=400)
+       
+        if logo_file:
+            logo_file_id = FileService.upload_file(logo_file, data["name"])
+            data["logo"] = logo_file_id
+
         app_config_writer = AppConfigWriter()
         app_config_writer.create_or_update_app_config(data)
+        
+        if logo_file:
+            resource_config_generator = ResourceConfigGenerator(data["name"])
+            resource_config_generator.update_config('favicon.ico', '/src/assets', "", logo_file_id)
         response = {"name": data["name"]}
         return JsonResponse(response, status=200)
 

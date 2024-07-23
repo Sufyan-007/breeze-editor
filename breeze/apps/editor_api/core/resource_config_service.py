@@ -26,6 +26,7 @@ class ResourceConfigGenerator:
         with open(file_path_full, 'rb') as f:
             file_content = f.read()
 
+        create_parent_dir_if_not_exists(path)
         final_path = os.path.join(path, file_name)
         with open(final_path, 'wb') as destination:
             destination.write(file_content)

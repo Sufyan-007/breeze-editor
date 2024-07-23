@@ -28,7 +28,7 @@ class FileService:
             json.dump(data, file, indent=4)
 
     @staticmethod
-    def upload_file(file, projectName):
+    def upload_file(file, projectName=None):
         file_id = str(uuid.uuid4())
         file_path_full = os.path.join(GLOBAL_RESOURCES_PATH, file_id)
 
@@ -41,8 +41,7 @@ class FileService:
             save_file(file, file_path_full)
         else:
             save_file(file, file_path_full)
-            return
-
+            
         return file_id
 
     @staticmethod
@@ -66,7 +65,7 @@ class FileService:
     @staticmethod
     def download_file(file_id, project_name):
         try:
-            if project_name is not None:
+            if project_name:
                 assets_upload_dir = os.path.join(
                     CONFIG_PATH, project_name, "uploaded_assets"
                 )
