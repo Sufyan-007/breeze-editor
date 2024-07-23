@@ -5,10 +5,10 @@ RUNNING_APPS = {}
 def start_app(app_config):
     project_id=app_config["name"]
     project_path = os.path.join(app_config["path"],project_id)
-    print("Starting :", project_id)
     if project_id in RUNNING_APPS:
         pass
     else:
+        print("Starting :", project_id)
         port= 3010+len(RUNNING_APPS)
         RUNNING_APPS[project_id] = port
         kill_command = ["fuser", "-k", f"{port}/tcp"]
