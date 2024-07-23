@@ -3,6 +3,7 @@ from common.utils.file_helper import read_json_file, write_file, create_parent_d
 import json,os
 from common.utils.request_code import REQUEST
 from .generate_project import GenerateProject
+from .app_startup_manager import start_app
 
 class AppConfigWriter:
     def __init__(self):
@@ -134,4 +135,5 @@ class AppConfigWriter:
         self.write_basic_config_files(app_current_config)
 
         GenerateProject.generate_project(app_current_config)
+        start_app(app_current_config)
     
