@@ -167,68 +167,70 @@ function FunctionCall({ config, update }) {
               </Form.Select>
             </Col>
           </Row>
-          <Row className="mb-2 px-1">
-            <Form.Label>
-              <strong>Configurations</strong>
-            </Form.Label>
-            <div className="d-flex">
-              <div className="form-check me-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="thenCatch"
-                  id="thenCatch"
-                  checked={checkedItems.thenCatch}
-                  onChange={handleCheckboxChange}
-                />
-                <label className="form-check-label" htmlFor="thenCatch">
-                  Then catch
-                </label>
-              </div>
-              <div className="form-check me-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="declarationCall"
-                  id="declarationCall"
-                  checked={checkedItems.declarationCall}
-                  onChange={handleCheckboxChange}
-                />
-                <label className="form-check-label" htmlFor="declarationCall">
-                  Declaration
-                </label>
-              </div>
-              <div className="form-check me-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="awaitCall"
-                  id="awaitCall"
-                  checked={checkedItems.awaitCall}
-                  onChange={handleCheckboxChange}
-                />
-                <label className="form-check-label" htmlFor="awaitCall">
-                  Await
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="tryCatch"
-                  id="tryCatch"
-                  checked={checkedItems.tryCatch}
-                  onChange={handleCheckboxChange}
-                />
-                <label className="form-check-label" htmlFor="tryCatch">
-                  Try catch
-                </label>
-              </div>
-            </div>
-          </Row>
-
           {selectedFunction && (
             <div>
+              <Row className="mb-2 px-1">
+                <Form.Label>
+                  <strong>Configurations</strong>
+                </Form.Label>
+                <div className="d-flex">
+                  <div className="form-check me-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      name="thenCatch"
+                      id="thenCatch"
+                      checked={checkedItems.thenCatch}
+                      onChange={handleCheckboxChange}
+                    />
+                    <label className="form-check-label" htmlFor="thenCatch">
+                      Then catch
+                    </label>
+                  </div>
+                  <div className="form-check me-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      name="declarationCall"
+                      id="declarationCall"
+                      checked={checkedItems.declarationCall}
+                      onChange={handleCheckboxChange}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="declarationCall"
+                    >
+                      Declaration
+                    </label>
+                  </div>
+                  <div className="form-check me-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      name="awaitCall"
+                      id="awaitCall"
+                      checked={checkedItems.awaitCall}
+                      onChange={handleCheckboxChange}
+                    />
+                    <label className="form-check-label" htmlFor="awaitCall">
+                      Await
+                    </label>
+                  </div>
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      name="tryCatch"
+                      id="tryCatch"
+                      checked={checkedItems.tryCatch}
+                      onChange={handleCheckboxChange}
+                    />
+                    <label className="form-check-label" htmlFor="tryCatch">
+                      Try catch
+                    </label>
+                  </div>
+                </div>
+              </Row>
               <strong>Parameter Mapping</strong>
               {conf.parameters &&
                 conf.parameters.map((param, index) => (
@@ -285,72 +287,74 @@ function FunctionCall({ config, update }) {
               </Form.Select>
             </Col>
           </Row>
-          <Row className="mb-2 px-1">
-            <Form.Label>
-              <strong>Configurations</strong>
-            </Form.Label>
-            <div className="d-flex">
-              <div className="form-check me-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="thenCatch"
-                  id="thenCatch"
-                  checked={checkedItems.thenCatch.checked}
-                  onChange={handleCheckboxChange}
-                  disabled={checkedItems.thenCatch.disabled}
-                />
-                <label className="form-check-label" htmlFor="thenCatch">
-                  Then catch
-                </label>
-              </div>
-              <div className="form-check me-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="declarationCall"
-                  id="declarationCall"
-                  checked={checkedItems.declarationCall.checked}
-                  onChange={handleCheckboxChange}
-                  disabled={checkedItems.declarationCall.disabled}
-                />
-                <label className="form-check-label" htmlFor="declarationCall">
-                  Declaration
-                </label>
-              </div>
-              <div className="form-check me-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="awaitCall"
-                  id="awaitCall"
-                  checked={checkedItems.awaitCall.checked}
-                  onChange={handleCheckboxChange}
-                  disabled={checkedItems.awaitCall.disabled}
-                />
-                <label className="form-check-label" htmlFor="awaitCall">
-                  Await
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="tryCatch"
-                  id="tryCatch"
-                  checked={checkedItems.tryCatch.checked}
-                  onChange={handleCheckboxChange}
-                  disabled={checkedItems.tryCatch.disabled}
-                />
-                <label className="form-check-label" htmlFor="tryCatch">
-                  Try catch
-                </label>
-              </div>
-            </div>
-          </Row>
-
           {selectedServiceFunction && (
             <div>
+              <Row className="mb-2 px-1">
+                <Form.Label>
+                  <strong>Configurations</strong>
+                </Form.Label>
+                <div className="d-flex">
+                  <div className="form-check me-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      name="thenCatch"
+                      id="thenCatch"
+                      checked={checkedItems.thenCatch.checked}
+                      onChange={handleCheckboxChange}
+                      disabled={checkedItems.thenCatch.disabled}
+                    />
+                    <label className="form-check-label" htmlFor="thenCatch">
+                      Then catch
+                    </label>
+                  </div>
+                  <div className="form-check me-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      name="declarationCall"
+                      id="declarationCall"
+                      checked={checkedItems.declarationCall.checked}
+                      onChange={handleCheckboxChange}
+                      disabled={checkedItems.declarationCall.disabled}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="declarationCall"
+                    >
+                      Declaration
+                    </label>
+                  </div>
+                  <div className="form-check me-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      name="awaitCall"
+                      id="awaitCall"
+                      checked={checkedItems.awaitCall.checked}
+                      onChange={handleCheckboxChange}
+                      disabled={checkedItems.awaitCall.disabled}
+                    />
+                    <label className="form-check-label" htmlFor="awaitCall">
+                      Await
+                    </label>
+                  </div>
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      name="tryCatch"
+                      id="tryCatch"
+                      checked={checkedItems.tryCatch.checked}
+                      onChange={handleCheckboxChange}
+                      disabled={checkedItems.tryCatch.disabled}
+                    />
+                    <label className="form-check-label" htmlFor="tryCatch">
+                      Try catch
+                    </label>
+                  </div>
+                </div>
+              </Row>
               <strong>Parameter Mapping</strong>
               {selectedServiceFunction.parameters.length > 0 &&
                 selectedServiceFunction.parameters.map((param, index) => (
