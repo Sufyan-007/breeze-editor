@@ -62,54 +62,18 @@ function FunctionCall({ config, update }) {
   const { componentConfig } = useContext(ComponentContext);
   const { resources } = componentConfig;
   const [checkedItems, setCheckedItems] = useState({
-    thenCatch: { checked: false, disabled: false },
-    declarationCall: { checked: false, disabled: false },
-    awaitCall: { checked: false, disabled: false },
-    tryCatch: { checked: false, disabled: false },
+    thenCatch: false,
+    declarationCall: false,
+    awaitCall: false,
+    tryCatch: false,
   });
 
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
-
-    const updatedCheckedItems = {
-      thenCatch: { checked: false, disabled: false },
-      declarationCall: { checked: false, disabled: false },
-      awaitCall: { checked: false, disabled: false },
-      tryCatch: { checked: false, disabled: false },
-    };
-
-    switch (name) {
-      case "thenCatch":
-        if (checked) {
-          updatedCheckedItems.thenCatch.checked = true;
-          updatedCheckedItems.declarationCall.disabled = true;
-          updatedCheckedItems.awaitCall.disabled = true;
-          updatedCheckedItems.tryCatch.disabled = true;
-        }
-        break;
-      case "declarationCall":
-        if (checked) {
-          updatedCheckedItems.declarationCall.checked = true;
-          updatedCheckedItems.thenCatch.disabled = true;
-        }
-        break;
-      case "awaitCall":
-        if (checked) {
-          updatedCheckedItems.awaitCall.checked = true;
-          updatedCheckedItems.thenCatch.disabled = true;
-        }
-        break;
-      case "tryCatch":
-        if (checked) {
-          updatedCheckedItems.tryCatch.checked = true;
-          updatedCheckedItems.thenCatch.disabled = true;
-        }
-        break;
-      default:
-        break;
-    }
-
-    setCheckedItems(updatedCheckedItems);
+    setCheckedItems({
+      ...checkedItems,
+      [name]: checked,
+    });
   };
 
   useEffect(() => {
@@ -214,9 +178,8 @@ function FunctionCall({ config, update }) {
                   type="checkbox"
                   name="thenCatch"
                   id="thenCatch"
-                  checked={checkedItems.thenCatch.checked}
+                  checked={checkedItems.thenCatch}
                   onChange={handleCheckboxChange}
-                  disabled={checkedItems.thenCatch.disabled}
                 />
                 <label className="form-check-label" htmlFor="thenCatch">
                   Then catch
@@ -228,9 +191,8 @@ function FunctionCall({ config, update }) {
                   type="checkbox"
                   name="declarationCall"
                   id="declarationCall"
-                  checked={checkedItems.declarationCall.checked}
+                  checked={checkedItems.declarationCall}
                   onChange={handleCheckboxChange}
-                  disabled={checkedItems.declarationCall.disabled}
                 />
                 <label className="form-check-label" htmlFor="declarationCall">
                   Declaration
@@ -242,9 +204,8 @@ function FunctionCall({ config, update }) {
                   type="checkbox"
                   name="awaitCall"
                   id="awaitCall"
-                  checked={checkedItems.awaitCall.checked}
+                  checked={checkedItems.awaitCall}
                   onChange={handleCheckboxChange}
-                  disabled={checkedItems.awaitCall.disabled}
                 />
                 <label className="form-check-label" htmlFor="awaitCall">
                   Await
@@ -256,9 +217,8 @@ function FunctionCall({ config, update }) {
                   type="checkbox"
                   name="tryCatch"
                   id="tryCatch"
-                  checked={checkedItems.tryCatch.checked}
+                  checked={checkedItems.tryCatch}
                   onChange={handleCheckboxChange}
-                  disabled={checkedItems.tryCatch.disabled}
                 />
                 <label className="form-check-label" htmlFor="tryCatch">
                   Try catch
