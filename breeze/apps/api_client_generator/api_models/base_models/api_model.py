@@ -41,6 +41,6 @@ class ApiModel:
             'response': responses,
             'summary' : self.summary,
             'is_authentication_api' : self.is_authentication_api,
-            'errors': self.errors if self.errors else None
+            'errors': self.errors 
         }
     

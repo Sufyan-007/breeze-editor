@@ -50,17 +50,24 @@ class ApiClientGenerator(View):
                 
                 ## for other models
                 tag_models = converted_data.get("tag_models")
-                resultant_filename = []
+                # resultant_filename = []
+                files_with_apis = []
                 
                 for tag, api_models in tag_models.items():
+                    function_with_errors = set()
                     model_dict = {}
                     filename = tag+".json"
                     full_file_path = os.path.join(folder_path, filename)
-                    resultant_filename.append(filename)
+                    # resultant_filename.append(filename)
                     for model in api_models:
-                        model_dict[model.id] = model.as_dict()
+                        model_as_dict = model.as_dict()
+                        model_dict[model.id] = model_as_dict
+                        if len(model_as_dict["errors"]["root_errors"])>0:
+                            function_with_errors.add(model.operation_id)
+                    function_with_errors_list = list(function_with_errors)
+                    files_with_apis.append({"filename": tag, "apis": model_dict, "errors": function_with_errors_list})
                     append_to_dict_file(full_file_path,model_dict)
-                return JsonResponse({"data": model_dict, "filename": resultant_filename}, status=201)
+                return JsonResponse({"files_with_apis": files_with_apis}, status=201)
             elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
                 converted_data = WebsocketConverter.prepare_api_models(json_data)
                 error_obj = converted_data.get("error_obj",{})
@@ -97,21 +104,27 @@ class ApiClientGenerator(View):
             
             for filename in files:
                 full_file_path = os.path.join(folder_path, filename)
+                function_with_errors = set()
                 result_arr = []
                 # Read the file
-                with open(full_file_path, "r") as file:
-                    api_models = json.load(file)
-                    for data in api_models.values():
-                        result_arr.append({
-                            "id" : data.get("id"),
-                            "operation_id" : data.get("operation_id"),
-                        })
+                if filename != "allSchemas.json":
+                    with open(full_file_path, "r") as file:
+                        api_models = json.load(file)
+                        for data in api_models.values():
+                            data_errors = data.get('errors')
+                            if data_errors and len(data_errors.get("root_errors"))>0:
+                                function_with_errors.add(data["operation_id"])
+                            result_arr.append({
+                                "id" : data.get("id"),
+                                "operation_id" : data.get("operation_id"),
+                            })
                 filename_without_extension = os.path.splitext(filename)[0]
-
+                function_with_errors_list = list(function_with_errors)
                 # Append file name and APIs to the list
                 files_with_apis.append({
                     "filename": filename_without_extension,
-                    "apis": api_models
+                    "apis": api_models,
+                    "errors": function_with_errors_list
                 })
 
             return JsonResponse({"files_with_apis": files_with_apis}, status=200)

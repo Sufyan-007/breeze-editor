@@ -14,7 +14,6 @@ class Request:
     parameters: List[Parameter]= CustomizedAttr((list),[])
     url: Url= CustomizedAttr((Url),[required_validator])
     body : list= CustomizedAttr((list),[])
-    # errors  = {}
     errors : dict = CustomizedAttr((dict), [])
 
 
@@ -45,5 +44,5 @@ class Request:
             'parameters': params,
             'url': self.url.as_dict() if self.url else None,
             'body': body,
-            'errors': self.errors if self.errors else None
+            'errors': self.errors 
         }

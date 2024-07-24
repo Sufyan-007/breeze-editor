@@ -21,6 +21,7 @@ function Test() {
   const [apiList, setApiList] = useState([]);
   const [schemaList, setSchemaList] = useState([]);
   const [selectedApi, setSelectedApi] = useState({});
+  const [serviceErrors, setServiceErrors] = useState({});
   const [selectedSchemaDetails, setSelectedSchemaDetails] = useState({});
   const [selectedServiceInfo, setSelectedServiceInfo] = useState({});
   const { projectName } = useParams();
@@ -33,7 +34,11 @@ function Test() {
   const fetchServiceList = useCallback(async () => {
     try {
       const result = await fetchIntermediate(projectName);
-      setApiList(result["files_with_apis"]);
+      const fetchedApiList = result["files_with_apis"];
+      console.log(fetchedApiList, "fetched");
+      setApiList(fetchedApiList);
+
+      // setServiceErrors({"filenames": ["orders"], "functions": ["orders_retrieve"]})
     } catch (error) {
       console.error("Error generating react service:", error);
     }
@@ -85,20 +90,19 @@ function Test() {
         projectName,
         formData
       );
-      if (response) {
+      if (response.files_with_apis) {
         fetchServiceList();
         setShow(false);
         setView("TEST");
         event.target.value = "";
       } else {
-        throw new Error("Upload failed. Check server logs for details.");
+        setErrorMessage(response.error);
       }
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
   const onSubmit = () => {
-    
     console.log(selectedApi, "selected api");
   };
   const handleSchemaChanges = async (operation, data) => {
@@ -106,7 +110,7 @@ function Test() {
     if (operation === "add") {
       const result = await addSchema(projectName, data);
       if (result.data) {
-        setShowToast(true)
+        setShowToast(true);
         setErrorMessage(result.data);
         fetchSchemasList(null);
       } else {
@@ -119,7 +123,7 @@ function Test() {
         selectedSchemaDetails.name
       );
       if (result.data) {
-        setShowToast(true)
+        setShowToast(true);
         setErrorMessage(result.data);
         fetchSchemasList(null);
       } else {
@@ -163,15 +167,12 @@ function Test() {
 
   return (
     <div className="container-fluid h-100">
-        <ToastContainer
-          position="top-end"
-          className="p-3"
-          style={{ zIndex: 1 }}>
-          <Toast onClose={() => setShowToast(false)} show={showToast} autohide>
-            <Toast.Header>Message</Toast.Header>
-            <Toast.Body>{errorMessage}</Toast.Body>
-          </Toast>
-        </ToastContainer>
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1 }}>
+        <Toast onClose={() => setShowToast(false)} show={showToast} autohide>
+          <Toast.Header>Message</Toast.Header>
+          <Toast.Body>{errorMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
       <Row className="h-100">
         <Col
           sm={2}
@@ -235,6 +236,11 @@ function Test() {
                         <div>
                           <img src={file} height={15} width={15} alt="file" />
                           <span className="mx-2">{service.filename}</span>
+                          {service.errors && service.errors.length > 0 && (
+                            <i
+                              class="bi bi-exclamation-circle"
+                              style={{ color: "red" }}></i>
+                          )}
                         </div>
                         <img
                           onClick={() => generateService(service.filename)}
@@ -259,7 +265,12 @@ function Test() {
                             <div
                               key={key}
                               className="m-1 d-flex justify-content-between">
-                              <span className="overflow-auto">
+                              <span
+                                className={`overflow-auto ${
+                                  value.errors.root_errors.length > 0
+                                    ? "text-danger"
+                                    : ""
+                                }`}>
                                 {value.operation_id}
                               </span>
                               <div id="actions-div" className="d-flex">

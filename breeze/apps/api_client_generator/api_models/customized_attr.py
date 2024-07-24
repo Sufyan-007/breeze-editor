@@ -16,7 +16,12 @@ class CustomizedAttr:
 
     def __set__(self, instance, value):
         if self.name == 'errors':
-            value = instance.errors
+            # value = instance.errors
+            if value:
+                instance.__dict__[self.name] = value
+            else:
+                value = instance.errors
+            
         if 'errors' not in instance.__dict__:
                 instance.__dict__['errors'] = {}
                 

@@ -7,6 +7,8 @@ class ApiModelLoader:
 
     @staticmethod
     def load_request(request_data):
+        final_errors = {"root_errors":[]}
+        root_errors_set = set()
         api_model_loader = ApiModelLoader()
         # Build Request Object
         method_name = request_data.get("method").upper()
@@ -18,6 +20,10 @@ class ApiModelLoader:
         if auth_data_arr and len(auth_data_arr)>0:
             for auth_d in auth_data_arr:
                 auth = api_model_loader.load_auth(auth_data=auth_d)
+                auth_obj = auth.as_dict()
+                auth_obj_errors = auth_obj.get("errors")
+                if auth_obj_errors and len(auth_obj_errors.get("root_errors")) > 0 :
+                    root_errors_set.add("auth")
                 auths_model.append(auth)
         else:
             auths_model = []
@@ -27,24 +33,45 @@ class ApiModelLoader:
         header_data = request_data.get("headers", [])
         if header_data:
             headers = api_model_loader.load_headers(header_data=header_data)
+            for header in headers:
+                header_obj = header.as_dict()
+                header_obj_errors = header_obj.get("errors")
+                if header_obj_errors and len(header_obj_errors.values())>0:
+                    root_errors_set.add("headers")
         # call to url data creation and parameters creation
         url_data = request_data.get("url", "")
         url = []
         if url_data:
             url = api_model_loader.load_url(url_data)
+            url_obj = url.as_dict()
+            url_obj_errors = url_obj.get("errors")
+            if url_obj_errors and  len(url_obj_errors.get("root_errors")) >0:
+                root_errors_set.add("url")
             
         parameters = []
         parameters = request_data.get("parameters", [])
         if parameters:
             parameters = api_model_loader.load_parameters(parameters=parameters)
+            for param in parameters:
+                param_obj = param.as_dict()
+                param_obj_errors = param_obj.get("errors")
+                if param_obj_errors and len(param_obj_errors.values())>0:
+                    root_errors_set.add("parameters")
            
         # call to body creation
         body = []
         if request_data.get("body"):
             body_data = request_data.get("body")
             body = api_model_loader.load_body(body_data=body_data)
-            
-        request_obj = Request(method, auths_model, headers, parameters, url, body, errors={})
+            for b in body:
+                b_obj = b.as_dict()
+                b_obj_errors = b_obj.get("errors")
+                if b_obj_errors and len(b_obj_errors.values())>0:
+                    root_errors_set.add("body")
+                    
+        root_errors_list = list(root_errors_set)
+        final_errors["root_errors"] = root_errors_list
+        request_obj = Request(method=method, auth=auths_model, headers=headers, parameters=parameters, url=url, body=body, errors=final_errors)
         
             
         return request_obj
@@ -70,10 +97,17 @@ class ApiModelLoader:
     @staticmethod
     def load_auth(auth_data):
         auth_type = auth_data.get("type")
+        auth_scheme = auth_data.get("scheme", None)
         login_api = auth_data.get("login_api", None)
         token_api = auth_data.get("token_api", None)
         content_data = auth_data.get("content", auth_data.get("contents", []))
-
+        auth_type_enum = ""
+        if auth_type and auth_type in AuthTypeEnum._member_map_:  
+            auth_type_enum = AuthTypeEnum[auth_type]
+        elif auth_scheme and auth_scheme in AuthTypeEnum._member_map_:  
+            auth_type_enum = AuthTypeEnum[auth_scheme]
+        else:
+            auth_type_enum = AuthTypeEnum.NOAUTH
         auth_content = []
         for content in content_data:
             new_auth_content = AuthContent(
@@ -84,7 +118,7 @@ class ApiModelLoader:
                 )
             auth_content.append(new_auth_content)
             
-        auth = Auth(type=AuthTypeEnum[auth_type], content=auth_content,
+        auth = Auth(type=auth_type_enum, content=auth_content,
                     login_api=login_api, token_api=token_api,errors={})
         
         return auth
@@ -176,11 +210,16 @@ class ApiModelLoader:
 
     @staticmethod
     def load_api_model(model_json):
+        final_errors = {"root_errors": []}
         api_model_loader = ApiModelLoader()
         request_data = model_json.get("request", {})
         response_data = model_json.get("response", [])
         request_obj = api_model_loader.load_request(request_data=request_data)
         response_obj = api_model_loader.load_response(response_data=response_data)
+        request_obj_dict = request_obj.as_dict()
+        if len(request_obj_dict.get("errors").get("root_errors"))>0:
+            final_errors["root_errors"].append("request")
+            
         api_model = ApiModel(
             type="FUNCTION",
             isAsync=True,
@@ -192,7 +231,7 @@ class ApiModelLoader:
             response=response_obj,
             summary=model_json.get("summary"),  # Summary later,
             is_authentication_api=model_json.get("is_authentication_api"),
-            errors={}
+            errors=final_errors
         )
         
         return api_model

@@ -121,7 +121,7 @@ class OpenapiConverter:
         if parameter_data and len(parameter_data) > 0:
             for param in parameter_data:
                 parameters.append({
-                    "param_in": param.get("in").strip().upper(),
+                    "param_in": param.get("in","").strip(),
                     "name":param.get("name"),
                     "type":param.get("schema").get("type").strip().upper(),
                     "required":param.get("required"),
@@ -490,7 +490,7 @@ class OpenapiConverter:
                 id = generate_uuid_as_key()
                 val["name"]= key
                 structured_schema_data[id] = val
-            print(structured_schema_data, "structured_schema_data")
+            # print(structured_schema_data, "structured_schema_data")
             schema_file_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json/allSchemas.json"
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
             security_schemes_models = self.handle_security_schema(security_schemes,openapi_data) #remaining
