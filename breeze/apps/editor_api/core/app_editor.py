@@ -130,7 +130,7 @@ class AppEditor:
        package_json['devDependencies']['web-vitals'] = "^3.5.0"
        write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
        process = subprocess.Popen(
-           ["npm", "install"],
+           " ".join(["npm", "install"]),shell=True,
            cwd=f"{self.app_config['path']}/{self.app_config['name']}",
            stdout=subprocess.PIPE,
            stderr=subprocess.PIPE,

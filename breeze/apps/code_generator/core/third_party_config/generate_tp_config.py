@@ -36,7 +36,7 @@ def call_config_generator(library_name):
 def call_node_script(script_path, function_name, *args):
     command = ["node", script_path, function_name,  *args]
     # print(command)
-    result = subprocess.run(command, capture_output=True, text=True)
+    result = subprocess.run(" ".join(command), shell=True, capture_output=True, text=True)
     print(result)
 
 

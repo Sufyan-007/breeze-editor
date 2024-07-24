@@ -13,7 +13,7 @@ from common.utils.file_helper import write_file, create_dir_if_not_exists
 # Generate ast from the given script path
 def get_ast(script_path, function_name, *args):
     command = ["node", script_path, function_name,  *args]
-    result = subprocess.run(command, capture_output=True, text=True)
+    result = subprocess.run(" ".join(command), shell=True, capture_output=True, text=True)
     
     # #print(result.stdout)
 
