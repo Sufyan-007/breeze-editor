@@ -118,12 +118,12 @@ const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
                       <img
                         src={logoPreview}
                         alt="Logo Preview"
-                        className="img-thumbnail"
+                        className="custom-img-thumbnail"
                         width="100"
                       />
                       <button
                         type="button"
-                        className="btn btn-danger mt-2"
+                        className="btn custom-btn-danger mt-2"
                         onClick={handleLogoDelete}
                       >
                         Delete

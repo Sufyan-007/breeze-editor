@@ -50,12 +50,12 @@ body {
     height: 80px;
   }
 
-.img-thumbnail {
+.custom-img-thumbnail {
   display: block;
   margin: 10px 0;
 }
 
-.btn-danger {
+.custom-btn-danger {
   display: block;
   margin-top: 10px;
 }
