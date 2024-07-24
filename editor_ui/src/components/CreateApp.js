@@ -139,7 +139,11 @@ export default function CreateApp({ ...props }) {
     const formData = new FormData();
   Object.keys(data).forEach((key) => {
     if (key === "logo") {
-      formData.append(key, data[key][0]); // Append file
+      if (data[key] && data[key][0]) {
+        formData.append(key, data[key][0]); 
+      } else {
+        formData.append(key, null); 
+      }
     } else {
       formData.append(key, data[key]);
     }

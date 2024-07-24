@@ -22,6 +22,7 @@ from .core.helpers.get_component_list import update_components
 from .core.files_upload_service import FileService
 from .core.resource_config_service import ResourceConfigGenerator
 from .core.helpers.function_ast_parser import FunctionParser
+from .core.app_generator import AppGenerator 
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -298,13 +299,14 @@ class ProjectConfig(APIView):
         if logo_file:
             logo_file_id = FileService.upload_file(logo_file, data["name"])
             data["logo"] = logo_file_id
+            data["logo_file_name"] = logo_file.name
 
         app_config_writer = AppConfigWriter()
         app_config_writer.create_or_update_app_config(data)
         
         if logo_file:
             resource_config_generator = ResourceConfigGenerator(data["name"])
-            resource_config_generator.update_config('favicon.ico', '/src/assets', "", logo_file_id)
+            resource_config_generator.update_config(logo_file.name, '/src/assets', "", logo_file_id)
         response = {"name": data["name"]}
         return JsonResponse(response, status=200)
 
@@ -327,17 +329,41 @@ class ProjectConfig(APIView):
 class ProjectDetailsConfig(APIView):
     def put(self, request):
         try:
-            data = json.loads(request.body.decode("utf-8"))
+            data = request.POST.copy()
+            logo_file = request.FILES.get('logo')
+            old_config = json.loads(data.get('oldConfig'))
+            old_logo = old_config.get('logo')
+
+            # Flags to track changes
+            project_name_changed = False
+            logo_changed = False
+            
             # rename the project folder name, rename the name and the projectName field in
             #  app_basic_config file
-            file_name = f"{CONFIG_PATH}/{data['oldConfig']['name']}/app_basic_config.json"
+            file_name = f"{CONFIG_PATH}/{old_config['name']}/app_basic_config.json"
             with open(file_name, 'r') as file:
                 app_basic_config = json.load(file)
                 app_basic_config['name'] = data['newProjectName'].lower().replace(
                     " ", "_")
+
+                if app_basic_config['name'] != data['newProjectName']:
+                    project_name_changed = True
+
                 app_basic_config['author'] = data['newAuthor']
                 app_basic_config['description'] = data['newDescription']
                 app_basic_config['projectName'] = data['newProjectName']
+
+                if old_config.get('logo') and old_config['logo'] != "null":
+                    logo_changed = True
+                    app_basic_config['logo'] = ""
+
+                if logo_file:
+                    logo_file_id = FileService.upload_file(logo_file, old_config["name"])
+                    app_basic_config["logo"] = logo_file_id
+                    logo_changed = True
+                else:
+                    app_basic_config["logo"] = ""
+
 
                 # generation path for new app_basic_config
                 generated_paths = os.path.split(app_basic_config['path'])
@@ -362,14 +388,10 @@ class ProjectDetailsConfig(APIView):
 
                 # renaming all the affected folders
                 try:
-                    os.rename(
-                        f"{data['oldConfig']['path']}/{data['oldConfig']['name']}",
-                        f"{data['oldConfig']['path']}/{app_basic_config['name']}"
-                    )
-                    os.rename(data['oldConfig']['path'],
-                              app_basic_config['path'])
-                    os.rename(
-                        f"{CONFIG_PATH}/{data['oldConfig']['name']}", f"{CONFIG_PATH}/{app_basic_config['name']}")
+                    os.rename(f"{old_config['path']}/{old_config['name']}",
+                      f"{old_config['path']}/{app_basic_config['name']}")
+                    os.rename(old_config['path'], app_basic_config['path'])
+                    os.rename(f"{CONFIG_PATH}/{old_config['name']}", f"{CONFIG_PATH}/{app_basic_config['name']}")
 
                     # renaming the project's name in its package.json & package-lock.json files
                     package_json_path = os.path.join(
@@ -404,6 +426,17 @@ class ProjectDetailsConfig(APIView):
             file_name = f"{CONFIG_PATH}/{app_basic_config['name']}/app_basic_config.json"
             with open(file_name, 'w') as file:
                 file.write(newData)
+
+            app_generator = AppGenerator(app_basic_config['name'])
+            if project_name_changed:
+                app_generator.modify_index_html_with_project_name()
+            if logo_changed:
+                app_generator.modify_index_html_with_logo()
+            
+            if logo_file:
+                resource_config_generator = ResourceConfigGenerator(app_basic_config["name"])
+                resource_config_generator.update_config(logo_file.name, '/src/assets', "", logo_file_id)
+
 
             print(
                 '--------------- ALL APPLICATION NAME CHANGES CONDUCTED SUCCESSFULLY -----------')

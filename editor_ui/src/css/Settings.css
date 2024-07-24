@@ -49,3 +49,13 @@ body {
     width: 300px;
     height: 80px;
   }
+
+.img-thumbnail {
+  display: block;
+  margin: 10px 0;
+}
+
+.btn-danger {
+  display: block;
+  margin-top: 10px;
+}

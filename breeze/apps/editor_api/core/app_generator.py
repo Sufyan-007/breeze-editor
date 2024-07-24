@@ -4,6 +4,7 @@ import json, os , uuid
 from common.utils.formatter import format_by_prettier,format_val
 import pathlib
 import shutil
+import re
 from .files_upload_service import FileService
 # JSON input with custom configurations and default component name
 config_input = '''
@@ -431,48 +432,74 @@ class AppGenerator:
     def modify_index_html_with_project_name(self):
         project_path = os.path.join(self.app_config['path'], self.app_config['name'])
         index_html_path = os.path.join(project_path, 'public', 'index.html')
-
+    
         # Modify the index.html to reference the new project name
         with open(index_html_path, 'r') as index_file:
             index_content = index_file.read()
-
-        modified_content = index_content.replace(
-                '<title>React App</title>',
-                f'<title>{self.app_config["projectName"]}</title>'
-            )
-        
+    
+        # Use regex to find and replace the title content
+        title_pattern = re.compile(r'<title>(.*?)</title>')
+        modified_content = title_pattern.sub(
+            f'<title>{self.app_config["projectName"]}</title>',
+            index_content
+        )
         with open(index_html_path, 'w') as index_file:
             index_file.write(modified_content)
+
 
     def modify_index_html_with_logo(self):
         project_path = os.path.join(self.app_config['path'], self.app_config['name'])
         index_html_path = os.path.join(project_path, 'public', 'index.html')
 
-        logo_id = self.app_config.get('logo', 'default_logo_id')
+        logo_id = self.app_config.get('logo')
+        logo_file_name = self.app_config.get('logo_file_name', 'default.ico')  
         project_name = self.app_config['name']
-        
-        # Download the file
-        downloaded_file_path = FileService.download_file(logo_id, project_name)
 
-        if downloaded_file_path:
-            # Determine the public path for the logo
-            public_logo_path = os.path.join(project_path, 'public', 'favicon.ico')
+        # Define the public logo path
+        public_logo_path = os.path.join(project_path, 'public', logo_file_name)
 
-            # Copy the downloaded file to the public folder with a .ico extension
-            shutil.copy(downloaded_file_path, public_logo_path)
-            
-            # Modify the index.html to reference the new favicon
+        if logo_id:
+            # Download the file
+            downloaded_file_path = FileService.download_file(logo_id, project_name)
+
+            if downloaded_file_path:
+                # Copy the downloaded file to the public folder with the appropriate extension
+                shutil.copy(downloaded_file_path, public_logo_path)
+
+                # Modify the index.html to reference the new favicon
+                with open(index_html_path, 'r') as index_file:
+                    index_content = index_file.read()
+
+                modified_content = re.sub(
+                    r'<link rel="icon" href="%PUBLIC_URL%/.*?" />',
+                    f'<link rel="icon" href="%PUBLIC_URL%/{logo_file_name}" />',
+                    index_content
+                )
+
+                with open(index_html_path, 'w') as index_file:
+                    index_file.write(modified_content)
+
+                print(f"Modified {index_html_path} to include logo from {public_logo_path}")
+            else:
+                print(f"Failed to download the logo with ID {logo_id}")
+        else:
+            # If logo is deleted, remove existing logo file if exists
+            if os.path.exists(public_logo_path):
+                os.remove(public_logo_path)
+                print(f"Deleted logo file from {public_logo_path}")
+
+            # Modify the index.html to reset to the default favicon
             with open(index_html_path, 'r') as index_file:
                 index_content = index_file.read()
 
-            modified_content = index_content.replace(
+            modified_content = re.sub(
+                r'<link rel="icon" href="%PUBLIC_URL%/.*?" />',
                 '<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />',
-                '<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />'
+                index_content
             )
 
             with open(index_html_path, 'w') as index_file:
                 index_file.write(modified_content)
 
-            print(f"Modified {index_html_path} to include logo from {public_logo_path}")
-        else:
-            print(f"Failed to download the logo with ID {logo_id}")
+            print(f"Modified {index_html_path} to reset to default favicon")
+
