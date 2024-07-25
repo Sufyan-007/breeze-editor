@@ -55,7 +55,7 @@ class FunctionParser:
         elif config['type']== "CHAINED_FUNCTIONS":
             function_calls = [ self.get_function_call_code(func,True) for func in config["functions"] ]
             isAwaited = ""
-            if config["isAwaited"]:
+            if config.get("isAwaited", False):
                 isAwaited = "await "
             return isAwaited+".".join(function_calls)
         
@@ -147,8 +147,14 @@ class FunctionParser:
                 return self.generate_statement_code(value)
             
             if type == "CUSTOM":
-                return value['value']          
+                return value["value"]
+
+            if type == "FUNCTION_CALL":
+                return self.generate_statement_code(value)
             
+            if type == "CHAINED_FUNCTIONS":
+                return self.generate_statement_code(value)
+
         return ""
         
     def get_function_call_code(self,config,disableAwait = False):

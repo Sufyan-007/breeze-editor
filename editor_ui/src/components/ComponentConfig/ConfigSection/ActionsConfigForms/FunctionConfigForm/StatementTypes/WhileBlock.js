@@ -29,7 +29,7 @@ export default function WhileBlock({ config, updateParent }) {
 
   return (
     <>
-      <div className="if-block border border-light px-2 py-1">
+      <div className="if-block border border-gray px-2 py-1">
         <div className="d-flex justify-content-between">
           <div className="">
             <strong>While:</strong> {config.condition.value}

@@ -5,7 +5,7 @@ import FunctionParams from "./FunctionParams";
 import FunctionConfigStack from "./FunctionConfigStack";
 import { generatePreviewCode } from "../../../../../services/ComponentConfigService";
 
-const dataTypes = ["ANY", "STRING", "NUMERIC", "OBJECT", "ARRAY", "CALLBACK"];
+const dataTypes = ["STRING", "NUMERIC", "OBJECT", "ARRAY", "CALLBACK", "ANY"];
 
 const formTemplate = {
   name: "",
@@ -93,14 +93,17 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   };
 
   const handleSubmit = (e) => {
+    if (formState.name.trim() === "") {
+      setToastMessage("Function name is required.");
+      setShowToast(true);
+      return;
+    }
     onSubmit(formState);
   };
 
   const generatePreview = async (val) => {
     try {
-      // console.log("val-------------------------::>>", val);
       const response = await generatePreviewCode(val);
-      // console.log("response::>>", response);
       if (response.status === 200) {
         if (response.body.function === "{\n}\n") {
           setPreviewCode("");
@@ -138,7 +141,6 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
                       name: e.target.value,
                     }))
                   }
-                  required
                 />
               </Form.Group>
               <FormGroup as={Col}>
@@ -358,7 +360,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
       <Toast
         onClose={() => setShowToast(false)}
         show={showToast}
-        delay={3000}
+        delay={4000}
         bg="danger"
         autohide
         style={{

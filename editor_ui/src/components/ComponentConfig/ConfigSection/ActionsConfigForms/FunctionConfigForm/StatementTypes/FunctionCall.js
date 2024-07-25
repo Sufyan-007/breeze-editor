@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Offcanvas from "../../../../../common/Offcanvas";
 import FunctionCallEdit from "../../FunctionItemComponents/FunctionCall";
+import FunctionConfigStack from "../FunctionConfigStack";
 
 export default function FunctionCall({ config, updateParent }) {
-  console.log("config::>>", config);
   const [isOffcanvasOpen, setOffCanvasOpen] = useState(false);
+  const [conf, setConf] = useState(config);
+
+  useEffect(() => {
+    setConf(config);
+  }, [config]);
 
   function handleOpen() {
     setOffCanvasOpen(true);
@@ -12,17 +17,44 @@ export default function FunctionCall({ config, updateParent }) {
 
   function handleClose(val) {
     if (val) {
-      console.log(val);
       updateParent(val);
     }
     setOffCanvasOpen(false);
   }
+
+  function updateParameter(value, index) {
+    if (value) {
+      setConf((state) => {
+        state.parameters[index] = value;
+        state = { ...state };
+        updateParent(state);
+        return state;
+      });
+    }
+    else{
+      setConf(state=>{
+        state.parameters.splice(index,1)
+        state = { ...state };
+        updateParent(state);
+        return state;
+      })
+    }
+  }
   return (
     <>
-      <div className="custom-code border border-light px-2 py-1">
+      <div className="custom-code border border-gray px-2 py-1">
         <div className="d-flex justify-content-between">
           <div>
-            <strong>{config.case} :</strong> {config.functionName}
+            <strong>
+              {config?.case === "serviceCall" ? (
+                <>Service Call</>
+              ) : (
+                <>Function Call</>
+              )}{" "}
+              :
+            </strong>{" "}
+            {(config.functions && config.functions[0].functionName) ||
+              config.functionName}
           </div>
           <div className="d-flex">
             <div
@@ -41,6 +73,19 @@ export default function FunctionCall({ config, updateParent }) {
             </div>
           </div>
         </div>
+        {config?.parameters &&
+          config.parameters.map((param, index) => {
+            return (
+              <div>
+                {param?.type === "FUNCTION" && (
+                  <FunctionConfigStack
+                    config={param}
+                    updateParent={(val) => updateParameter(val, index)}
+                  />
+                )}
+              </div>
+            );
+          })}
       </div>
       <Offcanvas
         isOpen={isOffcanvasOpen}

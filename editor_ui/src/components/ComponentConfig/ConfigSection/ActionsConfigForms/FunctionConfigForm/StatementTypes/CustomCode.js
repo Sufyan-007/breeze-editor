@@ -18,7 +18,7 @@ export default function CustomCode({ config, updateParent }) {
   }
   return (
     <>
-      <div className="custom-code border border-light px-2 py-1">
+      <div className="custom-code border border-gray px-2 py-1">
         <div className="d-flex justify-content-between">
           <div>
             <strong>Custom:</strong> {config.body}
