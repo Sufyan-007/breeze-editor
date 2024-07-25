@@ -26,15 +26,15 @@ class AppConfigWriter:
         usage_config = {
             "components": {
                     f"{app_config['defaultComponent']}": {
-                        "Imports": {},
-                        "Props": {},
-                        "Variables": {},
-                        "UsedRoutes": {},
-                        "Functions": {},
-                        "Lifecycle": {},
-                        "Hooks": {},
-                        "Css": {},
-                        "Usage": {},
+                        "imports": {},
+                        "props": {},
+                        "variables": {},
+                        "usedRoutes": {},
+                        "functions": {},
+                        "lifecycle": {},
+                        "hooks": {},
+                        "css": {},
+                        "usage": {}
                     }
                 },
             "contexts": {},

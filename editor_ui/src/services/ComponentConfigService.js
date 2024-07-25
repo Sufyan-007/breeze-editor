@@ -7,7 +7,7 @@ export async function addComponent(name, type, route, projectName) {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, type }),
+        body: JSON.stringify({ name, type, route }),
       }
     )
   ).json();
@@ -55,15 +55,16 @@ export async function deleteBaseRoute(route, projectName) {
 }
 
 export async function addChildRoute(childObj, projectName) {
-    if (!childObj.path || (!childObj.component && !childObj.redirectTo)) 
-        return {body: 'incomplete data provided', status: 400}
-    const resPromise = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/handle-child-route/${projectName}/`,
-        {
-            method: "POST",
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(childObj) 
-        }
-    )
+  if (!childObj.path || (!childObj.component && !childObj.redirectTo))
+    return { body: "incomplete data provided", status: 400 };
+  const resPromise = await fetch(
+    `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/handle-child-route/${projectName}/`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(childObj),
+    }
+  );
 
   const response = await resPromise.json();
   return { body: response, status: resPromise.status };
@@ -129,7 +130,7 @@ export const updateComponentConfig = async (payload) => {
     }
 
     const data = await response.json();
-    return data;
+    return {body: data, status: response.status};
   } catch (error) {
     console.error("Error updating component config:", error);
     throw error;

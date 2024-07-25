@@ -3,7 +3,7 @@ from common.utils.config_reader import read_config_file, read_file_json, write_f
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from .app_editor import AppEditor
 from .helpers.html_config_generator import HtmlConfigGenerator
-import re
+import json
 class ComponentConfigService:
     def __init__(self,projectId):
         self.projectId = projectId
@@ -11,6 +11,7 @@ class ComponentConfigService:
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
         self.css_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CSS_CONFIG'])
+        self.usage_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['USAGE_CONFIG'])
         
     def get_html_by_id(self,component,id):
         html= self.comp_config.get(component).get("html_elements").get(id)
@@ -83,11 +84,20 @@ class ComponentConfigService:
         type_prefix = type_map.get(resource_type, "UNKNOWN")
         return f"{type_prefix}/{uuid.uuid4()}"
 
-    def update_component(self, comp_name, config_data):
+    def check_usage(self, comp_name, config_data):
+        if config_data['type'] == "propsVars":
+            if config_data['id'] in self.usage_config['components'][comp_name]['props'].keys():
+                dependent_comps = self.usage_config['components'][comp_name]['props'][config_data['id']].get('usageInOtherComponets', [])
+                print("dependent_comps")
+                print(dependent_comps)
+                if len(dependent_comps) > 0:
+                    return {'res':dependent_comps, 'status':222}
+        return None
+    
+    def update_component(self, comp_name, config_data):        
         config = self.comp_config.get(comp_name)
-
         config_type = config_data["type"]
-
+        
         def handle_props_vars():
             props_vars = config["propsVars"]
 
@@ -105,6 +115,10 @@ class ComponentConfigService:
 
                 if "id" not in config_data:
                     config_data["id"] = self.generate_id(config_data["type"])
+                self.usage_config['components'][comp_name]['props'][config_data['id']] = {}
+                self.usage_config['components'][comp_name]['props'][config_data['id']]['usageInOtherComponets'] = []                
+                usage_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['USAGE_CONFIG']}"
+                write_file(f"{usage_config_path}.json", json.dumps(self.usage_config))
                 props_vars.append(config_data)
 
             config["propsVars"] = props_vars
@@ -161,19 +175,23 @@ class ComponentConfigService:
             "wrappers": handle_wrappers,
         }
 
+        if config_data.get('checkUsage'):
+            del config_data['checkUsage']
+            response = self.check_usage(comp_name, config_data)
+            if response != None:
+                print('response')
+                
+                return response
+           
         handler = switch.get(config_type)
-
         if not handler:
             raise ValueError("Invalid resource type.")
-
         handler()
-
         self.comp_config[comp_name] = config
-
         appEditor = AppEditor(self.projectId)
         appEditor.write_component(config)
 
-        return config
+        return {'res':config, 'status':200}
     
     def reorder_component_actions(self, comp_name, config_data):
         if "type" not in config_data or "data" not in config_data:
