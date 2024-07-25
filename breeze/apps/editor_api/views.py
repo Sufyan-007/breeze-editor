@@ -657,8 +657,8 @@ class ComponentConfigWriter(APIView):
                 return JsonResponse({"error": "project_id and component_id are required"}, status=400)
             
             componentConfigService = ComponentConfigService(project_id)
-            config = componentConfigService.update_component(component_id, data["body"])
-            return JsonResponse(config, status=200, safe=False)
+            res = componentConfigService.update_component(component_id, data["body"])
+            return JsonResponse(res['res'], status=res['status'], safe=False)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 

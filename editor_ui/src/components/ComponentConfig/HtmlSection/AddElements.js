@@ -78,6 +78,7 @@ export default function AddElements() {
           >
             {elementFilterOptions.map((obj) => (
               <li
+                key={obj.value}
                 className={`${
                   chosenType === obj.value ? "active" : ""
                 } dropdown-item`}
@@ -94,14 +95,14 @@ export default function AddElements() {
           data-bs-theme="dark"
           className="me-2"
           type="button"
-          onChange={(e) => setSearchedElement(e.target.value)}
-        >
+          >
           <input
             className="form-control me-2"
             type="search"
             placeholder={"Search from " + chosenType + " tags"}
             aria-label="Search"
             value={searchedElement}
+            onChange={(e) => setSearchedElement(e.target.value)}
           />
         </div>
         <div></div>

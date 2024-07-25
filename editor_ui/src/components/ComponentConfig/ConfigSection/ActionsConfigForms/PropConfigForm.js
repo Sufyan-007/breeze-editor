@@ -29,6 +29,7 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
 
   useEffect(() => {
     if (isEditing && formData) {
+      formData.checkUsage = true
       setFormState(formData);
     }
   }, [isEditing, formData]);
