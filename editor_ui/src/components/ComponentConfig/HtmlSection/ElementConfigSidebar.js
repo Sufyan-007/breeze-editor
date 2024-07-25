@@ -27,8 +27,8 @@ const getAllVariables = (componentConfig) => {
 
   const { resources, propsVars } = componentConfig;
 
-  const variables = resources.filter(resource => resource.type !== "function" && resource.type.datatype !== "function");
-  const propVariables = propsVars.filter(propsVar => propsVar.body.datatype !== "function");
+  const variables = resources.filter(resource => resource?.type !== "function" && resource?.type?.datatype !== "function");
+  const propVariables = propsVars.filter(propsVar => propsVar?.body?.datatype !== "function");
   
   variablesList.push(...variables,...propVariables);
   
@@ -44,14 +44,16 @@ export default function ElementConfigSidebar({ config }) {
     () => componentConfig?.html_elements[selectedElement?.elem],
     [componentConfig, selectedElement]
   );
+  console.log("slected ELement",selectedElement?.elem)
   const [isLoading, setIsLoading] = useState(false);
   const availableFunctions = getAvailableFunctions(componentConfig)
   const allVariables = getAllVariables(componentConfig);
- 
   useEffect(() => {
-    sidebarService.getSelectedElem().subscribe((elem) => {
+    const subscription =sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
     });
+    return () => subscription.unsubscribe();
+
   }, [sidebarService]);
 
   const makeSelectedElementNull = () => {

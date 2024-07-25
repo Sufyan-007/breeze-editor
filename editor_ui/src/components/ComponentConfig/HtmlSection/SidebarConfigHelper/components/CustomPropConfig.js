@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Creatable from "react-select/creatable";
 import { Form } from "react-bootstrap";
-import "../../../../../css/ElementConfigSidebar.css";
 import MonacoEditor from "../../../../common/MonacoEditor";
 import CreatableSelect from "react-select/creatable";
+import Creatable from "react-select/creatable";
 
-const AttributesConfig = ({
+const CustomPropConfig = ({
   index,
   key,
   inputField,
@@ -17,9 +16,15 @@ const AttributesConfig = ({
   attributeOptions,
   handleSelectAttributeChange,
   customStyles,
+  getPropDataType,
+  allVariables,
 }) => {
   const [checkbox, setCheckbox] = useState(false);
-  console.log("inputField", inputField);
+  const [availableVar, setAvailablevar] = useState();
+  console.log("AvailableFunction", availableFunctions);
+  console.log("inputField", inputField.value);
+  console.log(getPropDataType(inputField.key));
+  console.log(allVariables);
   useEffect(() => {
     if (
       inputField.type === "FUNCTION" &&
@@ -29,22 +34,40 @@ const AttributesConfig = ({
       setCheckbox(true);
     } else if (
       inputField.type !== "FUNCTION" &&
-      inputField.$ref !== undefined
+      inputField.$ref !== undefined &&
+      inputField.type !== "VARIABLE"
+    ) {
+      setCheckbox(true);
+    } else if (
+      inputField.type === "VARIABLE" &&
+      inputField.$ref === undefined &&
+      inputField.value !== ""
     ) {
       setCheckbox(true);
     }
   }, [inputField]);
 
+  useEffect(() => {
+    const propDataType = getPropDataType(inputField.key);
+    console.log("---------------------------PropDataType: ");
+    console.log(propDataType, allVariables);
+
+    const filteredDatatypes = allVariables.filter((item) => {
+      return item.body.datatype.toUpperCase() === propDataType;
+    });
+    
+    setAvailablevar(filteredDatatypes);
+  }, [allVariables]);
+
   return (
     <>
       {" "}
-      <div className="d-flex justify-content-between  mb-1">
-        <div style={{ width: "21%", fontSize: "1rem" }}>
+      <div className="d-flex justify-content-between  ">
+        <div style={{ width: "21%", fontSize: ".9rem" }}>
           {inputField.key === "" ? (
             <Creatable
-              options={attributeOptions}
               form="_none"
-
+              options={attributeOptions}
               onChange={handleSelectAttributeChange}
               placeholder="Set Attribute"
               styles={{
@@ -80,36 +103,49 @@ const AttributesConfig = ({
           controlId="exampleForm.ControlInput1"
           style={{ width: "68%", marginRight: "10px" }}
         >
-          {inputField.type === "VARIABLE" && (
-            <Form.Select
-              size="sm"
-              style={{
-                borderColor: "rgb(73, 80, 87)",
-                backgroundColor: "rgb(37 39 42) ",
-                color: "white",
-              }}
-              onChange={(event) => {
-                addRefToAttribute(
-                  "predefined",
-                  event,
-                  inputField.key,
-                  "VARIABLE"
-                );
-              }}
-              value={inputField.$ref}
-            >
-              <option value="" disabled selected hidden>
-                Select a binding
-              </option>
+          {inputField.type === "VARIABLE" &&
+            (checkbox === false ? (
+              <Form.Select
+                size="sm"
+                style={{
+                  borderColor: "rgb(73, 80, 87)",
+                  backgroundColor: "rgb(37 39 42) ",
+                  color: "white",
+                }}
+                onChange={(event) => {
+                  addRefToAttribute(
+                    "predefined",
+                    event,
+                    inputField.key,
+                    "VARIABLE"
+                  );
+                }}
+                value={inputField.$ref}
+              >
+                <option value="" disabled selected hidden>
+                  Select a binding
+                </option>
 
-              {availableFunctions &&
-                availableFunctions.map((functions, index) => (
-                  <option key={index} value={functions.id}>
-                    {functions.name}
-                  </option>
-                ))}
-            </Form.Select>
-          )}
+                {availableVar &&
+                  availableVar.map((functions, index) => (
+                    <option key={index} value={functions.id}>
+                      {functions.name}
+                    </option>
+                  ))}
+              </Form.Select>
+            ) : (
+              <div className="mb-2">
+                <MonacoEditor
+                  height="70px"
+                  key={inputField.key}
+                  id={`Variable-${inputField.key}`}
+                  defaultValue={inputField?.value || ""}
+                  onChange={(body) => {
+                    handleAttributeChange(inputField.key, body);
+                  }}
+                />
+              </div>
+            ))}
           {inputField.type === "LITERAL" &&
             (checkbox === true ? (
               <Form.Select
@@ -133,8 +169,8 @@ const AttributesConfig = ({
                   Select a binding
                 </option>
 
-                {availableFunctions &&
-                  availableFunctions.map((functions, index) => (
+                {availableVar &&
+                  availableVar.map((functions, index) => (
                     <option key={index} value={functions.id}>
                       {functions.name}
                     </option>
@@ -164,6 +200,7 @@ const AttributesConfig = ({
 
                   handleAttributeChange(inputField.key, valuesString);
                 }}
+                className="mb-1"
                 styles={{
                   container: (provided) => ({
                     ...provided,
@@ -180,9 +217,9 @@ const AttributesConfig = ({
               <Form.Control
                 type="text"
                 size="sm"
+                value={inputField.value}
                 style={{ borderColor: "rgb(73, 80, 87)" }}
                 placeholder="value"
-                value={inputField?.value}
                 className="bg-dark text-light "
                 onChange={(e) => {
                   e.preventDefault();
@@ -238,15 +275,18 @@ const AttributesConfig = ({
             ))}
 
           {inputField.type === "FUNCTION" && checkbox === true && (
-            <MonacoEditor
-              defaultValue={inputField?.value?.functionBody || ""}
-              height="150px"
-              onChange={(body) => {
-                console.log("monaco", body);
-                addRefToAttribute("functionValue", body, inputField.key);
-              }}
-              id={`functionEditor-${inputField.key}`}
-            ></MonacoEditor>
+            <div className="mb-2">
+              <MonacoEditor
+                defaultValue={inputField?.value?.functionBody || ""}
+                key={inputField.key}
+                height="150px"
+                onChange={(body) => {
+                  console.log("monaco", body);
+                  addRefToAttribute("functionValue", body, inputField.key);
+                }}
+                id={`functionEditor-${inputField.key}`}
+              ></MonacoEditor>
+            </div>
           )}
           {inputField.type === "FUNCTION" && checkbox === false && (
             <Form.Select
@@ -259,7 +299,7 @@ const AttributesConfig = ({
               onChange={(event) => {
                 addRefToAttribute("predefined", event, inputField.key);
               }}
-              value={inputField?.$ref || ''}
+              value={inputField.$ref || ""}
             >
               <option value="" disabled hidden>
                 Select a function
@@ -284,10 +324,10 @@ const AttributesConfig = ({
             custom
             className="attribute-config-checkbox"
             onChange={() => {
-              const attributeValue  = {
-                value: inputField.key
-              }
-              handleSelectAttributeChange(attributeValue)
+              const attributeValue = {
+                value: inputField.key,
+              };
+              handleSelectAttributeChange(attributeValue);
               setCheckbox(!checkbox);
             }}
           />
@@ -308,5 +348,4 @@ const AttributesConfig = ({
     </>
   );
 };
-
-export default AttributesConfig;
+export default CustomPropConfig;

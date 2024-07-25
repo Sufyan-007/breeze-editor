@@ -39,7 +39,7 @@ const TextElement = ({
       <Form.Control
         as="textarea"
         placeholder=""
-        className="m-auto mt-4 mb-3 ps-3 pe-4 pt-3 pb-3"
+        className="m-auto mt-4 mb-3 ps-3 pe-4 pt-3 pb-3 bg-dark text-light"
         value={elementValue.text}
         onChange={handleTextChange}
         style={{

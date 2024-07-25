@@ -24,6 +24,7 @@ const customStyles = {
       ...styles,
       backgroundColor: isFocused ? "#4B9CD3" : null,
       color: "white",
+      fontSize:".85rem",
       "&:hover": {
         backgroundColor: "#4B9CD3"
       }
@@ -76,6 +77,7 @@ const HtmlElementConfig = ({
   const [availableAttributes, setAvailableAttributes] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const { projectName } = useParams();
+  console.log(availableAttributes)
 
   useEffect(() => {
     setSelectedAttributes(element.attributes);
@@ -144,6 +146,7 @@ const HtmlElementConfig = ({
         }
       } else {
         const attributeList = await response.json();
+        console.log("attributeList",attributeList)
         const convertedAttributes = {};
 
         for (let key in attributeList) {
@@ -161,7 +164,7 @@ const HtmlElementConfig = ({
     const tempElememt = { ...element, attributes: selectedAttributes };
     console.log("tempELe",tempElememt)
 
-    // handleUpdateClick(tempElememt);
+     handleUpdateClick(tempElememt);
   };
 
   const handleSelectAttributeChange = (event) => {
@@ -169,7 +172,8 @@ const HtmlElementConfig = ({
 
     let type = availableAttributes[selectedOption]?.datatype || "LITERAL";
     if (type === "STRING") type = "LITERAL";
-    else if (type === "NUMBER") type = "VARIABLE";
+    else if (type === "BOOLEAN") type = "BOOLEAN";
+    else if (type==="OBJECT" || type==="ARRAY")type="VARIABLE"
 
     setSelectedAttributes((prevSelectedAttributes) => ({
       ...prevSelectedAttributes,
@@ -228,21 +232,15 @@ const HtmlElementConfig = ({
       }));
     }
   };
+  const getPropDataType = (attributeType) =>{
+    return availableAttributes[attributeType]?.datatype || ''
+  }
 
   return (
     <div className="mt-3 ps-1 pe-1">
       <Form className="text-light">
         {element.elementType === "CUSTOM" ? (
           <CustomComponentConfig
-            // element={element}
-            // makeSelectedElementNull={makeSelectedElementNull}
-            // handleUpdateClick={handleUpdateClick}
-            // attributeOptions={attributeOptions}
-            // availableAttributes={availableAttributes}
-            // selectedAttributes={selectedAttributes}
-            // setSelectedAttributes={setSelectedAttributes}
-            // availableFunctions={availableFunctions}
-            // allVariables={allVariables}
             attributeOptions={attributeOptions}
              handleSelectAttributeChange={handleSelectAttributeChange}
              customStyles={customStyles}
@@ -251,6 +249,8 @@ const HtmlElementConfig = ({
              handleDeleteAttribute={handleDeleteAttribute}
              availableFunctions={availableFunctions}
              addRefToAttribute={addRefToAttribute}
+             getPropDataType={getPropDataType}
+             allVariables={allVariables}
           />
         ) : (
           
