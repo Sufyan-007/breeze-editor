@@ -168,8 +168,8 @@ class AppGenerator:
     def create_react_app(self):
         project_name = self.app_config['name']
         app_config_dump = json.dumps(self.app_config)
-        subprocess.run(["npx", "create-react-app", project_name, "--template",
-                    "cra-template", "--use-npm"], text=True, input=app_config_dump, cwd=self.app_config['path'])
+        subprocess.run((" ".join["npx", "create-react-app", project_name, "--template",
+                    "cra-template", "--use-npm"]),shell=True, text=True, input=app_config_dump, cwd=self.app_config['path'])
 
 
     def modify_main_component(self):
@@ -226,7 +226,7 @@ class AppGenerator:
 
         write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
 
-        subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
+        subprocess.run(" ".join(["npm", "install"]),shell=True, cwd=f"{self.app_config['path']}/{self.app_config['name']}")
 
         if package_json['dependencies'].get('bootstrap') is not None:
             DependencyManager().handle_bootstrap(app_config=self.app_config)
