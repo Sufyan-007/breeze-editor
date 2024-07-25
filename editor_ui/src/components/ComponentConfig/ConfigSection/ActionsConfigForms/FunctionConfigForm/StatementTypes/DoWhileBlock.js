@@ -1,16 +1,27 @@
 import { useState } from "react";
+import FunctionConfigStack from "../FunctionConfigStack";
 import Offcanvas from "../../../../../common/Offcanvas";
-import UpdateVariable from "../../FunctionItemComponents/UpdateVariable";
+import DoWhileLoop from "../../FunctionItemComponents/DoWhileLoop";
 
-export default function Assignment({ config, updateParent }) {
+export default function DoWhileBlock({ config, updateParent }) {
   const [isOffcanvasOpen, setOffCanvasOpen] = useState(false);
+  const [blockConfig, setBlockConfig] = useState(config);
 
   function handleOpen() {
     setOffCanvasOpen(true);
   }
 
+  function update(val, key) {
+    setBlockConfig((state) => {
+      const newState = { ...state, [key]: val };
+      updateParent(newState);
+      return newState;
+    });
+  }
+
   function handleClose(val) {
     if (val) {
+      setBlockConfig(val);
       updateParent(val);
     }
     setOffCanvasOpen(false);
@@ -18,11 +29,17 @@ export default function Assignment({ config, updateParent }) {
 
   return (
     <>
-      <div className="declaration border border-light px-2 py-1">
+      <div className="if-block border border-light px-2 py-1">
+        <strong>Do Block</strong>
+        <div className="px-3">
+          <FunctionConfigStack
+            config={blockConfig.bodyConfig}
+            updateParent={(val) => update(val, "bodyConfig")}
+          />
+        </div>
         <div className="d-flex justify-content-between">
-          <div>
-            <strong>Update Variable:</strong> {config.varName}
-            {` = ${config.value.value}`}
+          <div className="mt-1">
+            <strong>Do While:</strong> {config.condition.value}
           </div>
           <div className="d-flex">
             <div
@@ -45,11 +62,11 @@ export default function Assignment({ config, updateParent }) {
       <Offcanvas
         isOpen={isOffcanvasOpen}
         onClose={() => handleClose(false)}
-        title={"Edit Variable"}
+        title={"Edit"}
         width="40%"
       >
         <div className="px-1 h-100 container">
-          <UpdateVariable config={config} update={(val) => handleClose(val)} />
+          <DoWhileLoop config={config} update={(val) => handleClose(val)} />
         </div>
       </Offcanvas>
     </>

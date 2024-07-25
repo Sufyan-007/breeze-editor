@@ -147,7 +147,7 @@ class NewComponentWriter(APIView):
         try:
             app_component_writer = AppEditor(param)
             res = app_component_writer.add_component(
-                data["name"], data["type"])
+                data["name"], data["type"], data['route'])
             print("djfvnskjvnsri",res)
             update_components()
 
@@ -657,8 +657,8 @@ class ComponentConfigWriter(APIView):
                 return JsonResponse({"error": "project_id and component_id are required"}, status=400)
             
             componentConfigService = ComponentConfigService(project_id)
-            config = componentConfigService.update_component(component_id, data["body"])
-            return JsonResponse(config, status=200, safe=False)
+            res = componentConfigService.update_component(component_id, data["body"])
+            return JsonResponse(res['res'], status=res['status'], safe=False)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
@@ -709,7 +709,7 @@ class ASTParser(APIView):
             data = json.loads(request.body.decode("utf-8"))
             function_generator = FunctionParser()
             function_code = function_generator.generate_statement_code(data)
-            formatted_function_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=function_code, text=True)
+            formatted_function_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=function_code, text=True)
             return JsonResponse({"function": formatted_function_code},status=200)
         except:
             return JsonResponse({}, status=500)

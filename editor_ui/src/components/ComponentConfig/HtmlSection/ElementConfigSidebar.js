@@ -9,6 +9,7 @@ const getAvailableFunctions = (componentConfig) => {
   const functionsList = [];
 
   const { resources, propsVars } = componentConfig;
+  console.log(componentConfig);
   
   const namedFunctions = resources.filter(resource => resource.type === "function");
   const propFunctions = propsVars.filter(propsVar => propsVar.body?.datatype === "function");
@@ -129,6 +130,7 @@ export default function ElementConfigSidebar({ config }) {
               <div>
                 <button
                   className="btn-close-white btn-close ms-3 flex-grow-1"
+                  aria-label="makeSelectedElementNull"
                   onClick={makeSelectedElementNull}
                 ></button>
               </div>

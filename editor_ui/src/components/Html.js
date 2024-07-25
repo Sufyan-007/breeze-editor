@@ -148,7 +148,7 @@ export default function Html({ value, selecteElement, config, reference, compone
                 </div>
                 <div className=" dropdown ">
                     <button className="btn p-0 mx-1"
-
+                        aria-label="option"
                         data-toggle="dropdown"
                     >
                         <img className=" h-75 " src={threeDots} alt="" />

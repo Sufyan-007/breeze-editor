@@ -3,6 +3,7 @@ from common.utils.file_helper import read_json_file, write_file, create_parent_d
 import json,os
 from common.utils.request_code import REQUEST
 from .generate_project import GenerateProject
+from .app_startup_manager import start_app
 
 class AppConfigWriter:
     def __init__(self):
@@ -22,11 +23,33 @@ class AppConfigWriter:
                 "/": {},
             }
         }
+        usage_config = {
+            "components": {
+                    f"{app_config['defaultComponent']}": {
+                        "imports": {},
+                        "props": {},
+                        "variables": {},
+                        "usedRoutes": {},
+                        "functions": {},
+                        "lifecycle": {},
+                        "hooks": {},
+                        "css": {},
+                        "usage": {}
+                    }
+                },
+            "contexts": {},
+            "reducers": {},
+            "reduxStore": {},
+            "routes": {},
+            "imports": {},
+            "css": {},
+        }
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", json.dumps(basic_routing_config))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUCER_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUX_STORE_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CSS_CONFIG']}.json", json.dumps({}))
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['USAGE_CONFIG']}.json", json.dumps(usage_config))
         write_file(f"{app_config_dir}/react_request_code.py", REQUEST)
 
     def write_basic_main_comp_config(self, app_config):
@@ -112,4 +135,5 @@ class AppConfigWriter:
         self.write_basic_config_files(app_current_config)
 
         GenerateProject.generate_project(app_current_config)
+        start_app(app_current_config)
     
