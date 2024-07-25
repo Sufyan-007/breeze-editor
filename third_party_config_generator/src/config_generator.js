@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { Project, Node, Symbol, TypeParameter, Type, UnionTypeNode } = require('ts-morph');
+const { Project, Node, Symbol, TypeParameter, Type, UnionTypeNode, HeritageClause } = require('ts-morph');
 const { SyntaxKind } = require('typescript');
 // Use this (handlePropTypes) for original code, decodePropType is only for easy debugging
 const { HandlePropTypes } = require('./handle_prop_types');
@@ -10,6 +10,7 @@ const { getAppRootDir, findTypeDefinitionFile, findTypeScriptEntryPoint, getFile
 const { INDEX_FILE_NAME } = require('./consts');
 const { FindDeclaration } = require('./declarationFinder');
 const { processFiles,createPropsNameFile } = require('./tester2');
+const JSX_ELEMENTS_TYPES = ['React.ReactElement', 'JSX.Element', 'react_jsx_runtime.JSX.Element','react.DetailedReactHTMLElement','import("react").ReactElement','React.JSXElementConstructor','OverridableComponent'];
 
 // Returns export variables from given file path
 function readExportsFromTypeScriptFile(project, filePath) {
@@ -169,7 +170,7 @@ function processExports(project, entryPoint, exportsConfig, libraryPath, libInfo
             // declare const _default: typeof DataTable;
             // export default _default;
             if (attributesOfVar.length == 0 && (exportVarSymbol instanceof Symbol)) {
-                const symbol =  getSymbolOrAliasSymbol(getDeclaration(exportVarSymbol).getType())
+                const symbol =  getSymbolOrAliasSymbol(getDeclaration(exportVarSymbol).getType()) ?? exportVarSymbol
                 isComponent = isComponentBySymbol(symbol,sourceFile);
             } else {
                 // Determine if it is component or not
@@ -240,8 +241,15 @@ function isComponentDeclaration(varDeclaration,sourceFile,callStack) {
             if (isComponent) break;
         }
     } else if (varKind == SyntaxKind.TypeAliasDeclaration) {
+        //declare const Hidden: React.JSXElementConstructor<HiddenProps>;
+        if(isTypeJSX(varDeclaration.getType())){
+            return true;
+        }
         return isComponentDeclaration(varDeclaration.getTypeNode(),sourceFile,callStack);
     } else if (varKind == SyntaxKind.TypeReference) {
+        if(isTypeJSX(varDeclaration)){
+            return true;
+        }
         const symbol = getSymbolOrAliasSymbol(varDeclaration.getType())
         const dec = getDeclaration(symbol);
 
@@ -321,11 +329,17 @@ function getVariableDeclarationForExport(sourceFile, name) {
 
 
 }
-
+function isTypeJSX(declaration){
+   const strings  = declaration.getText();
+   for (let substring of JSX_ELEMENTS_TYPES ){
+      if(strings.includes(substring))
+        return true
+   }
+   return false;
+}
 function isReturnJSX(functionDeclaration) {
     // Add this to also check if it is return type jsx, react_jsx_runtime.JSX.Element
 
-    const JSX_ELEMENTS_TYPES = ['React.ReactElement', 'JSX.Element', 'react_jsx_runtime.JSX.Element','react.DetailedReactHTMLElement','import("react").ReactElement'];
     if(functionDeclaration.getReturnTypeNode().getKind() == SyntaxKind.UnionType){
         return functionDeclaration.getReturnTypeNode().getTypeNodes().filter(tp => JSX_ELEMENTS_TYPES.includes(tp.getText())).length != 0 ;
     }
@@ -338,7 +352,22 @@ function isReturnJSX(functionDeclaration) {
     // return JSX_ELEMENTS_TYPES.includes(functionDeclaration.getReturnTypeNode().getText()) ||  JSX_ELEMENTS_TYPES.includes(functionDeclaration.getReturnTypeNode().getTypeName().getText());
 }
 
+function getExtendedPropsDeclaration(heritageNode,referenceToPropsVar){
+   const propName = heritageNode.getTypeNodes()[0].getTypeArguments()[0].getText();
+   const sourceFile =  referenceToPropsVar.getSourceFile().getImportDeclaration((i) => i.getText().includes(propName)).getModuleSpecifierSourceFile()
+   let propDeclaration;
+   for(const [name,dec] of sourceFile.getExportedDeclarations()){
+           if(name === propName){
+            propDeclaration = dec[0];
+            break;
+           }
+   }
+   return propDeclaration;
+
+}
+
 function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefaultExport = true) {
+    
 
     const handlePropTypes = new HandlePropTypes(libInfo);
     const propsReader = new PropsReader(libInfo);
@@ -523,6 +552,62 @@ function getPropsForDefaultExportVar(sourceFile, componentName, libInfo, isDefau
                 }
 
             }
+               //  declare const FilledInput: ((props: FilledInputProps) => JSX.Element) & { muiName: string };
+
+             // export default FilledInput;
+            //  this checks for above type
+            else if(ch.getKind() == SyntaxKind.IntersectionType){
+                let referenceToPropsVar = getTypeReferenceOfComponentVar(ch)
+                for(const type of ch.getTypeNodes()){
+                    if(type.getKind() === SyntaxKind.ParenthesizedType){
+                          let symbol = type.getType().getSymbol();
+                          let parameters = symbol.getDeclarations()[0].getParameters()[0];
+                          let variableName = filterReturnType(parameters.getType().getText()); //FilledInputProps
+                          for(const [name,dec] of referenceToPropsVar.getSourceFile().getExportedDeclarations()){
+                                if(name === variableName){
+                                    const declaration = dec[0];
+                                    propList = propsReader.processProps(declaration);
+
+                                    //this will check if above declaration extends some other props  (export interface FilledInputProps extends StandardProps<InputBaseProps>)
+                                    try{
+                                        if(declaration.getBaseTypes().length == 0 && declaration.getHeritageClauses()){
+                                            const propDeclaration = getExtendedPropsDeclaration(declaration.getHeritageClauses()[0],referenceToPropsVar);
+                                            propList = propList.concat(propsReader.processProps(propDeclaration));
+                                        }
+                                        break;
+                                    }
+                                    catch{
+                                        break;
+                                    }
+                                   
+                                    
+                                }
+                          }
+                    }
+                }
+            }
+//             declare const CardHeader: OverridableCardHeader;
+
+// export interface OverridableCardHeader extends OverridableComponent<CardHeaderTypeMap> {
+//   <
+//     RootComponent extends React.ElementType = CardHeaderTypeMap['defaultComponent'],
+//     AdditionalProps = {},
+//     TitleTypographyComponent extends React.ElementType = 'span',
+//     SubheaderTypographyComponent extends React.ElementType = 'span',
+//   >(
+//     props: CardHeaderPropsWithComponent<
+//       RootComponent,
+//       AdditionalProps,
+//       TitleTypographyComponent,
+//       SubheaderTypographyComponent
+//     >,
+//   ): JSX.Element;
+// }
+            else if(referenceToPropsVar.getBaseTypes().length != 0){
+                let props = propsReader.getNestedProps(referenceToPropsVar);
+                propList = propsReader.getAllProps(props);
+            }
+
             else{
 
                 // const tempListOfProps = referenceToPropsVar.getType().getProperties();
@@ -606,7 +691,7 @@ function getPropRef(typeNodeReference){
 }
 
 function filterReturnType(text){
-    let pattern = /import\(.*?\)\./
+    let pattern = /import\(.*?\)\.|<.*?>/g
     return text.replace(pattern,"");
     // return text.match(pattern) === null ? false : true ;
 }
@@ -749,6 +834,9 @@ class PropsReader {
             if(types.getAliasTypeArguments().length !== 0){
                return types.getAliasTypeArguments()[0].getProperties();
             }
+            if(types.getTypeArguments().length !== 0 ){
+                return types.getTypeArguments()[0].getProperties();
+            }
             else
                return [];
          }
@@ -756,18 +844,55 @@ class PropsReader {
     }
 
     processProps(referenceVar) {
+
         let props  = referenceVar.getType().getProperties();
+        
+        // this array handle cases for all component which have below component type
+        let specialComponentType = ['MenuListTypeMap','AccordionTypeMap'];
+//         export type MenuListTypeMap<
+//   AdditionalProps = {},
+//   RootComponent extends React.ElementType = 'ul',
+// > = ExtendListTypeMap<{
+//   props: AdditionalProps & MenuListOwnProps;
+//   defaultComponent: RootComponent;
+// }>;
+        // if(specialComponentType.includes(referenceVar.getText()) && referenceVar.getType().getTypeArguments().length){
+        //     props = referenceVar.getType().getTypeArguments()[0].getProperties();
+        // }
+        let typeArguments = referenceVar.getType().getTypeArguments();
+        let aliasTypeArguments = referenceVar.getType().getAliasTypeArguments();
+        if(typeArguments.length){
+            props = props.concat(typeArguments[0].getProperties());
+        }
+        else if(aliasTypeArguments.length){
+            for(const arg of aliasTypeArguments){
+                if(!arg.isStringLiteral()){
+                    if(arg.getTypeArguments().length){
+                        props = props.concat(arg.getTypeArguments()[0].getProperties());
+                        break;
+                    }
+                    else
+                    props = props.concat(arg.getProperties())
+                }
+                
+            }
+        }
+        
         props = props.concat(this.getNestedProps(referenceVar.getType()));
         return this.getAllProps(props);
     }
     // to get all the list of props
     getAllProps(props){
-        const propsList = [];
+        let propsList = [];
         for (const pr of props) {
 
             const declaration = getDeclaration(pr);
+            let props = this.getSinglePropObject(declaration || pr);
+            if( Array.isArray(props)){
+                propsList = propsList.concat(props)
+            }else
 
-            propsList.push(this.getSinglePropObject(declaration || pr));
+            propsList.push(props);
 
         }
         return propsList;
@@ -829,6 +954,16 @@ class PropsReader {
                 typeConfig = prop.getType()
                 isTypeNodeAvailable = false;
             } else {
+
+                if(prop.getName() === 'props'){
+                    let propslist = []
+                    for(const type of prop.getType().getProperties()){
+                         let dec = getDeclaration(type);
+                         if(dec)
+                         propslist.push(this.getSinglePropObject(dec));
+                    }
+                    return propslist;
+                }
                 isTypeNodeAvailable = true;
                 typeConfig = prop.getTypeNode()
 
