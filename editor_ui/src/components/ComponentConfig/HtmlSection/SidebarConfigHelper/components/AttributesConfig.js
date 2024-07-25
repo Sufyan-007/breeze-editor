@@ -7,7 +7,6 @@ import CreatableSelect from "react-select/creatable";
 
 const AttributesConfig = ({
   index,
-  key,
   inputField,
   selectedAttributes,
   handleAttributeChange,
@@ -19,7 +18,6 @@ const AttributesConfig = ({
   customStyles,
 }) => {
   const [checkbox, setCheckbox] = useState(false);
-  console.log("inputField", inputField);
   useEffect(() => {
     if (
       inputField.type === "FUNCTION" &&
@@ -242,7 +240,6 @@ const AttributesConfig = ({
               defaultValue={inputField?.value?.functionBody || ""}
               height="150px"
               onChange={(body) => {
-                console.log("monaco", body);
                 addRefToAttribute("functionValue", body, inputField.key);
               }}
               id={`functionEditor-${inputField.key}`}

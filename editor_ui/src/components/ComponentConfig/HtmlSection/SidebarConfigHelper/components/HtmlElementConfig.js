@@ -77,7 +77,6 @@ const HtmlElementConfig = ({
   const [availableAttributes, setAvailableAttributes] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const { projectName } = useParams();
-  console.log(availableAttributes)
 
   useEffect(() => {
     setSelectedAttributes(element.attributes);
@@ -146,7 +145,6 @@ const HtmlElementConfig = ({
         }
       } else {
         const attributeList = await response.json();
-        console.log("attributeList",attributeList)
         const convertedAttributes = {};
 
         for (let key in attributeList) {
@@ -162,7 +160,7 @@ const HtmlElementConfig = ({
   const updateHtmlElementConfig = (e) => {
     e.preventDefault();
     const tempElememt = { ...element, attributes: selectedAttributes };
-    console.log("tempELe",tempElememt)
+   // console.log("tempELe",tempElememt)
 
      handleUpdateClick(tempElememt);
   };

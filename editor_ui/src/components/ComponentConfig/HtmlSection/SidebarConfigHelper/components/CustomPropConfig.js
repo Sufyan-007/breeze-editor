@@ -6,7 +6,6 @@ import Creatable from "react-select/creatable";
 
 const CustomPropConfig = ({
   index,
-  key,
   inputField,
   selectedAttributes,
   handleAttributeChange,
@@ -21,10 +20,7 @@ const CustomPropConfig = ({
 }) => {
   const [checkbox, setCheckbox] = useState(false);
   const [availableVar, setAvailablevar] = useState();
-  console.log("AvailableFunction", availableFunctions);
-  console.log("inputField", inputField.value);
-  console.log(getPropDataType(inputField.key));
-  console.log(allVariables);
+ 
   useEffect(() => {
     if (
       inputField.type === "FUNCTION" &&
@@ -49,8 +45,6 @@ const CustomPropConfig = ({
 
   useEffect(() => {
     const propDataType = getPropDataType(inputField.key);
-    console.log("---------------------------PropDataType: ");
-    console.log(propDataType, allVariables);
 
     const filteredDatatypes = allVariables.filter((item) => {
       return item.body.datatype.toUpperCase() === propDataType;
@@ -281,7 +275,6 @@ const CustomPropConfig = ({
                 key={inputField.key}
                 height="150px"
                 onChange={(body) => {
-                  console.log("monaco", body);
                   addRefToAttribute("functionValue", body, inputField.key);
                 }}
                 id={`functionEditor-${inputField.key}`}

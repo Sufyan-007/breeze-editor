@@ -29,7 +29,6 @@ const TextElement = ({
  
   const handleTextChange = (e) => {
     
-    console.log(elementValue)
     const newText = e.target.value;
     setElementValue({ ...elementValue, text: newText });
     

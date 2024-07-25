@@ -44,10 +44,10 @@ export default function ElementConfigSidebar({ config }) {
     () => componentConfig?.html_elements[selectedElement?.elem],
     [componentConfig, selectedElement]
   );
-  console.log("slected ELement",selectedElement?.elem)
   const [isLoading, setIsLoading] = useState(false);
   const availableFunctions = getAvailableFunctions(componentConfig)
   const allVariables = getAllVariables(componentConfig);
+  
   useEffect(() => {
     const subscription =sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
