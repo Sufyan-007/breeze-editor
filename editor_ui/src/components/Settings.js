@@ -38,7 +38,7 @@ const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
       fileInputRef.current.click();
     }
   };
-  
+
   const submitForm = (data) => {
     const formData = new FormData();
     formData.append("newProjectName", data.name);
@@ -144,6 +144,7 @@ const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
                         {isHovered && (
                           <i
                             type="button"
+                            style={{color: "red", fontSize:"x-large"}}
                             className="bi bi-trash delete-logo-button"
                             onClick={handleLogoDelete}
                           ></i>
