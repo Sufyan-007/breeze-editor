@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Offcanvas from "../../../../../common/Offcanvas";
-import FunctionCallEdit from "../../FunctionItemComponents/FunctionCall";
+import FunctionCallEdit from "../../FunctionItemComponents/FunctionCallEdit";
 import FunctionConfigStack from "../FunctionConfigStack";
 
 export default function FunctionCall({ config, updateParent }) {
@@ -30,14 +30,13 @@ export default function FunctionCall({ config, updateParent }) {
         updateParent(state);
         return state;
       });
-    }
-    else{
-      setConf(state=>{
-        state.parameters.splice(index,1)
+    } else {
+      setConf((state) => {
+        state.parameters.splice(index, 1);
         state = { ...state };
         updateParent(state);
         return state;
-      })
+      });
     }
   }
   return (
@@ -90,7 +89,7 @@ export default function FunctionCall({ config, updateParent }) {
       <Offcanvas
         isOpen={isOffcanvasOpen}
         onClose={() => handleClose(false)}
-        title={"Edit"}
+        title={"Edit Function Call"}
         width="40%"
       >
         <div className="px-1 h-100 container">
