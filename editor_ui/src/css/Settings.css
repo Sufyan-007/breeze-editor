@@ -1,61 +1,79 @@
 body {
-    margin: 0;
-    padding: 0;
-  }
-  
-  .settings {
-    display: flex;
-  }
-  
-  .sidebar {
-    height: 80vh;
-    color: #fff;
-    width: 350px;
-    padding: 20px;
-    box-sizing: border-box;
-    margin-top: 10px;
-  }
-  
-  .sidebar-header {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 12px;
-    margin-top: 8px;
-  }
-  
-  .sidebar-suboptions {
-    margin-bottom: 20px;
-  }
-  
-  .sidebar-item {
-    margin-bottom: 10px;
-    padding: 5px 0px 5px 0px;
-  }
-  
-  .sidebar-item.active {
-    background-color: #ffffff; /* Highlight color */
-    color: black;
-    border-radius: 25px;
-  }
+  margin: 0;
+  padding: 0;
+}
 
-  .content {
-    margin-left: 20px; 
-    padding: 20px;
-    box-sizing: border-box;
-    width: 100%;
-  }
-  
-  .integration-image {
-    width: 300px;
-    height: 80px;
-  }
+.settings {
+  display: flex;
+}
+
+.sidebar {
+  height: 80vh;
+  color: #fff;
+  width: 350px;
+  padding: 20px;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+
+.sidebar-header {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  margin-top: 8px;
+}
+
+.sidebar-suboptions {
+  margin-bottom: 20px;
+}
+
+.sidebar-item {
+  margin-bottom: 10px;
+  padding: 5px 0px 5px 0px;
+}
+
+.sidebar-item.active {
+  background-color: #ffffff; /* Highlight color */
+  color: black;
+  border-radius: 25px;
+}
+
+.content {
+  margin-left: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.integration-image {
+  width: 300px;
+  height: 80px;
+}
 
 .custom-img-thumbnail {
   display: block;
   margin: 10px 0;
 }
 
-.custom-btn-danger {
-  display: block;
-  margin-top: 10px;
+.delete-logo-button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  right: 40%;
+  z-index: 10;
+}
+
+.logo-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-icon {
+  font-size: 24px;
+  color: #ccc;
 }

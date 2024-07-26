@@ -1,6 +1,6 @@
 import "../css/Settings.css";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { updateProject } from "../services/ProjectService";
 import { getAppBasicConfig } from "../services/ConfigService";
 import { useParams, useNavigate } from "react-router";
@@ -22,6 +22,9 @@ const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
   const [logoPreview, setLogoPreview] = useState(appDetails?.logo || "");
   const [logoFile, setLogoFile] = useState(null);
   const [logoDeleted, setLogoDeleted] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (appDetails?.logo) {
@@ -30,6 +33,12 @@ const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
     }
   }, [appDetails]);
 
+  const handleUploadIconClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
   const submitForm = (data) => {
     const formData = new FormData();
     formData.append("newProjectName", data.name);
@@ -113,28 +122,45 @@ const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
               <div className="d-flex justify-content-between align-items-center m-2">
                 <div className="">Logo:</div>
                 <div className="form-group" id="">
-                  {logoPreview ? (
-                    <div>
-                      <img
-                        src={logoPreview}
-                        alt="Logo Preview"
-                        className="custom-img-thumbnail"
-                        width="100"
-                      />
-                      <button
-                        type="button"
-                        className="btn custom-btn-danger mt-2"
-                        onClick={handleLogoDelete}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ) : (
+                  <div
+                    className="logo-container"
+                    style={!logoPreview ? { cursor: "pointer" } : {}}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    onClick={!logoPreview ? handleUploadIconClick : undefined}
+                  >
+                    {logoPreview ? (
+                      <>
+                        <img
+                          src={logoPreview}
+                          alt="Logo Preview"
+                          className="custom-img-thumbnail"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                        {isHovered && (
+                          <i
+                            type="button"
+                            className="bi bi-trash delete-logo-button"
+                            onClick={handleLogoDelete}
+                          ></i>
+                        )}
+                      </>
+                    ) : (
+                      <i className="bi bi-upload upload-icon"></i>
+                    )}
+                  </div>
+                  {!logoPreview && (
                     <input
+                      ref={fileInputRef}
                       className="form-control form-control-sm"
                       type="file"
                       accept="image/*"
                       onChange={handleLogoChange}
+                      style={{ display: "none" }}
                     />
                   )}
                 </div>
