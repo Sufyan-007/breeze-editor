@@ -37,6 +37,7 @@ function FunctionCallEdit({ config, update }) {
                   />
                 </div>
               ))}
+              {config.parameters && config.parameters.length === 0 && <div className="my-2">No Params Present</div>}
           </div>
         </div>
         <div className="my-3 d-flex justify-content-between">

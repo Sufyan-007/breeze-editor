@@ -172,7 +172,6 @@ function FunctionCall({ config, update }) {
     update(transformedConfig);
   };
 
-
   return (
     <div className="d-flex h-100 flex-column justify-content-between">
       {conf?.case === "serviceCall" ? (
@@ -394,6 +393,9 @@ function FunctionCall({ config, update }) {
                     />
                   </div>
                 ))}
+              {conf.parameters && conf.parameters.length === 0 && (
+                <div className="my-2">No Params Present</div>
+              )}
             </div>
           )}
         </div>
