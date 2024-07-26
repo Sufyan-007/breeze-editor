@@ -289,10 +289,12 @@ class ProjectConfig(APIView):
         data["projectName"] = data["name"]
         # data["selectedTemplate"]= data["selectedTemplate"]
         data["name"] = data['name'].lower().replace(" ", "_")
+        path = data["projectPath"]
         generated_paths = os.path.join(
-            os.path.dirname(os.getcwd()), "generated_projects")
+            os.path.dirname(os.getcwd()), path)
+
         # os.makedirs(generated_paths,exist_ok=True)
-        data["path"] = os.path.join(generated_paths, data["name"])
+        data["path"] = os.path.join(generated_paths)
         if (data["name"] in GenerateProject.get_projects().keys()):
             return JsonResponse({"error": "Application name should be unique."}, status=400)
        
