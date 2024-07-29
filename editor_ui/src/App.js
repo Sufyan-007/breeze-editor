@@ -22,6 +22,7 @@ import Styles from "./components/StylesConfiguration/Styles";
 import Code from "./components/Code";
 import Settings from "./components/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
+import Resources from "./components/ResourcesConfiguration/Resources";
 
 export const router = createBrowserRouter([
   {
@@ -47,18 +48,13 @@ export const router = createBrowserRouter([
       { path: "code", element: <Code /> },
       { path: "apps", element: <DependencyConfig /> },
       { path: "settings", element: <Settings /> },
+      { path: "resources", element: <Resources /> },
     ],
   },
   {
     path: "/project/:projectName/component/:componentName",
     element: <ComponentConfigPage />,
-    loader: configLoader,
-    children: [
-      { index: true, element: <ProjectHome /> },
-      { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting /> },
-      { path: "services", element: <ApiClientRoot /> },
-    ]
+    loader: configLoader
   },
   {
     path: "/editor/:projectName",

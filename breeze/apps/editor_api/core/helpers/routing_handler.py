@@ -30,8 +30,9 @@ class RouteHandler:
         function_pattern = r'(async\s+)?(?:function\s+(\w+)\s*)?\(([^)]*)\)\s*{([^}]*)}'
         match_function = re.search(function_pattern, js_function, re.DOTALL)
         arrow_function_pattern = r'(async\s+)?\s*\(\s*({[^}]*}|[^)]*)\s*\)\s*=>\s*(\{.*\}|[^{]*)\s*$'
-        match_arrow_function = re.search(arrow_function_pattern, js_function, re.DOTALL)
-
+        
+        js_Arrow_function = js_function[1:-1] if js_function.startswith('{') else js_function
+        match_arrow_function = re.search(arrow_function_pattern, js_Arrow_function, re.DOTALL)
         if match_function:
             is_async = bool(match_function.group(1))
             function_name = match_function.group(2) or ''
@@ -59,8 +60,8 @@ class RouteHandler:
             is_async = bool(match_arrow_function.group(1))
             function_name = ''
             parameters = match_arrow_function.group(2).strip()
-            # body = match_arrow_function.group(3).strip()
-            body_match = re.search(r'\{([^{}]*)\}$|([^{}]*)$', match_arrow_function.group(3).strip())
+            body = match_arrow_function.group(3).strip()
+            body_match = re.search(r'\{([^{}]*)\}$|([^{}]*)$', body)
             if (body_match.group(1) != None):
                 body = body_match.group(1)
             elif (body_match.group(2) != None):
@@ -85,7 +86,6 @@ class RouteHandler:
 
         if body.startswith('{') and body.endswith('}'):
             body = body[1:-1]
-        
         return {
             'implementation': {
                 # we are using anonymous function only but we can have 
@@ -104,7 +104,7 @@ class RouteHandler:
                     'list': parameter_list
                 },
                 'isAsync': is_async,
-                'body': body
+                'functionBody': body
             }
         }
         
@@ -180,24 +180,34 @@ class RouteHandler:
 
         return generated_code
     
-    def generate_routing_code(self, route_ids):
+    def generate_routing_code(self, route_ids, is_child=False):
 
         code = ""
         for route_id in route_ids:
             route=self.route_config['routes'][route_id]
             props_code = self.generate_route_props(route)
+            element_prop = []
+            if route.get("props", None) is not None:
+                for key in route["props"].keys():
+                    print("Key:", key, "Value:", route["props"][key])
+                    element_prop_code = f"{key}={{{route['props'][key]}}}"
+                    element_prop.append(element_prop_code)
+                element_prop = " ".join(element_prop)
+                print(element_prop)
+                
             if route.get('redirectTo'):
                 code += f'''<Route path="{route['path']}" element={{<Navigate to='{route['redirectTo']}' />}} {props_code} />'''
             else:
+                path = route['path'][1:] if is_child and route['path'].startswith('/') else route['path']
                 route_end = ' index ' if route['path'] == '/' else ''
                 route_end = route_end + '/' if not route.get('childRoutes') else route_end
                 code += f'''
-                <Route path="{route['path']}" element={{<{self.get_comp_name_by_id(route['component'])} />}} {props_code} {route_end}>
+                <Route path="{path}" element={{<{self.get_comp_name_by_id(route['component'])} {element_prop if element_prop else ''} />}} {props_code} {route_end}>
                 '''
                 if route.get('childRoutes', None):
                     for child_route_id in list(route['childRoutes'].keys()):
                         code += f'''
-                        {"".join(self.generate_routing_code([child_route_id]) )}
+                        {"".join(self.generate_routing_code([child_route_id], is_child=True))}
                         '''
                     code += '</Route>'
             

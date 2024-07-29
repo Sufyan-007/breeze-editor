@@ -45,7 +45,7 @@ export default function CreateApp({ ...props }) {
   }, [])
 
   React.useEffect(() => {
-    ws.current = new WebSocket(`ws://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}/ws/project-progress/`);
+    ws.current = new WebSocket(`${process.env.REACT_APP_SOCKET_URL}/ws/project-progress/`);
     ws.current.onopen = () => {
       console.log("Connected to the WebSocket");
     };

@@ -15,6 +15,7 @@ const routes = [
   { path: '/code', name: 'Code' },
   { path: '/apps', name: 'Third-party App' },
   { path: '/settings', name: 'Settings' },
+  { path: '/resources', name: 'Resources' },
 ];
 
 const useBreadcrumbs = () => {

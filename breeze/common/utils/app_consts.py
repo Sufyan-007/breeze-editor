@@ -1,6 +1,8 @@
 # Path of directory where the configuration for projects are stored
 CONFIG_PATH = "configurations"
 
+GLOBAL_RESOURCES_PATH = "user_uploads"
+
 # Path of directory where all the config of third party libraries are stored or you want to store
 THIRD_PARTY_CONFIG_PATH = "third_party_configs"
 
@@ -14,8 +16,9 @@ CONFIG_FILES_PATH = {
     'REDUCER_CONFIG' : 'reducer_config',
     'REDUX_STORE_CONFIG' : 'redux_store_config',
     'CSS_CONFIG' : 'css_config',
-    'SWAGGER_CONTENT' : 'sample_swagger'
-
+    'SWAGGER_CONTENT' : 'sample_swagger',
+    'RESOURCE_CONFIG' : 'uploaded_resources_config',
+    'USAGE_CONFIG' : 'usage_config',
 }
 
 NEW_LINE_CHAR = "\n"

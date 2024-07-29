@@ -5,6 +5,7 @@ from common.utils.path_extractor import get_path_without_ext
 from .helpers.html_generator import HTMLGenerator
 from .helpers.import_helper import ImportHelper
 from .helpers.api_parameters_mapping import APIParametersMapping
+from .helpers.function_ast_parser import FunctionParser
 
 def generate_imports_code(component_config, all_config,all_store_config,all_reducer_config):
     # print(component_config)
@@ -101,8 +102,9 @@ class ComponentGenerator():
         # print("REACTCOMPONENT")
         # print(react_component_code)
 
-        formatted_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=react_component_code, text=True)
-
+        formatted_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=react_component_code, text=True)
+        # formatted_code = react_component_code
+        
         # Create parent dir if not exists
         create_parent_dir_if_not_exists(output_file)
 
@@ -151,7 +153,7 @@ class ComponentGenerator():
             html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
             
         def generate_state_var_code(var):
-            return f'const [{var["name"]}, set{var["name"].capitalize()}] = useState({format_raw_val(var["body"]["defaultValue"])});'
+            return f'const [{var["name"]}, set{var["name"][0].upper()+var["name"][1:]}] = useState({format_raw_val(var["body"]["defaultValue"])});'
 
         def generate_ref_var_code(var):
             return f'const {var["name"]} = React.useRef({format_raw_val(var["body"]["defaultValue"])});'
@@ -173,27 +175,11 @@ class ComponentGenerator():
         
         import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
         
-        # functions_code = []
-        # api_parameters_mapping = APIParametersMapping(app_config=self.app_config)
-        
-        # for func_conf in config['functions']:
-        #     if func_conf.get("func_type") == "MAPPER_FUNC":
-        #         func = api_parameters_mapping.generate_mapping_function(func_conf["name"],func_conf)
-        #         functions_code.append(func)
-
-        #     else:
-        #         if func_conf['isAnonymous'] is not True:
-        #             functions_code.append(FunctionCodeGenerator.generate_function(func_conf, config))
-        
-        #need to modify generate_function_code function as per function type and cover mapper function.
-        
         def generate_function_code(func):
-            if func["body"]["isAnonymous"]:
-                return ""
-            params = ', '.join([p['name'] for p in func['body']['parameters']['list']])
-            async_keyword = 'async ' if func['body']['isAsync'] else ''
-            return f'\n{async_keyword}function {func["name"]}({params}) {{\n{func["body"]["functionBody"]}\n}}'
-        
+            function_generator = FunctionParser()
+            function_code = function_generator.generate_statement_code(func)
+            return function_code     
+           
         def generate_lifecycle_code(lifecycle):
             lifecycle_type = lifecycle['body']['lifecycleType']
             function_body = lifecycle['body'].get('functionBody', '')

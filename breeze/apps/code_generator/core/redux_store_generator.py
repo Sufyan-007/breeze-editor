@@ -59,7 +59,7 @@ class ReduxStoreGenerator():
         # Get the output file name from the JSON configuration
         output_file = f"{self.reducer_dir}/{store_config['containingFile']}"
 
-        formatted_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=react_store_code, text=True)
+        formatted_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']),shell=True, input=react_store_code, text=True)
 
         # Create parent dir if not exists
         create_parent_dir_if_not_exists(output_file)

@@ -753,6 +753,9 @@ ELEMENT_ATTRIBUTES = {
         "datatype": {
             "datatype": "STRING"
         },
+        "type": {
+            "datatype": "STRING"
+        },
         "usemap": {
             "datatype": "STRING"
         },
