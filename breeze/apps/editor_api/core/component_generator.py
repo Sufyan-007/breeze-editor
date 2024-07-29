@@ -160,12 +160,12 @@ class ComponentGenerator():
         
         def generate_other_var_code(var):
             datatype = var["body"].get("datatype")
-            default_value = var["body"].get("defaultValue")
+            default_value = var["body"].get("defaultValue", "")
             
-            if datatype == "string":
+            if datatype == "STRING":
                 formatted_value = f'"{default_value}"'
-            elif datatype == "boolean":
-                formatted_value = str(default_value).lower()  # Ensure true/false is in lowercase
+            elif datatype == "BOOLEAN":
+                formatted_value = str(default_value).lower()
             else:
                 formatted_value = f'{default_value}'
             
