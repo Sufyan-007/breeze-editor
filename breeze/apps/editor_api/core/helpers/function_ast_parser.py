@@ -65,6 +65,9 @@ class FunctionParser:
         elif config['type'] == "IF_BLOCK":
             code = f""" if ({self.get_value_code(config["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
             """
+            if config.get('elseIf', False):
+                for x in config.get('elseIf'):
+                    code += f"""else if({self.get_value_code(x["condition"])}) {self.generate_statement_code(x.get('body',{}))}"""
             if config.get('elseBody', False):
                 code += f"""else  {self.generate_statement_code(config.get('elseBody',{}))}
             """
