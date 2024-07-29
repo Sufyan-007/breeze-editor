@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Form, Button, Row, Col, FormGroup, Toast } from "react-bootstrap";
 import MonacoEditor from "../../../../common/MonacoEditor";
 import FunctionParams from "./FunctionParams";
@@ -18,6 +18,7 @@ const formTemplate = {
   },
   description: "",
 };
+
 function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   const [formState, setFormState] = useState(
     isEditing ? formData : formTemplate
@@ -33,6 +34,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   const [functionConfigOpen, setFunctionConfigOpen] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const debounceTimeout = useRef(null);
 
   const toggleParamConfigAccordion = () => {
     setParamsConfigOpen(!paramsConfigOpen);
@@ -43,8 +45,20 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   };
 
   useEffect(() => {
-    generatePreview(formState.bodyConfig);
-  }, [formState.bodyConfig]);
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(() => {
+      generatePreview(formState);
+    }, 500);
+
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, [formState]);
 
   const handleFormChange = (key, value) => {
     setFormState((prevState) => ({
@@ -52,6 +66,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
       [key]: value,
     }));
   };
+
   const handleAddParameter = () => {
     if (parameterDetails.name.trim() !== "") {
       setFormState((prevState) => ({
@@ -102,16 +117,18 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
 
   const generatePreview = async (val) => {
     try {
-      const response = await generatePreviewCode(val);
-      if (response.status === 200) {
-        if (response.body.function === "{\n}\n") {
-          setPreviewCode("");
+      if (formState.name) {
+        const response = await generatePreviewCode(val);
+        if (response.status === 200) {
+          if (response.body.function === "{\n}\n") {
+            setPreviewCode("");
+          } else {
+            setPreviewCode(response.body.function);
+          }
         } else {
-          setPreviewCode(response.body.function);
+          setToastMessage("Error occurred while generating code.");
+          setShowToast(true);
         }
-      } else {
-        setToastMessage("Error occurred while generating code.");
-        setShowToast(true);
       }
     } catch (error) {
       console.error("Error generating code:", error);
@@ -324,7 +341,12 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
                 <div className="accordion-content px-2 pt-1">
                   <FunctionConfigStack
                     config={formState.bodyConfig}
-                    updateParent={(val) => generatePreview(val)}
+                    updateParent={(val) => {
+                      setFormState((prevState) => ({
+                        ...prevState,
+                        bodyConfig: val,
+                      }));
+                    }}
                   />
                 </div>
               )}
