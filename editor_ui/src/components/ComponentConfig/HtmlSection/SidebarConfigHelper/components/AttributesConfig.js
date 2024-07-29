@@ -51,9 +51,10 @@ const AttributesConfig = ({
                   return {
                     ...deafult,
                     borderColor: "rgb(73, 80, 87)",
-                    backgroundColor: "#303033",
+                    backgroundColor: "#212529 ",
                     color: "white",
                     paddingRight: "0px",
+                    fontSize: "small"
                   };
                 },
 
@@ -62,6 +63,7 @@ const AttributesConfig = ({
                   marginRight: "5px",
                   paddingLeft: "0px",
                 }),
+               
               }}
               components={{
                 IndicatorSeparator: () => null,
@@ -278,7 +280,6 @@ const AttributesConfig = ({
             style={{ marginRight: ".6rem" }}
             checked={checkbox}
             disabled={inputField.key === ""}
-            custom
             className="attribute-config-checkbox"
             onChange={() => {
               const attributeValue  = {

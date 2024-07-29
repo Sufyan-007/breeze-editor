@@ -3,6 +3,9 @@ import { Form } from "react-bootstrap";
 import MonacoEditor from "../../../../common/MonacoEditor";
 import CreatableSelect from "react-select/creatable";
 import Creatable from "react-select/creatable";
+import { getComponents } from "../../../../../services/ComponentReadService";
+import { useParams } from "react-router-dom"; // If using React Router
+import Select from "react-select";
 
 const CustomPropConfig = ({
   index,
@@ -20,7 +23,8 @@ const CustomPropConfig = ({
 }) => {
   const [checkbox, setCheckbox] = useState(false);
   const [availableVar, setAvailablevar] = useState();
- 
+  const { projectName } = useParams(); // Extract projectName from URL parameters
+  const [availableComponents, setAvailablecomponents] = useState([]);
   useEffect(() => {
     if (
       inputField.type === "FUNCTION" &&
@@ -45,13 +49,81 @@ const CustomPropConfig = ({
 
   useEffect(() => {
     const propDataType = getPropDataType(inputField.key);
-
+    console.log("propDataType", propDataType);
     const filteredDatatypes = allVariables.filter((item) => {
       return item.body.datatype.toUpperCase() === propDataType;
     });
-    
+
     setAvailablevar(filteredDatatypes);
-  }, [allVariables]);
+  }, [allVariables,checkbox]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { CUSTOM, THIRD_PARTY } = await getComponents(projectName);
+        console.log(CUSTOM, THIRD_PARTY);
+        let allCustomTags = CUSTOM.map((obj) => {
+          obj.type = "CUSTOM";
+          return obj;
+        });
+        console.log(allCustomTags);
+
+        let allThirdPartyTags = [];
+        for (const [key, value] of Object.entries(THIRD_PARTY)) {
+          allThirdPartyTags.push(
+            ...value.map((obj) => {
+              obj.type = "THIRD_PARTY";
+              obj.libraryName = key;
+              return obj;
+            })
+          );
+        }
+        console.log(allThirdPartyTags);
+        const options = [...allCustomTags, ...allThirdPartyTags].map(
+          (item) => ({
+            value: item.name,
+            label: item.name,
+            description: item.type.toLowerCase(),
+          })
+        );
+
+        setAvailablecomponents(options);
+      } catch (error) {
+        console.error("Error fetching components:", error);
+      }
+    };
+    if (inputField.type === "COMPONENT") fetchData();
+  }, []);
+ useEffect(() => {
+
+  if((inputField.type === "COMPONENT" || inputField.type === "ELEMENT") && checkbox===true)
+      handleAttributeChange(inputField.key, "");
+
+
+ },[checkbox]);
+  const formatOptionLabel = ({ label, description }) => (
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "space-between",
+        color: "white",
+      }}
+    >
+      <span style={{ marginTop: ".1rem", color: "white", fontSize: ".9rem" }}>
+        {label}
+      </span>{" "}
+      <span
+        style={{
+          marginLeft: "auto",
+          marginTop: ".5rem",
+          color: "#ccc",
+          fontSize: "10px",
+        }}
+      >
+        {description}
+      </span>
+    </div>
+  );
 
   return (
     <>
@@ -70,7 +142,7 @@ const CustomPropConfig = ({
                   return {
                     ...deafult,
                     borderColor: "rgb(73, 80, 87)",
-                    backgroundColor: "#303033",
+                    backgroundColor: "#212529 !important",
                     color: "white",
                     paddingRight: "0px",
                   };
@@ -97,6 +169,80 @@ const CustomPropConfig = ({
           controlId="exampleForm.ControlInput1"
           style={{ width: "68%", marginRight: "10px" }}
         >
+          {" "}
+          {inputField.type === "COMPONENT" &&
+            (checkbox === true ? (
+              <Select
+                options={availableComponents}
+                formatOptionLabel={formatOptionLabel}
+                styles={customStyles}
+                form="_none"
+                components={{
+                  DropdownIndicator: () => null,
+                  IndicatorSeparator: () => null,
+                }}
+              />
+            ) : (
+              <Form.Select
+                size="sm"
+                style={{
+                  borderColor: "rgb(73, 80, 87)",
+                  backgroundColor: "rgb(37 39 42) ",
+                  color: "white",
+                }}
+                onChange={(event) => {
+                  addRefToAttribute(
+                    "predefined",
+                    event,
+                    inputField.key,
+                    "VARIABLE"
+                  );
+                }}
+                value={inputField.$ref}
+              >
+                <option value="" disabled selected hidden>
+                  Select a binding
+                </option>
+
+                {availableVar &&
+                  availableVar.map((functions, index) => (
+                    <option key={index} value={functions.id}>
+                      {functions.name}
+                    </option>
+                  ))}
+              </Form.Select>
+            ))}
+          {inputField.type === "ELEMENT" &&
+            (
+              <Form.Select
+                size="sm"
+                style={{
+                  borderColor: "rgb(73, 80, 87)",
+                  backgroundColor: "rgb(37 39 42) ",
+                  color: "white",
+                }}
+                onChange={(event) => {
+                  addRefToAttribute(
+                    "predefined",
+                    event,
+                    inputField.key,
+                    "VARIABLE"
+                  );
+                }}
+                value={inputField.$ref}
+              >
+                <option value="" disabled selected hidden>
+                  Select a binding
+                </option>
+            
+                {availableVar &&
+                  availableVar.map((functions, index) => (
+                    <option key={index} value={functions.id}>
+                      {functions.name}
+                    </option>
+                  ))}
+              </Form.Select>
+            )}
           {inputField.type === "VARIABLE" &&
             (checkbox === false ? (
               <Form.Select
@@ -141,7 +287,7 @@ const CustomPropConfig = ({
               </div>
             ))}
           {inputField.type === "LITERAL" &&
-            (checkbox === true ? (
+            (checkbox === false ? (
               <Form.Select
                 size="sm"
                 style={{
@@ -201,6 +347,10 @@ const CustomPropConfig = ({
                     width: "100%",
                   }),
                   ...customStyles,
+                  valueContainer: (provided) => ({
+                    ...provided,
+                    fontSize: "small ", // Adjust font size to be smaller
+                  }),
                   multiValue: (provided) => ({
                     ...provided,
                     backgroundColor: "#0e98ba",
@@ -267,7 +417,6 @@ const CustomPropConfig = ({
                   ))}
               </Form.Select>
             ))}
-
           {inputField.type === "FUNCTION" && checkbox === true && (
             <div className="mb-2">
               <MonacoEditor

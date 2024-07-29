@@ -1,6 +1,7 @@
 import { useContext, useMemo, useEffect, useState } from "react";
 import { ComponentContext } from "../ComponentConfigPage";
 import { useParams } from "react-router";
+import { useSelector } from 'react-redux';
 
 import TextElement from "./SidebarConfigHelper/components/TextElementConfig";
 import HtmlElementConfig from "./SidebarConfigHelper/components/HtmlElementConfig";
@@ -39,6 +40,8 @@ const getAllVariables = (componentConfig) => {
 
 export default function ElementConfigSidebar({ config }) {
   const { sidebarService, componentConfig, setComponentConfig } = useContext(ComponentContext);
+  const storeConfig = useSelector((state) => state.config);
+ console.log("StoreConfig",storeConfig)
   const [selectedElement, setSelectedElement] = useState(null);
   const { projectName, componentName } = useParams();
   const element = useMemo(
@@ -48,7 +51,7 @@ export default function ElementConfigSidebar({ config }) {
   const [isLoading, setIsLoading] = useState(false);
   const availableFunctions = getAvailableFunctions(componentConfig)
   const allVariables = getAllVariables(componentConfig);
-  
+  console.log(componentConfig)
   useEffect(() => {
     const subscription =sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
@@ -110,7 +113,7 @@ export default function ElementConfigSidebar({ config }) {
         <div
           style={{
             width: "42rem",
-            backgroundColor: "#303033",
+            backgroundColor: "#212529",
             overflowY: "scroll",
             position: "absolute",
             right: 0,

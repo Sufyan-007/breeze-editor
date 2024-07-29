@@ -18,6 +18,7 @@ const customStyles = {
       color: "white !important",
     },
   }),
+ 
   menu: (base) => ({
     ...base,
     // width: "auto",
@@ -32,6 +33,13 @@ const customStyles = {
       color: "white", // Customize placeholder color here
     };
   },
+  indicaterContainer: (defaultStyles) =>{
+    return {
+     ...defaultStyles,
+      // Customize the color of the indicator here
+      backgroundColor: "black",
+    }
+  }
 };
 const CustomComponentConfig = ({
   attributeOptions,

@@ -5,5 +5,7 @@ const dataTypes = [
   "ARRAY",
   "FUNCTION",
   "OBJECT",
+  "COMPONENT",
+  "ELEMENT"
 ];
 export default dataTypes;

@@ -9,11 +9,12 @@ const customStyles = {
   control: (base,state) => ({
     ...base,
     // width: '50%',
-    backgroundColor: "dark",
+    backgroundColor: "#212529",
     color: "white",
     minHeight:10,
     borderColor:"rgb(73, 80, 87)",
-    border: state.isFocused && "none"
+    border: state.isFocused && "none",
+    fontSize:".7rem"
 
     
 
@@ -50,6 +51,11 @@ const customStyles = {
     border: "2px solid rgb(100, 100, 100)",
 
     
+  }),
+  valueContainer: (provided, state) => ({
+    ...provided,
+    backgroundColor: "#212529  !important",
+    fontSize: "small"
   }),
   placeholder: (defaultStyles) => {
     return {
@@ -160,7 +166,7 @@ const HtmlElementConfig = ({
   const updateHtmlElementConfig = (e) => {
     e.preventDefault();
     const tempElememt = { ...element, attributes: selectedAttributes };
-   // console.log("tempELe",tempElememt)
+   console.log("tempELe",tempElememt)
 
     handleUpdateClick(tempElememt);
   };
@@ -193,10 +199,13 @@ const HtmlElementConfig = ({
   const handleAttributeChange = (key, value) => {
     setSelectedAttributes((prevSelectedAttributes) => {
       const prevAttribute = prevSelectedAttributes[key];
-      const newType =
+      let newType =
         prevAttribute && prevAttribute.type !== "LITERAL"
           ? prevAttribute.type
           : "LITERAL";
+      if (newType === "ELEMENT" || newType === "COMPONENT") {
+        newType = "VARIABLE"
+      }
 
       return {
         ...prevSelectedAttributes,
@@ -279,7 +288,7 @@ const HtmlElementConfig = ({
             position: "sticky",
             bottom: "0",
             marginBottom: "0",
-            backgroundColor: "#303033",
+            backgroundColor: "#212529",
             zIndex: "5",
           }}
         >

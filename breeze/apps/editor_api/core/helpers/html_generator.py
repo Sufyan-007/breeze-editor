@@ -50,12 +50,13 @@ class HTMLGenerator:
         except:
             return ""
         if config.get('type') == 'Element':
-            # print(config)
+            print("ImportExample",self.config ,config)
             if config.get('elementType',"") == 'CUSTOM':
                 tag =config.get("tagName") 
                 if tag!=self.config.get('name'):
                     if tag not in self.config['imports']['components']:
                         self.config['imports']['components'].append(tag)
+                    print("ImportExample",self.config['imports']['components'])
             elif config.get('elementType',"") == 'THIRD_PARTY':
                 tag = config.get("tagName")
                 typeId = config.get("typeId")
