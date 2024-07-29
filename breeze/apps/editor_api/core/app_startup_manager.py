@@ -44,7 +44,9 @@ def run_project_threaded(project_id,port,project_path):
     while True:
         output = process.stdout.readline()
         if output:
-            # print(output)
+            if output.startswith(b'webpack compiled'):
+                RUNNING_APPS[project_id]['status'] = "RUNNING"
+                print("Running :",project_id)
             pass
 
 def start_app(app_config):
@@ -59,7 +61,7 @@ def start_app(app_config):
         thread = threading.Thread(target=run_project_threaded,args= [project_id,port,project_path])
         thread.daemon = True
         thread.start()
-        RUNNING_APPS[project_id] = {'port':port,'thread':thread}
+        RUNNING_APPS[project_id] = {'port':port,'thread':thread,'status':"COMPILATION_STARTED"}
         # process.wait()
         # process=subprocess.run(command, cwd=project_path, env=environment)
 
