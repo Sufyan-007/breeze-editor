@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
-
-const dataTypes = ["string", "number", "boolean", "date", "array", "object"];
+import dataTypes from "../../../../constants/datatype";
+import MonacoEditor from "../../../common/MonacoEditor";
 
 function VariableForm({ onSubmit, formData, isEditing }) {
   const [formState, setFormState] = useState({
@@ -18,6 +18,7 @@ function VariableForm({ onSubmit, formData, isEditing }) {
     name: "",
     type: "",
     datatype: "",
+    defaultValue: "",
   });
 
   useEffect(() => {
@@ -39,6 +40,8 @@ function VariableForm({ onSubmit, formData, isEditing }) {
       error = "required";
     } else if (name === "datatype" && !value) {
       error = "required";
+    } else if (name === "defaultValue" && formState.type === "otherVars" && !value) {
+      error = "required";
     }
 
     return error;
@@ -53,12 +56,27 @@ function VariableForm({ onSubmit, formData, isEditing }) {
         ...prevState,
         body: { ...prevState.body, [name]: value },
       }));
-      error = validateField("datatype", value);
-      setErrors((prevErrors) => ({ ...prevErrors, datatype: error }));
+      error = validateField(name, value);
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
     } else {
       setFormState((prevState) => ({ ...prevState, [name]: value }));
       error = validateField(name, value);
       setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+    }
+  };
+
+  const handleFormChange = (key, value) => {
+    if (key in formState.body) {
+      setFormState((prevState) => ({
+        ...prevState,
+        body: { ...prevState.body, [key]: value },
+      }));
+      const error = validateField(key, value);
+      setErrors((prevErrors) => ({ ...prevErrors, [key]: error }));
+    } else {
+      setFormState((prevState) => ({ ...prevState, [key]: value }));
+      const error = validateField(key, value);
+      setErrors((prevErrors) => ({ ...prevErrors, [key]: error }));
     }
   };
 
@@ -70,7 +88,11 @@ function VariableForm({ onSubmit, formData, isEditing }) {
     newErrors.type = validateField("type", formState.type);
     newErrors.datatype = validateField("datatype", formState.body.datatype);
 
-    if (newErrors.name || newErrors.type || newErrors.datatype) {
+    if (formState.type === "otherVars") {
+      newErrors.defaultValue = validateField("defaultValue", formState.body.defaultValue);
+    }
+
+    if (newErrors.name || newErrors.type || newErrors.datatype || (formState.type === "otherVars" && newErrors.defaultValue)) {
       isValid = false;
     }
 
@@ -86,11 +108,7 @@ function VariableForm({ onSubmit, formData, isEditing }) {
   };
 
   return (
-    <Form
-      onSubmit={handleSubmit}
-      style={{ fontSize: "14px" }}
-      className="h-100"
-    >
+    <Form onSubmit={handleSubmit} style={{ fontSize: "14px" }} className="h-100">
       <div className="d-flex flex-column justify-content-between h-100">
         <div>
           <Form.Group className="mb-2" controlId="formVariableName">
@@ -99,7 +117,7 @@ function VariableForm({ onSubmit, formData, isEditing }) {
               type="text"
               name="name"
               value={formState.name}
-              onChange={handleChange}
+              onChange={(e) => handleFormChange("name", e.target.value)}
               placeholder="var"
               className="form-control form-control-sm"
             />
@@ -115,7 +133,7 @@ function VariableForm({ onSubmit, formData, isEditing }) {
               as="select"
               name="type"
               value={formState.type}
-              onChange={handleChange}
+              onChange={(e) => handleFormChange("type", e.target.value)}
               className="form-control form-control-sm"
             >
               <option value="">Select...</option>
@@ -135,7 +153,7 @@ function VariableForm({ onSubmit, formData, isEditing }) {
               as="select"
               name="datatype"
               value={formState.body.datatype}
-              onChange={handleChange}
+              onChange={(e) => handleFormChange("datatype", e.target.value)}
               className="form-control form-control-sm"
             >
               <option value="">Select a data type</option>
@@ -153,22 +171,28 @@ function VariableForm({ onSubmit, formData, isEditing }) {
           </Form.Group>
           <Form.Group className="mb-2" controlId="formDefaultValue">
             <Form.Label>Default Value</Form.Label>
-            <Form.Control
-              type="text"
-              name="defaultValue"
-              value={formState.body.defaultValue}
-              onChange={handleChange}
-              placeholder="value"
-              className="form-control form-control-sm"
+            <MonacoEditor
+              defaultValue={formState.body.defaultValue}
+              onChange={(value) => handleFormChange("defaultValue", value)}
+              height="100px"
+              width="100%"
+              id={isEditing ? `editor-${formState?.id}` : "prop-value"}
+              language="javascript"
             />
+            {errors.defaultValue && (
+              <p className="mb-0" style={{ color: "#EA868F" }}>
+                {errors.defaultValue}
+              </p>
+            )}
           </Form.Group>
           <Form.Group className="mb-2" controlId="formDescription">
             <Form.Label>Description</Form.Label>
             <Form.Control
-              type="text"
+              as="textarea"
+              rows={3}
               name="description"
               value={formState.body.description}
-              onChange={handleChange}
+              onChange={(e) => handleFormChange("description", e.target.value)}
               placeholder="Enter description"
               className="form-control form-control-sm"
             />

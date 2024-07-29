@@ -4,8 +4,7 @@ import MonacoEditor from "../../../../common/MonacoEditor";
 import FunctionParams from "./FunctionParams";
 import FunctionConfigStack from "./FunctionConfigStack";
 import { generatePreviewCode } from "../../../../../services/ComponentConfigService";
-
-const dataTypes = ["STRING", "NUMERIC", "OBJECT", "ARRAY", "CALLBACK", "ANY"];
+import dataTypes from "../../../../../constants/datatype";
 
 const formTemplate = {
   name: "",

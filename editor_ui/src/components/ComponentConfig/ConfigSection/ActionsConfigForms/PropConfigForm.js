@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
-
-const dataTypes = [
-  "string",
-  "number",
-  "boolean",
-  "date",
-  "array",
-  "object",
-  "function",
-];
+import dataTypes from "../../../../constants/datatype";
+import MonacoEditor from "../../../common/MonacoEditor";
 
 function PropConfigForm({ onSubmit, formData, isEditing }) {
   const [formState, setFormState] = useState({
@@ -29,7 +21,7 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
 
   useEffect(() => {
     if (isEditing && formData) {
-      formData.checkUsage = true
+      formData.checkUsage = true;
       setFormState(formData);
     }
   }, [isEditing, formData]);
@@ -50,21 +42,18 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
     return error;
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    let error = "";
-
-    if (name in formState.body) {
+  const handleFormChange = (key, value) => {
+    if (key in formState.body) {
       setFormState((prevState) => ({
         ...prevState,
-        body: { ...prevState.body, [name]: value },
+        body: { ...prevState.body, [key]: value },
       }));
-      error = validateField("datatype", value);
+      const error = validateField("datatype", value);
       setErrors((prevErrors) => ({ ...prevErrors, datatype: error }));
     } else {
-      setFormState((prevState) => ({ ...prevState, [name]: value }));
-      error = validateField(name, value);
-      setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+      setFormState((prevState) => ({ ...prevState, [key]: value }));
+      const error = validateField(key, value);
+      setErrors((prevErrors) => ({ ...prevErrors, [key]: error }));
     }
   };
 
@@ -104,7 +93,7 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
               type="text"
               name="name"
               value={formState.name}
-              onChange={handleChange}
+              onChange={(e) => handleFormChange("name", e.target.value)}
               placeholder="var"
               className="form-control form-control-sm"
             />
@@ -120,7 +109,7 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
               as="select"
               name="datatype"
               value={formState.body.datatype}
-              onChange={handleChange}
+              onChange={(e) => handleFormChange("datatype", e.target.value)}
               className="form-control form-control-sm"
             >
               <option value="">Select a data type</option>
@@ -138,22 +127,23 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
           </Form.Group>
           <Form.Group className="mb-2" controlId="formDefaultValue">
             <Form.Label>Default Value</Form.Label>
-            <Form.Control
-              type="text"
-              name="defaultValue"
-              value={formState.body.defaultValue}
-              onChange={handleChange}
-              placeholder="value"
-              className="form-control form-control-sm"
+            <MonacoEditor
+              defaultValue={formState.body.defaultValue}
+              onChange={(value) => handleFormChange("defaultValue", value)}
+              height="100px"
+              width="100%"
+              id={isEditing ? `editor-${formState?.id}` : "prop-value"}
+              language="javascript"
             />
           </Form.Group>
           <Form.Group className="mb-2" controlId="formDescription">
             <Form.Label>Description</Form.Label>
             <Form.Control
-              type="text"
+              as="textarea"
+              rows={3}
               name="description"
               value={formState.body.description}
-              onChange={handleChange}
+              onChange={(e) => handleFormChange("description", e.target.value)}
               placeholder="Prop description"
               className="form-control form-control-sm"
             />

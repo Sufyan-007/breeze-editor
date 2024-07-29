@@ -4,7 +4,7 @@ import javascript from "../assets/icons/javascript.svg";
 import react from "../assets/icons/react.svg";
 import { router } from "../App";
 
-export default function ProjectCards({ project, ...props }) {
+export default function ProjectCards({ project, removeProject, ...props }) {
   const [deleting, setDeleting] = useState(false);
 
   function reGenerate() {
@@ -18,25 +18,37 @@ export default function ProjectCards({ project, ...props }) {
   function deleteProject() {
     console.log(project);
     setDeleting(true);
-    window.confirm(
-      `Are you sure you want to delete project : ${project.projectName} ?`
+    const confirmed = window.confirm(
+      `Are you sure you want to delete project: ${project.projectName}?`
     );
-    ProjectService.deleteProject(project.name).then((response) => {
-      if (response.status === 200) {
-        alert("Project deleted successfully");
-      } else {
-        alert("Failed to delete project");
-      }
+    if (confirmed) {
+      ProjectService.deleteProject(project.project_name).then((response) => {
+        if (response.status === 200) {
+          alert("Project deleted successfully");
+          removeProject(project.project_name);
+        } else {
+          alert("Failed to delete project");
+        }
+        setDeleting(false);
+      });
+    } else {
       setDeleting(false);
-    });
+    }
   }
 
   return (
     <div {...props}>
       <div className="card my-2 text-white bg-dark">
         <div className="card-body">
-          <h4 className="card-title" style={{fontSize: "22px"}}>{project.projectName}</h4>
-          <p className="card-text" style={{ color: "#B7BBC8", fontSize: "14px"}}>{project.description}</p>
+          <h4 className="card-title" style={{ fontSize: "22px" }}>
+            {project.projectName}
+          </h4>
+          <p
+            className="card-text"
+            style={{ color: "#B7BBC8", fontSize: "14px" }}
+          >
+            {project.description}
+          </p>
         </div>
         <div className="card-footer text-muted d-flex justify-content-between border-top-0">
           <div className="tech d-flex">
@@ -48,8 +60,21 @@ export default function ProjectCards({ project, ...props }) {
             </div>
           </div>
           <div className="stats">
-          <button type="button" className="btn btn-secondary btn-sm mx-2" onClick={handleCardClick}>Config</button>
-          <button type="button" className="btn btn-danger btn-sm ml-1" onClick={deleteProject}>Delete</button>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm mx-2"
+              onClick={handleCardClick}
+            >
+              Config
+            </button>
+            <button
+              type="button"
+              className="btn btn-danger btn-sm ml-1"
+              onClick={deleteProject}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
           </div>
         </div>
       </div>

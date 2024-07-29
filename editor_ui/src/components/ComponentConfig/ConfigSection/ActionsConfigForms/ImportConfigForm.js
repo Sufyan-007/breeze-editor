@@ -8,14 +8,13 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
       import_entity: "",
       from: "",
       import_type: "SINGLE",
-      TYPE: "",
+      TYPE: "THIRD_PARTY",
     },
   });
 
   const [errors, setErrors] = useState({
     import_entity: "",
     from: "",
-    TYPE: "",
   });
 
   useEffect(() => {
@@ -27,10 +26,7 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
   const validateField = (name, value) => {
     let error = "";
 
-    if (
-      (name === "import_entity" || name === "from" || name === "TYPE") &&
-      !value
-    ) {
+    if ((name === "import_entity" || name === "from") && !value) {
       error = "required";
     }
 
@@ -74,9 +70,8 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
       formState.body.import_entity
     );
     newErrors.from = validateField("from", formState.body.from);
-    newErrors.TYPE = validateField("TYPE", formState.body.TYPE);
 
-    if (newErrors.import_entity || newErrors.from || newErrors.TYPE) {
+    if (newErrors.import_entity || newErrors.from) {
       isValid = false;
     }
 
@@ -139,25 +134,6 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
               checked={formState.body.import_type === "FULL"}
               onChange={handleCheckboxChange}
             />
-          </Form.Group>
-          <Form.Group className="mb-2" controlId="formType">
-            <Form.Label>Type</Form.Label>
-            <Form.Control
-              as="select"
-              name="TYPE"
-              value={formState.body.TYPE}
-              onChange={handleChange}
-              className="form-control form-control-sm"
-            >
-              <option value="">Select a type</option>
-              <option value="THIRD_PARTY">THIRD_PARTY</option>
-              <option value="SERVICES">SERVICES</option>
-            </Form.Control>
-            {errors.TYPE && (
-              <p className="mb-0" style={{ color: "#EA868F" }}>
-                {errors.TYPE}
-              </p>
-            )}
           </Form.Group>
         </div>
         <div className="d-flex">
