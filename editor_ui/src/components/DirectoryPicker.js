@@ -1,75 +1,116 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, ListGroup, Form, InputGroup } from "react-bootstrap";
-
-const mockDirectoryStructure = {
-  generated_projects: {
-    folder1: {
-      subfolder1: {},
-      subfolder2: {},
-    },
-    folder2: {
-      subfolder1: {},
-    },
-  },
-};
 
 const DirectoryPicker = ({ form }) => {
   const [show, setShow] = useState(false);
-  const [currentPath, setCurrentPath] = useState(["generated_projects"]);
+  const [currentPath, setCurrentPath] = useState("generated_projects");
   const [selectedFolder, setSelectedFolder] = useState("");
   const [newFolderName, setNewFolderName] = useState("");
+  const [directoryStructure, setDirectoryStructure] = useState([]);
+
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/all-projects/`)
+      .then((response) => response.json())
+      .then((data) => {
+        const structure = buildFileStructure(data);
+        setDirectoryStructure(structure);
+      })
+      .catch((error) => {
+        console.error("Error fetching directory structure:", error);
+      });
+  }, []);
+
+  const buildFileStructure = (projects) => {
+    const fileStructure = {};
+
+    Object.keys(projects).forEach((projectKey) => {
+      const project = projects[projectKey];
+      const pathParts = project.projectPath.split("/");
+
+      let currentLevel = fileStructure;
+
+      pathParts.forEach((part, index) => {
+        if (!currentLevel[part]) {
+          currentLevel[part] = { folders: {}, files: [] };
+        }
+        if (index < pathParts.length - 1) {
+          currentLevel = currentLevel[part].folders;
+        }
+      });
+
+      currentLevel[pathParts[pathParts.length - 1]].files.push(project.name);
+    });
+    return fileStructure;
+  };
 
   const handleShow = () => setShow(true);
   const handleClose = () => setShow(false);
 
   const navigateTo = (folder) => {
-    setCurrentPath((prevPath) => [...prevPath, folder]);
+    setCurrentPath((prevPath) => `${prevPath}/${folder}`);
     setSelectedFolder("");
   };
 
   const navigateBack = () => {
-    setCurrentPath((prevPath) => prevPath.slice(0, -1));
+    setCurrentPath((prevPath) => {
+      const pathArray = prevPath.split("/");
+      pathArray.pop();
+      return pathArray.join("/");
+    });
     setSelectedFolder("");
   };
 
   const handleSelect = () => {
-    const fullPath = selectedFolder
-      ? [...currentPath, selectedFolder].join("/")
-      : currentPath.join("/");
-    form.setValue("projectPath", fullPath);
-    console.log(form.getValues());
+    form.setValue("projectPath", currentFullPath);
     handleClose();
   };
 
-  const getCurrentDirectory = () => {
-    return currentPath.reduce(
-      (acc, folder) => acc[folder],
-      mockDirectoryStructure
-    );
+  const getCurrentDirectory = (structure, path) => {
+    const pathParts = path.split("/");
+    let currentLevel = structure;
+    let result = {};
+
+    for (const part of pathParts) {
+      if (currentLevel[part]) {
+        result[part] = currentLevel[part];
+        currentLevel = currentLevel[part].folders;
+      } else {
+        console.log("object");
+      }
+    }
+
+    return result[pathParts[pathParts.length - 1]];
   };
 
-  const currentDirectory = getCurrentDirectory();
+  const currentDirectory = getCurrentDirectory(directoryStructure, currentPath);
 
   const handleFolderClick = (folder) => {
     setSelectedFolder((prevSelectedFolder) =>
       prevSelectedFolder === folder ? "" : folder
     );
   };
+  const handleFolderDoubleClick = (name) => {
+    const folder = currentDirectory.folders
+      ? currentDirectory.folders[name]
+      : null;
 
-  const handleFolderDoubleClick = (folder) => {
-    navigateTo(folder);
+    if (folder) {
+      navigateTo(name);
+    }
   };
 
-  const handleAddFolder = () => {
-    if (newFolderName) {
-      currentDirectory[newFolderName] = {};
+  const handleAddFolder = (currentDirectory, path, newFolderName) => {
+    if (Object.keys(currentDirectory.folders).includes(newFolderName)) {
+      console.log("already");
+    } else {
+      currentDirectory.folders[newFolderName] = { folders: {}, files: [] };
       setNewFolderName("");
     }
   };
 
   const currentFullPath = selectedFolder
-    ? `${currentPath.join("/")}/${selectedFolder}`
-    : currentPath.join("/");
+    ? `${currentPath}/${selectedFolder}`
+    : currentPath;
 
   return (
     <>
@@ -84,7 +125,6 @@ const DirectoryPicker = ({ form }) => {
       <div className="text-white mt-2">
         Selected Directory: {currentFullPath}
       </div>
-
       <Modal
         show={show}
         onHide={handleClose}
@@ -98,22 +138,50 @@ const DirectoryPicker = ({ form }) => {
         </Modal.Header>
         <Modal.Body>
           <ListGroup>
-            {Object.keys(currentDirectory).map((folder) => (
-              <ListGroup.Item
-                key={folder}
-                action
-                active={folder === selectedFolder}
-                onClick={() => handleFolderClick(folder)}
-                onDoubleClick={() => handleFolderDoubleClick(folder)}
-                style={{
-                  backgroundColor:
-                    folder === selectedFolder ? "#6c757d" : "inherit",
-                  borderColor: "#6c757d",
-                }}
-              >
-                {folder}
-              </ListGroup.Item>
-            ))}
+            {currentDirectory && (
+              <>
+                {Object.entries(currentDirectory.folders || {}).map(
+                  ([folderName, folderContent]) => (
+                    <React.Fragment key={folderName}>
+                      <ListGroup.Item
+                        action
+                        active={folderName === selectedFolder}
+                        onClick={() => handleFolderClick(folderName)}
+                        onDoubleClick={() =>
+                          handleFolderDoubleClick(folderName)
+                        }
+                        style={{
+                          backgroundColor:
+                            folderName === selectedFolder
+                              ? "#6c757d"
+                              : "inherit",
+                          borderColor: "#6c757d",
+                        }}
+                      >
+                        {folderContent.isProject
+                          ? folderContent.projectName
+                          : folderName}
+                      </ListGroup.Item>
+                    </React.Fragment>
+                  )
+                )}
+                {currentDirectory.files &&
+                  currentDirectory.files.map((file) => (
+                    <ListGroup.Item
+                      key={file}
+                      action
+                      disabled
+                      style={{
+                        backgroundColor:
+                          file === selectedFolder ? "#6c757d" : "inherit",
+                        borderColor: "#6c757d",
+                      }}
+                    >
+                      {file}
+                    </ListGroup.Item>
+                  ))}
+              </>
+            )}
           </ListGroup>
           <InputGroup className="mt-3">
             <Form.Control
@@ -123,7 +191,13 @@ const DirectoryPicker = ({ form }) => {
             />
             <Button
               variant="primary"
-              onClick={handleAddFolder}
+              onClick={() =>
+                handleAddFolder(
+                  currentDirectory,
+                  currentFullPath,
+                  newFolderName
+                )
+              }
               style={{ backgroundColor: "#6c757d", borderColor: "#6c757d" }}
             >
               Add Folder
@@ -131,7 +205,7 @@ const DirectoryPicker = ({ form }) => {
           </InputGroup>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-between align-items-center">
-          {currentPath.length > 1 && (
+          {currentPath.length > 0 && (
             <Button
               variant="secondary"
               onClick={navigateBack}

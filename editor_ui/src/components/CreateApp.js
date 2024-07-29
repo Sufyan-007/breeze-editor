@@ -152,7 +152,6 @@ export default function CreateApp({ ...props }) {
         formData.append(key, data[key]);
       }
     });
-    console.log(formData);
     createNewProject(formData)
       .then((response) => {
         if (response.error) {
