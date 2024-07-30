@@ -39,6 +39,8 @@ export default function ProjectRouting() {
   const allPageComponents = Object.entries(componentConfig.pages).map(
     (obj) => obj[0]
   );
+  // static till next change call, by default react allows case-insensitive routes
+  const CASESENSITIVE = false;
   const [compRouteProps, setCompRouteProps] = useState({
     compProps: {
       ...Object.fromEntries(
@@ -214,14 +216,24 @@ export default function ProjectRouting() {
     ...allRoutes.map((route) => ({ value: route, label: route.fullPath })),
   ]);
 
+  const checkForMainsChildFullPath = (route) => {
+    if (route.initialParentPath === '/') {
+      return route.fullPath.slice(1);
+    }
+    return route.fullPath;
+  };
+
   const isRoutePathPresent = (routePath) => {
-    let isCaseSensitive = false;
+    let isCaseSensitive = CASESENSITIVE;
     routePath = rectifyPath(routePath, isCaseSensitive);
     if (selectedParentPathRoute.fullPath) {
       routePath = selectedParentPathRoute.fullPath + routePath;
     }
     let allFullPaths = allRoutes.map((route) => {
-      if (routeMode === "Edit") {
+      if (routeMode === "Edit" || routeMode === "View") {
+        if (!isCaseSensitive) {
+          currentOffCanvasRoute.fullPath = currentOffCanvasRoute.fullPath.toLowerCase();
+        }
         if (currentOffCanvasRoute.fullPath === routePath) {
           return "";
         }
@@ -634,8 +646,12 @@ export default function ProjectRouting() {
                       }
                       isInvalid={(() =>
                         isRoutePathPresent(displayRoute.path))()}
+                      autoComplete={routeMode === "View" ? "off" : ""}
                     />
-                    <Form.Control.Feedback type="invalid">
+                    <Form.Control.Feedback
+                      type="invalid"
+                      className={`${routeMode === "View" ? "mt-4" : ""}`}
+                    >
                       Path already present
                     </Form.Control.Feedback>
                   </FloatingLabel>
@@ -664,8 +680,9 @@ export default function ProjectRouting() {
                           minHeight: routeMode === "Add" ? "38px" : "58px",
                           height: routeMode === "Add" ? "38px" : "58px",
                         }}
-                        value={displayRoute ? displayRoute.fullPath : ""}
+                        defaultValue={displayRoute ? checkForMainsChildFullPath(displayRoute) : ""}
                         readOnly={true}
+                        autoComplete="off"
                       />
                     </FloatingLabel>
                   </div>
@@ -1078,7 +1095,7 @@ export default function ProjectRouting() {
               {routes.map((route) => (
                 <tr className="text-center" key={route.fullPath}>
                   <td width={"30%"} title={route.fullPath}>
-                    {route.fullPath}
+                    {checkForMainsChildFullPath(route)}
                   </td>
                   <td
                     width={"20%"}
