@@ -53,6 +53,7 @@ const DirectoryPicker = ({ form }) => {
 
   const navigateTo = (folder) => {
     setCurrentPath((prevPath) => `${prevPath}/${folder}`);
+    setWarningMessage("");
     setSelectedFolder("");
   };
 
@@ -63,6 +64,7 @@ const DirectoryPicker = ({ form }) => {
       return pathArray.join("/");
     });
     setSelectedFolder("");
+    setWarningMessage("");
   };
 
   const handleSelect = () => {
