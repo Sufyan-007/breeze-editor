@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, ListGroup, Form, InputGroup } from "react-bootstrap";
+import { Modal, Button, ListGroup, Form, InputGroup, Alert } from "react-bootstrap";
 
 const DirectoryPicker = ({ form }) => {
   const [show, setShow] = useState(false);
@@ -7,6 +7,7 @@ const DirectoryPicker = ({ form }) => {
   const [selectedFolder, setSelectedFolder] = useState("");
   const [newFolderName, setNewFolderName] = useState("");
   const [directoryStructure, setDirectoryStructure] = useState([]);
+  const [warningMessage, setWarningMessage] = useState("");
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/all-projects/`)
@@ -44,7 +45,11 @@ const DirectoryPicker = ({ form }) => {
   };
 
   const handleShow = () => setShow(true);
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setWarningMessage("");
+    setNewFolderName("");
+  };
 
   const navigateTo = (folder) => {
     setCurrentPath((prevPath) => `${prevPath}/${folder}`);
@@ -74,9 +79,7 @@ const DirectoryPicker = ({ form }) => {
       if (currentLevel[part]) {
         result[part] = currentLevel[part];
         currentLevel = currentLevel[part].folders;
-      } else {
-        console.log("object");
-      }
+      } 
     }
 
     return result[pathParts[pathParts.length - 1]];
@@ -89,6 +92,7 @@ const DirectoryPicker = ({ form }) => {
       prevSelectedFolder === folder ? "" : folder
     );
   };
+
   const handleFolderDoubleClick = (name) => {
     const folder = currentDirectory.folders
       ? currentDirectory.folders[name]
@@ -99,12 +103,14 @@ const DirectoryPicker = ({ form }) => {
     }
   };
 
-  const handleAddFolder = (currentDirectory, path, newFolderName) => {
+  const handleAddFolder = (currentDirectory, newFolderName) => {
     if (Object.keys(currentDirectory.folders).includes(newFolderName)) {
-      console.log("already");
+      setWarningMessage(`${newFolderName} already exists`);
+      setNewFolderName(""); 
     } else {
       currentDirectory.folders[newFolderName] = { folders: {}, files: [] };
       setNewFolderName("");
+      setWarningMessage("");
     }
   };
 
@@ -137,6 +143,11 @@ const DirectoryPicker = ({ form }) => {
           <Modal.Title>Select Directory</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {warningMessage && (
+            <Alert variant="warning">
+              {warningMessage}
+            </Alert>
+          )}
           <ListGroup>
             {currentDirectory && (
               <>
@@ -194,7 +205,6 @@ const DirectoryPicker = ({ form }) => {
               onClick={() =>
                 handleAddFolder(
                   currentDirectory,
-                  currentFullPath,
                   newFolderName
                 )
               }
@@ -205,7 +215,7 @@ const DirectoryPicker = ({ form }) => {
           </InputGroup>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-between align-items-center">
-          {currentPath.length > 0 && (
+          {currentPath !== "generated_projects" && (
             <Button
               variant="secondary"
               onClick={navigateBack}
