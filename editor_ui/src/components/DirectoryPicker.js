@@ -38,7 +38,7 @@ const DirectoryPicker = ({ form }) => {
         }
       });
 
-      currentLevel[pathParts[pathParts.length - 1]].files.push(project.name);
+      currentLevel[pathParts[pathParts.length - 1]].files.push(project.projectName);
     });
     return fileStructure;
   };
