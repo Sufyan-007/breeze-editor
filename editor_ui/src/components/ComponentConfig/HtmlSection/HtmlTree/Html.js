@@ -13,7 +13,7 @@ import { ComponentContext } from "../../ComponentConfigPage";
 
 export default function Html({ value, htmlId, reference, selectElem }) {
   const [showChild, setShowChild] = useState(false);
-  const { setComponentConfig } = useContext(ComponentContext);
+  const { setComponentConfig ,sidebarService} = useContext(ComponentContext);
   const { projectName, componentName } = useParams();
   const hasChildren = value.children?.length > 0;
   const [showAdd, setShowAdd] = useState(false);
@@ -63,7 +63,11 @@ export default function Html({ value, htmlId, reference, selectElem }) {
 
   function removeElem() {
     removeHtmlElem(projectName, componentName, htmlId).then((res) => {
+      const currentElement = sidebarService.getSelectedElem().getValue()?.elem;
+      if(currentElement === htmlId)
+         sidebarService.setSelectedElem(null)
       setComponentConfig(res);
+          
     });
   }
 

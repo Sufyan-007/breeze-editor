@@ -1,7 +1,7 @@
-import React from "react";
-import Creatable from "react-select/creatable";
-import CollapsibleProp from "./CollapsiblePropConfig";
+import React, { useState, useEffect } from "react";
 
+import Creatable from "react-select/creatable";
+import CustomPropConfig from "./CustomPropConfig";
 const customStyles = {
   control: (base) => ({
     ...base,
@@ -34,110 +34,79 @@ const customStyles = {
   },
 };
 const CustomComponentConfig = ({
-  element,
-  makeSelectedElementNull,
-  handleUpdateClick,
   attributeOptions,
-  availableAttributes,
+  handleSelectAttributeChange,
+  customStyles,
   selectedAttributes,
-  setSelectedAttributes,
+  handleAttributeChange,
+  handleDeleteAttribute,
   availableFunctions,
-  allVariables,
+  addRefToAttribute,
+  getPropDataType,
+  allVariables
 }) => {
-  //   const [attributeOption, setAttributeoptions] = useState([
-  //     { value: "chocolate", label: "Chocolate" },
-  //     { value: "strawberry", label: "Strawberry" },
-  //     { value: "vanilla", label: "Vanilla" },
-  //   ]);
-  const handleSelectAttributeChange = (event) => {
-    const selectedOption = event.value;
-    const attributeOptions = Object.keys(availableAttributes)
-      .filter(
-        (key) =>
-          !key.startsWith("on") && !selectedAttributes.hasOwnProperty(key)
-      )
-      .sort()
-      .map((key) => ({
-        value: key,
-        label: key,
-      }));
-    let type = availableAttributes[selectedOption]?.datatype || "LITERAL";
-    if (type === "STRING") type = "LITERAL";
-    else if (type === "NUMBER") type = "VARIABLE";
-    // let type = "LITERAL";
-
-    setSelectedAttributes((prevSelectedAttributes) => ({
-      ...prevSelectedAttributes,
-      [selectedOption]: {
-        type: type,
-        value: "",
-      },
+  console.log("Attribute options",attributeOptions)
+  const [inputFields, setInputFields] = useState([]);
+  console.log(inputFields);
+  useEffect(() => {
+    const fieldsArray = Object.keys(selectedAttributes).map((key) => ({
+      key,
+      ...selectedAttributes[key],
     }));
+    console.log([...inputFields]);
+
+    setInputFields([...fieldsArray]);
+  }, [selectedAttributes]);
+
+  const handleRemoveInputAttribute = (index, attribute) => {
+    setInputFields(inputFields.filter((_, i) => i !== index));
+    if (attribute !== "") handleDeleteAttribute(attribute);
   };
-  const handleDeleteAttribute = (attributeKey) => {
-    setSelectedAttributes((prevSelectedAttributes) => {
-      const updatedAttributes = { ...prevSelectedAttributes };
-      delete updatedAttributes[attributeKey];
-      return updatedAttributes;
-    });
-  };
-  const addFunctionAttribute = (functionType, value, attribute) => {
-    if (functionType === "bindValue") {
-      setSelectedAttributes((prev) => ({
-        ...prev,
-        [attribute]: { type: "FUNCTION", $ref: value.target.value },
-      }));
-    } else if(functionType === "functionValue") {
-      const functionConfig = {
-        parameters: { list: [{ name: "event" }] },
-        isAnonymous: true,
-        isAsync: false,
-        functionBody: value,
-      };
-      setSelectedAttributes((prev) => ({
-        ...prev,
-        [attribute]: { type: "FUNCTION", value: functionConfig },
-      }));
-      
-      } else {
-           setSelectedAttributes((prev) => ({
-            ...prev,
-            [attribute]: { type: "LITERAL", value: value.target.value },
-           }))
-      }
-    
+
+  const handleAddInput = () => {
+    setInputFields([...inputFields, { key: "", type: "", value: "" }]);
   };
 
   return (
     <>
-      <Creatable
-        options={attributeOptions}
-        onChange={handleSelectAttributeChange}
-        placeholder="Add Props"
-        styles={{
-          ...customStyles,
-        }}
-        // components={{
-        //   DropdownIndicator: () => null,
-        //   IndicatorSeparator: () => null,
-        // }}
-        value={null}
-      />
-
       <div>
-        {selectedAttributes &&
-          Object.entries(selectedAttributes).map(([key, value]) => (
-            <div className="d-flex justify-content-end mt-3" key={key}>
-              <CollapsibleProp
-                title={key}
-                handleDeleteAttribute={handleDeleteAttribute}
-                value={value}
-                addFunctionAttribute={addFunctionAttribute}
-                availableFunctions={availableFunctions}
-                allVariables={allVariables}
-              ></CollapsibleProp>
-            </div>
-          ))}
+        {inputFields.map((inputField, index) => (
+          <CustomPropConfig
+            index={index}
+            key={inputField.key}
+            inputField={inputField}
+            selectedAttributes={selectedAttributes}
+            handleAttributeChange={handleAttributeChange}
+            handleRemoveInputAttribute={handleRemoveInputAttribute}
+            availableFunctions={availableFunctions}
+            addRefToAttribute={addRefToAttribute}
+            attributeOptions={attributeOptions}
+            handleSelectAttributeChange={handleSelectAttributeChange}
+            customStyles={customStyles}
+            getPropDataType={getPropDataType}
+            allVariables={allVariables}
+          ></CustomPropConfig>
+        ))}
+      </div>
+      <div className="d-flex justify-content-end">
+        <button
+          className="btn btn-secondary"
+          type="button"
+          onClick={handleAddInput}
+          disabled={
+           ( Object.keys(selectedAttributes).length <
+            Object.keys(inputFields).length) || attributeOptions.length ===0
+          }
+        >
+          <img
+            className=""
+            width="20"
+            height="20"
+            src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
+            alt="add--v1"
+            style={{ cursor: "pointer" }}
+          />
+        </button>
       </div>
     </>
   );
