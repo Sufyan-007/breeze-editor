@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import ParamInput from "./ParamInput";
 
-function FunctionCallEdit({ config, update }) {
+function FunctionCallEdit({ config, functionConfig, update , hideName=false}) {
   const [conf, setConf] = useState({ ...config });
-
+  
   useEffect(() => {
     setConf({ ...config });
   }, [config]);
@@ -21,10 +21,10 @@ function FunctionCallEdit({ config, update }) {
     <>
       <div className="d-flex h-100 flex-column justify-content-between">
         <div>
-          <p className="mb-2" style={{ fontSize: "16px" }}>
+          {!hideName && <p className="mb-2" style={{ fontSize: "16px" }}>
             {" "}
             Name : {config?.functionName}
-          </p>
+          </p>}
           <div>
             <strong>Param Mapping</strong>
             {config.parameters &&
@@ -50,7 +50,6 @@ function FunctionCallEdit({ config, update }) {
           </Button>
         </div>
       </div>
-      ;
     </>
   );
 }
