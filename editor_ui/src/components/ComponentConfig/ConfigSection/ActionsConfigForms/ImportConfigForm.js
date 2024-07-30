@@ -8,8 +8,13 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
       import_entity: "",
       from: "",
       import_type: "SINGLE",
-      TYPE: "",
+      TYPE: "THIRD_PARTY",
     },
+  });
+
+  const [errors, setErrors] = useState({
+    import_entity: "",
+    from: "",
   });
 
   useEffect(() => {
@@ -18,8 +23,21 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
     }
   }, [isEditing, formData]);
 
+  const validateField = (name, value) => {
+    let error = "";
+
+    if ((name === "import_entity" || name === "from") && !value) {
+      error = "required";
+    }
+
+    return error;
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let error = validateField(name, value);
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+
     setFormState((prevState) => ({
       ...prevState,
       body: {
@@ -43,9 +61,29 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
     }));
   };
 
+  const validate = () => {
+    let isValid = true;
+    let newErrors = {};
+
+    newErrors.import_entity = validateField(
+      "import_entity",
+      formState.body.import_entity
+    );
+    newErrors.from = validateField("from", formState.body.from);
+
+    if (newErrors.import_entity || newErrors.from) {
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formState);
+    if (validate()) {
+      onSubmit(formState);
+    }
   };
 
   return (
@@ -66,6 +104,11 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
               placeholder="Enter import entity"
               className="form-control form-control-sm"
             />
+            {errors.import_entity && (
+              <p className="mb-0" style={{ color: "#EA868F" }}>
+                {errors.import_entity}
+              </p>
+            )}
           </Form.Group>
           <Form.Group className="mb-2" controlId="formFrom">
             <Form.Label>From</Form.Label>
@@ -77,6 +120,11 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
               placeholder="Enter source"
               className="form-control form-control-sm"
             />
+            {errors.from && (
+              <p className="mb-0" style={{ color: "#EA868F" }}>
+                {errors.from}
+              </p>
+            )}
           </Form.Group>
           <Form.Group className="mb-2" controlId="formFullImport">
             <Form.Check
@@ -86,20 +134,6 @@ function ImportConfigForm({ onSubmit, formData, isEditing }) {
               checked={formState.body.import_type === "FULL"}
               onChange={handleCheckboxChange}
             />
-          </Form.Group>
-          <Form.Group className="mb-2" controlId="formType">
-            <Form.Label>Type</Form.Label>
-            <Form.Control
-              as="select"
-              name="TYPE"
-              value={formState.body.TYPE}
-              onChange={handleChange}
-              className="form-control form-control-sm"
-            >
-              <option value="">Select a type</option>
-              <option value="THIRD_PARTY">THIRD_PARTY</option>
-              <option value="SERVICES">SERVICES</option>
-            </Form.Control>
           </Form.Group>
         </div>
         <div className="d-flex">

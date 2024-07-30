@@ -13,6 +13,7 @@ import {
   reorderComponentActions,
 } from "../../../services/ComponentConfigService";
 import { Toast } from "react-bootstrap";
+import ModalComponent from "../../../common/display/d.modal";
 
 const menuItems = [
   { key: "stateVars", label: "Variables" },
@@ -41,6 +42,16 @@ function ActionsConfig() {
   const { projectName, componentName } = useParams();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const defaultModal = {
+    'showModal':false,
+    'modalTitle':'',
+    'body':'',
+    'isSubmitButtonPresent':false,
+    'submitVariant':'',
+    'submitText':'',
+    'modalSubmitHandler': () => {}
+   }
+  const [modalDetails, setModalDetails] = useState(defaultModal);
 
   const handleOpen = (type) => {
     setFormType(type);
@@ -101,6 +112,37 @@ function ActionsConfig() {
       });
   };
 
+  const showDependantComponents = (payload, comps) => {
+    if (payload.body.type === 'propsVars') {
+      let compsList = ""
+      comps.forEach(element => {
+        compsList += element + ", "
+      }); 
+      compsList = compsList.slice(0, -3)
+      let modalBody = {
+        'showModal':true,
+        'modalTitle':'Props usage found...',
+
+        body: (
+          <>
+            <p><em className="text-muted">{payload.body.name}</em> prop is used across different components, are you sure?</p>
+            <p>You have to follow & update the prop there as well</p>
+            <p>Dependent components: <em className="text-muted">{compsList}</em></p>
+          </>
+        ),
+        'isSubmitButtonPresent':true,
+        'submitVariant':'warning',
+        'submitText':'update',
+        'modalSubmitHandler': () => {
+          setModalDetails(defaultModal);
+          delete payload.body.checkUsage
+          handleFormSubmit(payload.body);
+        }
+      }
+      setModalDetails(modalBody)
+    }
+  }
+
   const handleEdit = (data) => {
     setFormType(data.type);
     setFormData(data);
@@ -117,10 +159,14 @@ function ActionsConfig() {
 
     try {
       const response = await updateComponentConfig(payload);
-      console.log("Update successful:", response);
-      setComponentConfig(response);
-      setToastMessage("Action Successful");
-      setShowToast(true);
+      if (response.status === 222) {
+        showDependantComponents(payload, response.body);
+      } else {
+        console.log("Update successful:", response.body);
+        setComponentConfig(response.body);
+        setToastMessage("Action Successful");
+        setShowToast(true);
+      }
     } catch (error) {
       console.error("Error updating component config:", error);
       setToastMessage("Error updating component config");
@@ -308,7 +354,6 @@ function ActionsConfig() {
               <div
                 id="dropdownMenuButton1"
                 data-bs-toggle="dropdown"
-                aria-expanded="false"
                 style={{ cursor: "pointer" }}
               >
                 <i className="bi bi-plus-circle"></i>
@@ -367,6 +412,17 @@ function ActionsConfig() {
           <strong className="me-auto">{toastMessage}</strong>
         </Toast.Header>
       </Toast>
+
+      <ModalComponent
+          showModal={modalDetails.showModal}
+          modalTitle={modalDetails.modalTitle}
+          modalBody={modalDetails.body}
+          handleClose={() => setModalDetails(defaultModal)}
+          submitText={modalDetails.submitText}
+          submitHandler={modalDetails.modalSubmitHandler}
+          isSubmitButtonPresent={modalDetails.isSubmitButtonPresent}
+          submitVariant={modalDetails.submitVariant}
+        />
     </>
   );
 }

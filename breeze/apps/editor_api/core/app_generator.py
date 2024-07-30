@@ -181,14 +181,14 @@ class AppGenerator:
         project_name = self.app_config['name']
         app_config_dump = json.dumps(self.app_config)
         process = subprocess.Popen(
-            [
+            " ".join([
                 "npx",
                 "create-react-app",
                 project_name,
                 "--template",
                 "cra-template",
                 "--use-npm",
-            ],
+            ]), shell=True,
             cwd=self.app_config["path"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -280,7 +280,7 @@ class AppGenerator:
 
         # subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
         process = subprocess.Popen(
-            ["npm", "install"],
+            " ".join(["npm", "install"]), shell=True,
             cwd=f"{self.app_config['path']}/{self.app_config['name']}",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

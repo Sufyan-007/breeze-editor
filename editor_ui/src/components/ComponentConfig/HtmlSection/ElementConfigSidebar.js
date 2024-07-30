@@ -9,6 +9,7 @@ const getAvailableFunctions = (componentConfig) => {
   const functionsList = [];
 
   const { resources, propsVars } = componentConfig;
+  console.log(componentConfig);
   
   const namedFunctions = resources.filter(resource => resource.type === "function");
   const propFunctions = propsVars.filter(propsVar => propsVar.body?.datatype === "function");
@@ -27,8 +28,8 @@ const getAllVariables = (componentConfig) => {
 
   const { resources, propsVars } = componentConfig;
 
-  const variables = resources.filter(resource => resource.type !== "function" && resource.type.datatype !== "function");
-  const propVariables = propsVars.filter(propsVar => propsVar.body.datatype !== "function");
+  const variables = resources.filter(resource => resource?.type !== "function" && resource?.type?.datatype !== "function");
+  const propVariables = propsVars.filter(propsVar => propsVar?.body?.datatype !== "function");
   
   variablesList.push(...variables,...propVariables);
   
@@ -47,11 +48,13 @@ export default function ElementConfigSidebar({ config }) {
   const [isLoading, setIsLoading] = useState(false);
   const availableFunctions = getAvailableFunctions(componentConfig)
   const allVariables = getAllVariables(componentConfig);
- 
+  
   useEffect(() => {
-    sidebarService.getSelectedElem().subscribe((elem) => {
+    const subscription =sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
     });
+    return () => subscription.unsubscribe();
+
   }, [sidebarService]);
 
   const makeSelectedElementNull = () => {
@@ -127,6 +130,7 @@ export default function ElementConfigSidebar({ config }) {
               <div>
                 <button
                   className="btn-close-white btn-close ms-3 flex-grow-1"
+                  aria-label="makeSelectedElementNull"
                   onClick={makeSelectedElementNull}
                 ></button>
               </div>

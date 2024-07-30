@@ -39,6 +39,8 @@ export default function ProjectRouting() {
   const allPageComponents = Object.entries(componentConfig.pages).map(
     (obj) => obj[0]
   );
+  // static till next change call, by default react allows case-insensitive routes
+  const CASESENSITIVE = false;
   const [compRouteProps, setCompRouteProps] = useState({
     compProps: {
       ...Object.fromEntries(
@@ -54,23 +56,23 @@ export default function ProjectRouting() {
     routeProps: {},
   });
   const getRelativeRouteProps = (componentName, routeName) => {
-    let finalProps = []
-    let allProps = {}
+    let finalProps = [];
+    let allProps = {};
     if (compRouteProps.routeProps[routeName]) {
-      compRouteProps.routeProps[routeName].forEach(prop => {
-        finalProps.push({name: prop.name, value: prop.value});
+      compRouteProps.routeProps[routeName].forEach((prop) => {
+        finalProps.push({ name: prop.name, value: prop.value });
         allProps[prop.name] = true;
-      })
+      });
     }
     if (compRouteProps.compProps[componentName]) {
-      compRouteProps.compProps[componentName].forEach(prop => {
+      compRouteProps.compProps[componentName].forEach((prop) => {
         if (!allProps.hasOwnProperty(prop.name)) {
-          finalProps.push({name: prop.name, value: prop.value});
+          finalProps.push({ name: prop.name, value: prop.value });
         }
-      })
+      });
     }
-    return finalProps
-  }
+    return finalProps;
+  };
   const [selectedProps, setSelectedProps] = useState("");
   const selectRef = useRef(null);
   const optionalRouteProps = [
@@ -214,6 +216,33 @@ export default function ProjectRouting() {
     ...allRoutes.map((route) => ({ value: route, label: route.fullPath })),
   ]);
 
+  const checkForMainsChildFullPath = (route) => {
+    if (route.initialParentPath === '/') {
+      return route.fullPath.slice(1);
+    }
+    return route.fullPath;
+  };
+
+  const isRoutePathPresent = (routePath) => {
+    let isCaseSensitive = CASESENSITIVE;
+    routePath = rectifyPath(routePath, isCaseSensitive);
+    if (selectedParentPathRoute.fullPath) {
+      routePath = selectedParentPathRoute.fullPath + routePath;
+    }
+    let allFullPaths = allRoutes.map((route) => {
+      if (routeMode === "Edit" || routeMode === "View") {
+        if (!isCaseSensitive) {
+          currentOffCanvasRoute.fullPath = currentOffCanvasRoute.fullPath.toLowerCase();
+        }
+        if (currentOffCanvasRoute.fullPath === routePath) {
+          return "";
+        }
+      }
+      return isCaseSensitive ? route.fullPath : route.fullPath.toLowerCase();
+    });
+    return allFullPaths.includes(routePath);
+  };
+
   const displaySearchedRoute = (value) => {
     setSearchedRoute(value);
     let filteredDisplayRoutes = allRoutes.filter(
@@ -229,7 +258,6 @@ export default function ProjectRouting() {
   const handleRouteOffCanvas = (route, mode) => {
     setShowAllRouteObj(false);
     setCurrentOffCanvasRoute({ ...route });
-    console.log(route);
     setDisplayRoute(route);
     setRouteMode(mode);
     setSelectedProps("");
@@ -320,13 +348,26 @@ export default function ProjectRouting() {
     }
   };
 
-  const saveTheRoute = async () => {
-    if (displayRoute?.path) {
-      if (displayRoute.path[0] !== "/") {
-        displayRoute.path = "/" + displayRoute.path;
+  const rectifyPath = (routePath, isCaseSensitive) => {
+    if (routePath) {
+      routePath = routePath.trim();
+      if (routePath.length > 0 && routePath[0] !== "/") {
+        routePath = "/" + displayRoute.path;
+      }
+      if (routePath.length > 1 && routePath[routePath.length - 1] === "/") {
+        routePath = routePath.substring(0, routePath.length - 1);
+      }
+      if (!isCaseSensitive) {
+        routePath = routePath.toLowerCase();
       }
     }
+    return routePath;
+  };
 
+  const saveTheRoute = async () => {
+    if (displayRoute?.path) {
+      displayRoute.path = rectifyPath(displayRoute.path, true);
+    }
     if (
       !displayRoute.path ||
       !(displayRoute.component || displayRoute.redirectTo)
@@ -340,7 +381,6 @@ export default function ProjectRouting() {
       });
       return;
     }
-
     if (routeMode === "Edit" || routeMode === "Add") {
       if (routeMode === "Add") {
         if (
@@ -453,18 +493,14 @@ export default function ProjectRouting() {
       </div>
       <div className="d-flex justify-content-end mt-1 mb-2 mx-4">
         <div className="d-flex">
-          <div
-            data-bs-theme="dark"
-            className="me-2"
-            type="button"
-            onChange={(e) => displaySearchedRoute(e.target.value)}
-          >
+          <div data-bs-theme="dark" className="me-2" type="button">
             <input
               className="form-control me-2"
               type="search"
               placeholder="Search"
               aria-label="Search"
               value={searchedRoute}
+              onChange={(e) => displaySearchedRoute(e.target.value)}
             />
           </div>
           <button
@@ -485,7 +521,7 @@ export default function ProjectRouting() {
           routeMode === "Add" ? "addModeWidth" : "normalWidth"
         }`}
         data-bs-theme="dark"
-        tabindex="-1"
+        tabIndex="-1"
         id="projectRoutingOffcanvasRight"
         aria-labelledby="projectRoutingOffcanvasRightLabel"
       >
@@ -529,6 +565,9 @@ export default function ProjectRouting() {
                         placeholder="Select.. or search.. a parent path"
                         options={parentRouteOptions}
                         onChange={(e) => {
+                          if (e === null) {
+                            setSelectedParentPathRoute("");
+                          }
                           if (e?.value) {
                             setSelectedParentPathRoute(e.value);
                           }
@@ -556,12 +595,12 @@ export default function ProjectRouting() {
                           }),
                           option: (base, { isFocused }) => ({
                             ...base,
-                            backgroundColor: isFocused ? '#343a40' : '#212529',
-                            width: '100%',
-                            height: '100%',
-                            color: '#dee2e6bf',
+                            backgroundColor: isFocused ? "#343a40" : "#212529",
+                            width: "100%",
+                            height: "100%",
+                            color: "#dee2e6bf",
                             cursor: "pointer",
-                            border: isFocused ? '1px solid #495057' : 'none',
+                            border: isFocused ? "1px solid #495057" : "none",
                           }),
                           menu: (base) => ({
                             ...base,
@@ -579,7 +618,9 @@ export default function ProjectRouting() {
                       type="text"
                       contentEditable={true}
                       className={`${
-                        routeMode === "Add" ? "mb-3" : "mb-1"
+                        routeMode === "Add" || routeMode === "Edit"
+                          ? "mb-3"
+                          : "mb-1"
                       } py-1`}
                       style={{
                         position: "relative",
@@ -603,7 +644,16 @@ export default function ProjectRouting() {
                       onChange={(e) =>
                         handleRouteObjectChange(displayRoute, "path", e)
                       }
+                      isInvalid={(() =>
+                        isRoutePathPresent(displayRoute.path))()}
+                      autoComplete={routeMode === "View" ? "off" : ""}
                     />
+                    <Form.Control.Feedback
+                      type="invalid"
+                      className={`${routeMode === "View" ? "mt-4" : ""}`}
+                    >
+                      Path already present
+                    </Form.Control.Feedback>
                   </FloatingLabel>
                 </InputGroup>
               </div>
@@ -619,7 +669,6 @@ export default function ProjectRouting() {
                     >
                       <Form.Control
                         type="text"
-                        contentEditable={true}
                         className={`my-3 py-1 form-floating`}
                         style={{
                           position: "relative",
@@ -631,7 +680,9 @@ export default function ProjectRouting() {
                           minHeight: routeMode === "Add" ? "38px" : "58px",
                           height: routeMode === "Add" ? "38px" : "58px",
                         }}
-                        value={displayRoute ? displayRoute.fullPath : ""}
+                        defaultValue={displayRoute ? checkForMainsChildFullPath(displayRoute) : ""}
+                        readOnly={true}
+                        autoComplete="off"
                       />
                     </FloatingLabel>
                   </div>
@@ -639,7 +690,9 @@ export default function ProjectRouting() {
 
                 <div
                   className={`d-flex ${
-                    routeMode === "Add" ? "mt-1" : "mt-4"
+                    routeMode === "Add" || routeMode === "Edit"
+                      ? "mt-1"
+                      : "mt-4"
                   } pt-3`}
                   aria-label="toggler"
                 >
@@ -649,10 +702,13 @@ export default function ProjectRouting() {
                       type="radio"
                       name="flexRadioDefault"
                       id="flexRadioDefault1"
-                      checked={isRouteWithAComponent}
+                      defaultChecked={isRouteWithAComponent}
                       onClick={() => setIsRouteWithAComponent(true)}
                     />
-                    <label className="form-check-label" for="flexRadioDefault1">
+                    <label
+                      className="form-check-label"
+                      htmlFor="flexRadioDefault1"
+                    >
                       component
                     </label>
                   </div>
@@ -662,10 +718,13 @@ export default function ProjectRouting() {
                       type="radio"
                       name="flexRadioDefault"
                       id="flexRadioDefault2"
-                      checked={!isRouteWithAComponent}
+                      defaultChecked={!isRouteWithAComponent}
                       onClick={() => setIsRouteWithAComponent(false)}
                     />
-                    <label className="form-check-label" for="flexRadioDefault2">
+                    <label
+                      className="form-check-label"
+                      htmlFor="flexRadioDefault2"
+                    >
                       redirectTo
                     </label>
                   </div>
@@ -694,8 +753,8 @@ export default function ProjectRouting() {
                       </select>
                       {displayRoute.component &&
                         displayRoute.path &&
-                        (!!compRouteProps.compProps[displayRoute.component]
-                          .length) && (
+                        !!compRouteProps.compProps[displayRoute.component]
+                          .length && (
                           <div>
                             <div className="accordion mt-2" id="componentsProp">
                               <div className="accordion-item">
@@ -736,36 +795,34 @@ export default function ProjectRouting() {
                                   data-bs-parent="#componentsProp"
                                 >
                                   <div className="accordion-body">
-                                    {getRelativeRouteProps(displayRoute.component, displayRoute.path)?.map(
-                                      (obj) => (
-                                        <div
-                                          key={obj.name}
-                                          className="mb-4 row"
-                                        >
-                                          <label className="col-sm-3 col-form-label text-white">
-                                            {obj.name}
-                                          </label>
-                                          <div className="col-sm-9 mt-2">
-                                            <MonacoEditor
-                                              key={obj.name}
-                                              defaultValue={obj.value || ""}
-                                              onChange={(value) => {
-                                                console.log('onchange');
-                                                handleRouteProps(
-                                                  obj.name,
-                                                  value
-                                                );
-                                              }}
-                                              height="50px"
-                                              id={obj.name}
-                                              width="80%"
-                                              language="json"
-                                              readOnlyMode={routeMode === 'View' ? true : false}
-                                            />
-                                          </div>
+                                    {getRelativeRouteProps(
+                                      displayRoute.component,
+                                      displayRoute.path
+                                    )?.map((obj) => (
+                                      <div key={obj.name} className="mb-4 row">
+                                        <label className="col-sm-3 col-form-label text-white">
+                                          {obj.name}
+                                        </label>
+                                        <div className="col-sm-9 mt-2">
+                                          <MonacoEditor
+                                            key={obj.name}
+                                            defaultValue={obj.value || ""}
+                                            onChange={(value) => {
+                                              handleRouteProps(obj.name, value);
+                                            }}
+                                            height="50px"
+                                            id={obj.name}
+                                            width="80%"
+                                            language="json"
+                                            readOnlyMode={
+                                              routeMode === "View"
+                                                ? true
+                                                : false
+                                            }
+                                          />
                                         </div>
-                                      )
-                                    )}
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               </div>
@@ -806,8 +863,8 @@ export default function ProjectRouting() {
                     },
                     searchBox: {
                       border: "none",
-                      "border-bottom": "1px solid blue",
-                      "border-radius": "0px",
+                      borderBottom: "1px solid blue",
+                      borderRadius: "0px",
                     },
                   }}
                 />
@@ -1036,9 +1093,9 @@ export default function ProjectRouting() {
             </thead>
             <tbody>
               {routes.map((route) => (
-                <tr className="text-center" key={route.path}>
+                <tr className="text-center" key={route.fullPath}>
                   <td width={"30%"} title={route.fullPath}>
-                    {route.fullPath}
+                    {checkForMainsChildFullPath(route)}
                   </td>
                   <td
                     width={"20%"}

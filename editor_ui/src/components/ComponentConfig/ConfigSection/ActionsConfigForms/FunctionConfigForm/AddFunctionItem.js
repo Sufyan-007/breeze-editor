@@ -6,13 +6,18 @@ import IfBlock from "../FunctionItemComponents/IfBlock";
 import ReturnValue from "../FunctionItemComponents/ReturnValue";
 import FunctionCall from "../FunctionItemComponents/FunctionCall";
 import Select from "react-select";
+import WhileBlock from "../FunctionItemComponents/WhileBlock";
+import DoWhileBlock from "../FunctionItemComponents/DoWhileLoop";
 
 const options = [
   { value: "createVariable", label: "Create Variable" },
-  // { value: "updateVariable", label: "Update Variable" },
+  { value: "updateVariable", label: "Update Variable" },
   { value: "ifBlock", label: "If Else Block" },
+  { value: "whileBlock", label: "While Block" },
+  { value: "doWhileBlock", label: "Do While Block" },
+
   { value: "customCode", label: "Custom Code" },
-  // { value: "return", label: "Return Value" },
+  { value: "return", label: "Return Value" },
   // { value: "functionCall", label: "Function Call" },
 ];
 
@@ -37,9 +42,39 @@ const templates = {
     declarationType: "",
     varName: "",
   },
+  updateVariable: {
+    type: "ASSIGNMENT",
+    varName: "",
+  },
   customCode: {
     type: "CUSTOM",
     body: "",
+  },
+  return: {
+    type: "RETURN",
+    value: {},
+  },
+  whileBlock: {
+    type: "WHILE_BLOCK",
+    condition: {
+      type: "CUSTOM",
+      value: "",
+    },
+    bodyConfig: {
+      type: "BLOCK",
+      statements: [],
+    },
+  },
+  doWhileBlock: {
+    type: "DO_WHILE_BLOCK",
+    bodyConfig: {
+      type: "BLOCK",
+      statements: [],
+    },
+    condition: {
+      type: "CUSTOM",
+      value: "",
+    },
   },
 };
 
@@ -50,6 +85,8 @@ const statementTypes = {
   customCode: CustomCode,
   return: ReturnValue,
   functionCall: FunctionCall,
+  whileBlock: WhileBlock,
+  doWhileBlock: DoWhileBlock,
 };
 
 function AddFunctionItem({ update }) {

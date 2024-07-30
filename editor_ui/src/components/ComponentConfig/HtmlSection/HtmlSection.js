@@ -178,7 +178,7 @@ export default function HtmlSection() {
                   type="submit"
                   id="Form_Go"
                   className="Button bg-primary text-light rounded"
-                  value="GO"
+                  defaultValue="GO"
                   onClick={setIframeSource}
                 />
               </div>
