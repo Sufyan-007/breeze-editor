@@ -37,6 +37,7 @@ export default function CreateApp({ ...props }) {
     formState: { errors },
     setValue,
     setError,
+    clearErrors,
   } = form;
 
   const progressMessages = useMemo(() => {
@@ -99,6 +100,37 @@ export default function CreateApp({ ...props }) {
         return prevProgress + 1;
       });
     }, 1000);
+  };
+
+  const validateLogo = (file) => {
+    if (file.size > 2 * 1024 * 1024) { 
+      return "File size exceeds 2MB";
+    }
+  
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        // Allow images with dimensions less than or equal to 16x16 pixels
+        if (img.width > 16 || img.height > 16) {
+          resolve("Image dimensions should be 16x16 pixels or smaller");
+        } else {
+          resolve(true);
+        }
+      };
+    });
+  };
+  
+  const handleLogoChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validationError = await validateLogo(file);
+      if (validationError !== true) {
+        setError("logo", { message: validationError });
+      } else {
+        clearErrors("logo");
+      }
+    }
   };
 
   const stylingComponents = [
@@ -225,14 +257,20 @@ export default function CreateApp({ ...props }) {
                         id="logoUpload"
                         accept="image/*"
                         {...register("logo", { required: false })}
+                        onChange={handleLogoChange}
                       />
+                      {errors.logo && (
+                        <div className="text-danger mt-1">
+                          {errors.logo.message}
+                        </div>
+                      )}
                     </div>
-                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-5">
+                    {/* <div className="form-group mb-3" id="Main-0-0-0-0-0-0-5">
                       <label className="text-white mb-1 d-block">
                         Choose path for generated project
                       </label>
                       <DirectoryPicker form={form} />
-                    </div>
+                    </div> */}
                     <div className="form-group mb-3" id="Main-0-0-0-0-0-0-1">
                       <input
                         className="form-control"
@@ -339,6 +377,7 @@ export default function CreateApp({ ...props }) {
                         type="submit"
                         className="btn btn-primary bg-white"
                         style={{ color: "#152733" }}
+                        disabled={Object.keys(errors).length > 0}
                       >
                         Create App
                       </button>

@@ -210,6 +210,7 @@ const DirectoryPicker = ({ form }) => {
                   newFolderName
                 )
               }
+              disabled={!newFolderName.trim()}
               style={{ backgroundColor: "#6c757d", borderColor: "#6c757d" }}
             >
               Add Folder
