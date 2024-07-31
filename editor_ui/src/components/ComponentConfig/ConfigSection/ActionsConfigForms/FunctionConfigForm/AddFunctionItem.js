@@ -34,6 +34,7 @@ const templates = {
       type: "BLOCK",
       statements: [],
     },
+    elseIf: [],
     elseBody: {
       type: "BLOCK",
       statements: [],

@@ -11,12 +11,22 @@ export default function IfBlock({ config, updateParent }) {
     setOffCanvasOpen(true);
   }
 
-  function update(val, key) {
-    setBlockConfig((state) => {
-      const newState = { ...state, [key]: val };
-      updateParent(newState);
-      return newState;
-    });
+  function update(val, key, index) {
+    if (key === "elseIf") {
+      setBlockConfig((state) => {
+        state["elseIf"][index]["bodyConfig"] = val
+
+        const newState = { ...state}
+        updateParent(newState)
+        return newState
+      })
+    } else {
+      setBlockConfig((state) => {
+        const newState = { ...state, [key]: val };
+        updateParent(newState);
+        return newState;
+      });
+    }
   }
 
   function handleClose(val) {
@@ -25,6 +35,13 @@ export default function IfBlock({ config, updateParent }) {
       updateParent(val);
     }
     setOffCanvasOpen(false);
+  }
+
+  function deleteBlock(val) {
+    const newConfig = { ...blockConfig };
+    delete newConfig[val];
+    setBlockConfig(newConfig);
+    updateParent(newConfig);
   }
 
   return (
@@ -57,13 +74,47 @@ export default function IfBlock({ config, updateParent }) {
             updateParent={(val) => update(val, "bodyConfig")}
           />
         </div>
+        {config.elseIf.length > 0 && (
+          <>
+            {config.elseIf.map((item, i) => {
+              return (
+                <div key={i}>
+                  <div className="d-flex justify-content-between">
+                    <div className="">
+                      <strong>Else If:</strong> {item.condition.value}
+                    </div>
+                  </div>
+                  <div className="px-3">
+                    <FunctionConfigStack
+                      config={blockConfig.elseIf[i].bodyConfig}
+                      updateParent={(val) => update(val, "elseIf", i)}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        )}
         {config.elseBody && (
           <>
-            <strong>Else:</strong>
+            <div className="d-flex justify-content-between">
+              <div>
+                <strong>Else:</strong>
+              </div>
+              <div className="d-flex">
+                <div
+                  className=""
+                  style={{ cursor: "pointer", color: "red" }}
+                  onClick={() => deleteBlock("elseBody")}
+                >
+                  <i className="bi bi-trash-fill"></i>
+                </div>
+              </div>
+            </div>
             <div className="px-3">
               <FunctionConfigStack
                 config={blockConfig.elseBody}
-                updateParent={(val) =>update(val, "elseBody")}
+                updateParent={(val) => update(val, "elseBody")}
               />
             </div>
           </>

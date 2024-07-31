@@ -67,7 +67,7 @@ class FunctionParser:
             """
             if config.get('elseIf', False):
                 for x in config.get('elseIf'):
-                    code += f"""else if({self.get_value_code(x["condition"])}) {self.generate_statement_code(x.get('body',{}))}"""
+                    code += f"""else if({self.get_value_code(x["condition"])}) {self.generate_statement_code(x.get('bodyConfig',{}))}"""
             if config.get('elseBody', False):
                 code += f"""else  {self.generate_statement_code(config.get('elseBody',{}))}
             """

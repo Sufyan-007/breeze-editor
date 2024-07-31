@@ -328,7 +328,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
                 className="accordion-header d-flex justify-content-between bg-secondary text-white p-1"
                 onClick={toggleFunctionConfigAccordion}
               >
-                <div>Function Stack</div>
+                <div>Function Body</div>
                 <div>
                   {functionConfigOpen ? (
                     <i className="bi bi-dash"></i>
