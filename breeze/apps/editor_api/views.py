@@ -146,9 +146,8 @@ class NewComponentWriter(APIView):
             app_component_writer = AppEditor(param)
             res = app_component_writer.add_component(
                 data["name"], data["type"])
-            print("djfvnskjvnsri",res)
             update_components()
-
+            print(res,"see the response for add component")
             return JsonResponse(res)
         except:
             return JsonResponse({}, status=500)

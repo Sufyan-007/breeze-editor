@@ -10,16 +10,28 @@ import {
 import "../../css/folder.css";
 import { useParams } from "react-router-dom";
 import Node from "./Node";
+import { uploadFile } from "../../services/ResourceUploadService.js";
+import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal.js";
+import DeleteConfirmationModal from "../common/DeleteConfirmationModal.js";
+import AddFolderModal from "./AddFolderModal.js";
 
 const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
   const [treeData, setTreeData] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [selectedPath, setSelectedPath] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteFileName, setDeleteFileName] = useState("");
   const [selectedNode, setSelectedNode] = useState(null);
   const { projectName } = useParams();
 
   useEffect(() => {
     fetchData();
   }, [projectName]);
+
+  useEffect(() => {
+    console.log("jkjkhjg");
+  }, [selectedNode]);
 
   const fetchData = async () => {
     try {
@@ -62,7 +74,7 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
     return rootNodes;
   };
 
-  const onCreate = async (parentId, type, lineage, tag) => {
+  const onCreate = async (parentId, type, lineage, tag, name) => {
     try {
       console.log("Creating new item with details:", {
         parentId,
@@ -71,7 +83,14 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
         tag,
         projectName,
       });
-      const newItem = await onAdd(parentId, type, lineage, tag, projectName);
+      const newItem = await onAdd(
+        parentId,
+        type,
+        lineage,
+        tag,
+        projectName,
+        name
+      );
       console.log("New item created:", newItem);
       updateTreeData(parentId, newItem);
     } catch (error) {
@@ -205,9 +224,40 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
     }
   };
 
+  const handleUpload = async (formData) => {
+    console.log("parent");
+    try {
+      const result = await uploadFile(formData, projectName);
+      console.log(result, "result");
+      if (result.message) {
+        setToastMessage("File uploaded successfully");
+      } else {
+        setToastMessage(result.error || "Upload failed.");
+      }
+      fetchData();
+      setShowToast(true);
+    } catch (error) {
+      setToastMessage("An error occurred while adding the File.");
+      setShowToast(true);
+    }
+  };
+
   if (!treeData) {
     return <div>Loading...</div>;
   }
+
+  //  const handleConfirmDelete = () => {
+  //    onDelete(node.id);
+  //    setShowDeleteModal(false);
+  //  };
+
+  //  const handleDelete = (fileName) => {
+  //    setDeleteFileName(fileName);
+  //    setShowDeleteModal(true);
+  //  };
+  //   const closeModal = () => {
+  //     setShowDeleteModal(false);
+  //   };
 
   return (
     <div id="folderStructureConfig">
@@ -215,14 +265,10 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
         <Tree
           className="tree-node"
           data={treeData}
-          openByDefault={true}
           width={600}
           height={resourceUpload ? null : 600}
           indent={20}
           padding={25}
-          onCreate={onCreate}
-          onRename={onRename}
-          onDelete={onDelete}
         >
           {({ node, style, dragHandle }) => (
             <Node
@@ -236,6 +282,8 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
               resourceUpload={resourceUpload}
               selectedNode={selectedNode}
               setSelectedNode={setSelectedNode}
+              onUpload={handleUpload}
+              // handleDelete={handleDelete}
             />
           )}
         </Tree>
@@ -251,6 +299,23 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
           </button>
         </div>
       )}
+      {/* <ResourcesUploadModal
+        show={isModalVisible}
+        onHide={() => setIsModalVisible(false)}
+        onSubmit={handleUpload}
+        path={currentFolderPath}
+      /> */}
+      {/* <DeleteConfirmationModal
+        fileName={deleteFileName}
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onDelete={handleConfirmDelete}
+      /> */}
+      {/* <AddFolderModal
+        show={showAddModal}
+        onHide={() => setShowAddModal(false)}
+        onEnterName={handleEnterName}
+      /> */}
     </div>
   );
 };

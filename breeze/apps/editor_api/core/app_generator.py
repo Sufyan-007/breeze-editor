@@ -385,7 +385,9 @@ class AppGenerator:
         for item_id, item in structure.items():
             # Create the path based on lineage
             path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
+            print(path_parts,"path parts")
             current_path = os.path.join(*path_parts)
+            print(current_path,"current path")
 
             if item['type'] == 'DIRECTORY':
                 os.makedirs(current_path, exist_ok=True)

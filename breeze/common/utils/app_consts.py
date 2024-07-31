@@ -17,7 +17,8 @@ CONFIG_FILES_PATH = {
     'REDUX_STORE_CONFIG' : 'redux_store_config',
     'CSS_CONFIG' : 'css_config',
     'SWAGGER_CONTENT' : 'sample_swagger',
-    'RESOURCE_CONFIG' : 'uploaded_resources_config'
+    'RESOURCE_CONFIG' : 'uploaded_resources_config',
+    'DIRECTORY_MANAGEMENT':'directory_management'
 }
 
 NEW_LINE_CHAR = "\n"

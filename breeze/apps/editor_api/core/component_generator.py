@@ -90,14 +90,17 @@ class ComponentGenerator():
 
         for component_config in configs:
             self.write_component(component_config)
+
     
-    def write_component(self, comp_config):
+    def write_component(self, comp_config, file_path):
         react_component_code = self.generate_react_component_code(comp_config)
-        # print(react_component_code)
-
+            # print(react_component_code)
+        
+        
         # Get the output file name from the JSON configuration
-        output_file = f"{self.src_dir}/{comp_config['containingFile']}"
+        # output_file = f"{self.src_dir}/{comp_config['containingFile']}"
 
+        output_file = f"{file_path}"
         # print("REACTCOMPONENT")
         # print(react_component_code)
 
