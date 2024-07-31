@@ -27,7 +27,7 @@ from .views import ComponentConfigWriter
 from .views import ComponentConfigOrder
 from .views import GetResources
 from .views import StylesConfig
-from .views import FileUpload
+from .views import FileHandle
 from .views import ResourceConfig
 from .views import ASTParser
 
@@ -75,8 +75,10 @@ urlpatterns = [
         path("ast-parser/",ASTParser.as_view()),
         
         # Resources 
-        path('file-upload/', FileUpload.as_view()),
-        path('file-upload/<str:projectName>', FileUpload.as_view()),
+        path('file-upload/', FileHandle.as_view()),
+        path('file-upload/<str:projectName>', FileHandle.as_view()),
+        path('file-upload/<str:projectName>/<str:fileId>', FileHandle.as_view()),
+
         path('resource-config/<str:projectName>',ResourceConfig.as_view()),
 ]
 

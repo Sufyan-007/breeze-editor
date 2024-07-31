@@ -6,15 +6,18 @@ import Multiselect from "multiselect-react-dropdown";
 import { useForm } from "react-hook-form";
 import Modal from "react-bootstrap/Modal";
 import { ToastContainer, Toast } from "react-bootstrap";
+import DirectoryPicker from "./DirectoryPicker";
 
 export default function CreateApp({ ...props }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    setError,
-  } = useForm({
+  const [loading, setLoading] = useState(false);
+  const [selectedValues, setSelectedValues] = React.useState([]);
+  const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState("Uploading...");
+  const [showModal, setModalShow] = useState(false);
+  const ws = useRef(null);
+  const intervalId = useRef(null);
+
+  const form = useForm({
     defaultValues: {
       name: "",
       description: "",
@@ -23,16 +26,20 @@ export default function CreateApp({ ...props }) {
       language: "javascript",
       styling: [],
       buildTool: "create-react-app",
+      logo: null,
+      projectPath: "generated_projects",
     },
   });
-  const [loading, setLoading] = useState(false);
-  const [selectedValues, setSelectedValues] = React.useState([]);
-  const [progress, setProgress] = useState(0);
-  const [message, setMessage] = useState("Uploading...");
-  const [showModal, setModalShow] = useState(false);
-  const ws = useRef(null);
-  const intervalId = useRef(null);
-  
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    setError,
+    clearErrors,
+  } = form;
+
   const progressMessages = useMemo(() => {
     return {
       5: "Initializing your project",
@@ -40,9 +47,9 @@ export default function CreateApp({ ...props }) {
       50: "Configuring Services",
       60: "Setting up your project",
       80: "This might take a while",
-      90: "Almost there.."
+      90: "Almost there..",
     };
-  }, [])
+  }, []);
 
   React.useEffect(() => {
     ws.current = new WebSocket(`${process.env.REACT_APP_SOCKET_URL}/ws/project-progress/`);
@@ -53,7 +60,7 @@ export default function CreateApp({ ...props }) {
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       const progress = message?.progress;
-      
+
       if (progress === 20 && intervalId.current === null) {
         incrementProgress();
       } else if (progress === 50) {
@@ -93,6 +100,37 @@ export default function CreateApp({ ...props }) {
     }, 1000);
   };
 
+  const validateLogo = (file) => {
+    if (file.size > 2 * 1024 * 1024) { 
+      return "File size exceeds 2MB";
+    }
+  
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        // Allow images with dimensions less than or equal to 16x16 pixels
+        if (img.width > 16 || img.height > 16) {
+          resolve("Image dimensions should be 16x16 pixels or smaller");
+        } else {
+          resolve(true);
+        }
+      };
+    });
+  };
+  
+  const handleLogoChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validationError = await validateLogo(file);
+      if (validationError !== true) {
+        setError("logo", { message: validationError });
+      } else {
+        clearErrors("logo");
+      }
+    }
+  };
+
   const stylingComponents = [
     { id: "bootstrap", name: "Bootstrap" },
     { id: "react-bootstrap", name: "React-bootstrap" },
@@ -125,9 +163,26 @@ export default function CreateApp({ ...props }) {
     setLoading(true);
     setModalShow(true);
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify({ command: "start", project_id: data.name.toLowerCase().replace(/ /g, "_") }));
+      ws.current.send(
+        JSON.stringify({
+          command: "start",
+          project_id: data.name.toLowerCase().replace(/ /g, "_"),
+        })
+      );
     }
-    createNewProject(data)
+    const formData = new FormData();
+    Object.keys(data).forEach((key) => {
+      if (key === "logo") {
+        if (data[key] && data[key][0]) {
+          formData.append(key, data[key][0]);
+        } else {
+          formData.append(key, null);
+        }
+      } else {
+        formData.append(key, data[key]);
+      }
+    });
+    createNewProject(formData)
       .then((response) => {
         if (response.error) {
           throw new Error(response.error);
@@ -190,6 +245,30 @@ export default function CreateApp({ ...props }) {
                         </div>
                       )}
                     </div>
+                    <div className="form-group mb-3" id="Main-0-0-0-0-0-0-5">
+                      <label className="text-white mb-1 d-block">
+                        Upload image for project logo
+                      </label>
+                      <input
+                        type="file"
+                        className="form-control"
+                        id="logoUpload"
+                        accept="image/*"
+                        {...register("logo", { required: false })}
+                        onChange={handleLogoChange}
+                      />
+                      {errors.logo && (
+                        <div className="text-danger mt-1">
+                          {errors.logo.message}
+                        </div>
+                      )}
+                    </div>
+                    {/* <div className="form-group mb-3" id="Main-0-0-0-0-0-0-5">
+                      <label className="text-white mb-1 d-block">
+                        Choose path for generated project
+                      </label>
+                      <DirectoryPicker form={form} />
+                    </div> */}
                     <div className="form-group mb-3" id="Main-0-0-0-0-0-0-1">
                       <input
                         className="form-control"
@@ -199,9 +278,9 @@ export default function CreateApp({ ...props }) {
                       />
                     </div>
                     <div className="form-group mb-3" id="Main-0-0-0-0-0-0-2">
-                      <input
+                      <textarea
                         className="form-control"
-                        type="text"
+                        rows={3}
                         placeholder="Description"
                         {...register("description")}
                       />
@@ -287,15 +366,16 @@ export default function CreateApp({ ...props }) {
                         </div>
                       )}
                     </div>
+
                     <div
                       className="d-flex justify-content-center align-items-center"
                       id="Main-0-0-0-0-0-0-6"
                     >
                       <button
                         type="submit"
-                        // onClick={createNewApp}
                         className="btn btn-primary bg-white"
                         style={{ color: "#152733" }}
+                        disabled={Object.keys(errors).length > 0}
                       >
                         Create App
                       </button>
