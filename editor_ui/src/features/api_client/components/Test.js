@@ -1,34 +1,40 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Col, Row, Toast, ToastContainer } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Row,
+  Toast,
+  ToastContainer,
+} from "react-bootstrap";
 import { useParams } from "react-router";
 import file from "../../../assets/icons/file.svg";
-import edit from "../../../assets/icons/edit-icon.svg";
+// import edit from "../../../assets/icons/edit-icon.svg";
 import Delete from "../../../assets/icons/delete-trash.svg";
 import {
   fetchIntermediate,
   generateIntermediates,
 } from "../services/IntermediateService";
-import { getApiSchemaDetails } from "../services/ApiService";
 import ImportApi from "./ImportApi";
 import GeneralSettingsCard from "./views/EditView/GeneralSettingsCard";
 import EditServiceFunction from "./EditServiceFunction";
 import RequestSettings from "./views/EditView/RequestSettings";
 import ResponseSettings from "./views/EditView/ResponseSettings";
-import SchemaSettings from "../components/views/EditView/SchemaSettings";
-import { addSchema, deleteSchema, editSchema } from "../services/SchemaService";
 import { generateReactService } from "../services/GeneratedReactAppService";
+import AuthConfigSettings from "./views/AuthConfigSettings";
+import { getApiSchemaDetails, modifyApiConfig } from "../services/ApiService";
+import { appendToAuthApi } from "../services/AuthApiService";
 function Test() {
   const [apiList, setApiList] = useState([]);
   const [schemaList, setSchemaList] = useState([]);
   const [selectedApi, setSelectedApi] = useState({});
-  const [serviceErrors, setServiceErrors] = useState({});
-  const [selectedSchemaDetails, setSelectedSchemaDetails] = useState({});
+  const [selectedAuthApi, setSelectedAuthApi] = useState({});
   const [selectedServiceInfo, setSelectedServiceInfo] = useState({});
   const { projectName } = useParams();
   const [expandedFilenames, setExpandedFilenames] = useState([]);
   const [view, setView] = useState("TEST");
   const [show, setShow] = useState(true);
   const [showToast, setShowToast] = useState(false);
+  // const [showModal, setShowModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const fetchServiceList = useCallback(async () => {
@@ -53,7 +59,6 @@ function Test() {
         } else {
           setSchemaList(result);
         }
-
         // console.log(result, "result");
       } catch (e) {
         console.error(e);
@@ -73,6 +78,19 @@ function Test() {
     let model = { ...selectedApi };
     model[prop] = value;
     setSelectedApi({
+      ...model,
+    });
+  };
+  const onAuthApiModelChange = (prop, value) => {
+    let model = { ...selectedAuthApi };
+    if (prop === "authentication_type") {
+      model["access_token_request"] = {};
+      model["access_token_response"] = [];
+      model["refresh_token_request"] = {};
+      model["refresh_token_response"] = [];
+    }
+    model[prop] = value;
+    setSelectedAuthApi({
       ...model,
     });
   };
@@ -102,35 +120,39 @@ function Test() {
       setErrorMessage(error.message);
     }
   };
-  const onSubmit = () => {
+  const onSubmit = async (e) => {
     console.log(selectedApi, "selected api");
+    console.log(selectedServiceInfo, "selected service info");
+    let operation = "ADD";
+    if (selectedApi.id) { operation = "UPDATE" }
+    e.preventDefault();
+    await modifyApiConfig(
+      selectedApi,
+      projectName,
+      selectedServiceInfo["filename"]
+        ? selectedServiceInfo["filename"]
+        : selectedApi["tags"],
+      operation
+    );
+    setSelectedApi({});
+    setSelectedServiceInfo({})
+    fetchServiceList()
   };
-  const handleSchemaChanges = async (operation, data) => {
-    console.log(operation);
-    if (operation === "add") {
-      const result = await addSchema(projectName, data);
-      if (result.data) {
-        setShowToast(true);
-        setErrorMessage(result.data);
-        fetchSchemasList(null);
-      } else {
-        setErrorMessage(result.error);
-      }
-    } else if (operation === "edit") {
-      const result = await editSchema(
-        projectName,
-        data,
-        selectedSchemaDetails.name
-      );
-      if (result.data) {
-        setShowToast(true);
-        setErrorMessage(result.data);
-        fetchSchemasList(null);
-      } else {
-        setErrorMessage(result.error);
-      }
-    }
-  };
+
+  const onAuthApiSubmit = async (e) => {
+    console.log(selectedAuthApi, "onAuthApiSubmit");
+    let operation = "ADD";
+    if (selectedAuthApi.id) { operation = "UPDATE" }
+    selectedAuthApi.tags = "auth";
+    e.preventDefault();
+    await appendToAuthApi(
+      selectedAuthApi,
+      operation === "UPDATE" ? true : false,
+      projectName
+    );
+    fetchServiceList()
+  }
+
   useEffect(() => {
     fetchServiceList();
     fetchSchemasList(null);
@@ -143,27 +165,6 @@ function Test() {
       setExpandedFilenames([...expandedFilenames, filename]);
     }
   };
-  const handleSchemaOperations = async (operation, schema, index) => {
-    if (operation === "edit") {
-      const details = await fetchSchemasList(schema);
-      // console.log(details, "details");
-      setSelectedSchemaDetails((state) => {
-        state.name = schema;
-        state.type = "object";
-        state.details = details;
-        return { ...state };
-      });
-      setView("SCHEMA");
-    } else if (operation === "delete") {
-      console.log(schema, index, "schema and index");
-      const result = await deleteSchema(projectName, schema);
-      if (result.message) {
-        setShowToast(true);
-        setErrorMessage(result.message);
-        fetchSchemasList(null);
-      }
-    }
-  };
 
   return (
     <div className="container-fluid h-100">
@@ -173,6 +174,7 @@ function Test() {
           <Toast.Body>{errorMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
+
       <Row className="h-100">
         <Col
           sm={2}
@@ -215,7 +217,11 @@ function Test() {
             </div>
             {apiList && apiList.length > 0 ? (
               apiList
-                .filter((service) => service.filename !== "allSchemas")
+                .filter(
+                  (service) =>
+                    service.filename !== "allSchemas" &&
+                    service.filename !== "auth"
+                )
                 .map((service, index) => (
                   <div key={index} className="mb-2">
                     <div
@@ -264,13 +270,26 @@ function Test() {
                           Object.entries(service.apis).map(([key, value]) => (
                             <div
                               key={key}
-                              className="m-1 d-flex justify-content-between">
+                              className="m-1 d-flex justify-content-between"
+                            // onClick={() => {
+                            //   setSelectedApi(value);
+                            //   setView("TEST");
+                            // }}
+                            >
                               <span
-                                className={`overflow-auto ${
+                                className={`overflow-auto ${value.errors &&
                                   value.errors.root_errors.length > 0
-                                    ? "text-danger"
-                                    : ""
-                                }`}>
+                                  ? "text-danger"
+                                  : ""
+                                  }`}
+                                onClick={() => {
+                                  setSelectedApi(value);
+                                  setSelectedServiceInfo({
+                                    id: value.operation_id,
+                                    filename: service.filename,
+                                  });
+                                  setView("TEST");
+                                }} style={{ width: "90%" }}>
                                 {value.operation_id}
                               </span>
                               <div id="actions-div" className="d-flex">
@@ -288,7 +307,7 @@ function Test() {
                                     setView("TEST_API");
                                   }}
                                 />
-                                <img
+                                {/* <img
                                   className="mx-1"
                                   width={20}
                                   height={20}
@@ -298,7 +317,7 @@ function Test() {
                                     setSelectedApi(value);
                                     setView("TEST");
                                   }}
-                                />
+                                /> */}
                                 <img
                                   src={Delete}
                                   alt="delete"
@@ -322,7 +341,7 @@ function Test() {
           </div>
           <div id="schemas-div" className="h-50 overflow-auto">
             <div className="text-white mt-2 d-flex justify-content-between">
-              <strong>Schemas</strong>
+              <strong>Authentication Config</strong>
               <img
                 width="25"
                 height="25"
@@ -330,57 +349,125 @@ function Test() {
                 src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
                 alt="add--v1"
                 style={{ cursor: "pointer" }}
-                onClick={() => {
-                  setSelectedSchemaDetails({
-                    id: "",
-                    type: "",
-                    details: {
-                      type: "object",
-                      properties: {},
-                      required: [],
-                      name: "",
-                    },
-                  });
-                  setView("SCHEMA");
-                }}
+                onClick={() => setView("AUTH_API")}
               />
             </div>
-            {schemaList.length > 0 ? (
-              <div>
-                {schemaList.map((schema, index) => (
-                  <div
-                    key={index}
-                    className="text-white mt-2 d-flex justify-content-between">
-                    <span className="overflow-auto">{schema.name}</span>
-                    <div className="d-flex">
-                      <img
-                        src={edit}
-                        alt="edit"
-                        height={20}
-                        width={20}
-                        style={{ cursor: "pointer" }}
-                        className="mx-1"
-                        onClick={() =>
-                          handleSchemaOperations("edit", schema.id, null)
-                        }
-                      />
-                      <img
-                        src={Delete}
-                        alt="delete"
-                        height={20}
-                        width={20}
-                        style={{ cursor: "pointer" }}
-                        className="mx-1"
-                        onClick={() =>
-                          handleSchemaOperations("delete", schema.id, index)
-                        }
-                      />
+            {apiList && apiList.length > 0 ? (
+              apiList
+                .filter(
+                  (service) =>
+                    service.filename !== "allSchemas" &&
+                    service.filename === "auth"
+                )
+                .map((service, index) => (
+                  <div key={index} className="my-2">
+                    <div
+                      className="mb-2 p-1"
+                      onClick={() => toggleExpand(service.filename)}
+                      style={{
+                        cursor: "pointer",
+                        backgroundColor: expandedFilenames.includes(
+                          service.filename
+                        )
+                          ? "#303033"
+                          : "#212529",
+                        color: expandedFilenames.includes(service.filename)
+                          ? "white"
+                          : "white",
+                      }}>
+                      <div className="d-flex justify-content-between">
+                        <div>
+                          <img src={file} height={15} width={15} alt="file" />
+                          <span className="mx-2">{service.filename}</span>
+                          {service.errors && service.errors.length > 0 && (
+                            <i
+                              class="bi bi-exclamation-circle"
+                              style={{ color: "red" }}></i>
+                          )}
+                        </div>
+                        <img
+                          onClick={() => generateService(service.filename)}
+                          className="mt-1"
+                          width="15"
+                          height="15"
+                          src="https://img.icons8.com/ios-filled/50/FFFFFF/mechanistic-analysis.png"
+                          alt="mechanistic-analysis"
+                        />
+                      </div>
                     </div>
+                    {expandedFilenames.includes(service.filename) && (
+                      <div
+                        className="text-white"
+                        style={{
+                          cursor: "pointer",
+                          backgroundColor: "#212529",
+                          marginLeft: "15px",
+                        }}>
+                        {Object.keys(service.apis).length > 0 ? (
+                          Object.entries(service.apis).map(([key, value]) => (
+                            <div
+                              key={key}
+                              className="m-1 d-flex justify-content-between">
+                              <span
+                                className={`overflow-auto ${value.errors &&
+                                  value.errors.root_errors.length > 0
+                                  ? "text-danger"
+                                  : ""
+                                  }`}
+                                onClick={() => {
+                                  // setSelectedApi(value);
+                                  setSelectedAuthApi(value)
+                                  // setView("TEST");
+                                  setView("AUTH_API");
+                                }} style={{ width: "90%" }}>
+                                {value.operation_id}
+                              </span>
+                              <div id="actions-div" className="d-flex">
+                                <img
+                                  className="mx-1"
+                                  width="20"
+                                  height="20"
+                                  src="https://img.icons8.com/ios-filled/50/FFFFFF/test-passed.png"
+                                  alt="test-passed"
+                                  onClick={() => {
+                                    setSelectedServiceInfo({
+                                      id: value.operation_id,
+                                      filename: service.filename,
+                                    });
+                                    setView("TEST_API");
+                                  }}
+                                />
+                                {/* <img
+                                  className="mx-1"
+                                  width={20}
+                                  height={20}
+                                  src={edit}
+                                  alt="edit"
+                                  onClick={() => {
+                                    setSelectedApi(value);
+                                    // setView("TEST");
+                                    setView("AUTH_API");
+                                  }}
+                                /> */}
+                                <img
+                                  src={Delete}
+                                  alt="delete"
+                                  height={20}
+                                  width={20}
+                                  style={{ cursor: "pointer" }}
+                                />
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <h5 className="no-service">No services found</h5>
+                        )}
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
+                ))
             ) : (
-              <h5 className="no-service text-white">No schemas found</h5>
+              <h5 className="no-service text-white">No services found</h5>
             )}
           </div>
         </Col>
@@ -400,19 +487,109 @@ function Test() {
                   </Button>
                 </div>
               </div>
+
+              {/* <Row
+                className="mt-3 text-white "
+                style={{ backgroundColor: "#303033" }}>
+                <Col sm={2}>
+                  <Form.Label className="text-white mt-1">
+                    Is Authentication Api ?
+                  </Form.Label>
+                </Col>
+                <Col sm={10}>
+                  <Form.Check
+                    className="mt-1"
+                    type="checkbox"
+                    checked={selectedApi.is_authentication_api}
+                    onChange={(e) => {
+                      // handleModalChange("AUTH_API", e.target.checked);
+                      // setShowModal(!showModal)
+                      onApiModelChange("is_authentication_api", e.target.checked);
+                      setView("AUTH_API");
+                    }}
+                  />
+                </Col>
+              </Row> */}
               <GeneralSettingsCard
                 settings={selectedApi}
                 onChange={onApiModelChange}
+                isAuthApi={false}
               />
               <RequestSettings
                 requestData={selectedApi.request ? selectedApi.request : {}}
                 onChange={onApiModelChange}
+                apiData={selectedApi}
+                isAuthApi={false}
+                title="Request Settings"
+                requestType="request"
               />
               <ResponseSettings
                 responseData={selectedApi.response ? selectedApi.response : []}
                 onChange={onApiModelChange}
                 schemaList={schemaList}
+                isAuthApi={false}
+                title="Response Settings"
+                responseType="response"
               />
+            </>
+          ) : view === "AUTH_API" ? (
+            <>
+              <div className="d-flex justify-content-between">
+                <h5 className="text-white mt-4">AUTH API Configuration</h5>
+                <div>
+                  <Button
+                    variant="secondary"
+                    className="mt-3 rounded-0"
+                    onClick={onAuthApiSubmit}>
+                    Submit
+                  </Button>
+                </div>
+              </div>
+
+              <GeneralSettingsCard
+                settings={selectedAuthApi}
+                onChange={onAuthApiModelChange}
+                isAuthApi={true}
+              />
+             <div className="">
+             <RequestSettings
+                requestData={selectedAuthApi.access_token_request ? selectedAuthApi.access_token_request : {}}
+                onChange={onAuthApiModelChange}
+                apiData={selectedAuthApi}
+                isAuthApi={true}
+                title="Access Token Request Settings"
+                requestType="access_token_request"
+              />
+              <ResponseSettings
+                responseData={selectedAuthApi.access_token_response ? selectedAuthApi.access_token_response : []}
+                onChange={onAuthApiModelChange}
+                schemaList={schemaList}
+                isAuthApi={true}
+                title="Access Token Response Settings"
+                responseType="access_token_response"
+
+              />
+             </div>
+              {(selectedAuthApi.authentication_type === "BEARER" || selectedAuthApi.authentication_type === "APIKEY" || selectedAuthApi.authentication_type === "OAUTH2") && <>
+                <div >
+                <RequestSettings
+                  requestData={selectedAuthApi.refresh_token_request ? selectedAuthApi.refresh_token_request : {}}
+                  onChange={onAuthApiModelChange}
+                  apiData={selectedAuthApi}
+                  isAuthApi={true}
+                  title="Refresh Token Request Settings"
+                  requestType="refresh_token_request"
+                />
+                <ResponseSettings
+                  responseData={selectedAuthApi.refresh_token_response ? selectedAuthApi.refresh_token_response : []}
+                  onChange={onAuthApiModelChange}
+                  schemaList={schemaList}
+                  isAuthApi={true}
+                  title="Refresh Token Response Settings"
+                  responseType="refresh_token_response"
+                />
+                </div>
+                </>}
             </>
           ) : view === "IMPORT_API" ? (
             <>
@@ -426,17 +603,8 @@ function Test() {
             </>
           ) : view === "TEST_API" ? (
             <EditServiceFunction selectedServiceInfo={selectedServiceInfo} />
-          ) : view === "SCHEMA" ? (
-            <>
-              {console.log(selectedSchemaDetails)}
-              <SchemaSettings
-                key={selectedSchemaDetails.name}
-                schemaId={selectedSchemaDetails.name}
-                schemaData={selectedSchemaDetails.details}
-                onChange={handleSchemaChanges}
-                availableSchemas={schemaList}
-              />
-            </>
+          ) : view === "AUTH_CONFIG" ? (
+            <AuthConfigSettings selectedApi={selectedApi} />
           ) : null}
         </Col>
       </Row>

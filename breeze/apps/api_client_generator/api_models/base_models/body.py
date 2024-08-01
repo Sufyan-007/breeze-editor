@@ -13,7 +13,7 @@ class Body:
     schema : dict = CustomizedAttr((dict),[])
     raw_content : str = CustomizedAttr((str),[])
     file : str = CustomizedAttr((str),[])
-    anonymous : bool = CustomizedAttr((bool),[required_validator])
+    # anonymous : bool = CustomizedAttr((bool),[required_validator])
     # errors  = {}
     errors : dict = CustomizedAttr((dict), [])
 
@@ -33,6 +33,6 @@ class Body:
             'schema': self.schema,
             'raw_content' : self.raw_content,
             'file': self.file,
-            'anonymous': self.anonymous,
+            # 'anonymous': self.anonymous,
             'errors': self.errors if self.errors else None
         }

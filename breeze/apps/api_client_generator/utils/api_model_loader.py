@@ -45,7 +45,7 @@ class ApiModelLoader:
             url = api_model_loader.load_url(url_data)
             url_obj = url.as_dict()
             url_obj_errors = url_obj.get("errors")
-            if url_obj_errors and  len(url_obj_errors.get("root_errors")) >0:
+            if url_obj_errors is not None and  len(url_obj_errors.get("root_errors", [])) >0:
                 root_errors_set.add("url")
             
         parameters = []
@@ -89,6 +89,7 @@ class ApiModelLoader:
                     raw_content=r_data.get("raw_content",None),
                     file=r_data.get("file",None),
                     description = r_data.get("description",None),
+                    token_store=r_data.get("token_store",None),
                     errors={}
                 )
                 response.append(new_response)     
@@ -186,13 +187,13 @@ class ApiModelLoader:
         for body in body_data:
             new_body = Body(
                     content_type=ContentEnum[body.get("content_type")],
-                    mode=ModeEnum[body.get("mode")],
+                    mode=ModeEnum[body.get("mode").upper()],
                     raw_content=body.get("raw", body.get("raw_content")),
-                    schema=body.get("schema", {}),
+                    schema=body.get("schema", {}), 
                     required=body.get("required"),
                     schema_name=body.get("schema_name"),
                     file=body.get("file"),
-                    anonymous=body.get("anonymous"),
+                    # anonymous=body.get("anonymous"),
                     errors={}
                 )
             arr_body.append(new_body)
@@ -231,6 +232,7 @@ class ApiModelLoader:
             response=response_obj,
             summary=model_json.get("summary"),  # Summary later,
             is_authentication_api=model_json.get("is_authentication_api"),
+            is_open_api=model_json.get("is_open_api", False),
             errors=final_errors
         )
         
@@ -239,22 +241,24 @@ class ApiModelLoader:
     @staticmethod
     def load_auth_api_model(model_json):
         api_model_loader = ApiModelLoader()
-        request_data = model_json.get("request", {})
-        response_data = model_json.get("response", {})
-        request_obj = api_model_loader.load_request(request_data=request_data)
-        response_obj = api_model_loader.load_response(response_data=response_data)
+        access_token_request_obj = api_model_loader.load_request(request_data= model_json.get("access_token_request", {}))
+        access_token_response_obj = api_model_loader.load_response(response_data= model_json.get("access_token_response", {}))
+        refresh_token_request_obj = api_model_loader.load_request(request_data= model_json.get("refresh_token_request", {}))
+        refresh_token_response_obj = api_model_loader.load_response(response_data= model_json.get("refresh_token_response", {}))
         api_model = AuthApiModel(
             id=model_json.get("id"),
             operation_id=model_json.get("operation_id"),
             tags=model_json.get("tags"),  # Tags remaining
-            request=request_obj,
-            response=response_obj,
+            access_token_request=access_token_request_obj,
+            access_token_response=access_token_response_obj,
+            refresh_token_request=refresh_token_request_obj,
+            refresh_token_response=refresh_token_response_obj,
             summary=model_json.get("summary"),  # Summary later,
             auth_api_type=AuthApiTypeEnum[model_json.get("auth_api_type", "NONE").upper()] ,
             authentication_type= AuthTypeEnum[model_json.get("authentication_type").upper()],
-            is_authorization_url=model_json.get("is_authorization_url", ""),
-            flow=model_json.get("flow", {}),
-            flow_type= model_json.get("flow_type", ""),
+            # is_authorization_url=model_json.get("is_authorization_url", ""),
+            # flow=model_json.get("flow", {}),
+            # flow_type= model_json.get("flow_type", ""),
             token_store=api_model_loader.load_token_store(model_json.get("token_store",{})),
             is_authentication_api= model_json.get("is_authentication_api", False),
             errors={}

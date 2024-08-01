@@ -23,6 +23,7 @@ import Code from "./components/Code";
 import Settings from "./components/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
 import Resources from "./components/ResourcesConfiguration/Resources";
+import SchemaSettings from "./features/api_client/components/views/EditView/SchemaSettings";
 
 export const router = createBrowserRouter([
   {
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
       { path: "apps", element: <DependencyConfig /> },
       { path: "settings", element: <Settings /> },
       { path: "resources", element: <Resources /> },
+      { path: "schema", element: <SchemaSettings /> },
     ],
   },
   {
@@ -85,6 +87,10 @@ export const router = createBrowserRouter([
   {
     path: "editor/:projectName/service",
     element: <ApiClientRoot />,
+  },
+  {
+    path: "editor/:projectName/schema",
+    element: <SchemaSettings />,
   },
 ]);
 

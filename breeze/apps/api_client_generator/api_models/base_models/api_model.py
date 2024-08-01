@@ -15,7 +15,9 @@ class ApiModel:
     response : list = CustomizedAttr(list,[required_validator])
     summary : str =  CustomizedAttr((str),[])
     is_authentication_api: bool = CustomizedAttr((bool),[])
+    is_open_api: bool = CustomizedAttr((bool),[])
     errors : dict = CustomizedAttr((dict), [])
+    # source: str = CustomizedAttr((str),[])
 
    
 
@@ -41,6 +43,7 @@ class ApiModel:
             'response': responses,
             'summary' : self.summary,
             'is_authentication_api' : self.is_authentication_api,
+            'is_open_api' : self.is_open_api,
             'errors': self.errors 
         }
     

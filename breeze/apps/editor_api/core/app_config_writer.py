@@ -97,7 +97,10 @@ class AppConfigWriter:
 
         # Create Dir if not exists for config folder
         create_parent_dir_if_not_exists(app_config_dir)
-        create_parent_dir_if_not_exists(f"{app_config_dir}/generated_intermediate_json")
+        #for storing intermediate service config
+        create_parent_dir_if_not_exists(f"{app_config_dir}/api_client_intermediate_json")
+        #for storing schemas retrieved form swagger file
+        create_parent_dir_if_not_exists(f"{app_config_dir}/swagger_schema")
         create_parent_dir_if_not_exists(data["path"])
 
         app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
@@ -123,10 +126,6 @@ class AppConfigWriter:
         }
         
         # write configuration
-        # first check for an existing auth.json file
-        auth_json_path = f"{app_config_dir}/generated_intermediate_json/auth.json"
-        if not os.path.exists(auth_json_path):
-            write_file(auth_json_path, json.dumps({}))
             
         write_file(f"{app_config_path}.json", json.dumps(app_current_config))
 

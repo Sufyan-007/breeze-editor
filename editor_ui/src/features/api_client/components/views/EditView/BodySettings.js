@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
-import RenderObject from "./RenderObject";
+// import RenderObject from "./RenderObject";
 import { getApiSchemaDetails } from "../../../services/ApiService";
 import { useParams } from "react-router";
 function BodySettings({ bodyData, onChange }) {
   const [body, setBody] = useState(bodyData);
   const [schemaList, setSchemaList] = useState([]);
-  const [isExpanded, setIsExpanded] = useState(false);
+  // const [isExpanded, setIsExpanded] = useState(false);
   const { projectName } = useParams();
 
   const fetchSchemasList = useCallback(
@@ -82,7 +82,7 @@ function BodySettings({ bodyData, onChange }) {
     // onChange("body", [updatedBody]); // needs to be changed when body will be of one type only
   };
   const handleChanges = (prop, value) => {
-    // console.log(prop, value);
+    console.log(prop, value);
     const newBody = { ...body };
     newBody[prop] = value;
     setBody(newBody);
@@ -107,12 +107,12 @@ function BodySettings({ bodyData, onChange }) {
             value={body.content_type}
             onChange={(e) => handleChanges("content_type", e.target.value)}>
             <option value="">Select</option>
-            <option value="json">Json</option>
-            <option value="text">Text</option>
-            <option value="html">Html</option>
+            <option value="JSON">Json</option>
+            <option value="TEXT">Text</option>
+            <option value="HTML">Html</option>
           </Form.Control>
         </div>
-        {body.content_type === "text" ? (
+        {body.content_type === "TEXT" ? (
           <>
             <div className="mx-1 mb-2" style={{ width: "60%" }}>
               <Form.Label className="text-white mb-1">Value:</Form.Label>
@@ -145,9 +145,9 @@ function BodySettings({ bodyData, onChange }) {
                 value={body.mode}
                 onChange={(e) => handleChanges("mode", e.target.value)}>
                 <option value="">Select</option>
-                <option value="raw">Raw</option>
-                <option value="binary">Binary</option>
-                <option value="urlencoded">Urlencoded</option>
+                <option value="RAW">Raw</option>
+                <option value="BINARY">Binary</option>
+                <option value="URLENCODED">Urlencoded</option>
               </Form.Control>
             </div>
             <div className="mx-1 mb-2" style={{ width: "30%" }}>
@@ -175,7 +175,7 @@ function BodySettings({ bodyData, onChange }) {
           </>
         )}
       </div>
-      {body.content_type !== "text" &&
+      {/* {body.content_type !== "text" &&
         body.schema.properties &&
         Object.entries(body.schema.properties).length > 0 && (
           <div
@@ -216,7 +216,7 @@ function BodySettings({ bodyData, onChange }) {
                 />
               ))}
           </div>
-        )}
+        )} */}
     </>
   ) : (
     <div className="text-white">-----No Body Present-----</div>

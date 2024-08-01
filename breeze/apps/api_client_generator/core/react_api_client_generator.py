@@ -43,16 +43,17 @@ class ReactApiClientGenerator:
 
     def create_service_files(self, map_services):
         # preprare new service file for each tag
-        folder_name = "service"
+        parent_folder_name = "service"
+        folder_name= "module1"
         content = "import axios from 'axios'\n"
-        create_parent_dir_if_not_exists(f"{self.app_config['APP_SOURCE_DIR']}/{folder_name}")
+        create_parent_dir_if_not_exists(f"{self.app_config['APP_SOURCE_DIR']}/{parent_folder_name}/{folder_name}")
         for tag, func_arr in map_services.items():
             tag = tag.title()
             filename = tag+"Service.js"
             for func in func_arr:
                 content += "\n"
                 content += func
-            path = f"{self.app_config['APP_SOURCE_DIR']}/{folder_name}/{filename}"
+            path = f"{self.app_config['APP_SOURCE_DIR']}/{parent_folder_name}/{folder_name}/{filename}"
 
             write_file(path, content)
         print("services generated.............")
@@ -433,17 +434,22 @@ class ReactApiClientGenerator:
         # set request headers
         combined_headers = self.set_request_headers(model,app_name)
         param_headers = combined_headers["param_headers"] if combined_headers else []
-        
-        function_args.append(combined_headers.get("header_argument"))
+        if combined_headers.get("header_argument"):
+            function_args.append(combined_headers.get("header_argument"))
         
         
         headers = combined_headers["body_headers"] if combined_headers else {}
         # set request body if given
         body_items = self.set_request_body(model,app_name)
         #needs to be changed when body will be a dictionary instead of list
-        body_params = body_items["RAW"]["body_params"] if body_items else []
-        if body_params:
-            body_params["name"] = "BodyDetails";
+        body_params = {"type": "OBJECT", "name": "BodyDetails", "properties": {}}
+        if body_items:
+            if body_items.get("RAW"):
+                body_params = body_items["RAW"]["body_params"] 
+            elif body_items.get("BINARY"):
+                body_params = body_items["BINARY"]["body_params"] 
+            if body_params:
+                body_params["name"] = "BodyDetails";
         #writing all the required parameters into the config
         ######################################################################################################
         model_parameters = []
@@ -483,10 +489,11 @@ class ReactApiClientGenerator:
                 headers[head.get("key")] = head.get("value")
             
             function_args = copy.deepcopy(common_data.get("function_args"))
+            # print("function_args",function_args)
             if extra_params:
                 ## merge params
                 function_args = function_args + extra_params
-
+            print("function_args", function_args)
             if request_body is not None:
                 axis_object_declation = axis_object_declation.replace('{BODY}',"data : %s"%(request_body))
             else:

@@ -42,9 +42,9 @@ function ParameterSettings({ paramData, onChange }) {
         queryParameters.map((param, index) => (
           <div
             key={index}
-            className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
-            <div style={{ width: "90%" }} className="d-flex align-items-center">
-              <div className="mx-1" style={{ width: "30%" }}>
+            className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between mb-2 mx-1">
+            <div  className="d-flex align-items-center w-100">
+              <div className="mx-1" style={{ width: "50%" }}>
                 <Form.Label className="text-white mb-1">Name:</Form.Label>
                 <Form.Control
                   className="text-white"
@@ -61,7 +61,7 @@ function ParameterSettings({ paramData, onChange }) {
                   }
                 />
               </div>
-              <div className="mx-1 mt-1" style={{ width: "30%" }}>
+              <div className="mx-1 mt-1" style={{ width: "50%" }}>
                 <Form.Label className="text-white mb-1">Value Type:</Form.Label>
                 <Form.Control
                   as="select"
@@ -157,7 +157,7 @@ function ParameterSettings({ paramData, onChange }) {
         ))
       ) : (
         <div className="d-flex justify-content-center">
-          <span className="text-white">
+          <span className="text-white mb-1">
             -----No Query Parameters Present-----
           </span>
         </div>

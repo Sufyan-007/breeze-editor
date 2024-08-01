@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Card, Form, Row } from "react-bootstrap";
 import Delete from "../../../../../assets/icons/delete-trash.svg";
-// import edit from "../../../../assets/icons/edit-trash.svg";
 import edit from "../../../../../assets/icons/edit-icon.svg";
+
 const responseObject = {
   content_type: "",
   status: "",
@@ -11,59 +11,68 @@ const responseObject = {
   raw_content: "",
   file: "",
   description: "",
+  token_store: {
+    "store_in": "",
+    "stored_key": ""
+  }
 };
 
-function ResponseSettings({ responseData, onChange, schemaList }) {
+function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title, responseType }) {
+  // console.log(schemaList, "schemaList");
   const [response, setResponse] = useState(responseData);
   const [newResponse, setNewResponse] = useState(responseObject);
   const [expandedProperty, setExpandedProperty] = useState(null);
 
-  // console.log(response, "response");
   useEffect(() => {
     setResponse(responseData);
   }, [responseData]);
-  const handleInputChange = (index, field, value) => {
+
+  const handleInputChange = (index, field, value, subField = null) => {
     const updatedResponse = [...response];
+    if (subField) {
+      updatedResponse[index] = {
+        ...updatedResponse[index],
+        [field]: {
+          ...updatedResponse[index][field],
+          [subField]: value,
+        }
+      };
+    } 
     updatedResponse[index] = { ...updatedResponse[index], [field]: value };
-    onChange("response", updatedResponse);
+    onChange(responseType, updatedResponse);
   };
 
   const handleDelete = (index) => {
     const updatedResponse = [...response];
     updatedResponse.splice(index, 1);
-    onChange("response", updatedResponse);
+    onChange(responseType, updatedResponse);
   };
 
   const handleAddResponse = () => {
-    // console.log(newResponse, "newResponse");
-    onChange("response", [...response, newResponse]);
+    onChange(responseType, [...response, newResponse]);
     setNewResponse(responseObject);
   };
+
   const toggleProperty = (index) => {
-    console.log(index, "index");
-    if (expandedProperty === index) {
-      setExpandedProperty(null);
-    } else {
-      setExpandedProperty(index);
-    }
+    setExpandedProperty(expandedProperty === index ? null : index);
   };
 
   const renderResponses = () => {
     if (!response || response.length === 0) {
       return null;
     }
-    // console.log(response, "inside loop");
+
     return response.map((res, index) => (
       <Card
         className="rounded-0 text-white mt-2"
         bg="dark"
-        style={{ border: "1px solid rgba(128, 128, 128, 0.5)" }}>
+        style={{ border: "1px solid rgba(128, 128, 128, 0.5)" }}
+        key={index}>
         <Card.Body className="d-flex justify-content-between text-white">
           {expandedProperty === index ? (
             <>
               <div
-                key={index}
-                className="rounded-0 text-white bg-dark d-flex align-items-center justify-content-between  mb-2"
+                className="rounded-0 text-white bg-dark d-flex align-items-center justify-content-between mb-2"
                 style={{ width: "100%" }}>
                 <div
                   style={{ width: "90%" }}
@@ -90,13 +99,48 @@ function ResponseSettings({ responseData, onChange, schemaList }) {
                     onChange={(e) =>
                       handleInputChange(index, "schema_name", e.target.value)
                     }
-                    // options={schemaList}
+                    options={schemaList}
                   />
+                  {isAuthApi && (
+                    <>
+                      <ResponseForm
+                        label="Save As"
+                        value={res.token_store.store_in}
+                        onChange={(e) =>
+                          handleInputChange(index, "token_store", e.target.value, "store_in")
+                        }
+                        options={[
+                          "LOCAL_STORAGE",
+                          "SESSION",
+                          "COOKIE"
+                        ]}
+                      />
+                      <div className="mx-1 mt-1" style={{ width: "30%" }}>
+                        <Form.Label className="text-white mb-1">
+                          Storage Key
+                        </Form.Label>
+                        <Form.Control
+                          as="input"
+                          type="text"
+                          className="text-white"
+                          size="sm"
+                          style={{
+                            backgroundColor: "#212529",
+                            border: "1px solid rgba(128, 128, 128, 0.5)",
+                          }}
+                        value={res.token_store.stored_key}
+                        onChange={(e) =>
+                          handleInputChange(index, "token_store", e.target.value, "stored_key")
+                        }
+                        ></Form.Control>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="">
+                <div>
                   <img
                     alt="delete"
-                    className="mt-4 mx-1 "
+                    className="mt-4 mx-1"
                     height={25}
                     width={25}
                     src={Delete}
@@ -105,7 +149,7 @@ function ResponseSettings({ responseData, onChange, schemaList }) {
                   />
                   <img
                     alt="edit"
-                    className="mt-4 mx-1 "
+                    className="mt-4 mx-1"
                     height={25}
                     width={25}
                     src={edit}
@@ -117,7 +161,7 @@ function ResponseSettings({ responseData, onChange, schemaList }) {
             </>
           ) : (
             <>
-              {res.status}{" "}
+              {res.status}
               <img
                 alt="edit"
                 className="mx-1"
@@ -138,11 +182,13 @@ function ResponseSettings({ responseData, onChange, schemaList }) {
     <>
       <Row className="mt-3">
         <div className="text-white p-1" style={{ backgroundColor: "#303033" }}>
-          Response Settings
+          <span className="mx-2">{title}</span>
         </div>
       </Row>
       <div className="rounded-0 text-white bg-dark d-flex align-items-center justify-content-between">
-        <div style={{ width: "90%" }} className="d-flex align-items-center">
+        <div
+          style={{ width: "90%" }}
+          className="d-flex align-items-center flex-wrap">
           <ResponseForm
             label="Content Type"
             value={newResponse.content_type}
@@ -167,6 +213,36 @@ function ResponseSettings({ responseData, onChange, schemaList }) {
             }
             options={schemaList}
           />
+          {isAuthApi && (
+            <>
+              <ResponseForm
+                label="Save As"
+                value={newResponse.store_in}
+                onChange={(e) =>
+                  setNewResponse({ ...newResponse, store_in: e.target.value })
+                }
+                options={["localStorage", "sessionStorage", "cookie", "state"]}
+              />
+              <div className="mx-1 mt-1" style={{ width: "30%" }}>
+                <Form.Label className="text-white mb-1">Storage Key</Form.Label>
+                <Form.Control
+                  as="input"
+                  type="text"
+                  className="text-white"
+                  size="sm"
+                  style={{
+                    backgroundColor: "#212529",
+                    border: "1px solid rgba(128, 128, 128, 0.5)",
+                  }}
+                  value={newResponse.token_store.store_key}
+                  onChange={(e) => setNewResponse((state) => {
+                    state.token_store.stored_key = e.target.value;
+                    return { ...state }
+                  })}
+                ></Form.Control>
+              </div>
+            </>
+          )}
         </div>
         <div className="d-flex align-items-center">
           <img

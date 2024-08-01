@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
+import ParameterSettings from "./ParameterSettings";
 
-function UrlSettings({ urlData, onChange, paramData }) {
+function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
   const [url, setUrl] = useState(urlData);
   const [pathParams, setPathParams] = useState([]);
   const [queryParams, setQueryParams] = useState([]);
@@ -21,10 +22,10 @@ function UrlSettings({ urlData, onChange, paramData }) {
       setPathParams(pathParamsFiltered);
       setQueryParams(queryParamsFiltered);
     }
-    console.log(paramData, "paramdaata");
+    // console.log(paramData, "paramdaata");
   }, [paramData]);
 
-  const { baseurl, path, url_env } = url ? url : {};
+  const { baseurl, path, url_env, servers } = url ? url : {};
 
   const handleChanges = (prop, value) => {
     const newUrlData = { ...url };
@@ -35,6 +36,10 @@ function UrlSettings({ urlData, onChange, paramData }) {
     }
     onChange("url", newUrlData);
   };
+
+  const handleMethodChange = (value)=>{
+      onChange("method", value)
+  }
 
   const handlePathParsing = () => {
     if (path && Array.isArray(path)) {
@@ -88,38 +93,88 @@ function UrlSettings({ urlData, onChange, paramData }) {
 
       onChange("parameters", allParams);
       setPathParams(updatedParamData);
-      console.log(allParams, "updated parameters");
+      // console.log(allParams, "updated parameters");
     }
   };
 
-  const handleInputChange = (index, field, value) => {
-    if (index >= 0 && index < pathParams.length) {
-      const updatedParams = [...pathParams];
-      updatedParams[index] = { ...updatedParams[index], [field]: value };
-      setPathParams(updatedParams);
-      onChange("parameters", [...updatedParams, ...queryParams]);
+  const handleInputChange = (param_type, index, field, value) => {
+    if (param_type === "path") {
+      if (index >= 0 && index < pathParams.length) {
+        const updatedParams = [...pathParams];
+        updatedParams[index] = { ...updatedParams[index], [field]: value };
+        setPathParams(updatedParams);
+        onChange("parameters", [...updatedParams, ...queryParams]);
+      }
+    } else {
+      if (index >= 0 && index < queryParams.length) {
+        const updatedParams = [...queryParams];
+        updatedParams[index] = { ...updatedParams[index], [field]: value };
+        setQueryParams(updatedParams);
+        onChange("parameters", [...updatedParams, ...pathParams]);
+      }
     }
   };
 
   return (
     <>
       <div className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
-        <div className="mx-1" style={{ width: "30%" }}>
-          <Form.Label className="text-white mb-1">Base URL:</Form.Label>
+        <div className="mx-1" style={{ width: "50%" }}>
+          <Form.Label className="text-white mb-1">Method:</Form.Label>
           <Form.Control
+            as="select"
             className="text-white"
             size="sm"
+            style={{
+              backgroundColor: "#212529",
+              border: "1px solid rgba(128, 128, 128, 0.5)",
+            }}
+            value={method}
+          onChange={(e) => handleMethodChange(e.target.value)}
+          >
+            <option value="">Select</option>
+            <option value="GET">Get</option>
+            <option value="PUT">Put</option>
+            <option value="POST">Post</option>
+            <option value="DELETE">Delete</option>
+          </Form.Control>
+        </div>
+        <div className="mx-2" style={{ width: "50%" }}>
+          <Form.Label className="text-white mb-1">Base URL:</Form.Label>
+          {/* <Form.Control
+            className="text-white "
+            size="sm"
             type="text"
-            placeholder="Base URL"
+            placeholder="Enter Base URL"
             style={{
               backgroundColor: "#212529",
               border: "1px solid rgba(128, 128, 128, 0.5)",
             }}
             value={baseurl || ""}
             onChange={(e) => handleChanges("baseurl", e.target.value)}
-          />
+          /> */}
+          <Form.Control
+            as="select"
+            className="text-white"
+            size="sm"
+            style={{
+              backgroundColor: "#212529",
+              border: "1px solid rgba(128, 128, 128, 0.5)",
+            }}
+            value={servers ? servers[0].url : ""}
+          onChange={(e) => handleChanges("baseurl",e.target.value)}
+          >
+            <option value="">Select</option>
+            {servers &&
+              servers.map((server, index) => (
+                <option key={index} value={server.url}>
+                  {server.url}
+                </option>
+              ))}
+          </Form.Control>
         </div>
-        <div className="mx-1" style={{ width: "30%" }}>
+
+
+        <div className="mx-2" style={{ width: "50%" }}>
           <Form.Label className="text-white mb-1">Path:</Form.Label>
           <Form.Control
             className="text-white"
@@ -135,33 +190,18 @@ function UrlSettings({ urlData, onChange, paramData }) {
             onBlur={handlePathParsing}
           />
         </div>
-        <div className="mx-1" style={{ width: "30%" }}>
-          <Form.Label className="text-white mb-1">URL Environment:</Form.Label>
-          <Form.Control
-            className="text-white"
-            size="sm"
-            type="text"
-            placeholder="URL Environment"
-            style={{
-              backgroundColor: "#212529",
-              border: "1px solid rgba(128, 128, 128, 0.5)",
-            }}
-            value={url_env || ""}
-            onChange={(e) => handleChanges("url_env", e.target.value)}
-          />
-        </div>
       </div>
-      <div className="text-white mt-2">
-        <span>Parameter Details:</span>
-        {pathParams &&
+      <div
+        className="text-white mt-3"
+        style={{ border: "1px solid rgba(128, 128, 128, 0.5)" }}>
+        <div className="m-2">Path Parameter Details:</div>
+        {pathParams && pathParams.length > 0 ? (
           pathParams.map((para, index) => (
             <div
               key={index}
-              className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
-              <div
-                style={{ width: "90%" }}
-                className="d-flex align-items-center">
-                <div className="mx-1 mt-1" style={{ width: "30%" }}>
+              className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between mb-2 mx-1">
+              <div className="d-flex align-items-center w-100">
+                <div className="mx-1 mt-1" style={{ width: "50%" }}>
                   <Form.Label className="text-white mb-1">Name:</Form.Label>
                   <Form.Control
                     className="text-white"
@@ -176,7 +216,7 @@ function UrlSettings({ urlData, onChange, paramData }) {
                     readOnly
                   />
                 </div>
-                <div className="mx-1 mt-1" style={{ width: "30%" }}>
+                <div className="mx-1 mt-1" style={{ width: "50%" }}>
                   <Form.Label className="text-white mb-1">
                     Value Type:
                   </Form.Label>
@@ -190,7 +230,12 @@ function UrlSettings({ urlData, onChange, paramData }) {
                     }}
                     value={para.param_type}
                     onChange={(e) => {
-                      handleInputChange(index, "param_type", e.target.value);
+                      handleInputChange(
+                        "path",
+                        index,
+                        "param_type",
+                        e.target.value
+                      );
                     }}>
                     <option value="">Select</option>
                     <option value="STATIC">STATIC</option>
@@ -214,7 +259,12 @@ function UrlSettings({ urlData, onChange, paramData }) {
                       }}
                       value={para.value}
                       onChange={(e) => {
-                        handleInputChange(index, "value", e.target.value);
+                        handleInputChange(
+                          "path",
+                          index,
+                          "value",
+                          e.target.value
+                        );
                       }}
                     />
                   </div>
@@ -237,6 +287,7 @@ function UrlSettings({ urlData, onChange, paramData }) {
                         value={para.storage_key}
                         onChange={(e) => {
                           handleInputChange(
+                            "path",
                             index,
                             "storage_key",
                             e.target.value
@@ -250,7 +301,31 @@ function UrlSettings({ urlData, onChange, paramData }) {
                 )}
               </div>
             </div>
-          ))}
+          ))
+        ) : (
+          <div className="d-flex justify-content-center mb-1">
+            -----Add {"{Path}"} Parameters in the Path-----
+          </div>
+        )}
+      </div>
+
+      <div
+        className="text-white mt-3"
+        style={{ border: "1px solid rgba(128, 128, 128, 0.5)" }}>
+        <div className="m-2">
+          Query Parameter Details:
+          <img
+            className="mx-3 mb-1"
+            width="25"
+            height="25"
+            src="https://img.icons8.com/ios/50/FFFFFF/add--v1.png"
+            alt="add--v1"
+            onClick={() => onAdd("query parameters")}
+            style={{ cursor: "pointer" }}
+          />
+        </div>
+
+        <ParameterSettings paramData={paramData} onChange={onChange} />
       </div>
     </>
   );

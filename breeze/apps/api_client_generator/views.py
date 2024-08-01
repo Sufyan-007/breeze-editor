@@ -15,7 +15,7 @@ class ApiClientGenerator(View):
 
     def post(self, request, collectionType, appName):
         project_name = appName
-        folder_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json"
+        folder_path = f"{CONFIG_PATH}/{project_name}/api_client_intermediate_json" 
         filename = ''
         try:
             json_file = request.FILES['file']
@@ -31,6 +31,7 @@ class ApiClientGenerator(View):
                 for model in api_models:
                     model_dict[model.id] = model.as_dict()
                 full_file_path = os.path.join(folder_path, filename)
+                
                 append_to_dict_file(full_file_path,model_dict)
                 
                 return JsonResponse({"data": model_dict, "filename": filename}, status=201)
@@ -41,23 +42,30 @@ class ApiClientGenerator(View):
                 
                 ## for auth.json
                 security_schemes_models = converted_data.get("security_schemes_models")
-                auth_file = "auth.json"
+                # security_schemes_models = result.get("security_schemes_models")
+                swagger_metadata_key = converted_data.get("id")
+                swagger_metadata_config_path = f"{CONFIG_PATH}/{project_name}/swagger_metadata.json"
+                with open(swagger_metadata_config_path, "r") as file:
+                        swagger_metadata_content = json.load(file)
+                
                 auth_model_dict = {}
                 for model in security_schemes_models:
                     auth_model_dict[model.id] = model.as_dict()    
-                full_auth_file_path = os.path.join(folder_path, auth_file)
-                append_to_dict_file(full_auth_file_path,auth_model_dict)
+                swagger_metadata_content[swagger_metadata_key]["auth_apis"] = auth_model_dict
+                append_to_dict_file(swagger_metadata_config_path,swagger_metadata_content)
                 
                 ## for other models
                 tag_models = converted_data.get("tag_models")
                 # resultant_filename = []
                 files_with_apis = []
-                
+                api_models_folder_path = folder_path + f"/{swagger_metadata_key}"
+                if not os.path.exists(api_models_folder_path):
+                    os.makedirs(api_models_folder_path)
                 for tag, api_models in tag_models.items():
                     function_with_errors = set()
                     model_dict = {}
                     filename = tag+".json"
-                    full_file_path = os.path.join(folder_path, filename)
+                    full_file_path = os.path.join(api_models_folder_path, filename)
                     # resultant_filename.append(filename)
                     for model in api_models:
                         model_as_dict = model.as_dict()
@@ -93,7 +101,7 @@ class ApiClientGenerator(View):
         
     
     def get(self, request, projectName,files_only):
-        folder_path = f"{CONFIG_PATH}/{projectName}/generated_intermediate_json"
+        folder_path = f"{CONFIG_PATH}/{projectName}/api_client_intermediate_json"
         files_with_apis = []
 
         try:

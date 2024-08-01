@@ -87,9 +87,9 @@ class SchemaSettings(View):
                 schema_data[id] = schema_details
             append_to_dict_file(schema_file_path, schema_data)
             if schema_id:
-                return JsonResponse({"data": "Schema Edited Successfully"})
+                return JsonResponse({"message": "Schema Edited Successfully"})
             else:
-                return JsonResponse({"data": "Schema Added Successfully"})
+                return JsonResponse({"message": "Schema Added Successfully"})
         
         except Exception as e:
             return JsonResponse({"error": str(e)})

@@ -29,9 +29,12 @@ class AuthContent:
 @dataclass
 class Auth:
     type: AuthTypeEnum = CustomizedAttr((AuthTypeEnum),[required_validator])
-    content: list= CustomizedAttr((list),[required_validator])
+    content: list= CustomizedAttr((list),[])
     login_api: str= CustomizedAttr((str),[])
     token_api : str= CustomizedAttr((str),[])
+    # auth_api : str= CustomizedAttr((str),[])
+    # username : str= CustomizedAttr((str),[])
+    # password : str= CustomizedAttr((str),[])
     # errors  = {}
     errors : dict = CustomizedAttr((dict), [])
 

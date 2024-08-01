@@ -1,16 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { Card, Row } from "react-bootstrap";
 import edit from "../../../../../assets/icons/edit-icon.svg";
-import ParameterSettings from "./ParameterSettings";
 import HeadersSetting from "./HeadersSetting";
 import AuthSettings from "./AuthSettings";
 import UrlSettings from "./UrlSettings";
 import BodySettings from "./BodySettings";
 
-function RequestSettings({ requestData, onChange }) {
+function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, requestType }) {
+  // console.log(apiData, "apidata");
   const [request, setRequest] = useState(requestData);
   const [expandedProperty, setExpandedProperty] = useState(null);
-  const requestProperties = ["Url", "Body", "Query Parameters", "Headers", "Auth"];
+  const [api, setApi] = useState({});
+  const [requestProperties, setRequestProperties] = useState(["Url","Body","Headers","Auth",]);
+
+  useEffect(() => {
+    if (apiData.is_open_api) {
+      setRequestProperties(["Url", "Body", "Headers"]);
+    } else {
+      setRequestProperties(["Url", "Body", "Headers", "Auth"]);
+    }
+  }, [apiData.is_open_api]);
+  useEffect(() => {
+    if (isAuthApi) {
+      console.log(apiData.authentication_type, "authentication_type")
+      if (
+        apiData.authentication_type === "BEARER" ||
+        apiData.authentication_type === "APIKEY" || apiData.authentication_type === "OAUTH2"
+      ) {
+        setRequestProperties(["Url","Body", "Headers"]);
+      }  else if (apiData.authentication_type === "BASIC") {
+        setRequestProperties(["Body", "Headers"]);
+      }
+    } else {
+      setRequestProperties(["Url", "Body", "Headers", "Auth"]);
+    }
+  }, [isAuthApi, apiData.authentication_type]);
 
   const addProperty = (prop) => {
     console.log(prop, "prop");
@@ -53,15 +77,25 @@ function RequestSettings({ requestData, onChange }) {
   useEffect(() => {
     setRequest(requestData);
   }, [requestData]);
+  useEffect(() => {
+    setApi(apiData);
+  }, [apiData]);
 
   const onReqChange = (prop, value) => {
+    console.log(prop, value);
     let r = request;
     r[prop] = value;
     setRequest({
       ...r,
     });
-    onChange("request", r);
+    onChange(requestType, r);
   };
+  // const onAuthReqChange = (prop,value)=>{
+  //   let r = request;
+  //   r[prop] = value;
+  //   setRequest({...r})
+  //   onChange("")
+  // }
   const toggleProperty = (index) => {
     // console.log(index, "index");
     if (expandedProperty === index) {
@@ -73,7 +107,7 @@ function RequestSettings({ requestData, onChange }) {
   return (
     <Row className="mt-3">
       <div className="text-white p-1" style={{ backgroundColor: "#303033" }}>
-        Request Settings
+        <span className="mx-2">{title}</span>
       </div>
       <div className="p-1">
         {requestProperties &&
@@ -84,9 +118,9 @@ function RequestSettings({ requestData, onChange }) {
               bg="dark"
               style={{ border: "1px solid rgba(128, 128, 128, 0.5)" }}>
               <Card.Body className="d-flex justify-content-between">
-                {req}
+                {req === "Url" && request.url && request.url.baseurl !== "" ? request.url.baseurl : req} 
                 <div>
-                  {req !== "Url" && req !== "Body" && (
+                  {req === "Headers" && (
                     <img
                       className="mx-1"
                       width="25"
@@ -109,18 +143,7 @@ function RequestSettings({ requestData, onChange }) {
                 </div>
               </Card.Body>
               {expandedProperty === index &&
-                (req.toLowerCase() === "query parameters" ? (
-                  <Card.Body className="text-white">
-                    <ParameterSettings
-                      paramData={request.parameters || []
-                      //   .filter(
-                      //   (param) => param.param_in === "QUERY"
-                      // )
-                    }
-                      onChange={onReqChange}
-                    />
-                  </Card.Body>
-                ) : req.toLowerCase() === "headers" ? (
+                (req.toLowerCase() === "headers" ? (
                   <Card.Body className="text-white">
                     <HeadersSetting
                       headerData={request.headers}
@@ -132,17 +155,50 @@ function RequestSettings({ requestData, onChange }) {
                     <UrlSettings
                       urlData={request.url}
                       onChange={onReqChange}
-                      paramData={request.parameters || []
-                      //   .filter(
-                      //   (param) => param.param_in === "PATH"
-                      // )
-                    }
+                      paramData={
+                        request.parameters || []
+                        //   .filter(
+                        //   (param) => param.param_in === "PATH"
+                        // )
+                      }
+                      method={request.method}
+                      onAdd={addProperty}
+                    />
+                  </Card.Body>
+                ) : req.toLowerCase() === "loginurl" ? (
+                  <Card.Body className="text-white">
+                    <UrlSettings
+                      urlData={request.url}
+                      onChange={onReqChange}
+                      paramData={
+                        request.parameters || []
+                        //   .filter(
+                        //   (param) => param.param_in === "PATH"
+                        // )
+                      }
+                      onAdd={addProperty}
+                    />
+                  </Card.Body>
+                ) : req.toLowerCase() === "refreshurl" ? (
+                  <Card.Body className="text-white">
+                    <UrlSettings
+                      urlData={request.url}
+                      onChange={onReqChange}
+                      paramData={
+                        request.parameters || []
+                        //   .filter(
+                        //   (param) => param.param_in === "PATH"
+                        // )
+                      }
+                      onAdd={addProperty}
                     />
                   </Card.Body>
                 ) : req.toLowerCase() === "auth" ? (
                   <AuthSettings
                     authData={request.auth}
                     onChange={onReqChange}
+                    apiData={api}
+                    onApiChange={onChange}
                   />
                 ) : req.toLowerCase() === "body" ? (
                   <BodySettings
@@ -150,16 +206,16 @@ function RequestSettings({ requestData, onChange }) {
                       request.body && request.body.length > 0
                         ? request.body[0]
                         : {
-                            content_type: "",
-                            mode: "",
-                            required: false,
-                            schema_name: "",
-                            schema: {
-                              type: "object",
-                              properties: {},
-                              required: [],
-                            },
-                          }
+                          content_type: "",
+                          mode: "",
+                          required: false,
+                          schema_name: "",
+                          schema: {
+                            type: "object",
+                            properties: {},
+                            required: [],
+                          },
+                        }
                     }
                     onChange={onReqChange}
                   />

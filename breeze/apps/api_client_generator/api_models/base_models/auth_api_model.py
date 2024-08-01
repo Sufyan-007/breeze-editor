@@ -38,12 +38,14 @@ class AuthApiModel:
     tags: str = CustomizedAttr((str),[required_validator])
     auth_api_type : AuthApiTypeEnum =CustomizedAttr(AuthApiTypeEnum,[])
     authentication_type : AuthTypeEnum = CustomizedAttr(AuthTypeEnum,[required_validator])
-    request : Request = CustomizedAttr((Request),[])
-    response : list = CustomizedAttr(list,[])
+    access_token_request : Request = CustomizedAttr((Request),[])
+    refresh_token_request : Request = CustomizedAttr((Request),[])
+    access_token_response : list = CustomizedAttr(list,[])
+    refresh_token_response : list = CustomizedAttr(list,[])
     summary : str =  CustomizedAttr((str),[])
-    is_authorization_url : bool = CustomizedAttr(bool,[])
-    flow : dict = CustomizedAttr(dict,[])
-    flow_type : str = CustomizedAttr((str),[])
+    # is_authorization_url : bool = CustomizedAttr(bool,[])
+    # flow : dict = CustomizedAttr(dict,[])
+    # flow_type : str = CustomizedAttr((str),[])
     token_store: TokenStore = CustomizedAttr(TokenStore,[])
     errors: dict = CustomizedAttr(dict,[])
     is_authentication_api: bool = CustomizedAttr(bool,[])
@@ -55,22 +57,26 @@ class AuthApiModel:
 
     def as_dict(self):
         
-        responses = []
-        for rs in self.response:
-            responses.append(rs.as_dict() if rs else None) 
-        
+        access_token_responses = []
+        refresh_token_responses = []
+        for rs in self.access_token_response:
+            access_token_responses.append(rs.as_dict() if rs else None) 
+        for rs in self.refresh_token_response:
+            refresh_token_responses.append(rs.as_dict() if rs else None)
         return {
             'id': self.id,
             'operation_id': self.operation_id,
             'tags' : self.tags,
             'auth_api_type' : self.auth_api_type.name,
             'authentication_type' : self.authentication_type.name,
-            'request': self.request.as_dict() if self.request else None,
-            'response': responses,
+            'access_token_request': self.access_token_request.as_dict() if self.access_token_request else None,
+            'refresh_token_request': self.refresh_token_request.as_dict() if self.refresh_token_request else None,
+            'access_token_response': access_token_responses,
+            'refresh_token_response': refresh_token_responses,
             'summary' : self.summary,
-            'is_authorization_url' : self.is_authorization_url,
-            'flow' : self.flow,
-            'flow_type': self.flow_type,
+            # 'is_authorization_url' : self.is_authorization_url,
+            # 'flow' : self.flow,
+            # 'flow_type': self.flow_type,
             'token_store': self.token_store.as_dict() if self.token_store else None,
             'errors': self.errors if self.errors else None,
             'is_authentication_api': self.is_authentication_api
