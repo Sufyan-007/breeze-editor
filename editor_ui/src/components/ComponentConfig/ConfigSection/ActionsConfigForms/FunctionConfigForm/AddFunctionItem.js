@@ -80,13 +80,13 @@ const templates = {
     },
   },
   functionCall: {
-    case: "functionCall",
+    callType: "functionCall",
     type: "FUNCTION_CALL",
     functionName: "",
     parameters: [],
   },
   serviceCall: {
-    case: "serviceCall",
+    callType: "serviceCall",
     type: "FUNCTION_CALL",
     functionName: "",
     parameters: [],

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { Row, Col, Form, Button } from "react-bootstrap";
 import { ComponentContext } from "../../../ComponentConfigPage";
 import ParamInput from "./ParamInput";
@@ -18,22 +18,34 @@ const staticServiceList = {
 
 function FunctionCall({ config, update }) {
   const [conf, setConf] = useState({ ...config });
-  const [functionList, setFunctionList] = useState([]);
-  const [selectedFunction, setSelectedFunction] = useState(
-    config.functionName || ""
-  );
-  const [selectedService, setSelectedService] = useState("");
-  const [selectedServiceFunction, setSelectedServiceFunction] = useState(null);
   const { componentConfig } = useContext(ComponentContext);
-  const { resources } = componentConfig;
+  const resources = componentConfig.resources;
+  const functionList = useMemo(() => {
+    return resources.filter(
+      (resource) => resource.type === "function"
+    );
+  }, [resources]);
+  const [selectedFunction, setSelectedFunction] = useState();
+  const [selectedService, setSelectedService] = useState("");
   const [checkedItems, setCheckedItems] = useState({
     thenCatch: false,
     declarationCall: false,
     awaitCall: false,
     tryCatch: false,
   });
-  console.log(config)
-  console.log(selectedServiceFunction);
+
+  useEffect(()=>{
+    if(selectedFunction){
+      setConf((state)=>{
+        return {...state,functionName:selectedFunction.name}
+      })
+    }
+    else{
+      setConf((state)=>{
+        return {...state,functionName:null}
+      })
+    }
+  },[selectedFunction])
 
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
@@ -45,118 +57,27 @@ function FunctionCall({ config, update }) {
 
   useEffect(() => {
     setConf({ ...config });
-    setSelectedFunction(config.functionName || "");
   }, [config]);
 
-  useEffect(() => {
-    const functions = resources.filter(
-      (resource) => resource.type === "function"
-    );
-    setFunctionList(functions);
-  }, [resources]);
 
   useEffect(() => {
-    const selectedFunc = functionList.find(
-      (func) => func.name === selectedFunction
-    );
-    if (selectedFunc) {
+    // const selectedFunc = functionList.find(
+    //   (func) => func.name === selectedFunction
+    // );
+    if (selectedFunction) {
       setConf((prevState) => ({
         ...prevState,
-        functionName: selectedFunc.name,
-        parameters: selectedFunc.parameters.map((param) => ({
-          ...param,
-          value:
-            param.type === "OBJECT" ? {} : param.type === "ARRAY" ? [] : "",
-        })),
+        functionName: selectedFunction.name,
+        parameters: []
       }));
     }
   }, [selectedFunction, functionList]);
 
 
-
-  // const handleSave = () => {
-  //   const updatedConf = { ...conf };
-
-  //   if (conf.case === "serviceCall" && selectedServiceFunction) {
-  //     updatedConf.functionName = selectedServiceFunction.name;
-  //     updatedConf.parameters = selectedServiceFunction.parameters.map(
-  //       (param) => ({
-  //         ...param,
-  //         value: paramValues[param.name],
-  //       })
-  //     );
-  //   }
-  //   var transformedConfig = updatedConf;
-  //   if (checkedItems.awaitCall) {
-  //     transformedConfig["isAwaited"] = true;
-  //   }
-  //   if (checkedItems.thenCatch) {
-  //     transformedConfig = {
-  //       type: "CHAINED_FUNCTIONS",
-  //       functions: [
-  //         transformedConfig,
-  //         {
-  //           type: "FUNCTION_CALL",
-  //           functionName: "then",
-  //           parameters: [
-  //             {
-  //               type: "FUNCTION",
-  //               isAnonymous: true,
-  //               parameters: [{ name: "res", type: "CUSTOM" }],
-  //               bodyConfig: {
-  //                 type: "BLOCK",
-  //                 statements: [],
-  //               },
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           type: "FUNCTION_CALL",
-  //           functionName: "catch",
-  //           parameters: [
-  //             {
-  //               type: "FUNCTION",
-  //               isAnonymous: true,
-  //               parameters: [{ name: "err", type: "CUSTOM" }],
-  //               bodyConfig: {
-  //                 type: "BLOCK",
-  //                 statements: [],
-  //               },
-  //             },
-  //           ],
-  //         },
-  //       ],
-  //     };
-  //   }
-
-  //   if (checkedItems.declarationCall) {
-  //     transformedConfig = {
-  //       type: "DECLARATION",
-  //       varName: "response",
-  //       value: transformedConfig,
-  //       declarationType: "const",
-  //     };
-  //   }
-  //   if (checkedItems.tryCatch) {
-  //     transformedConfig = {
-  //       type: "TRY_CATCH",
-  //       tryBody: {
-  //         type: "BLOCK",
-  //         statements: [transformedConfig],
-  //       },
-  //       catchBody: {
-  //         type: "BLOCK",
-  //         statements: [],
-  //       },
-  //     };
-  //   }
-  //   update(transformedConfig);
-  // };
-
   return (
     <div className="d-flex h-100 flex-column justify-content-between">
       <div>
-        {conf?.case === "serviceCall" ? (
+        {conf?.callType === "serviceCall" ? (
           <Row className="mb-2">
             <Col sm={6}>
               <Form.Select
@@ -179,7 +100,7 @@ function FunctionCall({ config, update }) {
                 defaultValue=""
                 className="form-select-sm"
                 onChange={(e) => {
-                  setSelectedServiceFunction(
+                  setSelectedFunction(
                     staticServiceList[selectedService][e.target.value]
                   );
                 }}
@@ -208,7 +129,7 @@ function FunctionCall({ config, update }) {
                   Select function
                 </option>
                 {functionList.map((func, index) => (
-                  <option key={index} value={func.name}>
+                  <option key={index} value={func}>
                     {func.name}
                   </option>
                 ))}
@@ -284,8 +205,9 @@ function FunctionCall({ config, update }) {
           </div>
         </Row>
       </div>
-      <FunctionCallEdit config={config} functionConfig={selectedFunction} hideName update={console.log} />
-
+      {conf.functionName &&
+        <FunctionCallEdit config={conf} functionConfig={selectedFunction} hideName update={console.log} />
+      }
     </div >
   );
 }
