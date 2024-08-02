@@ -66,4 +66,4 @@ def start_app(app_config):
         # process=subprocess.run(command, cwd=project_path, env=environment)
 
     
-    return {"project_id":project_id,"port":RUNNING_APPS[project_id]}['port']
+    return {"project_id":project_id,"port":RUNNING_APPS[project_id]['port']}
