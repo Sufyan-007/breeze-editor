@@ -1,0 +1,130 @@
+.route-search-input-group {
+  position: relative;
+}
+
+.route-search-input-group .form-control {
+  padding-right: 2.25rem;
+  /* Adjust to ensure button does not overlap text */
+}
+
+.route-search-input-group-append {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding-right: 0.5rem;
+  /* Adjust padding as needed */
+}
+
+.route-tree {
+  max-width: 100%;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.route-node {
+  white-space: pre-wrap;
+}
+
+
+.route-item .route-icon {
+  margin-right: 8px;
+}
+
+.route-item.base {
+  color: rgb(89, 89, 142);
+  /* Base route color */
+}
+
+.route-item.child {
+  color: green;
+  /* Child route color */
+}
+
+.route-item.index {
+  color: orange;
+  /* Index route color */
+}
+
+/* Adjust the indentation and handle hover effects */
+.route-node {
+  padding-left: 10px;
+}
+
+.route-item .route-component {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.route-item .route-path {
+  color: grey;
+  /* overflow-x: hidden; */
+  /* white-space: nowrap; */
+  /* word-wrap: break-word;
+    overflow-wrap: break-word; */
+}
+
+/* .route-item:hover {
+    background-color: #f0f0f0;
+  } */
+
+.route-item {
+  /* background-color: #242627; */
+  background-color: #212529;
+  margin-top: 1px;
+  margin-bottom: 5px;
+  font-size: 80%;
+  align-items: center;
+  white-space: nowrap;
+  /* text-wrap: pretty; */
+  cursor: pointer;
+  overflow-x: hidden;
+}
+
+.route-wrap {
+  /* overflow-wrap: break-word; */
+  /* word-wrap: break-word;
+    white-space: pre-wrap;  */
+  /* white-space: nowrap; */
+  /* overflow-x: hidden; */
+  text-wrap: balance;
+}
+
+.route-children {
+  margin-left: 5px;
+}
+
+.header-strip {
+  height: 23px;
+  line-height: 23px;
+  width: 100%;
+  background-color: #3b3d40;
+  font-size: 78%;
+  padding-left: 10px;
+  border: thin solid rgb(45, 41, 41);
+  border-radius: 4px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.route-details-expandable-content {
+  padding: 10px;
+  border-left: thin black;
+  border-right: thin black;
+  border-bottom: thin black;
+  background-color: none;
+  font-size: 76%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.route-details-form .form-group {
+  margin-bottom: 10px;
+}
+
+.all-route-details {
+  height: 88%;
+}
