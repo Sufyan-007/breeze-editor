@@ -40,8 +40,8 @@ function FunctionCallEdit({ config, functionConfig, update , hideName=false}) {
                 <div className="my-2 border border-gray p-2" key={i}>
                   <ParamInput
                     param={param}
-                    name={functionConfig?.parameters[i]?.name || "PARAM-"+i}
-                    schema={functionConfig?.parameters[i]}
+                    name={(functionConfig?.parameters && functionConfig.parameters[i]?.name) || "PARAM-"+i}
+                    schema={functionConfig?.parameters && functionConfig.parameters[i]}
                     onChange={(value) => handleUpdate(i, value)}
                   />
                 </div>

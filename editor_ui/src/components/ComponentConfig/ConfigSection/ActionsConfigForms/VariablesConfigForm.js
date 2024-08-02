@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
-import dataTypes from "../../../../constants/datatype";
+import { dataTypes } from "../../../../constants/datatype";
 import MonacoEditor from "../../../common/MonacoEditor";
 
 function VariableForm({ onSubmit, formData, isEditing }) {
@@ -40,7 +40,11 @@ function VariableForm({ onSubmit, formData, isEditing }) {
       error = "required";
     } else if (name === "datatype" && !value) {
       error = "required";
-    } else if (name === "defaultValue" && formState.type === "otherVars" && !value) {
+    } else if (
+      name === "defaultValue" &&
+      formState.type === "otherVars" &&
+      !value
+    ) {
       error = "required";
     }
 
@@ -89,10 +93,18 @@ function VariableForm({ onSubmit, formData, isEditing }) {
     newErrors.datatype = validateField("datatype", formState.body.datatype);
 
     if (formState.type === "otherVars") {
-      newErrors.defaultValue = validateField("defaultValue", formState.body.defaultValue);
+      newErrors.defaultValue = validateField(
+        "defaultValue",
+        formState.body.defaultValue
+      );
     }
 
-    if (newErrors.name || newErrors.type || newErrors.datatype || (formState.type === "otherVars" && newErrors.defaultValue)) {
+    if (
+      newErrors.name ||
+      newErrors.type ||
+      newErrors.datatype ||
+      (formState.type === "otherVars" && newErrors.defaultValue)
+    ) {
       isValid = false;
     }
 
@@ -108,7 +120,11 @@ function VariableForm({ onSubmit, formData, isEditing }) {
   };
 
   return (
-    <Form onSubmit={handleSubmit} style={{ fontSize: "14px" }} className="h-100">
+    <Form
+      onSubmit={handleSubmit}
+      style={{ fontSize: "14px" }}
+      className="h-100"
+    >
       <div className="d-flex flex-column justify-content-between h-100">
         <div>
           <Form.Group className="mb-2" controlId="formVariableName">

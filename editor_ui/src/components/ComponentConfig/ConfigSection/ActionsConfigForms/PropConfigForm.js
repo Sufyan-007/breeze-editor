@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
-import dataTypes from "../../../../constants/datatype";
+import { dataTypes } from "../../../../constants/datatype";
 import MonacoEditor from "../../../common/MonacoEditor";
 
 function PropConfigForm({ onSubmit, formData, isEditing }) {

@@ -1,38 +1,45 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
-import { Row, Col, Form, Button } from "react-bootstrap";
+import { Row, Col, Form } from "react-bootstrap";
 import { ComponentContext } from "../../../ComponentConfigPage";
-import ParamInput from "./ParamInput";
 import FunctionCallEdit from "./FunctionCallEdit";
-
-const staticServiceList = {
-  userService: {
-    createUser: {
-      name: "createUser",
-      parameters: [
-        { type: "STRING", name: "name" },
-        { type: "STRING", name: "username" },
-      ],
-    },
-  },
-};
+import { staticServiceList } from "../../../../../constants/datatype";
 
 function FunctionCall({ config, update }) {
   const [conf, setConf] = useState({ ...config });
-  const { componentConfig } = useContext(ComponentContext);
-  const resources = componentConfig.resources;
-  const functionList = useMemo(() => {
-    return resources.filter(
-      (resource) => resource.type === "function"
-    );
-  }, [resources]);
-  const [selectedFunction, setSelectedFunction] = useState();
+  const [selectedFunction, setSelectedFunction] = useState(null);
   const [selectedService, setSelectedService] = useState("");
   const [checkedItems, setCheckedItems] = useState({
     thenCatch: false,
     declarationCall: false,
     awaitCall: false,
-    tryCatch: false,
   });
+
+  const { componentConfig } = useContext(ComponentContext);
+  const resources = componentConfig.resources;
+  const props = componentConfig.propsVars;
+
+  const functionList = useMemo(() => {
+    const stateVarFunctions = resources
+      .filter((resource) => resource.type === "stateVars")
+      .map((stateVar) => {
+        return {
+          ...stateVar,
+          name: `set${stateVar.name
+            .charAt(0)
+            .toUpperCase()}${stateVar.name.slice(1)}`,
+        };
+      });
+
+    const functionProps = props.filter(
+      (prop) => prop.body.datatype === "FUNCTION"
+    );
+
+    return [
+      ...resources.filter((resource) => resource.type === "function"),
+      ...stateVarFunctions,
+      ...functionProps,
+    ];
+  }, [resources, props]);
 
   useEffect(()=>{
     if(selectedFunction){
@@ -45,7 +52,7 @@ function FunctionCall({ config, update }) {
         return {...state,functionName:null}
       })
     }
-  },[selectedFunction])
+  }, [selectedFunction, conf?.case]);
 
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
@@ -59,20 +66,15 @@ function FunctionCall({ config, update }) {
     setConf({ ...config });
   }, [config]);
 
-
   useEffect(() => {
-    // const selectedFunc = functionList.find(
-    //   (func) => func.name === selectedFunction
-    // );
     if (selectedFunction) {
       setConf((prevState) => ({
         ...prevState,
         functionName: selectedFunction.name,
-        parameters: []
+        parameters: [],
       }));
     }
-  }, [selectedFunction, functionList]);
-
+  }, [selectedFunction, functionList, conf?.case]);
 
   return (
     <div className="d-flex h-100 flex-column justify-content-between">
@@ -116,27 +118,25 @@ function FunctionCall({ config, update }) {
               </Form.Select>
             </Col>
           </Row>
-
         ) : (
           <Row className="mb-2">
             <Col sm={12}>
               <Form.Select
                 className="form-select-sm"
-                value={selectedFunction}
-                onChange={(e) => setSelectedFunction(e.target.value)}
+                value={JSON.stringify(selectedFunction) || ""}
+                onChange={(e) =>
+                  setSelectedFunction(JSON.parse(e.target.value))
+                }
               >
-                <option disabled value="">
-                  Select function
-                </option>
-                {functionList.map((func, index) => (
-                  <option key={index} value={func}>
-                    {func.name}
+                <option value="">Select function</option>
+                {Object.keys(functionList).map((key, index) => (
+                  <option key={index} value={JSON.stringify(functionList[key])}>
+                    {functionList[key].name}
                   </option>
                 ))}
               </Form.Select>
             </Col>
           </Row>
-
         )}
         <Row className="mb-2 px-1">
           <Form.Label>
@@ -149,9 +149,8 @@ function FunctionCall({ config, update }) {
                 type="checkbox"
                 name="thenCatch"
                 id="thenCatch"
-                checked={checkedItems.thenCatch.checked}
+                checked={checkedItems.thenCatch}
                 onChange={handleCheckboxChange}
-                disabled={checkedItems.thenCatch.disabled}
               />
               <label className="form-check-label" htmlFor="thenCatch">
                 Then catch
@@ -163,14 +162,10 @@ function FunctionCall({ config, update }) {
                 type="checkbox"
                 name="declarationCall"
                 id="declarationCall"
-                checked={checkedItems.declarationCall.checked}
+                checked={checkedItems.declarationCall}
                 onChange={handleCheckboxChange}
-                disabled={checkedItems.declarationCall.disabled}
               />
-              <label
-                className="form-check-label"
-                htmlFor="declarationCall"
-              >
+              <label className="form-check-label" htmlFor="declarationCall">
                 Declaration
               </label>
             </div>
@@ -180,35 +175,25 @@ function FunctionCall({ config, update }) {
                 type="checkbox"
                 name="awaitCall"
                 id="awaitCall"
-                checked={checkedItems.awaitCall.checked}
+                checked={checkedItems.awaitCall}
                 onChange={handleCheckboxChange}
-                disabled={checkedItems.awaitCall.disabled}
               />
               <label className="form-check-label" htmlFor="awaitCall">
                 Await
               </label>
             </div>
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="tryCatch"
-                id="tryCatch"
-                checked={checkedItems.tryCatch.checked}
-                onChange={handleCheckboxChange}
-                disabled={checkedItems.tryCatch.disabled}
-              />
-              <label className="form-check-label" htmlFor="tryCatch">
-                Try catch
-              </label>
-            </div>
           </div>
         </Row>
       </div>
-      {conf.functionName &&
-        <FunctionCallEdit config={conf} functionConfig={selectedFunction} hideName update={console.log} />
-      }
-    </div >
+      {conf.functionName && selectedFunction && (
+        <FunctionCallEdit
+          config={conf}
+          functionConfig={selectedFunction}
+          hideName
+          update={update}
+        />
+      )}
+    </div>
   );
 }
 
