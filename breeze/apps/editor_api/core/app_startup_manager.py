@@ -5,6 +5,7 @@ RUNNING_APPS = {}
 import subprocess
 import platform
 import re
+import threading
 
 def kill_process_on_port(port):
     current_os = platform.system()
@@ -35,7 +36,18 @@ def kill_process_on_port(port):
                 subprocess.run(['taskkill', '/F', '/PID', pid])
             print(f"Process running on port {port} has been killed.")
 
-
+def run_project_threaded(project_id,port,project_path):
+    env = os.environ.copy()
+    env['PORT'] = str(port)
+    env['BROWSER'] =  "NONE"
+    process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
+    while True:
+        output = process.stdout.readline()
+        if output:
+            if output.startswith(b'webpack compiled'):
+                RUNNING_APPS[project_id]['status'] = "RUNNING"
+                print("Running :",project_id)
+            pass
 
 def start_app(app_config):
     project_id=app_config["name"]
@@ -45,14 +57,13 @@ def start_app(app_config):
     else:
         print("Starting :", project_id)
         port= 3010+len(RUNNING_APPS)
-        RUNNING_APPS[project_id] = port
         kill_process_on_port(port)
-        env = os.environ.copy()
-        env['PORT'] = str(port)
-        env['BROWSER'] =  "NONE"
-        process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=project_path,  )
+        thread = threading.Thread(target=run_project_threaded,args= [project_id,port,project_path])
+        thread.daemon = True
+        thread.start()
+        RUNNING_APPS[project_id] = {'port':port,'thread':thread,'status':"COMPILATION_STARTED"}
         # process.wait()
         # process=subprocess.run(command, cwd=project_path, env=environment)
 
     
-    return {"project_id":project_id,"port":RUNNING_APPS[project_id]}
+    return {"project_id":project_id,"port":RUNNING_APPS[project_id]}['port']

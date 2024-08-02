@@ -146,6 +146,13 @@ export default function ProjectRouting() {
     }
   };
 
+  const checkForMainsChildFullPath = (route) => {
+    if (route.initialParentPath === "/") {
+      return route.fullPath.slice(1);
+    }
+    return route.fullPath;
+  };
+
   const getFunctionFromConfig = (allRoutes) => {
     let entries = Object.entries(allRoutes);
     entries = entries.map((obj) => {
@@ -212,16 +219,12 @@ export default function ProjectRouting() {
 
   const [routes, setRoutes] = useState([...allRoutes]);
   const [parentRouteOptions, setParentRouteOptions] = useState([
-    { value: "none", label: "None" },
-    ...allRoutes.map((route) => ({ value: route, label: route.fullPath })),
+    { value: "none", label: "Nofvdfvdfvne" },
+    ...allRoutes.map((route) => ({
+      value: route,
+      label: checkForMainsChildFullPath(route),
+    })),
   ]);
-
-  const checkForMainsChildFullPath = (route) => {
-    if (route.initialParentPath === '/') {
-      return route.fullPath.slice(1);
-    }
-    return route.fullPath;
-  };
 
   const isRoutePathPresent = (routePath) => {
     let isCaseSensitive = CASESENSITIVE;
@@ -232,7 +235,8 @@ export default function ProjectRouting() {
     let allFullPaths = allRoutes.map((route) => {
       if (routeMode === "Edit" || routeMode === "View") {
         if (!isCaseSensitive) {
-          currentOffCanvasRoute.fullPath = currentOffCanvasRoute.fullPath.toLowerCase();
+          currentOffCanvasRoute.fullPath =
+            currentOffCanvasRoute.fullPath.toLowerCase();
         }
         if (currentOffCanvasRoute.fullPath === routePath) {
           return "";
@@ -279,7 +283,10 @@ export default function ProjectRouting() {
     setShowSelectedRouteObj("");
     setParentRouteOptions([
       { value: "none", label: "None" },
-      ...allRoutes.map((route) => ({ value: route, label: route.fullPath })),
+      ...allRoutes.map((route) => ({
+        value: route,
+        label: checkForMainsChildFullPath(route),
+      })),
     ]);
   };
 
@@ -332,7 +339,10 @@ export default function ProjectRouting() {
       setRoutes(updatedRoutes);
       setParentRouteOptions([
         { value: "none", label: "None" },
-        ...allRoutes.map((route) => ({ value: route, label: route.fullPath })),
+        ...allRoutes.map((route) => ({
+          value: route,
+          label: checkForMainsChildFullPath(route),
+        })),
       ]);
       setDisplayRoute("");
       setSearchedRoute("");
@@ -466,7 +476,10 @@ export default function ProjectRouting() {
               .filter(
                 (route) => route.fullPath !== currentOffCanvasRoute.fullPath
               )
-              .map((route) => ({ value: route, label: route.fullPath })),
+              .map((route) => ({
+                value: route,
+                label: checkForMainsChildFullPath(route),
+              })),
           ]);
         }
       } else {
@@ -479,7 +492,10 @@ export default function ProjectRouting() {
               .filter(
                 (route) => route.fullPath !== currentOffCanvasRoute.fullPath
               )
-              .map((route) => ({ value: route, label: route.fullPath })),
+              .map((route) => ({
+                value: route,
+                label: checkForMainsChildFullPath(route),
+              })),
           ]);
         }
       }
@@ -680,7 +696,11 @@ export default function ProjectRouting() {
                           minHeight: routeMode === "Add" ? "38px" : "58px",
                           height: routeMode === "Add" ? "38px" : "58px",
                         }}
-                        defaultValue={displayRoute ? checkForMainsChildFullPath(displayRoute) : ""}
+                        defaultValue={
+                          displayRoute
+                            ? checkForMainsChildFullPath(displayRoute)
+                            : ""
+                        }
                         readOnly={true}
                         autoComplete="off"
                       />
@@ -1094,7 +1114,7 @@ export default function ProjectRouting() {
             <tbody>
               {routes.map((route) => (
                 <tr className="text-center" key={route.fullPath}>
-                  <td width={"30%"} title={route.fullPath}>
+                  <td width={"30%"} title={checkForMainsChildFullPath(route)}>
                     {checkForMainsChildFullPath(route)}
                   </td>
                   <td
