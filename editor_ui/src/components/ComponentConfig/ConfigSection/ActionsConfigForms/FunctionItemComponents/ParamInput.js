@@ -1,139 +1,143 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 
 const ParamInput = ({ param, name, schema, onChange }) => {
-  const handleChange = (e) => {
-    console.log(e.target.value);
+  const [selection, setSelection] = useState(param?.type || "");
+  const [customValue, setCustomValue] = useState("");
+
+  const handleDropdownChange = (event) => {
+    setSelection(event.target.value);
+    if (
+      event.target.value !== "STRING" &&
+      event.target.value !== "NUMERIC" &&
+      event.target.value !== "BOOLEAN" &&
+      event.target.value !== "OBJECT"
+    ) {
+      handleParamChange(event.target.value);
+    }
   };
 
-  if (param.type === "STRING") {
-    return (
-      <Form.Group>
-        <div className="d-flex mb-1">
-          <div
-            className="col-3 border border-gray d-flex align-items-center px-2"
-            style={{ borderRadius: "5px" }}
+  const handleCustomInputChange = (event) => {
+    setCustomValue(event.target.value);
+    if (param.type === "STRING") {
+      handleParamChange({ type: "STRING", value: event.target.value });
+    } else if (param.type === "NUMERIC") {
+      handleParamChange({
+        type: "NUMERIC",
+        value: parseFloat(event.target.value),
+      });
+    } else if (param.type === "BOOLEAN") {
+      handleParamChange({
+        type: "BOOLEAN",
+        value: event.target.value === "true",
+      });
+    }
+  };
+
+  const handleParamChange = (newValue) => {
+    // console.log("newValue::>>", newValue);
+    if (newValue === "null") {
+      onChange({ type: "NULL" });
+    } else if (newValue === "undefined") {
+      onChange({ type: "UNDEFINED" });
+    } else if (typeof newValue === "object") {
+      onChange(newValue);
+    } else {
+      onChange({ $ref: newValue });
+    }
+  };
+
+  const handlePropertyUpdate = (key, val) => {
+    // console.log(key,val)
+    onChange({ ...param, properties: { ...param.properties, [key]: val } });
+  };
+
+  return (
+    <Form.Group>
+      <div className="row mx-0 mb-1">
+        <div
+          className="col-3 border border-gray d-flex align-items-center px-2"
+          style={{ borderRadius: "5px" }}
+        >
+          <Form.Label className="mb-0">{name}</Form.Label>
+        </div>
+        <div className="col-1 px-0 d-flex justify-content-center align-items-center">
+          <i className="bi bi-arrow-right"></i>
+        </div>
+        <div className="col-8 px-0 d-flex align-items-center">
+          <Form.Select
+            value={selection}
+            onChange={handleDropdownChange}
+            className="form-select-sm me-2"
           >
-            <Form.Label className="mb-0">{name}</Form.Label>
-          </div>
-          <div className="col-2 d-flex justify-content-center align-items-center">
-            <i className="bi bi-arrow-right"></i>
-          </div>
-          <div className="col-7">
+            <option value="">Select</option>
+            <option value="var1">var1</option>
+            <option value="var2">var2</option>
+            {param.type === "STRING" && (
+              <option value="STRING">String (Custom)</option>
+            )}
+            {param.type === "NUMERIC" && (
+              <option value="NUMERIC">Numeric (Custom)</option>
+            )}
+            {param.type === "BOOLEAN" && (
+              <option value="BOOLEAN">Boolean (Custom)</option>
+            )}
+            {param.type === "OBJECT" && (
+              <option value="OBJECT">Object (Custom)</option>
+            )}
+            <option value="null">null</option>
+            <option value="undefined">undefined</option>
+          </Form.Select>
+          {(selection === "STRING" || selection === "NUMERIC") && (
             <Form.Control
               className="form-control-sm"
-              type="text"
-              value={param.value || ""}
-              onChange={handleChange}
+              type={param.type === "STRING" ? "text" : "number"}
+              value={customValue}
+              onChange={handleCustomInputChange}
+              placeholder="Custom Input"
             />
-          </div>
+          )}
+          {selection === "BOOLEAN" && (
+            <div className="d-flex align-items-center mt-1">
+              <Form.Check
+                type="radio"
+                label="True"
+                name="booleanOption"
+                value="true"
+                checked={customValue === "true"}
+                onChange={handleCustomInputChange}
+                className="me-2"
+              />
+              <Form.Check
+                type="radio"
+                label="False"
+                name="booleanOption"
+                value="false"
+                checked={customValue === "false"}
+                onChange={handleCustomInputChange}
+              />
+            </div>
+          )}
         </div>
-      </Form.Group>
-    );
-  }
-
-  // if (param.type === "NUMERIC") {
-  //   return (
-  //     <Form.Group controlId={param.name}>
-  //       <div className="d-flex mb-1">
-  //         <div
-  //           className="col-3 border border-gray d-flex align-items-center px-2"
-  //           style={{ borderRadius: "5px" }}
-  //         >
-  //           <Form.Label className="mb-0">{param.name}</Form.Label>
-  //         </div>
-  //         <div className="col-2 d-flex justify-content-center align-items-center">
-  //           <i className="bi bi-arrow-right"></i>
-  //         </div>
-  //         <div className="col-7">
-  //           <Form.Control
-  //             className="form-control-sm"
-  //             type="number"
-  //             value={value || ""}
-  //             onChange={handleChange}
-  //           />
-  //         </div>
-  //       </div>
-  //     </Form.Group>
-  //   );
-  // }
-
-  // if (param.type === "OBJECT") {
-  //   return (
-  //     <div>
-  //       <strong className="mb-1">{param.name}</strong>
-  //       {param.properties &&
-  //         param.properties.map((prop, index) => (
-  //           <div className="ps-2" key={index}>
-  //             <ParamInput
-  //               param={prop}
-  //               value={value ? value[prop.name] : ""}
-  //               onChange={(propValue) =>
-  //                 onChange({ ...value, [prop.name]: propValue })
-  //               }
-  //             />
-  //           </div>
-  //         ))}
-  //     </div>
-  //   );
-  // }
-
-  // if (param.type === "ARRAY") {
-  //   return (
-  //     <div>
-  //       <div className="d-flex justify-content-between">
-  //         <strong className="mb-1">{param.name}</strong>
-  //         <div
-  //           className="ms-2"
-  //           onClick={() => onChange([...(value || []), ""])}
-  //         >
-  //           <i className="bi bi-plus-circle"></i>
-  //         </div>
-  //       </div>
-  //       {(value || []).map((val, idx) => (
-  //         <div className="ps-2" key={idx}>
-  //           <ParamInput
-  //             param={{ type: "STRING", name: `${param.name}[${idx}]` }}
-  //             value={val}
-  //             onChange={(newVal) => {
-  //               const newArray = [...value];
-  //               newArray[idx] = newVal;
-  //               onChange(newArray);
-  //             }}
-  //           />
-  //         </div>
-  //       ))}
-  //     </div>
-  //   );
-  // }
-
-  // if (param.type === "ANY") {
-  //   return (
-  //     <Form.Group controlId={param.name}>
-  //       <div className="d-flex mb-1">
-  //         <div
-  //           className="col-3 border border-gray d-flex align-items-center px-2"
-  //           style={{ borderRadius: "5px" }}
-  //         >
-  //           <Form.Label className="mb-0">{param.name}</Form.Label>
-  //         </div>
-  //         <div className="col-2 d-flex justify-content-center align-items-center">
-  //           <i className="bi bi-arrow-right"></i>
-  //         </div>
-  //         <div className="col-7">
-  //           <Form.Control
-  //             className="form-control-sm"
-  //             type="text"
-  //             value={value || ""}
-  //             onChange={handleChange}
-  //           />
-  //         </div>
-  //       </div>
-  //     </Form.Group>
-  //   );
-  // }
-
-  return null;
+      </div>{" "}
+      <div className="ps-3">
+        {selection === "OBJECT" &&
+          param.type === "OBJECT" &&
+          param.properties && (
+            <div className="mt-2 w-100">
+              {Object.entries(param.properties).map(([key, value]) => (
+                <ParamInput
+                  key={key}
+                  name={key}
+                  param={value}
+                  onChange={(newValue) => handlePropertyUpdate(key, newValue)}
+                />
+              ))}
+            </div>
+          )}
+      </div>
+    </Form.Group>
+  );
 };
 
 export default ParamInput;

@@ -5,6 +5,12 @@ RESOURCES={
     },
     "SERVICE/UUID1":{
         "functionName":"createUser"
+    },
+     "var1":{
+        "name":"val"
+    },
+     "var2":{
+        "name":"va1"
     }
 }
 
@@ -175,25 +181,23 @@ class FunctionParser:
         return ""
         
     def get_function_call_code(self,config,disableAwait = False):
-        callType = config.get("callType", "SIMPLE")
-        if callType == "SIMPLE":
-            ref = config.get("$ref",None)
-            if ref:
-                functionName = RESOURCES[config["$ref"]]["functionName"]
-            else:
-                functionName = config['functionName']
-            isAwait = ""
-            if config.get("isAwaited") and not disableAwait:
-                isAwait = "await "
-            return f"""{isAwait}{functionName}({self.get_parameter_mapping(config)})
-            """
+        ref = config.get("$ref",None)
+        if ref:
+            functionName = RESOURCES[config["$ref"]]["functionName"]
+        else:
+            functionName = config['functionName']
+        isAwait = ""
+        if config.get("isAwaited") and not disableAwait:
+            isAwait = "await "
+        return f"""{isAwait}{functionName}({self.get_parameter_mapping(config)})
+        """
         
         
     def get_parameter_mapping(self,config):
         param_list =[]
         for param in config.get("parameters",[]):
             param_list.append(self.get_value_code(param))
-        return ", ".join(param_list)
+        return ", ".join([str(x) for x in param_list])
     
     def get_operation_code(self,config):
         if config["operationType"] == "UNARY":

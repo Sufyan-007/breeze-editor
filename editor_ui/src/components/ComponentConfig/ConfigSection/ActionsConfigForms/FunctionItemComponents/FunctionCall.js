@@ -71,7 +71,7 @@ function FunctionCall({ config, update }) {
       setConf((prevState) => ({
         ...prevState,
         functionName: selectedFunction.name,
-        parameters: [],
+        parameters: selectedFunction.parameters,
       }));
     }
   }, [selectedFunction, functionList, conf?.case]);
