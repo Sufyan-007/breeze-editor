@@ -130,32 +130,46 @@ class FunctionParser:
     
     def get_value_code(self,value):
         ref = value.get("$ref")
-        type = value.get("type")
+        type = value.get("type","UNDEFINED")
         if ref:
             return RESOURCES[ref]["name"]
         else:
-            if type == "STRING":
+            if value.get("value",None) == None:
+                return "null"
+            elif type == "STRING":
                 return f" '{value['value']}' "
             
-            if type == "NUMERIC" or type == "TOKEN":
+            elif type == "NUMERIC" or type == "TOKEN":
                 return value["value"]
             
-            if type == "OBJECT":
+            elif type == "UNDEFINED":
+                return "undefined"
+            
+            elif type == "NULL":
+                return "null"
+            
+            elif type == "BOOLEAN":
+                if value["value"] and value["value"]!="false":
+                    return "true"
+                else:
+                    return "false"
+            
+            elif type == "OBJECT":
                 return f"""{{ {",".join([ f" {x} : {self.get_value_code(value['properties'][x])}" for x in value.get("properties") ])}}}"""
 
-            if type == "OPERATION":
+            elif type == "OPERATION":
                 return self.get_operation_code(value)
             
-            if type == "FUNCTION":
+            elif type == "FUNCTION" or type == "CALLBACK":
                 return self.generate_statement_code(value)
             
-            if type == "CUSTOM":
+            elif type == "CUSTOM":
                 return value["value"]
 
-            if type == "FUNCTION_CALL":
+            elif type == "FUNCTION_CALL":
                 return self.generate_statement_code(value)
             
-            if type == "CHAINED_FUNCTIONS":
+            elif type == "CHAINED_FUNCTIONS":
                 return self.generate_statement_code(value)
 
         return ""
