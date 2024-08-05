@@ -1,14 +1,14 @@
 import React from "react";
 import { Form } from "react-bootstrap";
 
-const ParamInput = ({ param, name, onChange }) => {
+const ParamInput = ({ param, name, schema, onChange }) => {
   const handleChange = (e) => {
     console.log(e.target.value);
   };
 
   if (param.type === "STRING") {
     return (
-      <Form.Group >
+      <Form.Group>
         <div className="d-flex mb-1">
           <div
             className="col-3 border border-gray d-flex align-items-center px-2"

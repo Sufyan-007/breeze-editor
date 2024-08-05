@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Row, Col } from "react-bootstrap";
-import dataTypes from "../../../../../constants/datatype";
+import { dataTypes } from "../../../../../constants/datatype";
 
 export default function FunctionParams({ param, setParam }) {
   const updateParam = (key, value) => {
@@ -46,9 +46,7 @@ export default function FunctionParams({ param, setParam }) {
                 size="sm"
                 placeholder="default value"
                 value={param.value}
-                onChange={(event) =>
-                  updateParam("value", event.target.value)
-                }
+                onChange={(event) => updateParam("value", event.target.value)}
               />
             </Form.Group>
           </Col>

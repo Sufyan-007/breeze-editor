@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Col, Row } from "react-bootstrap";
+import { dataTypes } from "../../../../../constants/datatype";
 
-const dataTypes = [
-  "CUSTOM",
-  "STRING",
-  "NUMERIC",
-  "OBJECT",
-  "ARRAY",
-  "CALLBACK",
-  "FUNCTION",
-  "OPERATION",
-];
 
 function FunctionDefinition({ config, update }) {
   const [conf, setConf] = useState({ ...config });
