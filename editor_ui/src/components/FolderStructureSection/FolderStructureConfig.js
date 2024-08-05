@@ -269,6 +269,10 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
           height={resourceUpload ? null : 600}
           indent={20}
           padding={25}
+          onCreate={onCreate}
+          onRename={onRename}
+          onDelete={onDelete}
+          onMove={onMove}
         >
           {({ node, style, dragHandle }) => (
             <Node

@@ -6,10 +6,8 @@ from ..core.directory_management_service import DirectoryManagementGenerator
 class RenameNode(APIView):
     def post(self, request, node_id, projectName):
         try:
-            print("11111111111")
             data = json.loads(request.body)
             new_name = data.get('new_name', None)
-            print(new_name, "new name 2222222222222")
 
             if not new_name:
                 return JsonResponse({'status': 'error', 'message': 'New name not provided'}, status=400)

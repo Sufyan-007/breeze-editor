@@ -1,3 +1,4 @@
+
 {
   "18aea09e_651e_4cc5_9a15_ad35b0132800": {
     "name": "src",
@@ -13,19 +14,15 @@
     "tag": "COMPONENTS",
     "type": "DIRECTORY"
   },
-  "25fbcc3a_415e_4e29_9226_70ece7691998": {
-    "name": "com1.js",
-    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132800", "c3fda74c_5ae2_434a_aec8_7aa5a57e3120"],
-    "id": "25fbcc3a_415e_4e29_9226_70ece7691998",
-    "tag": "COMPONENTS",
-    "type": "FILE"
-  },
-  "38017151_4c6a_4b82_b251_b3a6a34aa501": {
-    "name": "com2.js",
-    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132800", "c3fda74c_5ae2_434a_aec8_7aa5a57e3120"],
-    "id": "38017151_4c6a_4b82_b251_b3a6a34aa501",
-    "tag": "COMPONENTS",
-    "type": "FILE"
+  "f3fda75c_5ae2_424a_aec8_7aa5a57e3111":{
+    "name": "Main.js",
+    "lineage": [
+      "18aea09e_651e_4cc5_9a15_ad35b0132800",
+      "c3fda74c_5ae2_434a_aec8_7aa5a57e3120"
+    ],
+    "id":"f3fda75c_5ae2_424a_aec8_7aa5a57e3111",
+    "tag":"COMPONENTS",
+    "type":"FILE"
   },
   "139c0099_f26b_4959_be78_cb746760ff5c": {
     "name": "pages",
@@ -103,6 +100,13 @@
     "id": "f67b4c9c_9vvd_4a8b_b2a9_ce9e8024617f",
     "tag": "ROOT",
     "type": "FILE"
+  },
+  "d63b339d_9cvd_4a8a_bs9s_cwe9e4025667f":{
+    "name": "index.css",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132800"],
+    "id":"d63b339d_9cvd_4a8a_bs9s_cwe9e4025667f",
+    "tag":"ROOT",
+    "type":"FILE"
   },
   "41dd12cc_c05f_4f28_ae7c_c828a62ce08c": {
     "name": "App.js",
