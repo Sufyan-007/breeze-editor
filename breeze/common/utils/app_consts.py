@@ -19,6 +19,7 @@ CONFIG_FILES_PATH = {
     'SWAGGER_CONTENT' : 'sample_swagger',
     'RESOURCE_CONFIG' : 'uploaded_resources_config',
     'USAGE_CONFIG' : 'usage_config',
+    'ENVIRONMENT_SETTINGS' : 'environment_settings',
 }
 
 NEW_LINE_CHAR = "\n"

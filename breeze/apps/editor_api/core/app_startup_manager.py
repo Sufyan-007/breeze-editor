@@ -36,11 +36,16 @@ def kill_process_on_port(port):
                 subprocess.run(['taskkill', '/F', '/PID', pid])
             print(f"Process running on port {port} has been killed.")
 
-def run_project_threaded(project_id,port,project_path):
+def run_project_threaded(project_id,port,project_path, env_name):
     env = os.environ.copy()
     env['PORT'] = str(port)
     env['BROWSER'] =  "NONE"
-    process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
+    if env_name == '' or env_name == 'default (.env)':
+        process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
+    else:
+        process = subprocess.Popen(" ".join(['npm', f'run start:{env_name}','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
+    print(process)
+    
     while True:
         output = process.stdout.readline()
         if output:
@@ -49,16 +54,17 @@ def run_project_threaded(project_id,port,project_path):
                 print("Running :",project_id)
             pass
 
-def start_app(app_config):
-    project_id=app_config["name"]
+def start_app(app_config, forceRestart=False):
+    project_id = app_config["name"]
+    env_name = app_config["current_environment"]
     project_path = os.path.join(app_config["path"],project_id)
-    if project_id in RUNNING_APPS:
+    if project_id in RUNNING_APPS and not forceRestart:
         pass
     else:
         print("Starting :", project_id)
         port= 3010+len(RUNNING_APPS)
         kill_process_on_port(port)
-        thread = threading.Thread(target=run_project_threaded,args= [project_id,port,project_path])
+        thread = threading.Thread(target=run_project_threaded,args= [project_id,port,project_path, env_name])
         thread.daemon = True
         thread.start()
         RUNNING_APPS[project_id] = {'port':port,'thread':thread,'status':"COMPILATION_STARTED"}
