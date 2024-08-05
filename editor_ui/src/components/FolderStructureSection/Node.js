@@ -7,9 +7,6 @@ import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
 import addFolder from "../../assets/icons/addFolder.svg";
 import addFile from "../../assets/icons/addFile.svg";
-import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal";
-import DeleteConfirmationModal from "../common/DeleteConfirmationModal";
-import AddFolderModal from "./AddFolderModal";
 
 const Node = ({
   node,
@@ -17,12 +14,13 @@ const Node = ({
   dragHandle,
   onCreate,
   onRename,
-  onDelete,
+  // onDelete,
   onUpload,
   onSelectPath,
   resourceUpload,
   selectedNode,
   setSelectedNode,
+  onAdd
   
 }) => {
   const nodeName =
@@ -32,14 +30,8 @@ const Node = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(nodeName);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentFolderPath, setCurrentFolderPath] = useState("");
-  const [isSelected, setIsSelected] = useState(false); // State to track if node is selected
   const [expanded, setIsExpanded] = useState("");
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteFileName, setDeleteFileName] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [addModalType, setAddModalType] = useState("");
+
 
   const handleHover = (hoverState) => setIsHovered(hoverState);
 
@@ -54,28 +46,16 @@ const Node = ({
     }
   };
 
-  const handleAddFolder = () => {
-    console.log("innnn");
-    setAddModalType("folder");
-    setShowAddModal(true);
-  };
-
-  const handleAddFile = () => {
-    setAddModalType("file");
-    setShowAddModal(true);
-  };
+  const handleAdd = (e,type) => {
+    e.stopPropagation()
+    onAdd(node.id,node, type)
+  }
 
   const handleRename = () => {
     setIsEditing(true);
     // if (newName) {
     //   onRename(node.id, newName);
     // }
-  };
-
-  const handleUpload = (data) => {
-    console.log("here");
-    setIsModalVisible(false);
-    onUpload(data);
   };
 
   const handleSave = () => {
@@ -86,19 +66,6 @@ const Node = ({
   const handleCancel = () => {
     setNewName(nodeName);
     setIsEditing(false);
-  };
-
-  const handleDelete = () => {
-    // if (window.confirm(`Are you sure you want to delete ${nodeName}?`)) {
-    //   onDelete(node.id);
-    // }
-    setDeleteFileName(nodeName);
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = () => {
-    onDelete(node.id);
-    setShowDeleteModal(false);
   };
 
   const constructFolderPath = (node) => {
@@ -113,8 +80,8 @@ const Node = ({
 
   const handleUploadClick = () => {
     const folderPath = constructFolderPath(node);
-    setCurrentFolderPath(folderPath);
-    setIsModalVisible(true);
+    onUpload(folderPath)
+    
   };
 
   const handlePath = () => {
@@ -129,16 +96,12 @@ const Node = ({
     setIsExpanded(!expanded);
   };
 
-  const handleEnterName = (name) => {
-    console.log("in ddd");
-    if (addModalType === "folder") {
-      onCreate(node.id, "DIRECTORY", node.data.lineage, node.data.tag, name);
-    } else if (addModalType === "file") {
-      onCreate(node.id, "FILE", node.data.lineage, node.data.tag, name);
-    }
-    setShowAddModal(false);
-    setAddModalType("");
-  };
+  // const handleDeleteClick = (e) => {
+  //   e.stopPropagation();
+  //   onDelete(node.id, node);
+  // };
+
+  
   return (
     <div
       style={style}
@@ -227,8 +190,8 @@ const Node = ({
                   type="button"
                   className="icon-button"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddFolder();
+                   
+                    handleAdd(e, "DIRECTORY");
                   }}
                 >
                   <img
@@ -256,8 +219,8 @@ const Node = ({
                       type="button"
                       className="icon-button"
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddFile();
+                        
+                        handleAdd(e,"FILE");
                       }}
                     >
                       <img
@@ -283,16 +246,15 @@ const Node = ({
                     </button>
                   </>
                 )}
-                <button
+                {/* <button
                   type="button"
                   className="icon-button"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete();
+                    handleDeleteClick(e);
                   }}
                 >
                   <img src={deleteIcon} alt="Delete" width="15" height="20" />
-                </button>
+                </button> */}
               </>
             ) : (
               <>
@@ -308,12 +270,11 @@ const Node = ({
                     >
                       <img src={pencilIcon} alt="Edit" width="15" height="20" />
                     </button>
-                    <button
+                    {/* <button
                       type="button"
                       className="icon-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete();
+                      onClick ={(e)=>{
+                        handleDeleteClick(e)
                       }}
                     >
                       <img
@@ -322,7 +283,7 @@ const Node = ({
                         width="15"
                         height="20"
                       />
-                    </button>
+                    </button> */}
                   </>
                 )}
               </>
@@ -330,24 +291,6 @@ const Node = ({
           </span>
         )}
       </div>
-      <ResourcesUploadModal
-        show={isModalVisible}
-        onHide={() => setIsModalVisible(false)}
-        onSubmit={handleUpload}
-        path={currentFolderPath}
-      />
-      <DeleteConfirmationModal
-        fileName={deleteFileName}
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        onDelete={handleConfirmDelete}
-      />
-        <AddFolderModal
-          id ={node.id}
-          show={showAddModal}
-          onHide={() => setShowAddModal(false)}
-          onEnterName={handleEnterName}
-        />
     </div>
   );
 };

@@ -26,6 +26,12 @@ class DirectoryManagementGenerator:
         # Get the path using get_path_from_file_id
         constructed_final_path = self.get_path_from_file_id(file_id)
         
+         # Remove .js extension for directories
+        if is_directory:
+            # Ensure that .js is not included for directories
+            if constructed_final_path.endswith(".js"):
+                constructed_final_path = constructed_final_path[:-3]
+        
         self.create_parent_dir_if_not_exists(os.path.dirname(constructed_final_path))
         
         if is_directory:
