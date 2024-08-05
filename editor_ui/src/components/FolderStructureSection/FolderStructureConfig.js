@@ -14,6 +14,8 @@ import { uploadFile } from "../../services/ResourceUploadService.js";
 import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal.js";
 // import DeleteConfirmationModal from "../common/DeleteConfirmationModal.js";
 import AddFolderModal from "./AddFolderModal.js";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
   const [treeData, setTreeData] = useState(null);
@@ -21,6 +23,7 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
   const [toastMessage, setToastMessage] = useState("");
   const [selectedPath, setSelectedPath] = useState("");
   const [selectedNode, setSelectedNode] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const { projectName } = useParams();
 
   // New states for handling AddFolderModal
@@ -103,26 +106,32 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
     }
   };
 
-  const updateTreeData = (parentId, newItem) => {
-    const addNewNode = (nodes) => {
-      return nodes.map((node) => {
-        if (node.id === parentId) {
-          return {
-            ...node,
-            children: [...(node.children || []), newItem],
-          };
-        } else if (node.children) {
-          return {
-            ...node,
-            children: addNewNode(node.children),
-          };
-        }
-        return node;
-      });
-    };
-    setTreeData((prevData) => addNewNode(prevData));
-    console.log(treeData, "see the updated node name ");
+const updateTreeData = (parentId, newItem) => {
+  const addNewNode = (nodes) => {
+    return nodes.map((node) => {
+      if (node.id === parentId) {
+        const updatedChildren = [...(node.children || []), newItem].sort(
+          (a, b) => {
+            if (a.type === "DIRECTORY" && b.type !== "DIRECTORY") return -1;
+            if (a.type !== "DIRECTORY" && b.type === "DIRECTORY") return 1;
+            return 0;
+          }
+        );
+        return {
+          ...node,
+          children: updatedChildren,
+        };
+      } else if (node.children) {
+        return {
+          ...node,
+          children: addNewNode(node.children),
+        };
+      }
+      return node;
+    });
   };
+  setTreeData((prevData) => addNewNode(prevData));
+};
 
   const onRename = async (id, name) => {
     try {
@@ -280,14 +289,30 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
     setShowAddModal(true);
   };
 
+    const validateName = (name) => {
+      if (!name.trim()) {
+        return "Name cannot be empty.";
+      }
+      if (/[^a-zA-Z0-9_\-]/.test(name)) {
+        return "Name can only contain letters, numbers, underscores, and hyphens.";
+      }
+      return "";
+    };
+
+
   const handleEnterName = (name) => {
-    console.log(
-      selectedNode.id,
-      type,
-      selectedNode.data.lineage,
-      selectedNode.data.tag,
-      name,
-    );
+    // console.log(
+    //   selectedNode.id,
+    //   type,
+    //   selectedNode.data.lineage,
+    //   selectedNode.data.tag,
+    //   name,
+    // );
+     const error = validateName(name);
+     if (error) {
+       toast.error(error);
+       return;
+     }
     onCreate(selectedNode.id , type , selectedNode.data.lineage, selectedNode.data.tag, name);
     setShowAddModal(false);
   };
@@ -341,7 +366,7 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
         onHide={() => setIsModalVisible(false)}
         onSubmit={handleUpload}
         path={currentFolderPath}
-      /> 
+      />
       {/* <DeleteConfirmationModal
         fileName={deleteFileName}
         show={showDeleteModal}
@@ -353,6 +378,7 @@ const FolderStructureConfig = ({ onHide, onSelectPath, resourceUpload }) => {
         onHide={() => setShowAddModal(false)}
         onEnterName={handleEnterName}
       />
+      <ToastContainer/>
     </div>
   );
 };

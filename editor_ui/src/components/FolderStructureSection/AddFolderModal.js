@@ -1,17 +1,17 @@
-import React ,{useState} from 'react';
-import {Modal, Button,Form} from "react-bootstrap";
+import React, { useState } from "react";
+import { Modal, Button, Form } from "react-bootstrap";
 
-const AddFolderModal = ({name, show , onHide, onEnterName}) => {
-    const [enteredName, setEnteredName] = useState(""); 
+const AddFolderModal = ({ name, show, onHide, onEnterName }) => {
+  const [enteredName, setEnteredName] = useState("");
 
-    const handleChange = (e) =>{
-        setEnteredName(e.target.value);
-    }
+  const handleChange = (e) => {
+    setEnteredName(e.target.value);
+  };
 
-    const handleEnter = () => {
-        onEnterName(enteredName); // pass the entered name to the parent component
-        setEnteredName(""); //clear the entered name after passing it 
-    }
+  const handleEnter = () => {
+    onEnterName(enteredName); // pass the entered name to the parent component
+    setEnteredName(""); //clear the entered name after passing it
+  };
   return (
     <Modal
       show={show}
@@ -21,12 +21,12 @@ const AddFolderModal = ({name, show , onHide, onEnterName}) => {
       size="lg"
     >
       <Modal.Header closeButton>
-        <Modal.Title></Modal.Title>
+        <Modal.Title>Enter Name</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group>
-            <Form.Label>Enter Name</Form.Label>
+            <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
               placeholder="Enter Name"
@@ -46,6 +46,6 @@ const AddFolderModal = ({name, show , onHide, onEnterName}) => {
       </Modal.Footer>
     </Modal>
   );
-}
+};
 
-export default AddFolderModal
+export default AddFolderModal;
