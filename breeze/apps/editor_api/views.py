@@ -23,6 +23,7 @@ from .core.files_upload_service import FileService
 from .core.resource_config_service import ResourceConfigGenerator
 from .core.helpers.function_ast_parser import FunctionParser
 from .core.app_generator import AppGenerator 
+from .core.helpers.schema_mapper import get_schema_mapping
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -756,3 +757,15 @@ class ASTParser(APIView):
             return JsonResponse({"function": formatted_function_code},status=200)
         except:
             return JsonResponse({}, status=500)
+      
+@method_decorator(csrf_exempt,name='dispatch')  
+class SchemaMapper(APIView):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            type_definition = data.get('typeDefinition')
+            projectId = data.get('projectId')
+            sample_obj = get_schema_mapping(type_definition,projectId)
+            return JsonResponse(sample_obj,status=200)
+        except:
+            return JsonResponse("INTERNAL SERVER ERROR", status=500)
