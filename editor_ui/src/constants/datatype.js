@@ -49,7 +49,20 @@ export const staticServiceList = {
             },
           },
         },
+        { type: "STRING", name: "name" },
+        { type: "STRING", name: "username" },
+        {
+          name: "abc",
+          type: "ARRAY",
+          items: {
+            type: "STRING",
+          },
+        },
       ],
+    },
+    testService: {
+      name: "testService",
+      parameters: [{ type: "ANY" }],
     },
   },
 };

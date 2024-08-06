@@ -16,7 +16,8 @@ function FunctionCallEdit({
   }, [functionConfig]);
 
   useEffect(() => {
-    setConf({ ...config });
+    if(config){
+    setConf({ ...config });}
   }, [config]);
 
   const handleUpdate = (i, val) => {
@@ -27,20 +28,27 @@ function FunctionCallEdit({
     });
   };
 
+  const handleAddParam = () => {
+    setConf((prevState) => {
+      const newParams = prevState.parameters ? [...prevState.parameters] : [];
+      newParams.push({ type: "UNDEFINED" });
+      return { ...prevState, parameters: newParams };
+    });
+  };
+
   return (
     <>
       <div className="d-flex h-100 flex-column justify-content-between">
         <div>
           {!hideName && (
             <p className="mb-2" style={{ fontSize: "16px" }}>
-              {" "}
-              Name : {config?.functionName}
+              Name: {config?.functionName}
             </p>
           )}
           <div>
             <strong>Param Mapping</strong>
-            {config.parameters &&
-              config.parameters.map((param, i) => (
+            {conf.parameters &&
+              conf.parameters.map((param, i) => (
                 <div className="my-2 border border-gray p-2" key={i}>
                   <ParamInput
                     param={param}
@@ -56,8 +64,15 @@ function FunctionCallEdit({
                   />
                 </div>
               ))}
-            {config.parameters && config.parameters.length === 0 && (
+            {conf?.parameters && conf?.parameters.length === 0 && (
               <div className="my-2">No Params Present</div>
+            )}
+            {!functionConfig?.parameters && (
+              <div className="d-flex justify-content-end">
+                <Button className="btn btn-sm" variant="secondary" onClick={handleAddParam}>
+                  Add Param
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -66,6 +81,7 @@ function FunctionCallEdit({
             variant="success"
             className="btn btn-sm"
             onClick={() => {
+              console.log(conf)
               update(conf);
             }}
           >

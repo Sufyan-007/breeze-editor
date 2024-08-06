@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Form } from "react-bootstrap";
+import { ComponentContext } from "../../../ComponentConfigPage";
+import MonacoEditor from "../../../../common/MonacoEditor";
 
 const ParamInput = ({ param, name, schema, onChange }) => {
-  const [selection, setSelection] = useState(param?.type || "");
+  const [selection, setSelection] = useState(param.type || "");
   const [customValue, setCustomValue] = useState("");
+  const { componentConfig } = useContext(ComponentContext);
+  const { propsVars, resources } = componentConfig;
 
   const handleDropdownChange = (event) => {
     setSelection(event.target.value);
@@ -11,7 +15,9 @@ const ParamInput = ({ param, name, schema, onChange }) => {
       event.target.value !== "STRING" &&
       event.target.value !== "NUMERIC" &&
       event.target.value !== "BOOLEAN" &&
-      event.target.value !== "OBJECT"
+      event.target.value !== "OBJECT" &&
+      event.target.value !== "ARRAY" &&
+      event.target.value !== "FUNCTION"
     ) {
       handleParamChange(event.target.value);
     }
@@ -35,10 +41,10 @@ const ParamInput = ({ param, name, schema, onChange }) => {
   };
 
   const handleParamChange = (newValue) => {
-    // console.log("newValue::>>", newValue);
-    if (newValue === "null") {
+    console.log("newValue::>>", newValue);
+    if (newValue === "NULL") {
       onChange({ type: "NULL" });
-    } else if (newValue === "undefined") {
+    } else if (newValue === "UNDEFINED") {
       onChange({ type: "UNDEFINED" });
     } else if (typeof newValue === "object") {
       onChange(newValue);
@@ -51,6 +57,12 @@ const ParamInput = ({ param, name, schema, onChange }) => {
     // console.log(key,val)
     onChange({ ...param, properties: { ...param.properties, [key]: val } });
   };
+
+  const handleValue = (val) => {
+    handleParamChange({ type: "CUSTOM", value: val });
+  };
+
+  console.log('param,schema::>>', param,schema);
 
   return (
     <Form.Group>
@@ -71,22 +83,46 @@ const ParamInput = ({ param, name, schema, onChange }) => {
             className="form-select-sm me-2"
           >
             <option value="">Select</option>
-            <option value="var1">var1</option>
-            <option value="var2">var2</option>
-            {param.type === "STRING" && (
+
+            {propsVars.map((propVar) => (
+              <option key={propVar.id} value={propVar.id}>
+                {propVar.name} (PropsVar)
+              </option>
+            ))}
+
+            {resources.map((resource) => (
+              <option key={resource.id} value={resource.id}>
+                {resource.name} ({resource.type})
+              </option>
+            ))}
+
+            {(!schema || schema.type === "ANY" || schema.type === "STRING") && (
               <option value="STRING">String (Custom)</option>
             )}
-            {param.type === "NUMERIC" && (
+            {(!schema ||
+              schema.type === "ANY" ||
+              schema.type === "NUMERIC") && (
               <option value="NUMERIC">Numeric (Custom)</option>
             )}
-            {param.type === "BOOLEAN" && (
+            {(!schema ||
+              schema.type === "ANY" ||
+              schema.type === "BOOLEAN") && (
               <option value="BOOLEAN">Boolean (Custom)</option>
             )}
-            {param.type === "OBJECT" && (
+            {(!schema || schema.type === "ANY" || schema.type === "OBJECT") && (
               <option value="OBJECT">Object (Custom)</option>
             )}
-            <option value="null">null</option>
-            <option value="undefined">undefined</option>
+            {(!schema || schema.type === "ANY" || schema.type === "ARRAY") && (
+              <option value="ARRAY">Array (Custom)</option>
+            )}
+            {(!schema ||
+              schema.type === "ANY" ||
+              schema.type === "FUNCTION") && (
+              <option value="FUNCTION">Function (Custom)</option>
+            )}
+
+            <option value="NULL">Null</option>
+            <option value="UNDEFINED">Undefined</option>
           </Form.Select>
           {(selection === "STRING" || selection === "NUMERIC") && (
             <Form.Control
@@ -120,11 +156,11 @@ const ParamInput = ({ param, name, schema, onChange }) => {
           )}
         </div>
       </div>{" "}
-      <div className="ps-3">
+      <div className="ps-3 pe-2">
         {selection === "OBJECT" &&
           param.type === "OBJECT" &&
           param.properties && (
-            <div className="mt-2 w-100">
+            <div className="mt-2">
               {Object.entries(param.properties).map(([key, value]) => (
                 <ParamInput
                   key={key}
@@ -135,6 +171,22 @@ const ParamInput = ({ param, name, schema, onChange }) => {
               ))}
             </div>
           )}
+      </div>
+      <div className="px-2 mt-2">
+        {((selection === "OBJECT" &&
+          param.type === "OBJECT" &&
+          !param.properties) ||
+          (selection === "ARRAY" && param.type === "ARRAY") ||
+          (selection === "FUNCTION" && param.type === "FUNCTION")) && (
+          <MonacoEditor
+            value={customValue}
+            onChange={(val) => handleValue(val)}
+            height="100px"
+            width="100%"
+            language={selection === "FUNCTION" ? "javascript" : "json"}
+            id={name + "-monaco-editor"}
+          />
+        )}
       </div>
     </Form.Group>
   );
