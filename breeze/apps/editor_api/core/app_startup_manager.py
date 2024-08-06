@@ -44,7 +44,6 @@ def run_project_threaded(project_id,port,project_path, env_name):
         process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
     else:
         process = subprocess.Popen(" ".join(['npm', f'run start:{env_name}','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
-    print(process)
     
     while True:
         output = process.stdout.readline()
@@ -56,7 +55,7 @@ def run_project_threaded(project_id,port,project_path, env_name):
 
 def start_app(app_config, forceRestart=False):
     project_id = app_config["name"]
-    env_name = app_config["current_environment"]
+    env_name = app_config.get("current_environment","")
     project_path = os.path.join(app_config["path"],project_id)
     if project_id in RUNNING_APPS and not forceRestart:
         pass
