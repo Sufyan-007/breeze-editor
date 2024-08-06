@@ -77,3 +77,12 @@ body {
   font-size: 24px;
   color: #ccc;
 }
+
+.border-danger {
+  border: 2px solid red !important;
+}
+
+.custom-no-outline-button {
+  border: none !important;
+  box-shadow: none !important;
+}

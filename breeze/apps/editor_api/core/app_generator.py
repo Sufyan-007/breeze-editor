@@ -198,8 +198,9 @@ class AppGenerator:
         ProjectGenerationProgress.store_process(project_name, process, "create_react_app")
         process.wait()
         
-        # Step 2: Install specific versions of React and React-DOM
-        specific_version = "16.14.0"
+        # Step 2: Install specific versions of React, React-DOM
+        specific_version = "18.3.1"
+
         process_react_install = subprocess.Popen(
             [
                 "npm",
@@ -216,12 +217,6 @@ class AppGenerator:
         ProjectGenerationProgress.store_process(project_name, process_react_install, "install_specific_react_version")
         process_react_install.wait()
 
-        # Handle errors if any
-        stdout, stderr = process_react_install.communicate()
-        if process_react_install.returncode != 0:
-            print(f"Error installing specific React version: {stderr}")
-        else:
-            print(f"Successfully installed React and React-DOM version {specific_version}")
 
     def modify_main_component(self):
         default_comp_config = self.comp_config[self.app_config['defaultComponent']]
@@ -275,6 +270,8 @@ class AppGenerator:
         
         package_json['devDependencies'] = {}
         package_json['devDependencies']['web-vitals'] = "^3.5.0"
+
+        package_json['devDependencies']['env-cmd'] = "^10.1.0"
 
         write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
 

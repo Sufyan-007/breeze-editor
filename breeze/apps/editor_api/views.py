@@ -22,7 +22,8 @@ from .core.helpers.get_component_list import update_components
 from .core.files_upload_service import FileService
 from .core.resource_config_service import ResourceConfigGenerator
 from .core.helpers.function_ast_parser import FunctionParser
-from .core.app_generator import AppGenerator 
+from .core.app_generator import AppGenerator
+from .core.environment_settings_config_service import EnvironmentSettingsConfigService 
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -290,6 +291,7 @@ class ProjectConfig(APIView):
         # data["selectedTemplate"]= data["selectedTemplate"]
         data["name"] = data['name'].lower().replace(" ", "_")
         path = data["projectPath"]
+        data["current_environment"] = ""
         generated_paths = os.path.join(
             os.path.dirname(os.getcwd()), path)
 
@@ -756,3 +758,56 @@ class ASTParser(APIView):
             return JsonResponse({"function": formatted_function_code},status=200)
         except:
             return JsonResponse({}, status=500)
+        
+@method_decorator(csrf_exempt, name="dispatch")
+class EnvironementSettings(APIView):
+    def post(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            print(data)
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            config = environment_settings_service.generate_config_from_payload(data)
+            return JsonResponse({'status': 'success', 'config': config, 'message': 'Environment settings saved successfully'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def get(self, request, projectName):
+        try:
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            config = environment_settings_service.get_config()
+            return JsonResponse({'status': 'success', 'config': config}, status=200)
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            env_name = data.get('environmentName')
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            environment_settings_service.delete_config(env_name)
+            return JsonResponse({'status': 'success', 'message': 'Environment settings deleted successfully'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            print(f"Error: {e}")    
+            return JsonResponse({'error': str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name="dispatch")
+class SetEnvironment(APIView):
+    def post(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            env_name = data.get('environmentName')
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            environment_settings_service.set_environment(env_name)
+            if env_name == "default (.env)":
+                return JsonResponse({'status': 'success', 'message': 'Environment default set as active'}, status=200)
+
+            return JsonResponse({'status': 'success', 'message': f'Environment {env_name} hase been set as active'}, status=200)
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': 'Server error'}, status=500)

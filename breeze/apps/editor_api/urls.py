@@ -29,6 +29,8 @@ from .views import GetResources
 from .views import StylesConfig
 from .views import FileHandle
 from .views import ResourceConfig
+from .views import EnvironementSettings
+from .views import SetEnvironment
 from .views import ASTParser
 
 urlpatterns = [
@@ -80,5 +82,8 @@ urlpatterns = [
         path('file-upload/<str:projectName>/<str:fileId>', FileHandle.as_view()),
 
         path('resource-config/<str:projectName>',ResourceConfig.as_view()),
+
+        path('environment-settings/<str:projectName>', EnvironementSettings.as_view()),
+        path('set-environment/<str:projectName>', SetEnvironment.as_view()),
 ]
 
