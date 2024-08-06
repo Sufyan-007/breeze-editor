@@ -5,6 +5,7 @@ import FunctionParams from "./FunctionParams";
 import FunctionConfigStack from "./FunctionConfigStack";
 import { generatePreviewCode } from "../../../../../services/ComponentConfigService";
 import { dataTypes } from "../../../../../constants/datatype";
+import { useParams } from "react-router";
 
 const formTemplate = {
   name: "",
@@ -35,6 +36,7 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const debounceTimeout = useRef(null);
+  const { projectName, componentName } = useParams();
 
   const toggleParamConfigAccordion = () => {
     setParamsConfigOpen(!paramsConfigOpen);
@@ -118,7 +120,12 @@ function FunctionConfigForm({ onSubmit, formData, isEditing }) {
   const generatePreview = async (val) => {
     try {
       if (formState.name) {
-        const response = await generatePreviewCode(val);
+        const payload = {
+          project_id: projectName,
+          component_id: componentName,
+          config: val,
+        };
+        const response = await generatePreviewCode(payload);
         if (response.status === 200) {
           if (response.body.function === "{\n}\n") {
             setPreviewCode("");

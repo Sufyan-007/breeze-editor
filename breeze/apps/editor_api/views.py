@@ -753,8 +753,16 @@ class ASTParser(APIView):
     def post(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            function_generator = FunctionParser()
-            function_code = function_generator.generate_statement_code(data)
+            resources =[]
+            project_id = data["project_id"]
+            component_id = data["component_id"]
+            
+            if project_id and component_id:
+                app_editor = ComponentConfigService(project_id)
+                resources = app_editor.get_resource(component_id)["resources"]
+            
+            function_generator = FunctionParser(resources)
+            function_code = function_generator.generate_statement_code(data.get('config', {}))
             formatted_function_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=function_code, text=True)
             return JsonResponse({"function": formatted_function_code},status=200)
         except:

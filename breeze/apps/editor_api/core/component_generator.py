@@ -176,7 +176,10 @@ class ComponentGenerator():
         import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
         
         def generate_function_code(func):
-            function_generator = FunctionParser()
+            all_resources = []
+            all_resources.extend(resources)
+            all_resources.extend(props_vars)
+            function_generator = FunctionParser(all_resources)
             function_code = function_generator.generate_statement_code(func)
             return function_code     
            

@@ -1,3 +1,4 @@
+# from breeze.apps.editor_api.core.component_config_service import ComponentConfigService
 from .function_helper_consts import OPERATION_TYPES 
 RESOURCES={
     "STATE/UUID1":{
@@ -15,8 +16,8 @@ RESOURCES={
 }
 
 class FunctionParser:
-    def __init__(self):
-        pass
+    def __init__(self, resources=None):
+        self.resources = resources 
     
     def generate_statement_code(self,config):
         
@@ -134,11 +135,18 @@ class FunctionParser:
                 ])} }}"""
         
     
+    def get_resource_by_id(self,ref):
+        for resource in self.resources:
+            if resource.get("id") == ref:
+                return resource
+        raise IndexError(f"Resource with id {ref} not found.")
+    
     def get_value_code(self,value):
         ref = value.get("$ref")
         type = value.get("type","UNDEFINED")
         if ref:
-            return RESOURCES[ref]["name"]
+            resource = self.get_resource_by_id(ref)
+            return resource["name"]
         else:
             if value.get("value",None) == None:
                 return "null"
