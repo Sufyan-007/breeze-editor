@@ -771,7 +771,6 @@ class EnvironementSettings(APIView):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
-            print(f"Error: {e}")
             return JsonResponse({'error': str(e)}, status=500)
 
     def get(self, request, projectName):
@@ -793,7 +792,6 @@ class EnvironementSettings(APIView):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
-            print(f"Error: {e}")    
             return JsonResponse({'error': str(e)}, status=500)
         
 @method_decorator(csrf_exempt, name="dispatch")
@@ -805,9 +803,9 @@ class SetEnvironment(APIView):
             environment_settings_service = EnvironmentSettingsConfigService(projectName)
             environment_settings_service.set_environment(env_name)
             if env_name == "default (.env)":
-                return JsonResponse({'status': 'success', 'message': 'Environment default set as active'}, status=200)
+                return JsonResponse({'status': 'success', 'message': 'Environment default has been set as active'}, status=200)
 
-            return JsonResponse({'status': 'success', 'message': f'Environment {env_name} hase been set as active'}, status=200)
+            return JsonResponse({'status': 'success', 'message': f'Environment {env_name} has been set as active'}, status=200)
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': 'Server error'}, status=500)

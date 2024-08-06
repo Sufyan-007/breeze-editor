@@ -8,10 +8,6 @@ export const saveEnvironmentSettings = async (projectName, envVars, environments
         body: JSON.stringify({ envVars, environments }),
       });
   
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-  
       const result = await response.json();
       return result;
     } catch (error) {
@@ -28,9 +24,7 @@ export const saveEnvironmentSettings = async (projectName, envVars, environments
           'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+      
       const result = await response.json();
       return result;
 
@@ -49,9 +43,7 @@ export const saveEnvironmentSettings = async (projectName, envVars, environments
         },
         body: JSON.stringify({ environmentName }),
       });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+     
       const result = await response.json();
       return result;
 
@@ -70,9 +62,7 @@ export const saveEnvironmentSettings = async (projectName, envVars, environments
         },
         body: JSON.stringify({ environmentName }),
       });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+    
       const result = await response.json();
       return result;
 
@@ -91,9 +81,7 @@ export const saveEnvironmentSettings = async (projectName, envVars, environments
         },
         body: JSON.stringify({ environmentName }),
       });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+     
       const result = await response.json();
       return result;
 

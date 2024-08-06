@@ -78,11 +78,23 @@ body {
   color: #ccc;
 }
 
-.border-danger {
-  border: 2px solid red !important;
-}
-
 .custom-no-outline-button {
   border: none !important;
   box-shadow: none !important;
+}
+
+.input-with-prefix {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.input-with-prefix span {
+  position: absolute;
+  left: 10px;
+  color: #ccc;
+}
+
+.input-with-prefix input {
+  padding-left: 104px;
 }

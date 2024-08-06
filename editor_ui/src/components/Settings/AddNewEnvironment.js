@@ -1,11 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
 
-const AddNewEnvironment = ({ envVariables, onSubmit, onClose }) => {
+const AddNewEnvironment = ({ envVariables, envNames, onSubmit, onClose }) => {
   const [tempEnvName, setTempEnvName] = useState("");
   const [tempEnvValues, setTempEnvValues] = useState({});
   const [validationMessage, setValidationMessage] = useState('');
   const [isFormValid, setIsFormValid] = useState(false);
+
+  const handleEnvNameChange = (e) => {
+    const value = e.target.value;
+    const isValid = /^[a-zA-Z0-9]+$/.test(value);
+    if (isValid || value === '') {
+      setTempEnvName(value);
+      if (envNames.some((variable) => variable === value)) {
+        setValidationMessage('Environment name already exists.');
+      } else {
+        setValidationMessage('');
+      }
+    } else {
+      setValidationMessage('Environment name cannot contain special characters or spaces.');
+    }
+  };
 
   const handleTempEnvValueChange = (id, value) => {
     setTempEnvValues({
@@ -14,47 +29,43 @@ const AddNewEnvironment = ({ envVariables, onSubmit, onClose }) => {
     });
   };
 
-  const handleEnvNameChange = (e) => {
-    const value = e.target.value;
-    const isValid = /^[a-zA-Z0-9]+$/.test(value);
-    if (isValid || value === '') {
-      setTempEnvName(value);
-      setValidationMessage('');
-    } else {
-      setValidationMessage('Environment name cannot contain special characters or spaces.');
+  useEffect(() => {
+    const allFieldsFilled = tempEnvName && tempEnvValues && Object.keys(tempEnvValues).length === envVariables.length;
+    setIsFormValid(allFieldsFilled && !validationMessage);
+  }, [tempEnvName, tempEnvValues, envVariables, validationMessage]);
+
+  const handleFormSubmit = () => {
+    if (isFormValid) {
+      const trimmedEnvName = tempEnvName.trim();
+      const trimmedEnvValues = Object.keys(tempEnvValues).reduce((acc, key) => {
+        acc[key] = tempEnvValues[key].trim();
+        return acc;
+      }, {});
+
+      onSubmit(trimmedEnvName, trimmedEnvValues);
     }
   };
 
-  useEffect(() => {
-    const allFieldsFilled = tempEnvName && envVariables.every(variable => tempEnvValues[variable.id]);
-    setIsFormValid(allFieldsFilled);
-  }, [tempEnvName, tempEnvValues, envVariables]);
-
-  const handleFormSubmit = () => {
-    const trimmedEnvName = tempEnvName.trim();
-    const trimmedEnvValues = Object.keys(tempEnvValues).reduce((acc, key) => {
-      acc[key] = tempEnvValues[key].trim();
-      return acc;
-    }, {});
-
-    onSubmit(trimmedEnvName, trimmedEnvValues);
+  const handleClose = () => {
     setTempEnvName("");
     setTempEnvValues({});
+    setValidationMessage('');
+    onClose();
   };
 
   return (
     <div>
       <Form>
-      <Form.Group controlId="formEnvName">
-        <Form.Label>Environment Name <span className="text-danger">*</span></Form.Label>
-        <Form.Control
-          type="text"
-          value={tempEnvName}
-          onChange={handleEnvNameChange}
-          placeholder="Enter environment name"
-        />
-        {validationMessage && <p className="text-danger">{validationMessage}</p>}
-      </Form.Group>
+        <Form.Group controlId="formEnvName">
+          <Form.Label>Environment Name <span className="text-danger">*</span></Form.Label>
+          <Form.Control
+            type="text"
+            value={tempEnvName}
+            onChange={handleEnvNameChange}
+            placeholder="Enter environment name"
+          />
+          {validationMessage && <p className="text-danger">{validationMessage}</p>}
+        </Form.Group>
         {envVariables.map((variable) => (
           <Form.Group
             controlId={`formEnvValue-${variable.id}`}
@@ -73,7 +84,7 @@ const AddNewEnvironment = ({ envVariables, onSubmit, onClose }) => {
           </Form.Group>
         ))}
         <div className="d-flex justify-content-end mt-3">
-          <Button variant="secondary" onClick={onClose} className="me-2">
+          <Button variant="secondary" onClick={handleClose} className="me-2">
             Cancel
           </Button>
           <Button variant="primary" onClick={handleFormSubmit} disabled={!isFormValid}>

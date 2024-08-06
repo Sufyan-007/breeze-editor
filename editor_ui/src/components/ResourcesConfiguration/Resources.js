@@ -10,7 +10,7 @@ import {
 } from "../../services/ResourceUploadService.js";
 import FolderStructureConfig from "../FolderStructureSection/FolderStructureConfig.js";
 import ResourcesFileRow from "./ResourcesFileRow.js";
-import DeleteConfirmationModal from "../common/DeleteConfirmationModal.js";
+import ConfirmationModal from "../common/ConfirmationModal.js";
 
 const Resources = () => {
   const [showToast, setShowToast] = useState(false);
@@ -171,11 +171,15 @@ const Resources = () => {
         path={selectedPath} // Pass selected path to ResourcesUploadModal
         onSubmit={handleUpload} // Optionally handle form submission within ResourcesUploadModal
       />
-      <DeleteConfirmationModal
-        fileName={fileToDelete ? fileToDelete.name : null}
+      <ConfirmationModal
         show={!!fileToDelete}
         onHide={() => setFileToDelete(null)}
-        onDelete={handleDelete}
+        onCancel={() => setFileToDelete(null)}
+        onConfirm={handleDelete}
+        title="Confirm Deletion"
+        message={fileToDelete ? `Are you sure you want to delete ${fileToDelete.name}?` : "No file selected."}
+        confirmButtonText="Delete"
+        cancelButtonText="Cancel"
       />{" "}
       <Toast
         onClose={() => setShowToast(false)}

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Table, Button, Form, Modal, Toast } from "react-bootstrap";
+import { Table, Button, Form, Toast } from "react-bootstrap";
 import {
   Pencil,
   Check,
   X,
-  ExclamationTriangle,
   Trash,
 } from "react-bootstrap-icons";
 import Offcanvas from "../common/Offcanvas";
@@ -31,12 +30,8 @@ const EnvironmentSettings = () => {
     editVariableId: null,
   });
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [showEnvironmentChangeModal, setShowEnvironmentChangeModal] = useState(
-    false
-  );
-  const [showDeleteEnvironmentModal, setShowDeleteEnvironmentModal] = useState(
-    false
-  );
+  const [showEnvironmentChangeModal, setShowEnvironmentChangeModal] = useState(false);
+  const [showDeleteEnvironmentModal, setShowDeleteEnvironmentModal] = useState(false);
   const [environmentToDelete, setEnvironmentToDelete] = useState(null);
   const [pendingEnvName, setPendingEnvName] = useState(false);
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
@@ -47,7 +42,8 @@ const EnvironmentSettings = () => {
   const containerRef = useRef(null);
   const { projectName } = useParams();
   const defaultEnvName = "default (.env)";
-
+  const prefix = 'REACT_APP_'
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -129,8 +125,8 @@ const EnvironmentSettings = () => {
       setEnvNames([...envNames, defaultEnvName]);
     }
     const newVariable = {
-      id: envVariables.length + 1,
-      name: "",
+      id: envVariables.length + 1,  
+      name: prefix,
       values: { [defaultEnvName]: "" },
     };
     setOriginalState({
@@ -141,7 +137,7 @@ const EnvironmentSettings = () => {
     });
     setEnvVariables([newVariable, ...envVariables]);
     setEditVariableId(newVariable.id);
-    setEditTempValues({ name: "", values: { [defaultEnvName]: "" } });
+    setEditTempValues({ name: prefix, values: { [defaultEnvName]: "" } });
   };
 
   const handleAddEnvironment = () => {
@@ -218,7 +214,7 @@ const EnvironmentSettings = () => {
   const handleNameChange = (value) => {
     setEditTempValues({
       ...editTempValues,
-      name: value,
+      name: prefix + value,
     });
   };
 
@@ -251,10 +247,6 @@ const EnvironmentSettings = () => {
     setEnvVariables(newEnvVariables);
     setIsOffcanvasOpen(false);
     setShouldSave(true);
-  };
-
-  const handleOffcanvasClose = () => {
-    setIsOffcanvasOpen(false);
   };
 
   const handleSave = async () => {
@@ -313,7 +305,8 @@ const EnvironmentSettings = () => {
       setToastMessage(response.message);
       setShowToast(true);
     } catch (error) {
-      console.error("Failed to delete environment:", error);
+      setToastMessage(error.message);
+      setShowToast(true);
     }
   };
 
@@ -392,7 +385,7 @@ const EnvironmentSettings = () => {
                       onClick={() => handleSaveEdit(variable.id)}
                       className="me-2"
                       disabled={
-                        !editTempValues.name ||
+                        editTempValues.name === prefix ||
                         !envNames.every(
                           (envName) => editTempValues.values[envName]
                         )
@@ -427,13 +420,16 @@ const EnvironmentSettings = () => {
               </td>
               <td>
                 {editVariableId === variable.id ? (
-                  <Form.Control
-                    className="bg-dark text-light"
-                    type="text"
-                    value={editTempValues.name || ""}
-                    placeholder="Write some value here..."
-                    onChange={(e) => handleNameChange(e.target.value)}
-                  />
+                  <div className="input-with-prefix">
+                    <span>{prefix}</span>
+                    <Form.Control
+                      className="bg-dark text-light"
+                      type="text"
+                      value={editTempValues.name.replace(prefix, "")}
+                      placeholder="Write some value here..."
+                      onChange={(e) => handleNameChange(e.target.value)}
+                    />
+                  </div>
                 ) : (
                   variable.name
                 )}
@@ -467,12 +463,13 @@ const EnvironmentSettings = () => {
         isOpen={isOffcanvasOpen}
         title="Add New Environment"
         width="450px"
-        onClose={handleOffcanvasClose}
+        onClose={()=>setIsOffcanvasOpen(false)}
       >
         <AddNewEnvironment
           envVariables={envVariables}
+          envNames={envNames}
           onSubmit={handleOffcanvasSubmit}
-          onClose={handleOffcanvasClose}
+          onClose={()=>setIsOffcanvasOpen(false)}
         />
       </Offcanvas>
       <Toast
