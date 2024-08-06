@@ -41,16 +41,15 @@ function FunctionCall({ config, update }) {
     ];
   }, [resources, props]);
 
-  useEffect(()=>{
-    if(selectedFunction){
-      setConf((state)=>{
-        return {...state,functionName:selectedFunction.name}
-      })
-    }
-    else{
-      setConf((state)=>{
-        return {...state,functionName:null}
-      })
+  useEffect(() => {
+    if (selectedFunction) {
+      setConf((state) => {
+        return { ...state, functionName: selectedFunction.name };
+      });
+    } else {
+      setConf((state) => {
+        return { ...state, functionName: null };
+      });
     }
   }, [selectedFunction, conf?.case]);
 
@@ -75,6 +74,62 @@ function FunctionCall({ config, update }) {
       }));
     }
   }, [selectedFunction, functionList, conf?.case]);
+
+  const handleSave = (conf) => {
+    var transformedConfig = conf;
+    if (checkedItems.awaitCall) {
+      transformedConfig["isAwaited"] = true;
+    }
+    if (checkedItems.thenCatch) {
+      transformedConfig = {
+        type: "CHAINED_FUNCTIONS",
+        functions: [
+          transformedConfig,
+          {
+            type: "FUNCTION_CALL",
+            functionName: "then",
+            parameters: [
+              {
+                type: "FUNCTION",
+                isAnonymous: true,
+                parameters: [{ name: "res", type: "CUSTOM" }],
+                bodyConfig: {
+                  type: "BLOCK",
+                  statements: [],
+                },
+              },
+            ],
+          },
+          {
+            type: "FUNCTION_CALL",
+            functionName: "catch",
+            parameters: [
+              {
+                type: "FUNCTION",
+                isAnonymous: true,
+                parameters: [{ name: "err", type: "CUSTOM" }],
+                bodyConfig: {
+                  type: "BLOCK",
+                  statements: [],
+                },
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (checkedItems.declarationCall) {
+      transformedConfig = {
+        type: "DECLARATION",
+        varName: "response",
+        value: transformedConfig,
+        declarationType: "const",
+      };
+    }
+
+    update(transformedConfig);
+  };
 
   return (
     <div className="d-flex h-100 flex-column justify-content-between">
@@ -190,7 +245,7 @@ function FunctionCall({ config, update }) {
           config={conf}
           functionConfig={selectedFunction}
           hideName
-          update={update}
+          update={handleSave}
         />
       )}
     </div>

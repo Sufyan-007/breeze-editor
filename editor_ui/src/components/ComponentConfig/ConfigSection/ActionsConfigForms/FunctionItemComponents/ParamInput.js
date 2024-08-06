@@ -4,7 +4,7 @@ import { ComponentContext } from "../../../ComponentConfigPage";
 import MonacoEditor from "../../../../common/MonacoEditor";
 
 const ParamInput = ({ param, name, schema, onChange }) => {
-  const [selection, setSelection] = useState(param.type || "");
+  const [selection, setSelection] = useState();
   const [customValue, setCustomValue] = useState("");
   const { componentConfig } = useContext(ComponentContext);
   const { propsVars, resources } = componentConfig;
@@ -54,7 +54,6 @@ const ParamInput = ({ param, name, schema, onChange }) => {
   };
 
   const handlePropertyUpdate = (key, val) => {
-    // console.log(key,val)
     onChange({ ...param, properties: { ...param.properties, [key]: val } });
   };
 
@@ -62,7 +61,7 @@ const ParamInput = ({ param, name, schema, onChange }) => {
     handleParamChange({ type: "CUSTOM", value: val });
   };
 
-  console.log('param,schema::>>', param,schema);
+  console.log("param,schema::>>", param, schema);
 
   return (
     <Form.Group>
@@ -124,10 +123,19 @@ const ParamInput = ({ param, name, schema, onChange }) => {
             <option value="NULL">Null</option>
             <option value="UNDEFINED">Undefined</option>
           </Form.Select>
-          {(selection === "STRING" || selection === "NUMERIC") && (
+          {selection === "STRING" && (
             <Form.Control
               className="form-control-sm"
-              type={param.type === "STRING" ? "text" : "number"}
+              type="text"
+              value={customValue}
+              onChange={handleCustomInputChange}
+              placeholder="Custom Input"
+            />
+          )}
+          {selection === "NUMERIC" && (
+            <Form.Control
+              className="form-control-sm"
+              type="number"
               value={customValue}
               onChange={handleCustomInputChange}
               placeholder="Custom Input"

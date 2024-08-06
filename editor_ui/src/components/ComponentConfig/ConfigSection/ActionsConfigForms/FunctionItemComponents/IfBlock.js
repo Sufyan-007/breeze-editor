@@ -82,7 +82,7 @@ function IfBlock({ config, update }) {
               style={{ cursor: "pointer" }}
               onClick={addElseIf}
             >
-              <i class="bi bi-plus-circle"></i> Else If
+              <i className="bi bi-plus-circle"></i> Else If
             </div>
           </div>
           {conf.elseIf.length > 0 ? (
@@ -117,7 +117,7 @@ function IfBlock({ config, update }) {
                       style={{ color: "red", cursor: "pointer" }}
                       onClick={() => removeElseIf(index)}
                     >
-                      <i class="bi bi-trash"></i>
+                      <i className="bi bi-trash"></i>
                     </div>
                   </div>
                 </div>

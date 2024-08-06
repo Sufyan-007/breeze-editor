@@ -1,5 +1,4 @@
 export const dataTypes = [
-  "CUSTOM",
   "STRING",
   "NUMERIC",
   "BOOLEAN",
