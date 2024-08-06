@@ -175,7 +175,7 @@ class EnvironmentSettingsConfigService:
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Error deleting environment config: {e}")
         except Exception as e:
-            raise Exception(f"General error deleting environment config: {e}")
+            raise Exception(f"{e}")
 
 
     def set_environment(self, env_name):
@@ -187,4 +187,4 @@ class EnvironmentSettingsConfigService:
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Error setting environment: {e}")
         except Exception as e:
-            raise Exception(f"General error setting environment: {e}")
+            raise Exception(f"{e}")
