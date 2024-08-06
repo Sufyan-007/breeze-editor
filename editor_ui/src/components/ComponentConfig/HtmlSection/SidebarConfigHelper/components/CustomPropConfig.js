@@ -23,8 +23,16 @@ const CustomPropConfig = ({
 }) => {
   const [checkbox, setCheckbox] = useState(false);
   const [availableVar, setAvailablevar] = useState();
-  const { projectName } = useParams(); // Extract projectName from URL parameters
+  const { projectName } = useParams();
   const [availableComponents, setAvailablecomponents] = useState([]);
+  const [selectedComponent, setSelectedComponent] = useState({  value:inputField?.value  ,
+    label: inputField?.value ,
+    description: inputField?.importType,});
+  // useEffect(()=>{
+  //   setSelectedComponent({  value:inputField?.value  ,
+  //     label: inputField?.value ,
+  //     description: inputField?.importType,})
+  // },[inputField.value,inputField.importType])
   useEffect(() => {
     if (
       inputField.type === "FUNCTION" &&
@@ -41,31 +49,38 @@ const CustomPropConfig = ({
     } else if (
       inputField.type === "VARIABLE" &&
       inputField.$ref === undefined &&
-      inputField.value !== ""
+      inputField.value !== "" &&
+      inputField.importType === undefined
     ) {
+      setCheckbox(true);
+    } else if (inputField.key === "className" || inputField.importType) {
       setCheckbox(true);
     }
   }, [inputField]);
-
+  
   useEffect(() => {
     const propDataType = getPropDataType(inputField.key);
-    console.log("propDataType", propDataType);
     const filteredDatatypes = allVariables.filter((item) => {
       return item.body.datatype.toUpperCase() === propDataType;
     });
 
     setAvailablevar(filteredDatatypes);
-  }, [allVariables,checkbox]);
+  }, []);
+  useEffect(() => {
+    const propDataType = getPropDataType(inputField.key);
+    const filteredDatatypes = allVariables.filter((item) => {
+      return item.body.datatype.toUpperCase() === propDataType;
+    });
+    setAvailablevar(filteredDatatypes);
+  }, [allVariables, checkbox, getPropDataType]);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { CUSTOM, THIRD_PARTY } = await getComponents(projectName);
-        console.log(CUSTOM, THIRD_PARTY);
         let allCustomTags = CUSTOM.map((obj) => {
           obj.type = "CUSTOM";
           return obj;
         });
-        console.log(allCustomTags);
 
         let allThirdPartyTags = [];
         for (const [key, value] of Object.entries(THIRD_PARTY)) {
@@ -77,7 +92,6 @@ const CustomPropConfig = ({
             })
           );
         }
-        console.log(allThirdPartyTags);
         const options = [...allCustomTags, ...allThirdPartyTags].map(
           (item) => ({
             value: item.name,
@@ -91,15 +105,17 @@ const CustomPropConfig = ({
         console.error("Error fetching components:", error);
       }
     };
-    if (inputField.type === "COMPONENT") fetchData();
-  }, []);
- useEffect(() => {
 
-  if((inputField.type === "COMPONENT" || inputField.type === "ELEMENT") && checkbox===true)
+    if (inputField.type === "COMPONENT" || inputField.importType !== undefined) {
+      fetchData();}
+  }, [inputField.type]);
+  useEffect(() => {
+    if (
+      (inputField.type === "COMPONENT" || inputField.type === "ELEMENT") &&
+      checkbox === true
+    )
       handleAttributeChange(inputField.key, "");
-
-
- },[checkbox]);
+  }, [checkbox]);
   const formatOptionLabel = ({ label, description }) => (
     <div
       style={{
@@ -170,18 +186,44 @@ const CustomPropConfig = ({
           style={{ width: "68%", marginRight: "10px" }}
         >
           {" "}
-          {inputField.type === "COMPONENT" &&
+          {(inputField.type === "COMPONENT" ||
+            inputField.importType !== undefined) &&
             (checkbox === true ? (
-              <Select
-                options={availableComponents}
-                formatOptionLabel={formatOptionLabel}
-                styles={customStyles}
-                form="_none"
-                components={{
-                  DropdownIndicator: () => null,
-                  IndicatorSeparator: () => null,
+              <>
+              <Form.Select
+                size="sm"
+                style={{
+                  borderColor: "rgb(73, 80, 87)",
+                  backgroundColor: "rgb(37 39 42) ",
+                  color: "white",
                 }}
-              />
+                value={selectedComponent?.value}
+                onChange={(event) => {
+                  const selectedValue = event.target.value;
+                  const selectedComponent = availableComponents.find(
+                  (component) => component.value === selectedValue
+                );
+                
+                setSelectedComponent({  value:selectedComponent.value  ,
+                  label: selectedComponent.value ,
+                  description: selectedComponent.description,});
+                handleAttributeChange(inputField.key, selectedComponent.value, selectedComponent.description);
+            
+                }}
+              >
+                <option value="" disabled selected hidden>
+                  Select a binding
+                </option>
+
+                {availableComponents &&
+                  availableComponents.map((component, index) => (
+                    <option key={index} value={component.value}>
+                      {component.value} - {"   "}({component.description})
+                    </option>
+                  ))}
+              </Form.Select>
+             
+              </>
             ) : (
               <Form.Select
                 size="sm"
@@ -212,38 +254,38 @@ const CustomPropConfig = ({
                   ))}
               </Form.Select>
             ))}
-          {inputField.type === "ELEMENT" &&
-            (
-              <Form.Select
-                size="sm"
-                style={{
-                  borderColor: "rgb(73, 80, 87)",
-                  backgroundColor: "rgb(37 39 42) ",
-                  color: "white",
-                }}
-                onChange={(event) => {
-                  addRefToAttribute(
-                    "predefined",
-                    event,
-                    inputField.key,
-                    "VARIABLE"
-                  );
-                }}
-                value={inputField.$ref}
-              >
-                <option value="" disabled selected hidden>
-                  Select a binding
-                </option>
-            
-                {availableVar &&
-                  availableVar.map((functions, index) => (
-                    <option key={index} value={functions.id}>
-                      {functions.name}
-                    </option>
-                  ))}
-              </Form.Select>
-            )}
+          {inputField.type === "ELEMENT" && (
+            <Form.Select
+              size="sm"
+              style={{
+                borderColor: "rgb(73, 80, 87)",
+                backgroundColor: "rgb(37 39 42) ",
+                color: "white",
+              }}
+              onChange={(event) => {
+                addRefToAttribute(
+                  "predefined",
+                  event,
+                  inputField.key,
+                  "VARIABLE"
+                );
+              }}
+              value={inputField.$ref}
+            >
+              <option value="" disabled selected hidden>
+                Select a binding
+              </option>
+
+              {availableVar &&
+                availableVar.map((functions, index) => (
+                  <option key={index} value={functions.id}>
+                    {functions.name}
+                  </option>
+                ))}
+            </Form.Select>
+          )}
           {inputField.type === "VARIABLE" &&
+            inputField.importType === undefined &&
             (checkbox === false ? (
               <Form.Select
                 size="sm"
@@ -374,48 +416,50 @@ const CustomPropConfig = ({
           {inputField.type === "BOOLEAN" &&
             (checkbox === false ? (
               <Form.Select
-                size="sm"
-                onChange={(e) => {
-                  handleAttributeChange(inputField.key, e.target.value);
-                }}
-                style={{ borderColor: "rgb(73, 80, 87)" }}
-                defaultValue={true}
-                value={inputField.value || "false"}
-                //   value={selectedAttributes[attribute].value}
-                className="bg-dark text-light "
-              >
-                <option value="false">false</option>
-                <option value="true">true</option>
-              </Form.Select>
-            ) : (
-              <Form.Select
-                style={{
-                  backgroundColor: "rgb(37 39 42) ",
-                  borderColor: "rgb(73, 80, 87)",
-                  color: "white",
-                }}
-                onChange={(event) => {
-                  addRefToAttribute(
-                    "predefined",
-                    event,
-                    inputField.key,
-                    "VARIABLE"
-                  );
-                }}
-                value={inputField.$ref}
-                size="sm"
-              >
-                <option value="" disabled selected hidden>
-                  Select a binding
-                </option>
+              style={{
+                backgroundColor: "rgb(37 39 42) ",
+                borderColor: "rgb(73, 80, 87)",
+                color: "white",
+              }}
+              onChange={(event) => {
+                addRefToAttribute(
+                  "predefined",
+                  event,
+                  inputField.key,
+                  "VARIABLE"
+                );
+              }}
+              value={inputField.$ref}
+              size="sm"
+            >
+              <option value="" disabled selected hidden>
+                Select a binding
+              </option>
 
-                {availableFunctions &&
-                  availableFunctions.map((functions, index) => (
-                    <option key={index} value={functions.id}>
-                      {functions.name}
-                    </option>
-                  ))}
-              </Form.Select>
+              {availableVar &&
+                availableVar.map((boolRef, index) => (
+                  <option key={index} value={boolRef.id}>
+                    {boolRef.name}
+                  </option>
+                ))}
+            </Form.Select>
+              
+            ) : (
+             
+              <Form.Select
+              size="sm"
+              onChange={(e) => {
+                handleAttributeChange(inputField.key, e.target.value);
+              }}
+              style={{ borderColor: "rgb(73, 80, 87)" }}
+              defaultValue={true}
+              value={inputField.value || "false"}
+              //   value={selectedAttributes[attribute].value}
+              className="bg-dark text-light "
+            >
+              <option value="false">false</option>
+              <option value="true">true</option>
+            </Form.Select>
             ))}
           {inputField.type === "FUNCTION" && checkbox === true && (
             <div className="mb-2">
@@ -463,7 +507,6 @@ const CustomPropConfig = ({
             style={{ marginRight: ".6rem" }}
             checked={checkbox}
             disabled={inputField.key === ""}
-            custom
             className="attribute-config-checkbox"
             onChange={() => {
               const attributeValue = {

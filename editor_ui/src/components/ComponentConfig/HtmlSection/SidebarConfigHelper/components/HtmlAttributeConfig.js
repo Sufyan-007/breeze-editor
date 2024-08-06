@@ -12,6 +12,8 @@ const HtmlAttributeConfig = ({
   handleDeleteAttribute,
   availableFunctions,
   addRefToAttribute,
+  getPropDataType,
+  allVariables,
 }) => {
   const [inputFields, setInputFields] = useState([]);
 //   const [checkboxStates, setCheckboxStates] = useState({})
@@ -20,7 +22,6 @@ const HtmlAttributeConfig = ({
       key,
       ...selectedAttributes[key],
     }));
-    console.log([...inputFields]);
     const hasEmptyKeyField = inputFields.some((field) => field.key === "");
 
     if (hasEmptyKeyField && (Object.keys(selectedAttributes).length < Object.keys(inputFields).length)) {
@@ -62,6 +63,8 @@ const HtmlAttributeConfig = ({
           attributeOptions={attributeOptions}
           handleSelectAttributeChange={handleSelectAttributeChange}
           customStyles={customStyles}
+          getPropDataType={getPropDataType}
+          allVariables={allVariables}
          ></AttributesConfig>
       ))}
       <div className="d-flex justify-content-end">

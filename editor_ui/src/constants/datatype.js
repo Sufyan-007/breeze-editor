@@ -6,6 +6,8 @@ const dataTypes = [
   "FUNCTION",
   "OBJECT",
   "COMPONENT",
-  "ELEMENT"
+  "ELEMENT",
+  "ANY"
+  
 ];
 export default dataTypes;

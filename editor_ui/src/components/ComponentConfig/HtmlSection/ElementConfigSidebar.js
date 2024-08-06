@@ -10,11 +10,10 @@ const getAvailableFunctions = (componentConfig) => {
   const functionsList = [];
 
   const { resources, propsVars } = componentConfig;
-  console.log(componentConfig);
   
   const namedFunctions = resources.filter(resource => resource.type === "function");
-  const propFunctions = propsVars.filter(propsVar => propsVar.body?.datatype === "function");
-  const stateAsFunction = resources.filter(resource => resource.body?.datatype === "function");
+  const propFunctions = propsVars.filter(propsVar => propsVar.body?.datatype === "FUNCTION");
+  const stateAsFunction = resources.filter(resource => resource.body?.datatype === "FUNCTION");
   const hookFunction = resources.filter(resource => ["useMemo", "useCallback"].includes(resource.body?.type));
   // const setterFunctions = resources.filter(resource => resource.type === "stateVars")
   
@@ -124,7 +123,7 @@ export default function ElementConfigSidebar({ config }) {
           }}
         >
           <div>
-            <div className="d-flex align-items-center justify-content-between mb-4 text-light mt-2 ps-3 pe-3">
+            <div className="d-flex align-items-center justify-content-between mb-2 text-light mt-2 ps-1 pe-3">
               <div>
                 <h5 className="tag-name  mt-2 text-capitalize">
                   {element.tagName}
@@ -138,6 +137,10 @@ export default function ElementConfigSidebar({ config }) {
                 ></button>
               </div>
             </div>
+            <div className="mt-1 text-light mb-3 ms-0 ps-1 pb-1 " style={{ borderBottom: '3px solid black' }}>{element?.elementType === 'HTML' ? "Attributes" : element.type === 'text'?"Text":"Props" }</div>
+
+            
+            
             {element.type === "text" && (
               <TextElement
                 makeSelectedElementNull={makeSelectedElementNull}

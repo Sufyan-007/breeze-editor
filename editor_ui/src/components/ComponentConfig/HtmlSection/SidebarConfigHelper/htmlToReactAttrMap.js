@@ -41,6 +41,7 @@ var map = {
   download: "download",
   draggable: "draggable",
   enctype: "encType",
+  enterkeyhint:"enterKeyHint",
   form: "form",
   formaction: "formAction",
   formenctype: "formEncType",

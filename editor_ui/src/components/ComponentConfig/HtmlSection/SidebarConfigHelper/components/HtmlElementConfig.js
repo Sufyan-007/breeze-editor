@@ -166,7 +166,7 @@ const HtmlElementConfig = ({
   const updateHtmlElementConfig = (e) => {
     e.preventDefault();
     const tempElememt = { ...element, attributes: selectedAttributes };
-   console.log("tempELe",tempElememt)
+   //console.log("tempELe",tempElememt)
 
     handleUpdateClick(tempElememt);
   };
@@ -177,7 +177,7 @@ const HtmlElementConfig = ({
     let type = availableAttributes[selectedOption]?.datatype || "LITERAL";
     if (type === "STRING") type = "LITERAL";
     else if (type === "BOOLEAN") type = "BOOLEAN";
-    else if (type==="OBJECT" || type==="ARRAY")type="VARIABLE"
+    else if (type==="OBJECT" || type==="ARRAY" ||  type === "")type="VARIABLE"
 
     setSelectedAttributes((prevSelectedAttributes) => ({
       ...prevSelectedAttributes,
@@ -196,21 +196,27 @@ const HtmlElementConfig = ({
     });
   };
 
-  const handleAttributeChange = (key, value) => {
+  const handleAttributeChange = (key, value ,importType="") => {
     setSelectedAttributes((prevSelectedAttributes) => {
       const prevAttribute = prevSelectedAttributes[key];
       let newType =
         prevAttribute && prevAttribute.type !== "LITERAL"
           ? prevAttribute.type
           : "LITERAL";
-      if (newType === "ELEMENT" || newType === "COMPONENT") {
+      if (newType === "ELEMENT" ) {
         newType = "VARIABLE"
       }
-
+      if(importType!==""){
+        return{
+       ...prevSelectedAttributes,
+        [key]: { type: newType, value: value, importType: importType},
+      };
+    }
+      else{
       return {
         ...prevSelectedAttributes,
         [key]: { type: newType, value: value },
-      };
+      }};
     });
   };
   const addRefToAttribute = (functionType, value, attribute,attributeType = '') => {
@@ -248,6 +254,7 @@ const HtmlElementConfig = ({
       <Form className="text-light">
         {element.elementType === "CUSTOM" ? (
           <CustomComponentConfig
+            key={element.elementType} 
             attributeOptions={attributeOptions}
              handleSelectAttributeChange={handleSelectAttributeChange}
              customStyles={customStyles}
@@ -270,6 +277,8 @@ const HtmlElementConfig = ({
              handleDeleteAttribute={handleDeleteAttribute}
              availableFunctions={availableFunctions}
              addRefToAttribute={addRefToAttribute}
+             getPropDataType={getPropDataType}
+             allVariables={allVariables}
             ></HtmlAttributeConfig>
             )}
         {/* <Form.Group className="mb-4">
@@ -283,7 +292,7 @@ const HtmlElementConfig = ({
           />
         </Form.Group> */}
         <div
-          className="pt-1   mt-3  w-100"
+          className="pt-1   mt-3  w-100 "
           style={{
             position: "sticky",
             bottom: "0",
@@ -292,7 +301,7 @@ const HtmlElementConfig = ({
             zIndex: "5",
           }}
         >
-          <div className="d-flex justify-content-between pb-3 pt-2">
+          <div className="d-flex justify-content-between pb-3 pt-2 ">
             <div>
               <button
                 className="btn btn-secondary"

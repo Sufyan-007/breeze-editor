@@ -1,11 +1,13 @@
 from .function_code_generator import FunctionCodeGenerator
 import copy
+# from resource_handler import ResourceHandler
+
 class HTMLGenerator:
     def __init__(self,config):
         self.config = config
 
     def generateAttributeCode(self,attr, value):
-
+        
         # print("----")
         # print(value)
         val=""
@@ -17,9 +19,38 @@ class HTMLGenerator:
             val= f"{{{value.get('value')}}}"
         elif value.get('type') == 'BOOLEAN':
             val= f"{{{value.get('value')}}}"
-        
-        elif value.get('type') == 'VARIABLE':
+        elif value.get('type')=='COMPONENT':
+            #value['type'] = 'VARIABLE'
+            if value.get('importType',"") == 'custom':
+                tag =value.get('value')
+                if tag!=self.config.get('name'):
+                    #if tag not in self.config['imports']['components']:
+                    self.config['imports']['components'].append(tag)
+                
             val= f"{{{value.get('value')}}}"
+        elif value.get('type') == 'VARIABLE':
+            ref = value.get("$ref",None)
+            if ref:
+                for resource in self.config["resources"]:
+                    if resource["id"]==ref:
+                        related_var_config=resource
+                        related_var_config["name"]=resource["name"]
+                        val = "{%s}" % related_var_config["name"]
+                        break
+                else:
+                    for resource in self.config["propsVars"]:
+                        if resource["id"]==ref:
+                            related_var_config=resource
+                            related_var_config["name"]=resource["name"]
+                            val = "{%s}" % related_var_config["name"]
+                            break
+                    else:
+                        raise IndexError("Could not find %s" % ref)
+            else:
+                val= f"{{{value.get('value')}}}"
+
+                
+              
         elif value.get('type') == "FUNCTION":
             print("------------FUNCTION------------")
             #  print(FunctionCodeGenerator.generate_function(value.get('value'), {}))
@@ -33,7 +64,13 @@ class HTMLGenerator:
                         related_func_config["name"]=resource["name"]
                         break
                 else:
-                    raise IndexError("Could not find %s" % ref)
+                    for resource in self.config["propsVars"]:
+                        if resource["id"]==ref:
+                            related_func_config=resource
+                            related_func_config["name"]=resource["name"]
+                            break
+                    else:
+                        raise IndexError("Could not find %s" % ref)
             else:
                 related_func_config = value.get('value')
                 related_func_config["isAnonymous"]=True

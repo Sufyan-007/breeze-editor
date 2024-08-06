@@ -16,23 +16,31 @@ const AttributesConfig = ({
   attributeOptions,
   handleSelectAttributeChange,
   customStyles,
+  getPropDataType,
+  allVariables
 }) => {
   const [checkbox, setCheckbox] = useState(false);
+  const [availableVar, setAvailablevar] = useState();
   useEffect(() => {
     if (
       inputField.type === "FUNCTION" &&
       inputField.$ref === undefined &&
       inputField.value !== ""
     ) {
-      setCheckbox(true);
-    } else if (
-      inputField.type !== "FUNCTION" &&
-      inputField.$ref !== undefined
-    ) {
-      setCheckbox(true);
+       setCheckbox(true);
     }
-  }, [inputField]);
+    else if(inputField.key === "className" && inputField.value!=='' && inputField.$ref === undefined )
+      setCheckbox(true);
 
+
+  }, [inputField]);
+  useEffect(() => {
+    const propDataType = getPropDataType(inputField.key);
+    const filteredDatatypes = allVariables.filter((item) => {
+      return item.body.datatype.toUpperCase() === propDataType;
+    });
+    setAvailablevar(filteredDatatypes);
+  }, [allVariables, checkbox, getPropDataType]);
   return (
     <>
       {" "}
@@ -102,8 +110,8 @@ const AttributesConfig = ({
                 Select a binding
               </option>
 
-              {availableFunctions &&
-                availableFunctions.map((functions, index) => (
+              {availableVar &&
+                availableVar.map((functions, index) => (
                   <option key={index} value={functions.id}>
                     {functions.name}
                   </option>
@@ -111,7 +119,7 @@ const AttributesConfig = ({
             </Form.Select>
           )}
           {inputField.type === "LITERAL" &&
-            (checkbox === true ? (
+            (checkbox === false ? (
               <Form.Select
                 size="sm"
                 style={{
@@ -133,8 +141,8 @@ const AttributesConfig = ({
                   Select a binding
                 </option>
 
-                {availableFunctions &&
-                  availableFunctions.map((functions, index) => (
+                {availableVar &&
+                  availableVar.map((functions, index) => (
                     <option key={index} value={functions.id}>
                       {functions.name}
                     </option>
@@ -190,8 +198,53 @@ const AttributesConfig = ({
                 }}
               />
             ))}
+
+            { inputField.type === "NUMERIC" &&
+               ( checkbox===false ?(
+                <Form.Select
+                size="sm"
+                style={{
+                  borderColor: "rgb(73, 80, 87)",
+                  backgroundColor: "rgb(37 39 42) ",
+                  color: "white",
+                }}
+                onChange={(event) => {
+                  addRefToAttribute(
+                    "predefined",
+                    event,
+                    inputField.key,
+                    "VARIABLE"
+                  );
+                }}
+                value={inputField.$ref}
+              >
+                <option value="" disabled selected hidden>
+                  Select a binding
+                </option>
+
+                {availableVar &&
+                  availableVar.map((functions, index) => (
+                    <option key={index} value={functions.id}>
+                      {functions.name}
+                    </option>
+                  ))}
+              </Form.Select>
+               ):<Form.Control
+               type="number"
+               size="sm"
+               style={{ borderColor: "rgb(73, 80, 87)" }}
+               placeholder="value"
+               value={inputField?.value}
+               className="bg-dark text-light "
+               onChange={(e) => {
+                 e.preventDefault();
+                 handleAttributeChange(inputField.key, e.target.value);
+               }}
+             />)
+
+            }
           {inputField.type === "BOOLEAN" &&
-            (checkbox === false ? (
+            (checkbox === true ? (
               <Form.Select
                 size="sm"
                 onChange={(e) => {
@@ -228,8 +281,8 @@ const AttributesConfig = ({
                   Select a binding
                 </option>
 
-                {availableFunctions &&
-                  availableFunctions.map((functions, index) => (
+                {availableVar &&
+                  availableVar.map((functions, index) => (
                     <option key={index} value={functions.id}>
                       {functions.name}
                     </option>
