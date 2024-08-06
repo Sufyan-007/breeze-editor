@@ -14,6 +14,7 @@ export default function CreateApp({ ...props }) {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Uploading...");
   const [showModal, setModalShow] = useState(false);
+  const [warning, setWarning] = useState(false);
   const ws = useRef(null);
   const intervalId = useRef(null);
 
@@ -109,7 +110,6 @@ export default function CreateApp({ ...props }) {
       const img = new Image();
       img.src = URL.createObjectURL(file);
       img.onload = () => {
-        // Allow images with dimensions less than or equal to 16x16 pixels
         if (img.width > 16 || img.height > 16) {
           resolve("Image dimensions should be 16x16 pixels or smaller");
         } else {
@@ -122,11 +122,16 @@ export default function CreateApp({ ...props }) {
   const handleLogoChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validationError = await validateLogo(file);
-      if (validationError !== true) {
-        setError("logo", { message: validationError });
+      const validationMessage = await validateLogo(file);
+      if (validationMessage === "File size exceeds 2MB") {
+        setError("logo", { message: validationMessage }); 
+        setWarning(null); 
+      } else if (validationMessage === true) {
+        clearErrors("logo");
+        setWarning(null); 
       } else {
         clearErrors("logo");
+        setWarning(validationMessage); 
       }
     }
   };
@@ -151,6 +156,7 @@ export default function CreateApp({ ...props }) {
   const onSelect = (selectedList, selectedItem) => {
     setSelectedValues(selectedList);
     setValue("styling", selectedList);
+    clearErrors("styling"); 
   };
 
   const onRemove = (selectedList, removedItem) => {
@@ -260,6 +266,11 @@ export default function CreateApp({ ...props }) {
                       {errors.logo && (
                         <div className="text-danger mt-1">
                           {errors.logo.message}
+                        </div>
+                      )}
+                      {warning && (
+                        <div className="text-warning mt-1">
+                          {warning}
                         </div>
                       )}
                     </div>
