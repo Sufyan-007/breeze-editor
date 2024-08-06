@@ -5,12 +5,12 @@ import Delete from "../../../../../assets/icons/delete-trash.svg";
 import edit from "../../../../../assets/icons/edit-icon.svg";
 import { getApiSchemaDetails } from "../../../services/ApiService";
 import { useParams } from "react-router";
-// import MonacoEditor from '../../../components/common/MonacoEditor'
 import {
   addSchema,
   deleteSchema,
   editSchema,
 } from "../../../services/SchemaService";
+
 function SchemaSettings() {
   const [defaultSchemaObj, setDefaultSchemaObj] = useState({
     type: "object",
@@ -19,34 +19,37 @@ function SchemaSettings() {
     name: "",
   });
   const [id, setId] = useState();
+  const [moduleId, setModuleId] = useState();
   const [schemaList, setSchemaList] = useState([]);
   const [selectedSchema, setSelectedSchema] = useState(null);
+  const [expandedModule, setExpandedModule] = useState([]); // State to manage expanded module
   const { projectName } = useParams();
 
   const fetchSchemasList = useCallback(
-    async (schemaName) => {
+    async (schemaId,module_id) => {
+      
+      // console.log("fetchSchemasList>>>",schemaId, module_id);
       try {
-        const result = await getApiSchemaDetails(projectName, schemaName);
-        if (schemaName) {
+        const result = await getApiSchemaDetails(projectName,  schemaId,module_id,);
+        if (schemaId && module_id) {
           return result;
         } else {
           setSchemaList(result);
         }
-        // console.log(result, "result");
       } catch (e) {
         console.error(e);
       }
     },
     [projectName]
   );
+
   useEffect(() => {
-    fetchSchemasList(null);
+    fetchSchemasList(null, null);
   }, [fetchSchemasList]);
 
   const addProperty = () => {
-    const newPropertyKey = `property${
-      Object.keys(defaultSchemaObj.properties).length + 1
-    }`;
+    setId(null)
+    const newPropertyKey = `property${Object.keys(defaultSchemaObj.properties).length + 1}`;
     const newProperty = {
       type: "",
       required: false,
@@ -87,39 +90,45 @@ function SchemaSettings() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    // console.log(id, "iddddd");
     const finalSchema = { id, details: defaultSchemaObj };
     const operation = id ? "edit" : "add";
-    console.log(operation, "operation");
     if (operation === "add") {
-      const result = await addSchema(projectName, finalSchema);
+      const result = await addSchema(projectName, finalSchema, moduleId );
       if (result.message) {
-        fetchSchemasList(null);
+        fetchSchemasList(null,null);
       }
     } else {
-      const result = await editSchema(projectName, finalSchema, id);
+      const result = await editSchema(projectName, finalSchema, id, moduleId);
       if (result.message) {
-        fetchSchemasList(null);
-      }
-    }
-  };
-  const handleSchemaOperations = async (operation, schema, index) => {
-    console.log(operation, schema, "operation");
-    if (operation === "edit") {
-      setSelectedSchema(schema.name);
-      setId(schema.id);
-      const details = await fetchSchemasList(schema.id);
-      // console.log(details, "details");
-     setDefaultSchemaObj(details)
-    } else if (operation === "delete") {
-      console.log(schema, index, "schema and index");
-      const result = await deleteSchema(projectName, schema.id);
-      if (result.message) {
-        fetchSchemasList(null);
+        fetchSchemasList(null, null);
       }
     }
   };
 
+  const handleSchemaOperations = async (operation, schema, module_id) => {
+    if (operation === "edit") {
+      setSelectedSchema(schema.name);
+      setId(schema.id);
+      setModuleId(module_id);
+      const details = await fetchSchemasList(schema.id, module_id);
+      setDefaultSchemaObj(details);
+    } else if (operation === "delete") {
+      const result = await deleteSchema(projectName, schema.id, module_id);
+      if (result.message) {
+        fetchSchemasList(null, null);
+      }
+    }
+  };
+
+  const toggleModuleExpand = (moduleId) => {
+    setExpandedModule((prevExpandedModule) => {
+      if (prevExpandedModule.includes(moduleId)) {
+        return prevExpandedModule.filter((id) => id !== moduleId);
+      } else {
+        return [...prevExpandedModule, moduleId];
+      }
+    });
+  };
   return (
     defaultSchemaObj && (
       <Row id="main" className="container-fluid h-100">
@@ -152,35 +161,49 @@ function SchemaSettings() {
           </div>
           {schemaList.length > 0 ? (
             <div>
-              {schemaList.map((schema, index) => (
-                <div
-                  key={index}
-                  className="text-white mt-2 d-flex justify-content-between">
-                  <span className="overflow-auto">{schema.name}</span>
-                  <div className="d-flex">
-                    <img
-                      src={edit}
-                      alt="edit"
-                      height={20}
-                      width={20}
-                      style={{ cursor: "pointer" }}
-                      className="mx-1"
-                      onClick={() =>
-                        handleSchemaOperations("edit", schema, null)
-                      }
-                    />
-                    <img
-                      src={Delete}
-                      alt="delete"
-                      height={20}
-                      width={20}
-                      style={{ cursor: "pointer" }}
-                      className="mx-1"
-                      onClick={() =>
-                        handleSchemaOperations("delete", schema, index)
-                      }
-                    />
+              {schemaList.map((module) => (
+                <div key={module.module_id} className="text-white mt-2">
+                  <div
+                    className="d-flex justify-content-between my-2"
+                    onClick={() => toggleModuleExpand(module.module_id)}
+                    style={{
+                      cursor: "pointer",
+                      backgroundColor: expandedModule.includes(module.module_id)
+                        ? "#303033"
+                        : "#212529"
+                    }}
+                  >
+                    <span className="overflow-auto">{module.title}</span>
                   </div>
+                  {expandedModule.includes(module.module_id) && (
+                    <div className="">
+                      {module.schemas.map((schema) => (
+                        <div key={schema.id} className="d-flex justify-content-between mt-1">
+                          <span className="text-white mx-2">{schema.name}</span>
+                          <div className="d-flex">
+                            <img
+                              src={edit}
+                              alt="edit"
+                              height={20}
+                              width={20}
+                              style={{ cursor: "pointer" }}
+                              className="mx-1"
+                              onClick={() => handleSchemaOperations("edit", schema, module.module_id)}
+                            />
+                            <img
+                              src={Delete}
+                              alt="delete"
+                              height={20}
+                              width={20}
+                              style={{ cursor: "pointer" }}
+                              className="mx-1"
+                              onClick={() => handleSchemaOperations("delete", schema, module.module_id)}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -195,12 +218,12 @@ function SchemaSettings() {
               <Button
                 variant="secondary"
                 className="rounded-0 mt-4"
-                onClick={(e) => onSubmit(e)}>
+                onClick={onSubmit}>
                 Submit
               </Button>
             </div>
           </div>
-       
+
           <Row className="mb-2 mt-4">
             <Col sm={3} className="text-white">
               Schema Name:
@@ -242,26 +265,24 @@ function SchemaSettings() {
             </div>
           </Row>
           {defaultSchemaObj.properties &&
-            Object.entries(defaultSchemaObj.properties).map(([key, value]) => {
-              return (
-                <RenderObject
-                  key={key}
-                  propertyName={key}
-                  value={value}
-                  updateParent={(value, newKey = null) =>
-                    editProperty(key, value, newKey)
-                  }
-                  schemaList={schemaList}
-                />
-              );
-            })}
+            Object.entries(defaultSchemaObj.properties).map(([key, value]) => (
+              <RenderObject
+                key={key}
+                propertyName={key}
+                value={value}
+                updateParent={(value, newKey = null) =>
+                  editProperty(key, value, newKey)
+                }
+                schemaList={schemaList}
+              />
+            ))}
 
-            <Row className="mb-2 mt-4 mx-2 h-50 " style={{border:"1px solid white"}}>
-              <span className="text-white">Example : </span>
-              <div id="schema-example">
-             
-              </div>
-            </Row>
+          <Row className="mb-2 mt-4 mx-2 h-50 " style={{ border: "1px solid white" }}>
+            <span className="text-white">Example : </span>
+            <div id="schema-example">
+
+            </div>
+          </Row>
         </Col>
       </Row>
     )

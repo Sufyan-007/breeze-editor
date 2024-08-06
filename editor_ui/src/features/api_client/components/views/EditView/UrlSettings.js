@@ -37,8 +37,8 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
     onChange("url", newUrlData);
   };
 
-  const handleMethodChange = (value)=>{
-      onChange("method", value)
+  const handleMethodChange = (value) => {
+    onChange("method", value)
   }
 
   const handlePathParsing = () => {
@@ -114,7 +114,21 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
       }
     }
   };
-
+  const renderError = (errors) => {
+    console.log(errors, "errors");
+    if (!errors) return null;
+    return (
+      <div className="text-danger">
+        {Object.entries(errors).map(([key, messages]) => (
+          <div key={key}>
+            {messages.map((message, idx) => (
+              <div key={idx}>{key}:{message}</div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
   return (
     <>
       <div className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
@@ -129,7 +143,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
               border: "1px solid rgba(128, 128, 128, 0.5)",
             }}
             value={method}
-          onChange={(e) => handleMethodChange(e.target.value)}
+            onChange={(e) => handleMethodChange(e.target.value)}
           >
             <option value="">Select</option>
             <option value="GET">Get</option>
@@ -161,7 +175,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
               border: "1px solid rgba(128, 128, 128, 0.5)",
             }}
             value={servers ? servers[0].url : ""}
-          onChange={(e) => handleChanges("baseurl",e.target.value)}
+            onChange={(e) => handleChanges("baseurl", e.target.value)}
           >
             <option value="">Select</option>
             {servers &&
@@ -197,84 +211,58 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
         <div className="m-2">Path Parameter Details:</div>
         {pathParams && pathParams.length > 0 ? (
           pathParams.map((para, index) => (
-            <div
-              key={index}
-              className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between mb-2 mx-1">
-              <div className="d-flex align-items-center w-100">
-                <div className="mx-1 mt-1" style={{ width: "50%" }}>
-                  <Form.Label className="text-white mb-1">Name:</Form.Label>
-                  <Form.Control
-                    className="text-white"
-                    size="sm"
-                    type="text"
-                    placeholder="Parameter Name"
-                    style={{
-                      backgroundColor: "#212529",
-                      border: "1px solid rgba(128, 128, 128, 0.5)",
-                    }}
-                    value={para.name}
-                    readOnly
-                  />
-                </div>
-                <div className="mx-1 mt-1" style={{ width: "50%" }}>
-                  <Form.Label className="text-white mb-1">
-                    Value Type:
-                  </Form.Label>
-                  <Form.Control
-                    as="select"
-                    className="text-white"
-                    size="sm"
-                    style={{
-                      backgroundColor: "#212529",
-                      border: "1px solid rgba(128, 128, 128, 0.5)",
-                    }}
-                    value={para.param_type}
-                    onChange={(e) => {
-                      handleInputChange(
-                        "path",
-                        index,
-                        "param_type",
-                        e.target.value
-                      );
-                    }}>
-                    <option value="">Select</option>
-                    <option value="STATIC">STATIC</option>
-                    <option value="USER_INPUT">USER INPUT</option>
-                    <option value="LOCAL_STORAGE">LOCAL STORAGE</option>
-                    <option value="SESSION_STORAGE">SESSION STORAGE</option>
-                  </Form.Control>
-                </div>
-
-                {para.param_type === "STATIC" ? (
-                  <div className="mx-2" style={{ width: "50%" }}>
-                    <Form.Label className="text-white mb-1">Value</Form.Label>
+            <>
+              <div
+                key={index}
+                className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between mb-2 mx-1">
+                <div className="d-flex align-items-center w-100">
+                  <div className="mx-1 mt-1" style={{ width: "50%" }}>
+                    <Form.Label className="text-white mb-1">Name:</Form.Label>
                     <Form.Control
                       className="text-white"
                       size="sm"
                       type="text"
-                      placeholder="Value"
+                      placeholder="Parameter Name"
                       style={{
                         backgroundColor: "#212529",
                         border: "1px solid rgba(128, 128, 128, 0.5)",
                       }}
-                      value={para.value}
+                      value={para.name}
+                      readOnly
+                    />
+                  </div>
+                  <div className="mx-1 mt-1" style={{ width: "50%" }}>
+                    <Form.Label className="text-white mb-1">
+                      Value Type:
+                    </Form.Label>
+                    <Form.Control
+                      as="select"
+                      className="text-white"
+                      size="sm"
+                      style={{
+                        backgroundColor: "#212529",
+                        border: "1px solid rgba(128, 128, 128, 0.5)",
+                      }}
+                      value={para.param_type}
                       onChange={(e) => {
                         handleInputChange(
                           "path",
                           index,
-                          "value",
+                          "param_type",
                           e.target.value
                         );
-                      }}
-                    />
+                      }}>
+                      <option value="">Select</option>
+                      <option value="STATIC">STATIC</option>
+                      <option value="USER_INPUT">USER INPUT</option>
+                      <option value="LOCAL_STORAGE">LOCAL STORAGE</option>
+                      <option value="SESSION_STORAGE">SESSION STORAGE</option>
+                    </Form.Control>
                   </div>
-                ) : para.param_type === "LOCAL_STORAGE" ||
-                  para.param_type === "SESSION_STORAGE" ? (
-                  <>
+
+                  {para.param_type === "STATIC" ? (
                     <div className="mx-2" style={{ width: "50%" }}>
-                      <Form.Label className="text-white mb-1">
-                        Storage Key
-                      </Form.Label>
+                      <Form.Label className="text-white mb-1">Value</Form.Label>
                       <Form.Control
                         className="text-white"
                         size="sm"
@@ -284,23 +272,55 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
                           backgroundColor: "#212529",
                           border: "1px solid rgba(128, 128, 128, 0.5)",
                         }}
-                        value={para.storage_key}
+                        value={para.value}
                         onChange={(e) => {
                           handleInputChange(
                             "path",
                             index,
-                            "storage_key",
+                            "value",
                             e.target.value
                           );
                         }}
                       />
                     </div>
-                  </>
-                ) : (
-                  <></>
-                )}
+                  ) : para.param_type === "LOCAL_STORAGE" ||
+                    para.param_type === "SESSION_STORAGE" ? (
+                    <>
+                      <div className="mx-2" style={{ width: "50%" }}>
+                        <Form.Label className="text-white mb-1">
+                          Storage Key
+                        </Form.Label>
+                        <Form.Control
+                          className="text-white"
+                          size="sm"
+                          type="text"
+                          placeholder="Value"
+                          style={{
+                            backgroundColor: "#212529",
+                            border: "1px solid rgba(128, 128, 128, 0.5)",
+                          }}
+                          value={para.storage_key}
+                          onChange={(e) => {
+                            handleInputChange(
+                              "path",
+                              index,
+                              "storage_key",
+                              e.target.value
+                            );
+                          }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  
+                </div>
               </div>
-            </div>
+              <div className="mx-1 mt-1 text-white">
+                    {renderError(para.errors)}
+                  </div>
+              </>
           ))
         ) : (
           <div className="d-flex justify-content-center mb-1">
@@ -325,7 +345,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
           />
         </div>
 
-        <ParameterSettings paramData={paramData} onChange={onChange} />
+        <ParameterSettings paramData={paramData} onChange={onChange} renderError={renderError} />
       </div>
     </>
   );

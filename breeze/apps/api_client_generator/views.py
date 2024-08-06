@@ -100,44 +100,88 @@ class ApiClientGenerator(View):
         
         
     
-    def get(self, request, projectName,files_only):
-        folder_path = f"{CONFIG_PATH}/{projectName}/api_client_intermediate_json"
+    def get(self, request, projectName, files_only):
+        api_folder_path = f"{CONFIG_PATH}/{projectName}/api_client_intermediate_json"
+        auth_api_folder_path = f"{CONFIG_PATH}/{projectName}/swagger_metadata.json"
         files_with_apis = []
+        swagger_metadata = {}
 
         try:
-            # Get list of files in the folder
-            files = os.listdir(folder_path)
-            if files_only and files_only == 'true':
-                return JsonResponse({"files":  files}, status=200)
-            
-            for filename in files:
-                full_file_path = os.path.join(folder_path, filename)
-                function_with_errors = set()
-                result_arr = []
-                # Read the file
-                if filename != "allSchemas.json":
-                    with open(full_file_path, "r") as file:
-                        api_models = json.load(file)
-                        for data in api_models.values():
-                            data_errors = data.get('errors')
-                            if data_errors and len(data_errors.get("root_errors"))>0:
-                                function_with_errors.add(data["operation_id"])
-                            result_arr.append({
-                                "id" : data.get("id"),
-                                "operation_id" : data.get("operation_id"),
-                            })
-                filename_without_extension = os.path.splitext(filename)[0]
-                function_with_errors_list = list(function_with_errors)
-                # Append file name and APIs to the list
-                files_with_apis.append({
-                    "filename": filename_without_extension,
-                    "apis": api_models,
-                    "errors": function_with_errors_list
+            # Load authentication API data from Swagger metadata
+            auth_api_data = []
+            apis = []
+
+            with open(auth_api_folder_path, "r") as file:
+                swagger_metadata = json.load(file)
+
+            for key, value in swagger_metadata.items():
+                auth_apis = value.get("auth_apis", {})
+                for k, v in auth_apis.items():
+                    apis.append(v)
+                auth_api_data.append({
+                    "model_id": key,
+                    "apis": apis,
+                    "title": value.get("title")
                 })
 
-            return JsonResponse({"files_with_apis": files_with_apis}, status=200)
+            # If only files should be returned, return the list of files
+            # if files_only and files_only == 'true':
+            #     all_files = []
+            #     subfolders = [f for f in os.listdir(api_folder_path) if os.path.isdir(os.path.join(api_folder_path, f))]
+            #     for subfolder in subfolders:
+            #         subfolder_path = os.path.join(api_folder_path, subfolder)
+            #         files = [os.path.join(subfolder, file) for file in os.listdir(subfolder_path) if os.path.isfile(os.path.join(subfolder_path, file))]
+            #         all_files.extend(files)
+            #     return JsonResponse({"files": all_files}, status=200)
+
+            # Process each subfolder and its files
+            subfolders = [f for f in os.listdir(api_folder_path) if os.path.isdir(os.path.join(api_folder_path, f))]
+            for subfolder in subfolders:
+                subfolder_path = os.path.join(api_folder_path, subfolder)
+                
+                subfolder_data = {
+                    "subfolder": subfolder,
+                    "files": [],
+                    "title": ""
+                }
+                for key, value in swagger_metadata.items():
+                        if key == subfolder:
+                            subfolder_data["title"] = value.get("title")
+                            break
+
+                # List and process files in each subfolder
+                files = [f for f in os.listdir(subfolder_path) if os.path.isfile(os.path.join(subfolder_path, f))]
+                for filename in files:
+                    full_file_path = os.path.join(subfolder_path, filename)
+                    function_with_errors = set()
+                    result_arr = []
+                    
+                    if filename != "allSchemas.json":
+                        with open(full_file_path, "r") as file:
+                            api_models = json.load(file)
+                            for data in api_models.values():
+                                data_errors = data.get('errors', {})
+                                if data_errors and len(data_errors.get("root_errors", [])) > 0:
+                                    function_with_errors.add(data.get("operation_id"))
+                                result_arr.append({
+                                    "id": data.get("id"),
+                                    "operation_id": data.get("operation_id"),
+                                })
+                    
+                    filename_without_extension = os.path.splitext(filename)[0]
+                    function_with_errors_list = list(function_with_errors)
+                    
+                    subfolder_data["files"].append({
+                        "filename": filename_without_extension,
+                        "apis": api_models,
+                        "errors": function_with_errors_list
+                    })
+
+                files_with_apis.append(subfolder_data)
+
+            return JsonResponse({"files_with_apis": files_with_apis, "auth_api_files": auth_api_data}, status=200)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-        
-        #gijson-auth.json appname
+            
+            #gijson-auth.json appname

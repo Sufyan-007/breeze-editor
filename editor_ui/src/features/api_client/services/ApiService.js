@@ -37,11 +37,13 @@ export async function modifyApiConfig(data, projectName, filename, operation) {
   return response;
 }
 
-export async function getApiSchemaDetails(projectName, schemaName) {
+export async function getApiSchemaDetails(projectName, schemaName, moduleId) {
   const apiUrl =
     BASE_URL +
     "/api-client-generator/fetch-schema-details/" +
     projectName +
+    "/" +
+    moduleId +
     "/" +
     schemaName;
   const schema_details = await callApiClientGenerator(

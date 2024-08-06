@@ -9,6 +9,7 @@ class GenerateReactApiClient(View):
         data = json.loads(request.body.decode("utf-8"))
         app_name = data.get("appName")
         filename = data.get("filename")
+        module_id = data.get("moduleId")
         app_config_dir = app_name
         service_type = "ORDINARY"
         if(type == "AUTH"):
@@ -16,6 +17,6 @@ class GenerateReactApiClient(View):
         elif type == "WS":
             service_type = "WS"
         client_generator = ReactApiClientGenerator(app_config_dir)
-        client_generator.generate_react_service(app_name,filename,service_type)
+        client_generator.generate_react_service(app_name,filename,service_type, module_id)
         print(data)
         return JsonResponse({"list" : []}, status = 201)

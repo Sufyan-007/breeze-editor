@@ -7,26 +7,54 @@ from ..utils.uuid_as_key import generate_uuid_as_key
 
 class RetrieveSchemaDetails(View):
 
-   def get(self, request, projectName, schemaName):
+   def get(self, request, projectName,moduleId=None, schemaName=None):
     try:
-        schema_file_path = os.path.join(CONFIG_PATH, projectName, "generated_intermediate_json", "allSchemas.json")
-        schema_list = []
+        base_dir = os.path.join(CONFIG_PATH, projectName, "swagger_schema")
+        swagger_metadata_path = f"{CONFIG_PATH}/{projectName}/swagger_metadata.json"
+        final_data = []
         schema_details = {}
-        with open(schema_file_path, "r") as file:
+        with open(swagger_metadata_path, "r") as file:
+                    swagger_metadata = json.load(file)
+        # Helper function to process JSON files
+        def process_file(file_path, module_id, title):
+            schema_list = []
             try:
-                schema_data = json.load(file)
+                with open(file_path, "r") as file:
+                    schema_data = json.load(file)
+                    if moduleId and schemaName and schemaName in schema_data:
+                        schema_details.update(schema_data[schemaName])
+                    else:
+                        for key, value in schema_data.items():
+                            schema_list.append({"id": key, "name": value.get("name")})
+                        final_data.append({"module_id": module_id, "schemas": schema_list, "title": title})
             except json.JSONDecodeError:
-                return JsonResponse({"data": []}, status=200)
-            if schemaName and schemaName in schema_data:
-                schema_details = schema_data[schemaName]
-            else:
-                # schema_list = list(schema_data.keys())
-                for key,value in schema_data.items():
-                    schema_list.append({"id": key, "name": value.get("name")})
-        if len(schema_list)>0:
-            return JsonResponse({"data": schema_list}, status=200)
+                # Skip files with invalid JSON
+                pass
+
+        # Walk through the base directory and process each JSON file
+        for root, dirs, files in os.walk(base_dir):
+            if moduleId != 'null':
+                for file in files:
+                    file_name, _ = os.path.splitext(file)
+                    file_path = os.path.join(root, file)
+                    for key,value in swagger_metadata.items():
+                        if moduleId and (moduleId == file_name) and (file_name == key):
+                                process_file(file_path, moduleId,value.get('title'))
+                                break
+            else:    
+                for file in files:
+                    if file.endswith(".json"):
+                                file_name, _ = os.path.splitext(file)
+                                file_path = os.path.join(root, file)
+                                for key,value in swagger_metadata.items():
+                                    if key == file_name:
+                                        process_file(file_path, key, value.get("title") )
+                            # process_file(file_path)
+
+        if final_data:
+            return JsonResponse({"data": final_data}, status=200)
         else:
-            return JsonResponse({"data": schema_details}, status = 200)
+            return JsonResponse({"data": schema_details}, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
@@ -58,17 +86,18 @@ class RetrieveSchemaProperties(View):
         return JsonResponse({"error": str(e)}, status=400)
     
 class SchemaSettings(View):
-    def post(self, request, projectName):
-        return self._add_or_edit_schema(request, projectName)
+    def post(self, request, projectName,moduleId):
+        return self._add_or_edit_schema(request, projectName, moduleId)
     
-    def put(self, request, projectName,schemaId):
-        return self._add_or_edit_schema(request, projectName, schemaId)
+    def put(self, request, projectName,schemaId, moduleId):
+        return self._add_or_edit_schema(request, projectName,moduleId, schemaId)
     
-    def _add_or_edit_schema(self, request, projectName, schema_id=None):
+    def _add_or_edit_schema(self, request, projectName, moduleId, schema_id=None):
         try:
             data = json.loads(request.body.decode("utf-8"))
             schema_details = data.get("details")
-            schema_file_path = os.path.join(CONFIG_PATH, projectName, "generated_intermediate_json", "allSchemas.json")
+            # schema_file_path = os.path.join(CONFIG_PATH, projectName, "swagger_schema",".json")
+            schema_file_path = f"{CONFIG_PATH}/{projectName}/swagger_schema/{moduleId}.json"
             
             if not schema_details.get("name"):
                 return JsonResponse({"error": "Schema Name is required "})
@@ -94,9 +123,9 @@ class SchemaSettings(View):
         except Exception as e:
             return JsonResponse({"error": str(e)})
 
-    def delete(self, request, projectName, schemaId):
+    def delete(self, request, projectName, schemaId, moduleId):
         try:
-            schema_file_path = os.path.join(CONFIG_PATH, projectName, "generated_intermediate_json", "allSchemas.json")
+            schema_file_path = f"{CONFIG_PATH}/{projectName}/swagger_schema/{moduleId}.json"
             with open(schema_file_path, "r+") as file:
                 schema_data = json.load(file)
             if schemaId in schema_data:

@@ -18,7 +18,9 @@ const responseObject = {
 };
 
 function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title, responseType }) {
-  // console.log(schemaList, "schemaList");
+  // this also needs to be changed according to schema handling 
+  const combinedSchemaList = schemaList.length > 0 && schemaList.flatMap(module => module.schemas);
+  console.log(combinedSchemaList, "combinedSchemaList");
   const [response, setResponse] = useState(responseData);
   const [newResponse, setNewResponse] = useState(responseObject);
   const [expandedProperty, setExpandedProperty] = useState(null);
@@ -37,7 +39,7 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
           [subField]: value,
         }
       };
-    } 
+    }
     updatedResponse[index] = { ...updatedResponse[index], [field]: value };
     onChange(responseType, updatedResponse);
   };
@@ -99,7 +101,7 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
                     onChange={(e) =>
                       handleInputChange(index, "schema_name", e.target.value)
                     }
-                    options={schemaList}
+                    options={combinedSchemaList}
                   />
                   {isAuthApi && (
                     <>
@@ -128,10 +130,10 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
                             backgroundColor: "#212529",
                             border: "1px solid rgba(128, 128, 128, 0.5)",
                           }}
-                        value={res.token_store.stored_key}
-                        onChange={(e) =>
-                          handleInputChange(index, "token_store", e.target.value, "stored_key")
-                        }
+                          value={res.token_store.stored_key}
+                          onChange={(e) =>
+                            handleInputChange(index, "token_store", e.target.value, "stored_key")
+                          }
                         ></Form.Control>
                       </div>
                     </>
@@ -211,7 +213,7 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
             onChange={(e) =>
               setNewResponse({ ...newResponse, schema_name: e.target.value })
             }
-            options={schemaList}
+            options={combinedSchemaList}
           />
           {isAuthApi && (
             <>

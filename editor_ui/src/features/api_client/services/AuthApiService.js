@@ -35,13 +35,17 @@ export async function getAuthApiConfig(projectName, apiId) {
   const auth_api = await callApiClientGenerator(apiUrl, "GET", null, false, {});
   return auth_api;
 }
-export async function getAuthFileApis(projectName, apiId) {
+export async function getAuthFileApis(projectName, apiId, moduleId) {
   const apiUrl =
     BASE_URL +
     "/api-client-generator/fetch-auth-file/" +
     projectName +
     "/" +
-    apiId;
+    apiId
+    +
+    "/"
+    +
+    moduleId;
   const auth_apis = await callApiClientGenerator(
     apiUrl,
     "GET",

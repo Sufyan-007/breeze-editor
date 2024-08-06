@@ -7,6 +7,7 @@ from .api.append_auth_api import AppendAuthApi
 from .api.transfer_to_auth_api import TransferToAuthApi
 from .api.retrieve_auth_file import RetrieveAuthFile
 from .api.retrive_api_config import RetrieveApiConfig
+from .api.module_settings import ModuleSettings
 from .api.retrieve_schema_details import RetrieveSchemaDetails, RetrieveSchemaProperties, SchemaSettings
 urlpatterns = [
         path('generate-react-api-client/<str:type>', csrf_exempt(GenerateReactApiClient.as_view())),
@@ -16,10 +17,11 @@ urlpatterns = [
         path('fetch-api-config/<str:projectName>/<str:filename>/<str:apiId>', csrf_exempt(RetrieveApiConfig.as_view())),
         path('append-to-auth-api/<str:operation>/<str:projectName>', csrf_exempt(AppendAuthApi.as_view())),
         path('transfer-to-auth-api/<str:project_name>', csrf_exempt(TransferToAuthApi.as_view())),
-        path('fetch-auth-file/<str:projectName>/<str:apiId>', csrf_exempt(RetrieveAuthFile.as_view())),
-        path('fetch-schema-details/<str:projectName>/<str:schemaName>', csrf_exempt(RetrieveSchemaDetails.as_view())),
+        path('fetch-auth-file/<str:projectName>/<str:apiId>/<str:moduleId>', csrf_exempt(RetrieveAuthFile.as_view())),
+        path('fetch-schema-details/<str:projectName>/<str:moduleId>/<str:schemaName>', csrf_exempt(RetrieveSchemaDetails.as_view())),
         path('fetch-schema-properties/<str:projectName>/<str:schemaName>/<str:property>', csrf_exempt(RetrieveSchemaProperties.as_view())),
-        path('add-schema/<str:projectName>', csrf_exempt(SchemaSettings.as_view())),
-        path('edit-schema/<str:projectName>/<str:schemaId>', csrf_exempt(SchemaSettings.as_view())),
-        path('delete-schema/<str:projectName>/<str:schemaId>', csrf_exempt(SchemaSettings.as_view())),
+        path('add-schema/<str:projectName>/<str:moduleId>', csrf_exempt(SchemaSettings.as_view())),
+        path('edit-schema/<str:projectName>/<str:schemaId>/<str:moduleId>', csrf_exempt(SchemaSettings.as_view())),
+        path('delete-schema/<str:projectName>/<str:schemaId>/<moduleId>', csrf_exempt(SchemaSettings.as_view())),
+        path('edit-module-name/<str:projectName>/<str:moduleId>', csrf_exempt(ModuleSettings.as_view())),
 ]

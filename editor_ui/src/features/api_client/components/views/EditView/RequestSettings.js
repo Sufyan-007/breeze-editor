@@ -6,12 +6,12 @@ import AuthSettings from "./AuthSettings";
 import UrlSettings from "./UrlSettings";
 import BodySettings from "./BodySettings";
 
-function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, requestType }) {
-  // console.log(apiData, "apidata");
+function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, requestType, moduleId }) {
+  console.log(moduleId, "moduleid in reques");
   const [request, setRequest] = useState(requestData);
   const [expandedProperty, setExpandedProperty] = useState(null);
   const [api, setApi] = useState({});
-  const [requestProperties, setRequestProperties] = useState(["Url","Body","Headers","Auth",]);
+  const [requestProperties, setRequestProperties] = useState(["Url", "Body", "Headers", "Auth",]);
 
   useEffect(() => {
     if (apiData.is_open_api) {
@@ -27,8 +27,8 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
         apiData.authentication_type === "BEARER" ||
         apiData.authentication_type === "APIKEY" || apiData.authentication_type === "OAUTH2"
       ) {
-        setRequestProperties(["Url","Body", "Headers"]);
-      }  else if (apiData.authentication_type === "BASIC") {
+        setRequestProperties(["Url", "Body", "Headers"]);
+      } else if (apiData.authentication_type === "BASIC") {
         setRequestProperties(["Body", "Headers"]);
       }
     } else {
@@ -108,6 +108,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
     <Row className="mt-3">
       <div className="text-white p-1" style={{ backgroundColor: "#303033" }}>
         <span className="mx-2">{title}</span>
+
       </div>
       <div className="p-1">
         {requestProperties &&
@@ -117,8 +118,26 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
               className="mt-1  rounded-0 text-white"
               bg="dark"
               style={{ border: "1px solid rgba(128, 128, 128, 0.5)" }}>
+
               <Card.Body className="d-flex justify-content-between">
-                {req === "Url" && request.url && request.url.baseurl !== "" ? request.url.baseurl : req} 
+                <div>
+                  {req === "Url" && request.url && request.url.baseurl !== "" ? request.url.baseurl : req}
+                  {console.log(request.parameters, req)}
+
+                  {req === "Url" ? (
+                    request.parameters &&
+                    request.parameters.some(param => param.errors && Object.keys(param.errors).length > 0) && (
+                      <i className="bi bi-exclamation-circle mx-2" style={{ color: "red" }}></i>
+                    )
+                  ) : (
+                    request[req.toLowerCase()] &&
+                    request[req.toLowerCase()]["errors"] &&
+                    Object.keys(request[req.toLowerCase()]["errors"]).length > 0 && (
+                      <i className="bi bi-exclamation-circle mx-2" style={{ color: "red" }}></i>
+                    )
+                  )}
+                </div>
+
                 <div>
                   {req === "Headers" && (
                     <img
@@ -195,6 +214,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
                   </Card.Body>
                 ) : req.toLowerCase() === "auth" ? (
                   <AuthSettings
+                    moduleId={moduleId}
                     authData={request.auth}
                     onChange={onReqChange}
                     apiData={api}

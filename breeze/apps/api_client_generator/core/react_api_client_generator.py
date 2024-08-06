@@ -69,8 +69,11 @@ class ReactApiClientGenerator:
         print("services generated.............")
 
 
-    def generate_react_service(self, app_name, filename,service_type):
-        service_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/{filename}.json"
+    def generate_react_service(self, app_name, filename, service_type, module_id):
+        service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}.json"
+        auth_service_path = f"{CONFIG_PATH}/{app_name}/swagger_metadata.json"
+        auth_service_content = read_file_json(auth_service_path)
+        auth_apis = auth_service_content.get(module_id).get("auth_apis",{})
         service_config = read_file_json(service_path)
         map_services = {}
         if service_type == "WS":
@@ -91,9 +94,10 @@ class ReactApiClientGenerator:
             self.create_service_files(map_services)
 
     
-    def retrive_token_code(self,auth_api_id,app_name):
-        service_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/auth.json"
-        service_config = read_file_json(service_path)
+    def retrive_token_code(self,auth_api_id,app_name, module_id ):
+        service_path = f"{CONFIG_PATH}/{app_name}/swagger_metadata.json"
+        swagger_metadata = read_file_json(service_path)
+        service_config = swagger_metadata.get(module_id).get("auth_apis")
         auth_config = service_config.get(auth_api_id,None)
         if auth_config is not None:
             auth_config = ApiModelLoader.load_auth_api_model(auth_config)
@@ -148,7 +152,7 @@ class ReactApiClientGenerator:
     ## needs to think for refresh token api response
     def set_response_interceptor(self, auth, app_name):
         interceptor_code = REFRESH_TOKEN_API
-        auth_api_path = f"{CONFIG_PATH}/{app_name}/generated_intermediate_json/auth.json"
+        auth_api_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/auth.json" #ToDO
         auth_api_config = read_file_json(auth_api_path)
         token_api_config = auth_api_config.get(auth.token_api)
         token_api_code = ""
@@ -560,7 +564,8 @@ class ReactApiClientGenerator:
             else:
                 react_code = react_code.replace('{RESPONSE_CODE}',"")
 
-            react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
+            # react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
+            react_code = react_code.replace('{FUNC_NAME}',func_name)
             react_service_functions.append(react_code)
         return react_service_functions
     

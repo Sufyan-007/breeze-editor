@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 import Delete from "../../../../../assets/icons/delete-trash.svg";
 
-function ParameterSettings({ paramData, onChange }) {
+function ParameterSettings({ paramData, onChange, renderError }) {
   const [queryParameters, setQueryParameters] = useState([]);
   const [pathParameters, setPathParameters] = useState([]);
 
@@ -11,7 +11,6 @@ function ParameterSettings({ paramData, onChange }) {
       const pathParamsFiltered = paramData.filter(
         (param) => param.param_in === "PATH"
       );
-      // Filter only query parameters
       const queryParamsFiltered = paramData.filter(
         (param) => param.param_in === "QUERY"
       );
@@ -35,11 +34,20 @@ function ParameterSettings({ paramData, onChange }) {
     setQueryParameters(updatedParams); 
     onChange("parameters", finalParams);
   };
+  const baseStyle = {
+    backgroundColor: "#212529",
+    border: "1px solid rgba(128, 128, 128, 0.5)",
+  };
+
+  const errorStyle = {
+    border: "1px solid red",
+  };
 
   return (
     <>
       {queryParameters && queryParameters.length > 0 ? (
         queryParameters.map((param, index) => (
+          <>
           <div
             key={index}
             className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between mb-2 mx-1">
@@ -47,13 +55,13 @@ function ParameterSettings({ paramData, onChange }) {
               <div className="mx-1" style={{ width: "50%" }}>
                 <Form.Label className="text-white mb-1">Name:</Form.Label>
                 <Form.Control
-                  className="text-white"
+                  className={`text-white ${param.errors?.name ? 'error-border' : ''}`}
                   size="sm"
                   type="text"
                   placeholder="Parameter Name"
                   style={{
-                    backgroundColor: "#212529",
-                    border: "1px solid rgba(128, 128, 128, 0.5)",
+                    ...baseStyle,
+                    ...(param.errors?.name ? errorStyle : {}),
                   }}
                   value={param.name}
                   onChange={(e) =>
@@ -153,7 +161,12 @@ function ParameterSettings({ paramData, onChange }) {
                 style={{ cursor: "pointer" }}
               />
             </div>
+           
           </div>
+          <div className="mx-1 mt-1 text-white">
+                {renderError(param.errors)}
+              </div>
+          </>
         ))
       ) : (
         <div className="d-flex justify-content-center">

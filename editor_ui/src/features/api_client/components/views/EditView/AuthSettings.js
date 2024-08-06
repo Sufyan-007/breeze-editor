@@ -3,7 +3,7 @@ import { Form } from "react-bootstrap";
 import Delete from "../../../../../assets/icons/delete-trash.svg";
 import { getAuthFileApis } from "../../../services/AuthApiService";
 import { useParams } from "react-router";
-function AuthSettings({ authData, onChange, apiData, onApiChange }) {
+function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
   // console.log(apiData, "auth");
   const [loginApis, setLoginApis] = useState([]);
   const [tokenApis, setTokenApis] = useState([]);
@@ -31,8 +31,8 @@ function AuthSettings({ authData, onChange, apiData, onApiChange }) {
     const updatedAuth = [...authData, newAuth];
     onChange("auth", updatedAuth);
   };
-  const setAuthApis = useCallback(async () => {
-    const result = await getAuthFileApis(projectName, null);
+  const setAuthApis = useCallback(async (moduleId) => {
+    const result = await getAuthFileApis(projectName, null, moduleId);
     let login_api = [];
     let token_api = [];
     if (!Array.isArray(result.data)) {
@@ -59,8 +59,9 @@ function AuthSettings({ authData, onChange, apiData, onApiChange }) {
   }, [projectName]);
 
   useEffect(() => {
-    setAuthApis();
-  }, [setAuthApis]);
+    console.log(moduleId, "moduleiddd");
+    setAuthApis(moduleId);
+  }, [setAuthApis, moduleId]);
 
   const handleFlowChange = (prop, value) => {
     const updatedFlow = apiData.flow || {};
@@ -74,39 +75,37 @@ function AuthSettings({ authData, onChange, apiData, onApiChange }) {
   };
   return (
     <>
-      {apiData.is_authentication_api || true ? (
-        <>
-          <div id="main" className="d-flex mx-2">
-            <div id="left" className="h-full w-50">
-              <div className="mx-3 mb-1">
-                <Form.Label className="text-white mb-1">
-                  Authentication Type:
-                </Form.Label>
-                <Form.Control
-                  as="select"
-                  className="text-white"
-                  size="sm"
-                  style={{
-                    backgroundColor: "#212529",
-                    border: "1px solid rgba(128, 128, 128, 0.5)",
-                  }}
-                  value={apiData.authentication_type}
-                  onChange={(e) =>
-                    onApiChange("authentication_type", e.target.value)
-                  }>
-                  <option value="">Select</option>
-                  <option value="BEARER">Bearer</option>
-                  <option value="OAUTH">Oauth</option>
-                  <option value="OAUTH2">Oauth2</option>
-                  <option value="BASIC">Basic</option>
-                  <option value="APIKEY">ApiKey</option>
-                </Form.Control>
-              </div>
-            </div>
+      <div id="main" className="d-flex mx-2">
+        <div id="left" className="h-full w-50">
+          <div className="mx-3 mb-1">
+            <Form.Label className="text-white mb-1">
+              Authentication Type:
+            </Form.Label>
+            <Form.Control
+              as="select"
+              className="text-white"
+              size="sm"
+              style={{
+                backgroundColor: "#212529",
+                border: "1px solid rgba(128, 128, 128, 0.5)",
+              }}
+              value={apiData.authentication_type}
+              onChange={(e) =>
+                onApiChange("authentication_type", e.target.value)
+              }>
+              <option value="">Select</option>
+              <option value="BEARER">Bearer</option>
+              <option value="OAUTH">Oauth</option>
+              <option value="OAUTH2">Oauth2</option>
+              <option value="BASIC">Basic</option>
+              <option value="APIKEY">ApiKey</option>
+            </Form.Control>
+          </div>
+        </div>
 
-            {apiData.authentication_type === "BASIC" ? (
-              <>
-                {/* <div className="mx-3 mb-1" style={{ width: "50%" }}>
+        {apiData.authentication_type === "BASIC" ? (
+          <>
+            {/* <div className="mx-3 mb-1" style={{ width: "50%" }}>
                   <Form.Label className="text-white mb-1">UserName:</Form.Label>
                   <Form.Control
                     className="text-white"
@@ -146,35 +145,35 @@ function AuthSettings({ authData, onChange, apiData, onApiChange }) {
                     }}
                   />
                 </div> */}
-              </>
-            ) : (
-              <>
-                <div className="mx-3 mb-1" style={{ width: "50%" }}>
-                  <Form.Label className="text-white mb-1">
-                    Authentication Api:
-                  </Form.Label>
-                  <Form.Control
-                    as="select"
-                    className="text-white"
-                    size="sm"
-                    style={{
-                      backgroundColor: "#212529",
-                      border: "1px solid rgba(128, 128, 128, 0.5)",
-                    }}
-                    // value={auth.login_api}
-                    // onChange={(e) =>
-                    //   handleInputChange(index, "login_api", e.target.value)
-                    // }
-                  >
-                    <option value="">Select</option>
-                    {loginApis.map((api) => (
-                      <option key={api.id} value={api.id}>
-                        {api.operation_id}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </div>
-                {/* <div className="mx-3 mb-1" style={{ width: "50%" }}>
+          </>
+        ) : (
+          <>
+            <div className="mx-3 mb-1" style={{ width: "50%" }}>
+              <Form.Label className="text-white mb-1">
+                Authentication Api:
+              </Form.Label>
+              <Form.Control
+                as="select"
+                className="text-white"
+                size="sm"
+                style={{
+                  backgroundColor: "#212529",
+                  border: "1px solid rgba(128, 128, 128, 0.5)",
+                }}
+              // value={auth.login_api}
+              // onChange={(e) =>
+              //   handleInputChange(index, "login_api", e.target.value)
+              // }
+              >
+                <option value="">Select</option>
+                {loginApis.map((api) => (
+                  <option key={api.id} value={api.id}>
+                    {api.operation_id}
+                  </option>
+                ))}
+              </Form.Control>
+            </div>
+            {/* <div className="mx-3 mb-1" style={{ width: "50%" }}>
                   <Form.Label className="text-white mb-1">
                     Token Api:
                   </Form.Label>
@@ -199,89 +198,9 @@ function AuthSettings({ authData, onChange, apiData, onApiChange }) {
                     ))}
                   </Form.Control>
                 </div> */}
-              </>
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          {authData && authData.length > 0 ? (
-            authData.map((auth, index) => (
-              <div
-                key={index}
-                className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
-                <div
-                  style={{ width: "90%" }}
-                  className="d-flex align-items-center mb-1">
-                  <div className="mx-3 mb-1" style={{ width: "50%" }}>
-                    <Form.Label className="text-white mb-1">
-                      Login Api:
-                    </Form.Label>
-                    <Form.Control
-                      as="select"
-                      className="text-white"
-                      size="sm"
-                      style={{
-                        backgroundColor: "#212529",
-                        border: "1px solid rgba(128, 128, 128, 0.5)",
-                      }}
-                      value={auth.login_api}
-                      onChange={(e) =>
-                        handleInputChange(index, "login_api", e.target.value)
-                      }>
-                      <option value="">Select</option>
-                      {loginApis.map((api) => (
-                        <option key={api.id} value={api.id}>
-                          {api.operation_id}
-                        </option>
-                      ))}
-                    </Form.Control>
-                  </div>
-                  <div className="mx-3 mb-1" style={{ width: "50%" }}>
-                    <Form.Label className="text-white mb-1">
-                      Token Api:
-                    </Form.Label>
-                    <Form.Control
-                      as="select"
-                      className="text-white"
-                      size="sm"
-                      style={{
-                        backgroundColor: "#212529",
-                        border: "1px solid rgba(128, 128, 128, 0.5)",
-                      }}
-                      value={auth.token_api}
-                      onChange={(e) =>
-                        handleInputChange(index, "token_api", e.target.value)
-                      }>
-                      <option value="">Select</option>
-                      {tokenApis.map((api) => (
-                        <option key={api.id} value={api.id}>
-                          {api.operation_id}
-                        </option>
-                      ))}
-                    </Form.Control>
-                  </div>
-                </div>
-                <div className="d-flex align-items-center mb-1 mx-3">
-                  <img
-                    alt="delete"
-                    className="mt-4"
-                    height={25}
-                    width={25}
-                    src={Delete}
-                    onClick={() => handleDelete(index)}
-                    style={{ cursor: "pointer" }}
-                  />
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="d-flex justify-content-center">
-              <span className="text-white">-----No Auth Present-----</span>
-            </div>
-          )}
-        </>
-      )}
+          </>
+        )}
+      </div>
     </>
   );
 }

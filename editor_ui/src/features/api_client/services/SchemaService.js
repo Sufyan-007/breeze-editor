@@ -4,8 +4,8 @@ const BASE_URL =
     ? `http://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}`
     : `http://${process.env.REACT_APP_PROD_HOST}:${process.env.REACT_APP_PROD_PORT}`;
 
-export async function addSchema(projectName, SchemaDetails) {
-  const apiUrl = BASE_URL + "/api-client-generator/add-schema/" + projectName;
+export async function addSchema(projectName,SchemaDetails,moduleId) {
+  const apiUrl = BASE_URL + "/api-client-generator/add-schema/" + projectName + "/" + moduleId;
   const result = await callApiClientGenerator(
     apiUrl,
     "POST",
@@ -15,8 +15,8 @@ export async function addSchema(projectName, SchemaDetails) {
   );
   return result;
 }
-export async function deleteSchema(projectName, id) {
-  const apiUrl = BASE_URL + "/api-client-generator/delete-schema/" + projectName + "/" + id;
+export async function deleteSchema(projectName, id, moduleId) {
+  const apiUrl = BASE_URL + "/api-client-generator/delete-schema/" + projectName + "/" + id + "/" + moduleId;
   const result = await callApiClientGenerator(
     apiUrl,
     "DELETE",
@@ -26,13 +26,14 @@ export async function deleteSchema(projectName, id) {
   );
   return result;
 }
-export async function editSchema(projectName, SchemaDetails, schemaId) {
+export async function editSchema(projectName, SchemaDetails, schemaId, moduleId) {
   const apiUrl =
     BASE_URL +
     "/api-client-generator/edit-schema/" +
     projectName +
     "/" +
-    schemaId;
+    schemaId +
+    "/" + moduleId;
   const result = await callApiClientGenerator(
     apiUrl,
     "PUT",

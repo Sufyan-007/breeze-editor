@@ -1,19 +1,34 @@
 import React, { useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { transferToAuthApi } from "../../../services/AuthApiService";
+import { useParams } from "react-router";
 
-function GeneralSettingsCard({ settings, onChange, isAuthApi }) {
+function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInfo, onSuccessfulTransfer }) {
   const [showModal, setShowModal] = useState(false);
   const handleInputChange = (prop, value) => {
     onChange(prop, value);
   };
+  const {projectName}= useParams();
   console.log(settings, "settings");
   const convertToServiceApi = () => {
     // console.log("fsdfdf");
     setShowModal(!showModal);
   };
-  const convertToAuthApi = () => {
+  const convertToAuthApi = async() => {
     setShowModal(!showModal);
   };
+  const handleConversion = async () => {
+    const payload = {
+      "filename": selectedServiceInfo.filename,
+      "id": selectedServiceInfo.id,
+      "module_id":selectedServiceInfo.module_id
+    }
+    const result = await transferToAuthApi(payload, projectName);
+    if(result.message){
+      setShowModal(!showModal);
+      onSuccessfulTransfer();
+    }
+  }
   return (
     <>
       <Modal show={showModal}>
@@ -31,8 +46,7 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi }) {
           </Button>
           <Button
             variant="secondary"
-            onClick={() => setShowModal(!showModal)}
-          // onClick={()=> handleModelConversion()}
+            onClick={handleConversion}
           >
             Continue
           </Button>

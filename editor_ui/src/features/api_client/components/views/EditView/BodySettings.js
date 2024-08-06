@@ -16,7 +16,9 @@ function BodySettings({ bodyData, onChange }) {
         if (schemaName) {
           return result;
         } else {
-          setSchemaList(result);
+          // needs to be changed later 
+          const combinedSchemaList = result.flatMap(module => module.schemas);
+          setSchemaList(combinedSchemaList);
         }
         // console.log(result, "result");
       } catch (e) {
