@@ -22,6 +22,7 @@ import settings from "../assets/icons/settings.svg";
 import services from "../assets/icons/services.svg";
 import constants from "../assets/icons/constants.svg";
 import schema from "../assets/icons/schema.svg";
+import folder from "../assets/icons/folder.svg";
 import apps from "../assets/icons/apps.svg";
 import upload from "../assets/icons/upload.svg";
 import ProjectSidebar from "./ProjectSidebar";
@@ -62,6 +63,7 @@ export default function ProjectPage() {
     { id: 7, name: "Third-party App", icon: apps, path: "apps" },
     { id: 8, name: "Settings", icon: settings, path: "settings" },
     { id: 9, name: "Resources", icon: upload, path: "resources" },
+    { id: 10, name: "Folder Structure", icon: folder , path:"folderstructure"} 
     { id: 11, name: "Schema", icon: schema, path: "schema" },
   ];
 

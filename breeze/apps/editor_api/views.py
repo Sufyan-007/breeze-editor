@@ -1,6 +1,6 @@
 
 import subprocess
-from django.http import JsonResponse, Http404, HttpResponse
+from django.http import JsonResponse, Http404, FileResponse
 import json
 from .core.app_editor import AppEditor
 from .core.config_service import ConfigService
@@ -22,6 +22,8 @@ from .core.helpers.get_component_list import update_components
 from .core.files_upload_service import FileService
 from .core.resource_config_service import ResourceConfigGenerator
 from .core.helpers.function_ast_parser import FunctionParser
+from .core.app_generator import AppGenerator
+from .core.environment_settings_config_service import EnvironmentSettingsConfigService 
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -281,18 +283,34 @@ class ProjectConfig(APIView):
         return JsonResponse(projects, status=200)
 
     def post(self, request):
-        data = json.loads(request.body.decode("utf-8"))
+        data = request.POST.copy()
+        logo_file = request.FILES.get('logo')
+
         data['defaultComponent'] = "Main"
         data["projectName"] = data["name"]
+        # data["selectedTemplate"]= data["selectedTemplate"]
         data["name"] = data['name'].lower().replace(" ", "_")
+        path = data["projectPath"]
+        data["current_environment"] = ""
         generated_paths = os.path.join(
-            os.path.dirname(os.getcwd()), "generated_projects")
+            os.path.dirname(os.getcwd()), path)
+
         # os.makedirs(generated_paths,exist_ok=True)
-        data["path"] = os.path.join(generated_paths, data["name"])
+        data["path"] = os.path.join(generated_paths)
         if (data["name"] in GenerateProject.get_projects().keys()):
             return JsonResponse({"error": "Application name should be unique."}, status=400)
+       
+        if logo_file:
+            logo_file_id = FileService.upload_file(logo_file, data["name"])
+            data["logo"] = logo_file_id
+            data["logo_file_name"] = logo_file.name
+
         app_config_writer = AppConfigWriter()
         app_config_writer.create_or_update_app_config(data)
+        
+        if logo_file:
+            resource_config_generator = ResourceConfigGenerator(data["name"])
+            resource_config_generator.update_config(logo_file.name, '/src/assets', "", logo_file_id)
         response = {"name": data["name"]}
         return JsonResponse(response, status=200)
 
@@ -315,49 +333,46 @@ class ProjectConfig(APIView):
 class ProjectDetailsConfig(APIView):
     def put(self, request):
         try:
-            data = json.loads(request.body.decode("utf-8"))
+            data = request.POST.copy()
+            logo_file = request.FILES.get('logo')
+            old_config = json.loads(data.get('oldConfig'))
+            old_logo = old_config.get('logo')
+
+            # Flags to track changes
+            project_name_changed = False
+            logo_changed = False
+            
             # rename the project folder name, rename the name and the projectName field in
             #  app_basic_config file
-            file_name = f"{CONFIG_PATH}/{data['oldConfig']['name']}/app_basic_config.json"
+            file_name = f"{CONFIG_PATH}/{old_config['name']}/app_basic_config.json"
             with open(file_name, 'r') as file:
                 app_basic_config = json.load(file)
                 app_basic_config['name'] = data['newProjectName'].lower().replace(
                     " ", "_")
+
+                if app_basic_config['name'] != old_config['name']:
+                    project_name_changed = True
+
                 app_basic_config['author'] = data['newAuthor']
                 app_basic_config['description'] = data['newDescription']
                 app_basic_config['projectName'] = data['newProjectName']
 
-                # generation path for new app_basic_config
-                generated_paths = os.path.split(app_basic_config['path'])
-                app_basic_config['path'] = os.path.join(
-                    generated_paths[0], app_basic_config['name'])
+                if old_config.get('logo') and old_config['logo'] != "null":
+                    logo_changed = True
+                    app_basic_config['logo'] = ""
 
-                # remove all the extra project folders whose config files are not present
-                # in the configuration folder but are present in the generated_projects
-                # folder for eg. with a .cache folder in a previously named folder
-                try:
-                    project_names_in_config = os.listdir(CONFIG_PATH)
-                    project_names_in_generated_proj = os.listdir(
-                        generated_paths[0])
-                    for dir in project_names_in_generated_proj:
-                        if dir not in project_names_in_config:
-                            dir_to_remove = os.path.join(
-                                generated_paths[0], dir)
-                            if os.path.isdir(dir_to_remove):
-                                shutil.rmtree(dir_to_remove)
-                except Exception as e:
-                    return JsonResponse({e}, status=500)
+                if logo_file:
+                    logo_file_id = FileService.upload_file(logo_file, old_config["name"])
+                    app_basic_config["logo"] = logo_file_id
+                    logo_changed = True
+                else:
+                    app_basic_config["logo"] = ""
 
                 # renaming all the affected folders
                 try:
-                    os.rename(
-                        f"{data['oldConfig']['path']}/{data['oldConfig']['name']}",
-                        f"{data['oldConfig']['path']}/{app_basic_config['name']}"
-                    )
-                    os.rename(data['oldConfig']['path'],
-                              app_basic_config['path'])
-                    os.rename(
-                        f"{CONFIG_PATH}/{data['oldConfig']['name']}", f"{CONFIG_PATH}/{app_basic_config['name']}")
+                    os.rename(f"{old_config['path']}/{old_config['name']}",
+                      f"{old_config['path']}/{app_basic_config['name']}")
+                    os.rename(f"{CONFIG_PATH}/{old_config['name']}", f"{CONFIG_PATH}/{app_basic_config['name']}")
 
                     # renaming the project's name in its package.json & package-lock.json files
                     package_json_path = os.path.join(
@@ -392,6 +407,17 @@ class ProjectDetailsConfig(APIView):
             file_name = f"{CONFIG_PATH}/{app_basic_config['name']}/app_basic_config.json"
             with open(file_name, 'w') as file:
                 file.write(newData)
+
+            app_generator = AppGenerator(app_basic_config['name'])
+            if project_name_changed:
+                app_generator.modify_index_html_with_project_name()
+            if logo_changed:
+                app_generator.modify_index_html_with_logo()
+            
+            if logo_file:
+                resource_config_generator = ResourceConfigGenerator(app_basic_config["name"])
+                resource_config_generator.update_config(logo_file.name, '/src/assets', "", logo_file_id)
+
 
             print(
                 '--------------- ALL APPLICATION NAME CHANGES CONDUCTED SUCCESSFULLY -----------')
@@ -505,8 +531,8 @@ class StylesConfig(APIView):
             return JsonResponse({"error": str(e)}, status=500)
     
 @method_decorator(csrf_exempt, name='dispatch')
-class FileUpload(APIView):
-    def post(self, request, projectName= None):
+class FileHandle(APIView):
+    def post(self, request, projectName = None):
         try:
             file = request.FILES.get('file')
             fileName = request.POST.get('filename')
@@ -528,7 +554,7 @@ class FileUpload(APIView):
             return JsonResponse({'error': str(e)}, status=500)
 
         
-    def delete(self, request,projectName= None):
+    def delete(self, request, projectName = None):
         try:
             data = json.loads(request.body) 
             file_id = data.get('file_id')
@@ -547,6 +573,25 @@ class FileUpload(APIView):
             }, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+        
+    def get(self, request, projectName, fileId):
+        try:
+            if not projectName:
+                return JsonResponse({'error': 'Project ID is required.'}, status=400)
+
+            if not fileId:
+                return JsonResponse({'error': 'File ID is required.'}, status=400)
+
+            file_service = FileService()
+            file_path = file_service.download_file(fileId, projectName)
+
+            if file_path is None:
+                return JsonResponse({'error': 'File not found.'}, status=404)
+
+            response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+            return response
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ResourceConfig(APIView):
@@ -557,7 +602,7 @@ class ResourceConfig(APIView):
             file_path = data.get('filePath')
             description = data.get('description')
             fileId = data.get('fileId')
-
+            
             resource_config = ResourceConfigGenerator(projectName)
             config_data = resource_config.update_config(file_name, file_path, description, fileId)
 
@@ -713,3 +758,54 @@ class ASTParser(APIView):
             return JsonResponse({"function": formatted_function_code},status=200)
         except:
             return JsonResponse({}, status=500)
+        
+@method_decorator(csrf_exempt, name="dispatch")
+class EnvironementSettings(APIView):
+    def post(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            print(data)
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            config = environment_settings_service.generate_config_from_payload(data)
+            return JsonResponse({'status': 'success', 'config': config, 'message': 'Environment settings saved successfully'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def get(self, request, projectName):
+        try:
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            config = environment_settings_service.get_config()
+            return JsonResponse({'status': 'success', 'config': config}, status=200)
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            env_name = data.get('environmentName')
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            environment_settings_service.delete_config(env_name)
+            return JsonResponse({'status': 'success', 'message': 'Environment settings deleted successfully'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name="dispatch")
+class SetEnvironment(APIView):
+    def post(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            env_name = data.get('environmentName')
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            environment_settings_service.set_environment(env_name)
+            if env_name == "default (.env)":
+                return JsonResponse({'status': 'success', 'message': 'Environment default has been set as active'}, status=200)
+
+            return JsonResponse({'status': 'success', 'message': f'Environment {env_name} has been set as active'}, status=200)
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': 'Server error'}, status=500)

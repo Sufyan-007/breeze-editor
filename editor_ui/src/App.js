@@ -20,8 +20,10 @@ import ProjectComponents from "./components/ProjectComponents";
 import ProjectRouting from "./components/ProjectRouting";
 import Styles from "./components/StylesConfiguration/Styles";
 import Code from "./components/Code";
-import Settings from "./components/Settings";
+import Settings from "./components/Settings/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
+import FolderStructureConfig from "./components/FolderStructureSection/FolderStructureConfig";
+// import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
 import Resources from "./components/ResourcesConfiguration/Resources";
 import SchemaSettings from "./features/api_client/components/views/EditView/SchemaSettings";
 
@@ -36,6 +38,8 @@ export const router = createBrowserRouter([
       { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
+      { path: "folderstructure", element: <FolderStructureConfig /> },
+      // { path: "foldertemplate", element: <FolderTemplate /> },
       {
         path: "styles",
         element: <Outlet />,
@@ -56,7 +60,13 @@ export const router = createBrowserRouter([
   {
     path: "/project/:projectName/component/:componentName",
     element: <ComponentConfigPage />,
-    loader: configLoader
+    loader: configLoader,
+    children: [
+      { index: true, element: <ProjectHome /> },
+      { path: "pages", element: <ProjectComponents /> },
+      { path: "routing", element: <ProjectRouting /> },
+      { path: "services", element: <ApiClientRoot /> },
+    ],
   },
   {
     path: "/editor/:projectName",

@@ -1,14 +1,6 @@
 import React from "react";
 import { Form, Row, Col } from "react-bootstrap";
-
-const dataTypes = [
-  "ANY",
-  "STRING",
-  "NUMERIC",
-  "OBJECT",
-  "ARRAY",
-  "CALLBACK",
-];
+import dataTypes from "../../../../../constants/datatype";
 
 export default function FunctionParams({ param, setParam }) {
   const updateParam = (key, value) => {

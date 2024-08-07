@@ -133,6 +133,5 @@ class AppConfigWriter:
 
         self.write_basic_config_files(app_current_config)
 
-        GenerateProject.generate_project(app_current_config)
-        start_app(app_current_config)
+        GenerateProject.generate_project(app_current_config, app_current_config.get("logo"))
     

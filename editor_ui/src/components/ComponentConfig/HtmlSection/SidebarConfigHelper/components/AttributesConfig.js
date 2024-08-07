@@ -7,7 +7,6 @@ import CreatableSelect from "react-select/creatable";
 
 const AttributesConfig = ({
   index,
-  key,
   inputField,
   selectedAttributes,
   handleAttributeChange,
@@ -19,7 +18,6 @@ const AttributesConfig = ({
   customStyles,
 }) => {
   const [checkbox, setCheckbox] = useState(false);
-  console.log("inputField", inputField);
   useEffect(() => {
     if (
       inputField.type === "FUNCTION" &&
@@ -39,12 +37,14 @@ const AttributesConfig = ({
     <>
       {" "}
       <div className="d-flex justify-content-between  mb-1">
-        <div style={{ width: "23%", fontSize: ".9rem" }}>
+        <div style={{ width: "21%", fontSize: "1rem" }}>
           {inputField.key === "" ? (
             <Creatable
               options={attributeOptions}
+              form="_none"
+
               onChange={handleSelectAttributeChange}
-              placeholder="Select Attribute"
+              placeholder="Set Attribute"
               styles={{
                 ...customStyles,
                 valueContainer: (deafult) => {
@@ -76,7 +76,7 @@ const AttributesConfig = ({
         <Form.Group
           className=""
           controlId="exampleForm.ControlInput1"
-          style={{ width: "66%", marginRight: "10px" }}
+          style={{ width: "68%", marginRight: "10px" }}
         >
           {inputField.type === "VARIABLE" && (
             <Form.Select
@@ -180,6 +180,7 @@ const AttributesConfig = ({
                 size="sm"
                 style={{ borderColor: "rgb(73, 80, 87)" }}
                 placeholder="value"
+                value={inputField?.value}
                 className="bg-dark text-light "
                 onChange={(e) => {
                   e.preventDefault();
@@ -239,7 +240,6 @@ const AttributesConfig = ({
               defaultValue={inputField?.value?.functionBody || ""}
               height="150px"
               onChange={(body) => {
-                console.log("monaco", body);
                 addRefToAttribute("functionValue", body, inputField.key);
               }}
               id={`functionEditor-${inputField.key}`}
@@ -256,7 +256,7 @@ const AttributesConfig = ({
               onChange={(event) => {
                 addRefToAttribute("predefined", event, inputField.key);
               }}
-              value={inputField.value}
+              value={inputField?.$ref || ''}
             >
               <option value="" disabled hidden>
                 Select a function
