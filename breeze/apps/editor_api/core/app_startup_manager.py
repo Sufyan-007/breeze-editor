@@ -1,4 +1,6 @@
 import os,subprocess 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 RUNNING_APPS = {}
 
@@ -40,18 +42,38 @@ def run_project_threaded(project_id,port,project_path, env_name):
     env = os.environ.copy()
     env['PORT'] = str(port)
     env['BROWSER'] =  "NONE"
+    channel_layer = get_channel_layer()
+    
     if env_name == '' or env_name == 'default (.env)':
         process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
     else:
         process = subprocess.Popen(" ".join(['npm', f'run start:{env_name}','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
     
+    status_mapping = {
+    b'webpack compiled successfully': "RUNNING",
+    b'Compiled with warnings': "WARNING",
+    b'Failed to compile': "ERROR",
+    b'The build failed' : "CRASHED"
+}
+
     while True:
         output = process.stdout.readline()
         if output:
-            if output.startswith(b'webpack compiled'):
-                RUNNING_APPS[project_id]['status'] = "RUNNING"
-                print("Running :",project_id)
-            pass
+            # print(project_id)
+            # print("====================", output, "===================")
+            
+            for key, status in status_mapping.items():
+                if output.startswith(key):
+                    RUNNING_APPS[project_id]['status'] = status
+                    async_to_sync(channel_layer.group_send)(
+                        project_id,
+                        {
+                            "type": "app_status",
+                            "message": {"project_id": project_id, "status": status},
+                        }
+                    )
+                pass
+
 
 def start_app(app_config, forceRestart=False):
     project_id = app_config["name"]
