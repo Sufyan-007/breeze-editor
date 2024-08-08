@@ -1,67 +1,95 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 import { ComponentContext } from "../../../ComponentConfigPage";
 import MonacoEditor from "../../../../common/MonacoEditor";
 
+
+const TEMPLATE = {
+  "STRING": {
+    type: "STRING",
+    value: ""
+  },
+  "NUMERIC": {
+    type: "NUMERIC",
+    value: 0
+  },
+  "OBJECT": {
+    type: "OBJECT",
+    properties: {
+      name:{
+        type:"STRING",
+        value:""
+      },
+      abc:{
+        type:"STRING",
+        value:"abc"
+      }
+    }
+  },
+  "BOOLEAN": {
+    type: "BOOLEAN",
+    value: false
+  },
+  "UNDEFINED": {
+    type: "UNDEFINED"
+  },
+  "NULL": {
+    type: "NULL"
+  }
+}
+
+
 const ParamInput = ({ param, name, schema, onChange }) => {
-  const [selection, setSelection] = useState();
-  const [customValue, setCustomValue] = useState("");
+
+
+  const [config, setConfig] = useState(param)
   const { componentConfig } = useContext(ComponentContext);
   const { propsVars, resources } = componentConfig;
 
+
+
+  useEffect(() => {
+    setConfig(param)
+  }, [param])
+
   const handleDropdownChange = (event) => {
-    setSelection(event.target.value);
-    if (
-      event.target.value !== "STRING" &&
-      event.target.value !== "NUMERIC" &&
-      event.target.value !== "BOOLEAN" &&
-      event.target.value !== "OBJECT" &&
-      event.target.value !== "ARRAY" &&
-      event.target.value !== "FUNCTION"
-    ) {
-      handleParamChange(event.target.value);
+    const type = event.target.value
+    if (TEMPLATE[type]) {
+      setConfig(() => {
+        const conf = JSON.parse(JSON.stringify(TEMPLATE[type]))
+        onChange(conf)
+        return conf
+      })
+    }
+    else {
+      setConfig((state) => {
+        state = { $ref: type }
+        onChange(state)
+        return state
+      })
     }
   };
 
-  const handleCustomInputChange = (event) => {
-    setCustomValue(event.target.value);
-    if (param.type === "STRING") {
-      handleParamChange({ type: "STRING", value: event.target.value });
-    } else if (param.type === "NUMERIC") {
-      handleParamChange({
-        type: "NUMERIC",
-        value: parseFloat(event.target.value),
-      });
-    } else if (param.type === "BOOLEAN") {
-      handleParamChange({
-        type: "BOOLEAN",
-        value: event.target.value === "true",
-      });
-    }
-  };
-
-  const handleParamChange = (newValue) => {
-    console.log("newValue::>>", newValue);
-    if (newValue === "NULL") {
-      onChange({ type: "NULL" });
-    } else if (newValue === "UNDEFINED") {
-      onChange({ type: "UNDEFINED" });
-    } else if (typeof newValue === "object") {
-      onChange(newValue);
-    } else {
-      onChange({ $ref: newValue });
-    }
-  };
 
   const handlePropertyUpdate = (key, val) => {
-    onChange({ ...param, properties: { ...param.properties, [key]: val } });
+    setConfig(state => {
+      state.properties = { ...state.properties, [key]: val }
+
+      //test without this later
+      state = { ...state }
+
+      onChange(state)
+      return state
+    })
   };
 
-  const handleValue = (val) => {
-    handleParamChange({ type: "CUSTOM", value: val });
+  const handleValueChange = (val) => {
+    setConfig(state => {
+      state = { ...state, value: val };
+      onChange(state);
+      return state
+    })
   };
-
-  console.log("param,schema::>>", param, schema);
 
   return (
     <Form.Group>
@@ -77,7 +105,7 @@ const ParamInput = ({ param, name, schema, onChange }) => {
         </div>
         <div className="col-8 px-0 d-flex align-items-center">
           <Form.Select
-            value={selection}
+            value={config.type || config.$ref}
             onChange={handleDropdownChange}
             className="form-select-sm me-2"
           >
@@ -101,13 +129,13 @@ const ParamInput = ({ param, name, schema, onChange }) => {
             {(!schema ||
               schema.type === "ANY" ||
               schema.type === "NUMERIC") && (
-              <option value="NUMERIC">Numeric (Custom)</option>
-            )}
+                <option value="NUMERIC">Numeric (Custom)</option>
+              )}
             {(!schema ||
               schema.type === "ANY" ||
               schema.type === "BOOLEAN") && (
-              <option value="BOOLEAN">Boolean (Custom)</option>
-            )}
+                <option value="BOOLEAN">Boolean (Custom)</option>
+              )}
             {(!schema || schema.type === "ANY" || schema.type === "OBJECT") && (
               <option value="OBJECT">Object (Custom)</option>
             )}
@@ -117,39 +145,39 @@ const ParamInput = ({ param, name, schema, onChange }) => {
             {(!schema ||
               schema.type === "ANY" ||
               schema.type === "FUNCTION") && (
-              <option value="FUNCTION">Function (Custom)</option>
-            )}
+                <option value="FUNCTION">Function (Custom)</option>
+              )}
 
             <option value="NULL">Null</option>
             <option value="UNDEFINED">Undefined</option>
           </Form.Select>
-          {selection === "STRING" && (
+          {config.type === "STRING" && (
             <Form.Control
               className="form-control-sm"
               type="text"
-              value={customValue}
-              onChange={handleCustomInputChange}
+              value={config.value}
+              onChange={(event) => handleValueChange(event.target.value)}
               placeholder="Custom Input"
             />
           )}
-          {selection === "NUMERIC" && (
+          {config.type === "NUMERIC" && (
             <Form.Control
               className="form-control-sm"
               type="number"
-              value={customValue}
-              onChange={handleCustomInputChange}
+              value={config.value}
+              onChange={(event) => handleValueChange(event.target.value)}
               placeholder="Custom Input"
             />
           )}
-          {selection === "BOOLEAN" && (
+          {config.type === "BOOLEAN" && (
             <div className="d-flex align-items-center mt-1">
               <Form.Check
                 type="radio"
                 label="True"
                 name="booleanOption"
                 value="true"
-                checked={customValue === "true"}
-                onChange={handleCustomInputChange}
+                checked={config.value === true}
+                onChange={() => handleValueChange(true)}
                 className="me-2"
               />
               <Form.Check
@@ -157,19 +185,19 @@ const ParamInput = ({ param, name, schema, onChange }) => {
                 label="False"
                 name="booleanOption"
                 value="false"
-                checked={customValue === "false"}
-                onChange={handleCustomInputChange}
+                checked={config.value === false}
+                onChange={() => handleValueChange(false)}
               />
             </div>
           )}
         </div>
       </div>{" "}
       <div className="ps-3 pe-2">
-        {selection === "OBJECT" &&
-          param.type === "OBJECT" &&
-          param.properties && (
+        {config.type === "OBJECT" &&
+          config.type === "OBJECT" &&
+          config.properties && (
             <div className="mt-2">
-              {Object.entries(param.properties).map(([key, value]) => (
+              {Object.entries(config.properties).map(([key, value]) => (
                 <ParamInput
                   key={key}
                   name={key}
@@ -181,17 +209,13 @@ const ParamInput = ({ param, name, schema, onChange }) => {
           )}
       </div>
       <div className="px-2 mt-2">
-        {((selection === "OBJECT" &&
-          param.type === "OBJECT" &&
-          !param.properties) ||
-          (selection === "ARRAY" && param.type === "ARRAY") ||
-          (selection === "FUNCTION" && param.type === "FUNCTION")) && (
+        {(config.type === "CUSTOM") && (
           <MonacoEditor
-            value={customValue}
-            onChange={(val) => handleValue(val)}
+            value={config.value}
+            onChange={handleValueChange}
             height="100px"
             width="100%"
-            language={selection === "FUNCTION" ? "javascript" : "json"}
+            language={schema?.type === "FUNCTION" || "CALLBACK" ? "javascript" : "json"}
             id={name + "-monaco-editor"}
           />
         )}
