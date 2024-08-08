@@ -40,6 +40,7 @@ class GenerateProject:
         print(generated_project_path)
         shutil.rmtree(app_config_dir)
         try:
-            shutil.rmtree(generated_project_path)
+            # shutil.rmtree(generated_project_path)
+            pass
         except:
             pass
