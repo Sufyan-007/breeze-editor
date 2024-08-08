@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
+import {v4 as uuidv4} from 'uuid';
 
 
 // Utility function to get all TypeScript declaration files
@@ -87,44 +88,93 @@ export function extractPossibleChildren(allComponentNames: string[], parentCompo
     return children;
 }
 
+const isReactFunctionComponent = (node: ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction, checker: ts.TypeChecker): boolean => {
+    // Get the signature of the function
+    // Get the return type of the function
+    const signature = checker.getSignatureFromDeclaration(node);
+    if (!signature) {
+        return false;
+    }
+
+    const returnType = checker.getReturnTypeOfSignature(signature);
+
+    if (returnType) {
+        // Check if the return type is a React element
+        const typeName = checker.typeToString(returnType);
+        // Common type names for React components
+        if (typeName === 'ReactElement' || typeName === 'JSX.Element' || typeName === 'Element' || typeName === 'Element[]') {
+            return true;
+        }
+        // Optionally, check if the return type includes JSX
+        return typeName.includes('ReactElement') || typeName.includes('JSX.Element');
+    }
+    return false;
+};
+
+
 // Function to extract component details
-export function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[], library: string, directoryPath:string): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
+function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[],library:string,directoryPath:string): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
     const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
+    const functionDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
+    const classDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
 
     function visit(node: ts.Node) {
         let componentName: string | undefined;
         let type: ts.Type | undefined;
 
-        if (ts.isInterfaceDeclaration(node) && node.name.text.endsWith('Props')) {
+
+        if (ts.isTypeAliasDeclaration(node)) {
             componentName = node.name.text.replace('Props', '');
             type = typeChecker.getTypeAtLocation(node);
-        } else if (ts.isTypeAliasDeclaration(node) && node.name.text.endsWith('Props')) {
-            componentName = node.name.text.replace('Props', '');
-            type = typeChecker.getTypeAtLocation(node);
-        } else if (ts.isClassDeclaration(node) && node.name) {
+        } else if ((ts.isInterfaceDeclaration(node) || ts.isClassDeclaration(node)) && node.name) {
             componentName = node.name.text;
             type = typeChecker.getTypeAtLocation(node);
-        }
-
-        if (componentName && type) {
             const isJsx = isReactElement(type, typeChecker);
-            const props = extractProps(type, typeChecker);
+            if (isJsx) {
+                const props = extractProps(type, typeChecker);
 
-            const importPath = path.relative(directoryPath, sourceFile.fileName)
-            .replace(/\\/g, '/')
-            .replace(/\.d\.ts$/, '');;
+                const importPath = path.relative(directoryPath, sourceFile.fileName)
+                    .replace(/\\/g, '/')
+                    .replace(/\.d\.ts$/, '');
 
-            // Adjust import path to match 'craft.js' structure
-            // const importPathFormatted = importPath.startsWith('esm')
-            //     ? `@craftjs/core/${importPath.replace('esm/', '')}`
-            //     : `@craftjs/core/${importPath}`;
+                // Adjust import path to match 'craft.js' structure
+                const importPathFormatted = importPath.startsWith('esm')
+                    ? `@craftjs/core/${importPath.replace('esm/', '')}`
+                    : `@craftjs/core/${importPath}`;
 
-            const importPathFormatted=`${library}/${importPath}`
-            // Collect children components based on naming convention
-            const children = extractPossibleChildren(allComponentNames, componentName);
+                // Collect children components based on naming convention
+                const children = extractPossibleChildren(allComponentNames, componentName);
 
-            componentDetails[componentName] = { props, importPath: importPathFormatted, children };
+                componentDetails[componentName] = { props, importPath: importPathFormatted, children };
+            }
         }
+        else if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
+
+
+            let isFunctionalComponent = isReactFunctionComponent(node, typeChecker)
+            if (isFunctionalComponent) {
+                const parameters = node.parameters;
+                let functionName = node.name ? node.name.getText() : 'default';
+                let myuuid = uuidv4();
+                myuuid = myuuid.replace("-","_");
+                functionName = myuuid;
+                let parentNode = node.parent as ts.Node
+                if(node.parent){
+                    // remaining part 
+                    // extract name of the function
+                }
+                let formattedParams: Record<string, string> = {};
+
+                parameters.map(param => {
+                    const name = param.name.getText();
+                    const type = param.type ? param.type.getText() : 'any';
+                    formattedParams[name] = type;
+                });
+                componentDetails[functionName] = { props: formattedParams, importPath: "importPathFormatted", children: [""] };
+
+            }
+        }
+
 
         ts.forEachChild(node, visit);
     }
@@ -132,6 +182,7 @@ export function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: 
     visit(sourceFile);
     return componentDetails;
 }
+
 
 // Function to get all component names
 export function getAllComponentNames(sourceFiles: ts.SourceFile[]): string[] {
@@ -241,18 +292,5 @@ export function extractAllComponentDetails(directoryPath: string, library: strin
 
 
 
-    // Output the details of each component
-    // Object.entries(componentDetails).forEach(([componentName, { props, importPath, children }]) => {
-    //     console.log(`Component ${componentName}:`);
-    //     console.log(`import ${componentName} from '${importPath}';`);
-    //     if (Object.keys(props).length > 0) {
-    //         Object.entries(props).forEach(([propName, propType]) => console.log(`- ${propName}: ${propType}`));
-    //     } else {
-    //         console.log('No props found.');
-    //     }
-    //     if (children.length > 0) {
-    //         console.log(`Possible children components: ${children.join(', ')}`);
-    //     }
-    // });
 }
 
