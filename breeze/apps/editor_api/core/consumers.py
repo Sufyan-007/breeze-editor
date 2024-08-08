@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
+from .app_startup_manager import RUNNING_APPS
 
 
 class EchoConsumer(WebsocketConsumer):
@@ -26,6 +27,22 @@ class EchoConsumer(WebsocketConsumer):
                     "message": 5,
                 },
             )
-            
+        elif message_type == "status":
+            async_to_sync(self.channel_layer.group_send)(
+                self.group_name,
+                {
+                    "type": "app_status",
+                    "message": {
+                        "project_id": self.group_name,
+                        "status": RUNNING_APPS.get(self.group_name, {}).get(
+                            "status", "Fetching Status"
+                        ),
+                    },
+                },
+            )
+
     def project_progress(self, event):
         self.send(text_data=json.dumps({"progress": event["message"]}))
+
+    def app_status(self, event):
+        self.send(text_data=json.dumps({"status": event["message"]}))
