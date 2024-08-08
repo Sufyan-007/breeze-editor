@@ -9,9 +9,10 @@ const port = 3000;
 app.get('/', (req, res) => {
     // Directory containing TypeScript declaration files for craft.js
     // const directoryPath = path.join(__dirname, 'node_modules', '@craftjs', 'core');
-    const directoryPath = path.join('/home/yash/Documents/Projects/my-app', 'node_modules', '@craftjs', 'core');
+    const libraryName="react-bootstrap";
+    const directoryPath = path.join('/home/smit/breezeui/third_party_package_parser', 'node_modules', libraryName);
     if (fs.existsSync(directoryPath)) {
-        extractAllComponentDetails(directoryPath);
+        extractAllComponentDetails(directoryPath,libraryName);
         res.send('Hello, TypeScript with Express!');
     } else {
         console.log(`Directory not found: ${directoryPath}`);

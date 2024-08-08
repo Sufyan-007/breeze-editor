@@ -88,7 +88,7 @@ export function extractPossibleChildren(allComponentNames: string[], parentCompo
 }
 
 // Function to extract component details
-export function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[]): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
+export function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[], library: string, directoryPath:string): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
     const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
 
     function visit(node: ts.Node) {
@@ -110,13 +110,16 @@ export function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: 
             const isJsx = isReactElement(type, typeChecker);
             const props = extractProps(type, typeChecker);
 
-            const importPath = "";
+            const importPath = path.relative(directoryPath, sourceFile.fileName)
+            .replace(/\\/g, '/')
+            .replace(/\.d\.ts$/, '');;
 
             // Adjust import path to match 'craft.js' structure
-            const importPathFormatted = importPath.startsWith('esm')
-                ? `@craftjs/core/${importPath.replace('esm/', '')}`
-                : `@craftjs/core/${importPath}`;
+            // const importPathFormatted = importPath.startsWith('esm')
+            //     ? `@craftjs/core/${importPath.replace('esm/', '')}`
+            //     : `@craftjs/core/${importPath}`;
 
+            const importPathFormatted=`${library}/${importPath}`
             // Collect children components based on naming convention
             const children = extractPossibleChildren(allComponentNames, componentName);
 
@@ -151,8 +154,37 @@ export function getAllComponentNames(sourceFiles: ts.SourceFile[]): string[] {
     return componentNames;
 }
 
+//function for finding storepath for storing component details
+function getStoreDir(): string | null {
+    let currentDir = __dirname
+
+        while (!fs.existsSync(path.join(currentDir, 'third_party_configs'))) {
+            const parentDir = path.join(currentDir, '..');
+            if (currentDir === parentDir) {
+                // Reached the root of the filesystem
+                return null;
+            }
+            currentDir = parentDir;
+        }
+        
+        return path.join(currentDir, 'third_party_configs');
+    
+}
+
+function createComponentDir(baseDir: string): string{
+    const componentDir = path.join(baseDir, 'libs');
+    if (!fs.existsSync(componentDir)) {
+      fs.mkdirSync(componentDir);
+    //   console.log(`Component directory created at: ${componentDir}`);
+    } else {
+      console.log(`Component directory already exists at: ${componentDir}`);
+    }
+    return componentDir;
+  }
+
+
 // Main function to extract all component details from TypeScript declaration files
-export function extractAllComponentDetails(directoryPath: string) {
+export function extractAllComponentDetails(directoryPath: string, library: string) {
     const files = getDeclarationFiles(directoryPath);
 
     const program = ts.createProgram(files, {});
@@ -164,27 +196,63 @@ export function extractAllComponentDetails(directoryPath: string) {
     const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
 
     sourceFiles.forEach(sourceFile => {
-        if (sourceFile.fileName == '/home/yash/Documents/Projects/my-app/node_modules/@craftjs/core/lib/editor/myjs.d.ts' || 
-            sourceFile.fileName == '/home/yash/Documents/Projects/my-app/node_modules/@craftjs/core/lib/editor/myD..d.ts') {
 
-            const detailsInFile = extractComponentDetails(sourceFile, typeChecker, allComponentNames);
+            const detailsInFile = extractComponentDetails(sourceFile, typeChecker, allComponentNames, library, directoryPath);
             Object.assign(componentDetails, detailsInFile);
-        }
-
+        
     });
+    
+    // Create JSON file for the component of perticular library
+    const libraryName = library; 
+    const getStorePath = getStoreDir();
+    if(getStorePath){
+        const componentStorePath=createComponentDir(getStorePath)
+        const libraryStorePath = path.join(componentStorePath,libraryName,"component");
+        
+        // const componentNames: string[] = [];
+        const componentNames: Map<string, string> = new Map();
+
+        console.log(libraryStorePath)
+        if (!fs.existsSync(libraryStorePath)) {
+            // console.log("no file are there");
+            fs.mkdirSync(libraryStorePath, { recursive: true });
+        } 
+        else{
+            fs.rmSync(libraryStorePath,{ recursive: true, force: true });
+            fs.mkdirSync(libraryStorePath);
+        }
+        
+        for (const [componentName, { props, importPath, children }] of Object.entries(componentDetails)) {
+            const componentData = {
+                importPath,
+                props,
+                children
+            };
+            
+            const componentFilePath = path.join(libraryStorePath, `${componentName}.json`);
+            fs.writeFileSync(componentFilePath, JSON.stringify(componentData, null, 2), 'utf-8');
+            // componentNames.push(componentName);
+            componentNames.set(componentName, `${libraryStorePath}/${componentName}.json`);
+        }
+        
+        const finalComponentFilePath = path.join(libraryStorePath, '__component.json');
+        fs.writeFileSync(finalComponentFilePath, JSON.stringify(Object.fromEntries(componentNames), null, 2), 'utf-8');
+    }
+
+
 
     // Output the details of each component
-    Object.entries(componentDetails).forEach(([componentName, { props, importPath, children }]) => {
-        console.log(`Component ${componentName}:`);
-        console.log(`import ${componentName} from '${importPath}';`);
-        if (Object.keys(props).length > 0) {
-            Object.entries(props).forEach(([propName, propType]) => console.log(`- ${propName}: ${propType}`));
-        } else {
-            console.log('No props found.');
-        }
-        if (children.length > 0) {
-            console.log(`Possible children components: ${children.join(', ')}`);
-        }
-    });
+    // Object.entries(componentDetails).forEach(([componentName, { props, importPath, children }]) => {
+    //     console.log(`Component ${componentName}:`);
+    //     console.log(`import ${componentName} from '${importPath}';`);
+    //     if (Object.keys(props).length > 0) {
+    //         Object.entries(props).forEach(([propName, propType]) => console.log(`- ${propName}: ${propType}`));
+    //     } else {
+    //         console.log('No props found.');
+    //     }
+    //     if (children.length > 0) {
+    //         console.log(`Possible children components: ${children.join(', ')}`);
+    //     }
+    // });
 }
 
