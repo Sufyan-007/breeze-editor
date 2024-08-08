@@ -1,22 +1,80 @@
 import { router } from "../App";
-import { Fragment, useEffect, useState } from "react";
+import {
+  React,
+  Fragment,
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+} from "react";
 import ProjectCards from "./ProjectCards";
 import Navbar from "./Navbar";
 
 export default function Main() {
-  const [projects, setProjects] = useState();
+  const [projects, setProjects] = useState({});
+  const ws = useRef(null);
+
+  const fetchProjectStatus = useCallback((projectsList) => {
+    ws.current = new WebSocket(
+      `${process.env.REACT_APP_SOCKET_URL}/ws/app-status/`
+    );
+
+    ws.current.onopen = () => {
+      console.log("Connected to the WebSocket");
+
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        Object.values(projectsList).forEach((project) => {
+          ws.current.send(
+            JSON.stringify({
+              command: "status",
+              project_id: project.name,
+            })
+          );
+        });
+      }
+    };
+
+    ws.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      const { project_id, status } = message?.status || {};
+      if (project_id && status) {
+        setProjects((prevProjects) => ({
+          ...prevProjects,
+          [project_id]: {
+            ...prevProjects[project_id],
+            status,
+          },
+        }));
+      }
+    };
+
+    ws.current.onclose = () => {
+      console.log("Disconnected from the WebSocket");
+    };
+
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+        console.log("WebSocket connection closed");
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const loadProjects = async () => {
-      const projects = await (
+      const allProjects = await (
         await fetch(
           `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/all-projects/`
         )
       ).json();
-      setProjects(projects);
+      setProjects(allProjects);
+      return allProjects;
     };
-    loadProjects();
-  }, []);
+    loadProjects().then((res) => {
+      fetchProjectStatus(res);
+    });
+  }, [fetchProjectStatus]);
 
   const removeProject = (projectName) => {
     setProjects((prevProjects) => {
