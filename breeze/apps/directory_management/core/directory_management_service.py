@@ -251,7 +251,7 @@ class DirectoryManagementGenerator:
     
     #get path from file_id
     def get_path_from_file_id(self,file_id):
-          
+        print("1111111")
         if file_id not in self.directory_management_config:
             raise Exception(f"File ID {file_id} not found in directory_management.json")
        
@@ -280,6 +280,7 @@ class DirectoryManagementGenerator:
         if not path_elements[-1].endswith('.js'):
             path_elements[-1] += '.js'
 
+        
         constructed_path = os.path.join(self.app_config['APP_SOURCE_DIR'], *path_elements)
         
         print(f"Constructed path: {constructed_path}")

@@ -5,6 +5,7 @@ from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import write_file
 import json
 import re
+from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
 class RouteHandler:
     app_config = None
     route_config = None
@@ -153,11 +154,24 @@ class RouteHandler:
                 imported_components.append(rt['hydrateFallbackElement'])
 
         import_statements = []
-
+        
+        
         # Handle import for components
         for ic in imported_components:
             related_comp = self.comp_config[ic]
-            comp_path = get_path_without_ext(related_comp['containingFile'])
+            directory_manager= DirectoryManagementGenerator(self.app_config["name"])
+            full_file_path = directory_manager.get_path_from_file_id(related_comp["file_id"])
+            print(full_file_path,"qqqqqqqqq")
+             # Extract the relative path starting from 'src'
+            src_index = full_file_path.find('src')
+            if src_index != -1:
+                relative_path = full_file_path[src_index:]
+            else:
+                raise Exception("Constructed path does not contain 'src'")
+            
+            
+            print(relative_path,"1111111")
+            comp_path = get_path_without_ext(relative_path)
 
             import_statement = f'import {related_comp["name"]} from \'{comp_path}\';'
             import_statements.append(import_statement)

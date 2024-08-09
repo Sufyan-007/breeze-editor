@@ -18,6 +18,8 @@ import copy
 import subprocess
 from .project_generation_progress import ProjectGenerationProgress
 from .helpers.dependencies_manager import DependencyManager
+from apps.api_client_generator.utils.uuid_as_key import generate_uuid_as_key
+from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
@@ -205,7 +207,22 @@ class AppEditor:
         self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
 
     def modify_main_component(self):
+        project_name = self.app_config['name']
         default_comp_config = self.comp_config[self.app_config['defaultComponent']]
+        
+        directory_manager = DirectoryManagementGenerator(project_name)
+        full_file_path = directory_manager.get_path_from_file_id(default_comp_config["file_id"])
+        
+        # Extract the relative path starting from 'src'
+        src_index = full_file_path.find('src')
+        if src_index != -1:
+            relative_path = full_file_path[src_index:]
+        else:
+            raise Exception("Constructed path does not contain 'src'")
+        
+        # Update the containingFile with the relative path
+        default_comp_config['containingFile'] = relative_path
+        
         with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
             component_code = f"""
                 import React from 'react';
@@ -258,7 +275,7 @@ class AppEditor:
     def write_component(self,comp):
        
         # Updating component_config.json
-        print(comp['name'],"comp name")
+        print(comp['name'])
         
         self.comp_config[comp['name']] = comp
         comp_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
@@ -290,7 +307,7 @@ class AppEditor:
         comp=copy.deepcopy(NEW_COMP_FORMAT)
         
         #generate a unique file_id
-        file_id = str(uuid.uuid4())
+        file_id = generate_uuid_as_key()
         replace_variable(comp,"$NAME",name)
         replace_variable(comp, "$FILE_ID", file_id)
         
@@ -304,7 +321,7 @@ class AppEditor:
             
     def add_component_directory_management(self, name, file_id):
         directory_management_path= os.path.join(self.app_config_dir,"directory_management.json")
-      
+        print(directory_management_path,"pathhhhhhh")
     
         # Find the components directory entry
         components_entry = None
@@ -327,7 +344,7 @@ class AppEditor:
             "tag":"COMPONENTS",
             "type":"FILE",
         }
-    
+        print(self.directory_management_config,"directory management config ")
            # Write back to the directory_management.json file
         write_file(directory_management_path, json.dumps(self.directory_management_config, indent=2))
         

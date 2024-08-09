@@ -175,6 +175,28 @@ class ComponentConfigService:
 
         return config
     
+    # def edit_component_name(self, component_id, new_name):
+    #     component = next((comp for comp in self.comp_config.values() if comp.get('file_id') == component_id), None)
+    #     print(component,"component")
+        
+    #     if not component:
+    #         raise ValueError("Component not found.")
+        
+    #     old_name = component.get('name')
+    #     print(old_name,"old name")
+    #     if old_name:
+    #         component['name'] = new_name
+    #         print(component['name'],"changed name")
+    #     else:
+    #         raise ValueError("Component name not found.")
+        
+    #     print(self.comp_config,"see the name")
+    #     appEditor = AppEditor(self.projectId)
+    #     appEditor.write_component(self.comp_config)
+        
+    #     write_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'], self.comp_config)
+    #     return self.comp_config
+        
     def reorder_component_actions(self, comp_name, config_data):
         if "type" not in config_data or "data" not in config_data:
             raise ValueError("Invalid config_data: 'type' and 'data' keys are required.")

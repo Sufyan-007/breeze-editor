@@ -1,9 +1,10 @@
 export async function addComponent(name, type, route,projectName) {
+  console.log(route , "route of the component ");
 
     const response = await (await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/add-component/` + projectName + "/",
         { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name , type }) }
     )).json()
-    console.log(response,"see the name of the comp");
+
     // this.dispatch(setConfig(response.config)) : need to handle this in the component itself now
     if (route) {
         console.log("Hello there!")

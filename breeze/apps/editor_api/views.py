@@ -441,6 +441,15 @@ class ComponentReader(APIView):
         except:
             return JsonResponse({}, status=404)
 
+class ComponentPath(APIView):
+    def get(self,request, param):
+        try:
+            config_reader = ConfigService(param)
+            file_path_info = config_reader.get_file_path()
+            return JsonResponse(file_path_info,status=200)
+        except:
+            return JsonResponse({}, status=404)
+        
 @method_decorator(csrf_exempt, name='dispatch')
 class StylesConfig(APIView):
     def post(self, request):
@@ -829,10 +838,12 @@ class ComponentConfigWriter(APIView):
             data = json.loads(request.body.decode("utf-8"))
             project_id = data["projectId"]
             component_id = data["componentId"]
+            
             if not project_id or not component_id:
                 return JsonResponse({"error": "project_id and component_id are required"}, status=400)
             
             componentConfigService = ComponentConfigService(project_id)
+            
             config = componentConfigService.update_component(component_id, data["body"])
             return JsonResponse(config, status=200, safe=False)
         except Exception as e:
