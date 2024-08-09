@@ -1,10 +1,13 @@
 import os,subprocess 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 RUNNING_APPS = {}
 
 import subprocess
 import platform
 import re
+import threading
 
 def kill_process_on_port(port):
     current_os = platform.system()
@@ -35,24 +38,59 @@ def kill_process_on_port(port):
                 subprocess.run(['taskkill', '/F', '/PID', pid])
             print(f"Process running on port {port} has been killed.")
 
+def run_project_threaded(project_id,port,project_path, env_name):
+    env = os.environ.copy()
+    env['PORT'] = str(port)
+    env['BROWSER'] =  "NONE"
+    channel_layer = get_channel_layer()
+    
+    if env_name == '' or env_name == 'default (.env)':
+        process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
+    else:
+        process = subprocess.Popen(" ".join(['npm', f'run start:{env_name}','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
+    
+    status_mapping = {
+    b'webpack compiled successfully': "RUNNING",
+    b'Compiled with warnings': "WARNING",
+    b'Failed to compile': "ERROR",
+    b'The build failed' : "CRASHED"
+}
+
+    while True:
+        output = process.stdout.readline()
+        if output:
+            # print(project_id)
+            # print("====================", output, "===================")
+            
+            for key, status in status_mapping.items():
+                if output.startswith(key):
+                    RUNNING_APPS[project_id]['status'] = status
+                    async_to_sync(channel_layer.group_send)(
+                        project_id,
+                        {
+                            "type": "app_status",
+                            "message": {"project_id": project_id, "status": status},
+                        }
+                    )
+                pass
 
 
-def start_app(app_config):
-    project_id=app_config["name"]
+def start_app(app_config, forceRestart=False):
+    project_id = app_config["name"]
+    env_name = app_config.get("current_environment","")
     project_path = os.path.join(app_config["path"],project_id)
-    if project_id in RUNNING_APPS:
+    if project_id in RUNNING_APPS and not forceRestart:
         pass
     else:
         print("Starting :", project_id)
         port= 3010+len(RUNNING_APPS)
-        RUNNING_APPS[project_id] = port
         kill_process_on_port(port)
-        env = os.environ.copy()
-        env['PORT'] = str(port)
-        env['BROWSER'] =  "NONE"
-        process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=project_path,  )
+        thread = threading.Thread(target=run_project_threaded,args= [project_id,port,project_path, env_name])
+        thread.daemon = True
+        thread.start()
+        RUNNING_APPS[project_id] = {'port':port,'thread':thread,'status':"COMPILATION_STARTED"}
         # process.wait()
         # process=subprocess.run(command, cwd=project_path, env=environment)
 
     
-    return {"project_id":project_id,"port":RUNNING_APPS[project_id]}
+    return {"project_id":project_id,"port":RUNNING_APPS[project_id]['port']}

@@ -1,13 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Col, Row } from "react-bootstrap";
 
-function ResourcesUploadModal({ show, onHide, onSubmit }) {
+function ResourcesUploadModal({ show, onHide, path, onSubmit }) {
   const [formData, setFormData] = useState({
     filename: "",
-    file_path: "assets",
+    file_path: path,
     description: "",
     file: null,
   });
+
+  useEffect(() => {
+    setFormData((prevData) => ({
+      ...prevData,
+      file_path: path,
+    }));
+  }, [path]);
 
   const handleChange = (event) => {
     const { name, value, files } = event.target;
@@ -36,7 +43,7 @@ function ResourcesUploadModal({ show, onHide, onSubmit }) {
   const resetForm = () => {
     setFormData({
       filename: "",
-      file_path: "assets",
+      file_path: path,
       description: "",
       file: null,
     });
@@ -46,7 +53,10 @@ function ResourcesUploadModal({ show, onHide, onSubmit }) {
     <Modal
       className="text-white"
       show={show}
-      onHide={onHide}
+      onHide={() => {
+        resetForm(); 
+        onHide();
+      }}
       size="lg"
       data-bs-theme="dark"
     >
@@ -58,21 +68,20 @@ function ResourcesUploadModal({ show, onHide, onSubmit }) {
       >
         <Form onSubmit={handleSubmit}>
           <Row>
-          
-            <Col>
-              <Form.Group>
-                <Form.Label>File Name</Form.Label>
-                <div className="mb-3">
-                  <Form.Control
-                    placeholder="file"
-                    type="text"
-                    name="filename"
-                    value={formData.filename}
-                    onChange={handleChange}
-                    required
-                  />
+          <Col>
+            <Form.Group>
+              <Form.Label>Choose File</Form.Label>
+              <div className="mb-3">
+
+              <Form.Control
+                type="file"
+                name="file"
+                required
+                onChange={handleChange}
+              />
                 </div>
-              </Form.Group>
+
+            </Form.Group>
             </Col>
           </Row>
           <Row>
@@ -85,8 +94,7 @@ function ResourcesUploadModal({ show, onHide, onSubmit }) {
                     type="text"
                     name="file_path"
                     value={formData.file_path}
-                    onChange={handleChange}
-                    required
+                    readOnly
                   />
                 </div>
               </Form.Group>
@@ -107,21 +115,30 @@ function ResourcesUploadModal({ show, onHide, onSubmit }) {
               </Form.Group>
             </Col>
           </Row>
-          <Form.Group>
-            <Form.Control
-              type="file"
-              name="file"
-              required
-              onChange={handleChange}
-            />
-          </Form.Group>
+          {formData.filename && (
+            <Form.Group>
+              <Form.Label>File Name</Form.Label>
+              <div className="mb-3">
+                <Form.Control
+                  placeholder="file"
+                  type="text"
+                  name="filename"
+                  value={formData.filename}
+                  onChange={handleChange}
+                />
+              </div>
+            </Form.Group>
+          )}
         </Form>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="success" onClick={handleSubmit}>
           Upload
         </Button>
-        <Button variant="secondary" onClick={onHide}>
+        <Button variant="secondary" onClick={() => {
+            resetForm();
+            onHide();
+          }}>
           Cancel
         </Button>
       </Modal.Footer>

@@ -7,16 +7,15 @@ import { router } from "../App";
 export default function ProjectCards({ project, removeProject, ...props }) {
   const [deleting, setDeleting] = useState(false);
 
-  function reGenerate() {
-    ProjectService.reGenerateProject(project.project_name);
-  }
+  // function reGenerate() {
+  //   ProjectService.reGenerateProject(project.project_name);
+  // }
 
   const handleCardClick = () => {
     router.navigate("/project/" + project.project_name);
   };
 
   function deleteProject() {
-    console.log(project);
     setDeleting(true);
     const confirmed = window.confirm(
       `Are you sure you want to delete project: ${project.projectName}?`
@@ -40,9 +39,26 @@ export default function ProjectCards({ project, removeProject, ...props }) {
     <div {...props}>
       <div className="card my-2 text-white bg-dark">
         <div className="card-body">
-          <h4 className="card-title" style={{ fontSize: "22px" }}>
-            {project.projectName}
-          </h4>
+          <div className="d-flex justify-content-between">
+            <h4 className="" style={{ fontSize: "20px" }}>
+              {project.projectName}
+            </h4>
+            <div>
+              <span
+                className={`badge ${
+                  project?.status === "WARNING"
+                    ? "bg-warning text-dark"
+                    : project?.status === "ERROR"
+                    ? "bg-danger text-white"
+                    : project?.status === "RUNNING"
+                    ? "bg-success text-white"
+                    : "bg-light text-dark"
+                }`}
+              >
+                {project?.status || "Fetching Status"}
+              </span>
+            </div>
+          </div>
           <p
             className="card-text"
             style={{ color: "#B7BBC8", fontSize: "14px" }}

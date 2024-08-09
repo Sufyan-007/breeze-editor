@@ -1,0 +1,16 @@
+{
+  "18aea09e_651e_4cc5_9a15_ad35b0132800": {
+    "name": "src",
+    "lineage": [],
+    "id": "18aea09e_651e_4cc5_9a15_ad35b0132800",
+    "tag": "ROOT",
+    "type": "DIRECTORY"
+  },
+  "c3fda74c_5ae2_434a_aec8_7aa5a57e3120": {
+    "name": "components",
+    "lineage": ["18aea09e_651e_4cc5_9a15_ad35b0132800"],
+    "id": "c3fda74c_5ae2_434a_aec8_7aa5a57e3120",
+    "tag": "COMPONENTS",
+    "type": "DIRECTORY"
+  }
+}

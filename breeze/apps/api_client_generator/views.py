@@ -51,9 +51,8 @@ class ApiClientGenerator(View):
                 ## for other models
                 tag_models = converted_data.get("tag_models")
                 resultant_filename = []
-                
+                model_dict = {}
                 for tag, api_models in tag_models.items():
-                    model_dict = {}
                     filename = tag+".json"
                     full_file_path = os.path.join(folder_path, filename)
                     resultant_filename.append(filename)

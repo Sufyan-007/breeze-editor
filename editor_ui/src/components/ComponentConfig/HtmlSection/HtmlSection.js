@@ -29,9 +29,18 @@ export default function HtmlSection() {
 
   const [testProps, setTestProps] = useState({ prop1: "xyz" });
 
+  useEffect(() => {
+    console.log("Testing")
+  }, [iframeSrc]);
+
   const setIframeSource = () => {
     const newValue = srcInput.current.value;
-    setIframeSrc(newValue);
+    if(newValue === iframeSrc){
+      document.getElementById('iFrame').src+=''
+    }
+    else{
+      setIframeSrc(newValue);
+    }
   };
 
   const [windowWidth, windowHeight] = useWindowDimension();
@@ -174,13 +183,11 @@ export default function HtmlSection() {
                   role="searchbox"
                   className="InputBox me-2 rounded"
                 />
-                <input
-                  type="submit"
-                  id="Form_Go"
+                <button
                   className="Button bg-primary text-light rounded"
-                  defaultValue="GO"
+                  
                   onClick={setIframeSource}
-                />
+                >GO</button>
               </div>
             </div>
             <iframe
@@ -202,3 +209,4 @@ export default function HtmlSection() {
     </TestPropsContext.Provider>
   );
 }
+

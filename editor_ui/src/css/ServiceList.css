@@ -28,9 +28,7 @@
   cursor: pointer;
   max-width: 95%;
 }
-.overflow-y-auto.h-100.fs-6.text-light::-webkit-scrollbar {
-  display: none;
-}
+
 
 .name-cell {
   display: flex;
@@ -42,9 +40,7 @@
   justify-content: flex-end;
   align-items: center;
 }
-.name {
-  text-align: start;
-}
+
 .actions {
   text-align: end;
 }
