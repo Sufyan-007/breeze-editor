@@ -197,6 +197,9 @@ ELEMENT_ATTRIBUTES = {
         },
         "target": {
             "datatype": "STRING"
+        },
+        "onSubmit":{
+            "datatype": "FUNCTION"
         }
     },
 
@@ -399,10 +402,10 @@ ELEMENT_ATTRIBUTES = {
         "align": {
             "datatype":    "STRING"
         },
-        "onClick": {
+        "onclick": {
             "datatype": "FUNCTION"
         },
-        "onChange": {
+        "onchange": {
             "datatype": "FUNCTION"
         }
 
@@ -764,6 +767,9 @@ ELEMENT_ATTRIBUTES = {
         },
         "width": {
             "datatype": "NUMERIC"
+        },
+        "onchange": {
+            "datatype": "FUNCTION"
         }
     },
 
@@ -1290,7 +1296,14 @@ ELEMENT_ATTRIBUTES = {
         },
         "wrap": {
             "datatype": "STRING"
+        },
+        "value":{
+            "datatype": "STRING"
+        },
+         "onchange":{
+            "datatype": "FUNCTION"
         }
+        
     },
 
     "tfoot": {

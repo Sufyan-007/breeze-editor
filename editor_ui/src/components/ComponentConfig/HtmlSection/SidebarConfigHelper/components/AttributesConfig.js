@@ -29,13 +29,13 @@ const AttributesConfig = ({
     ) {
        setCheckbox(true);
     }
-    else if(inputField.key === "className" && inputField.value!=='' && inputField.$ref === undefined )
+    else if( inputField.value!=='' && inputField.$ref === undefined )
       setCheckbox(true);
 
 
   }, [inputField]);
   useEffect(() => {
-    const propDataType = getPropDataType(inputField.key);
+    const propDataType = getPropDataType(inputField.key)|| "STRING";
     const filteredDatatypes = allVariables.filter((item) => {
       return item.body.datatype.toUpperCase() === propDataType;
     });
@@ -111,9 +111,9 @@ const AttributesConfig = ({
               </option>
 
               {availableVar &&
-                availableVar.map((functions, index) => (
-                  <option key={index} value={functions.id}>
-                    {functions.name}
+                availableVar.map((varData, index) => (
+                  <option key={index} value={varData.id}>
+                    {varData.name}
                   </option>
                 ))}
             </Form.Select>
@@ -172,6 +172,7 @@ const AttributesConfig = ({
 
                   handleAttributeChange(inputField.key, valuesString);
                 }}
+
                 styles={{
                   container: (provided) => ({
                     ...provided,
@@ -185,18 +186,16 @@ const AttributesConfig = ({
                 }}
               />
             ) : (
-              <Form.Control
-                type="text"
-                size="sm"
-                style={{ borderColor: "rgb(73, 80, 87)" }}
-                placeholder="value"
-                value={inputField?.value}
-                className="bg-dark text-light "
-                onChange={(e) => {
-                  e.preventDefault();
-                  handleAttributeChange(inputField.key, e.target.value);
-                }}
-              />
+              <MonacoEditor
+              defaultValue={inputField?.value || ""}
+              height="75px"
+             
+              onChange={(body) => {
+                handleAttributeChange(inputField.key, body);
+              }}
+              id={`Literal-${inputField.key}`}
+              placeholderText="To denote expressions, use curly braces {}"
+            ></MonacoEditor>
             ))}
 
             { inputField.type === "NUMERIC" &&
@@ -229,36 +228,29 @@ const AttributesConfig = ({
                     </option>
                   ))}
               </Form.Select>
-               ):<Form.Control
-               type="number"
-               size="sm"
-               style={{ borderColor: "rgb(73, 80, 87)" }}
-               placeholder="value"
-               value={inputField?.value}
-               className="bg-dark text-light "
-               onChange={(e) => {
-                 e.preventDefault();
-                 handleAttributeChange(inputField.key, e.target.value);
+               ):<MonacoEditor
+               defaultValue={inputField?.value || ""}
+               height="75px"
+              
+               onChange={(body) => {
+                 handleAttributeChange(inputField.key, body);
                }}
-             />)
+               id={`Numeric-${inputField.key}`}
+             ></MonacoEditor>)
 
             }
           {inputField.type === "BOOLEAN" &&
             (checkbox === true ? (
-              <Form.Select
-                size="sm"
-                onChange={(e) => {
-                  handleAttributeChange(inputField.key, e.target.value);
-                }}
-                style={{ borderColor: "rgb(73, 80, 87)" }}
-                defaultValue={true}
-                value={inputField.value || "false"}
-                //   value={selectedAttributes[attribute].value}
-                className="bg-dark text-light "
-              >
-                <option value="false">false</option>
-                <option value="true">true</option>
-              </Form.Select>
+              
+              <MonacoEditor
+              defaultValue={inputField?.value || ""}
+              height="75px"
+             
+              onChange={(body) => {
+                handleAttributeChange(inputField.key, body);
+              }}
+              id={`Boolean-${inputField.key}`}
+            ></MonacoEditor>
             ) : (
               <Form.Select
                 style={{
@@ -327,6 +319,8 @@ const AttributesConfig = ({
           )}
         </Form.Group>
         <div className="d-flex me-1">
+        <div className="checkbox-container" title="custom value"> 
+
           <Form.Check
             inline
             type="checkbox"
@@ -342,6 +336,7 @@ const AttributesConfig = ({
               setCheckbox(!checkbox);
             }}
           />
+          </div>
           <div
             className=""
             style={{

@@ -14,7 +14,11 @@ class HTMLGenerator:
         if value.get('type') == "DESTRUCTURABLE":
             return f"{{...{value.get('value')} }}"
         if value.get('type') == 'LITERAL':
-            val= f'"{value.get("value")}"'
+            if value.get("value").startswith('{') and value.get("value").endswith('}'):
+                valueWithoutBraces = value.get('value')[1:-1]
+                val= f"{{{valueWithoutBraces}}}"
+            else:
+               val= f'"{value.get("value")}"'
         elif value.get('type') == 'OBJECT':
             val= f"{{{value.get('value')}}}"
         elif value.get('type') == 'BOOLEAN':
@@ -28,7 +32,7 @@ class HTMLGenerator:
                     self.config['imports']['components'].append(tag)
                 
             val= f"{{{value.get('value')}}}"
-        elif value.get('type') == 'VARIABLE':
+        elif value.get('type') in ['VARIABLE', 'NUMERIC']:
             ref = value.get("$ref",None)
             if ref:
                 for resource in self.config["resources"]:

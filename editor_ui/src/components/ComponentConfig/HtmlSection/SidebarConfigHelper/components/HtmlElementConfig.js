@@ -166,9 +166,9 @@ const HtmlElementConfig = ({
   const updateHtmlElementConfig = (e) => {
     e.preventDefault();
     const tempElememt = { ...element, attributes: selectedAttributes };
-   //console.log("tempELe",tempElememt)
+   console.log("tempELe",tempElememt)
 
-    handleUpdateClick(tempElememt);
+     handleUpdateClick(tempElememt);
   };
 
   const handleSelectAttributeChange = (event) => {
@@ -177,7 +177,7 @@ const HtmlElementConfig = ({
     let type = availableAttributes[selectedOption]?.datatype || "LITERAL";
     if (type === "STRING") type = "LITERAL";
     else if (type === "BOOLEAN") type = "BOOLEAN";
-    else if (type==="OBJECT" || type==="ARRAY" ||  type === "")type="VARIABLE"
+    else if (type==="OBJECT" || type==="ARRAY" ||  type === "" )type="VARIABLE"
 
     setSelectedAttributes((prevSelectedAttributes) => ({
       ...prevSelectedAttributes,
@@ -199,6 +199,8 @@ const HtmlElementConfig = ({
   const handleAttributeChange = (key, value ,importType="") => {
     setSelectedAttributes((prevSelectedAttributes) => {
       const prevAttribute = prevSelectedAttributes[key];
+      // if(key ==='className' && value)
+      //    value= `"${value}"`
       let newType =
         prevAttribute && prevAttribute.type !== "LITERAL"
           ? prevAttribute.type
