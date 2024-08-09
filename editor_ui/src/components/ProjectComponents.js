@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState , useCallback} from "react";
 import { useSelector } from "react-redux";
 import custom_ss from "../assets/icons/custom-component.png";
 import homeImage from "../assets/icons/home_page.png";
@@ -30,7 +30,9 @@ export default function ProjectComponents(props) {
   const { projectName } = useParams();
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
   const [error, setError] = useState("");
+
   const handleOpen = () => setIsOffcanvasOpen(true);
   const handleClose = () => setIsOffcanvasOpen(false);
 
@@ -54,6 +56,18 @@ export default function ProjectComponents(props) {
     }
   };
 
+    // Debouncing logic
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // 300ms debounce delay
+
+    return () => {
+      clearTimeout(handler); // Cleanup
+    };
+  }, [searchTerm]);
+
+
   const handleClick = (key) => {
     const path = `/project/${projectName}/component/${key}`;
     router.navigate(path);
@@ -67,12 +81,12 @@ export default function ProjectComponents(props) {
     config.custom_components || {}
   ).filter(
     ([key, value]) =>
-      key.toLowerCase().includes(searchTerm.toLowerCase())
+      key.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   const filteredPages = Object.entries(config.pages || {}).filter(
     ([key, value]) =>
-      key.toLowerCase().includes(searchTerm.toLowerCase()) 
+      key.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) 
   );
 
 
@@ -181,7 +195,7 @@ export default function ProjectComponents(props) {
                       </p>
                     </Col>
 
-                    <Col sm={6} style={{ marginTop: "10px" }}>
+                    <Col sm={6} style={{ marginTop: "48px" }}>
                       <p>Component Type : {value.type}</p>
                     </Col>
                   </Row>
