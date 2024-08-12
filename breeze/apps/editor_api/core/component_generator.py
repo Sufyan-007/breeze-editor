@@ -161,6 +161,7 @@ class ComponentGenerator():
         def generate_other_var_code(var):
             datatype = var["body"].get("datatype")
             default_value = var["body"].get("defaultValue", "")
+            declaration_type = var["body"].get("declarationType", "const")
             
             if datatype == "STRING":
                 formatted_value = f'"{default_value}"'
@@ -169,14 +170,21 @@ class ComponentGenerator():
             else:
                 formatted_value = f'{default_value}'
             
-            return f'const {var.get("name")} = {formatted_value};'
+            if declaration_type == 'const' or default_value:
+                return f'{declaration_type} {var.get("name")} = {formatted_value};'
+            else:
+                return f'{declaration_type} {var.get("name")};'
                     
         props_vars_declaration = ', '.join([f'{var["name"]}={var["body"]["defaultValue"]}' if var["body"].get("defaultValue") else var["name"] for var in props_vars])
-        
+        if props_vars_declaration != "":
+            props_vars_declaration = "{" + props_vars_declaration +"}"
         import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
         
         def generate_function_code(func):
-            function_generator = FunctionParser()
+            all_resources = []
+            all_resources.extend(resources)
+            all_resources.extend(props_vars)
+            function_generator = FunctionParser(all_resources)
             function_code = function_generator.generate_statement_code(func)
             return function_code     
            
@@ -261,7 +269,7 @@ class ComponentGenerator():
             import React, {{ useState, Fragment }} from 'react';
             {import_stats}
 
-            const {name} = ({{ {props_vars_declaration} }}) => {{
+            const {name} = ( {props_vars_declaration} ) => {{
                 {resources_code}
                 return (
                     {html_code}

@@ -61,7 +61,7 @@ function CreateVariable({ config, update }) {
             onChange={(value) => updateConfig("value.value", value)}
             height="100px"
             width="100%"
-            language="json"
+            language="javascript"
             id={generateUniqueId}
           />
         </div>

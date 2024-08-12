@@ -1,3 +1,4 @@
+# from breeze.apps.editor_api.core.component_config_service import ComponentConfigService
 from .function_helper_consts import OPERATION_TYPES 
 RESOURCES={
     "STATE/UUID1":{
@@ -5,12 +6,18 @@ RESOURCES={
     },
     "SERVICE/UUID1":{
         "functionName":"createUser"
+    },
+     "var1":{
+        "name":"val"
+    },
+     "var2":{
+        "name":"va1"
     }
 }
 
 class FunctionParser:
-    def __init__(self):
-        pass
+    def __init__(self, resources=None):
+        self.resources = resources 
     
     def generate_statement_code(self,config):
         
@@ -52,6 +59,12 @@ class FunctionParser:
         
         elif config['type'] == "FUNCTION_CALL":
             return self.get_function_call_code(config)
+        elif config['type']== "CHAINED_FUNCTIONS":
+            function_calls = [ self.get_function_call_code(func,True) for func in config["functions"] ]
+            isAwaited = ""
+            if config.get("isAwaited", False):
+                isAwaited = "await "
+            return isAwaited+".".join(function_calls)
         
         elif config['type'] == "CUSTOM":
             return config.get("body","")
@@ -59,6 +72,9 @@ class FunctionParser:
         elif config['type'] == "IF_BLOCK":
             code = f""" if ({self.get_value_code(config["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
             """
+            if config.get('elseIf', False):
+                for x in config.get('elseIf'):
+                    code += f"""else if({self.get_value_code(x["condition"])}) {self.generate_statement_code(x.get('bodyConfig',{}))}"""
             if config.get('elseBody', False):
                 code += f"""else  {self.generate_statement_code(config.get('elseBody',{}))}
             """
@@ -119,52 +135,78 @@ class FunctionParser:
                 ])} }}"""
         
     
+    def get_resource_by_id(self,ref):
+        for resource in self.resources:
+            if resource.get("id") == ref:
+                return resource
+        raise IndexError(f"Resource with id {ref} not found.")
+    
     def get_value_code(self,value):
         ref = value.get("$ref")
-        type = value.get("type")
+        type = value.get("type","UNDEFINED")
         if ref:
-            return RESOURCES[ref]["name"]
+            resource = self.get_resource_by_id(ref)
+            return resource["name"]
         else:
             if type == "STRING":
                 return f" '{value['value']}' "
             
-            if type == "NUMERIC" or type == "TOKEN":
+            elif type == "NUMERIC" or type == "TOKEN":
                 return value["value"]
             
-            if type == "OBJECT":
+            elif type == "UNDEFINED":
+                return "undefined"
+            
+            elif type == "NULL":
+                return "null"
+            
+            elif type == "BOOLEAN":
+                if value["value"] and value["value"]!="false":
+                    return "true"
+                else:
+                    return "false"
+            
+            elif type == "OBJECT":
                 return f"""{{ {",".join([ f" {x} : {self.get_value_code(value['properties'][x])}" for x in value.get("properties") ])}}}"""
+            
+            elif type == "ARRAY":
+                return f"[{', '.join([self.get_value_code(x) for x in value.get('values', [])])}]"
 
-            if type == "OPERATION":
+            elif type == "OPERATION":
                 return self.get_operation_code(value)
             
-            if type == "FUNCTION":
+            elif type == "FUNCTION" or type == "CALLBACK":
                 return self.generate_statement_code(value)
             
-            if type == "CUSTOM":
-                return value['value']          
+            elif type == "CUSTOM":
+                return value["value"]
+
+            elif type == "FUNCTION_CALL":
+                return self.generate_statement_code(value)
             
+            elif type == "CHAINED_FUNCTIONS":
+                return self.generate_statement_code(value)
+
         return ""
         
-    def get_function_call_code(self,config):
-        callType = config.get("callType", "SIMPLE")
+    def get_function_call_code(self,config,disableAwait = False):
+        ref = config.get("$ref",None)
+        if ref:
+            functionName = RESOURCES[config["$ref"]]["functionName"]
+        else:
+            functionName = config['functionName']
+        isAwait = ""
+        if config.get("isAwaited") and not disableAwait:
+            isAwait = "await "
+        return f"""{isAwait}{functionName}({self.get_parameter_mapping(config)})
+        """
         
-        if callType == "SIMPLE":
-            ref = config.get("$ref",None)
-            if ref:
-                functionName = RESOURCES[config["$ref"]]["functionName"]
-            else:
-                functionName = config['functionName']
-            return f"""{functionName}({self.get_parameter_mapping(config)})
-            """
-        elif callType== "CHAINED":
-            function_calls = [ self.get_function_call_code(func) for func in config["functions"] ]
-            return ".".join(function_calls)
         
     def get_parameter_mapping(self,config):
         param_list =[]
         for param in config.get("parameters",[]):
             param_list.append(self.get_value_code(param))
-        return ", ".join(param_list)
+        return ", ".join([str(x) for x in param_list])
     
     def get_operation_code(self,config):
         if config["operationType"] == "UNARY":

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import Offcanvas from "../../../../../common/Offcanvas";
 import CreateVariable from "../../FunctionItemComponents/CreateVariable";
+import FunctionConfigStack from "../FunctionConfigStack";
 
 export default function Declaration({ config, updateParent }) {
   const [isOffcanvasOpen, setOffCanvasOpen] = useState(false);
+  const [blockConfig, setBlockConfig] = useState(config);
 
   function handleOpen() {
     setOffCanvasOpen(true);
@@ -16,12 +18,22 @@ export default function Declaration({ config, updateParent }) {
     setOffCanvasOpen(false);
   }
 
+  function update(val, key) {
+    console.log("val  ::>>", val);
+    setBlockConfig((state) => {
+      const newState = { ...state, [key]: val };
+      updateParent(newState);
+      return newState;
+    });
+  }
+
   return (
     <>
-      <div className="declaration border border-light px-2 py-1">
+      <div className="declaration border border-gray px-2 py-1">
         <div className="d-flex justify-content-between">
           <div>
-            <strong>Variable:</strong> {config.declarationType} {config.varName}
+            <strong>Create Variable:</strong> {config.declarationType}{" "}
+            {config.varName}
             {config?.value?.value ? ` = ${config.value.value}` : ""}
           </div>
           <div className="d-flex">
@@ -41,6 +53,20 @@ export default function Declaration({ config, updateParent }) {
             </div>
           </div>
         </div>
+        {(config.value?.type === "FUNCTION_CALL" ||
+          config.value?.type === "CHAINED_FUNCTIONS") && (
+          <>
+            <div className="px-3">
+              <strong>Value:</strong>
+              <FunctionConfigStack
+                config={blockConfig.value}
+                updateParent={(val) => {
+                  update(val, "value");
+                }}
+              />
+            </div>
+          </>
+        )}
       </div>
       <Offcanvas
         isOpen={isOffcanvasOpen}
