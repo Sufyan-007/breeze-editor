@@ -26,6 +26,7 @@ import FolderStructureConfig from "./components/FolderStructureSection/FolderStr
 import Resources from "./components/ResourcesConfiguration/Resources";
 import Services from "./features/models/index";
 import Models from "./features/models/index";
+import CustomPackage from "./components/CustomPackages/CustomPackage";
 
 export const router = createBrowserRouter([
   {
@@ -38,7 +39,7 @@ export const router = createBrowserRouter([
       { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
-      { path: "folderstructure", element: <FolderStructureConfig /> },
+      { path: "custompackages", element: <CustomPackage /> },
       { path: "servicespage", element: <Services/>},
       { path: "models", element: <Models/>},
       {

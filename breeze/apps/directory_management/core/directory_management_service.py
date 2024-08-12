@@ -37,12 +37,12 @@ class DirectoryManagementGenerator:
         if is_directory:
         # Create a new directory
             os.makedirs(constructed_final_path, exist_ok=True)
-            print(f"Directory created at {constructed_final_path}")
+            
         else:
         # Create a new file
             with open(constructed_final_path, 'w') as new_file:
                 new_file.write("")  # Create an empty file
-            print(f"File created at {constructed_final_path}")
+
 
 
     def add_node_to_config(self, parent_id, node_type, lineage, tag, name=None):
@@ -231,11 +231,9 @@ class DirectoryManagementGenerator:
         old_path = os.path.join(self.app_config['APP_SOURCE_DIR'],old_path_base, node_name)
         new_path = os.path.join(self.app_config['APP_SOURCE_DIR'],new_path_base, node_name)
    
-        
-        print(f"Checking if old path exists: {old_path}")
         if os.path.exists(old_path):
             changed_path = shutil.move(old_path, new_path)
-            print(f"Changed path: {changed_path}")
+        
         else:
             print(f"Old path does not exist: {old_path}")
 
@@ -251,7 +249,6 @@ class DirectoryManagementGenerator:
     
     #get path from file_id
     def get_path_from_file_id(self,file_id):
-        print("1111111")
         if file_id not in self.directory_management_config:
             raise Exception(f"File ID {file_id} not found in directory_management.json")
        
@@ -283,5 +280,4 @@ class DirectoryManagementGenerator:
         
         constructed_path = os.path.join(self.app_config['APP_SOURCE_DIR'], *path_elements)
         
-        print(f"Constructed path: {constructed_path}")
         return constructed_path

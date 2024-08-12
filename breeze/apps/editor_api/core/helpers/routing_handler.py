@@ -161,7 +161,7 @@ class RouteHandler:
             related_comp = self.comp_config[ic]
             directory_manager= DirectoryManagementGenerator(self.app_config["name"])
             full_file_path = directory_manager.get_path_from_file_id(related_comp["file_id"])
-            print(full_file_path,"qqqqqqqqq")
+         
              # Extract the relative path starting from 'src'
             src_index = full_file_path.find('src')
             if src_index != -1:
@@ -170,7 +170,6 @@ class RouteHandler:
                 raise Exception("Constructed path does not contain 'src'")
             
             
-            print(relative_path,"1111111")
             comp_path = get_path_without_ext(relative_path)
 
             import_statement = f'import {related_comp["name"]} from \'{comp_path}\';'

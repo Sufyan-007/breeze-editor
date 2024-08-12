@@ -26,6 +26,7 @@ import apps from "../assets/icons/apps.svg";
 import upload from "../assets/icons/upload.svg";
 import modelsIcon from "../assets/icons/modelsIcon.svg"
 import servicesIcon from "../assets/icons/servicesIcon.svg";
+import zipFileIcon from "../assets/icons/zipFileicon.png"
 import ProjectSidebar from "./ProjectSidebar";
 import { router } from "../App";
 
@@ -63,7 +64,8 @@ export default function ProjectPage() {
     { id: 7, name: "Css Styles", icon: styles, path: "styles" },
     { id: 8, name: "Static Resources", icon: upload, path: "resources" },
     { id: 9, name: "NPM packages", icon: apps, path: "apps" },
-    { id: 10, name: "Settings", icon: settings, path: "settings" },
+    { id: 10,name: "Settings", icon: settings, path: "settings" },
+    { id: 11,name: "Custom Packages", icon: zipFileIcon ,path:"custompackages"}
   ];
 
   const toggleSidebar = () => {
