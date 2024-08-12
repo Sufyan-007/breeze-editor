@@ -6,6 +6,10 @@ import Return from "./StatementTypes/Return";
 import WhileBlock from "./StatementTypes/WhileBlock";
 import Block from "./StatementTypes/Block";
 import DoWhileBlock from "./StatementTypes/DoWhileBlock";
+import FunctionCall from "./StatementTypes/FunctionCall";
+import TryCatch from "./StatementTypes/TryCatch";
+import ChainedFunctionCall from "./StatementTypes/ChainedFunctionCall";
+import FunctionType from "./StatementTypes/FunctionType";
 
 const typeMapping = {
   BLOCK: Block,
@@ -16,6 +20,10 @@ const typeMapping = {
   CUSTOM: CustomCode,
   ASSIGNMENT: Assignment,
   DO_WHILE_BLOCK: DoWhileBlock,
+  FUNCTION_CALL: FunctionCall,
+  TRY_CATCH: TryCatch,
+  CHAINED_FUNCTIONS: ChainedFunctionCall,
+  FUNCTION: FunctionType,
 };
 
 export default function FunctionConfigStack({ config, updateParent }) {

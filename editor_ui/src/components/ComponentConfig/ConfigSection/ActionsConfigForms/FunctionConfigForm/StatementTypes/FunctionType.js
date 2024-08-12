@@ -1,45 +1,27 @@
+import React from "react";
 import { useState } from "react";
 import FunctionConfigStack from "../FunctionConfigStack";
 import Offcanvas from "../../../../../common/Offcanvas";
-import DoWhileLoop from "../../FunctionItemComponents/DoWhileLoop";
+import FunctionDefinition from "../../FunctionItemComponents/FunctionDefinition";
 
-export default function DoWhileBlock({ config, updateParent }) {
+function FunctionType({ config, updateParent }) {
   const [isOffcanvasOpen, setOffCanvasOpen] = useState(false);
-  const [blockConfig, setBlockConfig] = useState(config);
-
   function handleOpen() {
     setOffCanvasOpen(true);
   }
 
-  function update(val, key) {
-    setBlockConfig((state) => {
-      const newState = { ...state, [key]: val };
-      updateParent(newState);
-      return newState;
-    });
-  }
-
   function handleClose(val) {
     if (val) {
-      setBlockConfig(val);
       updateParent(val);
     }
     setOffCanvasOpen(false);
   }
-
   return (
     <>
-      <div className="if-block border border-gray px-2 py-1">
-        <strong>Do Block</strong>
-        <div className="px-3">
-          <FunctionConfigStack
-            config={blockConfig.bodyConfig}
-            updateParent={(val) => update(val, "bodyConfig")}
-          />
-        </div>
+      <div className="custom-code border border-gray px-2 py-1">
         <div className="d-flex justify-content-between">
-          <div className="mt-1">
-            <strong>Do While:</strong> {config.condition.value}
+          <div>
+            <strong>{config.type}</strong>
           </div>
           <div className="d-flex">
             <div
@@ -58,17 +40,28 @@ export default function DoWhileBlock({ config, updateParent }) {
             </div>
           </div>
         </div>
+        <div className="px-3">
+          <FunctionConfigStack
+            config={config.bodyConfig}
+            updateParent={() => {}}
+          />
+        </div>
       </div>
       <Offcanvas
         isOpen={isOffcanvasOpen}
         onClose={() => handleClose(false)}
-        title={"Edit"}
+        title={"Edit Function"}
         width="40%"
       >
         <div className="px-1 h-100 container">
-          <DoWhileLoop config={config} update={(val) => handleClose(val)} />
+          <FunctionDefinition
+            config={config}
+            update={(val) => handleClose(val)}
+          />
         </div>
       </Offcanvas>
     </>
   );
 }
+
+export default FunctionType;
