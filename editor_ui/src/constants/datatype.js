@@ -13,13 +13,15 @@ export const dataTypes = [
 export const staticServiceList = {
   userService: {
     createUser: {
+      id: "1",
       name: "createUser",
       parameters: [
         { type: "STRING", name: "name" },
-        { type: "STRING", name: "username" },
+        { type: "NUMERIC", name: "phone" },
       ],
     },
     addData: {
+      id: "2",
       name: "addData",
       parameters: [
         {
@@ -33,10 +35,10 @@ export const staticServiceList = {
               type: "STRING",
               value: "",
             },
-            // available: {
-            //   type: "BOOLEAN",
-            //   value: true,
-            // },
+            available: {
+              type: "BOOLEAN",
+              value: true,
+            },
             childObj: {
               type: "OBJECT",
               properties: {
@@ -48,10 +50,8 @@ export const staticServiceList = {
             },
           },
         },
-        { type: "STRING", name: "name" },
-        { type: "STRING", name: "username" },
         {
-          name: "abc",
+          name: "data",
           type: "ARRAY",
           items: {
             type: "STRING",
@@ -60,6 +60,7 @@ export const staticServiceList = {
       ],
     },
     testService: {
+      id: "3",
       name: "testService",
       parameters: [{ type: "ANY" }],
     },

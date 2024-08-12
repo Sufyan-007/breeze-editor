@@ -148,9 +148,7 @@ class FunctionParser:
             resource = self.get_resource_by_id(ref)
             return resource["name"]
         else:
-            if value.get("value",None) == None:
-                return "null"
-            elif type == "STRING":
+            if type == "STRING":
                 return f" '{value['value']}' "
             
             elif type == "NUMERIC" or type == "TOKEN":
@@ -170,6 +168,9 @@ class FunctionParser:
             
             elif type == "OBJECT":
                 return f"""{{ {",".join([ f" {x} : {self.get_value_code(value['properties'][x])}" for x in value.get("properties") ])}}}"""
+            
+            elif type == "ARRAY":
+                return f"[{', '.join([self.get_value_code(x) for x in value.get('values', [])])}]"
 
             elif type == "OPERATION":
                 return self.get_operation_code(value)

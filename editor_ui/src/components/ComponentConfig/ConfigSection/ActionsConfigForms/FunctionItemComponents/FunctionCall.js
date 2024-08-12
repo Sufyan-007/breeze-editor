@@ -44,7 +44,7 @@ function FunctionCall({ config, update }) {
   useEffect(() => {
     if (selectedFunction) {
       setConf((state) => {
-        return { ...state, functionName: selectedFunction.name };
+        return { ...state, id: selectedFunction.id, functionName: selectedFunction.name };
       });
     } else {
       setConf((state) => {
@@ -55,9 +55,17 @@ function FunctionCall({ config, update }) {
 
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
-    setCheckedItems({
-      ...checkedItems,
-      [name]: checked,
+
+    setCheckedItems((prevState) => {
+      const updatedItems = { ...prevState, [name]: checked };
+
+      if (name === "thenCatch" && checked) {
+        updatedItems.awaitCall = false;
+      } else if (name === "awaitCall" && checked) {
+        updatedItems.thenCatch = false;
+      }
+
+      return updatedItems;
     });
   };
 
@@ -206,6 +214,7 @@ function FunctionCall({ config, update }) {
                 id="thenCatch"
                 checked={checkedItems.thenCatch}
                 onChange={handleCheckboxChange}
+                disabled={checkedItems.awaitCall}
               />
               <label className="form-check-label" htmlFor="thenCatch">
                 Then catch
@@ -232,6 +241,7 @@ function FunctionCall({ config, update }) {
                 id="awaitCall"
                 checked={checkedItems.awaitCall}
                 onChange={handleCheckboxChange}
+                disabled={checkedItems.thenCatch}
               />
               <label className="form-check-label" htmlFor="awaitCall">
                 Await

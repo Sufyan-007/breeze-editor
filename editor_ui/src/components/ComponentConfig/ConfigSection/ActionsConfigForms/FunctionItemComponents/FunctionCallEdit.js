@@ -16,8 +16,9 @@ function FunctionCallEdit({
   }, [functionConfig]);
 
   useEffect(() => {
-    if(config){
-    setConf({ ...config });}
+    if (config) {
+      setConf({ ...config });
+    }
   }, [config]);
 
   const handleUpdate = (i, val) => {
@@ -49,17 +50,15 @@ function FunctionCallEdit({
             <strong>Param Mapping</strong>
             {conf.parameters &&
               conf.parameters.map((param, i) => (
-                <div className="my-2 border border-gray p-2" key={i}>
+                <div className="my-2 border border-gray px-2 pt-2" key={i}>
                   <ParamInput
                     param={param}
                     name={
-                      (functionConfig?.parameters &&
-                        functionConfig.parameters[i]?.name) ||
+                      (funcConfig?.parameters &&
+                        funcConfig.parameters[i]?.name) ||
                       "PARAM-" + i
                     }
-                    schema={
-                      functionConfig?.parameters && functionConfig.parameters[i]
-                    }
+                    schema={funcConfig?.parameters && funcConfig.parameters[i]}
                     onChange={(value) => handleUpdate(i, value)}
                   />
                 </div>
@@ -67,9 +66,13 @@ function FunctionCallEdit({
             {conf?.parameters && conf?.parameters.length === 0 && (
               <div className="my-2">No Params Present</div>
             )}
-            {!functionConfig?.parameters && (
+            {!funcConfig?.parameters && (
               <div className="d-flex justify-content-end">
-                <Button className="btn btn-sm" variant="secondary" onClick={handleAddParam}>
+                <Button
+                  className="btn btn-sm"
+                  variant="secondary"
+                  onClick={handleAddParam}
+                >
                   Add Param
                 </Button>
               </div>
@@ -81,7 +84,6 @@ function FunctionCallEdit({
             variant="success"
             className="btn btn-sm"
             onClick={() => {
-              console.log(conf)
               update(conf);
             }}
           >

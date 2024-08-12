@@ -2,14 +2,38 @@ import { useEffect, useState } from "react";
 import Offcanvas from "../../../../../common/Offcanvas";
 import FunctionCallEdit from "../../FunctionItemComponents/FunctionCallEdit";
 import FunctionConfigStack from "../FunctionConfigStack";
+import { useParams } from "react-router";
+import { getResource } from "../../../../../../services/ComponentConfigService";
 
 export default function FunctionCall({ config, updateParent }) {
   const [isOffcanvasOpen, setOffCanvasOpen] = useState(false);
   const [conf, setConf] = useState(config);
+  const [functionConfig, setFunctionConfig] = useState({});
+  const { projectName, componentName } = useParams();
 
   useEffect(() => {
     setConf(config);
   }, [config]);
+
+  useEffect(() => {
+    if (conf?.callType === "serviceCall") {
+      // fetch service details based on conf.id
+    } else if (conf?.callType === "functionCall" && conf.id) {
+      const payload = {
+        project_id: projectName,
+        component: componentName,
+        resource_id: conf?.id,
+      };
+
+      getResource(payload)
+        .then((response) => {
+          setFunctionConfig(response);
+        })
+        .catch((error) => {
+          console.error("Error updating order", error);
+        });
+    }
+  }, [conf, componentName, projectName]);
 
   function handleOpen() {
     setOffCanvasOpen(true);
@@ -45,7 +69,7 @@ export default function FunctionCall({ config, updateParent }) {
         <div className="d-flex justify-content-between">
           <div>
             <strong>
-              {config?.case === "serviceCall" ? (
+              {config?.callType === "serviceCall" ? (
                 <>Service Call</>
               ) : (
                 <>Function Call</>
@@ -95,6 +119,7 @@ export default function FunctionCall({ config, updateParent }) {
         <div className="px-1 h-100 container">
           <FunctionCallEdit
             config={config}
+            functionConfig={functionConfig}
             update={(val) => handleClose(val)}
           />
         </div>

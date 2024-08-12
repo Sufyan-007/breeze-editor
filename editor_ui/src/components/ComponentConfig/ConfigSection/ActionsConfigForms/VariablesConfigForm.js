@@ -11,14 +11,18 @@ function VariableForm({ onSubmit, formData, isEditing }) {
       datatype: "",
       defaultValue: "",
       description: "",
+      declarationType: "",
     },
   });
 
   const [errors, setErrors] = useState({
     name: "",
     type: "",
-    datatype: "",
-    defaultValue: "",
+    body: {
+      datatype: "",
+      defaultValue: "",
+      declarationType: "",
+    },
   });
 
   useEffect(() => {
@@ -41,32 +45,21 @@ function VariableForm({ onSubmit, formData, isEditing }) {
     } else if (name === "datatype" && !value) {
       error = "required";
     } else if (
+      name === "declarationType" &&
+      formState.type === "otherVars" &&
+      !value
+    ) {
+      error = "required";
+    } else if (
       name === "defaultValue" &&
       formState.type === "otherVars" &&
+      formState.body.declarationType === "const" &&
       !value
     ) {
       error = "required";
     }
 
     return error;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    let error = "";
-
-    if (name in formState.body) {
-      setFormState((prevState) => ({
-        ...prevState,
-        body: { ...prevState.body, [name]: value },
-      }));
-      error = validateField(name, value);
-      setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
-    } else {
-      setFormState((prevState) => ({ ...prevState, [name]: value }));
-      error = validateField(name, value);
-      setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
-    }
   };
 
   const handleFormChange = (key, value) => {
@@ -76,7 +69,10 @@ function VariableForm({ onSubmit, formData, isEditing }) {
         body: { ...prevState.body, [key]: value },
       }));
       const error = validateField(key, value);
-      setErrors((prevErrors) => ({ ...prevErrors, [key]: error }));
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        body: { ...prevErrors.body, [key]: error },
+      }));
     } else {
       setFormState((prevState) => ({ ...prevState, [key]: value }));
       const error = validateField(key, value);
@@ -86,24 +82,35 @@ function VariableForm({ onSubmit, formData, isEditing }) {
 
   const validate = () => {
     let isValid = true;
-    let newErrors = {};
+    let newErrors = { body: {} };
 
     newErrors.name = validateField("name", formState.name);
     newErrors.type = validateField("type", formState.type);
-    newErrors.datatype = validateField("datatype", formState.body.datatype);
+    newErrors.body.datatype = validateField(
+      "datatype",
+      formState.body.datatype
+    );
 
     if (formState.type === "otherVars") {
-      newErrors.defaultValue = validateField(
-        "defaultValue",
-        formState.body.defaultValue
+      newErrors.body.declarationType = validateField(
+        "declarationType",
+        formState.body.declarationType
       );
+
+      if (formState.body.declarationType === "const") {
+        newErrors.body.defaultValue = validateField(
+          "defaultValue",
+          formState.body.defaultValue
+        );
+      }
     }
 
     if (
       newErrors.name ||
       newErrors.type ||
-      newErrors.datatype ||
-      (formState.type === "otherVars" && newErrors.defaultValue)
+      newErrors.body.datatype ||
+      newErrors.body.declarationType ||
+      newErrors.body.defaultValue
     ) {
       isValid = false;
     }
@@ -179,12 +186,39 @@ function VariableForm({ onSubmit, formData, isEditing }) {
                 </option>
               ))}
             </Form.Control>
-            {errors.datatype && (
+            {errors.body.datatype && (
               <p className="mb-0" style={{ color: "#EA868F" }}>
-                {errors.datatype}
+                {errors.body.datatype}
               </p>
             )}
           </Form.Group>
+
+          {/* Conditional Declaration Type Dropdown */}
+          {formState.type === "otherVars" && (
+            <Form.Group className="mb-2" controlId="formDeclarationType">
+              <Form.Label>Declaration Type</Form.Label>
+              <Form.Control
+                as="select"
+                name="declarationType"
+                value={formState.body.declarationType}
+                onChange={(e) =>
+                  handleFormChange("declarationType", e.target.value)
+                }
+                className="form-control form-control-sm"
+              >
+                <option value="">Select declaration type</option>
+                <option value="const">const</option>
+                <option value="let">let</option>
+                <option value="var">var</option>
+              </Form.Control>
+              {errors.body.declarationType && (
+                <p className="mb-0" style={{ color: "#EA868F" }}>
+                  {errors.body.declarationType}
+                </p>
+              )}
+            </Form.Group>
+          )}
+
           <Form.Group className="mb-2" controlId="formDefaultValue">
             <Form.Label>Default Value</Form.Label>
             <MonacoEditor
@@ -195,9 +229,9 @@ function VariableForm({ onSubmit, formData, isEditing }) {
               id={isEditing ? `editor-${formState?.id}` : "prop-value"}
               language="javascript"
             />
-            {errors.defaultValue && (
+            {errors.body.defaultValue && (
               <p className="mb-0" style={{ color: "#EA868F" }}>
-                {errors.defaultValue}
+                {errors.body.defaultValue}
               </p>
             )}
           </Form.Group>

@@ -93,7 +93,7 @@ export default function Block({ config, updateParent }) {
                       animation: isReordering ? "blink 1s infinite" : "none",
                     }}
                   >
-                    <i class="bi bi-x-circle-fill"></i>
+                    <i className="bi bi-x-circle-fill"></i>
                   </div>
                 </>
               ) : (
@@ -103,7 +103,7 @@ export default function Block({ config, updateParent }) {
                   onClick={() => setIsReordering(!isReordering)}
                   style={{ cursor: "pointer" }}
                 >
-                  <i class="bi bi-arrow-down-up"></i>
+                  <i className="bi bi-arrow-down-up"></i>
                 </div>
               )}
             </div>
@@ -165,7 +165,7 @@ export default function Block({ config, updateParent }) {
         isOpen={isOffcanvasOpen}
         onClose={() => handleClose(false)}
         title={"Add Function"}
-        width="40%"
+        width="50%"
       >
         {isOffcanvasOpen && (
           <AddFunctionItem update={(val) => handleClose(val)} />
