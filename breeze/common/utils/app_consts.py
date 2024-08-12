@@ -18,6 +18,8 @@ CONFIG_FILES_PATH = {
     'CSS_CONFIG' : 'css_config',
     'SWAGGER_CONTENT' : 'sample_swagger',
     'RESOURCE_CONFIG' : 'uploaded_resources_config',
+    'USAGE_CONFIG' : 'usage_config',
+    'ENVIRONMENT_SETTINGS' : 'environment_settings',,
     'DIRECTORY_MANAGEMENT':'directory_management'
 }
 

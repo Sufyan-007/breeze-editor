@@ -20,7 +20,7 @@ import ProjectComponents from "./components/ProjectComponents";
 import ProjectRouting from "./components/ProjectRouting";
 import Styles from "./components/StylesConfiguration/Styles";
 import Code from "./components/Code";
-import Settings from "./components/Settings";
+import Settings from "./components/Settings/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
 import FolderStructureConfig from "./components/FolderStructureSection/FolderStructureConfig";
 import Resources from "./components/ResourcesConfiguration/Resources";

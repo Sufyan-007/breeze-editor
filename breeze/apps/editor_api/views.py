@@ -1,4 +1,5 @@
 
+import subprocess
 from django.http import JsonResponse, Http404, FileResponse
 import json
 from .core.app_editor import AppEditor
@@ -20,6 +21,9 @@ from .core.helpers.get_attributes_utils import get_attributes_logic
 from .core.helpers.get_component_list import update_components
 from .core.files_upload_service import FileService
 from .core.resource_config_service import ResourceConfigGenerator
+from .core.helpers.function_ast_parser import FunctionParser
+from .core.app_generator import AppGenerator
+from .core.environment_settings_config_service import EnvironmentSettingsConfigService 
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -278,18 +282,33 @@ class ProjectConfig(APIView):
         return JsonResponse(projects, status=200)
 
     def post(self, request):
-        data = json.loads(request.body.decode("utf-8"))
+        data = request.POST.copy()
+        logo_file = request.FILES.get('logo')
+
         data['defaultComponent'] = "Main"
         data["projectName"] = data["name"]
         data["name"] = data['name'].lower().replace(" ", "_")
+        path = data["projectPath"]
+        data["current_environment"] = ""
         generated_paths = os.path.join(
-            os.path.dirname(os.getcwd()), "generated_projects")
+            os.path.dirname(os.getcwd()), path)
+
         # os.makedirs(generated_paths,exist_ok=True)
-        data["path"] = os.path.join(generated_paths, data["name"])
+        data["path"] = os.path.join(generated_paths)
         if (data["name"] in GenerateProject.get_projects().keys()):
             return JsonResponse({"error": "Application name should be unique."}, status=400)
+       
+        if logo_file:
+            logo_file_id = FileService.upload_file(logo_file, data["name"])
+            data["logo"] = logo_file_id
+            data["logo_file_name"] = logo_file.name
+
         app_config_writer = AppConfigWriter()
         app_config_writer.create_or_update_app_config(data)
+        
+        if logo_file:
+            resource_config_generator = ResourceConfigGenerator(data["name"])
+            resource_config_generator.update_config(logo_file.name, '/src/assets', "", logo_file_id)
         response = {"name": data["name"]}
         return JsonResponse(response, status=200)
 
@@ -312,49 +331,46 @@ class ProjectConfig(APIView):
 class ProjectDetailsConfig(APIView):
     def put(self, request):
         try:
-            data = json.loads(request.body.decode("utf-8"))
+            data = request.POST.copy()
+            logo_file = request.FILES.get('logo')
+            old_config = json.loads(data.get('oldConfig'))
+            old_logo = old_config.get('logo')
+
+            # Flags to track changes
+            project_name_changed = False
+            logo_changed = False
+            
             # rename the project folder name, rename the name and the projectName field in
             #  app_basic_config file
-            file_name = f"{CONFIG_PATH}/{data['oldConfig']['name']}/app_basic_config.json"
+            file_name = f"{CONFIG_PATH}/{old_config['name']}/app_basic_config.json"
             with open(file_name, 'r') as file:
                 app_basic_config = json.load(file)
                 app_basic_config['name'] = data['newProjectName'].lower().replace(
                     " ", "_")
+
+                if app_basic_config['name'] != old_config['name']:
+                    project_name_changed = True
+
                 app_basic_config['author'] = data['newAuthor']
                 app_basic_config['description'] = data['newDescription']
                 app_basic_config['projectName'] = data['newProjectName']
 
-                # generation path for new app_basic_config
-                generated_paths = os.path.split(app_basic_config['path'])
-                app_basic_config['path'] = os.path.join(
-                    generated_paths[0], app_basic_config['name'])
+                if old_config.get('logo') and old_config['logo'] != "null":
+                    logo_changed = True
+                    app_basic_config['logo'] = ""
 
-                # remove all the extra project folders whose config files are not present
-                # in the configuration folder but are present in the generated_projects
-                # folder for eg. with a .cache folder in a previously named folder
-                try:
-                    project_names_in_config = os.listdir(CONFIG_PATH)
-                    project_names_in_generated_proj = os.listdir(
-                        generated_paths[0])
-                    for dir in project_names_in_generated_proj:
-                        if dir not in project_names_in_config:
-                            dir_to_remove = os.path.join(
-                                generated_paths[0], dir)
-                            if os.path.isdir(dir_to_remove):
-                                shutil.rmtree(dir_to_remove)
-                except Exception as e:
-                    return JsonResponse({e}, status=500)
+                if logo_file:
+                    logo_file_id = FileService.upload_file(logo_file, old_config["name"])
+                    app_basic_config["logo"] = logo_file_id
+                    logo_changed = True
+                else:
+                    app_basic_config["logo"] = ""
 
                 # renaming all the affected folders
                 try:
-                    os.rename(
-                        f"{data['oldConfig']['path']}/{data['oldConfig']['name']}",
-                        f"{data['oldConfig']['path']}/{app_basic_config['name']}"
-                    )
-                    os.rename(data['oldConfig']['path'],
-                              app_basic_config['path'])
-                    os.rename(
-                        f"{CONFIG_PATH}/{data['oldConfig']['name']}", f"{CONFIG_PATH}/{app_basic_config['name']}")
+                    os.rename(f"{old_config['path']}/{old_config['name']}",
+                      f"{old_config['path']}/{app_basic_config['name']}")
+                    os.rename(f"{CONFIG_PATH}/{old_config['name']}", f"{CONFIG_PATH}/{app_basic_config['name']}")
 
                     # renaming the project's name in its package.json & package-lock.json files
                     package_json_path = os.path.join(
@@ -389,6 +405,17 @@ class ProjectDetailsConfig(APIView):
             file_name = f"{CONFIG_PATH}/{app_basic_config['name']}/app_basic_config.json"
             with open(file_name, 'w') as file:
                 file.write(newData)
+
+            app_generator = AppGenerator(app_basic_config['name'])
+            if project_name_changed:
+                app_generator.modify_index_html_with_project_name()
+            if logo_changed:
+                app_generator.modify_index_html_with_logo()
+            
+            if logo_file:
+                resource_config_generator = ResourceConfigGenerator(app_basic_config["name"])
+                resource_config_generator.update_config(logo_file.name, '/src/assets', "", logo_file_id)
+
 
             print(
                 '--------------- ALL APPLICATION NAME CHANGES CONDUCTED SUCCESSFULLY -----------')
@@ -625,166 +652,6 @@ class ResourceConfig(APIView):
             }, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-
-# @method_decorator(csrf_exempt, name='dispatch')
-# class CSSConfig(APIView):
-#     def post(self, request):
-#         try:
-#             data = json.loads(request.body.decode("utf-8"))
-
-#             css_name = data.get('css_name')
-#             css_content = data.get('css_content')
-
-#             if not css_name:
-#                 return JsonResponse({'error': 'CSS Name is required.'}, status=400)
-#             if not css_content:
-#                 return JsonResponse({'error': 'CSS Content is required.'}, status=400)
-
-#             folder_path = os.path.join('uploaded_css', css_name)
-
-#             if os.path.exists(folder_path):
-#                 return JsonResponse({'error': f'A folder with the name "{css_name}" already exists.'}, status=400)
-
-#             css_file_name = css_name.lower().replace(" ", "_")
-#             file_path = os.path.join(folder_path, f"{css_file_name}.css")
-#             default_storage.save(file_path, ContentFile(css_content))
-
-#             rules = tinycss2.parse_stylesheet(
-#                 css_content, skip_whitespace=True)
-#             class_names = StylesConfigService.extract_class_names(rules)
-
-#             return JsonResponse({
-#                 'message': 'CSS data processed successfully',
-#                 'css_file': css_name,
-#                 'class_names': list(class_names)
-#             }, status=200)
-
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     def get(self, request):
-#         try:
-#             dir_path = f"uploaded_css/"
-#             if not default_storage.exists(dir_path):
-#                 return JsonResponse({'files': []}, status=200)
-
-#             files = default_storage.listdir("uploaded_css")[0]
-#             files_list = [{'css_file': file} for file in files]
-#             return JsonResponse({'files': files_list}, status=200)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     def put(self, request):
-#         try:
-#             data = json.loads(request.body.decode("utf-8"))
-
-#             css_name = data.get('css_name')
-#             css_content = data.get('css_content')
-
-#             if not css_name:
-#                 return JsonResponse({'error': 'CSS Name is required.'}, status=400)
-#             if not css_content:
-#                 return JsonResponse({'error': 'CSS Content is required.'}, status=400)
-
-#             folder_path = os.path.join('uploaded_css', css_name)
-#             file_name = f"{css_name.lower().replace(' ', '_')}.css"
-#             file_path = os.path.join(folder_path, file_name)
-
-#             if default_storage.exists(folder_path):
-#                 shutil.rmtree(default_storage.path(folder_path))
-
-#             os.makedirs(folder_path, exist_ok=True)
-#             with default_storage.open(file_path, 'w') as f:
-#                 f.write(css_content)
-
-#             return JsonResponse({'message': 'CSS configuration updated successfully', 'css_name': css_name}, status=200)
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     def delete(self, request, css_name):
-#         try:
-#             folder_path = f"uploaded_css/{css_name}/"
-#             full_path = default_storage.path(folder_path)
-
-#             if default_storage.exists(folder_path):
-#                 shutil.rmtree(full_path)
-#                 return JsonResponse({'message': 'CSS file deleted successfully.'}, status=200)
-#             else:
-#                 return JsonResponse({'error': 'CSS file not found.'}, status=404)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-
-# @method_decorator(csrf_exempt, name='dispatch')
-# class CSSConfigReader(APIView):
-#     def get(self, request, css_name):
-#         try:
-#             dir_path = f"uploaded_css/{css_name}/"
-#             if not default_storage.exists(dir_path):
-#                 raise Http404
-
-#             _, files = default_storage.listdir(dir_path)
-#             if not files:
-#                 return JsonResponse({'error': 'No CSS file found in the specified folder.'}, status=404)
-
-#             file_name = files[0]
-#             file_path = f"{dir_path}{file_name}"
-
-#             with default_storage.open(file_path, "r") as f:
-#                 file_content = f.read()
-
-#             return JsonResponse({
-#                 'css_name': css_name,
-#                 'file_name': file_name,
-#                 'content': file_content
-#             })
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-
-
-# @method_decorator(csrf_exempt, name='dispatch')
-# class CSSFileUpload(APIView):
-#     def post(self, request):
-#         try:
-#             css_name = request.POST.get('css_name')
-#             css_file = request.FILES.get('css_file')
-
-#             if not css_file:
-#                 return JsonResponse({'error': 'No CSS file provided.'}, status=400)
-
-#             if not css_name:
-#                 return JsonResponse({'error': 'CSS Name is required.'}, status=400)
-
-#             base_dir = os.path.join('uploaded_css')
-#             folder_path = os.path.join(base_dir, css_name)
-
-#             if os.path.exists(folder_path):
-#                 return JsonResponse({'error': f'A folder with the name "{css_name}" already exists.'}, status=400)
-
-#             file_path = f"{folder_path}/{css_file.name}"
-#             file_name = default_storage.save(
-#                 file_path, ContentFile(css_file.read()))
-
-#             with default_storage.open(file_name, 'r') as f:
-#                 css_text = f.read()
-
-#             rules = tinycss2.parse_stylesheet(css_text, skip_whitespace=True)
-#             class_names = StylesConfigService.extract_class_names(rules)
-#             print(len(class_names))
-#             return JsonResponse({
-#                 'message': 'CSS file uploaded successfully',
-#                 'css_name': css_name,
-#                 'class_names': list(class_names)
-#             }, status=200)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-
 @method_decorator(csrf_exempt, name='dispatch')
 class HtmlConfigReader(APIView):
     def post(self, request):
@@ -843,7 +710,6 @@ class ComponentConfigWriter(APIView):
                 return JsonResponse({"error": "project_id and component_id are required"}, status=400)
             
             componentConfigService = ComponentConfigService(project_id)
-            
             config = componentConfigService.update_component(component_id, data["body"])
             return JsonResponse(config, status=200, safe=False)
         except Exception as e:
@@ -868,159 +734,6 @@ class ComponentConfigOrder(APIView):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
-
-# @method_decorator(csrf_exempt, name='dispatch')
-# class LifeCycleConfigWriter(APIView):
-
-#     def post(self, request):
-#         try:
-#             data = json.loads(request.body)
-#             componentConfigService = ComponentConfigService(data["project_id"])
-#             lifecycle_data = self.extract_lifecycle_data(data)
-#             new_hook = componentConfigService.add_lifecycle(lifecycle_data)
-#             return JsonResponse(new_hook, status=200)
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON'}, status=400)
-#         except ValueError as e:
-#             return JsonResponse({'error': str(e)}, status=409)  # 409 Conflict
-
-#     def get(self, request):
-#         try:
-#             project_id = request.GET.get('project_id')
-#             comp_name = request.GET.get('comp_name')
-#             hook_name = request.GET.get('hook_name')
-#             if not project_id or not comp_name:
-#                 return JsonResponse({'error': 'Missing required parameters'}, status=400)
-#             componentConfigService = ComponentConfigService(project_id)
-#             lifecycle_hooks = componentConfigService.get_lifecycle(comp_name, hook_name)
-#             if lifecycle_hooks or isinstance(lifecycle_hooks, list):
-#                 return JsonResponse(lifecycle_hooks, safe=False, status=200)
-#             return JsonResponse({'error': 'Hook not found'}, status=404)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     def put(self, request):
-#         try:
-#             data = json.loads(request.body)
-#             lifecycle_data = self.extract_lifecycle_data(data)
-#             componentConfigService = ComponentConfigService(data["project_id"])
-#             updated_hook = componentConfigService.update_lifecycle(lifecycle_data)
-#             return JsonResponse(updated_hook, status=200)
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON'}, status=400)
-#         except (KeyError, LookupError, ValueError) as e:
-#             return JsonResponse({'error': str(e)}, status=400)
-
-#     def delete(self, request):
-#         try:
-#             project_id = request.GET.get('project_id')
-#             comp_name = request.GET.get('comp_name')
-#             hook_name = request.GET.get('hook_name')
-#             if not project_id or not comp_name or not hook_name:
-#                 return JsonResponse({'error': 'Missing required parameters'}, status=400)
-#             componentConfigService = ComponentConfigService(project_id)
-#             isDeleted = componentConfigService.delete_lifecycle(comp_name, hook_name)
-#             if isDeleted:
-#                 return JsonResponse({'msg': 'Hook deleted.'}, status=200)
-#             return JsonResponse({'error': 'Hook not found'}, status=404)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     @staticmethod
-#     def extract_lifecycle_data(data):
-#         return {
-#             "comp_name": data["comp_name"],
-#             "type": data["type"],
-#             "lifecycleType": data["lifecycleType"],
-#             "hook_name": data["hook_name"],
-#             "dependentVars": data["dependentVars"],
-#             "body": data["body"],
-#             "return_body": data.get("return_body")
-#         }
-        
-# @method_decorator(csrf_exempt, name='dispatch')
-# class VariablesConfigWriter(APIView):
-    
-#     def post(self, request):
-#         try:
-#             data = json.loads(request.body.decode("utf-8"))
-#             componentConfigService = ComponentConfigService(data["project_id"])
-#             var=componentConfigService.add_variable(data["component"],data["variable_config"])
-#             return JsonResponse(var,status=200,safe=False)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-        
-#     def get(self, request):
-#         try:
-#             project_id = request.GET.get('project_id')
-#             comp_name = request.GET.get('comp_name')
-#             variable_id = request.GET.get('variable_id')
-#             if not project_id or not comp_name:
-#                 return JsonResponse({'error': 'Missing required parameters'}, status=400)
-#             componentConfigService = ComponentConfigService(project_id)
-#             variables = componentConfigService.get_variables(comp_name, variable_id)
-#             if variables or isinstance(variables, list):
-#                 return JsonResponse(variables, safe=False, status=200)
-#             return JsonResponse({'error': 'Variable not found'}, status=404)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     def put(self, request):
-#         try:
-#             data = json.loads(request.body.decode("utf-8"))
-#             componentConfigService = ComponentConfigService(data["project_id"])
-#             var=componentConfigService.update_variable(data["component"],data["variable_config"])
-#             return JsonResponse(var,status=200,safe=False)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     def delete(self, request):
-#         try:
-#             project_id = request.GET.get('project_id')
-#             comp_name = request.GET.get('comp_name')
-#             variable_id = request.GET.get('variable_id')
-#             if not project_id or not comp_name or not variable_id:
-#                 return JsonResponse({'error': 'Missing required parameters'}, status=400)
-#             componentConfigService = ComponentConfigService(project_id)
-#             isDeleted = componentConfigService.delete_variable(comp_name, variable_id)
-#             if isDeleted:
-#                 return JsonResponse({'msg': 'Var deleted.'}, status=200)
-#             return JsonResponse({'error': 'Var not found'}, status=404)
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-        
-# @method_decorator(csrf_exempt,name="dispatch")
-# class FunctionConfigReader(APIView):
-    
-#     def post(self,request):
-#         raise NotImplementedError()
-#         return JsonResponse({},status=200)
-
-# @method_decorator(csrf_exempt,name="dispatch")
-# class FunctionConfigWriter(APIView):
-    
-#     def post(self,request):
-#         try:
-#             data = json.loads(request.body.decode("utf-8"))
-#             componentConfigService = ComponentConfigService(data["project_id"])
-#             func=componentConfigService.add_function(data["component"],data["function_config"])
-#             return JsonResponse(func,status=200,safe=False)
-#         except IndexError:
-#             return JsonResponse({},status=409)
-#         except:
-#             return JsonResponse({},status=500)
-        
-#     def put(self,request):
-#         try:
-#             data = json.loads(request.body.decode("utf-8"))
-#             componentConfigService = ComponentConfigService(data["project_id"])
-#             func=componentConfigService.update_function(data["component"],data["function_config"])
-#             return JsonResponse(func,status=200,safe=False)
-#         except IndexError:
-#             return JsonResponse({},status=404)
-#         except:
-#             return JsonResponse({},status=500)
-
 @method_decorator(csrf_exempt, name='dispatch')
 class GetAttributes(APIView):
     def post(self, request):
@@ -1041,3 +754,66 @@ class GetResources(APIView):
             return JsonResponse(app_editor.get_resource(data["component"],data.get("resource_id")),status=200)
         except IndexError:
             return JsonResponse({},status=404)
+        
+@method_decorator(csrf_exempt,name="dispatch")
+class ASTParser(APIView):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            function_generator = FunctionParser()
+            function_code = function_generator.generate_statement_code(data)
+            formatted_function_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=function_code, text=True)
+            return JsonResponse({"function": formatted_function_code},status=200)
+        except:
+            return JsonResponse({}, status=500)
+        
+@method_decorator(csrf_exempt, name="dispatch")
+class EnvironementSettings(APIView):
+    def post(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            print(data)
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            config = environment_settings_service.generate_config_from_payload(data)
+            return JsonResponse({'status': 'success', 'config': config, 'message': 'Environment settings saved successfully'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def get(self, request, projectName):
+        try:
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            config = environment_settings_service.get_config()
+            return JsonResponse({'status': 'success', 'config': config}, status=200)
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            env_name = data.get('environmentName')
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            environment_settings_service.delete_config(env_name)
+            return JsonResponse({'status': 'success', 'message': 'Environment settings deleted successfully'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+@method_decorator(csrf_exempt, name="dispatch")
+class SetEnvironment(APIView):
+    def post(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            env_name = data.get('environmentName')
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+            environment_settings_service.set_environment(env_name)
+            if env_name == "default (.env)":
+                return JsonResponse({'status': 'success', 'message': 'Environment default has been set as active'}, status=200)
+
+            return JsonResponse({'status': 'success', 'message': f'Environment {env_name} has been set as active'}, status=200)
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': 'Server error'}, status=500)

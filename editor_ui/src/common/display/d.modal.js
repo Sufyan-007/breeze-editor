@@ -22,7 +22,7 @@ const ModalComponent = ({
         </Modal.Header>
 
         <Modal.Body>
-          <p>{modalBody}</p>
+          <p style={{whiteSpace: "pre-line"}}>{modalBody}</p>
         </Modal.Body>
 
         <Modal.Footer>

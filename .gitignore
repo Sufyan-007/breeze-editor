@@ -12,3 +12,5 @@ package-lock.json
 /uploaded_css
 breeze/uploaded_css/
 /user_uploads
+nohup.out
+editor_ui/package-lock.json

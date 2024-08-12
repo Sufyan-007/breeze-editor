@@ -26,6 +26,7 @@ class ResourceConfigGenerator:
         with open(file_path_full, 'rb') as f:
             file_content = f.read()
 
+        create_parent_dir_if_not_exists(path)
         final_path = os.path.join(path, file_name)
         with open(final_path, 'wb') as destination:
             destination.write(file_content)
@@ -56,29 +57,86 @@ class ResourceConfigGenerator:
           
         return lineage
             
-    def update_directory_management(self, file_id, file_name, file_path, file_type):
+
+    def find_root_directory_id(self):
+        # Find the ID of the root directory
+        directory_management = self.read_config_file(self.directory_management_path)
+        root_id = None
+        for item_id, item in directory_management.items():
+            if item.get("tag") == "ROOT" and item.get("type") == "DIRECTORY":
+                root_id = item_id
+                break
+
+        if root_id is None:
+            print("Error: Root directory not found in the configuration.")
+        return root_id
+                
+    def update_directory_management(self, file_name, file_path, file_type):
+        print("Updating directory management...")
+        print(file_name, file_path, file_type, "parameters")
+
         # Read existing directory management configuration
         directory_management = self.read_config_file(self.directory_management_path)
         if not directory_management:
-            print(f"No existing directory management configuration found at {self.directory_management_path}")        
+            print(f"No existing directory management configuration found at {self.directory_management_path}")
+            directory_management = {}  # Initialize if the file is empty
+
+        # Generate unique ID for the new resource
+        unique_id = self.generate_unique_id()
+
         # Determine the lineage for the new resource based on the file path
         lineage = self.determine_lineage(file_path)
+
         if not lineage:
             print(f"Warning: No lineage found for the file path {file_path}")
 
-        # Create a new resource entry
-        new_resource = {
-            file_id: {
-                "name": file_name,
-                "lineage": lineage,
-                "id": file_id,
-                "tag": file_type.upper(),
-                "type": "FILE"
-            }
-        }
+            # Generate a unique ID for the new directory
+            unique_id_for_directory = self.generate_unique_id()
 
-        # Update the directory management configuration with the new resource
-        directory_management.update(new_resource)
+            # Find the root directory ID
+            root_id = self.find_root_directory_id()
+            if not root_id:
+                return
+
+            # Create new directory management entry
+            new_directory = {
+                unique_id_for_directory: {
+                    "name": 'assets',
+                    "lineage": [root_id],
+                    "id": unique_id_for_directory,
+                    "tag": file_type.upper(),
+                    "type": "DIRECTORY",
+                }
+            }
+
+            # Create new resource entry
+            new_resource = {
+                unique_id: {
+                    "name": file_name,
+                    "lineage": [root_id, unique_id_for_directory],
+                    "id": unique_id,
+                    "tag": file_type.upper(),
+                    "type": "FILE"
+                }
+            }
+
+            # Add the new directory and resource to the directory management
+            directory_management.update(new_directory)
+            directory_management.update(new_resource)
+        else:
+            # Create a new resource entry
+            new_resource = {
+                unique_id: {
+                    "name": file_name,
+                    "lineage": lineage,
+                    "id": unique_id,
+                    "tag": file_type.upper(),
+                    "type": "FILE"
+                }
+            }
+
+            # Update the directory management configuration with the new resource
+            directory_management.update(new_resource)
 
         # Write the updated configuration back to the file
         try:

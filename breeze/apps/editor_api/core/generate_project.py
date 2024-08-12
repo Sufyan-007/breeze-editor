@@ -8,11 +8,11 @@ class GenerateProject:
         pass
 
     @staticmethod
-    def generate_project(project_config):
+    def generate_project(project_config, logo=None):
         
         print("***********************************")
         print("RUNNING PROJECT GENERATION SCRIPT")
-        app_generator = AppGenerator(project_config['name'])
+        app_generator = AppGenerator(project_config['name'], logo)
         app_generator.generate_app()
         print("PROJECT GENERATION SCRIPT COMPLETED")
         print("***********************************")
@@ -40,6 +40,7 @@ class GenerateProject:
         print(generated_project_path)
         shutil.rmtree(app_config_dir)
         try:
-            shutil.rmtree(generated_project_path)
+            # shutil.rmtree(generated_project_path)
+            pass
         except:
             pass

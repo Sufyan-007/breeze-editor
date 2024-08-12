@@ -8,8 +8,9 @@ import routing from "../../assets/icons/routing.svg";
 import settings from "../../assets/icons/settings.svg";
 import services from "../../assets/icons/services.svg";
 import constants from "../../assets/icons/constants.svg";
-import apps from "../../assets/icons/apps.svg";
 import upload from "../../assets/icons/upload.svg";
+
+import apps from "../../assets/icons/apps.svg";
 import folder from "../../assets/icons/folder.svg";
 
 import {
@@ -18,7 +19,7 @@ import {
 } from "../../services/ConfigService";
 import { createContext, useMemo, useState } from "react";
 import ProjectSidebar from "../ProjectSidebar";
-import HtmlSection from "./HtmlSection";
+import HtmlSection from "./HtmlSection/HtmlSection";
 import SidebarService from "../../services/SidebarService";
 
 

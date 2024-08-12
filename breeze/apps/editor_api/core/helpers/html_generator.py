@@ -27,7 +27,9 @@ class HTMLGenerator:
             if ref:
                 for resource in self.config["resources"]:
                     if resource["id"]==ref:
-                        related_func_config=resource["body"]
+                        print("------------RESOURCE------------")
+                        print(resource)
+                        related_func_config=resource
                         related_func_config["name"]=resource["name"]
                         break
                 else:

@@ -88,7 +88,8 @@ class AppEditor:
     
     app_config_dir = None
     app_config = {}
-    comp_config = {} 
+    comp_config = {}
+    usage_config = {}
     # mapping_config = {}
     routing_config = None
     reducer_config = None
@@ -133,7 +134,7 @@ class AppEditor:
        package_json['devDependencies']['web-vitals'] = "^3.5.0"
        write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
        process = subprocess.Popen(
-           ["npm", "install"],
+           " ".join(["npm", "install"]),shell=True,
            cwd=f"{self.app_config['path']}/{self.app_config['name']}",
            stdout=subprocess.PIPE,
            stderr=subprocess.PIPE,
@@ -192,6 +193,8 @@ class AppEditor:
         # Read config of component written in component_config file
         self.comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
         # Read component config from different files and prepare map of config for all
+        
+        self.usage_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['USAGE_CONFIG'])
       
         self.directory_management_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
 
@@ -276,15 +279,14 @@ class AppEditor:
        
         # Updating component_config.json
         print(comp['name'])
-        
+        used_route = comp.get('route_path', None)
+        if (used_route):
+            del comp['route_path']
         self.comp_config[comp['name']] = comp
         comp_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
         write_file(f"{comp_config_path}.json", json.dumps(self.comp_config))
 
         conf=copy.deepcopy(self.comp_config)
-
-          # Get the constructed file path from the file_id
-        # constructed_file_path = self.directory_management_service.get_path_from_file_id(file_id)
         
         # Writing target component in generated project 
         comp_generator = ComponentGenerator(
@@ -297,12 +299,25 @@ class AppEditor:
             )
         print(comp_generator,"comp_generator")
         comp_generator.write_component(comp)
+        if not self.usage_config.get('components').get(comp['name']):
+            self.usage_config['components'][comp['name']] = {
+                "imports": {},
+                "props": {},
+                "variables": {},
+                "usedRoutes":  {used_route: {}} if used_route else {},
+                "functions": {},
+                "lifecycle": {},
+                "hooks": {},
+                "css": {},
+                "usage": {}
+            }
+            usage_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['USAGE_CONFIG']}"
+            write_file(f"{usage_config_path}.json", json.dumps(self.usage_config))
         return conf
     
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
-    def add_component(self,name,type):
-       
+    def add_component(self ,name, comp_type, route_path):
         name=name.replace(' ',"")
         comp=copy.deepcopy(NEW_COMP_FORMAT)
         
@@ -311,7 +326,8 @@ class AppEditor:
         replace_variable(comp,"$NAME",name)
         replace_variable(comp, "$FILE_ID", file_id)
         
-        comp["type"] = type
+        comp["type"] = comp_type
+        comp["route_path"] = route_path
         self.add_component_directory_management(name,file_id)
         
         config=self.write_component(comp)

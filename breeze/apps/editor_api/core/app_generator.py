@@ -3,7 +3,9 @@ import subprocess
 import json, os , uuid
 from common.utils.formatter import format_by_prettier,format_val
 import pathlib
-
+import shutil
+import re
+from .files_upload_service import FileService
 # JSON input with custom configurations and default component name
 config_input = '''
 {
@@ -49,13 +51,11 @@ class AppGenerator:
     redux_store_config = None
     
 
-    def __init__(self, app_config_dir):
-        # self.directory_management_service=DirectoryManagementGenerator(self.app_config_dir)
+    def __init__(self, app_config_dir, logo=None):
         self.app_config_dir = f"{CONFIG_PATH}/{app_config_dir}"
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{app_config_dir}"
         self.read_configs()
-        
-
+        self.logo = logo
     def read_configs(self):
         print(self.app_config,"app_config")
         print(self.app_config_dir,"app_config_dir")
@@ -126,8 +126,11 @@ class AppGenerator:
             print("----------------------")
             print("No YAML file")
 
+        self.modify_index_html_with_project_name()
 
-
+        # Conditionally modify index.html with logo
+        if self.logo:
+            self.modify_index_html_with_logo()
 
     def write_services(self):
         # imp_helper = ImportHelper()
@@ -180,14 +183,14 @@ class AppGenerator:
         project_name = self.app_config['name']
         app_config_dump = json.dumps(self.app_config)
         process = subprocess.Popen(
-            [
+            " ".join([
                 "npx",
                 "create-react-app",
                 project_name,
                 "--template",
                 "cra-template",
                 "--use-npm",
-            ],
+            ]), shell=True,
             cwd=self.app_config["path"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -196,6 +199,26 @@ class AppGenerator:
         )
         ProjectGenerationProgress.store_process(project_name, process, "create_react_app")
         process.wait()
+        
+        # Step 2: Install specific versions of React, React-DOM
+        specific_version = "18.3.1"
+
+        process_react_install = subprocess.Popen(
+            [
+                "npm",
+                "install",
+                f"react@{specific_version}",
+                f"react-dom@{specific_version}"
+            ],
+            cwd=os.path.join(self.app_config["path"], project_name),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            text=True,
+        )
+        ProjectGenerationProgress.store_process(project_name, process_react_install, "install_specific_react_version")
+        process_react_install.wait()
+
 
     def modify_main_component(self):
         # print(self.app_config,"See the project name ")
@@ -266,11 +289,13 @@ class AppGenerator:
         package_json['devDependencies'] = {}
         package_json['devDependencies']['web-vitals'] = "^3.5.0"
 
+        package_json['devDependencies']['env-cmd'] = "^10.1.0"
+
         write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
 
         # subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
         process = subprocess.Popen(
-            ["npm", "install"],
+            " ".join(["npm", "install"]), shell=True,
             cwd=f"{self.app_config['path']}/{self.app_config['name']}",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -345,3 +370,78 @@ class AppGenerator:
             id_to_path[item_id] = current_path
 
         print("Project structure created successfully.")
+
+    def modify_index_html_with_project_name(self):
+        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
+        index_html_path = os.path.join(project_path, 'public', 'index.html')
+    
+        # Modify the index.html to reference the new project name
+        with open(index_html_path, 'r') as index_file:
+            index_content = index_file.read()
+    
+        # Use regex to find and replace the title content
+        title_pattern = re.compile(r'<title>(.*?)</title>')
+        modified_content = title_pattern.sub(
+            f'<title>{self.app_config["projectName"]}</title>',
+            index_content
+        )
+        with open(index_html_path, 'w') as index_file:
+            index_file.write(modified_content)
+
+
+    def modify_index_html_with_logo(self):
+        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
+        index_html_path = os.path.join(project_path, 'public', 'index.html')
+
+        logo_id = self.app_config.get('logo')
+        logo_file_name = self.app_config.get('logo_file_name', 'default.ico')  
+        project_name = self.app_config['name']
+
+        # Define the public logo path
+        public_logo_path = os.path.join(project_path, 'public', logo_file_name)
+
+        if logo_id:
+            # Download the file
+            downloaded_file_path = FileService.download_file(logo_id, project_name)
+
+            if downloaded_file_path:
+                # Copy the downloaded file to the public folder with the appropriate extension
+                shutil.copy(downloaded_file_path, public_logo_path)
+
+                # Modify the index.html to reference the new favicon
+                with open(index_html_path, 'r') as index_file:
+                    index_content = index_file.read()
+
+                modified_content = re.sub(
+                    r'<link rel="icon" href="%PUBLIC_URL%/.*?" />',
+                    f'<link rel="icon" href="%PUBLIC_URL%/{logo_file_name}" />',
+                    index_content
+                )
+
+                with open(index_html_path, 'w') as index_file:
+                    index_file.write(modified_content)
+
+                print(f"Modified {index_html_path} to include logo from {public_logo_path}")
+            else:
+                print(f"Failed to download the logo with ID {logo_id}")
+        else:
+            # If logo is deleted, remove existing logo file if exists
+            if os.path.exists(public_logo_path):
+                os.remove(public_logo_path)
+                print(f"Deleted logo file from {public_logo_path}")
+
+            # Modify the index.html to reset to the default favicon
+            with open(index_html_path, 'r') as index_file:
+                index_content = index_file.read()
+
+            modified_content = re.sub(
+                r'<link rel="icon" href="%PUBLIC_URL%/.*?" />',
+                '<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />',
+                index_content
+            )
+
+            with open(index_html_path, 'w') as index_file:
+                index_file.write(modified_content)
+
+            print(f"Modified {index_html_path} to reset to default favicon")
+

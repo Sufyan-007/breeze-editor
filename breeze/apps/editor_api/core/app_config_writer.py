@@ -4,6 +4,8 @@ import json,os
 from common.utils.request_code import REQUEST
 from .generate_project import GenerateProject
 from apps.api_client_generator.utils.uuid_as_key import generate_uuid_as_key
+from .app_startup_manager import start_app
+
 class AppConfigWriter:
     def __init__(self):
         pass
@@ -22,11 +24,33 @@ class AppConfigWriter:
                 "/": {},
             }
         }
+        usage_config = {
+            "components": {
+                    f"{app_config['defaultComponent']}": {
+                        "imports": {},
+                        "props": {},
+                        "variables": {},
+                        "usedRoutes": {},
+                        "functions": {},
+                        "lifecycle": {},
+                        "hooks": {},
+                        "css": {},
+                        "usage": {}
+                    }
+                },
+            "contexts": {},
+            "reducers": {},
+            "reduxStore": {},
+            "routes": {},
+            "imports": {},
+            "css": {},
+        }
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", json.dumps(basic_routing_config))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUCER_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUX_STORE_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CSS_CONFIG']}.json", json.dumps({}))
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['USAGE_CONFIG']}.json", json.dumps(usage_config))
         write_file(f"{app_config_dir}/react_request_code.py", REQUEST)
 
     def write_basic_main_comp_config(self, app_config, file_id):
@@ -245,6 +269,6 @@ class AppConfigWriter:
         self.write_basic_main_comp_config(app_current_config,main_comp_file_id )
         
         self.write_basic_config_files(app_current_config)
-        
-        GenerateProject.generate_project(app_current_config)
+
+        GenerateProject.generate_project(app_current_config, app_current_config.get("logo"))
     
