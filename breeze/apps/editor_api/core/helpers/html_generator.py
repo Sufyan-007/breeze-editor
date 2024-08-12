@@ -13,7 +13,7 @@ class HTMLGenerator:
         val=""
         if value.get('type') == "DESTRUCTURABLE":
             return f"{{...{value.get('value')} }}"
-        if value.get('type') == 'LITERAL':
+        if value.get('type') in ['LITERAL','ANY']:
             if value.get("value").startswith('{') and value.get("value").endswith('}'):
                 valueWithoutBraces = value.get('value')[1:-1]
                 val= f"{{{valueWithoutBraces}}}"

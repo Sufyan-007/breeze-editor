@@ -25,7 +25,7 @@ const CustomPropConfig = ({
   const [availableVar, setAvailablevar] = useState();
   const { projectName } = useParams();
   const [availableComponents, setAvailablecomponents] = useState([]);
-
+  console.log(inputField)
   // useEffect(()=>{
   //   setSelectedComponent({  value:inputField?.value  ,
   //     label: inputField?.value ,
@@ -51,24 +51,31 @@ const CustomPropConfig = ({
       inputField.importType === undefined
     ) {
       setCheckbox(true);
-    } else if (inputField.key === "className" || inputField.importType) {
+    } else if ( inputField.importType) {
       setCheckbox(true);
     }
+    else if(inputField.value!=='' && inputField.$ref === undefined)
+      setCheckbox(true);
+
   }, [inputField]);
   
-  useEffect(() => {
-    const propDataType = getPropDataType(inputField.key);
-    const filteredDatatypes = allVariables.filter((item) => {
-      return item.body.datatype.toUpperCase() === propDataType;
-    });
+  // useEffect(() => {
+  //   const propDataType = getPropDataType(inputField.key);
+  //   const filteredDatatypes = allVariables.filter((item) => {
+  //     return item.body.datatype.toUpperCase() === propDataType;
+  //   });
 
-    setAvailablevar(filteredDatatypes);
-  }, []);
+  //   setAvailablevar(filteredDatatypes);
+  // }, []);
   useEffect(() => {
-    const propDataType = getPropDataType(inputField.key);
-    const filteredDatatypes = allVariables.filter((item) => {
+    const propDataType = getPropDataType(inputField.key)|| "STRING";
+    let filteredDatatypes = [];
+    if(propDataType==="ANY")
+       filteredDatatypes=[...allVariables,...availableFunctions]
+    else{
+     filteredDatatypes = allVariables.filter((item) => {
       return item.body.datatype.toUpperCase() === propDataType;
-    });
+    });}
     setAvailablevar(filteredDatatypes);
   }, [allVariables, checkbox, getPropDataType]);
   useEffect(() => {
@@ -228,7 +235,7 @@ const CustomPropConfig = ({
                   ))}
               </Form.Select>
             ))}
-          {inputField.type === "ELEMENT" && (
+          {inputField.type === "ELEMENT" || inputField.type ==="ANY" && (
              (checkbox===true?(
               <MonacoEditor
              defaultValue={inputField?.value || ""}
@@ -238,6 +245,8 @@ const CustomPropConfig = ({
                handleAttributeChange(inputField.key, body);
              }}
              id={`Boolean-${inputField.key}`}
+             placeholderText="To denote expressions, use curly braces {}"
+
            ></MonacoEditor>
             ):(
               <Form.Select
@@ -326,6 +335,7 @@ const CustomPropConfig = ({
                handleAttributeChange(inputField.key, body);
              }}
              id={`Boolean-${inputField.key}`}
+             placeholderText="Enter a Numeric Value"
            ></MonacoEditor>
             ):(
               <Form.Select
@@ -502,6 +512,7 @@ const CustomPropConfig = ({
                 handleAttributeChange(inputField.key, body);
               }}
               id={`Boolean-${inputField.key}`}
+              placeholderText="Enter a boolean value or boolean expression"
             ></MonacoEditor>
             </div>
             ))}

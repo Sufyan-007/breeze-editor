@@ -250,6 +250,8 @@ const AttributesConfig = ({
                 handleAttributeChange(inputField.key, body);
               }}
               id={`Boolean-${inputField.key}`}
+              placeholderText="Enter a boolean value or boolean expression"
+
             ></MonacoEditor>
             ) : (
               <Form.Select
