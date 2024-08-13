@@ -6,6 +6,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
   const [url, setUrl] = useState(urlData);
   const [pathParams, setPathParams] = useState([]);
   const [queryParams, setQueryParams] = useState([]);
+  
 
   useEffect(() => {
     setUrl(urlData);
@@ -115,7 +116,6 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
     }
   };
   const renderError = (errors) => {
-    console.log(errors, "errors");
     if (!errors) return null;
     return (
       <div className="text-danger">

@@ -1,26 +1,27 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
-// import RenderObject from "./RenderObject";
 import { getApiSchemaDetails } from "../../../services/ApiService";
 import { useParams } from "react-router";
-function BodySettings({ bodyData, onChange }) {
+function BodySettings({ bodyData, onChange, moduleId }) {
+  console.log(moduleId, "moduleid in bodyyyyyyyyyy");
   const [body, setBody] = useState(bodyData);
   const [schemaList, setSchemaList] = useState([]);
   // const [isExpanded, setIsExpanded] = useState(false);
   const { projectName } = useParams();
 
   const fetchSchemasList = useCallback(
-    async (schemaName) => {
+    async (schemaName, moduleId) => {
       try {
-        const result = await getApiSchemaDetails(projectName, schemaName);
+        const result = await getApiSchemaDetails(projectName, schemaName, moduleId);
         if (schemaName) {
           return result;
         } else {
           // needs to be changed later 
-          const combinedSchemaList = result.flatMap(module => module.schemas);
-          setSchemaList(combinedSchemaList);
+          // const combinedSchemaList = result.flatMap(module => module.schemas);
+
+          setSchemaList(result[0].schemas);
         }
-        // console.log(result, "result");
+        console.log(result, "result");
       } catch (e) {
         console.error(e);
       }
@@ -28,49 +29,14 @@ function BodySettings({ bodyData, onChange }) {
     [projectName]
   );
   useEffect(() => {
-    fetchSchemasList(null);
-  }, [fetchSchemasList]);
-  const addProperty = () => {
-    const newPropertyKey = `property${
-      Object.keys(body.schema.properties).length + 1
-    }`;
-    const newProperty = {
-      type: "",
-      required: false,
-      example: "",
-      objectType: "",
-    };
-    setBody((state) => {
-      state.schema.properties[newPropertyKey] = newProperty;
-      return { ...state };
-    });
-  };
-  const editProperty = (key, newValue, newKey) => {
-    console.log(key, newKey, newValue, "valuessss");
-    if (newValue) {
-      const updatedBody = { ...body };
-      if (updatedBody.schema && updatedBody.schema.properties) {
-        if (newKey) {
-          delete updatedBody.schema.properties[key];
-          updatedBody.schema.properties[newKey] = newValue;
-        } else {
-          updatedBody.schema.properties[key] = newValue;
-        }
-        setBody(updatedBody);
-        onChange("body", updatedBody);
-      }
-    } else {
-      if (body.schema && body.schema.properties) {
-        const updatedBody = { ...body };
-        delete updatedBody.schema.properties[key];
-        setBody(updatedBody);
-        console.log(updatedBody, "updatedbody");
-        onChange("body", updatedBody);
-      }
+    if(moduleId)
+    {
+      fetchSchemasList(null,moduleId);
     }
-  };
+  }, [fetchSchemasList, moduleId]);
+
   const handleSchemaChange = async (value) => {
-    const updatedSchema = await fetchSchemasList(value);
+    const updatedSchema = await fetchSchemasList(value,moduleId);
     console.log(updatedSchema, "updatedSchema");
     setBody((state) => {
       state.schema = updatedSchema;
@@ -78,10 +44,6 @@ function BodySettings({ bodyData, onChange }) {
       onChange("body", [state]);
       return { ...state };
     });
-    // const updatedBody = { ...body };
-    // updatedBody.schema = updatedSchema;
-    // updatedBody.schema_name = value;
-    // onChange("body", [updatedBody]); // needs to be changed when body will be of one type only
   };
   const handleChanges = (prop, value) => {
     console.log(prop, value);
@@ -93,6 +55,21 @@ function BodySettings({ bodyData, onChange }) {
   useEffect(() => {
     setBody(bodyData);
   }, [bodyData]);
+
+  const renderError = (errors) => {
+    if (!errors) return null;
+    return (
+      <div className="text-danger">
+        {Object.entries(errors).map(([key, messages]) => (
+          <div key={key}>
+            {messages.map((message, idx) => (
+              <div key={idx}>{key}:{message}</div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
   return body ? (
     <>
       <div className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
@@ -177,48 +154,7 @@ function BodySettings({ bodyData, onChange }) {
           </>
         )}
       </div>
-      {/* {body.content_type !== "text" &&
-        body.schema.properties &&
-        Object.entries(body.schema.properties).length > 0 && (
-          <div
-            className="p-2 m-2 d-flex flex-column"
-            style={{ border: "1px solid rgba(128, 128, 128, 0.5)" }}>
-            <div className="d-flex justify-content-between">
-              <span>Schema Properties:</span>
-              <div>
-                <img
-                  className="mx-2 mb-1"
-                  width="25"
-                  height="25"
-                  src="https://img.icons8.com/ios/50/FFFFFF/add--v1.png"
-                  alt="add--v1"
-                  onClick={addProperty}
-                  style={{ cursor: "pointer" }}
-                />
-                <img
-                  className="mx-1"
-                  width="20"
-                  height="20"
-                  src="https://img.icons8.com/fluency-systems-filled/48/FFFFFF/expand-arrow.png"
-                  alt="expand-arrow"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setIsExpanded(!isExpanded)}
-                />
-              </div>
-            </div>
-            {
-              isExpanded &&
-              Object.entries(body.schema.properties).map(([key, value]) => (
-                <RenderObject
-                  propertyName={key}
-                  value={value}
-                  updateParent={(value, newKey = null) =>
-                    editProperty(key, value, newKey)
-                  }
-                />
-              ))}
-          </div>
-        )} */}
+        {renderError(body.errors)}
     </>
   ) : (
     <div className="text-white">-----No Body Present-----</div>

@@ -100,7 +100,7 @@ class ApiModelLoader:
         auth_type = auth_data.get("type")
         auth_scheme = auth_data.get("scheme", None)
         login_api = auth_data.get("login_api", None)
-        token_api = auth_data.get("token_api", None)
+        token_id = auth_data.get("token_id", None)
         content_data = auth_data.get("content", auth_data.get("contents", []))
         auth_type_enum = ""
         if auth_type and auth_type in AuthTypeEnum._member_map_:  
@@ -120,7 +120,7 @@ class ApiModelLoader:
             auth_content.append(new_auth_content)
             
         auth = Auth(type=auth_type_enum, content=auth_content,
-                    login_api=login_api, token_api=token_api,errors={})
+                    login_api=login_api, token_id=token_id,errors={})
         
         return auth
 
@@ -241,18 +241,22 @@ class ApiModelLoader:
     @staticmethod
     def load_auth_api_model(model_json):
         api_model_loader = ApiModelLoader()
-        access_token_request_obj = api_model_loader.load_request(request_data= model_json.get("access_token_request", {}))
-        access_token_response_obj = api_model_loader.load_response(response_data= model_json.get("access_token_response", {}))
-        refresh_token_request_obj = api_model_loader.load_request(request_data= model_json.get("refresh_token_request", {}))
-        refresh_token_response_obj = api_model_loader.load_response(response_data= model_json.get("refresh_token_response", {}))
+        # access_token_request_obj = api_model_loader.load_request(request_data= model_json.get("access_token_request", {}))
+        # access_token_response_obj = api_model_loader.load_response(response_data= model_json.get("access_token_response", {}))
+        # refresh_token_request_obj = api_model_loader.load_request(request_data= model_json.get("refresh_token_request", {}))
+        # refresh_token_response_obj = api_model_loader.load_response(response_data= model_json.get("refresh_token_response", {}))
+        request_obj = api_model_loader.load_request(request_data= model_json.get("request"))
+        response_obj = api_model_loader.load_response(response_data= model_json.get("response"))
         api_model = AuthApiModel(
             id=model_json.get("id"),
             operation_id=model_json.get("operation_id"),
             tags=model_json.get("tags"),  # Tags remaining
-            access_token_request=access_token_request_obj,
-            access_token_response=access_token_response_obj,
-            refresh_token_request=refresh_token_request_obj,
-            refresh_token_response=refresh_token_response_obj,
+            # access_token_request=access_token_request_obj,
+            # access_token_response=access_token_response_obj,
+            # refresh_token_request=refresh_token_request_obj,
+            # refresh_token_response=refresh_token_response_obj,
+            request = request_obj,
+            response = response_obj,
             summary=model_json.get("summary"),  # Summary later,
             auth_api_type=AuthApiTypeEnum[model_json.get("auth_api_type", "NONE").upper()] ,
             authentication_type= AuthTypeEnum[model_json.get("authentication_type").upper()],

@@ -4,9 +4,10 @@ from ..utils.api_model_loader import ApiModelLoader
 from ..utils.append_dict_file import append_to_dict_file
 
 class IntermediateModificationHelper:
-    def __init__(self, project_name):
+    def __init__(self, project_name, moduleId):
         self.project_name = project_name
-        self.folder_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json"
+        self.module_id = moduleId
+        self.folder_path = f"{CONFIG_PATH}/{project_name}/api_client_intermediate_json/{moduleId}"
 
     def process_api_data(self, modified_api, filename):
         file_path = os.path.join(self.folder_path, filename)

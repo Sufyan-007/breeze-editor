@@ -7,7 +7,7 @@ import UrlSettings from "./UrlSettings";
 import BodySettings from "./BodySettings";
 
 function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, requestType, moduleId }) {
-  console.log(moduleId, "moduleid in reques");
+  // console.log(moduleId, "moduleid in reques");
   const [request, setRequest] = useState(requestData);
   const [expandedProperty, setExpandedProperty] = useState(null);
   const [api, setApi] = useState({});
@@ -122,11 +122,8 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
               <Card.Body className="d-flex justify-content-between">
                 <div>
                   {req === "Url" && request.url && request.url.baseurl !== "" ? request.url.baseurl : req}
-                  {console.log(request.parameters, req)}
-
-                  {req === "Url" ? (
-                    request.parameters &&
-                    request.parameters.some(param => param.errors && Object.keys(param.errors).length > 0) && (
+                  {/* {req === "Url" ? (
+                    ((request.parameters && request.parameters.some(param => param.errors && Object.keys(param.errors).length > 0) )|| (request.url && Object.keys(request.url.errors).length > 0)) && (
                       <i className="bi bi-exclamation-circle mx-2" style={{ color: "red" }}></i>
                     )
                   ) : (
@@ -135,7 +132,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
                     Object.keys(request[req.toLowerCase()]["errors"]).length > 0 && (
                       <i className="bi bi-exclamation-circle mx-2" style={{ color: "red" }}></i>
                     )
-                  )}
+                  )} */}
                 </div>
 
                 <div>
@@ -238,6 +235,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
                         }
                     }
                     onChange={onReqChange}
+                    moduleId={moduleId}
                   />
                 ) : (
                   <></>

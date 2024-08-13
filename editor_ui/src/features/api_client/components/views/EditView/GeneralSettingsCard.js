@@ -8,23 +8,23 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
   const handleInputChange = (prop, value) => {
     onChange(prop, value);
   };
-  const {projectName}= useParams();
+  const { projectName } = useParams();
   console.log(settings, "settings");
   const convertToServiceApi = () => {
     // console.log("fsdfdf");
     setShowModal(!showModal);
   };
-  const convertToAuthApi = async() => {
+  const convertToAuthApi = async () => {
     setShowModal(!showModal);
   };
   const handleConversion = async () => {
     const payload = {
       "filename": selectedServiceInfo.filename,
-      "id": selectedServiceInfo.id,
-      "module_id":selectedServiceInfo.module_id
+      "id": selectedServiceInfo.serviceId,
+      "module_id": selectedServiceInfo.id
     }
     const result = await transferToAuthApi(payload, projectName);
-    if(result.message){
+    if (result.message) {
       setShowModal(!showModal);
       onSuccessfulTransfer();
     }
@@ -154,7 +154,9 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
                 </Form.Control>
               </Col>
             </Row> :
-              <Row>
+              <>  { 
+                selectedServiceInfo && Object.keys(selectedServiceInfo).length > 0 &&
+                <Row>
                 <Col sm={3}>
                   <Form.Label className="text-white mx-3">Api Type:</Form.Label>
                 </Col>
@@ -194,13 +196,14 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
                     </label>
                   </div>
                   {/* <Form.Check
-                  className=""
-                  type="checkbox"
-                  checked={!settings.is_open_api}
-                  onChange={(e) => onChange("is_open_api", !e.target.checked)}
-                /> */}
+                className=""
+                type="checkbox"
+                checked={!settings.is_open_api}
+                onChange={(e) => onChange("is_open_api", !e.target.checked)}
+              /> */}
                 </Col>
-              </Row>}
+              </Row>}</>
+            }
           </Col>
         </Row>
         {!isAuthApi ? (

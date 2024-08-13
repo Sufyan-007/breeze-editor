@@ -346,10 +346,12 @@ class OpenapiConverter:
             "tags" : "auth",
             # "url" : None,
             "body" : None,
-            "access_token_request" : {"method" : "POST"},
-            "refresh_token_request" : {"method" : "POST"},
-            "access_token_response" : [],
-            "refresh_token_response" : [],
+            # "access_token_request" : {"method" : "POST"},
+            # "refresh_token_request" : {"method" : "POST"},
+            "request" : {"method" : "POST"},
+            # "access_token_response" : [],
+            # "refresh_token_response" : [],
+            "response" : [],
             "token_store" : None,
             "authentication_type" : "BASIC",
             # "is_authorization_url" : False,
@@ -489,23 +491,27 @@ class OpenapiConverter:
 
     ## complete        
     
-    def append_auth_json(self,auth_models, appName):
+    def append_auth_json(self,auth_model, appName,moduleId):
         ##first load existing file data into json
         # Read JSON file
         project_name = appName
         folder_path = f"{CONFIG_PATH}/{project_name}/swagger_metadata.json"
-        filename = "auth.json"
-        full_file_path = os.path.join(folder_path, filename)
+        # filename = "auth.json"
+        # full_file_path = os.path.join(folder_path)
         json_data = {}
-        with open(full_file_path) as fp:
+        with open(folder_path) as fp:
             json_data = json.load(fp)
-            ## append to existing json data 
-            for model in auth_models:
-                key = model.get("id")
-                json_data[key] = model
+            auth_api_data = json_data[moduleId].get("auth_apis", {})
             
+            ## append to existing json data 
+            # for model in auth_api_data:
+            #     key = model.get("id")
+            #     auth_api_data[key] = model
+            
+            auth_api_data[auth_model.get("id")] = auth_model
+            json_data[moduleId]["auth_apis"] = auth_api_data
             ## write all data back to file
-            with open(full_file_path, "w") as file:
+            with open(folder_path, "w") as file:
                 json.dump(json_data,file, cls=EnhancedJSONEncoder)
             
 
@@ -528,7 +534,7 @@ class OpenapiConverter:
             meta_data["auth_apis"] = {}
             if not os.path.exists(swagger_metadata_file_path):
                 with open(swagger_metadata_file_path, "w") as file:
-                    json.dump({}, file)
+                    json.dump({"custom_schemas": {"title": "custom_schemas"}}, file)
             with open(swagger_metadata_file_path, "r") as file:
                 swagger_metadata_file_content = json.load(file)
             swagger_metadata_id = generate_uuid_as_key()
@@ -541,8 +547,13 @@ class OpenapiConverter:
                 id = generate_uuid_as_key()
                 val["name"]= key
                 structured_schema_data[id] = val
-            # print(structured_schema_data, "structured_schema_data")
+                
+            custom_schemas_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/custom_schemas.json"
+            if not os.path.exists(custom_schemas_file_path):
+                with open(custom_schemas_file_path, "w+") as file:
+                    json.dump({}, file)
             schema_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/{swagger_metadata_id}.json"
+            
             if not os.path.exists(schema_file_path):
                 with open(schema_file_path, "w+") as file:
                     json.dump({}, file)

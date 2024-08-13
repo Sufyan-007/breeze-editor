@@ -12,10 +12,10 @@ from .api.retrieve_schema_details import RetrieveSchemaDetails, RetrieveSchemaPr
 urlpatterns = [
         path('generate-react-api-client/<str:type>', csrf_exempt(GenerateReactApiClient.as_view())),
         path('convert-standard-json/<str:collectionType>/<str:appName>', csrf_exempt(ApiClientGenerator.as_view())),
-        path('modified-intermediate-json/<str:projectName>/<str:filename>/<str:operation>', csrf_exempt(ModifyIntermediateJson.as_view())),
+        path('modified-intermediate-json/<str:projectName>/<str:filename>/<str:operation>/<str:moduleId>', csrf_exempt(ModifyIntermediateJson.as_view())),
         path('fetch-all-intermediates/<str:projectName>/<str:files_only>', csrf_exempt(ApiClientGenerator.as_view())),
         path('fetch-api-config/<str:projectName>/<str:filename>/<str:apiId>', csrf_exempt(RetrieveApiConfig.as_view())),
-        path('append-to-auth-api/<str:operation>/<str:projectName>', csrf_exempt(AppendAuthApi.as_view())),
+        path('append-to-auth-api/<str:operation>/<str:projectName>/<str:moduleId>', csrf_exempt(AppendAuthApi.as_view())),
         path('transfer-to-auth-api/<str:project_name>', csrf_exempt(TransferToAuthApi.as_view())),
         path('fetch-auth-file/<str:projectName>/<str:apiId>/<str:moduleId>', csrf_exempt(RetrieveAuthFile.as_view())),
         path('fetch-schema-details/<str:projectName>/<str:moduleId>/<str:schemaName>', csrf_exempt(RetrieveSchemaDetails.as_view())),

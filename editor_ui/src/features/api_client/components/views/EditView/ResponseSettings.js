@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Card, Form, Row } from "react-bootstrap";
+import React, { useCallback, useEffect, useState } from "react";
+import { Card, Form, Row, Table } from "react-bootstrap";
 import Delete from "../../../../../assets/icons/delete-trash.svg";
 import edit from "../../../../../assets/icons/edit-icon.svg";
+import { getApiSchemaDetails } from "../../../services/ApiService";
+import { useParams } from "react-router";
 
 const responseObject = {
   content_type: "",
@@ -17,18 +19,74 @@ const responseObject = {
   }
 };
 
-function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title, responseType }) {
-  // this also needs to be changed according to schema handling 
-  const combinedSchemaList = schemaList.length > 0 && schemaList.flatMap(module => module.schemas);
-  console.log(combinedSchemaList, "combinedSchemaList");
-  const [response, setResponse] = useState(responseData);
+function ResponseSettings({ responseData, onChange, isAuthApi, title, responseType, moduleId }) {
+  const [response, setResponse] = useState(responseData || []);
   const [newResponse, setNewResponse] = useState(responseObject);
   const [expandedProperty, setExpandedProperty] = useState(null);
+  const [schemaList, setSchemaList] = useState([]);
+  const { projectName } = useParams();
+  const [properties, setProperties] = useState([]);
+
+  const fetchSchemasList = useCallback(
+    async (schemaName, moduleId) => {
+      try {
+        const result = await getApiSchemaDetails(projectName, schemaName, moduleId);
+        if (schemaName) {
+          return result;
+        } else {
+          setSchemaList(result[0].schemas);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    [projectName]
+  );
+  useEffect(() => {
+    if (moduleId) {
+      fetchSchemasList(null, moduleId);
+    }
+  }, [fetchSchemasList, moduleId]);
+
+  useEffect(() => { setResponse(responseData); }, [responseData])
+
+  const extractProperties = useCallback((schema) => {
+    if (schema && schema.properties) {
+      const props = Object.entries(schema.properties).map(([key, value]) => ({
+        name: key,
+        type: value.type,
+      }));
+      setProperties(props.filter(prop => prop.type === 'string' || prop.type === 'integer'));
+
+      // Initialize token_store entries for the properties
+      if (newResponse.status === 'S_200') {
+        const initialTokenStore = {};
+        props.forEach(prop => {
+          initialTokenStore[`${newResponse.schema_name}.${prop.name}`] = {
+            store_in: 'LOCAL_STORAGE', 
+            storage_key: '', 
+          };
+        });
+        setNewResponse(prevState => ({ ...prevState, token_store: initialTokenStore }));
+      }
+    }
+  }, [newResponse.status, newResponse.schema_name]);
+  useEffect(() => {
+    if (response && response.length > 0) {
+      const selectedResponse = response.find(res => res.status === "S_200");
+      if (selectedResponse && selectedResponse.schema_name && selectedResponse.schema) {
+        extractProperties(selectedResponse.schema);
+      }
+    }
+  }, [response, schemaList, extractProperties]);
+
 
   useEffect(() => {
-    setResponse(responseData);
-  }, [responseData]);
-
+    if (newResponse.schema_name && newResponse.schema) {
+      console.log("insideee functionnnnnnnnn");
+      extractProperties(newResponse.schema);
+    }
+  }, [newResponse.schema, newResponse.schema_name, extractProperties])
   const handleInputChange = (index, field, value, subField = null) => {
     const updatedResponse = [...response];
     if (subField) {
@@ -44,6 +102,7 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
     onChange(responseType, updatedResponse);
   };
 
+
   const handleDelete = (index) => {
     const updatedResponse = [...response];
     updatedResponse.splice(index, 1);
@@ -51,13 +110,50 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
   };
 
   const handleAddResponse = () => {
-    onChange(responseType, [...response, newResponse]);
+    const updatedResponse = response || [];
+    console.log(newResponse, "new response");
+    onChange(responseType, [...updatedResponse, newResponse]);
     setNewResponse(responseObject);
   };
 
   const toggleProperty = (index) => {
     setExpandedProperty(expandedProperty === index ? null : index);
   };
+  const handleSchemaChange = async (event) => {
+    const schemaName = event.target.value;
+    setNewResponse({ ...newResponse, schema_name: schemaName });
+    const schema = await fetchSchemasList(schemaName, moduleId);
+    setNewResponse(prevState => ({ ...prevState, schema }));
+
+    // Update token_store with new schema properties
+    if (schema && schema.properties) {
+      const updatedTokenStore = {};
+      Object.keys(schema.properties).forEach(prop => {
+        updatedTokenStore[`${schemaName}.${prop}`] = {
+          store_in: 'LOCAL_STORAGE',
+          storage_key: '',
+        };
+      });
+      setNewResponse(prevState => ({ ...prevState, token_store: updatedTokenStore }));
+    }
+  };
+
+
+  const handlePropertyChange = (property, field, value) => {
+    const currentTokenStore = newResponse.token_store[`${newResponse.schema_name}.${property}`] || {};
+    const updatedTokenStoreEntry = {
+      ...currentTokenStore,
+      [field]: value, 
+    };
+    setNewResponse({
+      ...newResponse,
+      token_store: {
+        ...newResponse.token_store,
+        [`${newResponse.schema_name}.${property}`]: updatedTokenStoreEntry
+      }
+    });
+  };
+  
 
   const renderResponses = () => {
     if (!response || response.length === 0) {
@@ -101,9 +197,9 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
                     onChange={(e) =>
                       handleInputChange(index, "schema_name", e.target.value)
                     }
-                    options={combinedSchemaList}
+                    options={schemaList}
                   />
-                  {isAuthApi && (
+                  {/* {isAuthApi && (
                     <>
                       <ResponseForm
                         label="Save As"
@@ -137,8 +233,66 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
                         ></Form.Control>
                       </div>
                     </>
-                  )}
+                  )} */}
                 </div>
+                {res.status === 'S_200' && isAuthApi && (
+                <div className="mt-3 w-100">
+                  <Table bordered hover variant="dark">
+                    <thead>
+                      <tr>
+                        <th>Property</th>
+                        <th>Storage Key</th>
+                        <th>Save As</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {properties.map((prop, idx) => (
+                        <tr key={idx}>
+                          <td>{prop.name}</td>
+                          <td>
+                            <Form.Control
+                              as="input"
+                              type="text"
+                              placeholder="Storage Key"
+                              className="text-white"
+                              size="sm"
+                              style={{
+                                backgroundColor: "#212529",
+                                border: "1px solid rgba(128, 128, 128, 0.5)",
+                              }}
+                              value={res.token_store[`${res.schema_name}.${prop.name}`]?.storage_key || ""}
+                              onChange={(e) =>
+                                handlePropertyChange(prop.name, "storage_key", e.target.value)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Form.Control
+                              as="select"
+                              className="text-white"
+                              size="sm"
+                              style={{
+                                backgroundColor: "#212529",
+                                border: "1px solid rgba(128, 128, 128, 0.5)",
+                              }}
+                              value={res.token_store[`${res.schema_name}.${prop.name}`]?.store_in || ""}
+                              onChange={(e) =>
+                                handlePropertyChange(prop.name, "store_in", e.target.value)
+                              }
+                            >
+                              <option value="">Select</option>
+                              <option value="LOCAL_STORAGE">LOCAL_STORAGE</option>
+                              <option value="SESSION">SESSION</option>
+                              <option value="COOKIE">COOKIE</option>
+                              <option value="DontSave">Don't Save</option>
+                            </Form.Control>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+                )}
                 <div>
                   <img
                     alt="delete"
@@ -210,39 +364,69 @@ function ResponseSettings({ responseData, onChange, schemaList, isAuthApi, title
           <ResponseForm
             label="Schema"
             value={newResponse.schema_name}
-            onChange={(e) =>
-              setNewResponse({ ...newResponse, schema_name: e.target.value })
-            }
-            options={combinedSchemaList}
+            onChange={(e) => handleSchemaChange(e)}
+            options={schemaList}
           />
-          {isAuthApi && (
+          {isAuthApi && newResponse.status === 'S_200' && (
             <>
-              <ResponseForm
-                label="Save As"
-                value={newResponse.store_in}
-                onChange={(e) =>
-                  setNewResponse({ ...newResponse, store_in: e.target.value })
-                }
-                options={["localStorage", "sessionStorage", "cookie", "state"]}
-              />
-              <div className="mx-1 mt-1" style={{ width: "30%" }}>
-                <Form.Label className="text-white mb-1">Storage Key</Form.Label>
-                <Form.Control
-                  as="input"
-                  type="text"
-                  className="text-white"
-                  size="sm"
-                  style={{
-                    backgroundColor: "#212529",
-                    border: "1px solid rgba(128, 128, 128, 0.5)",
-                  }}
-                  value={newResponse.token_store.store_key}
-                  onChange={(e) => setNewResponse((state) => {
-                    state.token_store.stored_key = e.target.value;
-                    return { ...state }
-                  })}
-                ></Form.Control>
-              </div>
+              {properties.length > 0 && (
+                <div className="mt-3 w-100">
+                  <Table bordered hover variant="dark">
+                    <thead>
+                      <tr>
+                        <th>Property</th>
+                        <th>Storage Key</th>
+                        <th>Save As</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {properties.map((prop, idx) => (
+                        <tr key={idx}>
+                          <td>{prop.name}</td>
+                          <td>
+                            <Form.Control
+                              as="input"
+                              type="text"
+                              placeholder="Storage Key"
+                              className="text-white"
+                              size="sm"
+                              style={{
+                                backgroundColor: "#212529",
+                                border: "1px solid rgba(128, 128, 128, 0.5)",
+                              }}
+                              value={newResponse.token_store[`${newResponse.schema_name}.${prop.name}`]?.storage_key || ""}
+                              onChange={(e) =>
+                                handlePropertyChange(prop.name, "storage_key", e.target.value)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Form.Control
+                              as="select"
+                              className="text-white"
+                              size="sm"
+                              style={{
+                                backgroundColor: "#212529",
+                                border: "1px solid rgba(128, 128, 128, 0.5)",
+                              }}
+                              value={newResponse.token_store[`${newResponse.schema_name}.${prop.name}`]?.store_in || ""}
+                              onChange={(e) =>
+                                handlePropertyChange(prop.name, "store_in", e.target.value)
+                              }
+                            >
+                              <option value="">Select</option>
+                              <option value="LOCAL_STORAGE">LOCAL_STORAGE</option>
+                              <option value="SESSION">SESSION</option>
+                              <option value="COOKIE">COOKIE</option>
+                              <option value="DontSave">Don't Save</option>
+                            </Form.Control>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              )}
             </>
           )}
         </div>

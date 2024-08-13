@@ -3,7 +3,8 @@ const BASE_URL =
   process.env.CURRENT_ENV === "dev"
     ? `http://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}`
     : `http://${process.env.REACT_APP_PROD_HOST}:${process.env.REACT_APP_PROD_PORT}`;
-export async function appendToAuthApi(authObj, update, appName) {
+export async function appendToAuthApi(authObj, update, appName, moduleId) {
+  // console.log(moduleId, "moduleid befor call");
   let operation = "add";
   if (update) {
     operation = "update";
@@ -13,7 +14,8 @@ export async function appendToAuthApi(authObj, update, appName) {
     "/api-client-generator/append-to-auth-api/" +
     operation +
     "/" +
-    appName;
+    appName
+    + "/" + moduleId;
   const res = await callApiClientGenerator(apiUrl, "POST", authObj, false, {});
   return res;
 }

@@ -5,13 +5,13 @@ from ..core.openapi_swagger_converter import OpenapiConverter
 from ..utils.api_model_loader import ApiModelLoader
 from ..utils.uuid_as_key import generate_uuid_as_key
 class AppendAuthApi(View):
-    def post(self, request,operation,projectName):
+    def post(self, request,operation,projectName,moduleId):
         data = json.loads(request.body.decode("utf-8"))
         if operation == "add":
             data["id"] = generate_uuid_as_key()
         model = ApiModelLoader.load_auth_api_model(data)
         model_json = model.as_dict()
         openapiconvetor = OpenapiConverter()
-        openapiconvetor.append_auth_json(auth_models=[model_json], appName=projectName)
+        openapiconvetor.append_auth_json(auth_model=model_json, appName=projectName, moduleId=moduleId)
         return JsonResponse({"list" : []}, status = 201)
    

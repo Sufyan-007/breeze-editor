@@ -19,18 +19,18 @@ function SchemaSettings() {
     name: "",
   });
   const [id, setId] = useState();
-  const [moduleId, setModuleId] = useState();
+  // const [moduleId, setModuleId] = useState();
+  const [module, setModule] = useState(null);
   const [schemaList, setSchemaList] = useState([]);
-  const [selectedSchema, setSelectedSchema] = useState(null);
+  // const [selectedSchema, setSelectedSchema] = useState(null);
   const [expandedModule, setExpandedModule] = useState([]); // State to manage expanded module
   const { projectName } = useParams();
 
   const fetchSchemasList = useCallback(
-    async (schemaId,module_id) => {
-      
+    async (schemaId, module_id) => {
       // console.log("fetchSchemasList>>>",schemaId, module_id);
       try {
-        const result = await getApiSchemaDetails(projectName,  schemaId,module_id,);
+        const result = await getApiSchemaDetails(projectName, schemaId, module_id,);
         if (schemaId && module_id) {
           return result;
         } else {
@@ -42,7 +42,12 @@ function SchemaSettings() {
     },
     [projectName]
   );
-
+  const handleModuleSelect = (event) => {
+    const selectedOption = event.target.selectedOptions[0];
+    const moduleName = selectedOption.dataset.name;
+    const moduleId = selectedOption.dataset.id;
+    setModule({ "name": moduleName, "id": moduleId });
+  }
   useEffect(() => {
     fetchSchemasList(null, null);
   }, [fetchSchemasList]);
@@ -89,27 +94,32 @@ function SchemaSettings() {
   };
 
   const onSubmit = async (e) => {
+    if(!module){
+      alert("Please select a module.");
+      return;
+    }
     e.preventDefault();
     const finalSchema = { id, details: defaultSchemaObj };
     const operation = id ? "edit" : "add";
     if (operation === "add") {
-      const result = await addSchema(projectName, finalSchema, moduleId );
+      const result = await addSchema(projectName, finalSchema, module.id);
       if (result.message) {
-        fetchSchemasList(null,null);
+        fetchSchemasList(null, null);
       }
     } else {
-      const result = await editSchema(projectName, finalSchema, id, moduleId);
+      const result = await editSchema(projectName, finalSchema, id, module.id);
       if (result.message) {
         fetchSchemasList(null, null);
       }
     }
   };
 
-  const handleSchemaOperations = async (operation, schema, module_id) => {
+  const handleSchemaOperations = async (operation, schema, module_id, module_name) => {
     if (operation === "edit") {
-      setSelectedSchema(schema.name);
+      // setSelectedSchema(schema.name);
       setId(schema.id);
-      setModuleId(module_id);
+      // setModuleId(module_id);
+      setModule({"id": module_id, "name": module_name})
       const details = await fetchSchemasList(schema.id, module_id);
       setDefaultSchemaObj(details);
     } else if (operation === "delete") {
@@ -142,7 +152,7 @@ function SchemaSettings() {
           }}>
           <div className="text-white mt-2 d-flex justify-content-between">
             <strong>Schemas</strong>
-            <img
+            {/* <img
               width="25"
               height="25"
               className="mx-1"
@@ -157,7 +167,7 @@ function SchemaSettings() {
                   name: "",
                 });
               }}
-            />
+            /> */}
           </div>
           {schemaList.length > 0 ? (
             <div>
@@ -188,7 +198,7 @@ function SchemaSettings() {
                               width={20}
                               style={{ cursor: "pointer" }}
                               className="mx-1"
-                              onClick={() => handleSchemaOperations("edit", schema, module.module_id)}
+                              onClick={() => handleSchemaOperations("edit", schema, module.module_id, module.title)}
                             />
                             <img
                               src={Delete}
@@ -197,7 +207,7 @@ function SchemaSettings() {
                               width={20}
                               style={{ cursor: "pointer" }}
                               className="mx-1"
-                              onClick={() => handleSchemaOperations("delete", schema, module.module_id)}
+                              onClick={() => handleSchemaOperations("delete", schema, module.module_id, module.title)}
                             />
                           </div>
                         </div>
@@ -214,10 +224,38 @@ function SchemaSettings() {
         <Col sm={10} id="right-panel">
           <div className="d-flex justify-content-between">
             <h6 className="text-white mt-4">Schema Configuration</h6>
-            <div>
+            <div className="d-flex align-items-center">
+              <Form.Select
+                aria-label="Select Module"
+                className="rounded-0 mx-2 mt-3 text-white"
+                defaultValue=""
+                style={{ "backgroundColor": "#6c757d", "border": "none", "color": "white" }}
+                onChange={(e) => handleModuleSelect(e)}
+              >
+                <option value="" data-name="" data-id="">
+                  Select Module
+                </option>
+                {schemaList && schemaList.length > 0 ? (
+                  schemaList.map((schema, index) => (
+                    <option
+                      className="text-white"
+                      key={index}
+                      value={schema.title}
+                      data-name={schema.title}
+                      data-id={schema.module_id}
+                    >
+                      {schema.title}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" data-name="" data-id="">
+                    No modules available
+                  </option>
+                )}
+              </Form.Select>
               <Button
                 variant="secondary"
-                className="rounded-0 mt-4"
+                className="rounded-0 mt-3"
                 onClick={onSubmit}>
                 Submit
               </Button>

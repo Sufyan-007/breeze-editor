@@ -109,12 +109,15 @@ class ApiClientGenerator(View):
         try:
             # Load authentication API data from Swagger metadata
             auth_api_data = []
-            apis = []
+            
 
             with open(auth_api_folder_path, "r") as file:
                 swagger_metadata = json.load(file)
 
             for key, value in swagger_metadata.items():
+                apis = []
+                if key == "custom_schemas":
+                    continue
                 auth_apis = value.get("auth_apis", {})
                 for k, v in auth_apis.items():
                     apis.append(v)

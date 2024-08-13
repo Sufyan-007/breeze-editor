@@ -4,13 +4,13 @@ from ..core.intermediate_modification_helper import IntermediateModificationHelp
 from django.views import View
 from ..utils.uuid_as_key import generate_uuid_as_key
 class ModifyIntermediateJson(View):
-    def post(self, request,projectName,filename,operation):
+    def post(self, request,projectName,filename,operation, moduleId):
         try:
             data = json.loads(request.body.decode("utf-8"))
             filename = filename+".json"
             if operation == 'ADD':
                 data["id"] = generate_uuid_as_key()
-            intermediate_modification_helper = IntermediateModificationHelper(project_name=projectName)
+            intermediate_modification_helper = IntermediateModificationHelper(project_name=projectName, moduleId=moduleId)
             result = intermediate_modification_helper.process_api_data(data, filename)
             if result:
                 return JsonResponse({"message": "Function Added Successfully" }, status=201)

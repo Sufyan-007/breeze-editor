@@ -23,12 +23,11 @@ import RequestSettings from "./views/EditView/RequestSettings";
 import ResponseSettings from "./views/EditView/ResponseSettings";
 import { generateReactService } from "../services/GeneratedReactAppService";
 import AuthConfigSettings from "./views/AuthConfigSettings";
-import { getApiSchemaDetails, modifyApiConfig } from "../services/ApiService";
+import { modifyApiConfig } from "../services/ApiService";
 import { appendToAuthApi } from "../services/AuthApiService";
 function Test() {
   const [apiList, setApiList] = useState([]);
   const [authApiList, setAuthApiList] = useState([]);
-  const [schemaList, setSchemaList] = useState([]);
   const [selectedApi, setSelectedApi] = useState({});
   const [selectedAuthApi, setSelectedAuthApi] = useState({});
   const [selectedServiceInfo, setSelectedServiceInfo] = useState({});
@@ -40,8 +39,9 @@ function Test() {
   const [showToast, setShowToast] = useState(false);
   const [editingModule, setEditingModule] = useState(null);
   const [newModuleTitle, setNewModuleTitle] = useState("");
-  // const [showModal, setShowModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedModule, setSelectedModule] = useState(null);
 
   const fetchServiceList = useCallback(async () => {
     try {
@@ -50,29 +50,11 @@ function Test() {
       console.log(fetchedApiList, "fetched");
       setApiList(fetchedApiList);
       setAuthApiList(result["auth_api_files"]);
-
-      // setServiceErrors({"filenames": ["orders"], "functions": ["orders_retrieve"]})
     } catch (error) {
       console.error("Error generating react service:", error);
     }
   }, [projectName]);
 
-  const fetchSchemasList = useCallback(
-    async (schemaName) => {
-      try {
-        const result = await getApiSchemaDetails(projectName, schemaName);
-        if (schemaName) {
-          return result;
-        } else {
-          setSchemaList(result);
-        }
-        // console.log(result, "result");
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    [projectName]
-  );
   const generateService = async (fileType, filename, moduleId) => {
     try {
       const result = await generateReactService(fileType, projectName, filename, moduleId);
@@ -89,13 +71,8 @@ function Test() {
     });
   };
   const onAuthApiModelChange = (prop, value) => {
+    console.log(prop, value, "prop and value");
     let model = { ...selectedAuthApi };
-    if (prop === "authentication_type") {
-      model["access_token_request"] = {};
-      model["access_token_response"] = [];
-      model["refresh_token_request"] = {};
-      model["refresh_token_response"] = [];
-    }
     model[prop] = value;
     setSelectedAuthApi({
       ...model,
@@ -133,14 +110,12 @@ function Test() {
     if (!isValidApiStructure(selectedApi)) {
       setShowToast(true)
       setErrorMessage("Please Fill All the Values before Submitting");
-      console.log(selectedApi);
-      console.error("Invalid API structure");
       return;
     }
-    console.log(selectedApi, "selected api");
-    console.log(selectedServiceInfo, "selected service info");
-    if (selectedApi) {
-
+    if (!selectedModule) {
+      setShowToast(true)
+      setErrorMessage("Please Select a Module first");
+      return;
     }
     let operation = "ADD";
     if (selectedApi.id) { operation = "UPDATE" }
@@ -151,7 +126,8 @@ function Test() {
       selectedServiceInfo["filename"]
         ? selectedServiceInfo["filename"]
         : selectedApi["tags"],
-      operation
+      operation,
+      selectedModule.id
     );
     setSelectedApi({});
     setSelectedServiceInfo({})
@@ -160,26 +136,21 @@ function Test() {
 
   const isValidApiStructure = (api) => {
     if (!api) return false;
-
     // Check for top-level properties
     const hasRequiredTopLevelProps = api.operation_id && api.tags;
     if (!hasRequiredTopLevelProps) return false;
-
     // Check request structure
     if (api.request) {
       const hasValidRequestProps = api.request.method && api.request.url && Array.isArray(api.request.parameters) && Array.isArray(api.request.body);
       if (!hasValidRequestProps) return false;
-
       // Validate URL structure
-      // const url = api.request.url;
-      // if (!url.baseurl || !Array.isArray(url.path)) return false;
-
+      const url = api.request.url;
+      if (!Array.isArray(url.path)) return false;
       // Validate parameters
       for (const param of api.request.parameters) {
         const hasRequiredParamProps = param.param_in && param.name && param.type && param.param_type;
         if (!hasRequiredParamProps) return false;
       }
-
       // Validate body
       for (const body of api.request.body) {
         const hasRequiredBodyProps = body.content_type && body.mode;
@@ -193,29 +164,28 @@ function Test() {
         if (!hasRequiredResponseProps) return false;
       }
     }
-
     return true;
   };
 
   const onAuthApiSubmit = async (e) => {
-
-    console.log(selectedAuthApi, "onAuthApiSubmit");
-    let operation = "ADD";
-    if (selectedAuthApi.id) { operation = "UPDATE" }
-    selectedAuthApi.tags = "auth";
-    e.preventDefault();
-    await appendToAuthApi(
-      selectedAuthApi,
-      operation === "UPDATE" ? true : false,
-      projectName
-    );
-    fetchServiceList()
+    if (selectedModule) {
+      let operation = "ADD";
+      if (selectedAuthApi.id) { operation = "UPDATE" }
+      selectedAuthApi.tags = "auth";
+      e.preventDefault();
+      await appendToAuthApi(
+        selectedAuthApi,
+        operation === "UPDATE" ? true : false,
+        projectName,
+        selectedModule.id
+      );
+      fetchServiceList()
+    }
   }
 
   useEffect(() => {
     fetchServiceList();
-    fetchSchemasList(null);
-  }, [fetchServiceList, fetchSchemasList]);
+  }, [fetchServiceList]);
 
   const toggleExpand = (filename) => {
     if (expandedFilenames.includes(filename)) {
@@ -239,20 +209,12 @@ function Test() {
     setNewModuleTitle(title);
   };
 
-  const saveTitle = async(oldTitle, moduleId) => {
-    const result = await editModuleName(projectName, moduleId, {title: newModuleTitle})
-    if(result.message)
-    {
+  const saveTitle = async (moduleId) => {
+    const result = await editModuleName(projectName, moduleId, { title: newModuleTitle })
+    if (result.message) {
       setShowToast(true);
       setErrorMessage(result.message);
     }
-    // const updatedApiList = apiList.map((folder) => {
-    //   if (folder.title === oldTitle) {
-    //     return { ...folder, title: newModuleTitle };
-    //   }
-    //   return folder;
-    // });
-    // setApiList(updatedApiList);
     fetchServiceList();
     setEditingModule(null);
   };
@@ -261,7 +223,13 @@ function Test() {
     setEditingModule(null);
     setNewModuleTitle("");
   };
-
+  const handleModuleSelect = (event) => {
+    const selectedOption = event.target.selectedOptions[0];
+    const moduleName = selectedOption.dataset.name;
+    const moduleId = selectedOption.dataset.id;
+    setSelectedModule({ "name": moduleName, "id": moduleId });
+    setShowDropdown(false);
+  };
 
   return (
     <div className="container-fluid h-100">
@@ -289,18 +257,17 @@ function Test() {
                 <strong> Services</strong>
               </span>
               <div className="d-flex">
+
                 <img
+                  className="mx-1 mt-4"
                   width="25"
                   height="25"
-                  className="mx-1 mt-4"
                   src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
-                  alt="add--v1"
+                  alt="add"
                   style={{ cursor: "pointer" }}
-                  onClick={() => {
-                    setSelectedApi({});
-                    setView("TEST");
-                  }}
+                  onClick={() => { setView("TEST"); setSelectedApi({}); setSelectedModule({}) }}
                 />
+
                 <img
                   width="25"
                   height="25"
@@ -336,10 +303,10 @@ function Test() {
                               size="sm"
                               value={newModuleTitle}
                               onChange={handleInputChange}
-                              onBlur={() => saveTitle(folder.title, folder.subfolder)}
+                              onBlur={() => saveTitle(folder.subfolder)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
-                                  saveTitle(folder.title);
+                                  saveTitle(folder.subfolder);
                                 } else if (e.key === 'Escape') {
                                   cancelEditing();
                                 }
@@ -361,7 +328,9 @@ function Test() {
                           </div>
                         )}
                       </div>
-                      <img src={edit} alt="edit" height={15} width={15} onClick={() => startEditing(folder.title)} />
+                      <img src={edit} alt="edit" height={30} width={15} onClick={() => {
+                        startEditing(folder.title);
+                      }} />
                     </div>
                   </div>
                   {expandedModules.includes(folder.title) && editingModule === null && (
@@ -428,13 +397,8 @@ function Test() {
                                           : ""
                                           }`}
                                         onClick={() => {
-                                          console.log(folder.subfolder, "subfolderrrrrrrrrr");
+                                          setSelectedModule({ "name": folder.title, "id": folder.subfolder, "filename": service.filename, "serviceId": value.id })
                                           setSelectedApi(value);
-                                          setSelectedServiceInfo({
-                                            id: value.id,
-                                            filename: service.filename,
-                                            module_id: folder.subfolder
-                                          });
                                           setView("TEST");
                                         }} style={{ width: "90%" }}
                                       >
@@ -453,7 +417,6 @@ function Test() {
                                               filename: service.filename,
                                               module_id: folder.model_id
                                             });
-
                                             setView("TEST_API");
                                           }}
                                         />
@@ -496,7 +459,7 @@ function Test() {
                 src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
                 alt="add--v1"
                 style={{ cursor: "pointer" }}
-                onClick={() => setView("AUTH_API")}
+                onClick={() => { setView("AUTH_API"); setSelectedAuthApi({}); setSelectedModule({}) }}
               />
             </div>
             {authApiList && authApiList.length > 0 ? (
@@ -553,7 +516,7 @@ function Test() {
                                     : "text-white"
                                     }`}
                                   onClick={() => {
-                                    // setSelectedApi(value);
+                                    setSelectedModule({ "name": module.title, "id": module.module_id, "filename": '', "serviceId": api.id })
                                     setSelectedAuthApi(api)
                                     // setView("TEST");
                                     setView("AUTH_API");
@@ -569,7 +532,6 @@ function Test() {
                                     alt="test-passed"
 
                                   />
-
                                   <img
                                     src={Delete}
                                     alt="delete"
@@ -599,24 +561,54 @@ function Test() {
                 <h5 className="text-white mt-4">
                   Service Function Configuration
                 </h5>
-                <div>
+                <div className="d-flex align-items-center">
+
+                  <Form.Select
+                    aria-label="Select Module"
+                    className="rounded-0 mx-2 mt-3 text-white"
+                    value={selectedModule ? selectedModule.name : ""}
+                    style={{ "backgroundColor": "#6c757d", "border": "none", "color": "white" }}
+                    onChange={handleModuleSelect}
+                  >
+                    <option value="" data-name="" data-id="">
+                      Select Module
+                    </option>
+                    {apiList && apiList.length > 0 ? (
+                      apiList.map((folder, index) => (
+                        <option
+                          className="text-white"
+                          key={index}
+                          value={folder.title}
+                          data-name={folder.title}
+                          data-id={folder.subfolder}
+                        >
+                          {folder.title}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" data-name="" data-id="">
+                        No modules available
+                      </option>
+                    )}
+                  </Form.Select>
                   <Button
                     variant="secondary"
-                    className="mt-3 rounded-0"
-                    onClick={onSubmit}>
+                    className="mt-3 rounded-0 mx-3"
+                    onClick={onSubmit}
+                  >
                     Submit
                   </Button>
                 </div>
               </div>
               <GeneralSettingsCard
-                selectedServiceInfo={selectedServiceInfo}
+                selectedServiceInfo={selectedModule}
                 settings={selectedApi}
                 onChange={onApiModelChange}
                 isAuthApi={false}
-                onSuccessfulTransfer={() => { fetchServiceList() }}
+                onSuccessfulTransfer={() => { fetchServiceList(); setErrorMessage("Function Transferred Successfully"); setShowToast(true) }}
               />
               <RequestSettings
-                moduleId={selectedServiceInfo.module_id}
+                moduleId={selectedModule && selectedModule.id}
                 requestData={selectedApi.request ? selectedApi.request : {}}
                 onChange={onApiModelChange}
                 apiData={selectedApi}
@@ -627,7 +619,8 @@ function Test() {
               <ResponseSettings
                 responseData={selectedApi.response ? selectedApi.response : []}
                 onChange={onApiModelChange}
-                schemaList={schemaList}
+                // schemaList={schemaList}
+                moduleId={selectedModule && selectedModule.id}
                 isAuthApi={false}
                 title="Response Settings"
                 responseType="response"
@@ -637,7 +630,35 @@ function Test() {
             <>
               <div className="d-flex justify-content-between">
                 <h5 className="text-white mt-4">AUTH API Configuration</h5>
-                <div>
+                <div className="d-flex align-items-center">
+                  <Form.Select
+                    aria-label="Select Module"
+                    className="rounded-0 mx-2 mt-3 text-white"
+                    value={selectedModule ? selectedModule.name : ""}
+                    style={{ "backgroundColor": "#6c757d", "border": "none", "color": "white" }}
+                    onChange={handleModuleSelect}
+                  >
+                    <option value="" data-name="" data-id="">
+                      Select Module
+                    </option>
+                    {authApiList && authApiList.length > 0 ? (
+                      authApiList.map((folder, index) => (
+                        <option
+                          className="text-white"
+                          key={index}
+                          value={folder.title}
+                          data-name={folder.title}
+                          data-id={folder.model_id}
+                        >
+                          {folder.title}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" data-name="" data-id="">
+                        No modules available
+                      </option>
+                    )}
+                  </Form.Select>
                   <Button
                     variant="secondary"
                     className="mt-3 rounded-0"
@@ -654,28 +675,29 @@ function Test() {
               />
               <div className="">
                 <RequestSettings
-                  requestData={selectedAuthApi.access_token_request ? selectedAuthApi.access_token_request : {}}
+                  requestData={selectedAuthApi.request ? selectedAuthApi.request : {}}
                   onChange={onAuthApiModelChange}
                   apiData={selectedAuthApi}
                   isAuthApi={true}
-                  title="Access Token Request Settings"
-                  requestType="access_token_request"
-                  moduleId={selectedServiceInfo.module_id}
+                  title="Request Settings"
+                  requestType="request"
+                  moduleId={selectedModule && selectedModule.id}
                 />
                 <ResponseSettings
-                  responseData={selectedAuthApi.access_token_response ? selectedAuthApi.access_token_response : []}
+                  responseData={selectedAuthApi.response ? selectedAuthApi.response : []}
                   onChange={onAuthApiModelChange}
-                  schemaList={schemaList}
+                  // schemaList={schemaList}
+                  moduleId={selectedModule && selectedModule.id}
                   isAuthApi={true}
-                  title="Access Token Response Settings"
-                  responseType="access_token_response"
+                  title="Response Settings"
+                  responseType="response"
 
                 />
               </div>
-              {(selectedAuthApi.authentication_type === "BEARER" || selectedAuthApi.authentication_type === "APIKEY" || selectedAuthApi.authentication_type === "OAUTH2") && <>
+              {/* {(selectedAuthApi.authentication_type === "BEARER" || selectedAuthApi.authentication_type === "APIKEY" || selectedAuthApi.authentication_type === "OAUTH2") && <>
                 <div >
                   <RequestSettings
-                    moduleId={selectedServiceInfo.module_id}
+                    moduleId={selectedModule && selectedModule.id}
                     requestData={selectedAuthApi.refresh_token_request ? selectedAuthApi.refresh_token_request : {}}
                     onChange={onAuthApiModelChange}
                     apiData={selectedAuthApi}
@@ -692,7 +714,7 @@ function Test() {
                     responseType="refresh_token_response"
                   />
                 </div>
-              </>}
+              </>} */}
             </>
           ) : view === "IMPORT_API" ? (
             <>

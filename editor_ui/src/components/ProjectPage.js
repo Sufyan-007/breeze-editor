@@ -63,7 +63,7 @@ export default function ProjectPage() {
     { id: 7, name: "Third-party App", icon: apps, path: "apps" },
     { id: 8, name: "Settings", icon: settings, path: "settings" },
     { id: 9, name: "Resources", icon: upload, path: "resources" },
-    { id: 10, name: "Folder Structure", icon: folder , path:"folderstructure"} 
+    { id: 10, name: "Folder Structure", icon: folder , path:"folderstructure"},
     { id: 11, name: "Schema", icon: schema, path: "schema" },
   ];
 

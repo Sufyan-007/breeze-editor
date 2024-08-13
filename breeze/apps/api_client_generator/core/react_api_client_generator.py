@@ -70,59 +70,76 @@ class ReactApiClientGenerator:
 
 
     def generate_react_service(self, app_name, filename, service_type, module_id):
-        service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}.json"
-        auth_service_path = f"{CONFIG_PATH}/{app_name}/swagger_metadata.json"
-        auth_service_content = read_file_json(auth_service_path)
-        auth_apis = auth_service_content.get(module_id).get("auth_apis",{})
-        service_config = read_file_json(service_path)
         map_services = {}
         if service_type == "WS":
+            service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}.json"
+            service_config = read_file_json(service_path)
             for key,config in service_config.items():
                 model = ApiModelLoader.load_ws_model(config)
                 self.create_websocket_hook_file(model.tags)
+                
+        elif service_type == "AUTH":
+            auth_service_path = f"{CONFIG_PATH}/{app_name}/swagger_metadata.json"
+            auth_service_content = read_file_json(auth_service_path)
+            auth_apis = auth_service_content.get(module_id).get("auth_apis",{})
+            for key,config in auth_apis.items():
+                model = ApiModelLoader.load_auth_api_model(config)
+                react_functions = self.generate_service_function(model, False, app_name,service_type, service_path= auth_service_path,module_id=module_id)
+                
+                map_services = self._manage_service_tags(model.tags, react_functions, map_services)
+            
+            self.create_service_files(map_services)
         else:
+            service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}.json"
+            service_config = read_file_json(service_path)
             for key,config in service_config.items():
-                model = None
-                if service_type == "AUTH":
-                    model = ApiModelLoader.load_auth_api_model(config)
-                else:
-                    model = ApiModelLoader.load_api_model(config)
-                react_functions = self.generate_service_function(model, False, app_name,service_type, service_path= service_path)
+                model = ApiModelLoader.load_api_model(config)
+                react_functions = self.generate_service_function(model, False, app_name,service_type, service_path= service_path,module_id=module_id)
                 
                 map_services = self._manage_service_tags(model.tags, react_functions, map_services)
             
             self.create_service_files(map_services)
 
     
-    def retrive_token_code(self,auth_api_id,app_name, module_id ):
+    def retrive_token_code(self,auth_api_id,auth_token_id,app_name, module_id ):
         service_path = f"{CONFIG_PATH}/{app_name}/swagger_metadata.json"
         swagger_metadata = read_file_json(service_path)
         service_config = swagger_metadata.get(module_id).get("auth_apis")
         auth_config = service_config.get(auth_api_id,None)
         if auth_config is not None:
             auth_config = ApiModelLoader.load_auth_api_model(auth_config)
-            token_store_info = auth_config.token_store
-            store_in = token_store_info.store_in
-            access_token_key = token_store_info.access_token_key
-            refresh_token_key = token_store_info.refresh_token_key
-            code = ""
-            if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
-                code = "localStorage.getItem('%s');"%(access_token_key)
-            elif store_in == TokenStoreTypeEnum.SESSION:
-                code = "sessionStorage.getItem('%s');"%(access_token_key)
+            auth_config_obj = auth_config.as_dict()
+            token_store_info = {}
+            for resp in auth_config_obj.get("response"):
+                if resp.get("status") == 'S_200':
+                    token_store_info = resp.get("token_store")
+                    for key,value in token_store_info.items():
+                        if key == auth_token_id:
+                            store_in = value.get('store_in')
+                            storage_key = value.get("storage_key")
+                            code = ""
+                            if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
+                                code = "localStorage.getItem('%s');"%(storage_key)
+                            elif store_in == TokenStoreTypeEnum.SESSION:
+                                code = "sessionStorage.getItem('%s');"%(storage_key)
 
-            elif store_in == TokenStoreTypeEnum.COOKIES:
-                code = "localStorage.getItem('%s');"%(access_token_key)
+                            elif store_in == TokenStoreTypeEnum.COOKIES:
+                                code = "localStorage.getItem('%s');"%(storage_key)
+            # token_store_info = auth_config.token_store
+            # store_in = token_store_info.store_in
+            # access_token_key = token_store_info.access_token_key
+            # refresh_token_key = token_store_info.refresh_token_key
+            
             return code
         else:
             return ""
             
 
-    def generate_api_interceptor(self, auth, app_name):
+    def generate_api_interceptor(self, auth, app_name,module_id):
         type = auth.type
         auth_code = ""
         interceptor_code = REQUEST_INTERCEPTOR
-        token = self.retrive_token_code(auth.login_api,app_name)
+        token = self.retrive_token_code(auth.login_api, auth.token_id, app_name,module_id)
         interceptor_code = interceptor_code.replace("{FETCH_TOKEN}",token)
         if type == AuthTypeEnum.BASIC:
             auth_code = "config.headers.Authorization = `Basic ${token}`;"
@@ -376,7 +393,7 @@ class ReactApiClientGenerator:
             "query_params" : new_query_params
         }
 
-    def generate_service_function(self, model, anonymous, app_name,service_type, service_path):
+    def generate_service_function(self, model, anonymous, app_name,service_type, service_path,module_id):
         func_name = model.operation_id
         interceptor_code = ""
         response_interceptor_code = RESPONSE_INTERCEPTOR
@@ -384,13 +401,13 @@ class ReactApiClientGenerator:
             ## currently only support for single auth
             ## need to handle all array of auth
             auth = model.request.auth[0]
-            interceptor_code = self.generate_api_interceptor(auth, app_name)
+            interceptor_code = self.generate_api_interceptor(auth, app_name,module_id)
 
-            if auth and auth.token_api != "" and auth.token_api is not None:
-                r_interceptor_code = self.set_response_interceptor(auth, app_name)
-                response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',r_interceptor_code)
-            else:
-                response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
+            # if auth and auth.token_api != "" and auth.token_api is not None:
+            #     r_interceptor_code = self.set_response_interceptor(auth, app_name)
+            #     response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',r_interceptor_code)
+            # else:
+            #     response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
         react_code = ""
         response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
         if anonymous is True:
@@ -406,11 +423,12 @@ class ReactApiClientGenerator:
             react_code = """
                 export const {FUNC_NAME} = async ({FUNC_ARGS}) => {
                     {AXIOS_OBJECT_DECLARATION}
+                    const localInstance = axios.create();
                     {INTERCEPTOR_CODE}
                     {RESPONSE_INTERCEPTOR_CODE}
-                    let resp = await axios.request(api)
+                    let resp = await localInstance.request(api)
                     {RESPONSE_CODE}
-                    return resp
+                    return resp.data
                 };
                 """ 
 
@@ -464,7 +482,13 @@ class ReactApiClientGenerator:
         new_model = model.as_dict()
         new_model["parameters"] = model_parameters
         model_to_write = {new_model["id"]: new_model}
-        append_to_dict_file(service_path, model_to_write)
+        if service_type == "AUTH":
+            with open(service_path, "r")as file:
+                swagger_content = json.load(file)
+                swagger_content[module_id]["auth_apis"][new_model["id"]] = new_model
+                append_to_dict_file(service_path, swagger_content)
+        else:
+            append_to_dict_file(service_path, model_to_write)
         #######################################################################################################
         
         react_service_functions = []
@@ -546,20 +570,20 @@ class ReactApiClientGenerator:
                 auth_api_type = model.auth_api_type
                 code = ""
                 if auth_api_type == AuthApiTypeEnum.LOGIN or auth_api_type == AuthApiTypeEnum.REFRESH:
-                    
-                    token_store_info = model.token_store
-                    store_in = token_store_info.store_in
-                    access_token_key = token_store_info.access_token_key
-                    refresh_token_key = token_store_info.refresh_token_key
-                    if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
-                        code = "localStorage.setItem('%s',`${resp.data.access_token}`);"%(access_token_key)
-                        code = code + '\n' + "localStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
+                    model_obj = model.as_dict()
+                    for res in model_obj.get("response", []):
+                        if res.get("status") == "S_200":
+                            token_store_info = res.get("token_store")
+                            if token_store_info:
+                                for key,value in token_store_info.items():
+                                    store_in = value.get("store_in")
+                                    storage_key = value.get("storage_key")
+                                    if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
+                                        code += "localStorage.setItem('%s',`${resp.data.%s}`);"%(storage_key, key)
+                                    elif store_in == TokenStoreTypeEnum.SESSION:
+                                        code += "sessionStorage.setItem('%s',`${resp.data.%s}`);"%(storage_key, key)
 
-                    elif store_in == TokenStoreTypeEnum.SESSION:
-                        code = "sessionStorage.setItem('%s',`${resp.data.access_token}`);"%(access_token_key)
-                        code = code + '\n' + "sessionStorage.setItem('%s',`${resp.data.refresh_token}`);"%(refresh_token_key)
-
-                    
+                                
                 react_code = react_code.replace('{RESPONSE_CODE}',code)
             else:
                 react_code = react_code.replace('{RESPONSE_CODE}',"")

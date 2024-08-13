@@ -21,11 +21,17 @@ class RetrieveAuthFile(View):
                 auth_apis = file_content.get(moduleId).get("auth_apis",{})
                 if api_id == 'null':
                     result = []
-                    for api in auth_apis.keys():
+                    for key, api in auth_apis.items():
+                        response_tokens = ''
+                        for res in api.get("response", []):
+                            if res:
+                                if res.get("status") == 'S_200':
+                                    response_tokens = res.get("token_store")
                         result.append({
-                            "id" : api,
-                            "operation_id" : auth_apis[api].get("operation_id"),
-                            "auth_api_type":auth_apis[api].get("auth_api_type")
+                            "id" : key,
+                            "operation_id" : api.get("operation_id"),
+                            "response_tokens": response_tokens,
+                            # "auth_api_type":auth_apis[api].get("auth_api_type")
                         })
                 else:
                     result = auth_apis.get(api_id)

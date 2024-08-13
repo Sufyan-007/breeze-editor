@@ -11,10 +11,19 @@ class RetrieveSchemaDetails(View):
     try:
         base_dir = os.path.join(CONFIG_PATH, projectName, "swagger_schema")
         swagger_metadata_path = f"{CONFIG_PATH}/{projectName}/swagger_metadata.json"
+        custom_schemas_file_path = f"{CONFIG_PATH}/{projectName}/swagger_schema/custom_schemas.json"
+        
         final_data = []
         schema_details = {}
         with open(swagger_metadata_path, "r") as file:
-                    swagger_metadata = json.load(file)
+                swagger_metadata = json.load(file)
+                if "custom_schemas" not in swagger_metadata:
+                    swagger_metadata["custom_schemas"] = {"title": "custom_schemas"}
+                append_to_dict_file(swagger_metadata_path, swagger_metadata)
+                
+        if not os.path.exists(custom_schemas_file_path):
+                with open(custom_schemas_file_path, "w+") as file:
+                    json.dump({}, file)
         # Helper function to process JSON files
         def process_file(file_path, module_id, title):
             schema_list = []
@@ -33,7 +42,7 @@ class RetrieveSchemaDetails(View):
 
         # Walk through the base directory and process each JSON file
         for root, dirs, files in os.walk(base_dir):
-            if moduleId != 'null':
+            if  moduleId != 'undefined' and moduleId != 'null':
                 for file in files:
                     file_name, _ = os.path.splitext(file)
                     file_path = os.path.join(root, file)

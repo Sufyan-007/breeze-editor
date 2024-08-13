@@ -18,7 +18,7 @@ export async function getApiConfig(projectName, filename, apiId) {
   return auth_api;
 }
 
-export async function modifyApiConfig(data, projectName, filename, operation) {
+export async function modifyApiConfig(data, projectName, filename, operation, moduleId) {
   filename = filename.replace(/\.json$/, "");
   const apiUrl =
     `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/api-client-generator/modified-intermediate-json/` +
@@ -26,7 +26,7 @@ export async function modifyApiConfig(data, projectName, filename, operation) {
     "/" +
     filename +
     "/" +
-    operation;
+    operation + "/" + moduleId;
   const response = await callApiClientGenerator(
     apiUrl,
     "POST",

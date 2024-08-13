@@ -19,10 +19,10 @@ class TransferToAuthApi(View):
             "tags": "",
             "auth_api_type":'NONE',
             "authentication_type": 'NOAUTH',
-            "access_token_request":{ "method": "POST","auth": [],"headers": [],"parameters": [],"url": {},"body": []},
-            "refresh_token_request" : { "method": "POST","auth": [],"headers": [],"parameters": [],"url": {},"body": []},
-            "access_token_response":[],
-            "refresh_token_response":[],
+            "request":{ "method": "POST","auth": [],"headers": [],"parameters": [],"url": {},"body": []},
+            # "refresh_token_request" : { "method": "POST","auth": [],"headers": [],"parameters": [],"url": {},"body": []},
+            # "access_token_response":[],
+            "response":[],
             "summary":'',
             "token_store":{},
             "errors":{},
@@ -52,8 +52,8 @@ class TransferToAuthApi(View):
             
             auth_api_template["id"] = api_info["id"]
             auth_api_template["operation_id"] = api_info["operation_id"]
-            auth_api_template["access_token_request"] = api_info["request"]
-            auth_api_template["access_token_response"] = api_info["response"]
+            auth_api_template["request"] = api_info["request"]
+            auth_api_template["response"] = api_info["response"]
             auth_api_template["summary"] = api_info["summary"]
             
             # api_info["authentication_type"] = authentication_type

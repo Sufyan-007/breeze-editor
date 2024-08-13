@@ -12,10 +12,25 @@ function HeadersSetting({ headerData, onChange }) {
     updatedHeaders.splice(index, 1);
     onChange("headers", updatedHeaders);
   };
+  const renderError = (errors) => {
+    if (!errors) return null;
+    return (
+      <div className="text-danger">
+        {Object.entries(errors).map(([key, messages]) => (
+          <div key={key}>
+            {messages.map((message, idx) => (
+              <div key={idx}>{key}:{message}</div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
   return (
     <>
       {headerData && headerData.length > 0 ? (
         headerData.map((header, index) => (
+          <>
           <div
             key={index}
             className=" my-2 rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
@@ -116,12 +131,15 @@ function HeadersSetting({ headerData, onChange }) {
               />
             </div>
           </div>
+          {renderError(header.errors)}
+          </>
         ))
       ) : (
         <div className="d-flex justify-content-center">
           <span className="text-white">-----No Headers Present-----</span>
         </div>
       )}
+      
     </>
   );
 }
