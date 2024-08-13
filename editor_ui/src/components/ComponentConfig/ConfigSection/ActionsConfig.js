@@ -391,7 +391,10 @@ function ActionsConfig() {
         onClose={handleClose}
         title={formTitles[formType] || "Action Configuration"}
         width={
-          formTitles[formType] === "Function Configuration" ? "80%" : "600px"
+          formTitles[formType] === "Function Configuration" ||
+          formTitles[formType] === "Hook Configuration"
+            ? "80%"
+            : "600px"
         }
       >
         <div className="px-1 h-100">{renderForm()}</div>
