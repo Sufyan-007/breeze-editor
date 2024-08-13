@@ -2,6 +2,7 @@ import { useContext, useMemo, useEffect, useState } from "react";
 import { ComponentContext } from "../ComponentConfigPage";
 import { useParams } from "react-router";
 import { useSelector } from 'react-redux';
+import { Toast } from "react-bootstrap";
 
 import TextElement from "./SidebarConfigHelper/components/TextElementConfig";
 import HtmlElementConfig from "./SidebarConfigHelper/components/HtmlElementConfig";
@@ -40,7 +41,6 @@ const getAllVariables = (componentConfig) => {
 export default function ElementConfigSidebar({ config }) {
   const { sidebarService, componentConfig, setComponentConfig } = useContext(ComponentContext);
   const storeConfig = useSelector((state) => state.config);
- console.log("StoreConfig",storeConfig)
   const [selectedElement, setSelectedElement] = useState(null);
   const { projectName, componentName } = useParams();
   const element = useMemo(
@@ -50,7 +50,10 @@ export default function ElementConfigSidebar({ config }) {
   const [isLoading, setIsLoading] = useState(false);
   const availableFunctions = getAvailableFunctions(componentConfig)
   const allVariables = getAllVariables(componentConfig);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   console.log(componentConfig)
+  
   useEffect(() => {
     const subscription =sidebarService.getSelectedElem().subscribe((elem) => {
       setSelectedElement(elem);
@@ -86,9 +89,12 @@ export default function ElementConfigSidebar({ config }) {
 
       if (!response.ok) {
         setIsLoading(false);
+       
         throw new Error("Failed to update HTML config");
       } else {
         setIsLoading(false);
+        setShowToast(true)
+        setToastMessage("Successfully updated")
       }
 
       const responseData = await response.json();
@@ -100,6 +106,10 @@ export default function ElementConfigSidebar({ config }) {
       });
       //
     } catch (error) {
+      setShowToast(true)
+
+      setToastMessage("Update failed. Please try again.");
+
       console.error("Error:", error);
     }
   }
@@ -111,7 +121,7 @@ export default function ElementConfigSidebar({ config }) {
       <>
         <div
           style={{
-            width: "42rem",
+            width: "45rem",
             backgroundColor: "#212529",
             overflowY: "scroll",
             position: "absolute",
@@ -161,6 +171,21 @@ export default function ElementConfigSidebar({ config }) {
               />
             )}
           </div>
+          <Toast
+        onClose={() => setShowToast(false)}
+        show={showToast}
+        delay={3000}
+        autohide
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+        }}
+      >
+        <Toast.Header>
+          <strong className="me-auto">{toastMessage}</strong>
+        </Toast.Header>
+      </Toast>
         </div>
       </>
     );

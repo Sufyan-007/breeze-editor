@@ -167,7 +167,7 @@ const CustomPropConfig = ({
         <Form.Group
           className=""
           controlId="exampleForm.ControlInput1"
-          style={{ width: "68%", marginRight: "10px" }}
+          style={{ width: "70%", marginRight: "10px" }}
         >
           {" "}
           {(inputField.type === "COMPONENT" ||
@@ -237,6 +237,8 @@ const CustomPropConfig = ({
             ))}
           {inputField.type === "ELEMENT" || inputField.type ==="ANY" && (
              (checkbox===true?(
+              <div className="mb-2">
+
               <MonacoEditor
              defaultValue={inputField?.value || ""}
              height="75px"
@@ -248,6 +250,7 @@ const CustomPropConfig = ({
              placeholderText="To denote expressions, use curly braces {}"
 
            ></MonacoEditor>
+           </div>
             ):(
               <Form.Select
                 size="sm"
@@ -556,7 +559,7 @@ const CustomPropConfig = ({
           )}
         </Form.Group>
         <div className="d-flex me-1">
-        <div className="checkbox-container" title="Checkbox Tooltip"> 
+        <div className="checkbox-container" title="Custom Value"> 
 
           <Form.Check
             inline

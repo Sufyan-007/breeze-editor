@@ -30,6 +30,17 @@ class HTMLGenerator:
                 if tag!=self.config.get('name'):
                     #if tag not in self.config['imports']['components']:
                     self.config['imports']['components'].append(tag)
+            elif value.get('importType',"") == 'third_party':
+                # config=self.config["html_elements"][config_id["_id"]]
+                tag =value.get('value')
+
+                imports = {
+                        "TYPE": "THIRD_PARTY",
+                        "from": "react-bootstrap",
+                        "import_entity": tag,
+                        "import_type": "SINGLE"
+                    }
+                self.config['imports']['other'].append(imports)
                 
             val= f"{{{value.get('value')}}}"
         elif value.get('type') in ['VARIABLE', 'NUMERIC']:
