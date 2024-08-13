@@ -18,6 +18,7 @@ const customStyles = {
       color: "white !important",
     },
   }),
+ 
   menu: (base) => ({
     ...base,
     // width: "auto",
@@ -32,6 +33,13 @@ const customStyles = {
       color: "white", // Customize placeholder color here
     };
   },
+  indicaterContainer: (defaultStyles) =>{
+    return {
+     ...defaultStyles,
+      // Customize the color of the indicator here
+      backgroundColor: "black",
+    }
+  }
 };
 const CustomComponentConfig = ({
   attributeOptions,
@@ -45,15 +53,12 @@ const CustomComponentConfig = ({
   getPropDataType,
   allVariables
 }) => {
-  console.log("Attribute options",attributeOptions)
   const [inputFields, setInputFields] = useState([]);
-  console.log(inputFields);
   useEffect(() => {
     const fieldsArray = Object.keys(selectedAttributes).map((key) => ({
       key,
       ...selectedAttributes[key],
     }));
-    console.log([...inputFields]);
 
     setInputFields([...fieldsArray]);
   }, [selectedAttributes]);
@@ -70,6 +75,7 @@ const CustomComponentConfig = ({
   return (
     <>
       <div>
+
         {inputFields.map((inputField, index) => (
           <CustomPropConfig
             index={index}

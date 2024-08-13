@@ -236,13 +236,18 @@ class ComponentConfigService:
         appEditor.write_component(config)
         return True
 
-    def get_resource(self , comp_name, resource_id):
-        print("get_resource")
+    def get_resource(self, comp_name, resource_id=None):  
+        resources = []
+        resources.extend(self.comp_config[comp_name].get("resources"))
+        resources.extend(self.comp_config[comp_name].get("propsVars", []))
+        
         if resource_id:
-            for resource in self.comp_config[comp_name].get("resources"):
+            for resource in self.comp_config[comp_name].get("resources", []):
                 if resource.get("id") == resource_id:
                     return resource
             else:
                 raise IndexError("Resource %s not found" % resource_id)
         else:
-            return {"resources":self.comp_config[comp_name].get("resources")}
+            return {
+                "resources": resources
+            }

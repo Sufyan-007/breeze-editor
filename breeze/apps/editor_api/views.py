@@ -23,6 +23,7 @@ from .core.files_upload_service import FileService
 from .core.resource_config_service import ResourceConfigGenerator
 from .core.helpers.function_ast_parser import FunctionParser
 from .core.app_generator import AppGenerator
+from .core.helpers.schema_mapper import get_schema_mapping
 from .core.environment_settings_config_service import EnvironmentSettingsConfigService 
 
 @method_decorator(csrf_exempt,name="dispatch")
@@ -763,12 +764,32 @@ class ASTParser(APIView):
     def post(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
-            function_generator = FunctionParser()
-            function_code = function_generator.generate_statement_code(data)
+            resources =[]
+            project_id = data.get("project_id", None)
+            component_id = data.get("component_id", None)
+            
+            if project_id and component_id:
+                app_editor = ComponentConfigService(project_id)
+                resources = app_editor.get_resource(component_id)["resources"]
+            
+            function_generator = FunctionParser(resources)
+            function_code = function_generator.generate_statement_code(data.get('config', {}))
             formatted_function_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=function_code, text=True)
             return JsonResponse({"function": formatted_function_code},status=200)
         except:
             return JsonResponse({}, status=500)
+      
+@method_decorator(csrf_exempt,name='dispatch')  
+class SchemaMapper(APIView):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            type_definition = data.get('typeDefinition')
+            projectId = data.get('projectId')
+            sample_obj = get_schema_mapping(type_definition,projectId)
+            return JsonResponse(sample_obj,status=200)
+        except:
+            return JsonResponse("INTERNAL SERVER ERROR", status=500)
         
 @method_decorator(csrf_exempt, name="dispatch")
 class EnvironementSettings(APIView):

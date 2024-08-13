@@ -18,7 +18,7 @@ export default function Assignment({ config, updateParent }) {
 
   return (
     <>
-      <div className="declaration border border-light px-2 py-1">
+      <div className="declaration border border-gray px-2 py-1">
         <div className="d-flex justify-content-between">
           <div>
             <strong>Update Variable:</strong> {config.varName}

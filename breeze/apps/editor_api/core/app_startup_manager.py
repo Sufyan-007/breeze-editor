@@ -51,7 +51,7 @@ def run_project_threaded(project_id,port,project_path, env_name):
     
     status_mapping = {
     b'webpack compiled successfully': "RUNNING",
-    b'Compiled with warnings': "WARNING",
+    b'Compiled with warnings': "RUNNING", # WARNING
     b'Failed to compile': "ERROR",
     b'The build failed' : "CRASHED"
 }
