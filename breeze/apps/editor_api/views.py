@@ -754,8 +754,8 @@ class ASTParser(APIView):
         try:
             data = json.loads(request.body.decode("utf-8"))
             resources =[]
-            project_id = data["project_id"]
-            component_id = data["component_id"]
+            project_id = data.get("project_id", None)
+            component_id = data.get("component_id", None)
             
             if project_id and component_id:
                 app_editor = ComponentConfigService(project_id)

@@ -231,15 +231,12 @@ class ComponentGenerator():
             hook_name = hook['name']
             hook_type = hook['body']['type']
             hook_body = hook['body']['hookBody']
-            hook_params = hook['body'].get('hookParams', []) if hook_type == 'useCallback' else ''
-            params = ', '.join(hook_params) if hook_params else ''
+            hook_body_code = generate_function_code(hook_body)
             dependent_vars = hook['body'].get('dependentVars', [])
             dependencies = ', '.join(dependent_vars) if dependent_vars else ''
 
             hook_code = f"""
-                const {hook_name} = React.{hook_type}(({params}) => {{
-                    {hook_body}
-                }}, [{dependencies}]);
+                const {hook_name} = React.{hook_type}({hook_body_code}, [{dependencies}]);
             """
 
             return hook_code
