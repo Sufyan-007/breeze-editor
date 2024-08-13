@@ -1,4 +1,5 @@
 export async function addComponent(name, type, route, projectName) {
+  console.log(name , type , route ,"in service");
   const response = await (
     await fetch(
       `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/add-component/` +
@@ -13,7 +14,6 @@ export async function addComponent(name, type, route, projectName) {
   ).json();
   // this.dispatch(setConfig(response.config)) : need to handle this in the component itself now
   if (route) {
-    console.log("Hello there!");
     await saveRoute({ path: route, component: response.comp }, projectName);
   }
   return response;

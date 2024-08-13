@@ -2,7 +2,7 @@ import "./App.css";
 import Editor from "./components/Editor";
 import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 // import { Navigate } from 'react-router';
-import Main from "./components/Main";
+import Main from "./components/Main"
 import configureStore from "./store/Store";
 import { Provider } from "react-redux";
 import Sidebar from "./components/Sidebar";

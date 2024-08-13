@@ -170,6 +170,7 @@ const Resources = () => {
         }}
         path={selectedPath} // Pass selected path to ResourcesUploadModal
         onSubmit={handleUpload} // Optionally handle form submission within ResourcesUploadModal
+        
       />
       <ConfirmationModal
         show={!!fileToDelete}

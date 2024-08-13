@@ -13,9 +13,18 @@ class DirectoryManagementGenerator:
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
         self.directory_management_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
+    
     def reload_config(self):
         self.directory_management_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
         
+    def load_config(self,config_path):
+        with open(config_path, 'r') as file:
+            return json.load(file)
+
+    def save_config(self,config_path, config_data):
+        with open(config_path, 'w') as file:
+            json.dump(config_data, file, indent=4)
+            
     def create_parent_dir_if_not_exists(self,directory):
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -201,13 +210,6 @@ class DirectoryManagementGenerator:
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
         
-    def load_config(self,config_path):
-        with open(config_path, 'r') as file:
-            return json.load(file)
-
-    def save_config(self,config_path, config_data):
-        with open(config_path, 'w') as file:
-            json.dump(config_data, file, indent=4)
 
     def build_parent_child_map(self,config_data):
         parent_child_map = {}

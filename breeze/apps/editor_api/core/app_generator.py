@@ -90,7 +90,7 @@ class AppGenerator:
         # Set base path for the components
         self.setup_base_path_for_comps()
         
-        self.create_directory_structure()
+        # self.create_directory_structure()
         
         # Modify main component (App.js)
         self.modify_main_component()
@@ -231,7 +231,7 @@ class AppGenerator:
         # Extract the relative path starting from 'src'
         src_index = full_file_path.find('src')
         if src_index != -1:
-            relative_path = full_file_path[src_index:]
+            relative_path = full_file_path[src_index+4:]
         else:
             raise Exception("Constructed path does not contain 'src'")
         
@@ -341,35 +341,35 @@ class AppGenerator:
         
      
     #create project file structure based on the pre defined folder structure
-    def create_directory_structure(self):
+    # def create_directory_structure(self):
         
-        directory_management_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "directory_management.json")
+    #     directory_management_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "directory_management.json")
 
-        with open(directory_management_path, 'r') as dir_mgmt_file:
-            structure = json.load(dir_mgmt_file)
+    #     with open(directory_management_path, 'r') as dir_mgmt_file:
+    #         structure = json.load(dir_mgmt_file)
         
-        base_path = os.path.join(self.app_config['path'], self.app_config['name'])
-        # Create a map of ID to path
-        id_to_path = {}
+    #     base_path = os.path.join(self.app_config['path'], self.app_config['name'])
+    #     # Create a map of ID to path
+    #     id_to_path = {}
 
-        for item_id, item in structure.items():
-            # Create the path based on lineage
-            path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
-            print(path_parts,"path parts")
-            current_path = os.path.join(*path_parts)
-            print(current_path,"current path")
+    #     for item_id, item in structure.items():
+    #         # Create the path based on lineage
+    #         path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
+    #         print(path_parts,"path parts")
+    #         current_path = os.path.join(*path_parts)
+    #         print(current_path,"current path")
 
-            if item['type'] == 'DIRECTORY':
-                os.makedirs(current_path, exist_ok=True)
-            elif item['type'] == 'FILE':
-                # Create a file 
-                with open(current_path, 'w') as file:
-                    file.write(f"// {item['name']} content")
+    #         if item['type'] == 'DIRECTORY':
+    #             os.makedirs(current_path, exist_ok=True)
+    #         elif item['type'] == 'FILE':
+    #             # Create a file 
+    #             with open(current_path, 'w') as file:
+    #                 file.write(f"// {item['name']} content")
 
-            # Map the ID to the created path
-            id_to_path[item_id] = current_path
+    #         # Map the ID to the created path
+    #         id_to_path[item_id] = current_path
 
-        print("Project structure created successfully.")
+    #     print("Project structure created successfully.")
 
     def modify_index_html_with_project_name(self):
         project_path = os.path.join(self.app_config['path'], self.app_config['name'])

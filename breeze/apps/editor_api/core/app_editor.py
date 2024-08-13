@@ -276,6 +276,7 @@ class AppEditor:
     # Triggers re-write of the <comp>.js file in generated project
     # Differes from write_components in app_generator, only for writing single specified component
     def write_component(self,comp):
+        print(comp, "comp")
        
         # Updating component_config.json
         print(comp['name'])
@@ -297,7 +298,7 @@ class AppEditor:
             all_reducer_config=self.reducer_config
             # mapping_config=self.mapping_config
             )
-        print(comp_generator,"comp_generator")
+        print(comp_generator,"222222")
         comp_generator.write_component(comp)
         if not self.usage_config.get('components').get(comp['name']):
             self.usage_config['components'][comp['name']] = {
@@ -318,6 +319,7 @@ class AppEditor:
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
     def add_component(self ,name, comp_type, route_path):
+        print(name, comp_type , "name , comp_type 33333333")
         name=name.replace(' ',"")
         comp=copy.deepcopy(NEW_COMP_FORMAT)
         

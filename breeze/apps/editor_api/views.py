@@ -145,11 +145,13 @@ class RoutingReader(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class NewComponentWriter(APIView):
     def post(self, request, param):
+        print(param,"param when new component added ")
         data = json.loads(request.body.decode("utf-8"))
+        print(data["name"],data["type"],"1111111")
         try:
             app_component_writer = AppEditor(param)
             res = app_component_writer.add_component(
-                data["name"], data["type"])
+                data["name"], data["type"], data["route"])
             update_components()
             print(res,"see the response for add component")
             return JsonResponse(res)
@@ -454,6 +456,7 @@ class AppStartup(APIView):
 
 class ComponentReader(APIView):
     def get(self, request, param):
+        print(param,"param")
         try:
             config_reader = ConfigService(param)
             return JsonResponse(config_reader.get_all_component_configs(), status=200)

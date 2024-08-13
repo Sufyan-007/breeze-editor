@@ -165,7 +165,7 @@ class RouteHandler:
              # Extract the relative path starting from 'src'
             src_index = full_file_path.find('src')
             if src_index != -1:
-                relative_path = full_file_path[src_index:]
+                relative_path = full_file_path[src_index+4:]
             else:
                 raise Exception("Constructed path does not contain 'src'")
             
