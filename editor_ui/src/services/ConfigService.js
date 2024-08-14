@@ -20,11 +20,6 @@ export async function getAllComponentConfig(projectName) {
     return config
 }
 
-export async function getComponentPath(projectName){
-    console.log(projectName,"project name");
-    const path= await (await fetch(HOST+ "/editor/get-file-path/" + projectName+"/")).json()
-    return path 
-}
 
 export async function getRouterConfig(projectName) {
     const config = await (await fetch(HOST+"/editor/read-router-config/" + projectName + "/")).json()

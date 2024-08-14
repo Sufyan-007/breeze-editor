@@ -1,4 +1,4 @@
-import os, uuid
+import os
 import shutil
 from .helpers.style_handler import StyleHandler
 from .api_client_generator import GenerateAPIClient
@@ -18,14 +18,13 @@ import copy
 import subprocess
 from .project_generation_progress import ProjectGenerationProgress
 from .helpers.dependencies_manager import DependencyManager
-from apps.api_client_generator.utils.uuid_as_key import generate_uuid_as_key
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+
+
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
     "name": "$NAME",
-    "file_id":"$FILE_ID",
-    # "containingFile":"components/$NAME",
+    "containingFile": "components/$NAME.js",
     "propsVars": [],
     "resources": [],
     "componentType" : "CUSTOM",
@@ -53,7 +52,7 @@ NEW_COMP_FORMAT={
             "typeId": "DIV",
             "tagName": "div",
             "attributes": {
-                "className": { "type": "LITERAL", "value": "" },
+                "className": { "type": "LITERAL", "value": "" }
             },
             "children": [
                 {"_id":"$NAME-0"},
@@ -97,8 +96,6 @@ class AppEditor:
     
     def __init__(self,project_name):
         # self.project_name = project_name
-        
-        self.project_name= project_name
         self.app_config_dir = f"{CONFIG_PATH}/{project_name}"
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{project_name}"
         self.read_config()
@@ -189,15 +186,11 @@ class AppEditor:
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
         self.app_config['APP_CONFIG_PATH'] = self.app_config_dir
-        
         # Read config of component written in component_config file
         self.comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
         # Read component config from different files and prepare map of config for all
         
         self.usage_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['USAGE_CONFIG'])
-      
-        self.directory_management_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
-
         
         # self.prepare_comp_config()
         self.context_comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG'])
@@ -208,24 +201,10 @@ class AppEditor:
         # self.prepare_path_mappings() 
         
         self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
-
+    
+    
     def modify_main_component(self):
-        project_name = self.app_config['name']
         default_comp_config = self.comp_config[self.app_config['defaultComponent']]
-        
-        directory_manager = DirectoryManagementGenerator(project_name)
-        full_file_path = directory_manager.get_path_from_file_id(default_comp_config["file_id"])
-        
-        # Extract the relative path starting from 'src'
-        src_index = full_file_path.find('src')
-        if src_index != -1:
-            relative_path = full_file_path[src_index:]
-        else:
-            raise Exception("Constructed path does not contain 'src'")
-        
-        # Update the containingFile with the relative path
-        default_comp_config['containingFile'] = relative_path
-        
         with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
             component_code = f"""
                 import React from 'react';
@@ -276,8 +255,7 @@ class AppEditor:
     # Triggers re-write of the <comp>.js file in generated project
     # Differes from write_components in app_generator, only for writing single specified component
     def write_component(self,comp):
-        print(comp, "comp")
-       
+        
         # Updating component_config.json
         print(comp['name'])
         used_route = comp.get('route_path', None)
@@ -286,7 +264,6 @@ class AppEditor:
         self.comp_config[comp['name']] = comp
         comp_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
         write_file(f"{comp_config_path}.json", json.dumps(self.comp_config))
-
         conf=copy.deepcopy(self.comp_config)
         
         # Writing target component in generated project 
@@ -298,7 +275,6 @@ class AppEditor:
             all_reducer_config=self.reducer_config
             # mapping_config=self.mapping_config
             )
-        print(comp_generator,"222222")
         comp_generator.write_component(comp)
         if not self.usage_config.get('components').get(comp['name']):
             self.usage_config['components'][comp['name']] = {
@@ -319,54 +295,15 @@ class AppEditor:
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
     def add_component(self ,name, comp_type, route_path):
-        print(name, comp_type , "name , comp_type 33333333")
         name=name.replace(' ',"")
         comp=copy.deepcopy(NEW_COMP_FORMAT)
-        
-        #generate a unique file_id
-        file_id = generate_uuid_as_key()
         replace_variable(comp,"$NAME",name)
-        replace_variable(comp, "$FILE_ID", file_id)
-        
         comp["type"] = comp_type
         comp["route_path"] = route_path
-        self.add_component_directory_management(name,file_id)
-        
         config=self.write_component(comp)
         
         return {"config":config, "comp":name}
          
-            
-    def add_component_directory_management(self, name, file_id):
-        directory_management_path= os.path.join(self.app_config_dir,"directory_management.json")
-        print(directory_management_path,"pathhhhhhh")
-    
-        # Find the components directory entry
-        components_entry = None
-        for entry in self.directory_management_config.values():
-            if entry['name'] == 'components' and entry['type'] == 'DIRECTORY':
-                components_entry = entry
-                break
-        
-        if not components_entry:
-            raise Exception("Components directory not found in directory_management.json")
-        
-        # Extract and modify the lineage
-        components_lineage = components_entry['lineage'] + [components_entry['id']]
-      
-        
-        self.directory_management_config[file_id] = {
-            "name": name,
-            "lineage":components_lineage,
-            "id":file_id,
-            "tag":"COMPONENTS",
-            "type":"FILE",
-        }
-        print(self.directory_management_config,"directory management config ")
-           # Write back to the directory_management.json file
-        write_file(directory_management_path, json.dumps(self.directory_management_config, indent=2))
-        
-    
     def set_parent_initial_parent(self, route_obj, intial_parent_path):
         if route_obj.get('childRoutes'):
             for path in route_obj.get('childRoutes').keys():

@@ -20,7 +20,6 @@ CONFIG_FILES_PATH = {
     'RESOURCE_CONFIG' : 'uploaded_resources_config',
     'USAGE_CONFIG' : 'usage_config',
     'ENVIRONMENT_SETTINGS' : 'environment_settings',
-    'DIRECTORY_MANAGEMENT':'directory_management'
 }
 
 NEW_LINE_CHAR = "\n"

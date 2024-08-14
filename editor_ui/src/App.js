@@ -2,7 +2,7 @@ import "./App.css";
 import Editor from "./components/Editor";
 import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 // import { Navigate } from 'react-router';
-import Main from "./components/Main"
+import Main from "./components/Main";
 import configureStore from "./store/Store";
 import { Provider } from "react-redux";
 import Sidebar from "./components/Sidebar";
@@ -23,10 +23,8 @@ import Code from "./components/Code";
 import Settings from "./components/Settings/Settings";
 import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
 import FolderStructureConfig from "./components/FolderStructureSection/FolderStructureConfig";
+// import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
 import Resources from "./components/ResourcesConfiguration/Resources";
-import Services from "./features/models/index";
-import Models from "./features/models/index";
-import CustomPackage from "./components/CustomPackages/CustomPackage";
 
 export const router = createBrowserRouter([
   {
@@ -39,9 +37,8 @@ export const router = createBrowserRouter([
       { path: "routing", element: <ProjectRouting /> },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
-      { path: "custompackages", element: <CustomPackage /> },
-      { path: "servicespage", element: <Services/>},
-      { path: "models", element: <Models/>},
+      { path: "folderstructure", element: <FolderStructureConfig /> },
+      // { path: "foldertemplate", element: <FolderTemplate /> },
       {
         path: "styles",
         element: <Outlet />,

@@ -41,7 +41,10 @@ class ResourceConfigGenerator:
         create_parent_dir_if_not_exists(os.path.dirname(path))
         with open(path, 'w') as file:
             json.dump(data, file, indent=4)
-            
+
+    def generate_unique_id(self):
+        return str(uuid.uuid4())
+    
     def determine_lineage(self, file_path):
         directory_management = self.read_config_file(self.directory_management_path)
         
@@ -171,7 +174,7 @@ class ResourceConfigGenerator:
         full_path = os.path.join(self.app_config['APP_SOURCE_DIR'], file_path)
         self.save_file(file_id, file_name, full_path)
 
-        self.update_directory_management(file_id, file_name, file_path, file_type)
+        self.update_directory_management(file_name, file_path, file_type)
         return config_data
 
     def get_uploaded_files(self):
@@ -186,6 +189,7 @@ class ResourceConfigGenerator:
             del config_data[file_id]
             self.write_config_file(self.config_file_path, config_data)
 
+            # Remove leading 'src/' if present
             if file_path.startswith('/src/'):
                 file_path = file_path[len('/src/'):]
 
@@ -193,24 +197,7 @@ class ResourceConfigGenerator:
 
             if os.path.exists(full_path):
                 os.remove(full_path)
-
-                # Update directory_management.json after deleting the file
-        directory_management = self.read_config_file(self.directory_management_path)
-        if file_id in directory_management:
-            del directory_management[file_id]
-
-            try:
-                self.write_config_file(self.directory_management_path, directory_management)
-                print(f"Successfully updated directory management configuration at {self.directory_management_path}")
-            except IOError as e:
-                print(f"Error writing to {self.directory_management_path}: {e}")
-            else:
-                print(f"Error: File {full_path} does not exist.")
-        else:
-            print(f"Error: File ID {file_id} not found in config data.")
-
-            
-            
+    
     def file_duplicacy(self, file_name):
         existing_config = self.read_config_file(self.config_file_path)
         return any(value['name'] == file_name for value in existing_config.values())

@@ -21,13 +21,10 @@ const getAllUploadedFiles = async (projectName) => {
 
 const uploadFile = async (formData, projectName) => {
   const fileInput = document.querySelector('input[type="file"]');
-  console.log(fileInput.files.length);
   if (fileInput.files.length > 0) {
     const file = fileInput.files[0];
-    console.log(file, formData);
     formData.projectId = projectName;
     formData.file = file;
-console.log(formData);
 
     const submitData = new FormData();
     for (const key in formData) {
@@ -36,9 +33,8 @@ console.log(formData);
       }
     }
     submitData.append("file", formData.file);
-    try {
-        console.log("innnnnnnn");
 
+    try {
       const response = await fetch(
         `${BASE_URL}/editor/file-upload/${projectName}`,
         {
@@ -47,7 +43,6 @@ console.log(formData);
         }
       );
       const result = await response.json();
-      console.log('resss',result);
       if (result.fileId) {
         const specificParams = {
           fileName: formData.filename,
@@ -55,7 +50,7 @@ console.log(formData);
           description: formData.description,
           fileId: result.fileId,
         };
-  
+        console.log(specificParams,"see the file path");
         await fetch(`${BASE_URL}/editor/resource-config/${projectName}`, {
           method: "POST",
           headers: {

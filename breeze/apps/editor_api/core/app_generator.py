@@ -36,7 +36,7 @@ from .helpers.dependencies_manager import DependencyManager
 from .helpers.style_handler import StyleHandler
 import sys
 import pathlib
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+
 # APP_CONFIG_PATH =  f"{CONFIG_PATH}/{sys.argv[1]}"
 # print("-------------", APP_CONFIG_PATH)
 
@@ -49,7 +49,7 @@ class AppGenerator:
     routing_config = None
     reducer_config = None
     redux_store_config = None
-    
+
 
     def __init__(self, app_config_dir, logo=None):
         self.app_config_dir = f"{CONFIG_PATH}/{app_config_dir}"
@@ -57,8 +57,6 @@ class AppGenerator:
         self.read_configs()
         self.logo = logo
     def read_configs(self):
-        print(self.app_config,"app_config")
-        print(self.app_config_dir,"app_config_dir")
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
         self.app_config['APP_CONFIG_PATH'] = self.app_config_dir
@@ -87,11 +85,11 @@ class AppGenerator:
         # Install dependecies
         self.install_dependencies()
        
+       #create directory
+        self.create_directory_management_file()
         # Set base path for the components
         self.setup_base_path_for_comps()
-        
-        # self.create_directory_structure()
-        
+
         # Modify main component (App.js)
         self.modify_main_component()
 
@@ -221,23 +219,7 @@ class AppGenerator:
 
 
     def modify_main_component(self):
-        # print(self.app_config,"See the project name ")
-        project_name= self.app_config['name']
         default_comp_config = self.comp_config[self.app_config['defaultComponent']]
-        # print(default_comp_config,"see the project name ")
-        directory_manager= DirectoryManagementGenerator(project_name)
-        full_file_path = directory_manager.get_path_from_file_id(default_comp_config["file_id"])
-        
-        # Extract the relative path starting from 'src'
-        src_index = full_file_path.find('src')
-        if src_index != -1:
-            relative_path = full_file_path[src_index+4:]
-        else:
-            raise Exception("Constructed path does not contain 'src'")
-        
-        # Update the containingFile with the relative path
-        default_comp_config['containingFile'] = relative_path
-        
         with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
             component_code = f"""
                 import React from 'react';
@@ -339,37 +321,110 @@ class AppGenerator:
     def create_styles_file(self):
         write_file(self.app_config["APP_SOURCE_DIR"] + "/styles.js", '')
         
+    def create_directory_management_file(self):
+        selected_template = "temp2.json"
+
+        templates_path = f"breeze/apps/directory_management/const/{selected_template}"
+   
+        if not os.path.exists(templates_path):
+            raise FileNotFoundError(f"Template file {templates_path} does not exist")
+
+        with open(templates_path, 'r') as template_file:
+            template_content = json.load(template_file)
+
+        directory_management_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "directory_management.json")
+
+        with open(directory_management_path, 'w') as dir_mgmt_file:
+            json.dump(template_content, dir_mgmt_file, indent=4)
+        
+        #call the function to update component_config.json
+        self.update_component_config(selected_template, template_content)
+        
+        # Create directories and files based on the template
+        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
+        self.create_structure(project_path, template_content)
      
-    #create project file structure based on the pre defined folder structure
-    # def create_directory_structure(self):
+   
+    def update_component_config(self, selected_template, template_content):
+        components_config_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "component_config.json")
+        # Initialize an empty list to store component config
+        component_configs = []
         
-    #     directory_management_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "directory_management.json")
+        # Iterate over the template_content dictionary to find files tagged as COMPONENTS
+        for file_id, file_info in template_content.items():
 
-    #     with open(directory_management_path, 'r') as dir_mgmt_file:
-    #         structure = json.load(dir_mgmt_file)
+            new_id = str(uuid.uuid4())
+            if file_info['type'] == 'FILE' and file_info['tag'] == 'COMPONENTS':
+                # Extract the component name from the file name (without the .js extension)
+                component_name = os.path.splitext(file_info['name'])[0]
+              
+                component_config = {
+                    new_id: {
+                        "name": component_name,
+                        "id": component_name.upper(),
+                        "file_id":new_id,
+                        "imports": {
+                            "components": [],
+                            "other": []
+                        },
+                        "propsVars": [],
+                        "resources": [],
+                        "html": {"_id": component_name},
+                        "wrapper_store": None,
+                        "html_elements": {
+                            component_name: {
+                                "type": "Element",
+                                "elementType": "HTML",
+                                "typeId": "DIV",
+                                "tagName": "div",
+                                "attributes": {
+                                    "className": {"type": "LITERAL", "value": ""},
+                                    "id": {"type": "LITERAL", "value": ""}
+                                },
+                                "children": [{"_id": f"{new_id}-0"}]
+                            },
+                            f"{new_id}-0": {"type": "text", "text": "Hello world"}
+                        },
+                        
+                    }
+                }
+                component_configs.append(component_config)
+                print(component_configs,"combined configs")
         
-    #     base_path = os.path.join(self.app_config['path'], self.app_config['name'])
-    #     # Create a map of ID to path
-    #     id_to_path = {}
+        # Load existing component_config.json if it exists
+        existing_config = {}
+        if os.path.exists(components_config_path):
+            with open(components_config_path, 'r') as comp_config_file:
+                existing_config = json.load(comp_config_file)
 
-    #     for item_id, item in structure.items():
-    #         # Create the path based on lineage
-    #         path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
-    #         print(path_parts,"path parts")
-    #         current_path = os.path.join(*path_parts)
-    #         print(current_path,"current path")
+        # Update existing_config with new component_configs
+        for config in component_configs:
+            existing_config.update(config)
 
-    #         if item['type'] == 'DIRECTORY':
-    #             os.makedirs(current_path, exist_ok=True)
-    #         elif item['type'] == 'FILE':
-    #             # Create a file 
-    #             with open(current_path, 'w') as file:
-    #                 file.write(f"// {item['name']} content")
+        # Write updated component_config.json
+        with open(components_config_path, 'w') as comp_config_file:
+            json.dump(existing_config, comp_config_file, indent=4)
+       
+    def create_structure(self, base_path, structure):
+        # Create a map of ID to path
+        id_to_path = {}
 
-    #         # Map the ID to the created path
-    #         id_to_path[item_id] = current_path
+        for item_id, item in structure.items():
+            # Create the path based on lineage
+            path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
+            current_path = os.path.join(*path_parts)
 
-    #     print("Project structure created successfully.")
+            if item['type'] == 'DIRECTORY':
+                os.makedirs(current_path, exist_ok=True)
+            elif item['type'] == 'FILE':
+                # Create a file 
+                with open(current_path, 'w') as file:
+                    file.write(f"// {item['name']} content")
+
+            # Map the ID to the created path
+            id_to_path[item_id] = current_path
+
+        print("Project structure created successfully.")
 
     def modify_index_html_with_project_name(self):
         project_path = os.path.join(self.app_config['path'], self.app_config['name'])

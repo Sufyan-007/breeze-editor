@@ -24,9 +24,6 @@ import constants from "../assets/icons/constants.svg";
 import folder from "../assets/icons/folder.svg";
 import apps from "../assets/icons/apps.svg";
 import upload from "../assets/icons/upload.svg";
-import modelsIcon from "../assets/icons/modelsIcon.svg"
-import servicesIcon from "../assets/icons/servicesIcon.svg";
-import zipFileIcon from "../assets/icons/zipFileicon.png"
 import ProjectSidebar from "./ProjectSidebar";
 import { router } from "../App";
 
@@ -55,17 +52,17 @@ export default function ProjectPage() {
   // }, [allConfig, dispatch]);
 
   const sidebarItems = [
-    { id: 1, name: "Components", icon: pages, path: "pages" },
+    { id: 0, name: "Home", icon: home, path: "" },
+    { id: 1, name: "Pages", icon: pages, path: "pages" },
     { id: 2, name: "Routing", icon: routing, path: "routing" },
-    { id: 3, name: "API Client", icon: services, path: "services" },
-    { id: 4, name: "Models", icon: modelsIcon, path:"models" },
-    { id: 5, name: "Services",icon: servicesIcon, path:"servicespage"},
-    { id: 6, name: "Constants", icon: constants, path: "constants" },
-    { id: 7, name: "Css Styles", icon: styles, path: "styles" },
-    { id: 8, name: "Static Resources", icon: upload, path: "resources" },
-    { id: 9, name: "NPM packages", icon: apps, path: "apps" },
-    { id: 10,name: "Settings", icon: settings, path: "settings" },
-    { id: 11,name: "Custom Packages", icon: zipFileIcon ,path:"custompackages"}
+    { id: 3, name: "Services", icon: services, path: "services" },
+    { id: 4, name: "Constants", icon: constants, path: "constants" },
+    { id: 5, name: "Styles", icon: styles, path: "styles" },
+    { id: 6, name: "Code", icon: code, path: "code" },
+    { id: 7, name: "Third-party App", icon: apps, path: "apps" },
+    { id: 8, name: "Settings", icon: settings, path: "settings" },
+    { id: 9, name: "Resources", icon: upload, path: "resources" },
+    { id: 10, name: "Folder Structure", icon: folder , path:"folderstructure"} 
   ];
 
   const toggleSidebar = () => {
@@ -91,14 +88,14 @@ export default function ProjectPage() {
       />
       <div className="row d-flex no-wrap flex-grow-1">
         <div className="col-auto px-0">
-          <ProjectSidebar
-            isSidebarExpanded={isSidebarExpanded}
-            sidebarItems={sidebarItems}
-            tagSelection={tagSelection}
-            setSelection={setSelection}
-            toggleSidebar={toggleSidebar}
-            highlightedStyle={highlightedStyle}
-          />
+        <ProjectSidebar
+          isSidebarExpanded={isSidebarExpanded}
+          sidebarItems={sidebarItems}
+          tagSelection={tagSelection}
+          setSelection={setSelection}
+          toggleSidebar={toggleSidebar}
+          highlightedStyle={highlightedStyle}
+        />
         </div>
         <div className="col px-0" style={{ backgroundColor: "#303033" }}>
           <Outlet />

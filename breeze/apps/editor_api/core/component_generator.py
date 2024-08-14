@@ -6,7 +6,6 @@ from .helpers.html_generator import HTMLGenerator
 from .helpers.import_helper import ImportHelper
 from .helpers.api_parameters_mapping import APIParametersMapping
 from .helpers.function_ast_parser import FunctionParser
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
 
 def generate_imports_code(component_config, all_config,all_store_config,all_reducer_config):
     # print(component_config)
@@ -72,14 +71,12 @@ class ComponentGenerator():
 
     def __init__(self, app_config, all_comp_config,all_context_comp_config={},all_store_config={},all_reducer_config={}):
         self.app_config = app_config
-        project_name = app_config.get('name')
         self.all_comp_config = all_comp_config
         self.all_store_config = all_store_config
         self.all_context_comp_config = all_context_comp_config
         self.src_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
         self.app_config['APP_SOURCE_DIR'] = self.src_dir 
         self.all_reducer_config = all_reducer_config
-        self.directory_management_service = DirectoryManagementGenerator(project_name)
         # self.mapping_config = mapping_config
         self.components_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
 
@@ -94,24 +91,14 @@ class ComponentGenerator():
 
         for component_config in configs:
             self.write_component(component_config)
-
-      # Get the output file name from the JSON configuration
-        # output_file = f"{self.src_dir}/{comp_config['containingFile']}"
-
-    def write_component(self, comp_config):
     
-        #generate react component code
+    def write_component(self, comp_config):
         react_component_code = self.generate_react_component_code(comp_config)
-        
-        file_id = comp_config.get("file_id")
-        
-          # Get the constructed file path from the file_id
-        file_path = self.directory_management_service.get_path_from_file_id(file_id)
-        print(file_path,"file_path")
-        # Get the output file name from the JSON configuration
-        # output_file = f"{self.src_dir}/{comp_config['containingFile']}"
+        # print(react_component_code)
 
-        output_file = f"{file_path}"
+        # Get the output file name from the JSON configuration
+        output_file = f"{self.src_dir}/{comp_config['containingFile']}"
+
         # print("REACTCOMPONENT")
         # print(react_component_code)
 

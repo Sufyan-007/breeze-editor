@@ -165,7 +165,6 @@ export default function CreateApp({ ...props }) {
   };
 
   const onSubmit = (data) => {
-    console.log(data,"data");
     data.styling = selectedValues.map((option) => option.name);
     setLoading(true);
     setModalShow(true);

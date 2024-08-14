@@ -146,15 +146,14 @@ class RoutingReader(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class NewComponentWriter(APIView):
     def post(self, request, param):
-        print(param,"param when new component added ")
         data = json.loads(request.body.decode("utf-8"))
-        print(data["name"],data["type"],"1111111")
         try:
             app_component_writer = AppEditor(param)
             res = app_component_writer.add_component(
-                data["name"], data["type"], data["route"])
+                data["name"], data["type"], data['route'])
+            print("djfvnskjvnsri",res)
             update_components()
-            print(res,"see the response for add component")
+
             return JsonResponse(res)
         except:
             return JsonResponse({}, status=500)
@@ -290,6 +289,7 @@ class ProjectConfig(APIView):
 
         data['defaultComponent'] = "Main"
         data["projectName"] = data["name"]
+        # data["selectedTemplate"]= data["selectedTemplate"]
         data["name"] = data['name'].lower().replace(" ", "_")
         path = data["projectPath"]
         data["current_environment"] = ""
@@ -457,7 +457,6 @@ class AppStartup(APIView):
 
 class ComponentReader(APIView):
     def get(self, request, param):
-        print(param,"param")
         try:
             config_reader = ConfigService(param)
             return JsonResponse(config_reader.get_all_component_configs(), status=200)
@@ -472,15 +471,6 @@ class ComponentReader(APIView):
         except:
             return JsonResponse({}, status=404)
 
-class ComponentPath(APIView):
-    def get(self,request, param):
-        try:
-            config_reader = ConfigService(param)
-            file_path_info = config_reader.get_file_path()
-            return JsonResponse(file_path_info,status=200)
-        except:
-            return JsonResponse({}, status=404)
-        
 @method_decorator(csrf_exempt, name='dispatch')
 class StylesConfig(APIView):
     def post(self, request):
@@ -709,13 +699,12 @@ class ComponentConfigWriter(APIView):
             data = json.loads(request.body.decode("utf-8"))
             project_id = data["projectId"]
             component_id = data["componentId"]
-            
             if not project_id or not component_id:
                 return JsonResponse({"error": "project_id and component_id are required"}, status=400)
             
             componentConfigService = ComponentConfigService(project_id)
-            config = componentConfigService.update_component(component_id, data["body"])
-            return JsonResponse(config, status=200, safe=False)
+            res = componentConfigService.update_component(component_id, data["body"])
+            return JsonResponse(res['res'], status=res['status'], safe=False)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 

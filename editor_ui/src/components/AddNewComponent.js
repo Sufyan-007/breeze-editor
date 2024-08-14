@@ -43,7 +43,6 @@ export default function AddNewComponent() {
       projectName
     ).then((res) => {
       alert("Component added successfully");
-      console.log(res.comp,"comp name");
       router.navigate("/project/" + projectName + "/component/" + res.comp);
     });
   }
