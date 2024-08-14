@@ -5,7 +5,7 @@ import { getAuthFileApis } from "../../../services/AuthApiService";
 import { useParams } from "react-router";
 function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
   // console.log(apiData, "auth");
-  const [auth, setAuth] = useState(authData ? authData[0] : {});
+  const [auth, setAuth] = useState(authData ? authData[0]? authData[0]:{} : {});
   const [loginApis, setLoginApis] = useState([]);
   const { projectName } = useParams();
 

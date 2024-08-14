@@ -353,30 +353,34 @@ class ReactApiClientGenerator:
                 elif params.param_type == "LOCAL_STORAGE":
                     query_params.append("%s=${localStorage.getItem('%s')}" % (params.name, params.storage_key))
 
-                elif params.param_type == "SESION_STORAGE":
-                    query_params.append("%s=${sessionStorage.getItem('%s')}" % (params.name),(params.storage_key))
+                elif params.param_type == "SESSION_STORAGE":
+                    query_params.append("%s=${sessionStorage.getItem('%s')}" % (params.name, params.storage_key))
                 # query_params.append("%s=${%s}"%(params.name,params.name))
                 # function_args.append(params.name)
                 
             elif params.param_in == ParamsInEnum.PATH:
                 if params.param_type == "USER_INPUT":
                     new_path_params.append({"name":params.name, "type":params.type})
-                    path_params.append("${PathParameters.%s}" %(params.name)) 
+                    url=url.replace(f"{{{params.name}}}", f"${{PathParameters.{params.name}}}")
+                    # path_params.append("${PathParameters.%s}" %(params.name)) 
                 elif params.param_type == "STATIC":
-                    path_params.append("%s"%(params.value))
+                    url=url.replace(f"{{{params.name}}}",params.value)
+                    # path_params.append("%s"%(params.value))
                 elif params.param_type == "LOCAL_STORAGE":
-                    path_params.append("${localStorage.getItem('%s')}"%(params.storage_key))
+                    url=url.replace(f"{{{params.name}}}", "${localStorage.getItem('%s')}"%(params.storage_key))
+                    # path_params.append("${localStorage.getItem('%s')}"%(params.storage_key))
                 elif params.param_type == "SESSION_STORAGE":
-                    path_params.append("${sessionStorage.getItem('%s')}"%(params.storage_key))
+                    url=url.replace(f"{{{params.name}}}", "${sessionStorage.getItem('%s')}"%(params.storage_key))
+                    # path_params.append("${sessionStorage.getItem('%s')}"%(params.storage_key))
                 # path_params.append("${%s}"%(params.name))
                 # function_args.append(params.name)
         function_args.append('QueryParameters')
         function_args.append('PathParameters')
         
-        if len(path_params) > 0:
-            path = '/'.join(path_params)
-            path = "/"+path
-            url = url + path
+        # if len(path_params) > 0:
+        #     path = '/'.join(path_params)
+        #     path = "/"+path
+        #     url = url + path
 
         if len(query_params) > 0:
             query = '&'.join(query_params)
