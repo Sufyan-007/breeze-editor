@@ -152,29 +152,13 @@ function SchemaSettings() {
           }}>
           <div className="text-white mt-2 d-flex justify-content-between">
             <strong>Schemas</strong>
-            {/* <img
-              width="25"
-              height="25"
-              className="mx-1"
-              src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
-              alt="add--v1"
-              style={{ cursor: "pointer" }}
-              onClick={() => {
-                setDefaultSchemaObj({
-                  type: "object",
-                  properties: {},
-                  required: [],
-                  name: "",
-                });
-              }}
-            /> */}
           </div>
           {schemaList.length > 0 ? (
             <div>
               {schemaList.map((module) => (
                 <div key={module.module_id} className="text-white mt-2">
                   <div
-                    className="d-flex justify-content-between my-2"
+                    className="d-flex my-3"
                     onClick={() => toggleModuleExpand(module.module_id)}
                     style={{
                       cursor: "pointer",
@@ -183,7 +167,8 @@ function SchemaSettings() {
                         : "#212529"
                     }}
                   >
-                    <span className="overflow-auto">{module.title}</span>
+                    <img width="20" height="20" src="https://img.icons8.com/ios-filled/50/FFFFFF/module.png" alt="module"  className="mt-1"/>
+                    <span className="overflow-auto mx-2">{module.title}</span>
                   </div>
                   {expandedModule.includes(module.module_id) && (
                     <div className="">

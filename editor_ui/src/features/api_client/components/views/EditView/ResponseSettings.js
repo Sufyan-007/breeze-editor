@@ -62,7 +62,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
       if (newResponse.status === 'S_200') {
         const initialTokenStore = {};
         props.forEach(prop => {
-          initialTokenStore[`${newResponse.schema_name}.${prop.name}`] = {
+          initialTokenStore[`${prop.name}`] = {
             store_in: 'LOCAL_STORAGE', 
             storage_key: '', 
           };
@@ -70,7 +70,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
         setNewResponse(prevState => ({ ...prevState, token_store: initialTokenStore }));
       }
     }
-  }, [newResponse.status, newResponse.schema_name]);
+  }, [newResponse.status]);
   useEffect(() => {
     if (response && response.length > 0) {
       const selectedResponse = response.find(res => res.status === "S_200");
@@ -140,7 +140,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
 
 
   const handlePropertyChange = (property, field, value) => {
-    const currentTokenStore = newResponse.token_store[`${newResponse.schema_name}.${property}`] || {};
+    const currentTokenStore = newResponse.token_store[`${property}`] || {};
     const updatedTokenStoreEntry = {
       ...currentTokenStore,
       [field]: value, 
@@ -149,7 +149,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
       ...newResponse,
       token_store: {
         ...newResponse.token_store,
-        [`${newResponse.schema_name}.${property}`]: updatedTokenStoreEntry
+        [`${property}`]: updatedTokenStoreEntry
       }
     });
   };
@@ -260,7 +260,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                                 backgroundColor: "#212529",
                                 border: "1px solid rgba(128, 128, 128, 0.5)",
                               }}
-                              value={res.token_store[`${res.schema_name}.${prop.name}`]?.storage_key || ""}
+                              value={res.token_store[`${prop.name}`]?.storage_key || ""}
                               onChange={(e) =>
                                 handlePropertyChange(prop.name, "storage_key", e.target.value)
                               }
@@ -275,7 +275,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                                 backgroundColor: "#212529",
                                 border: "1px solid rgba(128, 128, 128, 0.5)",
                               }}
-                              value={res.token_store[`${res.schema_name}.${prop.name}`]?.store_in || ""}
+                              value={res.token_store[`${prop.name}`]?.store_in || ""}
                               onChange={(e) =>
                                 handlePropertyChange(prop.name, "store_in", e.target.value)
                               }
@@ -394,7 +394,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                                 backgroundColor: "#212529",
                                 border: "1px solid rgba(128, 128, 128, 0.5)",
                               }}
-                              value={newResponse.token_store[`${newResponse.schema_name}.${prop.name}`]?.storage_key || ""}
+                              value={newResponse.token_store[`${prop.name}`]?.storage_key || ""}
                               onChange={(e) =>
                                 handlePropertyChange(prop.name, "storage_key", e.target.value)
                               }
@@ -409,7 +409,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                                 backgroundColor: "#212529",
                                 border: "1px solid rgba(128, 128, 128, 0.5)",
                               }}
-                              value={newResponse.token_store[`${newResponse.schema_name}.${prop.name}`]?.store_in || ""}
+                              value={newResponse.token_store[`${prop.name}`]?.store_in || ""}
                               onChange={(e) =>
                                 handlePropertyChange(prop.name, "store_in", e.target.value)
                               }

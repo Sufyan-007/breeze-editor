@@ -11,14 +11,14 @@ class RetrieveSchemaDetails(View):
     try:
         base_dir = os.path.join(CONFIG_PATH, projectName, "swagger_schema")
         swagger_metadata_path = f"{CONFIG_PATH}/{projectName}/swagger_metadata.json"
-        custom_schemas_file_path = f"{CONFIG_PATH}/{projectName}/swagger_schema/custom_schemas.json"
+        custom_schemas_file_path = f"{CONFIG_PATH}/{projectName}/swagger_schema/custom.json"
         
         final_data = []
         schema_details = {}
         with open(swagger_metadata_path, "r") as file:
                 swagger_metadata = json.load(file)
-                if "custom_schemas" not in swagger_metadata:
-                    swagger_metadata["custom_schemas"] = {"title": "custom_schemas"}
+                if "custom" not in swagger_metadata:
+                    swagger_metadata["custom"] = {"title": "custom_module", "description": "custom_description", "auth_apis":{}}
                 append_to_dict_file(swagger_metadata_path, swagger_metadata)
                 
         if not os.path.exists(custom_schemas_file_path):

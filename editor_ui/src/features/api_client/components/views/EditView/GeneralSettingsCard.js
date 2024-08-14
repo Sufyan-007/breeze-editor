@@ -155,7 +155,7 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
               </Col>
             </Row> :
               <>  { 
-                selectedServiceInfo && Object.keys(selectedServiceInfo).length > 0 &&
+                selectedServiceInfo && Object.keys(selectedServiceInfo).length > 0 && settings.id &&
                 <Row>
                 <Col sm={3}>
                   <Form.Label className="text-white mx-3">Api Type:</Form.Label>

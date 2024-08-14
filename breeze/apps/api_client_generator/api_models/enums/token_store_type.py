@@ -2,7 +2,7 @@ from enum import Enum
 
 class TokenStoreTypeEnum(str, Enum):
     NONE="null"
-    SESSION= "Session"
-    LOCAL_STORAGE = "Local Storage"
-    COOKIES = "Cookies"
+    SESSION= "SESSION"
+    LOCAL_STORAGE = "LOCAL_STORAGE"
+    COOKIES = "COOKIES"
     

@@ -106,25 +106,23 @@ class ReactApiClientGenerator:
         swagger_metadata = read_file_json(service_path)
         service_config = swagger_metadata.get(module_id).get("auth_apis")
         auth_config = service_config.get(auth_api_id,None)
-        if auth_config is not None:
+        code = ""
+        if auth_config is not None and auth_token_id:
             auth_config = ApiModelLoader.load_auth_api_model(auth_config)
             auth_config_obj = auth_config.as_dict()
             token_store_info = {}
             for resp in auth_config_obj.get("response"):
                 if resp.get("status") == 'S_200':
                     token_store_info = resp.get("token_store")
-                    for key,value in token_store_info.items():
-                        if key == auth_token_id:
-                            store_in = value.get('store_in')
-                            storage_key = value.get("storage_key")
-                            code = ""
-                            if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
-                                code = "localStorage.getItem('%s');"%(storage_key)
-                            elif store_in == TokenStoreTypeEnum.SESSION:
-                                code = "sessionStorage.getItem('%s');"%(storage_key)
+                    token_config = token_store_info[auth_token_id]
+                    
+                    if token_config["store_in"] == TokenStoreTypeEnum.LOCAL_STORAGE:
+                        code = "localStorage.getItem('%s')"%(token_config["storage_key"])
+                    elif token_config["store_in"] == TokenStoreTypeEnum.SESSION:
+                        code = "sessionStorage.getItem('%s')"%(token_config["storage_key"])
 
-                            elif store_in == TokenStoreTypeEnum.COOKIES:
-                                code = "localStorage.getItem('%s');"%(storage_key)
+                    elif token_config["store_in"] == TokenStoreTypeEnum.COOKIES:
+                        code = "localStorage.getItem('%s')"%(token_config["storage_key"])
             # token_store_info = auth_config.token_store
             # store_in = token_store_info.store_in
             # access_token_key = token_store_info.access_token_key

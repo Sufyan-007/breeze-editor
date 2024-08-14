@@ -109,15 +109,16 @@ class ApiClientGenerator(View):
         try:
             # Load authentication API data from Swagger metadata
             auth_api_data = []
-            
-
             with open(auth_api_folder_path, "r") as file:
                 swagger_metadata = json.load(file)
-
+            if "custom" not in swagger_metadata:
+                swagger_metadata["custom"] = {"title": "custom_module", "description": "custom_description", "auth_apis":{}}
+                append_to_dict_file(auth_api_folder_path, swagger_metadata)
+                
             for key, value in swagger_metadata.items():
                 apis = []
-                if key == "custom_schemas":
-                    continue
+                # if key == "custom":
+                #     continue
                 auth_apis = value.get("auth_apis", {})
                 for k, v in auth_apis.items():
                     apis.append(v)
@@ -126,22 +127,13 @@ class ApiClientGenerator(View):
                     "apis": apis,
                     "title": value.get("title")
                 })
-
-            # If only files should be returned, return the list of files
-            # if files_only and files_only == 'true':
-            #     all_files = []
-            #     subfolders = [f for f in os.listdir(api_folder_path) if os.path.isdir(os.path.join(api_folder_path, f))]
-            #     for subfolder in subfolders:
-            #         subfolder_path = os.path.join(api_folder_path, subfolder)
-            #         files = [os.path.join(subfolder, file) for file in os.listdir(subfolder_path) if os.path.isfile(os.path.join(subfolder_path, file))]
-            #         all_files.extend(files)
-            #     return JsonResponse({"files": all_files}, status=200)
-
-            # Process each subfolder and its files
+                
+            custom_module_path = os.path.join(api_folder_path, "custom")
+            os.makedirs(custom_module_path, exist_ok=True)
+            
             subfolders = [f for f in os.listdir(api_folder_path) if os.path.isdir(os.path.join(api_folder_path, f))]
             for subfolder in subfolders:
                 subfolder_path = os.path.join(api_folder_path, subfolder)
-                
                 subfolder_data = {
                     "subfolder": subfolder,
                     "files": [],

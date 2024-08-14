@@ -209,13 +209,16 @@ function Test() {
     setNewModuleTitle(title);
   };
 
-  const saveTitle = async (moduleId) => {
-    const result = await editModuleName(projectName, moduleId, { title: newModuleTitle })
-    if (result.message) {
-      setShowToast(true);
-      setErrorMessage(result.message);
+  const saveTitle = async (oldTitle, moduleId) => {
+    if(oldTitle !== newModuleTitle)
+    {
+      const result = await editModuleName(projectName, moduleId, { title: newModuleTitle })
+      if (result.message) {
+        setShowToast(true);
+        setErrorMessage(result.message);
+      }
+      fetchServiceList();
     }
-    fetchServiceList();
     setEditingModule(null);
   };
 
@@ -303,10 +306,10 @@ function Test() {
                               size="sm"
                               value={newModuleTitle}
                               onChange={handleInputChange}
-                              onBlur={() => saveTitle(folder.subfolder)}
+                              onBlur={() => saveTitle(folder.title, folder.subfolder)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
-                                  saveTitle(folder.subfolder);
+                                  saveTitle(folder.title,folder.subfolder);
                                 } else if (e.key === 'Escape') {
                                   cancelEditing();
                                 }
@@ -694,27 +697,7 @@ function Test() {
 
                 />
               </div>
-              {/* {(selectedAuthApi.authentication_type === "BEARER" || selectedAuthApi.authentication_type === "APIKEY" || selectedAuthApi.authentication_type === "OAUTH2") && <>
-                <div >
-                  <RequestSettings
-                    moduleId={selectedModule && selectedModule.id}
-                    requestData={selectedAuthApi.refresh_token_request ? selectedAuthApi.refresh_token_request : {}}
-                    onChange={onAuthApiModelChange}
-                    apiData={selectedAuthApi}
-                    isAuthApi={true}
-                    title="Refresh Token Request Settings"
-                    requestType="refresh_token_request"
-                  />
-                  <ResponseSettings
-                    responseData={selectedAuthApi.refresh_token_response ? selectedAuthApi.refresh_token_response : []}
-                    onChange={onAuthApiModelChange}
-                    schemaList={schemaList}
-                    isAuthApi={true}
-                    title="Refresh Token Response Settings"
-                    responseType="refresh_token_response"
-                  />
-                </div>
-              </>} */}
+            
             </>
           ) : view === "IMPORT_API" ? (
             <>
@@ -730,7 +713,7 @@ function Test() {
             <EditServiceFunction selectedServiceInfo={selectedServiceInfo} />
           ) : view === "AUTH_CONFIG" ? (
             <AuthConfigSettings selectedApi={selectedApi} />
-          ) : null}
+          ) : null} 
         </Col>
       </Row>
     </div>
