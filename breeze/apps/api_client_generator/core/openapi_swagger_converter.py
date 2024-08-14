@@ -14,7 +14,7 @@ from ..utils.uuid_as_key import generate_uuid_as_key
 from ..utils.api_model_loader import ApiModelLoader
 from ..api_models.custom_exception import CustomeException
 from common.utils.app_consts import CONFIG_PATH
-from ..api.create_auth_interceptors import create_auth_interceptors
+# from ..api.create_auth_interceptors import create_auth_interceptors
 from ..utils.append_dict_file import append_to_dict_file
 class OpenapiConverter:
     def __init__(self):
@@ -564,7 +564,7 @@ class OpenapiConverter:
             
             # create auth interceptors 
             
-            create_auth_interceptors( security_schemes= security_schemes, path=app_config['APP_SOURCE_DIR'] )
+            # create_auth_interceptors( security_schemes= security_schemes, path=app_config['APP_SOURCE_DIR'] )
                 
                 
             security_schemes_models = self.handle_security_schema(security_schemes,openapi_data) #remaining
