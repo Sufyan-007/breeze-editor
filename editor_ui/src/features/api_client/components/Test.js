@@ -22,7 +22,6 @@ import EditServiceFunction from "./EditServiceFunction";
 import RequestSettings from "./views/EditView/RequestSettings";
 import ResponseSettings from "./views/EditView/ResponseSettings";
 import { generateReactService } from "../services/GeneratedReactAppService";
-import AuthConfigSettings from "./views/AuthConfigSettings";
 import { modifyApiConfig } from "../services/ApiService";
 import { appendToAuthApi } from "../services/AuthApiService";
 function Test() {
@@ -711,8 +710,6 @@ function Test() {
             </>
           ) : view === "TEST_API" ? (
             <EditServiceFunction selectedServiceInfo={selectedServiceInfo} />
-          ) : view === "AUTH_CONFIG" ? (
-            <AuthConfigSettings selectedApi={selectedApi} />
           ) : null} 
         </Col>
       </Row>
