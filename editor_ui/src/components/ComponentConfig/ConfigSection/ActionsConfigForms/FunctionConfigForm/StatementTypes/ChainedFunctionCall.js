@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
 import FunctionConfigStack from "../FunctionConfigStack";
 
 function ChainedFunctionCall({ config, updateParent }) {
   const [conf, setConf] = useState(config);
-  const [isOpen, setIsOpen] = useState(true);
+  const [chainedFunctionCallOpen, setChainedFunctionCallOpen] = useState(true);
+  const [uniqueId, setUniqueId] = useState("");
 
   const handleToggle = () => {
-    setIsOpen(!isOpen);
+    setChainedFunctionCallOpen(!chainedFunctionCallOpen);
   };
 
   useEffect(() => {
     setConf(config);
+    setUniqueId(uuidv4());
   }, [config]);
 
   function update(value, index) {
@@ -30,6 +33,7 @@ function ChainedFunctionCall({ config, updateParent }) {
       });
     }
   }
+
   return (
     <>
       <div className="custom-code border border-gray px-2 py-1">
@@ -40,12 +44,12 @@ function ChainedFunctionCall({ config, updateParent }) {
               style={{ cursor: "pointer" }}
               onClick={handleToggle}
               data-bs-toggle="collapse"
-              data-bs-target={`#collapse-${config?.type}`}
-              aria-expanded={isOpen}
+              data-bs-target={`#collapse-${uniqueId}`}
+              aria-expanded={chainedFunctionCallOpen}
             >
               <i
                 className={`bi ${
-                  isOpen ? "bi-chevron-down" : "bi-chevron-right"
+                  chainedFunctionCallOpen ? "bi-chevron-down" : "bi-chevron-right"
                 }`}
               ></i>
             </div>
@@ -63,8 +67,8 @@ function ChainedFunctionCall({ config, updateParent }) {
           </div>
         </div>
         <div
-          id={`collapse-${config?.type}`}
-          className={`collapse ${isOpen ? "show" : ""}`}
+          id={`collapse-${uniqueId}`}
+          className={`collapse ${chainedFunctionCallOpen ? "show" : ""}`}
         >
           {config?.functions &&
             config.functions.map((func, index) => (
@@ -77,19 +81,6 @@ function ChainedFunctionCall({ config, updateParent }) {
             ))}
         </div>
       </div>
-      {/* <Offcanvas
-        isOpen={isOffcanvasOpen}
-        onClose={() => handleClose(false)}
-        title={"Edit"}
-        width="40%"
-      >
-        <div className="px-1 h-100 container">
-          <FunctionCallEdit
-            config={config}
-            update={(val) => handleClose(val)}
-          />
-        </div>
-      </Offcanvas> */}
     </>
   );
 }

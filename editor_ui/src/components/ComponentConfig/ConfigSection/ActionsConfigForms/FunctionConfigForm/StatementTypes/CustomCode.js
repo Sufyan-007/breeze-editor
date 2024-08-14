@@ -16,12 +16,16 @@ export default function CustomCode({ config, updateParent }) {
     }
     setOffCanvasOpen(false);
   }
+
   return (
     <>
       <div className="custom-code border border-gray px-2 py-1">
         <div className="d-flex justify-content-between">
           <div>
-            <strong>Custom:</strong> {config.body}
+            <strong>Custom:</strong>{" "}
+            {config.body && config.body.length > 100
+              ? `${config.body.substring(0, 100)}...`
+              : config.body}
           </div>
           <div className="d-flex">
             <div
