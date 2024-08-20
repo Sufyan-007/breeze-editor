@@ -262,7 +262,7 @@ class RouteHandler:
         react_code = f'''
         import './styles.js';
         import React, {{useEffect}} from 'react';
-        import SandBox from "SandB/ox.js";
+        import SandBox from "SandBox.js";
         import {{ Routes, Route, Navigate, BrowserRouter, createBrowserRouter, createRoutesFromElements, RouterProvider }} from "react-router-dom";
         
         export const router = createBrowserRouter (

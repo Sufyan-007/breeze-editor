@@ -17,7 +17,7 @@ export const TestPropsContext = createContext({});
 export default function HtmlSection() {
   const { componentConfig } = useContext(ComponentContext);
   const [iframeSrc, setIframeSrc] = useState(
-    `${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port
+    `${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port+'/breeze/sandbox'
   );
   const srcInput = useRef();
   const [selected, setSelected] = useState(0);
@@ -32,6 +32,10 @@ export default function HtmlSection() {
   useEffect(() => {
     console.log("Testing")
   }, [iframeSrc]);
+
+  useEffect(()=>{
+    console.log(componentConfig)
+  },[componentName,componentConfig])
 
   const setIframeSource = () => {
     const newValue = srcInput.current.value;
