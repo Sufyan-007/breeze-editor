@@ -392,7 +392,8 @@ function ActionsConfig() {
         title={formTitles[formType] || "Action Configuration"}
         width={
           formTitles[formType] === "Function Configuration" ||
-          formTitles[formType] === "Hook Configuration"
+          formTitles[formType] === "Hook Configuration" ||
+          formTitles[formType] === "Lifecycle Configuration"
             ? "80%"
             : "600px"
         }
