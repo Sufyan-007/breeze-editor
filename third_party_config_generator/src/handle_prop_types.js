@@ -1,6 +1,6 @@
 const { TypeFlags } = require('ts-morph');
 const { SyntaxKind } = require('typescript');
-const { sanitizeFilePath, storeInfo } = require('./helper')
+const { sanitizeFilePath, storeInfo, getAbsoluteStorageDirForLib } = require('./helper')
 
 
 let max = 0;
@@ -8,9 +8,11 @@ let max = 0;
 class HandlePropTypes {
 
 
-    constructor(libraryName, storePath){
-        this.libraryName = libraryName;
-        this.storePath = storePath;
+    constructor(libInfo) {
+        this.libraryName = libInfo.libName;
+        this.libVersion = libInfo.libVersion;
+        this.storePath = libInfo.storePath;
+        this.libInfo = libInfo;
     }
 
     handleProps(prop, type, processed = [], recLevel = 0, all = []) {
@@ -41,12 +43,19 @@ class HandlePropTypes {
 
         const typeInfo = {};
 
-        if (typeof type.getKind === 'function' && type.getKind() === SyntaxKind.UnionType) {
-            typeInfo['type'] = 'UNION_TYPE'
-            typeInfo['name'] = type.getText()
-            typeInfo['data'] = type.getTypeNodes().map(tn => this.handleProps(prop, tn.getType(), processed, recLevel, all))
+        if (typeof type.getKind === 'function') {
+            if(type.getKind() === SyntaxKind.UnionType){
 
-            return typeInfo;
+                typeInfo['type'] = 'UNION_TYPE'
+                typeInfo['name'] = type.getText()
+                typeInfo['data'] = type.getTypeNodes().map(tn => this.handleProps(prop, tn.getType(), processed, recLevel, all))
+    
+                return typeInfo;
+            }else if(type.getKind() == SyntaxKind.TypeReference || type.getKind() == SyntaxKind.FunctionType){
+                return this.handleProps(prop, type.getType(), processed, recLevel, all);
+            }
+
+            return this.handleProps(prop, type.getType(), processed, recLevel, all);
         }
 
         // Handle all the cases
@@ -73,6 +82,8 @@ class HandlePropTypes {
                 return { 'type': 'DATA_TYPE', 'data': 'any' };
             case type.isVoid():
                 return { 'type': 'DATA_TYPE', 'data': 'void' };
+            case type.isEnum():
+                return this.decodeEnumType(prop, type, processed, recLevel, all);
             case type.isTypeParameter():
                 return { 'type': 'TYPE_PARAMETER', 'data': this.handleProps(prop, type.getDefault(), processed, recLevel, all) };
             case type.isInterface():
@@ -89,6 +100,22 @@ class HandlePropTypes {
 
 
         return typeInfo;
+    }
+
+    decodeEnumType(prop, type, processed, recLevel, all) {
+        const typeInfo = {}
+        typeInfo['type'] = 'CUSTOM_ENUM'
+        typeInfo['name'] = type.getText()
+
+        typeInfo['data'] = type.getSymbol().getValueDeclaration().getMembers().map(member => {
+            return {
+                'name': member.getName(),
+                'value': member.getValue()
+            }
+        })
+
+        return typeInfo;
+
     }
 
     // Handle Interface Type
@@ -119,24 +146,39 @@ class HandlePropTypes {
         }
 
         // Go through all the properties of the interface and decode them
+
+
         typeInfo['data'] = type.getProperties().map(p => {
+            let declaration = p.getValueDeclaration();
+            if (p.getDeclarations().length != 0) {
+                declaration = p.getDeclarations()[0]
+            }
+
+            if (!declaration) {
+                return {
+                    name: p.getName(),
+                    type: 'NO_DECLARATION_FOUND'
+                }
+            }
+
             return {
                 name: p.getName(),
-                type: this.handleProps(prop, p.getValueDeclaration().getType(), processed, recLevel, all)
+                type: this.handleProps(prop, declaration.getType(), processed, recLevel, all)
             }
         })
 
+
         // We store the interface details to seperate file
         // So we store the details and give only ref
-        if(alreadyProcessed.path){
+        if (alreadyProcessed.path) {
             storeInfo(typeInfo, {
-                refVariable : sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
-                refPath : sanitizeFilePath(alreadyProcessed.path)
-            },  `${this.storePath}/${this.libraryName}`)
+                refVariable: sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
+                refPath: sanitizeFilePath(alreadyProcessed.path)
+            }, getAbsoluteStorageDirForLib(this.libInfo))
             typeInfo['data'] = {
-                refVariable :sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
-                refPath : sanitizeFilePath(alreadyProcessed.path)
-             
+                refVariable: sanitizeFilePath(`${alreadyProcessed.path}.${type.getSymbol()?.getName() || type.getText()}`),
+                refPath: sanitizeFilePath(alreadyProcessed.path)
+
             }
 
         }
@@ -164,9 +206,12 @@ class HandlePropTypes {
             parameters: {
                 destructured: false,
                 list: params.map(p => {
+                    if(!p.getValueDeclaration()){
+                        console.log('No Declaration Found, Check it later, Maybe need to fix this!!');
+                    }
                     return {
                         name: p.getName(),
-                        type: this.handleProps(prop, p.getValueDeclaration().getType(), processed, recLevel, all)
+                        type: this.handleProps(prop, p.getValueDeclaration()?.getType() || p.getDeclaredType(), processed, recLevel, all)
                     }
                 }
                 )
@@ -306,8 +351,8 @@ function checkAlreadyProcessed(type, declaration, processedArr) {
 
     return {
         isAlreadyProcessed: false,
-        path : path,
-        objectPath : objectPath
+        path: path,
+        objectPath: objectPath
     }
 
 }

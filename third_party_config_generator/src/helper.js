@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { INDEX_FILE_NAME } = require('./consts');
 
 function getAppRootDir() {
     let currentDir = __dirname
@@ -13,12 +14,26 @@ function findTypeScriptEntryPoint(libraryPath) {
     const packageJsonPath = path.join(libraryPath, 'package.json');
     const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
     const packageJson = JSON.parse(packageJsonContent);
-    return packageJson.types || packageJson.typings;
+    return packageJson.types || packageJson.typings || changeExtToTs(packageJson.main);
 }
 
 function findTypeDefinitionFile(entryPoint, moduleSpecifier, libraryPath) {
     const modulePath = path.join(libraryPath, path.dirname(entryPoint), moduleSpecifier);
-    const typeDefinitionFile = `${modulePath}.d.ts`;
+    
+    let typeDefinitionFile;
+    if(fs.existsSync(modulePath) && fs.lstatSync(modulePath).isDirectory()){
+        typeDefinitionFile = `${modulePath}/index.d.ts`; 
+
+
+        // Check if it is referencing /dist/index.d.ts file if index.d.ts doesn't 
+        // exists directly
+        if(!fs.existsSync(typeDefinitionFile) && fs.existsSync(`${modulePath}/dist`) && fs.lstatSync(`${modulePath}/dist`).isDirectory()){
+            typeDefinitionFile = `${modulePath}/dist/index.d.ts`;
+        }
+        
+    }else{
+        typeDefinitionFile = `${modulePath}.d.ts`;
+    }
     // // console.log(typeDefinitionFile);
     return fs.existsSync(typeDefinitionFile) ? typeDefinitionFile : null;
 }
@@ -35,6 +50,11 @@ function removePathTillNodeModule(str) {
     return str.replace(/.*\/node_modules\//, "");
 }
 
+function changeExtToTs(filePath){
+    if(!filePath) return filePath;
+    return filePath.replace(/\.js$/, '.d.ts');
+}
+
 const fileDir = "/home/raj/Desktop/bridge/npm_libraries/conf_generator/third_party_configs/react-bootstrap/others"
 
 
@@ -46,6 +66,31 @@ function createDirectoryIfNotExists(directory) {
         // console.log(`Directory "${directory}" already exists.`);
     }
 }
+
+function createFileIfNotExists(filePath, initialData) {
+    if (fs.existsSync(filePath)) {
+        console.log("File exists")
+    }
+    else {
+        console.log('INITIAL DATA ', initialData);
+        fs.writeFileSync(filePath, initialData, (err) => {
+            if (err) throw err;
+            console.log('File created successfully.');
+          });
+
+        console.log("File does not exist")
+    }
+
+}
+
+function getFileContent(filePath, createIfNotExists=true, initialData = '{}') {
+    if(createIfNotExists){
+        createFileIfNotExists(filePath, initialData);
+    }
+    const content = fs.readFileSync(filePath, 'utf-8');
+    return content;
+}
+
 
 function storeInfo(info, fileInfo, storageDir) {
 
@@ -71,11 +116,40 @@ function storeInfo(info, fileInfo, storageDir) {
 
 }
 
+function writeJsonFile(content, filePath){
+    fs.writeFileSync(filePath, JSON.stringify(content, null, 4));
+}
+
+function getLibraryProcessStatus(libName, libVersion, storePath){
+    const indexFilePath = `${storePath}/${INDEX_FILE_NAME}`
+    let indexFile = getFileContent(indexFilePath);
+    indexFile = JSON.parse(indexFile);
+
+    const libKey = getKeyForProcessStatus(libName, libVersion)
+
+    return  indexFile[libKey]
+
+}
+
+function getKeyForProcessStatus(libName, libVersion){
+    if(!libVersion) return libName
+
+    return `${libName}@${libVersion}`
+}
+
+function getAbsoluteStorageDirForLib(libInfo){
+    return `${libInfo.storePath}/${libInfo.libName}_${libInfo.libVersion}` ;
+}
 module.exports = {
     getAppRootDir,
     findTypeDefinitionFile,
     findTypeScriptEntryPoint,
     replaceSlashWithUnderscore,
     storeInfo,
-    sanitizeFilePath
+    sanitizeFilePath,
+    getFileContent,
+    writeJsonFile,
+    getLibraryProcessStatus,
+    getKeyForProcessStatus,
+    getAbsoluteStorageDirForLib
 }

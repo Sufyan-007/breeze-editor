@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
 import {v4 as uuidv4} from 'uuid';
+import {Project, SourceFile} from 'ts-morph'
 
 
 // Utility function to get all TypeScript declaration files
@@ -183,6 +184,49 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
     return componentDetails;
 }
 
+//to get all sourceFile according to ts-morph libraray
+function getTSMorphSourceFiles(files: string[],project:Project):SourceFile[]{
+    let sourceFiles: SourceFile[] = [];
+    for(const file of files){
+      sourceFiles.push(project.addSourceFileAtPath(file));
+    }
+    return sourceFiles;
+  }
+
+//to get all nested sourceFiles of importDeclaration
+function getRecursivelySourceFilesofImport(sf:SourceFile,ref:any[],processedSourceFiles:string[],files:string[]){
+    const importsDec = sf.getImportDeclarations();
+    if(!importsDec.length){
+        return;
+    }
+    for(const imp of importsDec){
+        const moduleSpecifierSourceFile = imp.getModuleSpecifierSourceFile();
+        const moduleSpecifierName = imp.getModuleSpecifierValue();
+        if(moduleSpecifierSourceFile && !processedSourceFiles.includes(moduleSpecifierName)){
+            ref.push(moduleSpecifierSourceFile.compilerNode);
+            files.push(moduleSpecifierSourceFile.getFilePath())
+            processedSourceFiles.push(moduleSpecifierName);
+            getRecursivelySourceFilesofImport(moduleSpecifierSourceFile,ref,processedSourceFiles,files);
+        }
+    }
+    return ;
+}
+function getSourceFileofImport(files: string[],project:Project){
+    //    const missedComponentName = [];
+    //    const exportVarSymbol = sourceFile.getDefaultExportSymbol().getAliasedSymbol() || sourceFile.getDefaultExportSymbol();
+    //    const dec = getDeclaration(exportVarSymbol);
+          const sourceFiles = getTSMorphSourceFiles(files,project);
+          let ref:any[] = [];
+          const processedSourceFiles:string[] = [];
+          for(const sf of sourceFiles){
+            getRecursivelySourceFilesofImport(sf,ref,processedSourceFiles,files);
+            // componentNames.push(...getAllComponentNames(ref));
+            // }
+          
+    }
+    return ref;
+}
+
 
 // Function to get all component names
 export function getAllComponentNames(sourceFiles: ts.SourceFile[]): string[] {
@@ -237,11 +281,12 @@ function createComponentDir(baseDir: string): string{
 // Main function to extract all component details from TypeScript declaration files
 export function extractAllComponentDetails(directoryPath: string, library: string) {
     const files = getDeclarationFiles(directoryPath);
+    const project  = new Project();
 
     const program = ts.createProgram(files, {});
     const typeChecker = program.getTypeChecker();
-    const sourceFiles = program.getSourceFiles().filter(file => file.fileName.includes(directoryPath));
-
+    let sourceFiles = program.getSourceFiles().filter(file => file.fileName.includes(directoryPath));
+    sourceFiles = sourceFiles.concat(...getSourceFileofImport(files,project));
     const allComponentNames = getAllComponentNames(sourceFiles);
 
     const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
