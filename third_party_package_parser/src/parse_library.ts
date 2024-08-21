@@ -50,13 +50,13 @@ export function extractProps(type: ts.Type, typeChecker: ts.TypeChecker): Record
 
 
 // Function to extract all props of a component
-export function isReactElement(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
+function isReactElement(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
     let isReactEl = false;
 
     const symbol = type.getSymbol();
     if (symbol && symbol.declarations) {
         for (const dl of symbol.declarations) {
-            if (ts.isClassDeclaration(dl) && dl?.heritageClauses) {
+            if ((ts.isClassDeclaration(dl) || ts.isInterfaceDeclaration(dl)) && dl?.heritageClauses) {
                 for (const clause of dl.heritageClauses) {
                     for (const typeNode of clause.types) {
                         let name = typeNode.expression.getText()
@@ -65,7 +65,9 @@ export function isReactElement(type: ts.Type, typeChecker: ts.TypeChecker): bool
                         } else {
                             const baseTypes = type.getBaseTypes() || [];
                             baseTypes.forEach(baseType => {
-                                isReactEl = isReactElement(baseType, typeChecker)
+                                if (!isReactEl) {
+                                    isReactEl = isReactElement(baseType, typeChecker)
+                                }
                             });
 
                         }
@@ -78,6 +80,7 @@ export function isReactElement(type: ts.Type, typeChecker: ts.TypeChecker): bool
 
     return isReactEl
 }
+
 
 
 
@@ -129,6 +132,8 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
             type = typeChecker.getTypeAtLocation(node);
         } else if ((ts.isInterfaceDeclaration(node) || ts.isClassDeclaration(node)) && node.name) {
             componentName = node.name.text;
+            componentName = componentName.replace('Props', '');
+
             type = typeChecker.getTypeAtLocation(node);
             const isJsx = isReactElement(type, typeChecker);
             if (isJsx) {
@@ -293,8 +298,8 @@ export function extractAllComponentDetails(directoryPath: string, library: strin
 
     sourceFiles.forEach(sourceFile => {
 
-            const detailsInFile = extractComponentDetails(sourceFile, typeChecker, allComponentNames, library, directoryPath);
-            Object.assign(componentDetails, detailsInFile);
+        const detailsInFile = extractComponentDetails(sourceFile, typeChecker, allComponentNames, library, directoryPath);
+        Object.assign(componentDetails, detailsInFile);
         
     });
     
