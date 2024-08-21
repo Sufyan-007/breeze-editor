@@ -24,6 +24,7 @@ from .core.resource_config_service import ResourceConfigGenerator
 from .core.helpers.function_ast_parser import FunctionParser
 from .core.app_generator import AppGenerator
 from .core.environment_settings_config_service import EnvironmentSettingsConfigService 
+from .core.custom_package_service import CustomPackageService
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -809,3 +810,57 @@ class SetEnvironment(APIView):
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': 'Server error'}, status=500)
+        
+class CustomPackage(APIView):
+    def post(self,request, projectName):
+        try:
+            file = request.FILES.get('file')
+            print(file,"file")
+            fileName = request.POST.get("filename")
+            print(fileName,"fileName")
+            if not file:
+                return JsonResponse({'error': 'No file provided.'}, status=400)
+            
+            CustomPackageService.upload_file(file,fileName, projectName)
+            return JsonResponse({
+                'message':'File uploaded successfully',
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error':str(e)},status=500)
+            
+    def get(self,request,  projectName):
+        try:
+            if not projectName:
+                return JsonResponse({'error': 'Project name is required.'}, status=400)
+
+            else:
+                print("inside else")
+                # Retrieve all custom packages for the project
+                zip_files_info = CustomPackageService.get_zip_files(projectName)
+
+                return JsonResponse(zip_files_info, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete(self, request, projectName):
+        try:
+            data= json.loads(request.body)
+            fileName = data.get("fileName")
+            
+            if not projectName:
+                return JsonResponse({'error':'project name required'}, status=400)
+            
+            if not fileName:
+                return JsonResponse({'error':'file name is required'},status= 400)
+            
+            custom_service = CustomPackageService()
+            custom_service.delete_file(fileName,projectName)
+            
+            return JsonResponse({
+                'message':"File deleted successfully"
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error':str(e)}, status=500)
+
+
+            

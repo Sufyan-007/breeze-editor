@@ -32,6 +32,7 @@ from .views import ResourceConfig
 from .views import EnvironementSettings
 from .views import SetEnvironment
 from .views import ASTParser
+from .views import CustomPackage
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -85,5 +86,9 @@ urlpatterns = [
 
         path('environment-settings/<str:projectName>', EnvironementSettings.as_view()),
         path('set-environment/<str:projectName>', SetEnvironment.as_view()),
+        
+        #custom packages 
+        path('custom-package-upload/<str:projectName>',CustomPackage.as_view()),
+
 ]
 
