@@ -5,6 +5,7 @@ from common.utils.path_extractor import get_path_without_ext
 from .helpers.html_generator import HTMLGenerator
 from .helpers.import_helper import ImportHelper
 from .helpers.api_parameters_mapping import APIParametersMapping
+from .helpers.function_ast_parser import FunctionParser
 
 def generate_imports_code(component_config, all_config,all_store_config,all_reducer_config):
     # print(component_config)
@@ -101,8 +102,9 @@ class ComponentGenerator():
         # print("REACTCOMPONENT")
         # print(react_component_code)
 
-        formatted_code = subprocess.check_output(['npx', 'prettier', '--parser', 'babel'], input=react_component_code, text=True)
-
+        formatted_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=react_component_code, text=True)
+        # formatted_code = react_component_code
+        
         # Create parent dir if not exists
         create_parent_dir_if_not_exists(output_file)
 
@@ -121,15 +123,13 @@ class ComponentGenerator():
         all_reducer_config = self.all_reducer_config
 
         name = config['name']
-        state_vars = config['stateVars']
-        other_vars = config.get('otherVars',[])
         props_vars = config['propsVars']
+        resources = config['resources']
         html_config = config['html']
         generator = HTMLGenerator(config)
         html_code = generator.generateHTML(html_config)
 
-        print(html_code)
-        functions = config['functions']
+        # print(html_code)
 
         wrapper_store = config.get("wrapper_store",None)
         if not wrapper_store :
@@ -151,115 +151,124 @@ class ComponentGenerator():
             
             store = all_store_config[wrapper_store]
             html_code = "<Provider store={%s}>%s</Provider>"%(store["name"],html_code)
-        
-        state_vars_declaration = '\n'.join([f'const [{var["name"]}, set{var["name"][0].title()+var["name"][1:]}] = useState({format_raw_val(var["defaultValue"])});' for var in state_vars])
-        props_vars_declaration = '\n'.join([f'const {var["name"]} = props.{var["name"]};' for var in props_vars])
-        
-        # other vars
-        other_vars_declaration = ""
-        for ovar in other_vars:
-            parameters = ""
-            if len(ovar.get("parameters",[]))> 0:
-                parameters = ",".join(ovar["parameters"])
-            other_vars_declaration = other_vars_declaration + " \n %s %s = %s(%s);"%(ovar["declarationType"],ovar.get("name"),ovar.get("className"),parameters)
-        
-        # functions_code = '\n\n'.join()
-
-
-        import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
-        # import_stats = generate_imports_code(config, all_config,all_store_config,all_reducer_config)
-
-        # functions_definition = '\n\n'.join([f'def {func["name"]}(event):' for func in functions])
-        # functions_body = '\n'.join([f'    {func["body"]}' for func in functions])
-
-        functions_code = []
-        api_parameters_mapping = APIParametersMapping(app_config=self.app_config)
-        
-        for func_conf in config['functions']:
-            if func_conf.get("func_type") == "MAPPER_FUNC":
-                func = api_parameters_mapping.generate_mapping_function(func_conf["name"],func_conf)
-                functions_code.append(func)
-
-            else:
-                if func_conf['isAnonymous'] is not True:
-                    functions_code.append(FunctionCodeGenerator.generate_function(func_conf, config))
-
-        hooks = []
-        for hook_conf in config['hooks']:
-            hooks.append(HookCodeHelper.generate_hook_code(hook_conf, config))
-        
-        # api_parameters_mapping = APIParametersMapping(app_config=self.app_config)
-        # for mapping in config.get("mapping_func",[]):
-        #     api_mappings = self.mapping_config[mapping["id"]]["mapping_config"]
-        #     func = api_parameters_mapping.generate_mapping_function(mapping["name"],api_mappings)
-        #     print("===============================================")
-        #     functions_code.append(func)
-
-
-        react_component = """
-            import React, { useState , Fragment } from 'react';
-            %s
             
-            const %s = (props) => {
-                %s
-                %s
-                %s
-                %s
-                %s
-                return (
-                    %s
-                );
-            }
+        def generate_state_var_code(var):
+            return f'const [{var["name"]}, set{var["name"][0].upper()+var["name"][1:]}] = useState({format_raw_val(var["body"]["defaultValue"])});'
 
-            export default %s;
-        """%(import_stats,name,props_vars_declaration,state_vars_declaration,other_vars_declaration,NEW_LINE_CHAR.join(hooks),NEW_LINE_CHAR.join(functions_code),html_code,name)
+        def generate_ref_var_code(var):
+            return f'const {var["name"]} = React.useRef({format_raw_val(var["body"]["defaultValue"])});'
+        
+        def generate_other_var_code(var):
+            datatype = var["body"].get("datatype")
+            default_value = var["body"].get("defaultValue", "")
+            
+            if datatype == "STRING":
+                formatted_value = f'"{default_value}"'
+            elif datatype == "BOOLEAN":
+                formatted_value = str(default_value).lower()
+            else:
+                formatted_value = f'{default_value}'
+            
+            return f'const {var.get("name")} = {formatted_value};'
+                    
+        props_vars_declaration = ', '.join([f'{var["name"]}={var["body"]["defaultValue"]}' if var["body"].get("defaultValue") else var["name"] for var in props_vars])
+        
+        import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
+        
+        def generate_function_code(func):
+            function_generator = FunctionParser()
+            function_code = function_generator.generate_statement_code(func)
+            return function_code     
+           
+        def generate_lifecycle_code(lifecycle):
+            lifecycle_type = lifecycle['body']['lifecycleType']
+            function_body = lifecycle['body'].get('functionBody', '')
+            return_body = lifecycle['body'].get('returnBody', '')
+            dependent_vars = lifecycle['body'].get('dependentVars', [])
+            dependencies = ', '.join(dependent_vars) if dependent_vars else ''
+            
+            if lifecycle_type == 'onEveryMount':
+                return f"""
+                    React.useEffect(() => {{
+                        {lifecycle['body']['functionBody']}
+                    }});
+                """
+            elif lifecycle_type == 'onComponentMount':
+                return f"""
+                    React.useEffect(() => {{
+                        {function_body}
+                    }}, [{dependencies}]);
+                    """
+            elif lifecycle_type == 'onMountAndUnmount':
+                return f"""
+                    React.useEffect(() => {{
+                        {function_body}
+                        return () => {{
+                           {return_body}
+                        }};
+                    }}, [{dependencies}]);
+                """
+            elif lifecycle_type == 'onUnmount':
+                return f"""
+                    React.useEffect(() => {{
+                        return () => {{
+                           {return_body}
+                        }};
+                    }}, [{dependencies}]);
+                """
+            else:
+                raise ValueError(f"Unknown lifecycle type: {lifecycle_type}")
+        
+        def generate_hook_code(hook):
+            hook_name = hook['name']
+            hook_type = hook['body']['type']
+            hook_body = hook['body']['hookBody']
+            hook_params = hook['body'].get('hookParams', []) if hook_type == 'useCallback' else ''
+            params = ', '.join(hook_params) if hook_params else ''
+            dependent_vars = hook['body'].get('dependentVars', [])
+            dependencies = ', '.join(dependent_vars) if dependent_vars else ''
+
+            hook_code = f"""
+                const {hook_name} = React.{hook_type}(({params}) => {{
+                    {hook_body}
+                }}, [{dependencies}]);
+            """
+
+            return hook_code
+    
+        def generate_resources_code(resources):
+            resources_code = []
+            for resource in resources:
+                if resource['type'] == 'stateVars':
+                    resources_code.append(generate_state_var_code(resource))
+                elif resource['type'] == 'refVars':
+                    resources_code.append(generate_ref_var_code(resource))
+                elif resource['type'] == 'otherVars':
+                    resources_code.append(generate_other_var_code(resource))
+                elif resource['type'] == 'function':
+                    resources_code.append(generate_function_code(resource))
+                elif resource['type'] == 'lifecycle':
+                    resources_code.append(generate_lifecycle_code(resource))
+                elif resource['type'] == 'hook':
+                    resources_code.append(generate_hook_code(resource))
+                # Add more resource types if needed
+
+            return '\n'.join(resources_code)
+        
+        resources_code = generate_resources_code(resources)
+        
+        react_component = f"""
+            import React, {{ useState, Fragment }} from 'react';
+            {import_stats}
+
+            const {name} = ({{ {props_vars_declaration} }}) => {{
+                {resources_code}
+                return (
+                    {html_code}
+                );
+            }}
+
+            export default {name};
+            """
 
         return react_component
-
-
-from .helpers.function_code_generator import FunctionCodeGenerator
-class HookCodeHelper:
-
-
-    @staticmethod
-    def generate_hook_code(hook_conf, comp_conf):
-        if hook_conf['type'] in ['USE_EFFECT', 'USE_CALLBACK', 'USE_MEMO']:
-            return HookCodeHelper.handle_generic_hook(hook_conf, comp_conf)
-
-    @staticmethod
-    def handle_generic_hook(hook_config, comp_config):
-        related_func_config = next(item for item in comp_config['functions'] if item["$id"] == hook_config['implementation']['$ref'])
-        dependent_vars = hook_config.get('dependantVars', [])
-        hook_name = ""
-
-        if hook_config['type'] == 'USE_EFFECT':
-            hook_name = 'useEffect'
-        elif hook_config['type'] == 'USE_CALLBACK':
-            hook_name = 'useCallback'
-        elif hook_config['type'] == 'USE_MEMO':
-            hook_name = 'useMemo'
-        else:
-            raise ValueError("Unsupported hook type")
-
-        function_code = FunctionCodeGenerator.generate_function(related_func_config, comp_config)
-
-        if hook_config['type'] == 'USE_EFFECT':
-            hook_code = f"""
-            React.{hook_name}({function_code}, [{", ".join(dependent_vars)}]);
-            """
-        else:
-            hook_code = f"""
-            const {hook_config['name']} = React.{hook_name}({function_code}, [{", ".join(dependent_vars)}]);
-            """
-
-        return hook_code
-
-
-
-# def write_components():
-
-#     all_comp_config = read_all_component_config()
-#     app_config = read_app_config()
-#     comps = list(all_comp_config.values())
-
-#     generate_components(comps, app_config)

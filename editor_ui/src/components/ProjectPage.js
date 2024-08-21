@@ -21,7 +21,9 @@ import routing from "../assets/icons/routing.svg";
 import settings from "../assets/icons/settings.svg";
 import services from "../assets/icons/services.svg";
 import constants from "../assets/icons/constants.svg";
+import folder from "../assets/icons/folder.svg";
 import apps from "../assets/icons/apps.svg";
+import upload from "../assets/icons/upload.svg";
 import ProjectSidebar from "./ProjectSidebar";
 import { router } from "../App";
 
@@ -33,14 +35,21 @@ export default function ProjectPage() {
   const dispatch = useDispatch();
   const { projectName } = useParams();
 
-  useEffect(() => {
-    console.log(allConfig);
-    dispatch(setReducerConfig(allConfig.reducerConfig));
-    dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
-    dispatch(setServiceConfig(allConfig.serviceConfig));
-    dispatch(setRouterConfig(allConfig.routerConfig));
-    dispatch(setConfig({ ...allConfig.componentConfig, port: allConfig.port }));
-  }, [allConfig, dispatch]);
+  console.log(allConfig);
+  dispatch(setReducerConfig(allConfig.reducerConfig));
+  dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
+  dispatch(setServiceConfig(allConfig.serviceConfig));
+  dispatch(setRouterConfig(allConfig.routerConfig));
+  dispatch(setConfig({ ...allConfig.componentConfig, port: allConfig.port }));
+
+  // useEffect(() => {
+  //   console.log(allConfig);
+  //   dispatch(setReducerConfig(allConfig.reducerConfig));
+  //   dispatch(setReduxStoreConfig(allConfig.reduxStoreConfig));
+  //   dispatch(setServiceConfig(allConfig.serviceConfig));
+  //   dispatch(setRouterConfig(allConfig.routerConfig));
+  //   dispatch(setConfig({ ...allConfig.componentConfig, port: allConfig.port }));
+  // }, [allConfig, dispatch]);
 
   const sidebarItems = [
     { id: 0, name: "Home", icon: home, path: "" },
@@ -52,6 +61,8 @@ export default function ProjectPage() {
     { id: 6, name: "Code", icon: code, path: "code" },
     { id: 7, name: "Third-party App", icon: apps, path: "apps" },
     { id: 8, name: "Settings", icon: settings, path: "settings" },
+    { id: 9, name: "Resources", icon: upload, path: "resources" },
+    { id: 10, name: "Folder Structure", icon: folder , path:"folderstructure"} 
   ];
 
   const toggleSidebar = () => {
@@ -59,14 +70,14 @@ export default function ProjectPage() {
   };
 
   return (
-    <div className="container-fluid vh-100">
+    <div className="container-fluid vh-100 flex-column d-flex">
       <Navbar
         leftContent={
           <div className="d-flex">
             <div
               className=" d-flex align-items-center text-white me-3"
               onClick={() => {
-                router.navigate(`/${projectName}`);
+                router.navigate(`/project/${projectName}`);
               }}
               style={{ cursor: "pointer" }}
             >
@@ -75,7 +86,7 @@ export default function ProjectPage() {
           </div>
         }
       />
-      <div className="row d-flex no-wrap container-height">
+      <div className="row d-flex no-wrap flex-grow-1">
         <div className="col-auto px-0">
         <ProjectSidebar
           isSidebarExpanded={isSidebarExpanded}

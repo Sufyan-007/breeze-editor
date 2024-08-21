@@ -23,7 +23,7 @@ import { Modal, Button, Form } from 'react-bootstrap'
             const component= formRef.current[1].value
             const redirectTo= formRef.current[2].value
             if(route){
-                configService.addRoute(route, component, redirectTo)
+                configService.addRoute({path: route, component, redirectTo})
             }
         }
         setShowModal(false)

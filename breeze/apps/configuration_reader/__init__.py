@@ -25,9 +25,6 @@ def prepare_config_map():
         }
 
 
-        all_projects = []
-        all_projects_path = pathlib.Path(CONFIG_PATH)
-        all_projects_path = list(all_projects_path.iterdir())
 
         # Preapre config map for html components
         COMPONENTS_CONFIG["HTML"] = prepare_html_comp_config()
@@ -42,19 +39,24 @@ def prepare_config_map():
         prepare_tp_comp_config()
 
         # Prepare config map for custom project components
-        for project_config_dir in all_projects_path:
-            project_config = read_config_file(project_config_dir, CONFIG_FILES_PATH['APP_CONFIG']) 
-            comp_config = prepare_comp_config(project_config_dir)
-            COMPONENTS_CONFIG["CUSTOM"][project_config['name']] = comp_config
+        
+        # all_projects = []
+        # all_projects_path = pathlib.Path(CONFIG_PATH)
+        # all_projects_path = list(all_projects_path.iterdir())
+        
+        # for project_config_dir in all_projects_path:
+        #     project_config = read_config_file(project_config_dir, CONFIG_FILES_PATH['APP_CONFIG']) 
+        #     comp_config = prepare_comp_config(project_config_dir)
+        #     COMPONENTS_CONFIG["CUSTOM"][project_config['name']] = comp_config
 
-            COMPONENTS_LIST["CUSTOM"][project_config['name']] = []
+        #     COMPONENTS_LIST["CUSTOM"][project_config['name']] = []
 
-            for single_comp_config in comp_config:
-                COMPONENTS_LIST["CUSTOM"][project_config['name']].append({
-                    "name" : comp_config[single_comp_config]['name'],
-                    #Certain config files don't contain $ID field, will remove later
-                    "id" : comp_config[single_comp_config].get("$id",comp_config[single_comp_config]['name'])
-                })
+        #     for single_comp_config in comp_config:
+        #         COMPONENTS_LIST["CUSTOM"][project_config['name']].append({
+        #             "name" : comp_config[single_comp_config]['name'],
+        #             #Certain config files don't contain $ID field, will remove later
+        #             "id" : comp_config[single_comp_config].get("$id",comp_config[single_comp_config]['name'])
+        #         })
             
 
         print("FINISHED PREPARING COMPONENT CONFIG MAP")
@@ -96,50 +98,141 @@ def prepare_html_comp_config():
 
     html_elements = [
         "DOCTYPE html",
-        "div",
-        "html",
+        # Metadata:
+        "base",
         "head",
-        "title",
-        "meta",
         "link",
-        "body",
-        # Text Elements
+        "meta",
+        "style",
+        "title",
+
+        # Content Sectioning:
+        "article",
+        "aside",
+        "footer",
+        "header",
+        "main",
+        "nav",
+        "section",
+
+        # Text Content:
+        "blockquote",
+        "dd",
+        "div",
+        "dl",
+        "dt",
+        "figcaption",
+        "figure",
+        "hr",
         "h1",
         "h2",
         "h3",
         "h4",
         "h5",
         "h6",
-        "p",
-        "span",
-        "a",
-        "strong",
-        "em",
-        "br",
-        "hr",
-        # Lists
-        "ul",
         "li",
-        "dl",
-        "dt",
-        "dd",
-        # Tables
+        "ol",
+        "p",
+        "pre",
+        "ul",
+
+        # Inline Text Semantics:
+        "a",
+        "abbr",
+        "b",
+        "bdi",
+        "bdo",
+        "br",
+        "cite",
+        "code",
+        "data",
+        "dfn",
+        "em",
+        "i",
+        "kbd",
+        "mark",
+        "q",
+        "rp",
+        "rt",
+        "rtc",
+        "ruby",
+        "s",
+        "samp",
+        "small",
+        "span",
+        "strong",
+        "sub",
+        "sup",
+        "time",
+        "u",
+        "var",
+        "wbr",
+
+        # Image and Multimedia:
+        "area",
+        "audio",
+        "img",
+        "map",
+        "track",
+        "video",
+
+        # Embedded Content:
+        "embed",
+        "iframe",
+        "object",
+        "param",
+        "picture",
+        "source",
+
+        # Scripting:
+        "canvas",
+        "noscript",
+        "script",
+
+        # Demarcating Edits:
+        "del",
+        "ins",
+
+        # Table Content:
+        "caption",
+        "col",
+        "colgroup",
         "table",
-        "tr",
+        "tbody",
         "td",
+        "tfoot",
         "th",
-        # Forms
+        "thead",
+        "tr",
+
+        # Forms:
+        "button",
+        "datalist",
+        "fieldset",
         "form",
         "input",
-        "textarea",
-        "button",
-        "select",
-        "option",
         "label",
-        "fieldset",
         "legend",
-        "body",
-        "img"
+        "meter",
+        "optgroup",
+        "option",
+        "output",
+        "progress",
+        "select",
+        "textarea",
+
+        # Interactive Elements:
+        "details",
+        "dialog",
+        "menu",
+        "menuitem",
+        "summary",
+
+        # Web Components:
+        "content",
+        "element",
+        "shadow",
+        "template",
     ]
     
     html_elements = sorted(html_elements)

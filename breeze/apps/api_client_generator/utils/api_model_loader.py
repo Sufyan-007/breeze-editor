@@ -211,6 +211,7 @@ class ApiModelLoader:
             flow=model_json.get("flow", {}),
             flow_type= model_json.get("flow_type", ""),
             token_store=api_model_loader.load_token_store(model_json.get("token_store",{})),
+            is_authentication_api= model_json.get("is_authentication_api", False),
             errors={}
         )
         return api_model

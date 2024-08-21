@@ -1,19 +1,19 @@
-export async function createNewProject(projectDetails){
-    const response = await (await fetch("http://localhost:8000/editor/new-project/",
-            { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(projectDetails) }
+export async function createNewProject(formData){
+    const response = await (await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/new-project/`,
+            { method: "POST", body: formData }
         )).json()
     return response
 }
 
 export async function reGenerateProject(projectName){
-    const respnse = await (await fetch("http://localhost:8000/editor/update-project/"+projectName+"/",
+    const respnse = await (await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/update-project/`+projectName+"/",
         {method:"PUT",headers: { 'Content-Type': 'application/json' }}
     )).json()
     return respnse
 }
 
 export async function deleteProject(projectName){
-    const response = await fetch("http://localhost:8000/editor/delete-project/"+projectName+"/",
+    const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/delete-project/`+projectName+"/",
         {method:"DELETE",headers: { 'Content-Type': 'application/json' }}
     )
     const status = response.status
@@ -22,11 +22,11 @@ export async function deleteProject(projectName){
     return {status,body}
 }
 
-export async function updateProject(projectDetails){
-    const response = await fetch("http://localhost:8000/editor/update-project-details/",
-        {method:"PUT",headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(projectDetails)}
-    )
-    const status = response.status
-    const body = await response.json()
-    return {status,body}
+export async function updateProject(formData) {
+    const response = await fetch(`${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/update-project-details/`,
+        { method: "PUT", body: formData }
+    );
+    const status = response.status;
+    const body = await response.json();
+    return { status, body };
 }

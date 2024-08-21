@@ -3,6 +3,7 @@ from common.utils.file_helper import read_json_file, write_file, create_parent_d
 import json,os
 from common.utils.request_code import REQUEST
 from .generate_project import GenerateProject
+from .app_startup_manager import start_app
 
 class AppConfigWriter:
     def __init__(self):
@@ -10,20 +11,45 @@ class AppConfigWriter:
     
     def write_basic_config_files(self, app_config):
         app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
-
         basic_routing_config = {
-            "routes": [
+            "routes":
                 {
-                    "path": "/",
-                    "component": f"{app_config['defaultComponent']}"
-                }
-            ]
+                    "/" : {
+                        "path": "/",
+                        "component": f"{app_config['defaultComponent']}"
+                    }
+                },
+            "baseRoutes": {
+                "/": {},
+            }
+        }
+        usage_config = {
+            "components": {
+                    f"{app_config['defaultComponent']}": {
+                        "imports": {},
+                        "props": {},
+                        "variables": {},
+                        "usedRoutes": {},
+                        "functions": {},
+                        "lifecycle": {},
+                        "hooks": {},
+                        "css": {},
+                        "usage": {}
+                    }
+                },
+            "contexts": {},
+            "reducers": {},
+            "reduxStore": {},
+            "routes": {},
+            "imports": {},
+            "css": {},
         }
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", json.dumps(basic_routing_config))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUCER_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUX_STORE_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CSS_CONFIG']}.json", json.dumps({}))
+        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['USAGE_CONFIG']}.json", json.dumps(usage_config))
         write_file(f"{app_config_dir}/react_request_code.py", REQUEST)
 
     def write_basic_main_comp_config(self, app_config):
@@ -32,19 +58,16 @@ class AppConfigWriter:
                 "name": app_config['defaultComponent'],
                 "id":app_config['defaultComponent'].upper(),
                 "containingFile": f"components/{app_config['defaultComponent']}.js",
-                "stateVars": [],
-                "propsVars": [],
-                "otherVars" : [],
-                "functions": [],
-                "html": { "_id": "Main" },
-                "wrapper_store": None,
                 "imports": {
                     "components": [
                     ],
                     "other": [
                     ]
                 },
-                "hooks": [],
+                "propsVars": [],
+                "resources": [],
+                "html": { "_id": "Main" },
+                "wrapper_store": None,
                 "html_elements": {
                     "Main": {
                         "type": "Element",
@@ -52,8 +75,7 @@ class AppConfigWriter:
                         "typeId": "DIV",
                         "tagName": "div",
                         "attributes": {
-                        "className": { "type": "LITERAL", "value": "" },
-                        "id": { "type": "LITERAL", "value": "" }
+                        "className": { "type": "LITERAL", "value": "" }
                         },
                         "children": [{ "_id": "Main-0" }]
                     },
@@ -112,5 +134,5 @@ class AppConfigWriter:
 
         self.write_basic_config_files(app_current_config)
 
-        GenerateProject.generate_project(app_current_config)
+        GenerateProject.generate_project(app_current_config, app_current_config.get("logo"))
     

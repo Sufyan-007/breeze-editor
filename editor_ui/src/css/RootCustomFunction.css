@@ -1,0 +1,13 @@
+.custom-function{
+    color:white
+}
+.custom-function-form-control{
+    background-color: #303033 !important ;
+    color: white !important;
+}
+.custom-function-form-control::placeholder{
+    color:white !important;
+}
+/* .custom-function.list-group-item{
+    background-color: #303033;
+} */

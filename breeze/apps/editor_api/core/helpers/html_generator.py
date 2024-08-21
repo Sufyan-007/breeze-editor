@@ -25,27 +25,30 @@ class HTMLGenerator:
             #  print(FunctionCodeGenerator.generate_function(value.get('value'), {}))
             ref = value.get("$ref",None)
             if ref:
-                for func in self.config["functions"]:
-                    if func["$id"]==ref:
-                        related_func_config=func
+                for resource in self.config["resources"]:
+                    if resource["id"]==ref:
+                        print("------------RESOURCE------------")
+                        print(resource)
+                        related_func_config=resource
+                        related_func_config["name"]=resource["name"]
                         break
                 else:
-                    related_func_config={
-                        "parameters": { "list": [] },
-                        "isAnonymous": True,
-                        "isAsync": False,
-                        "body": "alert(\"Function reference not defined\")"
-                    }
+                    raise IndexError("Could not find %s" % ref)
             else:
                 related_func_config = value.get('value')
-            related_func_config = copy.deepcopy(related_func_config)
-            related_func_config["isAnonymous"]=True
-            val= f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
+                related_func_config["isAnonymous"]=True
+            if related_func_config["isAnonymous"]:
+                val= f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
+            else:
+                val = "{%s}" % related_func_config["name"]
         return f"{attr}={val}"
 
     def generateHTML(self,config_id):
         # print("---", config)
-        config=self.config["html_elements"][config_id["_id"]]
+        try:
+            config=self.config["html_elements"][config_id["_id"]]
+        except:
+            return ""
         if config.get('type') == 'Element':
             # print(config)
             if config.get('elementType',"") == 'CUSTOM':
@@ -74,6 +77,7 @@ class HTMLGenerator:
             children = config.get('children', [])
 
             attribute_str = ' '.join([f'{self.generateAttributeCode(attr, value)}' for attr, value in attributes.items()])
+            attribute_str = attribute_str+f" data-brz-id='{config_id['_id']}'"
             open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
             close_tag = f'</{tag_name}>'
 
@@ -87,22 +91,22 @@ class HTMLGenerator:
         elif config.get('type') == 'text':
             return config['text']
         
-        elif config.get("type") == "Expression":
+        # elif config.get("type") == "Expression":
 
-            children_code = "\n".join(self.generateHTML(child) for child in config.get("children", []))
-            return f"""
-                {{  {children_code} }}
-            """
+        #     children_code = "\n".join(self.generateHTML(child) for child in config.get("children", []))
+        #     return f"""
+        #         {{  {children_code} }}
+        #     """
 
         elif config.get("type") in   ["map", "forEach"]:
             callback_params = config.get("callbackParams", ["item", "index"])
             children_code = "\n".join(self.generateHTML(child) for child in config.get("children", []))
 
             return f"""
-                    {config["variable"]}.{config.get("type")}( ({", ".join(callback_params)}) => {{
+                    {{{config["variable"]}.{config.get("type")}( ({", ".join(callback_params)}) => {{
                         {config.get("code", "")} 
-                        return {children_code}
-                    }})
+                        return <>{children_code}</>
+                    }})}}
                 """
 
         elif config.get('type') == 'condition':
@@ -111,14 +115,14 @@ class HTMLGenerator:
                 false_case_code = self.generateHTML(config.get("falseCase", {}))
 
                 return f"""
-                    {config["variable"]} ? 
-                        {true_case_code if 'trueCase' in config else ''}
+                    {{{config["variable"]} ? 
+                        <>{true_case_code if 'trueCase' in config else ''}</>
                     :
-                        {false_case_code if 'falseCase' in config else ''}
-                    
+                        <>{false_case_code if 'falseCase' in config else ''}</>
+                    }}
                 """
 
         elif config.get('type') == "code":
-                return f""" {config['code']} """
+                return f"""{{ {config['code']} }}"""
         
         return ""

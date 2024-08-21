@@ -11,3 +11,7 @@ package-lock.json
 /generated_projects
 /uploaded_css
 breeze/uploaded_css/
+/user_uploads
+nohup.out
+editor_ui/package-lock.json
+/third_party_package_parser/node_modules

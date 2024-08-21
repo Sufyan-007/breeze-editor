@@ -40,7 +40,8 @@ urlpatterns = [
     path("editor/", include('apps.editor_api.urls')),
     path('api/swagger', schema_view.with_ui('swagger', cache_timeout=0),
          name='schema-swagger-ui'),
-    path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui')
+    path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
+    path('directory-management/',include('apps.directory_management.urls'))
 ]
 
 

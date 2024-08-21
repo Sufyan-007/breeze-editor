@@ -1,9 +1,6 @@
 import { useLoaderData, useParams } from "react-router";
 import Navbar from "../Navbar";
 import code from "../../assets/icons/code.svg";
-import variables from "../../assets/icons/variables.svg";
-import functions from "../../assets/icons/functions.svg";
-import cycle from "../../assets/icons/cycle.svg";
 import home from "../../assets/icons/home.svg";
 import styles from "../../assets/icons/styles.svg";
 import pages from "../../assets/icons/pages.svg";
@@ -11,7 +8,10 @@ import routing from "../../assets/icons/routing.svg";
 import settings from "../../assets/icons/settings.svg";
 import services from "../../assets/icons/services.svg";
 import constants from "../../assets/icons/constants.svg";
+import upload from "../../assets/icons/upload.svg";
+
 import apps from "../../assets/icons/apps.svg";
+import folder from "../../assets/icons/folder.svg";
 
 import {
   getComponentConfig,
@@ -19,18 +19,9 @@ import {
 } from "../../services/ConfigService";
 import { createContext, useMemo, useState } from "react";
 import ProjectSidebar from "../ProjectSidebar";
-import HtmlSection from "./HtmlSection";
-import StateVarsSection from "./StateVarsSection";
-import LifeCycleSection from "./LifeCycleSection";
-import FunctionSection from "./FunctionSection";
+import HtmlSection from "./HtmlSection/HtmlSection";
 import SidebarService from "../../services/SidebarService";
 
-const components = [
-  HtmlSection,
-  StateVarsSection,
-  FunctionSection,
-  LifeCycleSection,
-];
 
 const sidebarItems = [
   { id: 0, name: "Home", icon: home, path: "" },
@@ -42,15 +33,9 @@ const sidebarItems = [
   { id: 6, name: "Code", icon: code, path: "code" },
   { id: 7, name: "Third-party App", icon: apps, path: "apps" },
   { id: 8, name: "Settings", icon: settings, path: "settings" },
+  { id: 9, name: "Resources", icon: upload, path: "resources" },
+  { id: 10, name: "Folder Structure", icon: folder , path:"folderstructure"} 
 ];
-
-const menu = [
-  { id: 0, name: "Html Tree", icon: code },
-  { id: 1, name: "Variables", icon: variables },
-  { id: 2, name: "Functions", icon: functions },
-  { id: 3, name: "Life Cycle", icon: cycle },
-];
-
 
 export const ComponentContext = createContext({
   componentConfig: null,
@@ -62,23 +47,18 @@ export const ComponentContext = createContext({
 export default function ComponentConfigPage() {
   const componentConfigInit = useLoaderData();
   const [ componentConfig, setComponentConfig] = useState(componentConfigInit)
-  console.log(componentConfig);
   const { projectName, componentName } = useParams();
-  const [selectedItem, setSelectedItem] = useState(0);
-  const [selectedMenu, setSelectedMenu] = useState(0);
+  const [selectedItem, setSelectedItem] = useState(1);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const sidebarService = useMemo(() => {
-    console.log("Created Service")
     return new SidebarService()
   }, [])
   
-  console.log(sidebarService)
   const highlightedStyle = { backgroundColor: "#303033" };
 
   const toggleSidebar = () => {
     setIsSidebarExpanded(!isSidebarExpanded);
   };
-  const SelectedElement =components[selectedMenu]
 
   return (
 
@@ -93,8 +73,8 @@ export default function ComponentConfigPage() {
             </div>
           }
         />
-        <div className="row d-flex no-wrap h-100">
-          <div className="col-auto px-0">
+        <div className="row flex-grow-1 overflow-hidden">
+          <div className="col-auto h-100 px-0">
             <ProjectSidebar
               isSidebarExpanded={isSidebarExpanded}
               sidebarItems={sidebarItems}
@@ -104,31 +84,9 @@ export default function ComponentConfigPage() {
               highlightedStyle={highlightedStyle}
             />
           </div>
-          <div className="col px-0 d-flex flex-column">
-            <div className="row mx-0 bg-dark p-1">
-              <div className="d-flex justify-content-start">
-                {menu.map((item, index) => (
-                  <button
-                    key={item.id}ServicePage
-                    className={`btn ${index === selectedMenu
-                      ? "btn-outline-secondary border-bottom btn-sm"
-                      : "btn-outline-secondary btn-sm"
-                      }`}
-                    onClick={() => setSelectedMenu(index)}
-                    style={{ marginRight: 10, borderRadius: 0 }}
-                  >
-                    <img
-                      src={item.icon}
-                      alt={item.name}
-                      style={{ height: 20, marginRight: 5 }}
-                    />
-                    {item.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="col px-0 d-flex flex-column h-100">
             <div className="row mx-0 flex-grow-1">
-              <div className=" d-flex flex-column">{< SelectedElement />}</div>
+              <div className="d-flex">{< HtmlSection />}</div>
             </div>
           </div>
         </div>
@@ -140,7 +98,6 @@ export default function ComponentConfigPage() {
 export async function configLoader({ params }) {
   const projectName = params.projectName;
   const componentName = params.componentName;
-  console.log("Loading component ", projectName, componentName);
   const config = await getComponentConfig(projectName, componentName);
   const port = await getRunningPort(projectName);
   config["port"] = port;

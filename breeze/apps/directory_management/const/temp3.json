@@ -1,0 +1,197 @@
+{
+  "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123": {
+    "name": "src",
+    "lineage": [],
+    "id": "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+    "tag": "ROOT",
+    "type": "DIRECTORY"
+  },
+  "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234": {
+    "name": "features",
+    "lineage": ["1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123"],
+    "id": "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+    "tag": "FEATURES",
+    "type": "DIRECTORY"
+  },
+  "3b8e5c1b_ae3d_4d6f_c45d_d45d8c16e345": {
+    "name": "module1",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234"
+    ],
+    "id": "3b8e5c1b_ae3d_4d6f_c45d_d45d8c16e345",
+    "tag": "MODULE",
+    "type": "DIRECTORY"
+  },
+  "4c9e6d2c_bf4e_4e7f_d56e_e56e9d17f456": {
+    "name": "components",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "3b8e5c1b_ae3d_4d6f_c45d_d45d8c16e345"
+    ],
+    "id": "4c9e6d2c_bf4e_4e7f_d56e_e56e9d17f456",
+    "tag": "COMPONENTS",
+    "type": "DIRECTORY"
+  },
+  "5d0e7e3d_d05f_4f80_e67f_f67f0e18g567": {
+    "name": "com1.js",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "3b8e5c1b_ae3d_4d6f_c45d_d45d8c16e345",
+      "4c9e6d2c_bf4e_4e7f_d56e_e56e9d17f456"
+    ],
+    "id": "5d0e7e3d_d05f_4f80_e67f_f67f0e18g567",
+    "tag": "COMPONENTS",
+    "type": "FILE"
+  },
+  "6e1f8f4e_e160_5091_f78f_078f1f19h678": {
+    "name": "com2.js",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "3b8e5c1b_ae3d_4d6f_c45d_d45d8c16e345",
+      "4c9e6d2c_bf4e_4e7f_d56e_e56e9d17f456"
+    ],
+    "id": "6e1f8f4e_e160_5091_f78f_078f1f19h678",
+    "tag": "COMPONENTS",
+    "type": "FILE"
+  },
+  "7f2f905f_f271_51a2_0890_1890201ah789": {
+    "name": "services",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "3b8e5c1b_ae3d_4d6f_c45d_d45d8c16e345"
+    ],
+    "id": "7f2f905f_f271_51a2_0890_1890201ah789",
+    "tag": "SERVICES",
+    "type": "DIRECTORY"
+  },
+  "8a3f0160_0372_52b3_19a1_29a1312bi890": {
+    "name": "ser1.js",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "3b8e5c1b_ae3d_4d6f_c45d_d45d8c16e345",
+      "7f2f905f_f271_51a2_0890_1890201ah789"
+    ],
+    "id": "8a3f0160_0372_52b3_19a1_29a1312bi890",
+    "tag": "SERVICE",
+    "type": "FILE"
+  },
+  "9b4f1271_1483_53c4_2ab2_3ab2423cj901": {
+    "name": "ser2.js",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "3b8e5c1b_ae3d_4d6f_c45d_d45d8c16e345",
+      "7f2f905f_f271_51a2_0890_1890201ah789"
+    ],
+    "id": "9b4f1271_1483_53c4_2ab2_3ab2423cj901",
+    "tag": "SERVICE",
+    "type": "FILE"
+  },
+  "0c5f2382_2594_54d5_3bc3_4bc3534dk012": {
+    "name": "module2",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234"
+    ],
+    "id": "0c5f2382_2594_54d5_3bc3_4bc3534dk012",
+    "tag": "MODULE",
+    "type": "DIRECTORY"
+  },
+  "1d6f3493_36a5_55e6_4cd4_5cd4645el123": {
+    "name": "components",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "0c5f2382_2594_54d5_3bc3_4bc3534dk012"
+    ],
+    "id": "1d6f3493_36a5_55e6_4cd4_5cd4645el123",
+    "tag": "COMPONENTS",
+    "type": "DIRECTORY"
+  },
+  "2e7f45a4_47b6_56f7_5de5_6de5756fm234": {
+    "name": "com1.js",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "0c5f2382_2594_54d5_3bc3_4bc3534dk012",
+      "1d6f3493_36a5_55e6_4cd4_5cd4645el123"
+    ],
+    "id": "2e7f45a4_47b6_56f7_5de5_6de5756fm234",
+    "tag": "COMPONENTS",
+    "type": "FILE"
+  },
+  "3f8f56b5_58c7_5708_6ef6_7ef6867gn345": {
+    "name": "com2.js",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "0c5f2382_2594_54d5_3bc3_4bc3534dk012",
+      "1d6f3493_36a5_55e6_4cd4_5cd4645el123"
+    ],
+    "id": "3f8f56b5_58c7_5708_6ef6_7ef6867gn345",
+    "tag": "COMPONENTS",
+    "type": "FILE"
+  },
+  "4a9f67c6_69d8_5819_7f07_8f09778ho456": {
+    "name": "services",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "0c5f2382_2594_54d5_3bc3_4bc3534dk012"
+    ],
+    "id": "4a9f67c6_69d8_5819_7f07_8f09778ho456",
+    "tag": "SERVICES",
+    "type": "DIRECTORY"
+  },
+  "5b0f78d7_7ae9_592a_8018_901a889ip567": {
+    "name": "ser1.js",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "0c5f2382_2594_54d5_3bc3_4bc3534dk012",
+      "4a9f67c6_69d8_5819_7f07_8f09778ho456"
+    ],
+    "id": "5b0f78d7_7ae9_592a_8018_901a889ip567",
+    "tag": "SERVICE",
+    "type": "FILE"
+  },
+  "6c1f89e8_8bfa_5a3b_9129_a12b990jq678": {
+    "name": "ser2.js",
+    "lineage": [
+      "1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123",
+      "2a7e4b0a_9d2c_4c5f_b34c_c34c7b15d234",
+      "0c5f2382_2594_54d5_3bc3_4bc3534dk012",
+      "4a9f67c6_69d8_5819_7f07_8f09778ho456"
+    ],
+    "id": "6c1f89e8_8bfa_5a3b_9129_a12b990jq678",
+    "tag": "SERVICE",
+    "type": "FILE"
+  },
+  "7d2f9af9_9d0b_5b4c_a23a_b23ca01kr789": {
+    "name": "index.js",
+    "lineage": ["1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123"],
+    "id": "7d2f9af9_9d0b_5b4c_a23a_b23ca01kr789",
+    "tag": "ROOT",
+    "type": "FILE"
+  },
+  "8e3fbba0_ae1c_5c5d_b34b_c34db12ls890": {
+    "name": "App.js",
+    "lineage": ["1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123"],
+    "id": "8e3fbba0_ae1c_5c5d_b34b_c34db12ls890",
+    "tag": "ROOT",
+    "type": "FILE"
+  },
+  "9f4fccb1_bf2d_5d6e_c45c_d45ec23mt901": {
+    "name": "App.css",
+    "lineage": ["1f6e3a9b_8c2d_4b5e_a26c_b89b8b14c123"],
+    "id": "9f4fccb1_bf2d_5d6e_c45c_d45ec23mt901",
+    "tag": "ROOT",
+    "type": "FILE"
+  }
+}

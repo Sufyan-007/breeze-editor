@@ -9,19 +9,22 @@ import Sidebar from "./components/Sidebar";
 import DetailedComponent from "./components/DetailedComponent";
 import ReduxConfig from "./components/ReduxConfig";
 import CreateApp from "./components/CreateApp";
-import  Root  from "./components/ApiClient/Root";
+import ApiClientRoot from "./features/api_client/index";
 import ProjectPage, { projectLoader } from "./components/ProjectPage";
 import ComponentConfigPage, {
   configLoader,
 } from "./components/ComponentConfig/ComponentConfigPage";
-import CssEditor from "./components/CssEditor";
+import CssEditor from "./components/StylesConfiguration/CssEditor";
 import ProjectHome from "./components/ProjectHome";
 import ProjectComponents from "./components/ProjectComponents";
 import ProjectRouting from "./components/ProjectRouting";
-import Styles from "./components/Styles";
+import Styles from "./components/StylesConfiguration/Styles";
 import Code from "./components/Code";
-import ThirdPartyApp from "./components/ThirdPartyApp";
-import Settings from "./components/Settings";
+import Settings from "./components/Settings/Settings";
+import DependencyConfig from "./components/DependencyConfiguration/DependencyConfig";
+import FolderStructureConfig from "./components/FolderStructureSection/FolderStructureConfig";
+// import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
+import Resources from "./components/ResourcesConfiguration/Resources";
 
 export const router = createBrowserRouter([
   {
@@ -32,8 +35,10 @@ export const router = createBrowserRouter([
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
       { path: "routing", element: <ProjectRouting /> },
-      { path: "services", element: <Root/> },
+      { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
+      { path: "folderstructure", element: <FolderStructureConfig /> },
+      // { path: "foldertemplate", element: <FolderTemplate /> },
       {
         path: "styles",
         element: <Outlet />,
@@ -45,8 +50,9 @@ export const router = createBrowserRouter([
         ],
       },
       { path: "code", element: <Code /> },
-      { path: "apps", element: <ThirdPartyApp /> },
+      { path: "apps", element: <DependencyConfig /> },
       { path: "settings", element: <Settings /> },
+      { path: "resources", element: <Resources /> },
     ],
   },
   {
@@ -57,8 +63,8 @@ export const router = createBrowserRouter([
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
       { path: "routing", element: <ProjectRouting /> },
-      { path: "services", element: <Root /> },
-    ]
+      { path: "services", element: <ApiClientRoot /> },
+    ],
   },
   {
     path: "/editor/:projectName",
@@ -88,7 +94,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "editor/:projectName/service",
-    element: <Root />,
+    element: <ApiClientRoot />,
   },
 ]);
 

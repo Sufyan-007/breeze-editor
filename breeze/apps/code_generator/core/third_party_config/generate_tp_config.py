@@ -45,7 +45,7 @@ def call_node_script(script_path, function_name, *args):
     print(script_path)
     command = ["node", script_absolute_path, function_name,  *args]
     # print(command)
-    result = subprocess.run(command, capture_output=True, text=True, cwd=get_dir_path_from_file(script_absolute_path))
+    result = subprocess.run(" ".join(command), shell=True, capture_output=True, text=True)
     print(result)
 
 
