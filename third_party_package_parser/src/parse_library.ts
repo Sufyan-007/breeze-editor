@@ -59,7 +59,7 @@ export function isReactElement(type: ts.Type, typeChecker: ts.TypeChecker): bool
                 for (const clause of dl.heritageClauses) {
                     for (const typeNode of clause.types) {
                         let name = typeNode.expression.getText()
-                        if (name == 'React.Component') {
+                        if (name.includes("React.") || name == 'React.Component' || name == 'Component') {
                             isReactEl = true
                         } else {
                             const baseTypes = type.getBaseTypes() || [];
