@@ -8,8 +8,6 @@ export const dataTypes = [
   "COMPONENT",
   "ELEMENT",
   "ANY",
-  
-  "TOKEN",
   // "FUNCTION_CALL",
   // "OPERATION"
 ];

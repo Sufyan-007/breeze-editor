@@ -11,7 +11,7 @@ const ParamInput = ({ param, name, schema, onChange }) => {
 
   const randomId = useMemo(() => {
     return "id-" + Math.random().toString(36).substr(2, 9);
-  },[])
+  }, []);
 
   // useEffect(() => {
   //   setConfig(param);
@@ -78,11 +78,13 @@ const ParamInput = ({ param, name, schema, onChange }) => {
               </option>
             ))}
 
-            {resources.map((resource) => (
-              <option key={resource.id} value={resource.id}>
-                {resource.name} ({resource.type})
-              </option>
-            ))}
+            {resources
+              .filter((resource) => resource.type !== "lifecycle")
+              .map((resource) => (
+                <option key={resource.id} value={resource.id}>
+                  {resource.name} ({resource.type})
+                </option>
+              ))}
 
             {(!schema || schema.type === "ANY" || schema.type === "STRING") && (
               <option value="STRING">String (Custom)</option>
@@ -154,7 +156,7 @@ const ParamInput = ({ param, name, schema, onChange }) => {
         </div>
       </div>{" "}
       <div className="ps-3 pe-2">
-        {config.type === "OBJECT" &&  config.properties &&  (
+        {config.type === "OBJECT" && config.properties && (
           <div className="mt-2">
             {Object.entries(config?.properties).map(([key, value]) => (
               <ParamInput

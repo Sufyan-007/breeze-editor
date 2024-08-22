@@ -4,6 +4,7 @@ import FunctionCallEdit from "../../FunctionItemComponents/FunctionCallEdit";
 import FunctionConfigStack from "../FunctionConfigStack";
 import { useParams } from "react-router";
 import { getResource } from "../../../../../../services/ComponentConfigService";
+import AddNavigation from "../../FunctionItemComponents/AddNavigation";
 
 export default function FunctionCall({ config, updateParent }) {
   const [isOffcanvasOpen, setOffCanvasOpen] = useState(false);
@@ -68,14 +69,9 @@ export default function FunctionCall({ config, updateParent }) {
       <div className="custom-code border border-gray px-2 py-1">
         <div className="d-flex justify-content-between">
           <div>
-            <strong>
-              {config?.callType === "serviceCall" ? (
-                <>Service Call</>
-              ) : (
-                <>Function Call</>
-              )}{" "}
-              :
-            </strong>{" "}
+            <strong className="me-1">
+              {config?.callType ? config.callType : "Function Call"}:
+            </strong>
             {(config.functions && config.functions[0].functionName) ||
               config.functionName}
           </div>
@@ -117,11 +113,15 @@ export default function FunctionCall({ config, updateParent }) {
         width="40%"
       >
         <div className="px-1 h-100 container">
-          <FunctionCallEdit
-            config={config}
-            functionConfig={functionConfig}
-            update={(val) => handleClose(val)}
-          />
+          {config?.callType === "navigation" ? (
+            <AddNavigation config={config} update={(val) => handleClose(val)} />
+          ) : (
+            <FunctionCallEdit
+              config={config}
+              functionConfig={functionConfig}
+              update={(val) => handleClose(val)}
+            />
+          )}
         </div>
       </Offcanvas>
     </>
