@@ -5,6 +5,7 @@ import {v4 as uuidv4} from 'uuid';
 import {Project, SourceFile} from 'ts-morph'
 
 
+const fileTypes:string[] = ['.d.ts','.js','.ts'];
 // Utility function to get all TypeScript declaration files
 export function getDeclarationFiles(directory: string): string[] {
     const files: string[] = [];
@@ -17,7 +18,7 @@ export function getDeclarationFiles(directory: string): string[] {
 
             if (entry.isDirectory()) {
                 traverseDirectory(entryPath);
-            } else if (entry.isFile() && entry.name.endsWith('.d.ts')) {
+            } else if (entry.isFile() && fileTypes.some((type)=> entry.name.includes(type))) {
                 files.push(entryPath);
             }
         }
