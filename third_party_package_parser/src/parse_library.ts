@@ -1,11 +1,11 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
-import {v4 as uuidv4} from 'uuid';
-import {Project, SourceFile} from 'ts-morph'
+import { v4 as uuidv4 } from 'uuid';
+import { Project, SourceFile } from 'ts-morph'
 
 
-const fileTypes:string[] = ['.d.ts','.js','.ts'];
+const fileTypes: string[] = ['.d.ts', '.js', '.ts'];
 // Utility function to get all TypeScript declaration files
 export function getDeclarationFiles(directory: string): string[] {
     const files: string[] = [];
@@ -18,7 +18,7 @@ export function getDeclarationFiles(directory: string): string[] {
 
             if (entry.isDirectory()) {
                 traverseDirectory(entryPath);
-            } else if (entry.isFile() && fileTypes.some((type)=> entry.name.includes(type))) {
+            } else if (entry.isFile() && fileTypes.some((type) => entry.name.includes(type))) {
                 files.push(entryPath);
             }
         }
@@ -100,6 +100,8 @@ const isReactFunctionComponent = (node: ts.FunctionDeclaration | ts.FunctionExpr
     if (!signature) {
         return false;
     }
+    let foundJsx = false;
+
 
     const returnType = checker.getReturnTypeOfSignature(signature);
 
@@ -110,15 +112,33 @@ const isReactFunctionComponent = (node: ts.FunctionDeclaration | ts.FunctionExpr
         if (typeName === 'ReactElement' || typeName === 'JSX.Element' || typeName === 'Element' || typeName === 'Element[]') {
             return true;
         }
+        if (typeName === 'any') {
+            function visit(child: ts.Node) {
+                if (ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child) || ts.isJsxFragment(child)) {
+                    foundJsx = true;
+                }
+                // Recursively visit all child nodes
+                ts.forEachChild(child, visit);
+            }
+
+            if (node.body) {
+                ts.forEachChild(node.body, visit);
+            }
+
+            return foundJsx;
+
+            
+        }
+
         // Optionally, check if the return type includes JSX
-        return typeName.includes("Component") ||  typeName.includes('ReactElement') || typeName.includes('JSX.Element');
+        return typeName.includes("Component") || typeName.includes('ReactElement') || typeName.includes('JSX.Element');
     }
     return false;
 };
 
 
 // Function to extract component details
-function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[],library:string,directoryPath:string): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
+function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[], library: string, directoryPath: string): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
     const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
     const functionDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
     const classDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
@@ -162,13 +182,13 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
             if (isFunctionalComponent) {
                 const parameters = node.parameters;
                 let functionName = node.name ? node.name.getText() : null;
-                if(!functionName){
+                if (!functionName) {
                     let myuuid = uuidv4();
-                    myuuid = myuuid.replace("-","_");
+                    myuuid = myuuid.replace("-", "_");
                     functionName = myuuid;
                 }
                 let parentNode = node.parent as ts.Node
-                if(node.parent){
+                if (node.parent) {
                     // remaining part 
                     // extract name of the function
                 }
@@ -193,44 +213,44 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
 }
 
 //to get all sourceFile according to ts-morph libraray
-function getTSMorphSourceFiles(files: string[],project:Project):SourceFile[]{
+function getTSMorphSourceFiles(files: string[], project: Project): SourceFile[] {
     let sourceFiles: SourceFile[] = [];
-    for(const file of files){
-      sourceFiles.push(project.addSourceFileAtPath(file));
+    for (const file of files) {
+        sourceFiles.push(project.addSourceFileAtPath(file));
     }
     return sourceFiles;
-  }
+}
 
 //to get all nested sourceFiles of importDeclaration
-function getRecursivelySourceFilesofImport(sf:SourceFile,ref:any[],processedSourceFiles:string[],files:string[]){
+function getRecursivelySourceFilesofImport(sf: SourceFile, ref: any[], processedSourceFiles: string[], files: string[]) {
     const importsDec = sf.getImportDeclarations();
-    if(!importsDec.length){
+    if (!importsDec.length) {
         return;
     }
-    for(const imp of importsDec){
+    for (const imp of importsDec) {
         const moduleSpecifierSourceFile = imp.getModuleSpecifierSourceFile();
         const moduleSpecifierName = imp.getModuleSpecifierValue();
-        if(moduleSpecifierSourceFile && !processedSourceFiles.includes(moduleSpecifierName)){
+        if (moduleSpecifierSourceFile && !processedSourceFiles.includes(moduleSpecifierName)) {
             ref.push(moduleSpecifierSourceFile.compilerNode);
             files.push(moduleSpecifierSourceFile.getFilePath())
             processedSourceFiles.push(moduleSpecifierName);
-            getRecursivelySourceFilesofImport(moduleSpecifierSourceFile,ref,processedSourceFiles,files);
+            getRecursivelySourceFilesofImport(moduleSpecifierSourceFile, ref, processedSourceFiles, files);
         }
     }
-    return ;
+    return;
 }
-function getSourceFileofImport(files: string[],project:Project){
+function getSourceFileofImport(files: string[], project: Project) {
     //    const missedComponentName = [];
     //    const exportVarSymbol = sourceFile.getDefaultExportSymbol().getAliasedSymbol() || sourceFile.getDefaultExportSymbol();
     //    const dec = getDeclaration(exportVarSymbol);
-          const sourceFiles = getTSMorphSourceFiles(files,project);
-          let ref:any[] = [];
-          const processedSourceFiles:string[] = [];
-          for(const sf of sourceFiles){
-            getRecursivelySourceFilesofImport(sf,ref,processedSourceFiles,files);
-            // componentNames.push(...getAllComponentNames(ref));
-            // }
-          
+    const sourceFiles = getTSMorphSourceFiles(files, project);
+    let ref: any[] = [];
+    const processedSourceFiles: string[] = [];
+    for (const sf of sourceFiles) {
+        getRecursivelySourceFilesofImport(sf, ref, processedSourceFiles, files);
+        // componentNames.push(...getAllComponentNames(ref));
+        // }
+
     }
     return ref;
 }
@@ -261,62 +281,66 @@ export function getAllComponentNames(sourceFiles: ts.SourceFile[]): string[] {
 function getStoreDir(): string | null {
     let currentDir = __dirname
 
-        while (!fs.existsSync(path.join(currentDir, 'third_party_configs'))) {
-            const parentDir = path.join(currentDir, '..');
-            if (currentDir === parentDir) {
-                // Reached the root of the filesystem
-                return null;
-            }
-            currentDir = parentDir;
+    while (!fs.existsSync(path.join(currentDir, 'third_party_configs'))) {
+        const parentDir = path.join(currentDir, '..');
+        if (currentDir === parentDir) {
+            // Reached the root of the filesystem
+            return null;
         }
-        
-        return path.join(currentDir, 'third_party_configs');
-    
+        currentDir = parentDir;
+    }
+
+    return path.join(currentDir, 'third_party_configs');
+
 }
 
-function createComponentDir(baseDir: string): string{
+function createComponentDir(baseDir: string): string {
     const componentDir = path.join(baseDir, 'libs');
     if (!fs.existsSync(componentDir)) {
-      fs.mkdirSync(componentDir);
-    //   console.log(`Component directory created at: ${componentDir}`);
+        fs.mkdirSync(componentDir);
+        //   console.log(`Component directory created at: ${componentDir}`);
     } else {
-      console.log(`Component directory already exists at: ${componentDir}`);
+        console.log(`Component directory already exists at: ${componentDir}`);
     }
     return componentDir;
-  }
+}
 
 
 // Main function to extract all component details from TypeScript declaration files
 export function extractAllComponentDetails(directoryPath: string, library: string) {
     const files = getDeclarationFiles(directoryPath);
-    const project  = new Project();
-
-    const program = ts.createProgram(files, {});
+    const project = new Project();
+    const options: ts.CompilerOptions = {
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES5,
+        allowJs: true
+    };
+    const program = ts.createProgram(files, options);
     const typeChecker = program.getTypeChecker();
     let sourceFiles = program.getSourceFiles().filter(file => file.fileName.includes(directoryPath));
-    sourceFiles = sourceFiles.concat(...getSourceFileofImport(files,project));
+    sourceFiles = sourceFiles.concat(...getSourceFileofImport(files, project));
     const allComponentNames = getAllComponentNames(sourceFiles);
 
     const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
 
     sourceFiles.forEach(sourceFile => {
-        if(sourceFile.fileName.includes("drawer")){
-         console.log(sourceFile);
-            
+        if (sourceFile.fileName.includes("drawer")) {
+            console.log(sourceFile);
+
         }
 
         const detailsInFile = extractComponentDetails(sourceFile, typeChecker, allComponentNames, library, directoryPath);
         Object.assign(componentDetails, detailsInFile);
-        
+
     });
-    
+
     // Create JSON file for the component of perticular library
-    const libraryName = library; 
+    const libraryName = library;
     const getStorePath = getStoreDir();
-    if(getStorePath){
-        const componentStorePath=createComponentDir(getStorePath)
-        const libraryStorePath = path.join(componentStorePath,libraryName,"component");
-        
+    if (getStorePath) {
+        const componentStorePath = createComponentDir(getStorePath)
+        const libraryStorePath = path.join(componentStorePath, libraryName, "component");
+
         // const componentNames: string[] = [];
         const componentNames: Map<string, string> = new Map();
 
@@ -324,25 +348,25 @@ export function extractAllComponentDetails(directoryPath: string, library: strin
         if (!fs.existsSync(libraryStorePath)) {
             // console.log("no file are there");
             fs.mkdirSync(libraryStorePath, { recursive: true });
-        } 
-        else{
-            fs.rmSync(libraryStorePath,{ recursive: true, force: true });
+        }
+        else {
+            fs.rmSync(libraryStorePath, { recursive: true, force: true });
             fs.mkdirSync(libraryStorePath);
         }
-        
+
         for (const [componentName, { props, importPath, children }] of Object.entries(componentDetails)) {
             const componentData = {
                 importPath,
                 props,
                 children
             };
-            
+
             const componentFilePath = path.join(libraryStorePath, `${componentName}.json`);
             fs.writeFileSync(componentFilePath, JSON.stringify(componentData, null, 2), 'utf-8');
             // componentNames.push(componentName);
             componentNames.set(componentName, `${libraryStorePath}/${componentName}.json`);
         }
-        
+
         const finalComponentFilePath = path.join(libraryStorePath, '__component.json');
         fs.writeFileSync(finalComponentFilePath, JSON.stringify(Object.fromEntries(componentNames), null, 2), 'utf-8');
     }
