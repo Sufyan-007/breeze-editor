@@ -60,7 +60,7 @@ function isReactElement(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
                 for (const clause of dl.heritageClauses) {
                     for (const typeNode of clause.types) {
                         let name = typeNode.expression.getText()
-                        if (name.includes("React.") || name == 'React.Component' || name == 'Component') {
+                        if (name.includes("Component") || name.includes("React.") || name == 'React.Component' || name == 'Component') {
                             isReactEl = true
                         } else {
                             const baseTypes = type.getBaseTypes() || [];
@@ -110,7 +110,7 @@ const isReactFunctionComponent = (node: ts.FunctionDeclaration | ts.FunctionExpr
             return true;
         }
         // Optionally, check if the return type includes JSX
-        return typeName.includes('ReactElement') || typeName.includes('JSX.Element');
+        return typeName.includes("Component") ||  typeName.includes('ReactElement') || typeName.includes('JSX.Element');
     }
     return false;
 };
@@ -160,10 +160,12 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
             let isFunctionalComponent = isReactFunctionComponent(node, typeChecker)
             if (isFunctionalComponent) {
                 const parameters = node.parameters;
-                let functionName = node.name ? node.name.getText() : 'default';
-                let myuuid = uuidv4();
-                myuuid = myuuid.replace("-","_");
-                functionName = myuuid;
+                let functionName = node.name ? node.name.getText() : null;
+                if(!functionName){
+                    let myuuid = uuidv4();
+                    myuuid = myuuid.replace("-","_");
+                    functionName = myuuid;
+                }
                 let parentNode = node.parent as ts.Node
                 if(node.parent){
                     // remaining part 
@@ -297,6 +299,10 @@ export function extractAllComponentDetails(directoryPath: string, library: strin
     const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
 
     sourceFiles.forEach(sourceFile => {
+        if(sourceFile.fileName.includes("drawer")){
+         console.log(sourceFile);
+            
+        }
 
         const detailsInFile = extractComponentDetails(sourceFile, typeChecker, allComponentNames, library, directoryPath);
         Object.assign(componentDetails, detailsInFile);
