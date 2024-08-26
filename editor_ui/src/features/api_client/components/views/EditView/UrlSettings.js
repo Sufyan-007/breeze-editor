@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 import ParameterSettings from "./ParameterSettings";
+import { fetchEnvironmentSettings } from "../../../../../services/EnvironmentSettingsService";
+import { useParams } from "react-router";
 
-function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
+function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
   const [url, setUrl] = useState(urlData);
   const [pathParams, setPathParams] = useState([]);
   const [queryParams, setQueryParams] = useState([]);
-  
-
+  // const { projectName } = useParams();
+ 
   useEffect(() => {
     setUrl(urlData);
   }, [urlData]);
@@ -26,14 +28,34 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
     // console.log(paramData, "paramdaata");
   }, [paramData]);
 
-  const { baseurl, path, url_env, servers } = url ? url : {};
+  // const getEnvironments = useCallback(async () => {
+  //   const result = await fetchEnvironmentSettings(projectName);
+  //   if (result && result.config) {
+  //     setEnvVars(result.config.envVars);
+  //   }
+  // }, [projectName]);
 
-  const handleChanges = (prop, value) => {
+  // useEffect(() => {
+  //   getEnvironments();
+  // }, [getEnvironments]);
+
+
+  const { baseurl, path, servers } = url ? url : {};
+
+  const handleChanges = (prop, event) => {
+    const selectedValue = event.target.value;
     const newUrlData = { ...url };
     if (prop === "path") {
-      newUrlData[prop] = value.split("/");
+      newUrlData[prop] = selectedValue.split("/");
     } else {
-      newUrlData[prop] = value;
+      const selectedOption = event.target.options[event.target.selectedIndex];
+      const source = selectedOption.getAttribute('data-source');
+      if (source === "envVars")
+        {
+            newUrlData["url_env"] = selectedValue
+        }
+      else newUrlData["url_env"] = "";
+      newUrlData[prop] = selectedValue;
     }
     onChange("url", newUrlData);
   };
@@ -129,6 +151,8 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
       </div>
     );
   };
+ 
+
   return (
     <>
       <div className=" rounded-0 text-white bg-dark  d-flex align-items-center justify-content-between">
@@ -154,18 +178,6 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
         </div>
         <div className="mx-2" style={{ width: "50%" }}>
           <Form.Label className="text-white mb-1">Base URL:</Form.Label>
-          {/* <Form.Control
-            className="text-white "
-            size="sm"
-            type="text"
-            placeholder="Enter Base URL"
-            style={{
-              backgroundColor: "#212529",
-              border: "1px solid rgba(128, 128, 128, 0.5)",
-            }}
-            value={baseurl || ""}
-            onChange={(e) => handleChanges("baseurl", e.target.value)}
-          /> */}
           <Form.Control
             as="select"
             className="text-white"
@@ -174,16 +186,21 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
               backgroundColor: "#212529",
               border: "1px solid rgba(128, 128, 128, 0.5)",
             }}
-            value={servers ? servers[0].url : ""}
-            onChange={(e) => handleChanges("baseurl", e.target.value)}
+            value={ baseurl }
+            onChange={(e) => handleChanges("baseurl", e)}
           >
             <option value="">Select</option>
             {servers &&
               servers.map((server, index) => (
-                <option key={index} value={server.url}>
+                <option key={index} value={server.url} data-source="swagger">
                   {server.url}
                 </option>
               ))}
+            {envVars && Object.entries(envVars).length >0 && Object.entries(envVars).map(([key, value]) => (
+              <option key={key} value={key} data-source="envVars">
+                {value}
+              </option>
+            ))}
           </Form.Control>
         </div>
 
@@ -200,7 +217,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
               border: "1px solid rgba(128, 128, 128, 0.5)",
             }}
             value={path ? path.join("/") : ""}
-            onChange={(e) => handleChanges("path", e.target.value)}
+            onChange={(e) => handleChanges("path", e)}
             onBlur={handlePathParsing}
           />
         </div>
@@ -314,13 +331,13 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method }) {
                   ) : (
                     <></>
                   )}
-                  
+
                 </div>
               </div>
               <div className="mx-1 mt-1 text-white">
-                    {renderError(para.errors)}
-                  </div>
-              </>
+                {renderError(para.errors)}
+              </div>
+            </>
           ))
         ) : (
           <div className="d-flex justify-content-center mb-1">
