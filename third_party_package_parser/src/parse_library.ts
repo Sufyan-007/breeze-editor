@@ -183,15 +183,18 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
                 const parameters = node.parameters;
                 let functionName = node.name ? node.name.getText() : null;
                 if (!functionName) {
-                    let myuuid = uuidv4();
-                    myuuid = myuuid.replace("-", "_");
-                    functionName = myuuid;
+                    // let myuuid = uuidv4();
+                    // myuuid = myuuid.replace("-", "_");
+                    // functionName = myuuid;
+                    functionName = getFunctionName(node) + 'JS'; // join JS because this will differentiate between .d.ts and .js file
+                    
                 }
-                let parentNode = node.parent as ts.Node
-                if (node.parent) {
-                    // remaining part 
-                    // extract name of the function
-                }
+                // let parentNode = node.parent as ts.Node
+                // if (node.parent) {
+                //     // remaining part 
+                //     // extract name of the function
+
+                // }
                 let formattedParams: Record<string, string> = {};
 
                 parameters.map(param => {
@@ -210,6 +213,35 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
 
     visit(sourceFile);
     return componentDetails;
+}
+
+function getFunctionName(node:ts.Node):string{
+    if(node.parent == undefined){
+        return "exportAsAnonymousFunction"
+    }
+    
+    let parentNode = node.parent as ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction;
+    if(parentNode.name == undefined)
+        return getFunctionName(parentNode);
+    else
+        return parentNode?.name?.getText() || "not found";
+
+    
+    // let parentNode = node.parent as ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction;
+    // let parentOfParentNode = parentNode.parent as ts.FunctionDeclaration | ts.FunctionExpression | ts.ArrowFunction;
+    // if(parentOfParentNode?.name){
+    //     if(parentOfParentNode.name == undefined){
+    //         console.log(node)
+    //     }
+    //     return parentOfParentNode.name?.getText() || myuuid;
+    // }
+    // else{
+    //     if(parentNode.name == undefined){
+    //         console.log(node)
+    //     }
+    //     return parentNode.name?.getText() || myuuid;
+    // }
+  
 }
 
 //to get all sourceFile according to ts-morph libraray
@@ -311,9 +343,25 @@ export function extractAllComponentDetails(directoryPath: string, library: strin
     const files = getDeclarationFiles(directoryPath);
     const project = new Project();
     const options: ts.CompilerOptions = {
-        module: ts.ModuleKind.CommonJS,
         target: ts.ScriptTarget.ES5,
-        allowJs: true
+        module: ts.ModuleKind.CommonJS,
+        allowJs: true,
+        lib: [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
+        skipLibCheck: true,
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        strict: true,
+        forceConsistentCasingInFileNames: true,
+        noFallthroughCasesInSwitch: true,
+        isolatedModules: true,
+        noEmit: true,
+        sourceMap: true,
+        jsx: ts.JsxEmit.ReactJSX
+        
     };
     const program = ts.createProgram(files, options);
     const typeChecker = program.getTypeChecker();
