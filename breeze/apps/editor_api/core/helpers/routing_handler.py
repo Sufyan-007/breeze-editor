@@ -262,12 +262,14 @@ class RouteHandler:
         react_code = f'''
         import './styles.js';
         import React, {{useEffect}} from 'react';
+        import SandBox from "SandBox.js";
         import {{ Routes, Route, Navigate, BrowserRouter, createBrowserRouter, createRoutesFromElements, RouterProvider }} from "react-router-dom";
         
         export const router = createBrowserRouter (
           createRoutesFromElements(
-          <Route>
-                {routing_code}
+            <Route>
+                    {routing_code}
+                    <Route path="breeze/sandbox" element={{<SandBox />}} />
                 </Route>
             )
         );

@@ -197,6 +197,9 @@ ELEMENT_ATTRIBUTES = {
         },
         "target": {
             "datatype": "STRING"
+        },
+        "onSubmit":{
+            "datatype": "FUNCTION"
         }
     },
 
@@ -239,7 +242,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype":    "STRING"
         },
         "size": {
-            "datatype":    "NUMBER"
+            "datatype":    "NUMERIC"
         }
     },
     "blockquote": {
@@ -313,10 +316,10 @@ ELEMENT_ATTRIBUTES = {
 
     "canvas": {
         "height": {
-            "datatype":    "NUMBER"
+            "datatype":    "NUMERIC"
         },
         "width": {
-            "datatype":    "NUMBER"
+            "datatype":    "NUMERIC"
         }
     },
     "caption": {
@@ -335,7 +338,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype":    "STRING"
         },
         "span": {
-            "datatype":    "NUMBER"
+            "datatype":    "NUMERIC"
         },
         "valign": {
             "datatype":    "STRING"
@@ -355,7 +358,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype":    "STRING"
         },
         "span": {
-            "datatype":    "NUMBER"
+            "datatype":    "NUMERIC"
         },
         "valign": {
             "datatype":    "STRING"
@@ -399,10 +402,10 @@ ELEMENT_ATTRIBUTES = {
         "align": {
             "datatype":    "STRING"
         },
-        "onClick": {
+        "onclick": {
             "datatype": "FUNCTION"
         },
-        "onChange": {
+        "onchange": {
             "datatype": "FUNCTION"
         }
 
@@ -445,7 +448,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype":    "STRING"
         },
         "size": {
-            "datatype":    "NUMBER"
+            "datatype":    "NUMERIC"
         }
     },
 
@@ -457,10 +460,10 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "marginheight": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "marginwidth": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "name": {
             "datatype": "STRING"
@@ -526,7 +529,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "BOOLEAN"
         },
         "size": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "width": {
             "datatype": "STRING"
@@ -560,7 +563,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "height": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "loading": {
             "datatype": "STRING"
@@ -569,10 +572,10 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "marginheight": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "marginwidth": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "name": {
             "datatype": "STRING"
@@ -593,7 +596,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "width": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         }
     },
 
@@ -617,10 +620,10 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "height": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "hspace": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "ismap": {
             "datatype": "BOOLEAN"
@@ -650,10 +653,10 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "vspace": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "width": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         }
     },
     "input": {
@@ -697,7 +700,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "height": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "ismap": {
             "datatype": "BOOLEAN"
@@ -709,13 +712,13 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "maxlength": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "min": {
             "datatype": "STRING"
         },
         "minlength": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "multiple": {
             "datatype": "BOOLEAN"
@@ -742,7 +745,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "BOOLEAN"
         },
         "size": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "src": {
             "datatype": "STRING"
@@ -763,7 +766,10 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "width": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
+        },
+        "onchange": {
+            "datatype": "FUNCTION"
         }
     },
 
@@ -892,22 +898,22 @@ ELEMENT_ATTRIBUTES = {
     },
     "meter": {
         "high": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "low": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "max": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "min": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "optimum": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "value": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         }
     },
 
@@ -975,7 +981,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "BOOLEAN"
         },
         "start": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "datatype": {
             "datatype": "STRING"
@@ -1035,15 +1041,15 @@ ELEMENT_ATTRIBUTES = {
     },
     "pre": {
         "width": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         }
     },
     "progress": {
         "max": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "value": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         }
     },
     "q": {
@@ -1216,7 +1222,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "colspan": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "headers": {
             "datatype": "STRING"
@@ -1228,7 +1234,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "BOOLEAN"
         },
         "rowspan": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "scope": {
             "datatype": "STRING"
@@ -1256,7 +1262,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "cols": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "dirname": {
             "datatype": "STRING"
@@ -1268,10 +1274,10 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "maxlength": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "minlength": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "name": {
             "datatype": "STRING"
@@ -1286,11 +1292,18 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "BOOLEAN"
         },
         "rows": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "wrap": {
             "datatype": "STRING"
+        },
+        "value":{
+            "datatype": "STRING"
+        },
+         "onchange":{
+            "datatype": "FUNCTION"
         }
+        
     },
 
     "tfoot": {
@@ -1327,7 +1340,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "colspan": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "headers": {
             "datatype": "STRING"
@@ -1339,7 +1352,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "BOOLEAN"
         },
         "rowspan": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "scope": {
             "datatype": "STRING"
@@ -1423,7 +1436,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "height": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         },
         "loop": {
             "datatype": "BOOLEAN"
@@ -1444,7 +1457,7 @@ ELEMENT_ATTRIBUTES = {
             "datatype": "STRING"
         },
         "width": {
-            "datatype": "NUMBER"
+            "datatype": "NUMERIC"
         }
     }
 

@@ -9,104 +9,9 @@ import Select from "react-select";
 import WhileBlock from "../FunctionItemComponents/WhileBlock";
 import DoWhileBlock from "../FunctionItemComponents/DoWhileLoop";
 import TryCatch from "../FunctionItemComponents/TryCatch";
-
-const options = [
-  { value: "createVariable", label: "Create Variable" },
-  { value: "updateVariable", label: "Update Variable" },
-  { value: "ifBlock", label: "If Else Block" },
-  { value: "whileBlock", label: "While Block" },
-  { value: "doWhileBlock", label: "Do While Block" },
-  { value: "customCode", label: "Custom Code" },
-  { value: "return", label: "Return Value" },
-  { value: "functionCall", label: "Function Call" },
-  { value: "serviceCall", label: "Service Call" },
-  { value: "tryCatch", label: "Try Catch" },
-];
-
-const templates = {
-  ifBlock: {
-    type: "IF_BLOCK",
-    condition: {
-      type: "CUSTOM",
-      value: "",
-    },
-    bodyConfig: {
-      type: "BLOCK",
-      statements: [],
-    },
-    elseIf: [],
-    elseBody: {
-      type: "BLOCK",
-      statements: [],
-    },
-  },
-  createVariable: {
-    type: "DECLARATION",
-    declarationType: "",
-    varName: "",
-  },
-  updateVariable: {
-    type: "ASSIGNMENT",
-    varName: "",
-  },
-  customCode: {
-    type: "CUSTOM",
-    body: "",
-  },
-  return: {
-    type: "RETURN",
-    value: {},
-  },
-  whileBlock: {
-    type: "WHILE_BLOCK",
-    condition: {
-      type: "CUSTOM",
-      value: "",
-    },
-    bodyConfig: {
-      type: "BLOCK",
-      statements: [],
-    },
-  },
-  doWhileBlock: {
-    type: "DO_WHILE_BLOCK",
-    bodyConfig: {
-      type: "BLOCK",
-      statements: [],
-    },
-    condition: {
-      type: "CUSTOM",
-      value: "",
-    },
-  },
-  functionCall: {
-    callType: "functionCall",
-    type: "FUNCTION_CALL",
-    functionName: "",
-    parameters: [],
-  },
-  serviceCall: {
-    callType: "serviceCall",
-    type: "FUNCTION_CALL",
-    functionName: "",
-    parameters: [],
-  },
-  tryCatch: {
-    type: "TRY_CATCH",
-    tryBody: {
-      type: "BLOCK",
-      statements: [],
-    },
-    catchBody: {
-      type: "BLOCK",
-      statements: [],
-    },
-    finallyBody: {
-      type: "BLOCK",
-      statements: [],
-    },
-  },
-};
+import AddNavigation from "../FunctionItemComponents/AddNavigation";
+import { funcConfigOptions } from "../../../../../constants/functionConfigConstants";
+import { funcConfigTemplates } from "../../../../../constants/functionConfigConstants";
 
 const statementTypes = {
   createVariable: CreateVariable,
@@ -119,6 +24,7 @@ const statementTypes = {
   doWhileBlock: DoWhileBlock,
   serviceCall: FunctionCall,
   tryCatch: TryCatch,
+  addNavigation: AddNavigation
 };
 
 function AddFunctionItem({ update }) {
@@ -133,7 +39,7 @@ function AddFunctionItem({ update }) {
       <Select
         value={selectedOption}
         onChange={handleChange}
-        options={options}
+        options={funcConfigOptions}
         placeholder="Select an option..."
         isSearchable
         styles={{
@@ -177,7 +83,7 @@ function AddFunctionItem({ update }) {
         {SelectedComponent ? (
           <SelectedComponent
             config={JSON.parse(
-              JSON.stringify(templates[selectedOption?.value])
+              JSON.stringify(funcConfigTemplates[selectedOption?.value])
             )}
             update={(val) => {
               setSelectedOption(null);

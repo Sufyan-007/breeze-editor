@@ -1,6 +1,8 @@
 import { useContext, useMemo, useEffect, useState } from "react";
 import { ComponentContext } from "../ComponentConfigPage";
 import { useParams } from "react-router";
+import { useSelector } from 'react-redux';
+import { Toast } from "react-bootstrap";
 
 import TextElement from "./SidebarConfigHelper/components/TextElementConfig";
 import HtmlElementConfig from "./SidebarConfigHelper/components/HtmlElementConfig";
@@ -9,11 +11,10 @@ const getAvailableFunctions = (componentConfig) => {
   const functionsList = [];
 
   const { resources, propsVars } = componentConfig;
-  console.log(componentConfig);
   
   const namedFunctions = resources.filter(resource => resource.type === "function");
-  const propFunctions = propsVars.filter(propsVar => propsVar.body?.datatype === "function");
-  const stateAsFunction = resources.filter(resource => resource.body?.datatype === "function");
+  const propFunctions = propsVars.filter(propsVar => propsVar.body?.datatype === "FUNCTION");
+  const stateAsFunction = resources.filter(resource => resource.body?.datatype === "FUNCTION");
   const hookFunction = resources.filter(resource => ["useMemo", "useCallback"].includes(resource.body?.type));
   // const setterFunctions = resources.filter(resource => resource.type === "stateVars")
   
@@ -39,6 +40,7 @@ const getAllVariables = (componentConfig) => {
 
 export default function ElementConfigSidebar({ config }) {
   const { sidebarService, componentConfig, setComponentConfig } = useContext(ComponentContext);
+  const storeConfig = useSelector((state) => state.config);
   const [selectedElement, setSelectedElement] = useState(null);
   const { projectName, componentName } = useParams();
   const element = useMemo(
@@ -48,6 +50,9 @@ export default function ElementConfigSidebar({ config }) {
   const [isLoading, setIsLoading] = useState(false);
   const availableFunctions = getAvailableFunctions(componentConfig)
   const allVariables = getAllVariables(componentConfig);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  console.log(componentConfig)
   
   useEffect(() => {
     const subscription =sidebarService.getSelectedElem().subscribe((elem) => {
@@ -84,9 +89,12 @@ export default function ElementConfigSidebar({ config }) {
 
       if (!response.ok) {
         setIsLoading(false);
+       
         throw new Error("Failed to update HTML config");
       } else {
         setIsLoading(false);
+        setShowToast(true)
+        setToastMessage("Successfully updated")
       }
 
       const responseData = await response.json();
@@ -98,6 +106,10 @@ export default function ElementConfigSidebar({ config }) {
       });
       //
     } catch (error) {
+      setShowToast(true)
+
+      setToastMessage("Update failed. Please try again.");
+
       console.error("Error:", error);
     }
   }
@@ -109,8 +121,8 @@ export default function ElementConfigSidebar({ config }) {
       <>
         <div
           style={{
-            width: "42rem",
-            backgroundColor: "#303033",
+            width: "45rem",
+            backgroundColor: "#212529",
             overflowY: "scroll",
             position: "absolute",
             right: 0,
@@ -121,7 +133,7 @@ export default function ElementConfigSidebar({ config }) {
           }}
         >
           <div>
-            <div className="d-flex align-items-center justify-content-between mb-4 text-light mt-2 ps-3 pe-3">
+            <div className="d-flex align-items-center justify-content-between mb-2 text-light mt-2 ps-1 pe-3">
               <div>
                 <h5 className="tag-name  mt-2 text-capitalize">
                   {element.tagName}
@@ -135,6 +147,10 @@ export default function ElementConfigSidebar({ config }) {
                 ></button>
               </div>
             </div>
+            <div className="mt-1 text-light mb-3 ms-0 ps-1 pb-1 " style={{ borderBottom: '3px solid black' }}>{element?.elementType === 'HTML' ? "Attributes" : element.type === 'text'?"Text":"Props" }</div>
+
+            
+            
             {element.type === "text" && (
               <TextElement
                 makeSelectedElementNull={makeSelectedElementNull}
@@ -155,6 +171,21 @@ export default function ElementConfigSidebar({ config }) {
               />
             )}
           </div>
+          <Toast
+        onClose={() => setShowToast(false)}
+        show={showToast}
+        delay={3000}
+        autohide
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+        }}
+      >
+        <Toast.Header>
+          <strong className="me-auto">{toastMessage}</strong>
+        </Toast.Header>
+      </Toast>
         </div>
       </>
     );

@@ -5,7 +5,9 @@ export const dataTypes = [
   "ARRAY",
   "FUNCTION",
   "OBJECT",
-  "TOKEN",
+  "COMPONENT",
+  "ELEMENT",
+  "ANY",
   // "FUNCTION_CALL",
   // "OPERATION"
 ];

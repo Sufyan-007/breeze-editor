@@ -190,40 +190,23 @@ class ComponentGenerator():
            
         def generate_lifecycle_code(lifecycle):
             lifecycle_type = lifecycle['body']['lifecycleType']
-            function_body = lifecycle['body'].get('functionBody', '')
-            return_body = lifecycle['body'].get('returnBody', '')
+            lifecycle_body = lifecycle['body'].get('lifecycleBody', '')
+            lifecycle_body_code = generate_function_code(lifecycle_body)
             dependent_vars = lifecycle['body'].get('dependentVars', [])
             dependencies = ', '.join(dependent_vars) if dependent_vars else ''
             
             if lifecycle_type == 'onEveryMount':
                 return f"""
-                    React.useEffect(() => {{
-                        {lifecycle['body']['functionBody']}
-                    }});
+                    React.useEffect({lifecycle_body_code});
                 """
+            elif lifecycle_type == 'onInitialMount':
+                return f"""
+                    React.useEffect({lifecycle_body_code}, []);
+                    """
             elif lifecycle_type == 'onComponentMount':
                 return f"""
-                    React.useEffect(() => {{
-                        {function_body}
-                    }}, [{dependencies}]);
+                    React.useEffect({lifecycle_body_code}, [{dependencies}]);
                     """
-            elif lifecycle_type == 'onMountAndUnmount':
-                return f"""
-                    React.useEffect(() => {{
-                        {function_body}
-                        return () => {{
-                           {return_body}
-                        }};
-                    }}, [{dependencies}]);
-                """
-            elif lifecycle_type == 'onUnmount':
-                return f"""
-                    React.useEffect(() => {{
-                        return () => {{
-                           {return_body}
-                        }};
-                    }}, [{dependencies}]);
-                """
             else:
                 raise ValueError(f"Unknown lifecycle type: {lifecycle_type}")
         
@@ -231,15 +214,12 @@ class ComponentGenerator():
             hook_name = hook['name']
             hook_type = hook['body']['type']
             hook_body = hook['body']['hookBody']
-            hook_params = hook['body'].get('hookParams', []) if hook_type == 'useCallback' else ''
-            params = ', '.join(hook_params) if hook_params else ''
+            hook_body_code = generate_function_code(hook_body)
             dependent_vars = hook['body'].get('dependentVars', [])
             dependencies = ', '.join(dependent_vars) if dependent_vars else ''
 
             hook_code = f"""
-                const {hook_name} = React.{hook_type}(({params}) => {{
-                    {hook_body}
-                }}, [{dependencies}]);
+                const {hook_name} = React.{hook_type}({hook_body_code}, [{dependencies}]);
             """
 
             return hook_code

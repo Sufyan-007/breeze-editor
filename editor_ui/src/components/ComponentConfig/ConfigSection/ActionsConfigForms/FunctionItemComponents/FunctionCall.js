@@ -94,6 +94,7 @@ function FunctionCall({ config, update }) {
         functions: [
           transformedConfig,
           {
+            callType: "functionCall",
             type: "FUNCTION_CALL",
             functionName: "then",
             parameters: [
@@ -109,6 +110,7 @@ function FunctionCall({ config, update }) {
             ],
           },
           {
+            callType: "functionCall",
             type: "FUNCTION_CALL",
             functionName: "catch",
             parameters: [
