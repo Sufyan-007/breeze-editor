@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Card, Row } from "react-bootstrap";
 import edit from "../../../../../assets/icons/edit-icon.svg";
 import HeadersSetting from "./HeadersSetting";
 import AuthSettings from "./AuthSettings";
 import UrlSettings from "./UrlSettings";
 import BodySettings from "./BodySettings";
+import { useParams } from "react-router";
+import { fetchEnvironmentSettings } from "../../../../../services/EnvironmentSettingsService";
 
 function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, requestType, moduleId }) {
   // console.log(moduleId, "moduleid in reques");
@@ -12,7 +14,18 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
   const [expandedProperty, setExpandedProperty] = useState(null);
   const [api, setApi] = useState({});
   const [requestProperties, setRequestProperties] = useState(["Url", "Body", "Headers", "Auth",]);
+  const [envVars, setEnvVars] = useState({});
+  const { projectName } = useParams();
+  const getEnvironments = useCallback(async () => {
+    const result = await fetchEnvironmentSettings(projectName);
+    if (result && result.config) {
+      setEnvVars(result.config.envVars);
+    }
+  }, [projectName]);
 
+  useEffect(() => {
+    getEnvironments();
+  }, [getEnvironments]);
   useEffect(() => {
     if (apiData.is_open_api) {
       setRequestProperties(["Url", "Body", "Headers"]);
@@ -90,12 +103,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
     });
     onChange(requestType, r);
   };
-  // const onAuthReqChange = (prop,value)=>{
-  //   let r = request;
-  //   r[prop] = value;
-  //   setRequest({...r})
-  //   onChange("")
-  // }
+
   const toggleProperty = (index) => {
     // console.log(index, "index");
     if (expandedProperty === index) {
@@ -121,7 +129,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
 
               <Card.Body className="d-flex justify-content-between">
                 <div>
-                  {req === "Url" && request.url && request.url.baseurl !== "" ? request.url.baseurl : req}
+                  {req === "Url" && request.url && request.url.baseurl !== "" ? envVars[request.url.baseurl]? envVars[request.url.baseurl] : request.url.baseurl : req}
                   {/* {req === "Url" ? (
                     ((request.parameters && request.parameters.some(param => param.errors && Object.keys(param.errors).length > 0) )|| (request.url && Object.keys(request.url.errors).length > 0)) && (
                       <i className="bi bi-exclamation-circle mx-2" style={{ color: "red" }}></i>
@@ -177,6 +185,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
                         //   (param) => param.param_in === "PATH"
                         // )
                       }
+                      envVars={envVars}
                       method={request.method}
                       onAdd={addProperty}
                     />

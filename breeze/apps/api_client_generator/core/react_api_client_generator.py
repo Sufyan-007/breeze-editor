@@ -1,5 +1,6 @@
 import json
 import copy
+from apps.editor_api.core.environment_settings_config_service import EnvironmentSettingsConfigService
 
 from ..api_models import TokenStoreTypeEnum,AuthApiTypeEnum,ContentEnum,ModeEnum
 from ..api_models import ParamsInEnum,AuthTypeEnum,TokenStoreTypeEnum
@@ -340,7 +341,10 @@ class ReactApiClientGenerator:
         if url_env is None or url_env == "":
             url = baseurl+path
         else:
-            url = url_env+path
+            # url = url_env+path
+            environment_settings_service = EnvironmentSettingsConfigService(app_name)
+            config = environment_settings_service.get_config()
+            url = "${process.env.%s}" % config.get("envVars").get(url_env)  + path
         new_query_params =[]
         new_path_params = []
         for params in model.request.parameters:

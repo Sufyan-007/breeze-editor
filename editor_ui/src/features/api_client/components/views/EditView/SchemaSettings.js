@@ -19,16 +19,13 @@ function SchemaSettings() {
     name: "",
   });
   const [id, setId] = useState();
-  // const [moduleId, setModuleId] = useState();
   const [module, setModule] = useState(null);
   const [schemaList, setSchemaList] = useState([]);
-  // const [selectedSchema, setSelectedSchema] = useState(null);
-  const [expandedModule, setExpandedModule] = useState([]); // State to manage expanded module
+  const [expandedModule, setExpandedModule] = useState([]); 
   const { projectName } = useParams();
 
   const fetchSchemasList = useCallback(
     async (schemaId, module_id) => {
-      // console.log("fetchSchemasList>>>",schemaId, module_id);
       try {
         const result = await getApiSchemaDetails(projectName, schemaId, module_id,);
         if (schemaId && module_id) {
@@ -116,9 +113,7 @@ function SchemaSettings() {
 
   const handleSchemaOperations = async (operation, schema, module_id, module_name) => {
     if (operation === "edit") {
-      // setSelectedSchema(schema.name);
       setId(schema.id);
-      // setModuleId(module_id);
       setModule({"id": module_id, "name": module_name})
       const details = await fetchSchemasList(schema.id, module_id);
       setDefaultSchemaObj(details);

@@ -461,7 +461,7 @@ function Test() {
                 src="https://img.icons8.com/ios-glyphs/30/FFFFFF/add--v1.png"
                 alt="add--v1"
                 style={{ cursor: "pointer" }}
-                onClick={() => { setView("AUTH_API"); setSelectedAuthApi({}); setSelectedModule({}) }}
+                onClick={() => { setView("AUTH_API"); setSelectedAuthApi({}); setSelectedModule(null); }}
               />
             </div>
             {authApiList && authApiList.length > 0 ? (
@@ -518,7 +518,7 @@ function Test() {
                                     : "text-white"
                                     }`}
                                   onClick={() => {
-                                    setSelectedModule({ "name": module.title, "id": module.module_id, "filename": '', "serviceId": api.id })
+                                    setSelectedModule({ "name": module.title, "id": module.model_id, "filename": '', "serviceId": api.id })
                                     setSelectedAuthApi(api)
                                     // setView("TEST");
                                     setView("AUTH_API");
