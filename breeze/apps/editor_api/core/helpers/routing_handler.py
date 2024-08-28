@@ -15,9 +15,16 @@ class RouteHandler:
         self.app_config = app_config
         self.route_config = route_config
         self.comp_config = comp_config
-        
+    
+    def add_params_to_route_object(self):
+        for full_path_route_key in self.route_config.get('routes'):
+            params = []
+            for i in full_path_route_key.split('/'):
+                if len(i) > 1 and i[0] == ':':
+                    params.append(i[1:])
+            self.route_config['routes'][full_path_route_key]['params'] = params
+      
     def rewrite_clean_route_config(self, updated_route_config):
-        
         for route in list(updated_route_config.get('routes').values()):
             keys_to_remove = [key for key, val in route.items() if val is None or val == []]
             for key in keys_to_remove:
@@ -140,6 +147,7 @@ class RouteHandler:
     def handle_routing_code(self):
         self.transform_route_config(self.route_config)
         # write the implementation object in the routing_config
+        self.add_params_to_route_object()
         self.rewrite_clean_route_config(self.route_config)
         imported_components = []
         print("-----------------route_config--------------------")
@@ -147,7 +155,7 @@ class RouteHandler:
         for rt in list(self.route_config['routes'].values()):
             if rt.get('component') is not None and rt['component'] not in imported_components:
                 imported_components.append(rt['component'])
-            if rt.get('errorElement') is not None and rt['errorElement'] not in imported_components:
+            if rt.get('errorElement') is not None and rt['errorElement'] not in imported_components and rt.get('errorElement'):
                 imported_components.append(rt['errorElement'])
             if rt.get('hydrateFallbackElement') is not None and rt['hydrateFallbackElement'] not in imported_components:
                 imported_components.append(rt['hydrateFallbackElement'])
@@ -190,8 +198,9 @@ class RouteHandler:
             if route.get("props", None) is not None:
                 for key in route["props"].keys():
                     print("Key:", key, "Value:", route["props"][key])
-                    element_prop_code = f"{key}={{{route['props'][key]}}}"
-                    element_prop.append(element_prop_code)
+                    if (route["props"][key].strip()):
+                        element_prop_code = f"{key}={{{route['props'][key]}}}"
+                        element_prop.append(element_prop_code)
                 element_prop = " ".join(element_prop)
                 print(element_prop)
                 
@@ -199,10 +208,11 @@ class RouteHandler:
                 code += f'''<Route path="{route['path']}" element={{<Navigate to='{route['redirectTo']}' />}} {props_code} />'''
             else:
                 path = route['path'][1:] if is_child and route['path'].startswith('/') else route['path']
-                route_end = ' index ' if route['path'] == '/' else ''
-                route_end = route_end + '/' if not route.get('childRoutes') else route_end
+                route_end = '/' if not route.get('childRoutes') else ""
+                layout_route_pattern = re.compile(r'^/?layout__[\w-]{9}__$')
+                path_attribute = f'path="{path}"' if not layout_route_pattern.match(path) else ''
                 code += f'''
-                <Route path="{path}" element={{<{self.get_comp_name_by_id(route['component'])} {element_prop if element_prop else ''} />}} {props_code} {route_end}>
+                <Route {path_attribute} element={{<{self.get_comp_name_by_id(route['component'])} {element_prop if element_prop else ''} />}} {props_code} {route_end}>
                 '''
                 if route.get('childRoutes', None):
                     for child_route_id in list(route['childRoutes'].keys()):
@@ -222,6 +232,12 @@ class RouteHandler:
 
         print(route_config)
 
+        if route_config.get('caseSensitive'):
+            props_code.append('caseSensitive')
+        
+        if route_config.get('index'):
+            props_code.append('index')
+            
         if route_config.get("action", None):
             code = "action = {"
             code += FunctionCodeGenerator.generate_function(route_config['action']['implementation'], None)
@@ -267,7 +283,7 @@ class RouteHandler:
         
         export const router = createBrowserRouter (
           createRoutesFromElements(
-            <Route>
+                <Route>
                     {routing_code}
                     <Route path="breeze/sandbox" element={{<SandBox />}} />
                 </Route>

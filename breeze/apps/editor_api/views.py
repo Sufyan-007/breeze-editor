@@ -1,5 +1,6 @@
 
 import subprocess
+import threading
 from django.http import JsonResponse, Http404, FileResponse
 import json
 from .core.app_editor import AppEditor
@@ -160,7 +161,7 @@ class NewComponentWriter(APIView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class RoutingWriter(APIView):
+class old_RoutingWriter(APIView):
     # here need to handle case like add edit delete for 
     # default component currently named 'Main'
     def get(self, param):
@@ -170,8 +171,9 @@ class RoutingWriter(APIView):
         data = json.loads(request.body.decode("utf-8"))
         try:
             app_editor = AppEditor(param)
-            res = app_editor.add_edit_base_route(data)
+            res = app_editor.old_add_edit_base_route(data)
             if res['case']:
+                threading.Thread(target=app_editor.post_success_function, args=(res['res'], )).start()
                 return JsonResponse(res['res'], status=200)
             else:
                 return JsonResponse(res['res'], status=400, safe=False)
@@ -183,8 +185,46 @@ class RoutingWriter(APIView):
         try:
             data = json.loads(request.body.decode("utf-8"))
             app_editor= AppEditor(param);
-            res = app_editor.delete_base_route(data)
+            res = app_editor.delete_route(data)
             if res['case']:
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400, safe=False)
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse(e, status=500)  
+ 
+@method_decorator(csrf_exempt, name='dispatch')
+class RoutingWriter(APIView):
+    # here need to handle case like add edit delete for 
+    # default component currently named 'Main'
+    def get(self, param):
+        pass
+   
+    def post(self,request,param):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            app_editor = AppEditor(param)
+            if data.get('addCompRoute'):
+                res = app_editor.add_edit_base_route(data)
+            else:
+                res = app_editor.add_edit_route(data)
+            if res['case']:
+                threading.Thread(target=app_editor.post_success_function, args=(res['res'], )).start()
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400, safe=False)
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse({e}, status=500)
+    
+    def delete(self, request, param):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            app_editor= AppEditor(param);
+            res = app_editor.delete_route(data)
+            if res['case']:
+                threading.Thread(target=app_editor.post_success_function, args=(res['res'], )).start()
                 return JsonResponse(res['res'], status=200)
             else:
                 return JsonResponse(res['res'], status=400, safe=False)

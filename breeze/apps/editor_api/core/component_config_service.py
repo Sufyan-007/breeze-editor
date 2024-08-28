@@ -87,7 +87,7 @@ class ComponentConfigService:
     def check_usage(self, comp_name, config_data):
         if config_data['type'] == "propsVars":
             if config_data['id'] in self.usage_config['components'][comp_name]['props'].keys():
-                dependent_comps = self.usage_config['components'][comp_name]['props'][config_data['id']].get('usageInOtherComponets', [])
+                dependent_comps = self.usage_config['components'][comp_name]['props'][config_data['id']].get('usageInOtherComponents', [])
                 print("dependent_comps")
                 print(dependent_comps)
                 if len(dependent_comps) > 0:
@@ -116,7 +116,7 @@ class ComponentConfigService:
                 if "id" not in config_data:
                     config_data["id"] = self.generate_id(config_data["type"])
                 self.usage_config['components'][comp_name]['props'][config_data['id']] = {}
-                self.usage_config['components'][comp_name]['props'][config_data['id']]['usageInOtherComponets'] = []                
+                self.usage_config['components'][comp_name]['props'][config_data['id']]['usageInOtherComponents'] = []                
                 usage_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['USAGE_CONFIG']}"
                 write_file(f"{usage_config_path}.json", json.dumps(self.usage_config))
                 props_vars.append(config_data)

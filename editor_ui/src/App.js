@@ -18,6 +18,7 @@ import CssEditor from "./components/StylesConfiguration/CssEditor";
 import ProjectHome from "./components/ProjectHome";
 import ProjectComponents from "./components/ProjectComponents";
 import ProjectRouting from "./components/ProjectRouting";
+import RouteTreeView from "./components/ProjectRouting2";
 import Styles from "./components/StylesConfiguration/Styles";
 import Code from "./components/Code";
 import Settings from "./components/Settings/Settings";
@@ -35,7 +36,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting /> },
+      { path: "oldRoutingPage", element: <ProjectRouting /> },
+      { path: "routing", element: <RouteTreeView /> },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
       { path: "folderstructure", element: <FolderStructureConfig /> },
