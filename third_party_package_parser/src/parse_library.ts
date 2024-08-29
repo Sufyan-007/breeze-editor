@@ -127,7 +127,7 @@ const isReactFunctionComponent = (node: ts.FunctionDeclaration | ts.FunctionExpr
 
             return foundJsx;
 
-            
+
         }
 
         // Optionally, check if the return type includes JSX
@@ -136,6 +136,71 @@ const isReactFunctionComponent = (node: ts.FunctionDeclaration | ts.FunctionExpr
     return false;
 };
 
+function findFunctionNames(node: ts.Node) {
+    if (ts.isCallExpression(node)) {
+        const functionName = getFunctionNameCall(node.expression);
+        if (functionName) {
+            console.log("Function Name:", functionName);
+        }
+    }
+
+    ts.forEachChild(node, findFunctionNames);
+}
+
+function getFunctionNameCall(node: ts.Expression): string  {
+    if (ts.isIdentifier(node)) {
+        return node.text;
+    }
+    if (ts.isPropertyAccessExpression(node)) {
+        return node.name.text;
+    }
+    if (ts.isCallExpression(node)) {
+        return getFunctionNameCall(node.expression);
+    }
+    return "";
+}
+
+
+function getFunctionName(node: ts.Node): string {
+    let name = null
+    if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
+        if (node.name) {
+            name = node.name.getText();
+        }
+    } else if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+        if (node.initializer && (ts.isFunctionExpression(node.initializer) || ts.isArrowFunction(node.initializer))) {
+            name = node.name.getText();
+        }
+    } else if (ts.isClassDeclaration(node) && node.name) {
+        name = node.name.getText();
+    } else if (ts.isInterfaceDeclaration(node) && node.name) {
+        name = node.name.getText();
+    }
+    if (ts.isFunctionDeclaration(node) && node.name) {
+        name = node.name.getText();
+    }
+    if (node.parent && ts.isVariableDeclaration(node.parent) && ts.isIdentifier(node.parent.name)) {
+        name = node.parent.name.getText();
+    }
+    // Handle `declare function` specifically
+    if (ts.isVariableStatement(node)) {
+        const declaration = node.declarationList.declarations[0];
+        if (declaration && ts.isIdentifier(declaration.name)) {
+            name= declaration.name.getText();
+        }
+    }
+    if(!name){
+        name = findFunctionNames(node);
+    }
+    if (!name) {
+        // Add more cases as needed for other node types
+        let myuuid = uuidv4();
+        myuuid = myuuid.replace("-", "_");
+        return myuuid;
+    } else {
+        return name
+    }
+}
 
 // Function to extract component details
 function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[], library: string, directoryPath: string): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
@@ -158,6 +223,10 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
             type = typeChecker.getTypeAtLocation(node);
             const isJsx = isReactElement(type, typeChecker);
             if (isJsx) {
+                if(componentName == 'AccordionButton'){
+                    console.log("chck");
+                    
+                }
                 const props = extractProps(type, typeChecker);
 
                 const importPath = path.relative(directoryPath, sourceFile.fileName)
@@ -181,16 +250,13 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
             let isFunctionalComponent = isReactFunctionComponent(node, typeChecker)
             if (isFunctionalComponent) {
                 const parameters = node.parameters;
-                let functionName = node.name ? node.name.getText() : null;
-                if (!functionName) {
-                    let myuuid = uuidv4();
-                    myuuid = myuuid.replace("-", "_");
-                    functionName = myuuid;
+                let functionName = null;
+                if (node.name) {
+                    functionName = node.name.getText();
                 }
-                let parentNode = node.parent as ts.Node
-                if (node.parent) {
-                    // remaining part 
-                    // extract name of the function
+                if(!functionName || functionName == '__function'){
+                    let parentNode = node.parent;
+                    functionName = getFunctionName(parentNode)
                 }
                 let formattedParams: Record<string, string> = {};
 
@@ -311,9 +377,25 @@ export function extractAllComponentDetails(directoryPath: string, library: strin
     const files = getDeclarationFiles(directoryPath);
     const project = new Project();
     const options: ts.CompilerOptions = {
-        module: ts.ModuleKind.CommonJS,
         target: ts.ScriptTarget.ES5,
-        allowJs: true
+        module: ts.ModuleKind.CommonJS,
+        allowJs: true,
+        lib: [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
+        skipLibCheck: true,
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        strict: true,
+        forceConsistentCasingInFileNames: true,
+        noFallthroughCasesInSwitch: true,
+        isolatedModules: true,
+        noEmit: true,
+        sourceMap: true,
+        jsx: ts.JsxEmit.ReactJSX
+
     };
     const program = ts.createProgram(files, options);
     const typeChecker = program.getTypeChecker();
@@ -324,13 +406,13 @@ export function extractAllComponentDetails(directoryPath: string, library: strin
     const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
 
     sourceFiles.forEach(sourceFile => {
-        if (sourceFile.fileName.includes("drawer")) {
-            console.log(sourceFile);
-
-        }
 
         const detailsInFile = extractComponentDetails(sourceFile, typeChecker, allComponentNames, library, directoryPath);
-        Object.assign(componentDetails, detailsInFile);
+        Object.keys(detailsInFile).forEach((key) => {
+            if (!(key in componentDetails)) {
+                (componentDetails as any)[key] = (detailsInFile as any)[key];
+            }
+        });
 
     });
 
