@@ -1,18 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Table, Button, Form, Toast } from "react-bootstrap";
-import {
-  Pencil,
-  Check,
-  X,
-  Trash,
-} from "react-bootstrap-icons";
+import { Pencil, Check, X, Trash } from "react-bootstrap-icons";
 import Offcanvas from "../common/Offcanvas";
 import AddNewEnvironment from "./AddNewEnvironment";
 import {
   fetchEnvironmentSettings,
   saveEnvironmentSettings,
-  deleteEnvironment,
   setEnvirontment,
+  deleteEnvironmentOrVariable,
+  editEnvironmentSettings,
 } from "../../services/EnvironmentSettingsService";
 import { useParams } from "react-router";
 import { getAppBasicConfig } from "../../services/ConfigService";
@@ -30,20 +26,38 @@ const EnvironmentSettings = () => {
     editVariableId: null,
   });
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [showEnvironmentChangeModal, setShowEnvironmentChangeModal] = useState(false);
-  const [showDeleteEnvironmentModal, setShowDeleteEnvironmentModal] = useState(false);
+  const [showEnvironmentChangeModal, setShowEnvironmentChangeModal] = useState(
+    false
+  );
+  const [showDeleteEnvironmentModal, setShowDeleteEnvironmentModal] = useState(
+    false
+  );
   const [environmentToDelete, setEnvironmentToDelete] = useState(null);
+  const [envVariableToDelete, setEnvVariableToDelete] = useState(null);
   const [pendingEnvName, setPendingEnvName] = useState(false);
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [shouldSave, setShouldSave] = useState(false);
   const [selectedEnvName, setSelectedEnvName] = useState(null);
+  const [editEnvName, setEditEnvName] = useState(null); 
+  const [tempEnvName, setTempEnvName] = useState(""); 
   const containerRef = useRef(null);
   const { projectName } = useParams();
   const defaultEnvName = "default (.env)";
-  const prefix = 'REACT_APP_'
-  
+  const prefix = "REACT_APP_";
+
+
+  const handleEditEnvName = (envName) => {
+    setEditEnvName(envName);
+    setTempEnvName(envName); 
+  };
+
+  const handleCancelEnvName = () => {
+    setEditEnvName(null);
+    setTempEnvName("");
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -103,6 +117,8 @@ const EnvironmentSettings = () => {
         return { ...variable, values };
       });
 
+      updatedEnvVars.reverse();
+
       setEnvVariables(updatedEnvVars);
       setEnvNames(envNames);
     } catch (error) {
@@ -125,7 +141,7 @@ const EnvironmentSettings = () => {
       setEnvNames([...envNames, defaultEnvName]);
     }
     const newVariable = {
-      id: envVariables.length + 1,  
+      id: envVariables.length + 1,
       name: prefix,
       values: { [defaultEnvName]: "" },
     };
@@ -150,7 +166,12 @@ const EnvironmentSettings = () => {
     setIsOffcanvasOpen(true);
   };
 
-  const handleSaveEdit = (id) => {
+  const isUUID = (id) => {
+    const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    return uuidPattern.test(id);
+  };
+
+  const handleSaveEdit = async (id) => {
     const allFieldsFilled = envNames.every(
       (envName) => editTempValues.values[envName]
     );
@@ -160,20 +181,63 @@ const EnvironmentSettings = () => {
       return;
     }
 
-    setEnvVariables(
-      envVariables.map((variable) =>
-        variable.id === id
-          ? {
-              ...variable,
-              name: editTempValues.name,
-              values: { ...editTempValues.values },
-            }
-          : variable
-      )
-    );
-    setEditVariableId(null);
-    setEditTempValues({});
-    setShouldSave(true);
+    if (isUUID(id)) {
+      try {
+        const updatedVariables = envVariables.map((variable) =>
+          variable.id === id
+            ? {
+                ...variable,
+                name: editTempValues.name,
+                values: { ...editTempValues.values },
+              }
+            : variable
+        );
+
+        // Find the updated variable
+        const updatedVariable = updatedVariables.find(
+          (variable) => variable.id === id
+        );
+
+        const result = await editEnvironmentSettings(
+          projectName,
+          id,
+          updatedVariable,
+          envNames
+        );
+
+        if (result.status === "success") {
+          setEnvVariables(updatedVariables);
+          setEditVariableId(null);
+          setEditTempValues({});
+          setToastMessage(result.message);
+          setShowToast(true);
+        } else {
+          setToastMessage("Failed to update environment settings");
+          setShowToast(true);
+        }
+      } catch (error) {
+        console.error("Failed to edit environment settings:", error);
+        setToastMessage("An error occurred while saving");
+        setShowToast(true);
+      }
+      setShouldSave(true);
+    } else {
+      setEnvVariables(
+        envVariables.map((variable) =>
+          variable.id === id
+            ? {
+                ...variable,
+                name: editTempValues.name,
+                values: { ...editTempValues.values },
+              }
+            : variable
+        )
+      );
+      setEditVariableId(null);
+      setEditTempValues({});
+      setShouldSave(true);
+      return;
+    }
   };
 
   const handleCancelEdit = (varId) => {
@@ -245,6 +309,7 @@ const EnvironmentSettings = () => {
     }));
     setEnvNames(newEnvNames);
     setEnvVariables(newEnvVariables);
+
     setIsOffcanvasOpen(false);
     setShouldSave(true);
   };
@@ -252,14 +317,14 @@ const EnvironmentSettings = () => {
   const handleSave = async () => {
     const envVars = {};
     envVariables.forEach((variable) => {
-      envVars[`id${variable.id}`] = variable.name;
+      envVars[`${variable.id}`] = variable.name;
     });
 
     const environments = {};
     envNames.forEach((envName) => {
       environments[envName] = {};
       envVariables.forEach((variable) => {
-        environments[envName][`id${variable.id}`] = variable.values[envName];
+        environments[envName][`${variable.id}`] = variable.values[envName];
       });
     });
 
@@ -275,39 +340,74 @@ const EnvironmentSettings = () => {
     } catch (error) {
       console.error("Failed to save environment settings:", error);
     }
+
+    fetchEnvironments();
   };
 
-  const handleDeleteVariable = (id) => {
-    setEnvVariables(envVariables.filter((variable) => variable.id !== id));
+  const handleSaveEnvName = async () => {
+    try {
+      const result = await editEnvironmentSettings(
+        projectName,
+        null, // No variable ID, as we are editing the environment name
+        null, // No envVars, as we're not editing the variables
+        null, // No environments, as we're not editing the variables
+        editEnvName, // The old environment name
+        tempEnvName // The new environment name
+      );
+
+      if (result.status === "success") {
+        // Update the state with the new environment name
+        const updatedEnvNames = envNames.map((envName) =>
+          envName === editEnvName ? tempEnvName : envName
+        );
+        setEnvNames(updatedEnvNames);
+        setEditEnvName(null);
+        setTempEnvName("");
+        setToastMessage(result.message);
+        setShowToast(true);
+      } else {
+        setToastMessage("Failed to update environment name");
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error("Failed to edit environment name:", error);
+      setToastMessage("An error occurred while saving");
+      setShowToast(true);
+    }
     setShouldSave(true);
   };
 
-  const handleDeleteEnvironment = (envName) => {
-    setEnvironmentToDelete(envName);
-    setShowDeleteEnvironmentModal(true);
-  };
-
-  const handleDeleteEnvironmentConfirm = async (envName) => {
+  const handleDelete = async ({ envName, envVariableId }) => {
     try {
-      const response = await deleteEnvironment(projectName, envName);
+      const response = await deleteEnvironmentOrVariable(
+        projectName,
+        envName,
+        envVariableId
+      );
       if (response.error) {
         setToastMessage(response.error);
         setShowToast(true);
         return;
       }
-      const updatedEnvNames = envNames.filter((name) => name !== envName);
-      const updatedEnvVariables = envVariables.map((variable) => {
-        const { [envName]: _, ...remainingValues } = variable.values;
-        return { ...variable, values: remainingValues };
-      });
-      setEnvNames(updatedEnvNames);
-      setEnvVariables(updatedEnvVariables);
       setToastMessage(response.message);
       setShowToast(true);
+      fetchEnvironments();
     } catch (error) {
       setToastMessage(error.message);
       setShowToast(true);
     }
+  };
+
+  // For deleting an environment
+  const handleDeleteEnvironment = (envName) => {
+    setEnvironmentToDelete(envName);
+    setShowDeleteEnvironmentModal(true);
+  };
+
+  // For deleting an environment variable
+  const handleDeleteEnvVariable = (envVariableId) => {
+    setEnvVariableToDelete(envVariableId);
+    setShowDeleteEnvironmentModal(true);
   };
 
   const handleEnvironmentChange = (event) => {
@@ -351,24 +451,58 @@ const EnvironmentSettings = () => {
                     alignItems: "center",
                   }}
                 >
-                  <span>{envName}</span>
-                  <div className="d-flex align-items-center">
-                    <Form.Check
-                      type="checkbox"
-                      value={envName}
-                      checked={selectedEnvName === envName}
-                      onChange={handleEnvironmentChange}
-                      className="me-2"
-                    />
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      className="custom-no-outline-button"
-                      onClick={() => handleDeleteEnvironment(envName)}
-                    >
-                      <Trash />
-                    </Button>
-                  </div>
+                  {editEnvName === envName ? (
+                    <>
+                      <Form.Control
+                        className="bg-dark text-light me-2"
+                        type="text"
+                        value={tempEnvName}
+                        onChange={(e) => setTempEnvName(e.target.value)}
+                      />
+                      <Button
+                        variant="outline-secondary"
+                        onClick={handleSaveEnvName}
+                        className="me-2"
+                      >
+                        <Check />
+                      </Button>
+                      <Button
+                        variant="outline-secondary"
+                        onClick={handleCancelEnvName}
+                      >
+                        <X />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span>{envName}</span>
+                      <div className="d-flex align-items-center">
+                        <Form.Check
+                          type="checkbox"
+                          value={envName}
+                          checked={selectedEnvName === envName}
+                          onChange={handleEnvironmentChange}
+                          className="me-2"
+                        />
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          className="custom-no-outline-button"
+                          onClick={() => handleEditEnvName(envName)}
+                        >
+                          <Pencil />
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="custom-no-outline-button"
+                          onClick={() => handleDeleteEnvironment(envName)}
+                        >
+                          <Trash />
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </th>
             ))}
@@ -379,27 +513,29 @@ const EnvironmentSettings = () => {
             <tr key={variable.id}>
               <td>
                 {editVariableId === variable.id ? (
-                  <div className="d-flex align-items-center">
-                    <Button
-                      variant="outline-secondary"
-                      onClick={() => handleSaveEdit(variable.id)}
-                      className="me-2"
-                      disabled={
-                        editTempValues.name === prefix ||
-                        !envNames.every(
-                          (envName) => editTempValues.values[envName]
-                        )
-                      }
-                    >
-                      <Check />
-                    </Button>
-                    <Button
-                      variant="outline-secondary"
-                      onClick={() => handleCancelEdit(variable.id)}
-                    >
-                      <X />
-                    </Button>
-                  </div>
+                  <>
+                    <div className="d-flex align-items-center">
+                      <Button
+                        variant="outline-secondary"
+                        onClick={() => handleSaveEdit(editVariableId)}
+                        className="me-2"
+                        disabled={
+                          editTempValues.name === prefix ||
+                          !envNames.every(
+                            (envName) => editTempValues.values[envName]
+                          )
+                        }
+                      >
+                        <Check />
+                      </Button>
+                      <Button
+                        variant="outline-secondary"
+                        onClick={() => handleCancelEdit(variable.id)}
+                      >
+                        <X />
+                      </Button>
+                    </div>
+                  </>
                 ) : (
                   <div className="d-flex align-items-center">
                     <Button
@@ -411,7 +547,7 @@ const EnvironmentSettings = () => {
                     </Button>
                     <Button
                       variant="outline-secondary"
-                      onClick={() => handleDeleteVariable(variable.id)}
+                      onClick={() => handleDeleteEnvVariable(variable.id)}
                     >
                       <Trash />
                     </Button>
@@ -463,13 +599,14 @@ const EnvironmentSettings = () => {
         isOpen={isOffcanvasOpen}
         title="Add New Environment"
         width="450px"
-        onClose={()=>setIsOffcanvasOpen(false)}
+        onClose={() => setIsOffcanvasOpen(false)}
       >
         <AddNewEnvironment
           envVariables={envVariables}
           envNames={envNames}
           onSubmit={handleOffcanvasSubmit}
-          onClose={()=>setIsOffcanvasOpen(false)}
+          onClose={() => setIsOffcanvasOpen(false)}
+          resetForm={!isOffcanvasOpen}
         />
       </Offcanvas>
       <Toast
@@ -511,12 +648,24 @@ const EnvironmentSettings = () => {
         show={showDeleteEnvironmentModal}
         onHide={() => setShowDeleteEnvironmentModal(false)}
         title="Warning"
-        message={`Are you sure you want to delete the environment "${environmentToDelete}"?`}
-        confirmButtonText="Delete Environment"
+        message={
+          environmentToDelete
+            ? `Are you sure you want to delete the environment "${environmentToDelete}"?`
+            : `Are you sure you want to delete this environment variable?`
+        }
+        confirmButtonText={
+          environmentToDelete ? "Delete Environment" : "Delete Variable"
+        }
         onCancel={() => setShowDeleteEnvironmentModal(false)}
         onConfirm={async () => {
-          await handleDeleteEnvironmentConfirm(environmentToDelete);
+          if (environmentToDelete) {
+            await handleDelete({ envName: environmentToDelete });
+          } else if (envVariableToDelete) {
+            await handleDelete({ envVariableId: envVariableToDelete });
+          }
           setShowDeleteEnvironmentModal(false);
+          setEnvironmentToDelete(null);
+          setEnvVariableToDelete(null);
         }}
       />
     </div>

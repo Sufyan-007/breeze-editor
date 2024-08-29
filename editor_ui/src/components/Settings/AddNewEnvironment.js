@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
 
-const AddNewEnvironment = ({ envVariables, envNames, onSubmit, onClose }) => {
+const AddNewEnvironment = ({ envVariables, envNames, onSubmit, onClose, resetForm }) => {
   const [tempEnvName, setTempEnvName] = useState("");
   const [tempEnvValues, setTempEnvValues] = useState({});
   const [validationMessage, setValidationMessage] = useState('');
   const [isFormValid, setIsFormValid] = useState(false);
 
+  useEffect(() => {
+    if (resetForm) {
+      setTempEnvName("");
+      setTempEnvValues({});
+      setValidationMessage('');
+    }
+  }, [resetForm]);
+
+  
   const handleEnvNameChange = (e) => {
     const value = e.target.value;
     const isValid = /^[a-zA-Z0-9]+$/.test(value);
