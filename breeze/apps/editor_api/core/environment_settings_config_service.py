@@ -132,6 +132,12 @@ class EnvironmentSettingsConfigService:
             # Load the existing configuration
             config = self.get_config()
 
+            if not config:  # If the config doesn't exist or is empty
+                config = {
+                    "envVars": {},
+                    "environments": {}
+                }
+
             # Track IDs to remove or update
             new_env_vars = {}
             id_mapping = {}
