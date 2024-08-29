@@ -258,6 +258,12 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
                     let parentNode = node.parent;
                     functionName = getFunctionName(parentNode)
                 }
+                // let parentNode = node.parent as ts.Node
+                // if (node.parent) {
+                //     // remaining part 
+                //     // extract name of the function
+
+                // }
                 let formattedParams: Record<string, string> = {};
 
                 parameters.map(param => {
@@ -277,6 +283,8 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
     visit(sourceFile);
     return componentDetails;
 }
+
+
 
 //to get all sourceFile according to ts-morph libraray
 function getTSMorphSourceFiles(files: string[], project: Project): SourceFile[] {
@@ -343,6 +351,7 @@ export function getAllComponentNames(sourceFiles: ts.SourceFile[]): string[] {
     return componentNames;
 }
 
+
 //function for finding storepath for storing component details
 function getStoreDir(): string | null {
     let currentDir = __dirname
@@ -395,7 +404,6 @@ export function extractAllComponentDetails(directoryPath: string, library: strin
         noEmit: true,
         sourceMap: true,
         jsx: ts.JsxEmit.ReactJSX
-
     };
     const program = ts.createProgram(files, options);
     const typeChecker = program.getTypeChecker();
