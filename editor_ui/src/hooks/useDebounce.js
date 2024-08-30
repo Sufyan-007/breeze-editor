@@ -3,12 +3,12 @@ import React from "react";
 function useDebounce() {
   return (func, milliSeconds) => {
     let timer;
-    console.log('debounce timer');
-    return () => {
+    return (...args) => {      
       clearTimeout(timer);
       timer = setTimeout(() => {
-        timer = null;
-        func.apply(this, arguments);
+        timer = null;        
+        func.apply(this, args);
+        console.log(args);
       }, milliSeconds);
     };
   };

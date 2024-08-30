@@ -1,4 +1,3 @@
-import os
 import shutil
 from .helpers.style_handler import StyleHandler
 from .api_client_generator import GenerateAPIClient
@@ -89,6 +88,7 @@ class AppEditor:
     app_config = {}
     comp_config = {}
     usage_config = {}
+    routing_helper_data = {}
     # mapping_config = {}
     routing_config = None
     reducer_config = None
@@ -276,6 +276,28 @@ class AppEditor:
             # mapping_config=self.mapping_config
             )
         comp_generator.write_component(comp)
+        if self.usage_config == {}:
+            self.usage_config = {
+                "components": {
+                        f"{self.app_config['defaultComponent']}": {
+                            "imports": {},
+                            "props": {},
+                            "variables": {},
+                            "usedRoutes": {},
+                            "functions": {},
+                            "lifecycle": {},
+                            "hooks": {},
+                            "css": {},
+                            "usage": {}
+                        }
+                    },
+                "contexts": {},
+                "reducers": {},
+                "reduxStore": {},
+                "routes": {},
+                "imports": {},
+                "css": {},
+            }
         if not self.usage_config.get('components').get(comp['name']):
             self.usage_config['components'][comp['name']] = {
                 "imports": {},
@@ -303,7 +325,44 @@ class AppEditor:
         config=self.write_component(comp)
         
         return {"config":config, "comp":name}
-         
+    
+    def post_success_function(self, config):
+        # Function to run after a successful post request
+        print("This function runs after returning a 200 response.")
+        print("=================config========================") 
+        print(config) 
+        print("------------config----------------") 
+        print(self.process_and_save_config_file()) 
+    
+    def generate_layout_route_key(self):
+        # Generate a unique key for layout routes
+        return f"/layout__{''.join(random.choices(string.ascii_lowercase + string.digits, k=9))}__"
+    
+    def process_and_save_config_file(self):
+        try:
+            route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
+            react_code = route_handler.handle_routing_code()
+            with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
+                formatted_code = format_by_prettier(react_code)
+                component_file.write(formatted_code)
+            return {'case': True, 'res' : { 'config': self.routing_config, 'helper_data' : self.routing_helper_data}}
+        except Exception as e:
+            print("Error while processing and saving config file.")
+            print("Error: ", e)
+            return {'case' : False, 'res' : 'Error while processing file'}
+    
+    def generate_full_path(self, route_obj):
+        if route_obj.get('parentPath') not in [None, 'none']:
+            return f"{route_obj['parentPath']}{route_obj['path']}"
+        else:
+            return route_obj.get('path')
+    
+    def get_full_parent_path_from_child_route(self, child_route):
+        path_length = len(child_route.get('path', ''))
+        full_path_length = len(child_route.get('fullPath', ''))
+        full_parent_path = child_route.get('fullPath', '')[:(full_path_length - path_length)] or ""
+        return full_parent_path
+    
     def set_parent_initial_parent(self, route_obj, intial_parent_path):
         if route_obj.get('childRoutes'):
             for path in route_obj.get('childRoutes').keys():
@@ -312,24 +371,188 @@ class AppEditor:
                 if route_obj['path'] != child_obj['parentPath']:
                     child_obj['parentPath'] = route_obj['path']    
                 self.set_parent_initial_parent(child_obj, intial_parent_path)
-                   
+                       
+    def clean_dict_value(self, input_dict):
+        cleaned_dict = {}
+        print(input_dict)
+        print(type(input_dict))
+        for key, value in input_dict.items():
+            # Check if value is a string and contains extra quotes
+            if isinstance(value, str):
+                # Remove leading and trailing single or double quotes
+                cleaned_value = value.strip("'\"")
+                cleaned_dict[key] = cleaned_value
+            else:
+                cleaned_dict[key] = value
+        
+        return cleaned_dict
+    
+    def replace_first_instance(self, text, old_path, new_path):
+        index = text.find(old_path)
+        if index != -1:
+            return text[:index] + new_path + text[index + len(old_path):]
+        return text
+    
+    def handle_route_path_change_in_child(self, route_obj, prev_path, new_path, parent_path, initial_parent_path):
+        if route_obj.get('childRoutes'):
+            keys_to_modify = [path for path in route_obj.get('childRoutes').keys()]
+            for child_path in keys_to_modify:
+                new_child_path = self.replace_first_instance(child_path, prev_path, new_path)
+                if self.routing_config['routes'].get(new_child_path):
+                    return {'case': False, 'res': 'error: route with same path already exists'}
+
+                self.handle_route_path_change_in_child(
+                    self.routing_config['routes'][child_path],
+                    child_path,
+                    new_child_path,
+                    new_path,
+                    initial_parent_path
+                )
+                
+                route_obj.get('childRoutes')[new_child_path] = route_obj.get('childRoutes')[child_path]
+                del route_obj.get('childRoutes')[child_path] 
+        if route_obj.get('parentPath'):
+            route_obj['parentPath'] = parent_path
+        if route_obj.get('initialParentPath'):
+            route_obj['initialParentPath'] = initial_parent_path
+
+        self.routing_config['routes'][new_path] = route_obj
+        del self.routing_config['routes'][prev_path]
+    
+    def replace_last_instance(self, text, old_path, new_path):
+        index = text.rfind(old_path)
+        if index != -1:
+            return text[:index] + new_path + text[index + len(old_path):]
+        return text
+
+    def handle_route_path_change_in_child_for_child(self, route_obj, prev_full_path, new_full_path):
+        if route_obj.get('childRoutes'):
+            keys_to_modify = [path for path in route_obj.get('childRoutes').keys()]
+            for child_path in keys_to_modify:
+                relative_child_path = self.routing_config['routes'][child_path]['path']
+                new_full_parent_path = new_full_path
+                new_child_path = new_full_parent_path + relative_child_path
+                if self.routing_config['routes'].get(new_child_path):
+                    return {'case': False, 'res': 'error: route with same path already exists'}
+
+                self.handle_route_path_change_in_child_for_child(
+                    self.routing_config['routes'][child_path],
+                    child_path,
+                    new_child_path
+                )
+                route_obj.get('childRoutes')[new_child_path] = route_obj.get('childRoutes')[child_path]
+                del route_obj.get('childRoutes')[child_path] 
+        self.routing_config['routes'][new_full_path] = route_obj
+        del self.routing_config['routes'][prev_full_path]
+     
+    def get_config_obj(self, route, selected_route):
+        # selectedRoute and RouterProviderSection are being devoid from route object
+        route_section = ['propDetails', 'advancePropDetails']
+        prop_name_map = {'parent path': 'parentPath',  "error-element": 'errorElement', "element": 'component', "elementProp": 'props'}
+        route_obj = {}
+        for section in route_section:
+            for prop in route[section]['props']:
+                # if value is empty it won't include the key in route object
+                # so we use default value while getting the key's value
+                print(prop)
+                if prop['value']:
+                    if prop_name_map.get(prop['name']):
+                        prop['name'] = prop_name_map.get(prop['name'])
+                    if prop.get('type') == 'key-value-pair':
+                        rectified_pair = {}
+                        for pair in prop['value']:
+                            rectified_pair.update(self.clean_dict_value({pair : prop['value'][pair]})) 
+                        prop['value'] = rectified_pair
+                    route_obj[prop['name']] = prop['value']
+        if not route_obj.get('path', "").strip():
+            # here write a functino that returns path 
+            route_obj['path'] = self.generate_layout_route_key()
+        else:
+            route_obj['path'] = route_obj.get('path').strip()
+            route_obj['path'] = "/" + route_obj['path'].strip('/')
+        if not route_obj.get('component', "").strip():
+            route_obj['component'] = ""
+        else:
+            route_obj['component'] = route_obj.get('component').strip()
+        
+        if selected_route:
+            route_obj['fullPath'] = selected_route.get('fullPath')
+            prev_route_parent_path = selected_route.get('parentPath')
+            if selected_route.get('childRoutes'):
+                route_obj['childRoutes'] = selected_route.get('childRoutes')
+            # here parentPath key has full parent path value
+            if route_obj.get('parentPath', 'none') != 'none':
+                # it is a base route converted to child -> base_edit
+                if not prev_route_parent_path:
+                    route_obj['newFullParentPath'] = route_obj.get('parentPath')
+                    route_obj['prevPath'] = selected_route.get('path')
+                # it is a child route updated to a child -> child_edit
+                else:
+                    route_obj['prevPath'] = selected_route.get('path') 
+                    route_obj['fullParentPath'] = self.get_full_parent_path_from_child_route(selected_route) 
+                    route_obj['newFullParentPath'] = route_obj.get('parentPath')
+            else:
+                # it is a base route updated to base route -> base_edit
+                if prev_route_parent_path in [None, "none"]:
+                    route_obj['newFullParentPath'] = route_obj.get('parentPath')
+                    route_obj['prevPath'] = selected_route.get('path')
+                # it is a child route converted to base route -> edit_child
+                else:
+                    route_obj['prevPath'] = selected_route.get('path') 
+                    route_obj['fullParentPath'] = self.get_full_parent_path_from_child_route(selected_route) 
+                    route_obj['newFullParentPath'] = route_obj.get('parentPath')
+        else:
+            if route_obj.get('parentPath', 'none') != 'none':
+                route_obj['fullParentPath'] = route_obj['parentPath']
+        
+        self.routing_helper_data['recently_saved_route_fullpath'] = self.generate_full_path(route_obj)
+        if route_obj.get('parentPath', "none") != "none":
+            route_obj['parentPath'] = self.routing_config['routes'][route_obj['parentPath']].get('path')
+        return route_obj
+    
     # Adds a new route to specified component,
     #!!! routes preferably placed in a new file that's imported to App.js to avoid re-writing it
+    def add_edit_route(self, route):
+        print(route)
+        route_obj = self.get_config_obj(route, route.get('selectedRoute'))
+        print("=============route_obj======================")
+        print(route_obj)
+        print("=============route_obj======================")
+        if not route_obj['component']:
+            return {'case': False, 'res': 'error: please select an element!'}
+        if route_obj.get('index') and route_obj.get('childRoutes'):
+            return {'case': False, 'res': 'error: index routes can\'t have child routes'}
+        
+        if route.get('selectedRoute') :
+            if route_obj.get('parentPath', 'none') != 'none':
+                if not route['selectedRoute'].get('parentPath'):
+                    return self.add_edit_base_route(route_obj)
+                else:
+                    return self.edit_child_route(route_obj)
+            else:
+                if route['selectedRoute'].get('parentPath') in [None, "none"]:
+                    return self.add_edit_base_route(route_obj)
+                else:
+                    return self.edit_child_route(route_obj)
+        else:
+            if route_obj.get('parentPath'):
+                return self.add_child_route(route_obj)
+            else:
+                return self.add_edit_base_route(route_obj)
     
     def add_edit_base_route(self, route_obj):
         print(route_obj)
-        if route_obj.get('path')[0]!='/':
-            route_obj['path'] = "/"+route_obj.get('path')
-        if route_obj['path'][-1]=='/' and route_obj['path'][0] != '/':
-            route_obj['path'] = route_obj['path'][:-1]      
+        if route_obj.get('path'):
+            route_obj['path'] = route_obj.get('path').strip()
+            route_obj['path'] = "/" + route_obj['path'].strip('/')     
         if route_obj.get('component'):
             route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
         elif route_obj.get('redirectTo'):
             route_obj.pop('component') if route_obj.get('component') else ''
         
         if route_obj.get("prevPath"):
-            prev_path = route_obj.pop('prevPath')
-            route_obj.pop('fullPath')                
+            prev_path = route_obj.pop('prevPath', None)
+            route_obj.pop('fullPath', None)
             if route_obj.get('newFullParentPath') not in [None, 'none']:
                 parent_obj = self.routing_config['routes'][route_obj['newFullParentPath']]
                 route_obj['parentPath'] = parent_obj['path']
@@ -338,7 +561,7 @@ class AppEditor:
                 prev_full_path = prev_path if route_obj['path'] != prev_path else route_obj['path']
                 
                 if self.routing_config['routes'].get(new_full_path):
-                    return {'case': False, 'res': 'error: can\'t have two routes with same path'}
+                    return {'case': False, 'res': 'error: route with same path already exists'}
                 self.handle_route_path_change_in_child_for_child(
                     route_obj,
                     prev_full_path,
@@ -357,11 +580,11 @@ class AppEditor:
                     del self.routing_config["baseRoutes"][prev_path]
                 else:
                     del self.routing_config["baseRoutes"][route_obj['path']]
-                route_obj.pop('newFullParentPath')                    
+                route_obj.pop('newFullParentPath', None)                    
             
             elif route_obj['path'] != prev_path:
                 if self.routing_config['routes'].get(route_obj['path']):
-                    return {'case': False, 'res': 'error: can\'t have two routes with same path'}
+                    return {'case': False, 'res': 'error: route with same path already exists'}
                 # change parent path and initial parent path of all nested childs
                 # replace all the parts of childRoute paths consisting prevPath
                 self.handle_route_path_change_in_child(
@@ -381,49 +604,15 @@ class AppEditor:
                 self.routing_config["routes"][route_obj['path']] = route_obj        
         else:
             if self.routing_config['routes'].get(route_obj['path']):
-                return {'case': False, 'res': 'error: can\'t have two routes with same path'}
+                return {'case': False, 'res': 'error: route with same path already exists'}
             self.routing_config["routes"][route_obj['path']] = route_obj 
             self.routing_config["baseRoutes"][route_obj['path']] = {} 
         
-        routing_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
-        write_file(f"{routing_config_path}.json", json.dumps(self.routing_config))
-        self.modify_main_component()
-        return {'case': True, 'res': self.routing_config}
+        return {'case': True, 'res': { 'config': self.routing_config, 'helper_data' : self.routing_helper_data}}
     
-    def handle_route_path_change_in_child(self, route_obj, prev_path, new_path, parent_path, initial_parent_path):
-        if route_obj.get('childRoutes'):
-            keys_to_modify = [path for path in route_obj.get('childRoutes').keys()]
-            for child_path in keys_to_modify:
-                new_child_path = self.replace_first_instance(child_path, prev_path, new_path)
-                if self.routing_config['routes'].get(new_child_path):
-                    return {'case': False, 'res': 'error: can\'t have two routes with same path'}
-
-                self.handle_route_path_change_in_child(
-                    self.routing_config['routes'][child_path],
-                    child_path,
-                    new_child_path,
-                    new_path,
-                    initial_parent_path
-                )
-                
-                route_obj.get('childRoutes')[new_child_path] = route_obj.get('childRoutes')[child_path]
-                del route_obj.get('childRoutes')[child_path] 
-        if route_obj.get('parentPath'):
-            route_obj['parentPath'] = parent_path
-        if route_obj.get('initialParentPath'):
-            route_obj['initialParentPath'] = initial_parent_path
-        self.routing_config['routes'][new_path] = route_obj
-        del self.routing_config['routes'][prev_path]
-    
-    def replace_first_instance(self, text, old_path, new_path):
-        index = text.find(old_path)
-        if index != -1:
-            return text[:index] + new_path + text[index + len(old_path):]
-        return text
-
     def add_child_route(self, child_object):
         if route := self.routing_config['routes'].get(child_object['fullParentPath']):
-            fullParentPath = child_object.pop('fullParentPath')
+            fullParentPath = child_object.pop('fullParentPath', None)
             if child_object.get('component'):
                 child_object.pop('redirectTo') if child_object.get('redirectTo') else ''
             elif child_object['redirectTo']: 
@@ -436,7 +625,7 @@ class AppEditor:
             full_child_path = fullParentPath + child_object['path']
             
             if self.routing_config['routes'].get(full_child_path):
-                return {'case': False, 'res': 'error: can\'t have two routes with same path'}
+                return {'case': False, 'res': 'error: route with same path already exists'}
             
             child_routes = self.routing_config['routes'][fullParentPath].get('childRoutes')
             if child_routes is None:
@@ -446,54 +635,27 @@ class AppEditor:
             
             self.routing_config['routes'][full_child_path] = child_object
             
-            route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
-            react_code = route_handler.handle_routing_code()
-            with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-                formatted_code = format_by_prettier(react_code)
-                component_file.write(formatted_code)
-            return {'case': True, 'res' : self.routing_config}
+            return {'case': True, 'res' : { 'config': self.routing_config, 'helper_data' : self.routing_helper_data}}
         return {'case' : False, 'res' : 'No matching parent route was present'}
     
-    def replace_last_instance(self, text, old_path, new_path):
-        index = text.rfind(old_path)
-        if index != -1:
-            return text[:index] + new_path + text[index + len(old_path):]
-        return text
-
-    def handle_route_path_change_in_child_for_child(self, route_obj, prev_full_path, new_full_path):
-        if route_obj.get('childRoutes'):
-            keys_to_modify = [path for path in route_obj.get('childRoutes').keys()]
-            for child_path in keys_to_modify:
-                relative_child_path = self.routing_config['routes'][child_path]['path']
-                new_full_parent_path = new_full_path
-                new_child_path = new_full_parent_path + relative_child_path
-                if self.routing_config['routes'].get(new_child_path):
-                    return {'case': False, 'res': 'error: can\'t have two routes with same path'}
-
-                self.handle_route_path_change_in_child_for_child(
-                    self.routing_config['routes'][child_path],
-                    child_path,
-                    new_child_path
-                )
-                route_obj.get('childRoutes')[new_child_path] = route_obj.get('childRoutes')[child_path]
-                del route_obj.get('childRoutes')[child_path] 
-        self.routing_config['routes'][new_full_path] = route_obj
-        del self.routing_config['routes'][prev_full_path]
-        
     def edit_child_route(self, child_object):
         if child_object.get("prevPath"):
             child_object['path'] = child_object['path'] if child_object['path'][0]=='/' else '/'+child_object['path']
             child_object['path'] = child_object['path'][:-1] if child_object['path'][-1]=='/' else child_object['path']
+            if childs_initial_parent_path := self.routing_config['routes'][child_object.get('fullParentPath')].get('initialParentPath'):
+                child_object['initialParentPath'] = childs_initial_parent_path
+            else:
+                child_object['initialParentPath'] = child_object.get('fullParentPath')
             
             if child_object.get('newFullParentPath') == 'none':
                 if self.routing_config['routes'].get(child_object['path']):
-                    return {'case': False, 'res': 'error: can\'t have two routes with same path'}
+                    return {'case': False, 'res': 'error: route with same path already exists'}
                 
                 self.routing_config['baseRoutes'][child_object['path']] = {}
                 prev_parent_obj = self.routing_config['routes'][child_object['fullParentPath']]
                 del prev_parent_obj['childRoutes'][child_object['fullPath']]
                 del child_object['parentPath']
-                del child_object['initialParentPath']
+                child_object.pop('initialParentPath', None)
                 
                 self.handle_route_path_change_in_child_for_child(
                     child_object,
@@ -502,7 +664,7 @@ class AppEditor:
                 )
                 
                 self.set_parent_initial_parent(child_object, child_object['path'])
-                child_object.pop('newFullParentPath')
+                child_object.pop('newFullParentPath', None)
                     
             elif child_object.get('newFullParentPath') not in [None, child_object['fullParentPath']]:
                 
@@ -518,7 +680,8 @@ class AppEditor:
                 child_object['initialParentPath'] = new_parent_obj['initialParentPath'] if new_parent_obj.get('initialParentPath') else new_parent_obj['path']
                 
                 if self.routing_config['routes'].get(new_full_path):
-                    return {'case': False, 'res': 'error: can\'t have two routes with same path'}
+                    child_object.pop('newFullParentPath', None)
+                    return {'case': False, 'res': 'error: route with same path already exists'}
                 self.handle_route_path_change_in_child_for_child(
                     child_object,
                     child_object['fullPath'],
@@ -526,13 +689,13 @@ class AppEditor:
                 )
                 
                 self.set_parent_initial_parent(child_object, child_object['initialParentPath'])
-                child_object.pop('newFullParentPath')
+                child_object.pop('newFullParentPath', None)
                 
             elif child_object['path'] != child_object['prevPath']:
                 new_full_child_path = child_object['fullParentPath'] + child_object['path']
                 old_full_child_path = child_object['fullParentPath'] + child_object['prevPath']
                 if self.routing_config['routes'].get(new_full_child_path):
-                    return {'case': False, 'res': 'error: can\'t have two routes with same path'}
+                    return {'case': False, 'res': 'error: route with same path already exists'}
         
                 # change parent path and initial parent path of all nested childs
                 # replace all the parts of childRoute paths consisting prevPath
@@ -551,42 +714,34 @@ class AppEditor:
                         self.routing_config["routes"][path]['parentPath'] = child_object["path"]
             else:
                 self.routing_config["routes"][child_object['fullPath']] = child_object   
-            child_object.pop('prevPath')
-            child_object.pop('fullPath')
-            child_object.pop('fullParentPath')
-            
-            route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
-            react_code = route_handler.handle_routing_code()
-            with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-                formatted_code = format_by_prettier(react_code)
-                component_file.write(formatted_code)
-            return {'case': True, 'res' : self.routing_config}
-        
+            child_object.pop('prevPath', None)
+            child_object.pop('fullPath', None)
+            child_object.pop('fullParentPath', None)
+            child_object.pop('newFullParentPath', None)
+            return {'case': True, 'res' : { 'config': self.routing_config, 'helper_data' : self.routing_helper_data}}
+                
         else:
             return {'case' : False, 'res' : 'Invalid data sent'}
+    
+    def delete_route(self, route):
+        if route.get('path') == '/':
+            return {'case' : False, 'res' : "root path can't be deleted"}
+        if route.get('parentPath'):
+            return self.delete_child_route(route)
+        else:
+            return self.delete_base_route(route)
     
     def delete_base_route(self, route):
         if route['fullPath'] in self.routing_config['baseRoutes'].keys() and self.routing_config['routes'][route['fullPath']]:
             self.delete_all_child(route['fullPath'])
             del self.routing_config['baseRoutes'][route['fullPath']]
-
-        route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
-        react_code = route_handler.handle_routing_code()
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-            formatted_code = format_by_prettier(react_code)
-            component_file.write(formatted_code)
-        return {'case': True, 'res' : self.routing_config}
+        return {'case': True, 'res' : { 'config': self.routing_config, 'helper_data' : self.routing_helper_data}}
     
     def delete_child_route(self, route):
         full_parent_path = self.replace_last_instance(route['fullPath'], route['path'], '')
         del self.routing_config['routes'][full_parent_path]['childRoutes'][route['fullPath']]
         self.delete_all_child(route['fullPath'])
-        route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
-        react_code = route_handler.handle_routing_code()
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-            formatted_code = format_by_prettier(react_code)
-            component_file.write(formatted_code)
-        return {'case': True, 'res' : self.routing_config}
+        return {'case': True, 'res' : { 'config': self.routing_config, 'helper_data' : self.routing_helper_data}}
     
     def delete_all_child(self, parent_path):
         if self.routing_config['routes'][parent_path].get('childRoutes'):

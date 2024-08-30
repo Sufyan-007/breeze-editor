@@ -1,5 +1,6 @@
 
 import subprocess
+import threading
 from django.http import JsonResponse, Http404, FileResponse
 import json
 from .core.app_editor import AppEditor
@@ -160,7 +161,7 @@ class NewComponentWriter(APIView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class RoutingWriter(APIView):
+class old_RoutingWriter(APIView):
     # here need to handle case like add edit delete for 
     # default component currently named 'Main'
     def get(self, param):
@@ -170,8 +171,9 @@ class RoutingWriter(APIView):
         data = json.loads(request.body.decode("utf-8"))
         try:
             app_editor = AppEditor(param)
-            res = app_editor.add_edit_base_route(data)
+            res = app_editor.old_add_edit_base_route(data)
             if res['case']:
+                threading.Thread(target=app_editor.post_success_function, args=(res['res'], )).start()
                 return JsonResponse(res['res'], status=200)
             else:
                 return JsonResponse(res['res'], status=400, safe=False)
@@ -183,8 +185,46 @@ class RoutingWriter(APIView):
         try:
             data = json.loads(request.body.decode("utf-8"))
             app_editor= AppEditor(param);
-            res = app_editor.delete_base_route(data)
+            res = app_editor.delete_route(data)
             if res['case']:
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400, safe=False)
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse(e, status=500)  
+ 
+@method_decorator(csrf_exempt, name='dispatch')
+class RoutingWriter(APIView):
+    # here need to handle case like add edit delete for 
+    # default component currently named 'Main'
+    def get(self, param):
+        pass
+   
+    def post(self,request,param):
+        data = json.loads(request.body.decode("utf-8"))
+        try:
+            app_editor = AppEditor(param)
+            if data.get('addCompRoute'):
+                res = app_editor.add_edit_base_route(data)
+            else:
+                res = app_editor.add_edit_route(data)
+            if res['case']:
+                threading.Thread(target=app_editor.post_success_function, args=(res['res'], )).start()
+                return JsonResponse(res['res'], status=200)
+            else:
+                return JsonResponse(res['res'], status=400, safe=False)
+        except Exception as e:
+            print("Error ", e)
+            return JsonResponse({e}, status=500)
+    
+    def delete(self, request, param):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            app_editor= AppEditor(param);
+            res = app_editor.delete_route(data)
+            if res['case']:
+                threading.Thread(target=app_editor.post_success_function, args=(res['res'], )).start()
                 return JsonResponse(res['res'], status=200)
             else:
                 return JsonResponse(res['res'], status=400, safe=False)
@@ -802,14 +842,51 @@ class EnvironementSettings(APIView):
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': str(e)}, status=500)
+    
+    def put(self, request, projectName):
+        try:
+            data = json.loads(request.body)
+            variable_id = data.get('envVariableId')
+            env_vars = data.get('envVars')
+            env_name = env_vars.get('name')
+            env_values = env_vars.get('values')
+    
+            environment_settings_service = EnvironmentSettingsConfigService(projectName)
+    
+            if variable_id:
+                # Update environment variable
+                environment_settings_service.update_env_vars(variable_id, env_name, env_values)
+            elif env_name:
+                # Update environment name
+                old_env_name = data.get('oldEnvName')  # Assuming the old environment name is sent in the request
+                environment_settings_service.update_environment_name(old_env_name, env_name)
+    
+            return JsonResponse({'status': 'success', 'message': 'Environment settings updated successfully'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
 
     def delete(self, request, projectName):
         try:
             data = json.loads(request.body)
-            env_name = data.get('environmentName')
+            env_name = data.get('envName')
+            env_variable_id = data.get('envVariableId')
+
             environment_settings_service = EnvironmentSettingsConfigService(projectName)
-            environment_settings_service.delete_config(env_name)
-            return JsonResponse({'status': 'success', 'message': 'Environment settings deleted successfully'}, status=200)
+            if env_name:
+                # Handle environment deletion
+                environment_settings_service.delete_config(env_name)
+                return JsonResponse({'status': 'success', 'message': f'Environment "{env_name}" deleted successfully'}, status=200)
+
+            elif env_variable_id:
+                # Handle environment variable deletion
+                env_var_name = environment_settings_service.delete_env_variable(env_variable_id)
+                return JsonResponse({'status': 'success', 'message': f'Environment variable "{env_var_name}" deleted successfully'}, status=200)
+            else:
+                return JsonResponse({'error': 'No valid identifier provided'}, status=400)
+            
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:

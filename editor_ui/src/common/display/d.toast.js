@@ -1,7 +1,8 @@
 import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer'
+import '../display/d.display.css'
 
-const ToasterComponent = ({showToaster, position, variant, toastTitle, toastBody, onClose, delay, autohide, closeButton}) => {
+const ToasterComponent = ({showToaster, position, variant, toastTitle, toastBody, onClose, delay, autohide, closeButton=true, bodyFontColor = 'text-secondary'}) => {
 
   return (
       <ToastContainer
@@ -15,10 +16,10 @@ const ToasterComponent = ({showToaster, position, variant, toastTitle, toastBody
             autohide={autohide || true}
             bg={variant || 'secondary'} // should be in complete lowercase
         >
-          <Toast.Header  closeButton={ closeButton ? true : false}>
+          <Toast.Header  className="toaster-header" closeButton={ closeButton }>
             {toastTitle}
           </Toast.Header>
-          <Toast.Body className={variant === 'Dark' && 'text-white'}>{toastBody}</Toast.Body>
+          <Toast.Body className={`bodyFontColor`}>{toastBody}</Toast.Body>
         </Toast>
       </ToastContainer>
   );

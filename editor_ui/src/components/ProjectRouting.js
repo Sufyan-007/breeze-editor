@@ -40,7 +40,7 @@ export default function ProjectRouting() {
     (obj) => obj[0]
   );
   // static till next change call, by default react allows case-insensitive routes
-  const CASESENSITIVE = false;
+  const CASE_SENSITIVE = false;
   const [compRouteProps, setCompRouteProps] = useState({
     compProps: {
       ...Object.fromEntries(
@@ -219,7 +219,7 @@ export default function ProjectRouting() {
 
   const [routes, setRoutes] = useState([...allRoutes]);
   const [parentRouteOptions, setParentRouteOptions] = useState([
-    { value: "none", label: "Nofvdfvdfvne" },
+    { value: "none", label: "None" },
     ...allRoutes.map((route) => ({
       value: route,
       label: checkForMainsChildFullPath(route),
@@ -227,18 +227,19 @@ export default function ProjectRouting() {
   ]);
 
   const isRoutePathPresent = (routePath) => {
-    let isCaseSensitive = CASESENSITIVE;
+    let isCaseSensitive = CASE_SENSITIVE;
     routePath = rectifyPath(routePath, isCaseSensitive);
     if (selectedParentPathRoute.fullPath) {
       routePath = selectedParentPathRoute.fullPath + routePath;
     }
     let allFullPaths = allRoutes.map((route) => {
       if (routeMode === "Edit" || routeMode === "View") {
+        let currentSelectedRoute = {...currentOffCanvasRoute}
         if (!isCaseSensitive) {
-          currentOffCanvasRoute.fullPath =
-            currentOffCanvasRoute.fullPath.toLowerCase();
+          currentSelectedRoute.fullPath =
+            currentSelectedRoute.fullPath.toLowerCase();
         }
-        if (currentOffCanvasRoute.fullPath === routePath) {
+        if (currentSelectedRoute.fullPath === routePath) {
           return "";
         }
       }
@@ -468,7 +469,7 @@ export default function ProjectRouting() {
           setSelectedParentPathRoute(requiredParent);
           selectRef.current.setValue({
             value: requiredParent,
-            label: requiredParent.fullPath,
+            label: checkForMainsChildFullPath(requiredParent),
           });
           setParentRouteOptions([
             { value: "none", label: "None" },
@@ -668,7 +669,7 @@ export default function ProjectRouting() {
                       type="invalid"
                       className={`${routeMode === "View" ? "mt-4" : ""}`}
                     >
-                      Path already present
+                      Full Path already present
                     </Form.Control.Feedback>
                   </FloatingLabel>
                 </InputGroup>
@@ -814,10 +815,10 @@ export default function ProjectRouting() {
                                   className="accordion-collapse collapse show"
                                   data-bs-parent="#componentsProp"
                                 >
-                                  <div className="accordion-body">
+                                  <div className="accordion-body" style={{overflowY: 'auto', height: '170px'}}>
                                     {getRelativeRouteProps(
                                       displayRoute.component,
-                                      displayRoute.path
+                                      displayRoute.fullPath
                                     )?.map((obj) => (
                                       <div key={obj.name} className="mb-4 row">
                                         <label className="col-sm-3 col-form-label text-white">
