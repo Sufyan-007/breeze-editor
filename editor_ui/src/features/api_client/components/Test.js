@@ -167,19 +167,27 @@ function Test() {
   };
 
   const onAuthApiSubmit = async (e) => {
-    if (selectedModule) {
-      let operation = "ADD";
-      if (selectedAuthApi.id) { operation = "UPDATE" }
-      selectedAuthApi.tags = "auth";
-      e.preventDefault();
-      await appendToAuthApi(
-        selectedAuthApi,
-        operation === "UPDATE" ? true : false,
-        projectName,
-        selectedModule.id
-      );
-      fetchServiceList()
+    if (!isValidApiStructure(selectedAuthApi)) {
+      setShowToast(true)
+      setErrorMessage("Please Fill All the Values before Submitting");
+      return;
     }
+    if (!selectedModule) {
+      setShowToast(true)
+      setErrorMessage("Please Select a Module first");
+      return;
+    }
+    let operation = "ADD";
+    if (selectedAuthApi.id) { operation = "UPDATE" }
+    selectedAuthApi.tags = "auth";
+    e.preventDefault();
+    await appendToAuthApi(
+      selectedAuthApi,
+      operation === "UPDATE" ? true : false,
+      projectName,
+      selectedModule.id
+    );
+    fetchServiceList()
   }
 
   useEffect(() => {
@@ -209,8 +217,7 @@ function Test() {
   };
 
   const saveTitle = async (oldTitle, moduleId) => {
-    if(oldTitle !== newModuleTitle)
-    {
+    if (oldTitle !== newModuleTitle) {
       const result = await editModuleName(projectName, moduleId, { title: newModuleTitle })
       if (result.message) {
         setShowToast(true);
@@ -308,7 +315,7 @@ function Test() {
                               onBlur={() => saveTitle(folder.title, folder.subfolder)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
-                                  saveTitle(folder.title,folder.subfolder);
+                                  saveTitle(folder.title, folder.subfolder);
                                 } else if (e.key === 'Escape') {
                                   cancelEditing();
                                 }
@@ -696,7 +703,7 @@ function Test() {
 
                 />
               </div>
-            
+
             </>
           ) : view === "IMPORT_API" ? (
             <>
@@ -710,7 +717,7 @@ function Test() {
             </>
           ) : view === "TEST_API" ? (
             <EditServiceFunction selectedServiceInfo={selectedServiceInfo} />
-          ) : null} 
+          ) : null}
         </Col>
       </Row>
     </div>
