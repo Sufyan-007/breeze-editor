@@ -1,8 +1,5 @@
 import { callApiClientGenerator } from "../../../common/api_call/apiClientGenerator";
-const BASE_URL =
-  process.env.CURRENT_ENV === "dev"
-    ? `http://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}`
-    : `http://${process.env.REACT_APP_PROD_HOST}:${process.env.REACT_APP_PROD_PORT}`;
+const BASE_URL = process.env.REACT_APP_BREEZE_BACKEND_HOST
 
 export async function addSchema(projectName,SchemaDetails,moduleId) {
   const apiUrl = BASE_URL + "/api-client-generator/add-schema/" + projectName + "/" + moduleId;
