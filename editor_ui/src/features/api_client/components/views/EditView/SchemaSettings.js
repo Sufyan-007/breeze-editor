@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Col, Form, Row } from "react-bootstrap";
+import { Button, Col, Form, Row, Toast, ToastContainer } from "react-bootstrap";
 import RenderObject from "../EditView/RenderObject";
 import Delete from "../../../../../assets/icons/delete-trash.svg";
 import edit from "../../../../../assets/icons/edit-icon.svg";
@@ -20,15 +20,19 @@ function SchemaSettings() {
   });
   const [id, setId] = useState();
   const [module, setModule] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
   const [schemaList, setSchemaList] = useState([]);
-  const [expandedModule, setExpandedModule] = useState([]); 
+  const [renderSchemaList, setRenderSchemaList] = useState([]);
+
+  const [expandedModule, setExpandedModule] = useState([]);
+  const [showToast, setShowToast] = useState(false);
   const { projectName } = useParams();
 
   const fetchSchemasList = useCallback(
     async (schemaId, module_id) => {
       try {
         const result = await getApiSchemaDetails(projectName, schemaId, module_id,);
-        if (schemaId && module_id) {
+        if (schemaId || module_id) {
           return result;
         } else {
           setSchemaList(result);
@@ -39,11 +43,13 @@ function SchemaSettings() {
     },
     [projectName]
   );
-  const handleModuleSelect = (event) => {
+  const handleModuleSelect = async(event) => {
     const selectedOption = event.target.selectedOptions[0];
     const moduleName = selectedOption.dataset.name;
     const moduleId = selectedOption.dataset.id;
     setModule({ "name": moduleName, "id": moduleId });
+    const res = await fetchSchemasList(null, moduleId)    
+    setRenderSchemaList(res[0].schemas)
   }
   useEffect(() => {
     fetchSchemasList(null, null);
@@ -91,8 +97,9 @@ function SchemaSettings() {
   };
 
   const onSubmit = async (e) => {
-    if(!module){
-      alert("Please select a module.");
+    if (!module) {
+      setErrorMessage("Please select a module.")
+      setShowToast(true);
       return;
     }
     e.preventDefault();
@@ -101,25 +108,38 @@ function SchemaSettings() {
     if (operation === "add") {
       const result = await addSchema(projectName, finalSchema, module.id);
       if (result.message) {
+        setErrorMessage(result.message);
         fetchSchemasList(null, null);
       }
+      else {
+        setErrorMessage(result.error)
+      }
+      setShowToast(true);
     } else {
       const result = await editSchema(projectName, finalSchema, id, module.id);
       if (result.message) {
         fetchSchemasList(null, null);
+        setErrorMessage(result.message)
       }
+      else {
+        setErrorMessage(result.error)
+        setErrorMessage(result.error)
+      }
+      setShowToast(true)
     }
   };
 
   const handleSchemaOperations = async (operation, schema, module_id, module_name) => {
     if (operation === "edit") {
       setId(schema.id);
-      setModule({"id": module_id, "name": module_name})
+      setModule({ "id": module_id, "name": module_name })
       const details = await fetchSchemasList(schema.id, module_id);
       setDefaultSchemaObj(details);
     } else if (operation === "delete") {
       const result = await deleteSchema(projectName, schema.id, module_id);
       if (result.message) {
+        setErrorMessage(result.message)
+        setShowToast(true);
         fetchSchemasList(null, null);
       }
     }
@@ -137,6 +157,12 @@ function SchemaSettings() {
   return (
     defaultSchemaObj && (
       <Row id="main" className="container-fluid h-100">
+        <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1 }}>
+          <Toast onClose={() => setShowToast(false)} show={showToast} autohide>
+            <Toast.Header>Message</Toast.Header>
+            <Toast.Body>{errorMessage}</Toast.Body>
+          </Toast>
+        </ToastContainer>
         <Col
           sm={2}
           className="h-100"
@@ -162,7 +188,7 @@ function SchemaSettings() {
                         : "#212529"
                     }}
                   >
-                    <img width="20" height="20" src="https://img.icons8.com/ios-filled/50/FFFFFF/module.png" alt="module"  className="mt-1"/>
+                    <img width="20" height="20" src="https://img.icons8.com/ios-filled/50/FFFFFF/module.png" alt="module" className="mt-1" />
                     <span className="overflow-auto mx-2">{module.title}</span>
                   </div>
                   {expandedModule.includes(module.module_id) && (
@@ -291,7 +317,7 @@ function SchemaSettings() {
                 updateParent={(value, newKey = null) =>
                   editProperty(key, value, newKey)
                 }
-                schemaList={schemaList}
+                schemaList={module ? renderSchemaList : []}
               />
             ))}
 
