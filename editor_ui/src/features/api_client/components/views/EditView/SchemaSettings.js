@@ -10,14 +10,14 @@ import {
   deleteSchema,
   editSchema,
 } from "../../../services/SchemaService";
-
+const defaultSchemaObjectTemplate = {
+  type: "object",
+  properties: {},
+  required: [],
+  name: "",
+}
 function SchemaSettings() {
-  const [defaultSchemaObj, setDefaultSchemaObj] = useState({
-    type: "object",
-    properties: {},
-    required: [],
-    name: "",
-  });
+  const [defaultSchemaObj, setDefaultSchemaObj] = useState(defaultSchemaObjectTemplate);
   const [id, setId] = useState();
   const [module, setModule] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -127,6 +127,8 @@ function SchemaSettings() {
       }
       setShowToast(true)
     }
+    setDefaultSchemaObj(defaultSchemaObjectTemplate);
+    setModule(null)
   };
 
   const handleSchemaOperations = async (operation, schema, module_id, module_name) => {
@@ -234,7 +236,8 @@ function SchemaSettings() {
               <Form.Select
                 aria-label="Select Module"
                 className="rounded-0 mx-2 mt-3 text-white"
-                defaultValue=""
+                // defaultValue=""
+                value={module ? module.name : ''}
                 style={{ "backgroundColor": "#6c757d", "border": "none", "color": "white" }}
                 onChange={(e) => handleModuleSelect(e)}
               >

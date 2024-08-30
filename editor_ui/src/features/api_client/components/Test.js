@@ -144,6 +144,9 @@ function Test() {
       if (!hasValidRequestProps) return false;
       // Validate URL structure
       const url = api.request.url;
+      const hasRequiredUrlProps = url.path && url.baseurl;
+      if (!hasRequiredUrlProps) return false;
+      
       if (!Array.isArray(url.path)) return false;
       // Validate parameters
       for (const param of api.request.parameters) {
