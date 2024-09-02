@@ -1,7 +1,5 @@
-import React from 'react';
-
 function LandingPage() {
-  return <div>Breeze studio</div>;
+  return <div className="primary-background primary-text">Breeze studio</div>;
 }
 
 export default LandingPage;
