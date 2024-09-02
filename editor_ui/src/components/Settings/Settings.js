@@ -1,9 +1,5 @@
 import "../../css/Settings.css";
-import { useEffect, useState } from "react";
-import { getAppBasicConfig } from "../../services/ConfigService";
-import { useParams } from "react-router";
-import Toast from "react-bootstrap/Toast";
-import ToastContainer from "react-bootstrap/ToastContainer";
+import { useState } from "react";
 import IntegrationsSettings from "./IntegrationsSettings";
 import EnvironmentSettings from "./EnvironmentSettings";
 import GeneralSettings from "./GeneralSettings";
@@ -33,33 +29,16 @@ const Content = ({ selected, items }) => {
 
 const Settings = () => {
   const [selected, setSelected] = useState("general");
-  const [appBasicConfig, setAppBasicConfig] = useState();
-  const { projectName } = useParams();
-  const [showSaveToast, setShowSaveToast] = useState(false);
 
-  const toggleShowSaveToast = () => setShowSaveToast(!showSaveToast);
   const handleSelect = (section) => {
     setSelected(section);
   };
-  useEffect(() => {
-    const fetchAppBasicConfig = () => {
-      getAppBasicConfig(projectName).then((res) => {
-        setAppBasicConfig(res);
-      });
-    };
-    fetchAppBasicConfig();
-  }, [projectName]);
 
   const sidebarItems = [
     {
       label: "General Settings",
       key: "general",
-      component: appBasicConfig ? (
-        <GeneralSettings
-          appDetails={appBasicConfig}
-          toggleShowSaveToast={toggleShowSaveToast}
-        />
-      ) : null,
+      component: <GeneralSettings />,
     },
     {
       label: "Integrations",
@@ -70,7 +49,7 @@ const Settings = () => {
       label: "Environment Settings",
       key: "environment",
       component: <EnvironmentSettings />,
-    }
+    },
   ];
 
   return (
@@ -84,26 +63,6 @@ const Settings = () => {
         <div className="content">
           <Content items={sidebarItems} selected={selected} />
         </div>
-      </div>
-      <div>
-        <ToastContainer
-          position="top-end"
-          className="p-3"
-          style={{ zIndex: 1 }}
-        >
-          <Toast
-            bg={"primary"}
-            show={showSaveToast}
-            onClose={toggleShowSaveToast}
-            delay={2000}
-            autohide
-          >
-            <Toast.Header closeButton={false}>
-              <strong>Success..!</strong>
-            </Toast.Header>
-            <Toast.Body>Project Details are Updated</Toast.Body>
-          </Toast>
-        </ToastContainer>
       </div>
     </div>
   );

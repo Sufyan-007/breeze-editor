@@ -1,34 +1,69 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { getAppBasicConfig } from "../../services/ConfigService";
 import { updateProject } from "../../services/ProjectService";
+import Toast from "react-bootstrap/Toast";
+import ToastContainer from "react-bootstrap/ToastContainer";
 
-const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
+const GeneralSettings = () => {
   const navigate = useNavigate();
+  const { projectName } = useParams();
 
-  const { register, handleSubmit, setValue } = useForm({
-    defaultValues: {
-      name: appDetails?.projectName,
-      author: appDetails?.author,
-      description: appDetails?.description,
-      logo: appDetails?.logo,
-    },
-  });
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm();
 
-  const [logoPreview, setLogoPreview] = useState(appDetails?.logo || "");
+  const [appDetails, setAppDetails] = useState(null);
+  const [logoPreview, setLogoPreview] = useState("");
   const [logoFile, setLogoFile] = useState(null);
   const [logoDeleted, setLogoDeleted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showSaveToast, setShowSaveToast] = useState(false);
+  const [isChanged, setIsChanged] = useState(false);
+  const [initialValues, setInitialValues] = useState({});
 
   const fileInputRef = useRef(null);
 
+  const watchFields = watch();
+
   useEffect(() => {
-    if (appDetails?.logo) {
-      const logoUrl = `http://localhost:8000/editor/file-upload/${appDetails.name}/${appDetails.logo}`;
-      setLogoPreview(logoUrl);
-    }
-  }, [appDetails]);
+    getAppBasicConfig(projectName).then((res) => {
+      setAppDetails(res);
+      setValue("name", res.projectName);
+      setValue("author", res.author);
+      setValue("description", res.description);
+
+      setInitialValues({
+        name: res.projectName,
+        author: res.author,
+        description: res.description,
+      });
+
+      if (res.logo && res.logo !== "null" && res.logo !== "") {
+        const logoUrl = `http://localhost:8000/editor/file-upload/${res.name}/${res.logo}`;
+        setLogoPreview(logoUrl);
+      } else {
+        setLogoPreview("");
+      }
+    });
+  }, [projectName, setValue]);
+
+  useEffect(() => {
+    const hasChanged =
+      watchFields.name !== initialValues.name ||
+      watchFields.author !== initialValues.author ||
+      watchFields.description !== initialValues.description ||
+      logoFile !== null ||
+      logoDeleted;
+    setIsChanged(hasChanged);
+  }, [watchFields, initialValues, logoFile, logoDeleted]);
+
+  const toggleShowSaveToast = () => setShowSaveToast(!showSaveToast);
 
   const handleUploadIconClick = () => {
     if (fileInputRef.current) {
@@ -88,8 +123,13 @@ const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
                     className="form-control form-control-sm"
                     type="text"
                     placeholder="Name of the Application"
-                    {...register("name")}
+                    {...register("name", {
+                      required: "Application name is required",
+                    })}
                   />
+                  {errors.name && (
+                    <div className="text-danger">{errors.name.message}</div>
+                  )}
                 </div>
               </div>
 
@@ -164,12 +204,30 @@ const GeneralSettings = ({ appDetails, toggleShowSaveToast }) => {
                 </div>
               </div>
             </div>
-            <button className="btn btn-primary my-3" type="submit">
+            <button
+              className="btn btn-primary my-3"
+              type="submit"
+              disabled={!isChanged}
+            >
               Save
             </button>
           </form>
         </div>
       </div>
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1 }}>
+        <Toast
+          bg={"primary"}
+          show={showSaveToast}
+          onClose={toggleShowSaveToast}
+          delay={2000}
+          autohide
+        >
+          <Toast.Header closeButton={false}>
+            <strong>Success..!</strong>
+          </Toast.Header>
+          <Toast.Body>Project Details are Updated</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 };
