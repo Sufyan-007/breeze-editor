@@ -1,26 +1,22 @@
-
-.bg-primary{
+.bg-primary {
   background-color: var(--background-color-primary);
 }
 
-
-.bg-secondary{
+.bg-secondary {
   background-color: var(--background-color-secondary);
 }
 
-.bg-tertiary{
+.bg-tertiary {
   background-color: var(--background-color-tertiary);
 }
 
-.text-primary{
+.text-primary {
   color: var(--color-primary);
 }
-.text-secondary{
+.text-secondary {
   color: var(--color-secondary);
 }
 
-.text-primary{
+.text-primary {
   color: var(--color-tertiary);
 }
-
-
