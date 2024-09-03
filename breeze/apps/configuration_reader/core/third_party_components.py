@@ -196,7 +196,9 @@ class ThirdPartyComponents:
         try:
            
             base_path = os.path.join(CONFIG_PATH, project_id, 'external_project_configs', zip_file)
-
+            
+            if not os.path.exists(base_path):
+                return{"error":f"Zip file not found"}, 404
             # Path to the __component.json file
             component_json_path = os.path.join(base_path, 'component', '__component.json')
             
