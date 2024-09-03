@@ -15,3 +15,4 @@ breeze/uploaded_css/
 nohup.out
 editor_ui/package-lock.json
 /third_party_package_parser/node_modules
+/third_party_configs
