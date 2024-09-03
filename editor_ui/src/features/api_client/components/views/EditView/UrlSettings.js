@@ -357,7 +357,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
             height="25"
             src="https://img.icons8.com/ios/50/FFFFFF/add--v1.png"
             alt="add--v1"
-            onClick={() => onAdd("query parameters")}
+            onClick={() => onAdd(null,"query parameters")}
             style={{ cursor: "pointer" }}
           />
         </div>

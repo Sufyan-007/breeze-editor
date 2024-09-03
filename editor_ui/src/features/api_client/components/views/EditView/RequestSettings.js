@@ -49,7 +49,8 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
     }
   }, [isAuthApi, apiData.authentication_type]);
 
-  const addProperty = (prop) => {
+  const addProperty = (e, prop) => {
+    e.stopPropagation();
     console.log(prop, "prop");
     let newData = null;
     if (prop === "query parameters") {
@@ -127,8 +128,8 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
               bg="dark"
               style={{ border: "1px solid rgba(128, 128, 128, 0.5)" }}>
 
-              <Card.Body className="d-flex justify-content-between">
-                <div>
+              <Card.Body className="d-flex justify-content-between" onClick={() => toggleProperty(index)}>
+                <div >
                   {req === "Url" && request.url && request.url.baseurl !== "" ? envVars[request.url.baseurl]? envVars[request.url.baseurl] : request.url.baseurl : req}
                   {/* {req === "Url" ? (
                     ((request.parameters && request.parameters.some(param => param.errors && Object.keys(param.errors).length > 0) )|| (request.url && Object.keys(request.url.errors).length > 0)) && (
@@ -151,7 +152,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
                       height="25"
                       src="https://img.icons8.com/ios/50/FFFFFF/add--v1.png"
                       alt="add--v1"
-                      onClick={() => addProperty(req.toLowerCase())}
+                      onClick={(e) => addProperty(e, req.toLowerCase())}
                       style={{ cursor: "pointer" }}
                     />
                   )}
