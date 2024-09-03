@@ -4,10 +4,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import {extractAllComponentDetails,getDeclarationFiles} from './parse_library';
+import {extractAllComponentDetails,getDeclarationFiles,install_library,getInstalledVersion,updateLibraryStatus, checkForLib } from './parse_library';
+import {CUSTOM_DIRECTORY_PATH, DIRECTORY_PATH, PORT} from './consts';
 const app = express();
-const port = 3000;
 
+
+app.use(express.json());
 
 function findSrcFolder(basePath:any) {
   const files = fs.readdirSync(basePath);
@@ -24,52 +26,70 @@ function findSrcFolder(basePath:any) {
   return null; // If no `src` folder is found
 }
 
-app.get('/', (req, res) => {
-    // Directory containing TypeScript declaration files for craft.js
-    // const directoryPath = path.join(__dirname, 'node_modules', '@craftjs', 'core');
-    const libraryName="@chakra-ui";
-    const dire = path.basename(__dirname)
-    const directoryPath = path.join('/home/yash/Documents/Projects/breezeui/third_party_package_parser', 'node_modules', libraryName);
-    if (fs.existsSync(directoryPath)) {
-        extractAllComponentDetails(directoryPath,libraryName);
-        res.send('Hello, TypeScript with Express!');
-    } else {
-        console.log(`Directory not found: ${directoryPath}`);
-        res.send('Hello, TypeScript with Express!');
+app.post('/', (req, res) => {
+    const libraryName=req.body.fileName;
+    let libraryVersion=req.body.fileVersion;
+    console.log(libraryName);
+    // const libraryName=file;
 
+
+    // install packages
+    install_library(libraryName,libraryVersion);
+    
+    // if library version not present it will find by getintalledversion
+    libraryVersion = libraryVersion ? libraryVersion : getInstalledVersion(libraryName);
+    
+    const directoryPath = path.join( DIRECTORY_PATH, 'node_modules', libraryName);
+    
+    if(!checkForLib(libraryName,libraryVersion)){
+
+        if (fs.existsSync(directoryPath)) {
+            if(extractAllComponentDetails(directoryPath,libraryName,"library",libraryVersion)){
+                res.send('Hello, TypeScript with Express!');
+                updateLibraryStatus(libraryName,libraryVersion);
+            }
+            else{
+                console.log("extractDetails failed. statusChange will not run.");
+            }
+        } else {
+            console.log(`Directory not found: ${directoryPath}`);
+            res.send('Hello, TypeScript with Express!');
+        }
     }
-
+    else{
+        console.log('library already exists')
+        res.send('Hello, TypeScript with Express!');
+    }   
+        
 });
 
-app.get('/custom', (req, res) => {
+app.post('/custom', (req, res) => {
   
-  const projName = "creator"
-  const zipFileName="@chakra-ui";
-  const directoryPath = path.join('/home/yash/Documents/Projects/breezeui/configurations', projName, zipFileName);
+  const projName = "projname/uploaded_zip";
+  const zipFileName="client";
+  const directoryPath = path.join(CUSTOM_DIRECTORY_PATH, projName, zipFileName);
+// const directoryPath = "/home/smit/breezeui/breeze/configurations/projname/uploaded_zip/client";
   // install specific version of dependency if not present in our third party parser
   
   if (fs.existsSync(directoryPath)) {
-      extractAllComponentDetails(directoryPath,zipFileName);
+      extractAllComponentDetails(directoryPath,zipFileName,"file");
       res.send('Hello, TypeScript with Express!');
   } else {
       console.log(`Directory not found: ${directoryPath}`);
       res.send('Hello, TypeScript with Express!');
-
   }
-
 });
 
 app.post('/upload', async (req, res) => {
   
     let srcFolderPath = "/home/yash/Documents/Projects/temp"
     // Extract and process component details
-    extractAllComponentDetails(srcFolderPath, 'userProject/temp');
+    extractAllComponentDetails(srcFolderPath, 'userProject/temp',"file");
 
-    res.send('Uploaded and processed successfully.');
-    
-    
+    res.send('Uploaded and processed successfully.');  
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
