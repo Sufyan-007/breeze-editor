@@ -38,7 +38,7 @@ class ReadFromPath(View):
 
 class GetThirdPartyComponents(View):
     
-    def get(self,request):
+    def post(self,request):
         data = json.loads(request.body.decode("utf-8"))
         library = data.get('library')
         lib_version = data.get('lib_version')
@@ -51,13 +51,13 @@ class GetThirdPartyComponents(View):
             response, status = third_party_components.get_components_from_zip(zip_file,project_id)
             
         else:
-            response, status= third_party_components.get_third_party_components(library, lib_version)
+            response, status= third_party_components.get_third_party_components(project_id, library, lib_version)
             
         return JsonResponse(response, status=status)
     
 class GetThirdPartyComponentConfig(View):
     
-    def get(self, request ):
+    def post(self, request ):
         try:
             data = json.loads(request.body.decode("utf-8"))
             project_id = data.get('project_id')
@@ -74,7 +74,7 @@ class GetThirdPartyComponentConfig(View):
             if zip_file:
                 response, status_code = third_party_components.get_component_config_from_zip(zip_file, project_id, component_name)
             else:  
-                response, status_code = third_party_components.get_third_party_component_config(library, component_name, lib_version)
+                response, status_code = third_party_components.get_third_party_component_config(project_id, library, component_name, lib_version)
             return JsonResponse(response, status=status_code)
         
         except json.JSONDecodeError:
@@ -85,7 +85,7 @@ class GetThirdPartyComponentConfig(View):
         
 class GetProjectLibrariesList(View):
     
-    def get(self, request):
+    def post(self, request):
         try:
             data = json.loads(request.body.decode("utf-8"))
             project_id = data.get('project_id')

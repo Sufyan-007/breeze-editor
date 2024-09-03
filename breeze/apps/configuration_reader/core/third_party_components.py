@@ -6,11 +6,10 @@ class ThirdPartyComponents:
     def __init__(self):
         pass 
     
-    def get_latest_version(self,library_name):
+    def get_latest_version(self, library_name):
         libs_path = os.path.join(THIRD_PARTY_CONFIG_PATH, 'libs')
         folders = os.listdir(libs_path)
         versions = []
-
         # Pattern to match folder names with version
         pattern = re.compile(rf"^{re.escape(library_name)}__(\d+)$")
 
@@ -18,23 +17,52 @@ class ThirdPartyComponents:
             match = pattern.match(folder)
             if match:
                 versions.append(int(match.group(1)))
+            elif folder == library_name:
+                versions.append(0)  
 
         if versions:
-            # Return the highest version number
-            return max(versions)
+            max_version = max(versions)
+            if max_version == 0:
+                return library_name
+            else:
+                return f"{library_name}__{max_version}"
         else:
-            # No versioned folders found, return None
             return None
     
-    def get_third_party_components(self, library, lib_version=None):
+    def get_third_party_components(self,project_id, library, lib_version=None):
+        folder_name= None 
+        
+        #retrieve the list of available libraries and their versions for the project 
+        available_libraries = self.get_project_lib_list(project_id)
+        
+          # Check if the library is available in the project dependencies
+        matching_lib = None
+        for lib in available_libraries:
+            if lib['name'] == library:
+                if lib_version:
+                    # If a version is provided, match both name and version
+                    if 'version' in lib and lib['version'] == lib_version:
+                        matching_lib = lib
+                        break
+                else:
+                    # If no version is provided, match by name only
+                    matching_lib = lib
+                    break
+        
+         # If the library or specified version is not found, return an error
+        if not matching_lib:
+            return {"error": f"Library '{library}' version '{lib_version}' is not available in the project."}, 404
+        
         # Determine the folder name based on the version
         if not lib_version:
             latest_version = self.get_latest_version(library)
-            if latest_version is not None:
-                folder_name = f"{library}__{latest_version}"
+            print(latest_version,"latest version")
+            if latest_version:
+                folder_name = latest_version if latest_version == library else f"{library}__{latest_version}"
+            
         else:
             folder_name = f"{library}__{lib_version}"
-        
+        print(folder_name,"folder name ")
         # Construct the path to the __component.json file
         folder_path = f"{THIRD_PARTY_CONFIG_PATH}/libs/{folder_name}"
         component_file_path = os.path.join(folder_path, "component", "__component.json")
@@ -53,20 +81,46 @@ class ThirdPartyComponents:
         component_names = list(components.keys())
         return {"components": component_names}, 200
         
-    def get_third_party_component_config(self, library, component_name, lib_version=None):
-        # If lib_version is not provided, get the latest version
-        if lib_version is None:
-            lib_version = self.get_latest_version(library)
-            if lib_version is None:
-                return {"error": "Library version not found."}, 404
-            
-        # Construct the folder name and path based on the library and version
-        folder_name = f"{library}__{lib_version}"
+    def get_third_party_component_config(self, project_id, library, component_name, lib_version=None):
+        folder_name = None
+        
+        # Retrieve the list of available libraries and their versions for the project
+        available_libraries = self.get_project_lib_list(project_id)
+        
+        # Check if the library is available in the project dependencies
+        matching_lib = None
+        for lib in available_libraries:
+            if lib['name'] == library:
+                if lib_version:
+                    # If a version is provided, match both name and version
+                    if 'version' in lib and lib['version'] == lib_version:
+                        matching_lib = lib
+                        break
+                else:
+                    # If no version is provided, match by name only
+                    matching_lib = lib
+                    break
+        
+        # If the library or specified version is not found, return an error
+        if not matching_lib:
+            return {"error": f"Library '{library}' version '{lib_version}' is not available in the project."}, 404
+        
+        # Determine the folder name based on the version
+        if not lib_version:
+            latest_version = self.get_latest_version(library)
+            print(latest_version, "latest version")
+            if latest_version:
+                folder_name = latest_version if latest_version == library else f"{library}__{latest_version}"
+        else:
+            folder_name = f"{library}__{lib_version}"
+        print(folder_name, "folder name")
+        
         folder_path = os.path.join(THIRD_PARTY_CONFIG_PATH, 'libs', folder_name)
-        print(folder_path,"folder path")
+        print(folder_path, "folder path")
+        
         # Load the __component.json file to get the path to the component
-        components_json_path = os.path.join(folder_path,"component", '__component.json')
-        print(components_json_path,"components json path")
+        components_json_path = os.path.join(folder_path, "component", '__component.json')
+        print(components_json_path, "components json path")
         
         if not os.path.exists(components_json_path):
             return {"error": "__component.json file not found."}, 404
@@ -99,7 +153,7 @@ class ThirdPartyComponents:
             return {"component_config": component_config}, 200
         except Exception as e:
             return {"error": f"Failed to load component config: {str(e)}"}, 500
-        
+
     def get_project_lib_list(self, projectId):
         project_config_path = os.path.join(CONFIG_PATH, projectId)
         config_file_name = CONFIG_FILES_PATH['APP_CONFIG']
