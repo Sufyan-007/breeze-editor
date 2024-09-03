@@ -187,7 +187,13 @@ class EnvironmentSettingsConfigService:
     def get_config(self):
         try:
             config_data = self.read_config_file(self.config_file_path)
-            return config_data
+            
+            config = {
+                "envVars": config_data.get("envVars",{}),
+                "environments": config_data.get("environments",{})
+            }
+                
+            return config
         except Exception as e:
             raise Exception(f"Error getting config: {e}")
 
