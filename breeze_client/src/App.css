@@ -1,16 +1,16 @@
-.primary-background {
+.br-background-primary {
   background-color: var(--color-primary);
 }
 
-.secondary-background {
+.br-background-secondary {
   background-color: var(--color-secondary);
 }
 
-.primary-text {
+.br-text-primary {
   color: var(--color-text);
 }
 
-.text-secondary {
+.br-text-secondary {
   color: var(--color-subtext);
 }
 
