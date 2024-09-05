@@ -1,5 +1,5 @@
 
-import subprocess
+import subprocess, requests, threading
 from django.http import JsonResponse, Http404, FileResponse
 import json
 from .core.app_editor import AppEditor
@@ -44,7 +44,15 @@ class AddPackage(APIView):
             
             # Add the package and version to the app_basic_config.json file
             app_editor.add_package_to_dependencies(package_name, package_version)
-            
+        
+            #external Api call 
+            api_url = "http://127.0.0.1:4000/"
+            payload = {
+                "fileName":package_name,
+                "fileVersion":package_version
+            }
+            trigger_api(api_url, payload)
+
             return JsonResponse({'message': 'Package added successfully'}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
@@ -815,16 +823,24 @@ class CustomPackage(APIView):
     def post(self,request, projectName):
         try:
             file = request.FILES.get('file')
-            print(file,"file")
             fileName = request.POST.get("filename")
-            print(fileName,"fileName")
             if not file:
                 return JsonResponse({'error': 'No file provided.'}, status=400)
             
+            #upload the file
             CustomPackageService.upload_file(file,fileName, projectName)
-            return JsonResponse({
-                'message':'File uploaded successfully',
-            }, status=200)
+            
+            #after the file is uploaded , call the express API
+            api_url = "http://127.0.0.1:4000/custom"
+            payload = {
+                "projName":projectName, 
+                "zipFileName":fileName
+            }
+            trigger_api(api_url, payload)
+            
+            print("returning response to user ")
+            return JsonResponse({'message': 'File uploaded successfully'}, status=200)
+
         except Exception as e:
             return JsonResponse({'error':str(e)},status=500)
             
@@ -863,4 +879,19 @@ class CustomPackage(APIView):
             return JsonResponse({'error':str(e)}, status=500)
 
 
-            
+def call_external_api_async(api_url, payload):
+    print("starting api call in background")
+    try:
+        response = requests.post(api_url, json=payload)
+        if response.status_code == 200:
+            print("external api call successful")
+        else:
+            print(f"Failed to call external API: {response.text}")
+    except Exception as e:
+        print(f"Error during external API call: {str(e)}")
+    print("API call finished")
+    
+def trigger_api(api_url, payload):
+    print("Triggering API call in background thread...")
+    threading.Thread(target=call_external_api_async,args=(api_url,payload)).start()
+        
