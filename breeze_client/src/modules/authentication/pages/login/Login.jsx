@@ -4,12 +4,32 @@ import DeveloperActivityAmico from '../../../../assets/images/Developer activity
 import BreezeStudio from '../../../../assets/images/Breeze Studio.png';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import '../../styles/authentication_module.css';
+// import CustomFormBuilder from '../../../../common/form_builder/CustomFormBuilder';
+// import { loginMappings } from '../../../../common/form_builder/mappings/TestMappings';
 function Login() {
   const { toggleTheme } = useContext(ThemeContext);
-
+  // const [loginData, setLoginData] = useState({
+  //   username: '',
+  //   password: '',
+  //   rememberMe: true,
+  // });
+  // const handleLoginChange = ({ name, value }) => {
+  //   setLoginData((prevValues) => ({
+  //     ...prevValues,
+  //     [name]: value,
+  //   }));
+  // };
   const handleSubmit = (event) => {
     event.preventDefault();
   };
+  // const customStyles = {
+  //   form: 'login-custom-form',
+  //   fieldWrapper: 'login-form-box mb-3',
+  //   label: 'login-text login-med-font mb-1 br-text-primary',
+  //   text: { input: 'form-control', label: 'login-text login-med-font mb-1 br-text-primary', div: 'mb-3' },
+  //   button: 'button login-btn-filled w-100 mb-3',
+  //   select: { padding: '8px', fontSize: '16px' },
+  // };
 
   return (
     <div className="h-100 container-fluid br-background-primary">
@@ -67,6 +87,13 @@ function Login() {
                   Sign In
                 </button>
               </form>
+              {/* 
+              <CustomFormBuilder
+                config={loginMappings}
+                formValues={loginData}
+                onFormValueChange={handleLoginChange}
+                styles={customStyles}
+              /> */}
             </div>
           </div>
 

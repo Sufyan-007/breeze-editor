@@ -1,7 +1,8 @@
-import { createBrowserRouter } from "react-router-dom";
-import Login from "../modules/authentication/pages/login/Login";
-import LandingPage from "../modules/landingPage/pages/LandingPage";
-import TestingSelectField from "../modules/justTestingNewComponents/TestingSelectField";
+import { createBrowserRouter } from 'react-router-dom';
+import Login from '../modules/authentication/pages/login/Login';
+import LandingPage from '../modules/landingPage/pages/LandingPage';
+import TestingSelectField from '../modules/justTestingNewComponents/TestingSelectField';
+import TestingComponent from '../common/form_builder/TestingComponent';
 
 export const router = createBrowserRouter([
   {
@@ -9,13 +10,17 @@ export const router = createBrowserRouter([
     element: <LandingPage />,
   },
   {
-    path: "/TestingComps",
+    path: '/TestingComps',
     children: [
-      { path: "selectField", element: <TestingSelectField /> },
-    ]
+      { path: 'selectField', element: <TestingSelectField /> },
+      {
+        path: 'form-builder',
+        element: <TestingComponent />,
+      },
+    ],
   },
   {
-    path: "/login",
+    path: '/login',
     element: <Login />,
   },
 ]);
