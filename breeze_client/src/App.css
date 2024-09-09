@@ -21,3 +21,20 @@
 .color-blue:hover {
   color: var(--color-blue-hover);
 }
+
+.theme-switch {
+  padding: 0 0.375rem 0.25rem 0.375rem;
+}
+
+.btn-theme {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.small-font {
+  font-size: 0.75rem !important;
+}
+
+.med-font {
+  font-size: 0.875rem !important;
+}
