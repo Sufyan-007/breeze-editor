@@ -1,5 +1,11 @@
+import Navbar from '../../../common/navbar/Navbar';
+
 function LandingPage() {
-  return <div className="primary-background primary-text">Breeze studio</div>;
+  return (
+    <div>
+      <Navbar />
+    </div>
+  );
 }
 
 export default LandingPage;
