@@ -1,6 +1,7 @@
 :root {
   --color-blue: #006EB9;
   --color-blue-hover: #035891;
+  --color-white: #fff;
 }
 
 body.dark {
@@ -10,6 +11,8 @@ body.dark {
   --color-text: #A5A5A4;
   --color-subtext: rgb(165, 165, 164, .2);
   --color-background: rgba(165, 165, 164, 0.5);
+  --badge-bg-color: #1E1F1C;
+  --badge-text-color: #A5A5A4;
 }
 
 body.light {
@@ -19,6 +22,8 @@ body.light {
   --color-text: #252525;
   --color-subtext: #686864;
   --color-background: #D8D7DD;
+  --badge-bg-color: #D8D7DD;
+  --badge-text-color: #252525;
 }
 
 body {
