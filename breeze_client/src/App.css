@@ -1,0 +1,40 @@
+.br-background-primary {
+  background-color: var(--color-primary);
+}
+
+.br-background-secondary {
+  background-color: var(--color-secondary);
+}
+
+.br-text-primary {
+  color: var(--color-text);
+}
+
+.br-text-secondary {
+  color: var(--color-subtext);
+}
+
+.color-blue {
+  color: var(--color-blue);
+}
+
+.color-blue:hover {
+  color: var(--color-blue-hover);
+}
+
+.theme-switch {
+  padding: 0 0.375rem 0.25rem 0.375rem;
+}
+
+.btn-theme {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.small-font {
+  font-size: 0.75rem !important;
+}
+
+.med-font {
+  font-size: 0.875rem !important;
+}

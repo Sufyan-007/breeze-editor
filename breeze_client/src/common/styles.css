@@ -1,0 +1,48 @@
+.single-select {
+    display: flex;
+}
+
+.breeze-select {
+    display: block;
+    border: 1px solid #505152;
+    box-shadow: none;
+    margin: 0 0px 0 0;
+    background-color: #3c3f41;
+    color: #adadad;
+    font-size: 12px;
+    position: relative;
+    border-radius: 3px;
+  }
+  .breeze-select.hasButton .breeze-select-data .item {
+    line-height: 25px;
+  }
+  .breeze-select .handle {
+    cursor: pointer;
+  }
+  .breeze-select .handle .ide-col {
+    padding: 7px 5px;
+    font-size: 12px;
+  }
+  .breeze-select .handle .icon {
+    text-align: center;
+    border-left: 1px solid #505152;
+  }
+  .breeze-select .handle table tr td {
+    padding: 7px 5px;
+    font-size: 12px;
+  }
+  .breeze-select .handle table tr td.icon {
+    text-align: center;
+    border-left: 1px solid #505152;
+  }
+  .breeze-select .handle .label {
+    flex: 2;
+    padding: 7px 10px 7px 5px;
+    word-wrap: normal;
+    height: 20px;
+  }
+  .breeze-select .handle .pointer {
+    flex: 1;
+    padding: 5px 7px;
+    text-align: center;
+  }
