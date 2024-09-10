@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from '../modules/authentication/pages/login/Login';
-// import ProjectPage from '../modules/project/pages/ProjectPage';
+import ProjectPage from '../modules/project/pages/ProjectPage';
 import HomePage from '../modules/home/pages/HomePage';
 
 const checkAccessToken = () => {

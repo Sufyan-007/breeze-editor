@@ -13,6 +13,7 @@ body.dark {
   --color-background: rgba(165, 165, 164, 0.5);
   --badge-bg-color: #1E1F1C;
   --badge-text-color: #A5A5A4;
+  --project-card-border: none; 
 }
 
 body.light {
@@ -24,6 +25,7 @@ body.light {
   --color-background: #D8D7DD;
   --badge-bg-color: #D8D7DD;
   --badge-text-color: #252525;
+  --project-card-border: 2px solid #D8D7DD;
 }
 
 body {

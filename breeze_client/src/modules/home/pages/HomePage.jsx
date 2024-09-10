@@ -3,9 +3,6 @@ import './HomePage.css';
 import Navbar from '../../../common/navbar/Navbar';
 import VectorIcon from '../../../assets/images/Vector.png';
 import ABDMLoginPage from '../../../assets/images/ABDM Login Page 1.png';
-import verticalEllipsis from '../../../assets/svgs/vertical-ellipsis.svg';
-import playPause from '../../../assets/svgs/play-pause.svg';
-import plusButton from '../../../assets/svgs/plus-button.svg';
 import reactLogo from '../../../assets/svgs/react-logo.svg';
 import tsLogo from '../../../assets/svgs/typescript-logo.svg';
 import vueLogo from '../../../assets/svgs/vue-logo.svg';
@@ -47,24 +44,24 @@ function HomePage() {
   return (
     <div>
       <Navbar />
-      <div className="container-fluid p-0 vh-100 br-background-secondary">
-        <div className="main-content">
-          <div className="title">
+      <div className="container-fluid vh-100 p-0 br-background-secondary">
+        <div className="home-main-content">
+          <div className="home-title">
             <h2 className="xlarge-font br-text-tertiary">Welcome, John</h2>
             <h2 className="mb-3 large-font color-text br-text-primary">Select a Project</h2>
           </div>
 
           <div className="row m-0 gap-2">
-            <div className="col-md-3 m-0 p-0 project-card">
+            <div className="col-md-3 m-0 p-0 home-project-card br-background-primary">
               <div className="right-side rounded pb-3">
                 <div className="d-flex justify-content-between p-3">
                   <div className="d-flex justify-content-start">
                     <img src={VectorIcon} className="mx-2" alt="icon" />
                     <span className="med-font text-nowrap ms-2 br-text-primary">ABDM Connector</span>
                   </div>
-                  <div className="action-buttons">
-                    <img src={playPause} alt="playPause" />
-                    <img src={verticalEllipsis} alt="verticalEllipsis" />
+                  <div className="home-action-buttons">
+                    <i className="bi bi-caret-right br-text-primary"></i>
+                    <i className="bi bi-three-dots-vertical br-text-primary"></i>{' '}
                   </div>
                 </div>
                 <div className="card mx-3">
@@ -73,13 +70,13 @@ function HomePage() {
               </div>
             </div>
 
-            <div className="new-card col-md-3 m-0 p-0">
+            <div className="home-new-card col-md-3 m-0 p-0">
               <div
-                className="modal-box rounded h-100 d-flex align-items-center justify-content-center"
+                className="home-modal-box rounded h-100 d-flex align-items-center justify-content-center"
                 onClick={openModal}
               >
                 <button type="button" className="btn modal-btn btn-theme color-text">
-                  <img src={plusButton} alt="plusButton" />
+                  <i className="bi bi-plus-circle br-text-primary"></i>
                   <span className="ms-1 med-font fw-bold br-text-primary">Create new project</span>
                 </button>
               </div>
@@ -88,10 +85,10 @@ function HomePage() {
 
           {/* custom modal */}
           <CustomModal isOpen={isModalOpen} onClose={closeModal} header={modalHeader} footer={modalFooter}>
-            <form className="custom-form">
+            <form className="home-custom-form">
               <div className="row">
                 <div className="col-md-6">
-                  <div className="mb-3 form-box">
+                  <div className="mb-3 home-form-box">
                     <label htmlFor="applicationName" className="med-font color-text mb-1 fw-semibold">
                       Application Name
                     </label>
@@ -99,7 +96,7 @@ function HomePage() {
                   </div>
                 </div>
                 <div className="col-md-6">
-                  <div className="mb-3 form-box">
+                  <div className="mb-3 home-form-box">
                     <label htmlFor="author" className="med-font color-text mb-1 fw-semibold">
                       Author
                     </label>
@@ -109,7 +106,7 @@ function HomePage() {
               </div>
               <div className="row">
                 <div className="col-md-6">
-                  <div className="mb-3 form-box">
+                  <div className="mb-3 home-form-box">
                     <label htmlFor="projectLogo" className="med-font color-text mb-1 fw-semibold">
                       Upload image for project logo
                     </label>
@@ -120,7 +117,7 @@ function HomePage() {
                   </div>
                 </div>
                 <div className="col-md-6">
-                  <div className="mb-3 form-box">
+                  <div className="mb-3 home-form-box">
                     <label htmlFor="description" className="med-font color-text mb-1 fw-semibold">
                       Description
                     </label>
@@ -136,20 +133,20 @@ function HomePage() {
                 </div>
               </div>
               <div className="row">
-                <div className="mb-3 form-box">
+                <div className="mb-3 home-form-box">
                   <label htmlFor="technology" className="med-font color-text mb-1 fw-semibold">
                     Technology
                   </label>
-                  <div className="badges-wrapper">
-                    <span className="home-badge theme-badge badge-active">
+                  <div className="home-badges-wrapper">
+                    <span className="home-badge home-home-theme-badge home-badge-active">
                       <img src={reactLogo} alt="React logo" />
                       <span className="med-font ms-1">React</span>
                     </span>
-                    <span className="home-badge theme-badge">
+                    <span className="home-badge home-theme-badge">
                       <img src={vueLogo} alt="Vue logo" />
                       <span className="med-font ms-1">Vue</span>
                     </span>
-                    <span className="home-badge theme-badge">
+                    <span className="home-badge home-theme-badge">
                       <img src={angularLogo} alt="Angular logo" />
                       <span className="med-font ms-1">Angular</span>
                     </span>
@@ -157,16 +154,16 @@ function HomePage() {
                 </div>
               </div>
               <div className="row">
-                <div className="mb-3 form-box">
+                <div className="mb-3 home-form-box">
                   <label htmlFor="language" className="med-font color-text mb-1 fw-semibold">
                     Language
                   </label>
-                  <div className="badges-wrapper">
-                    <span className="home-badge theme-badge">
+                  <div className="home-badges-wrapper">
+                    <span className="home-badge home-theme-badge">
                       <img src={jsLogo} alt="JavaScript logo" />
                       <span className="med-font ms-1">JavaScript</span>
                     </span>
-                    <span className="home-badge theme-badge">
+                    <span className="home-badge home-theme-badge">
                       <img src={tsLogo} alt="TypeScript logo" />
                       <span className="med-font ms-1">TypeScript</span>
                     </span>
@@ -174,24 +171,24 @@ function HomePage() {
                 </div>
               </div>
               <div className="row">
-                <div className="mb-3 form-box">
+                <div className="mb-3 home-form-box">
                   <label htmlFor="styling" className="med-font color-text mb-1 fw-semibold">
                     Styling Components
                   </label>
-                  <div className="badges-wrapper">
-                    <span className="home-badge theme-badge">
+                  <div className="home-badges-wrapper">
+                    <span className="home-badge home-theme-badge">
                       <img src={bootstrapLogo} alt="Bootstrap logo" />
                       <span className="med-font ms-1">Bootstrap</span>
                     </span>
-                    <span className="home-badge theme-badge">
+                    <span className="home-badge home-theme-badge">
                       <img src={reactBootstrap} alt="React Bootstrap logo" />
                       <span className="med-font ms-1">React Bootstrap</span>
                     </span>
-                    <span className="home-badge theme-badge">
+                    <span className="home-badge home-theme-badge">
                       <img src={chakraUI} alt="Chakra UI logo" />
                       <span className="med-font ms-1">Chakra UI</span>
                     </span>
-                    <span className="home-badge theme-badge">
+                    <span className="home-badge home-theme-badge">
                       <img src={materialUI} alt="Material UI logo" />
                       <span className="med-font ms-1">Material UI</span>
                     </span>
@@ -199,16 +196,16 @@ function HomePage() {
                 </div>
               </div>
               <div className="row">
-                <div className="mb-3 form-box">
+                <div className="mb-3 home-form-box">
                   <label htmlFor="buildTool" className="med-font color-text mb-1 fw-semibold">
                     Build Tool
                   </label>
-                  <div className="badges-wrapper">
-                    <span className="home-badge theme-badge">
+                  <div className="home-badges-wrapper">
+                    <span className="home-badge home-theme-badge">
                       <img src={reactLogo} alt="Create React App logo" />
                       <span className="med-font ms-1">Create React App</span>
                     </span>
-                    <span className="home-badge theme-badge">
+                    <span className="home-badge home-theme-badge">
                       <img src={viteLogo} alt="Vite logo" />
                       <span className="med-font ms-1">Vite</span>
                     </span>
@@ -216,16 +213,16 @@ function HomePage() {
                 </div>
               </div>
               <div className="row">
-                <div className="mb-3 form-box">
+                <div className="mb-3 home-form-box">
                   <label htmlFor="layout" className="med-font color-text mb-1 fw-semibold">
                     Layout
                   </label>
-                  <div className="badges-wrapper">
-                    <span className="home-badge theme-badge">
-                      <div className="block"></div>
+                  <div className="home-badges-wrapper">
+                    <span className="home-badge home-theme-badge">
+                      <div className="home-block"></div>
                     </span>
-                    <span className="home-badge theme-badge">
-                      <div className="block"></div>
+                    <span className="home-badge home-theme-badge">
+                      <div className="home-block"></div>
                     </span>
                   </div>
                 </div>
