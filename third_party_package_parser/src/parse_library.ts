@@ -164,14 +164,13 @@ const isReactFunctionComponent = (
 };
 
 function findFunctionNames(node: ts.Node) {
-  if (ts.isCallExpression(node)) {
-    const functionName = getFunctionNameCall(node.expression);
-    if (functionName) {
-      console.log("Function Name:", functionName);
+    if (ts.isCallExpression(node)) {
+        const functionName = getFunctionNameCall(node.expression);
+        // if (functionName) {
+        //    console.log("Function Name:", functionName);
+        // }
     }
-  }
-
-  ts.forEachChild(node, findFunctionNames);
+    ts.forEachChild(node, findFunctionNames);
 }
 
 function getFunctionNameCall(node: ts.Expression): string {
@@ -241,123 +240,90 @@ function getFunctionName(node: ts.Node): string {
 }
 
 // Function to extract component details
-function extractComponentDetails(
-  sourceFile: ts.SourceFile,
-  typeChecker: ts.TypeChecker,
-  allComponentNames: string[],
-  library: string,
-  directoryPath: string
-): {
-  [componentName: string]: {
-    props: Record<string, string>;
-    importPath: string;
-    children: string[];
-  };
-} {
-  const componentDetails: {
-    [componentName: string]: {
-      props: Record<string, string>;
-      importPath: string;
-      children: string[];
-    };
-  } = {};
-  const functionDetails: {
-    [componentName: string]: {
-      props: Record<string, string>;
-      importPath: string;
-      children: string[];
-    };
-  } = {};
-  const classDetails: {
-    [componentName: string]: {
-      props: Record<string, string>;
-      importPath: string;
-      children: string[];
-    };
-  } = {};
+function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[], library: string, directoryPath: string): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
+    const componentDetails: { [componentName: string]: {_id:string, name:string , props: Record<string, string>, importPath: string, children: string[]} } = {};
+    const functionDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
+    const classDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
 
   function visit(node: ts.Node) {
     let componentName: string | undefined;
     let type: ts.Type | undefined;
 
-    const importPath = path
-      .relative(directoryPath, sourceFile.fileName)
-      .replace(/\\/g, "/")
-      .replace(/\.d\.ts$/, "");
+        
+        const importPath = path.relative(directoryPath, sourceFile.fileName)
+            .replace(/\\/g, '/')
+            .replace(/\.d\.ts$/, '');
+        
 
-    const importPathFormatted = `${library}/${importPath}`;
-    if (ts.isTypeAliasDeclaration(node)) {
-      componentName = node.name.text.replace("Props", "");
-      type = typeChecker.getTypeAtLocation(node);
-    } else if (
-      (ts.isInterfaceDeclaration(node) || ts.isClassDeclaration(node)) &&
-      node.name
-    ) {
-      componentName = node.name.text;
-      componentName = componentName.replace("Props", "");
+        const importPathFormatted = `${library}/${importPath}`;
+        if (ts.isTypeAliasDeclaration(node)) {
+            componentName = node.name.text.replace('Props', '');
+            type = typeChecker.getTypeAtLocation(node);
+        } 
+        else if ((ts.isInterfaceDeclaration(node) || ts.isClassDeclaration(node)) && node.name) {
+            componentName = node.name.text;
+            componentName = componentName.replace('Props', '');
 
-      type = typeChecker.getTypeAtLocation(node);
-      const isJsx = isReactElement(type, typeChecker);
+            type = typeChecker.getTypeAtLocation(node);
+            const isJsx = isReactElement(type, typeChecker);
 
-      if (isJsx) {
-        // if(componentName == 'AccordionButton'){
-        //     console.log("chck");
-        // }
-        const props = extractProps(type, typeChecker);
+        
+            if (isJsx) {
+                const props = extractProps(type, typeChecker);
 
         // Adjust import path to match 'craft.js' structure
 
-        // Collect children components based on naming convention
-        const children = extractPossibleChildren(
-          allComponentNames,
-          componentName
-        );
+                // Collect children components based on naming convention
+                const children = extractPossibleChildren(allComponentNames, componentName);
+                let myuuid = uuidv4();
+                myuuid = myuuid.replace(/-/g, "_");
+                const _id=myuuid;
 
-        componentDetails[componentName] = {
-          props,
-          importPath: importPathFormatted,
-          children,
-        };
-      }
-    } else if (
-      ts.isFunctionDeclaration(node) ||
-      ts.isFunctionExpression(node) ||
-      ts.isArrowFunction(node)
-    ) {
-      let isFunctionalComponent = isReactFunctionComponent(node, typeChecker);
-      if (isFunctionalComponent) {
-        const parameters = node.parameters;
-        let functionName = null;
-        if (node.name) {
-          functionName = node.name.getText();
+                componentDetails[componentName] = {_id, name:componentName, props, importPath: importPathFormatted, children};
+            }
         }
-        if (!functionName || functionName == "__function") {
-          let parentNode = node.parent;
-          functionName = getFunctionName(parentNode);
+        else if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
+
+
+            let isFunctionalComponent = isReactFunctionComponent(node, typeChecker)
+            if (isFunctionalComponent) {
+                const parameters = node.parameters;
+                let functionName = null;
+                if (node.name) {
+                    functionName = node.name.getText();
+                }
+                if(!functionName || functionName == '__function'){
+                    let parentNode = node.parent;
+                    functionName = getFunctionName(parentNode)
+                }
+
+                if(functionName){
+
+                    
+                    // let parentNode = node.parent as ts.Node
+                    // if (node.parent) {
+                        //     // remaining part 
+                        //     // extract name of the function
+                        
+                        // }
+                        let formattedParams: Record<string, string> = {};
+                        
+                        parameters.map(param => {
+                            const name = param.name.getText();
+                            const type = param.type ? param.type.getText() : 'any';
+                            formattedParams[name] = type;
+                        });
+
+                        let myuuid = uuidv4();
+                        myuuid = myuuid.replace(/-/g, "_");
+                        const _id=myuuid;
+
+                    componentDetails[functionName] = { _id , name:functionName  ,props: formattedParams, importPath: importPathFormatted, children: [""] };
+                }
+                
+            }
         }
 
-        if (functionName) {
-          // let parentNode = node.parent as ts.Node
-          // if (node.parent) {
-          //     // remaining part
-          //     // extract name of the function
-
-          // }
-          let formattedParams: Record<string, string> = {};
-
-          parameters.map((param) => {
-            const name = param.name.getText();
-            const type = param.type ? param.type.getText() : "any";
-            formattedParams[name] = type;
-          });
-          componentDetails[functionName] = {
-            props: formattedParams,
-            importPath: importPathFormatted,
-            children: [""],
-          };
-        }
-      }
-    }
 
     ts.forEachChild(node, visit);
   }
@@ -409,6 +375,7 @@ function getRecursivelySourceFilesofImport(
   }
   return;
 }
+
 function getSourceFileofImport(files: string[], project: Project) {
   //    const missedComponentName = [];
   //    const exportVarSymbol = sourceFile.getDefaultExportSymbol().getAliasedSymbol() || sourceFile.getDefaultExportSymbol();
@@ -461,93 +428,123 @@ function getStoreDir(): string | null {
     currentDir = parentDir;
   }
 
-  return path.join(currentDir, "third_party_configs");
+    return path.join(currentDir, 'third_party_configs');
 }
 
-function getCustomStoreDir(projName: string): string | null {
-  let currentDir = __dirname;
+function getCustomStoreDir(projName:string|null): string | null {
+    let currentDir = __dirname
 
-  while (!fs.existsSync(path.join(currentDir, "breeze"))) {
-    const parentDir = path.join(currentDir, "..");
-    if (currentDir === parentDir) {
-      // Reached the root of the filesystem
-      return null;
+    while (!fs.existsSync(path.join(currentDir, 'breezeui'))) {
+        const parentDir = path.join(currentDir, '..');
+        if (currentDir === parentDir) {
+            // Reached the root of the filesystem
+            return null;
+        }
+        currentDir = parentDir;
     }
-    currentDir = parentDir;
-  }
 
-  return path.join(
-    currentDir,
-    "configurations/",
-    projName,
-    "/customized_proj_config"
-  );
+    return path.join(currentDir,`breezeui/configurations/${projName}/customized_proj_config`);
 }
 
-function createComponentDir(baseDir: string, type: string): string {
-  let componentDir;
-  if (type === "library") {
-    componentDir = path.join(baseDir, "libs");
-  } else {
-    componentDir = path.join(baseDir);
-  }
-  if (!fs.existsSync(componentDir)) {
-    fs.mkdirSync(componentDir);
-    //   console.log(`Component directory created at: ${componentDir}`);
-  } else {
-    console.log(`Component directory already exists at: ${componentDir}`);
-  }
-  return componentDir;
+function createComponentDir(baseDir: string,type:string): string {
+    let componentDir;
+    if(type==="library"){
+        componentDir = path.join(baseDir);
+    }
+    else{
+        componentDir = path.join(baseDir);
+    }
+    if (!fs.existsSync(componentDir)) {
+        fs.mkdirSync(componentDir);
+    } else {
+        console.log(`Component directory already exists at: ${componentDir}`);
+    }
+    return componentDir;
 }
 
 //install library
-export function install_library(libraryName: string, libraryVersion: string) {
-  if (!libraryName) {
-    console.error("Please provide a package name.");
-    return;
-  }
+export function install_library(libraryName:string , libraryVersion:string) :{ message: string, technicalDetails: string, statusCode: number }{
+    try{
+        if (!libraryName) {
+            console.error('Please provide a package name.');
+            return {message:'Please provide a package name.',technicalDetails:"",statusCode:500};
+        }
 
-    if (libraryVersion) {
-      libraryName = `${libraryName}@${libraryVersion}`; // execSync(command, (error, stdout, stderr) => {
+        if (libraryVersion) {
+            libraryName = `${libraryName}@${libraryVersion}`// execSync(command, (error, stdout, stderr) => {
+        }
+
+        const command = `npm audit fix && npm install ${libraryName} --save`;        
+
+        const stdout = execSync(command, { stdio: 'pipe' }).toString();
+
+        console.log(`\n---PACKAGE ${libraryName} INSTALLATION SUCCESSFUL---`);
+        return {
+            message:`---PACKAGE ${libraryName} INSTALLATION SUCCESSFUL---`,
+            technicalDetails:"",
+            statusCode:200
+        };
+    } catch (error: any) {
+
+    // Handle specific errors during package installation
+
+    let clientMessage = `Failed to install the package "${libraryName}". Please try again later or contact support.`;
+        
+    if (error.message.includes('ENOENT')) {
+        clientMessage = `Command not found: npm might not be installed or is not in the PATH.`;
+        // statusCode = 404; // Not found
+    }  else if (error.message.includes('EACCES') || error.message.includes('EPERM')) {
+        clientMessage = `Permission denied: Run the command with elevated permissions (e.g., using 'sudo').`;
+        // statusCode = 403; // Forbidden
+    } else if (error.message.includes('network')) {
+        clientMessage = `Network error: Please check your internet connection.`;
+        // statusCode = 503; // Service unavailable
+    } else if (error.message.includes('ERESOLVE')) {
+        clientMessage = `Dependency conflict while installing "${libraryName}". Please ensure all required dependencies are compatible.`;
+        // statusCode = 409; // Conflict
+    }else if (error.message.includes('E404')) {
+        clientMessage = `Package "${libraryName}" not found in the npm registry. Please check the package name for any typos.`;
+        // statusCode = 404; // Not found
+    }else if (error.message.includes('npm ERR!')) {
+        clientMessage = `NPM error during installation.`;
+        // statusCode = 500; // Internal server error
     }
+    console.error(clientMessage);
+    
+    const technicalDetails = error.message.split('\n')[0]; 
+    console.error(`Technical details: ${technicalDetails}`);
+    return {
+        message:clientMessage,
+        technicalDetails:technicalDetails,
+        statusCode:500
+    };
 
-  const command = `npm install ${libraryName} --save`;
-  console.log(command, "command");
-
-  const stdout = execSync(command, { stdio: "pipe" }).toString();
-  console.log(stdout, "stdout");
-
-  console.log(`\n---PACKAGE ${libraryName} INSTALLATION SUCCESSFUL---`);
+    }
 }
 
 export function getInstalledVersion(libraryName: string) {
   const command = `npm list ${libraryName} --json`;
 
-  let info = execSync(command, { stdio: "pipe" }).toString();
-  // console.log(info);
-  const data = JSON.parse(info);
-  return data.dependencies[libraryName].version;
-  // console.log(info["dependencies"]);
-  // return info['dependencies'][libraryName]['version'];
+    let info = execSync(command, { stdio: 'pipe' }).toString();
+    const data = JSON.parse(info);
+    return data.dependencies[libraryName].version;
 }
 
-export function checkForLib(
-  libraryName: string,
-  libraryVersion: string
-): boolean {
-  const dirpath = getStoreDir();
-  if (dirpath) {
-    const indexFilePath = path.join(dirpath, "libs", "index.json");
-    const key = `${libraryName}@${libraryVersion}`;
-    let data: Record<string, { status: string }> = {};
-    if (fs.existsSync(indexFilePath)) {
-      const fileContent = fs.readFileSync(indexFilePath, "utf-8");
-      if (fileContent.trim() !== "") {
-        data = JSON.parse(fileContent) as Record<string, { status: string }>;
-      } else {
-        return false;
-      }
-    }
+export function checkForLib(libraryName:string,libraryVersion:string):boolean{
+    const dirpath = getStoreDir();
+    if(dirpath){
+        const indexFilePath = path.join(dirpath,"index.json");
+        const key=`${libraryName}@${libraryVersion}`;
+        let data: Record<string, { status: string }> = {};
+        if (fs.existsSync(indexFilePath)) {
+            const fileContent = fs.readFileSync(indexFilePath, 'utf-8');
+            if (fileContent.trim() !== '') {
+                data = JSON.parse(fileContent) as Record<string, { status: string }>;
+            }
+            else{
+                return false;
+            }
+        }
 
     if (data.hasOwnProperty(key)) {
       return true;
@@ -566,9 +563,9 @@ export function updateLibraryStatus(
   const dirpath = getStoreDir();
   let indexFilePath: string | undefined;
 
-  if (dirpath) {
-    indexFilePath = path.join(dirpath, "libs", "index.json");
-    let data: Record<string, { status: string }> = {};
+    if (dirpath) {
+        indexFilePath = path.join(dirpath, 'index.json');
+        let data: Record<string, { status: string }> = {};
 
     if (fs.existsSync(indexFilePath)) {
       const fileContent = fs.readFileSync(indexFilePath, "utf-8");
@@ -597,31 +594,29 @@ export function updateLibraryStatus(
 }
 
 // Main function to extract all component details from TypeScript declaration files
-export function extractAllComponentDetails(
-  projName: string,
-  directoryPath: string,
-  library: string,
-  type: string,
-  libraryVersion?: string
-): boolean {
-  try {
-    const files = getDeclarationFiles(directoryPath);
-    const project = new Project();
-    const options: ts.CompilerOptions = {
-      target: ts.ScriptTarget.ES5,
-      module: ts.ModuleKind.CommonJS,
-      allowJs: true,
-      lib: ["dom", "dom.iterable", "esnext"],
-      skipLibCheck: true,
-      esModuleInterop: true,
-      allowSyntheticDefaultImports: true,
-      strict: true,
-      forceConsistentCasingInFileNames: true,
-      noFallthroughCasesInSwitch: true,
-      isolatedModules: true,
-      noEmit: true,
-      sourceMap: true,
-      jsx: ts.JsxEmit.ReactJSX,
+export function extractAllComponentDetails(directoryPath: string, library: string, type:string, libraryVersion:string ):boolean {
+    try{
+        const files = getDeclarationFiles(directoryPath);
+        const project = new Project();
+        const options: ts.CompilerOptions = {
+            target: ts.ScriptTarget.ES5,
+        module: ts.ModuleKind.CommonJS,
+        allowJs: true,
+        lib: [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
+        skipLibCheck: true,
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        strict: true,
+        forceConsistentCasingInFileNames: true,
+        noFallthroughCasesInSwitch: true,
+        isolatedModules: true,
+        noEmit: true,
+        sourceMap: true,
+        jsx: ts.JsxEmit.ReactJSX
     };
     const program = ts.createProgram(files, options);
     const typeChecker = program.getTypeChecker();
@@ -631,98 +626,81 @@ export function extractAllComponentDetails(
     sourceFiles = sourceFiles.concat(...getSourceFileofImport(files, project));
     const allComponentNames = getAllComponentNames(sourceFiles);
 
-    const componentDetails: {
-      [componentName: string]: {
-        props: Record<string, string>;
-        importPath: string;
-        children: string[];
-      };
-    } = {};
+        const componentDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[],_id:string , name:string } } = {};
 
-    sourceFiles.forEach((sourceFile) => {
-      const detailsInFile = extractComponentDetails(
-        sourceFile,
-        typeChecker,
-        allComponentNames,
-        library,
-        directoryPath
-      );
-      Object.keys(detailsInFile).forEach((key) => {
-        if (!(key in componentDetails)) {
-          (componentDetails as any)[key] = (detailsInFile as any)[key];
+    sourceFiles.forEach(sourceFile => {
+//detailsInfile= extractComponenetDetails(sourceFile,typeChecker,all componentNames,library,directPath)
+            const detailsInFile = extractComponentDetails(sourceFile, typeChecker, allComponentNames, library, directoryPath);
+            Object.keys(detailsInFile).forEach((key) => {
+            if (!(key in componentDetails)) {
+                (componentDetails as any)[key] = (detailsInFile as any)[key];
+            }
+        });
+            
+        });
+        
+        // Create JSON file for the component of perticular library
+        
+        let libraryName; 
+        let getStorePath;
+        if(type === "library"){
+            libraryName = `${library}@${libraryVersion}`;
+            getStorePath = getStoreDir();
         }
-      });
-    });
+        else{
+            let projName = libraryVersion
+            libraryName = `${library}`;
+            getStorePath = getCustomStoreDir(projName);
+        }
 
-    // Create JSON file for the component of perticular library
-    const libraryName = `${library}@${libraryVersion}`;
-    const getStorePath =
-      type === "library" ? getStoreDir() : getCustomStoreDir(projName);
-    if (getStorePath) {
-      const componentStorePath = createComponentDir(getStorePath, type);
-      let libraryStorePath;
-      if (type === "library") {
-        libraryStorePath = path.join(
-          componentStorePath,
-          libraryName,
-          "component"
-        );
-      } else {
-        libraryStorePath = path.join(componentStorePath, libraryName);
-      }
+        if(getStorePath){
+            const componentStorePath=createComponentDir(getStorePath,type);
+            let libraryStorePath;
+            if(type==="library"){
+                libraryStorePath = path.join(componentStorePath,libraryName,"component");
+            }
+            else{
+                libraryStorePath = path.join(componentStorePath,libraryName);
+            }
 
-      // const componentNames: string[] = [];
-      const componentNames: Map<string, string> = new Map();
-
-      console.log(libraryStorePath);
-      if (!fs.existsSync(libraryStorePath)) {
-        // console.log("no file are there");
-        fs.mkdirSync(libraryStorePath, { recursive: true });
-      } else {
-        fs.rmSync(libraryStorePath, { recursive: true, force: true });
-        fs.mkdirSync(libraryStorePath);
-      }
-
-      for (const [
-        componentName,
-        { props, importPath, children },
-      ] of Object.entries(componentDetails)) {
-        const componentData = {
-          importPath,
-          props,
-          children,
-        };
-
-        const componentFilePath = path.join(
-          libraryStorePath,
-          `${componentName}.json`
-        );
-        fs.writeFileSync(
-          componentFilePath,
-          JSON.stringify(componentData, null, 2),
-          "utf-8"
-        );
-        // componentNames.push(componentName);
-        componentNames.set(
-          componentName,
-          `${libraryStorePath}/${componentName}.json`
-        );
-      }
-
-      const finalComponentFilePath = path.join(
-        libraryStorePath,
-        "__component.json"
-      );
-
-      fs.writeFileSync(
-        finalComponentFilePath,
-        JSON.stringify(Object.fromEntries(componentNames), null, 2),
-        "utf-8"
-      );
-    }
-    return true;
-  } catch (error) {
-    console.error("Error in extractDetails:", error);
-    return false;
-  }
+            // const componentNames: string[] = [];
+            const componentNames: Map<string, string> = new Map();
+            
+            // console.log(libraryStorePath)
+            if (!fs.existsSync(libraryStorePath)) {
+                // console.log("no file are there");
+                fs.mkdirSync(libraryStorePath, { recursive: true });
+            } 
+            else{
+                fs.rmSync(libraryStorePath,{ recursive: true, force: true });
+                fs.mkdirSync(libraryStorePath);
+            }
+            
+            for (const [componentName, { props, importPath, children, _id, name }] of Object.entries(componentDetails)) {
+                const componentData = {
+                    importPath,
+                    props,
+                    children,
+                    _id,
+                    name,
+                };
+                
+                const componentFilePath = path.join(libraryStorePath, `${componentData._id}.json`);
+                fs.writeFileSync(componentFilePath, JSON.stringify(componentData, null, 2), 'utf-8');
+                // componentNames.push(componentName);
+                const tempPath = libraryStorePath.split('/breezeui')[1]
+                
+                const storePath = path.join(tempPath);
+                componentNames.set(componentData._id, `${componentName}`);
+                
+            }
+            
+            const finalComponentFilePath = path.join(libraryStorePath, 'index.json');
+            fs.writeFileSync(finalComponentFilePath, JSON.stringify(Object.fromEntries(componentNames), null, 2), 'utf-8');
+        }
+        return true;
+    }catch(error){
+        console.error("Error in extractDetails:", error);
+        return false;
+    }   
 }
