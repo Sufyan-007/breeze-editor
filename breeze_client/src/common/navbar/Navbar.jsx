@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import ThemeContext from '../../contexts/ThemeContext';
+import PropTypes from 'prop-types';
 import BreezeStudio from '../../assets/images/Breeze Studio.png';
 import Avatar from '../../assets/images/Ellipse 1.png';
 import VectorIcon from '../../assets/images/Vector.png';
-import PropTypes from 'prop-types';
 
 function Navbar({ currentPage = 'index' }) {
   const { toggleTheme } = useContext(ThemeContext);
@@ -15,7 +15,7 @@ function Navbar({ currentPage = 'index' }) {
       style={{ '--bs-breadcrumb-divider': "'>'" }}
     >
       <div className="container-fluid">
-        <ol className="breadcrumb mb-0">
+        <ol className="breadcrumb mb-0" style={{ '--bs-breadcrumb-divider-color': 'var(--color-text)' }}>
           <li className="breadcrumb-item mb-1">
             <a href="/">
               <img src={BreezeStudio} alt="logo" />

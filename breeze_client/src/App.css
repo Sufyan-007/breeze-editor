@@ -38,3 +38,27 @@
 .med-font {
   font-size: 0.875rem !important;
 }
+
+.wrapper {
+  align-items: stretch;
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 46px);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 46px);
+  width: 100%;
+  overflow: hidden;
+  transition: all 0.35s ease-in-out;
+}
+
+.main .content {
+  flex: 1;
+  margin: 10px 0;
+  max-width: 100vw;
+  width: auto;
+  padding-right: 10px;
+}
