@@ -3,7 +3,7 @@ const fs = require('fs');
 function handleConfigFileGeneration(exports, storePath, libraryName) {
     const folderPath = storePath;
     if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath);
+        fs.mkdirSync(folderPath, {recursive:true});
     }
 
     exports.forEach(item => {
@@ -22,6 +22,7 @@ function getDefaultConfig(config, libName) {
         "$id": `${libName}.${config['name']}`,
         "library": libName,
         "importName": config['name'],
+        "exportType" : config['exportType'],
         "containingFile": config['module'],
         "stateVars": [],
         "propsVars": config['props'],
