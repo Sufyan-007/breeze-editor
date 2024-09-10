@@ -26,6 +26,7 @@ import DependencyConfig from "./components/DependencyConfiguration/DependencyCon
 import FolderStructureConfig from "./components/FolderStructureSection/FolderStructureConfig";
 // import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
 import Resources from "./components/ResourcesConfiguration/Resources";
+import CustomPackage from "./components/CustomPackages/CustomPackage";
 import SchemaSettings from "./features/api_client/components/views/EditView/SchemaSettings";
 
 export const router = createBrowserRouter([
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: "constants", element: <ReduxConfig /> },
       { path: "folderstructure", element: <FolderStructureConfig /> },
       // { path: "foldertemplate", element: <FolderTemplate /> },
+      {path:"custompackage", element:<CustomPackage/>},
       {
         path: "styles",
         element: <Outlet />,

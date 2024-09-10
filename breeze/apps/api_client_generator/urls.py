@@ -8,9 +8,12 @@ from .api.transfer_to_auth_api import TransferToAuthApi
 from .api.retrieve_auth_file import RetrieveAuthFile
 from .api.retrive_api_config import RetrieveApiConfig
 from .api.module_settings import ModuleSettings
+from .api.service_details import GetAllServices, GetServiceFunctionConfig
 from .api.retrieve_schema_details import RetrieveSchemaDetails, RetrieveSchemaProperties, SchemaSettings
 urlpatterns = [
         path('generate-react-api-client/<str:type>', csrf_exempt(GenerateReactApiClient.as_view())),
+        path('get-all-services/<str:projectName>', csrf_exempt(GetAllServices.as_view())),
+        path('get-service-function-config/<str:projectName>', csrf_exempt(GetServiceFunctionConfig.as_view())),
         path('convert-standard-json/<str:collectionType>/<str:appName>', csrf_exempt(ApiClientGenerator.as_view())),
         path('modified-intermediate-json/<str:projectName>/<str:filename>/<str:operation>/<str:moduleId>', csrf_exempt(ModifyIntermediateJson.as_view())),
         path('fetch-all-intermediates/<str:projectName>/<str:files_only>', csrf_exempt(ApiClientGenerator.as_view())),
@@ -24,4 +27,5 @@ urlpatterns = [
         path('edit-schema/<str:projectName>/<str:schemaId>/<str:moduleId>', csrf_exempt(SchemaSettings.as_view())),
         path('delete-schema/<str:projectName>/<str:schemaId>/<moduleId>', csrf_exempt(SchemaSettings.as_view())),
         path('edit-module-name/<str:projectName>/<str:moduleId>', csrf_exempt(ModuleSettings.as_view())),
+        
 ]
