@@ -1,6 +1,8 @@
 .custom-accordion-header button.accordion-button.collapsed {
   background-color: #212529;
   color: white;
+  border: none;
+  border-radius: 0%;
 }
 
 .custom-accordion-body {

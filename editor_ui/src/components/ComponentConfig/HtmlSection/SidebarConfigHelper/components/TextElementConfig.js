@@ -54,7 +54,7 @@ const TextElement = ({
         style={{
           position: "sticky",
           bottom: "0",
-          backgroundColor: "#303033",
+          backgroundColor: "#212529",
         }}
       >
         <div className="d-flex justify-content-between  ps-3 pe-3">

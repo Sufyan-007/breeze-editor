@@ -11,11 +11,6 @@ export async function addComponent(name, type, route, projectName) {
       }
     )
   ).json();
-  // this.dispatch(setConfig(response.config)) : need to handle this in the component itself now
-  if (route) {
-    console.log("Hello there!");
-    await saveRoute({ path: route, component: response.comp }, projectName);
-  }
   return response;
 }
 
@@ -161,3 +156,17 @@ export const reorderComponentActions = async (payload) => {
     throw error;
   }
 };
+
+export async function getResource(payload) {
+  const response = await (
+    await fetch(
+      `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/editor/get-resources/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    )
+  ).json();
+  return response;
+}

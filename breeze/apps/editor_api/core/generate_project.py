@@ -33,13 +33,14 @@ class GenerateProject:
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         try:
             app_config = read_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
-            generated_project_path = app_config['path']
+            generated_project_path = app_config['path']+"/"+project_name
         except:
             raise FileNotFoundError("Could not find project '{project_name}")
         print(app_config_dir)
         print(generated_project_path)
         shutil.rmtree(app_config_dir)
         try:
-            shutil.rmtree(generated_project_path)
+            shutil.rmtree(generated_project_path,ignore_errors=False)
+            pass
         except:
             pass

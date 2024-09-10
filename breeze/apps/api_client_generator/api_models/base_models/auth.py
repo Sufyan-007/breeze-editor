@@ -29,9 +29,12 @@ class AuthContent:
 @dataclass
 class Auth:
     type: AuthTypeEnum = CustomizedAttr((AuthTypeEnum),[required_validator])
-    content: list= CustomizedAttr((list),[required_validator])
+    content: list= CustomizedAttr((list),[])
     login_api: str= CustomizedAttr((str),[])
-    token_api : str= CustomizedAttr((str),[])
+    token_id : str= CustomizedAttr((str),[])
+    # auth_api : str= CustomizedAttr((str),[])
+    # username : str= CustomizedAttr((str),[])
+    # password : str= CustomizedAttr((str),[])
     # errors  = {}
     errors : dict = CustomizedAttr((dict), [])
 
@@ -49,7 +52,7 @@ class Auth:
             'type': self.type.name,
             'contents': contents,
             'login_api': self.login_api,
-            'token_api': self.token_api,
+            'token_id': self.token_id,
             'errors': self.errors if self.errors else None
         }
     

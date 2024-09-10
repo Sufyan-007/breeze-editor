@@ -1,9 +1,5 @@
 import { callApiClientGenerator } from "../../../common/api_call/apiClientGenerator";
-const BASE_URL =
-  process.env.CURRENT_ENV === "dev"
-    ? `http://${process.env.REACT_APP_DEV_HOST}:${process.env.REACT_APP_DEV_PORT}`
-    : `http://${process.env.REACT_APP_PROD_HOST}:${process.env.REACT_APP_PROD_PORT}`;
-
+const BASE_URL = process.env.REACT_APP_BREEZE_BACKEND_HOST;
 export async function getApiConfig(projectName, filename, apiId) {
   filename = filename.replace(/\.json$/, "");
   const apiUrl =
@@ -18,7 +14,7 @@ export async function getApiConfig(projectName, filename, apiId) {
   return auth_api;
 }
 
-export async function modifyApiConfig(data, projectName, filename, operation) {
+export async function modifyApiConfig(data, projectName, filename, operation, moduleId) {
   filename = filename.replace(/\.json$/, "");
   const apiUrl =
     `${process.env.REACT_APP_BREEZE_BACKEND_HOST}/api-client-generator/modified-intermediate-json/` +
@@ -26,7 +22,7 @@ export async function modifyApiConfig(data, projectName, filename, operation) {
     "/" +
     filename +
     "/" +
-    operation;
+    operation + "/" + moduleId;
   const response = await callApiClientGenerator(
     apiUrl,
     "POST",
@@ -37,11 +33,13 @@ export async function modifyApiConfig(data, projectName, filename, operation) {
   return response;
 }
 
-export async function getApiSchemaDetails(projectName, schemaName) {
+export async function getApiSchemaDetails(projectName, schemaName, moduleId) {
   const apiUrl =
     BASE_URL +
     "/api-client-generator/fetch-schema-details/" +
     projectName +
+    "/" +
+    moduleId +
     "/" +
     schemaName;
   const schema_details = await callApiClientGenerator(

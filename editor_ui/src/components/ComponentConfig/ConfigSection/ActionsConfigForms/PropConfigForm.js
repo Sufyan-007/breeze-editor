@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button } from "react-bootstrap";
-import dataTypes from "../../../../constants/datatype";
+import { Form, Button, Row, Col } from "react-bootstrap";
+import { dataTypes } from "../../../../constants/datatype";
 import MonacoEditor from "../../../common/MonacoEditor";
 
 function PropConfigForm({ onSubmit, formData, isEditing }) {
@@ -11,6 +11,7 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
       datatype: "",
       defaultValue: "",
       description: "",
+      isRequired: false,
     },
   });
 
@@ -48,8 +49,8 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
         ...prevState,
         body: { ...prevState.body, [key]: value },
       }));
-      const error = validateField("datatype", value);
-      setErrors((prevErrors) => ({ ...prevErrors, datatype: error }));
+      const error = validateField(key, value);
+      setErrors((prevErrors) => ({ ...prevErrors, [key]: error }));
     } else {
       setFormState((prevState) => ({ ...prevState, [key]: value }));
       const error = validateField(key, value);
@@ -88,15 +89,30 @@ function PropConfigForm({ onSubmit, formData, isEditing }) {
       <div className="d-flex flex-column justify-content-between h-100">
         <div>
           <Form.Group className="mb-2" controlId="formVariableName">
-            <Form.Label>Prop Name</Form.Label>
-            <Form.Control
-              type="text"
-              name="name"
-              value={formState.name}
-              onChange={(e) => handleFormChange("name", e.target.value)}
-              placeholder="var"
-              className="form-control form-control-sm"
-            />
+            <Row>
+              <Form.Label>Prop Name</Form.Label>
+              <Col xs={9}>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  value={formState.name}
+                  onChange={(e) => handleFormChange("name", e.target.value)}
+                  placeholder="var"
+                  className="form-control form-control-sm me-2"
+                />
+              </Col>
+              <Col xs={3} className="mt-1">
+                <Form.Check
+                  type="checkbox"
+                  id="isRequired"
+                  label="Is Required"
+                  checked={formState.body.isRequired}
+                  onChange={(e) =>
+                    handleFormChange("isRequired", e.target.checked)
+                  }
+                />
+              </Col>
+            </Row>
             {errors.name && (
               <p className="mb-0" style={{ color: "#EA868F" }}>
                 {errors.name}

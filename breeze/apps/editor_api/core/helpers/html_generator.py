@@ -1,25 +1,71 @@
 from .function_code_generator import FunctionCodeGenerator
 import copy
+# from resource_handler import ResourceHandler
+
 class HTMLGenerator:
     def __init__(self,config):
         self.config = config
 
     def generateAttributeCode(self,attr, value):
-
+        
         # print("----")
         # print(value)
         val=""
         if value.get('type') == "DESTRUCTURABLE":
             return f"{{...{value.get('value')} }}"
-        if value.get('type') == 'LITERAL':
-            val= f'"{value.get("value")}"'
+        if value.get('type') in ['LITERAL','ANY']:
+            if value.get("value").startswith('{') and value.get("value").endswith('}'):
+                valueWithoutBraces = value.get('value')[1:-1]
+                val= f"{{{valueWithoutBraces}}}"
+            else:
+               val= f'"{value.get("value")}"'
         elif value.get('type') == 'OBJECT':
             val= f"{{{value.get('value')}}}"
         elif value.get('type') == 'BOOLEAN':
             val= f"{{{value.get('value')}}}"
-        
-        elif value.get('type') == 'VARIABLE':
+        elif value.get('type')=='COMPONENT':
+            #value['type'] = 'VARIABLE'
+            if value.get('importType',"") == 'custom':
+                tag =value.get('value')
+                if tag!=self.config.get('name'):
+                    #if tag not in self.config['imports']['components']:
+                    self.config['imports']['components'].append(tag)
+            elif value.get('importType',"") == 'third_party':
+                # config=self.config["html_elements"][config_id["_id"]]
+                tag =value.get('value')
+
+                imports = {
+                        "TYPE": "THIRD_PARTY",
+                        "from": "react-bootstrap",
+                        "import_entity": tag,
+                        "import_type": "SINGLE"
+                    }
+                self.config['imports']['other'].append(imports)
+                
             val= f"{{{value.get('value')}}}"
+        elif value.get('type') in ['VARIABLE', 'NUMERIC']:
+            ref = value.get("$ref",None)
+            if ref:
+                for resource in self.config["resources"]:
+                    if resource["id"]==ref:
+                        related_var_config=resource
+                        related_var_config["name"]=resource["name"]
+                        val = "{%s}" % related_var_config["name"]
+                        break
+                else:
+                    for resource in self.config["propsVars"]:
+                        if resource["id"]==ref:
+                            related_var_config=resource
+                            related_var_config["name"]=resource["name"]
+                            val = "{%s}" % related_var_config["name"]
+                            break
+                    else:
+                        raise IndexError("Could not find %s" % ref)
+            else:
+                val= f"{{{value.get('value')}}}"
+
+                
+              
         elif value.get('type') == "FUNCTION":
             print("------------FUNCTION------------")
             #  print(FunctionCodeGenerator.generate_function(value.get('value'), {}))
@@ -33,7 +79,13 @@ class HTMLGenerator:
                         related_func_config["name"]=resource["name"]
                         break
                 else:
-                    raise IndexError("Could not find %s" % ref)
+                    for resource in self.config["propsVars"]:
+                        if resource["id"]==ref:
+                            related_func_config=resource
+                            related_func_config["name"]=resource["name"]
+                            break
+                    else:
+                        raise IndexError("Could not find %s" % ref)
             else:
                 related_func_config = value.get('value')
                 related_func_config["isAnonymous"]=True
@@ -50,12 +102,13 @@ class HTMLGenerator:
         except:
             return ""
         if config.get('type') == 'Element':
-            # print(config)
+            print("ImportExample",self.config ,config)
             if config.get('elementType',"") == 'CUSTOM':
                 tag =config.get("tagName") 
                 if tag!=self.config.get('name'):
                     if tag not in self.config['imports']['components']:
                         self.config['imports']['components'].append(tag)
+                    print("ImportExample",self.config['imports']['components'])
             elif config.get('elementType',"") == 'THIRD_PARTY':
                 tag = config.get("tagName")
                 typeId = config.get("typeId")

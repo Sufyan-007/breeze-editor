@@ -30,7 +30,7 @@ function UpdateVariable({ config, update }) {
   return (
     <div className="d-flex h-100 flex-column justify-content-between">
       <Form>
-        <Form.Group controlId="varName" className="mt-3">
+        <Form.Group controlId="varName">
           <Form.Label>Variable Name</Form.Label>
           <Form.Control
             type="text"
@@ -46,7 +46,7 @@ function UpdateVariable({ config, update }) {
             onChange={(value) => updateConfig("value.value", value)}
             height="100px"
             width="100%"
-            language="json"
+            language="javascript"
             id={generateUniqueId}
           />
         </div>

@@ -21,8 +21,8 @@ function ImportApi({ show, onClose, onImport }) {
     onImport(event, fileType);
   };
   return (
-    <Modal size="lg" centered show={show}>
-      <Modal.Header className="api-client-bg-dark">
+    <Modal size="lg" centered show={show} className="rounded-0">
+      <Modal.Header className="api-client-bg-dark rounded-0">
         <Modal.Title
           id="contained-modal-title-vcenter"
           className="api-client-color-white">
@@ -141,7 +141,7 @@ function ImportApi({ show, onClose, onImport }) {
           </div>
         </div>
       </Modal.Body>
-      <Modal.Footer className="api-client-bg-dark">
+      <Modal.Footer className="api-client-bg-dark rounded-0">
         <Button onClick={onClose}>Close</Button>
       </Modal.Footer>
     </Modal>

@@ -12,7 +12,7 @@ class Url:
     url_env : str= CustomizedAttr((str),[])
     # errors = {}
     errors : dict = CustomizedAttr((dict), [])
-    # errors: dict = None
+   
     
         
 

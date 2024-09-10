@@ -9,7 +9,7 @@ import Sidebar from "./components/Sidebar";
 import DetailedComponent from "./components/DetailedComponent";
 import ReduxConfig from "./components/ReduxConfig";
 import CreateApp from "./components/CreateApp";
-import ApiClientRoot from "./features/api_client/index";
+import ApiClientRoot from "./features/api_client/components/Test";
 import ProjectPage, { projectLoader } from "./components/ProjectPage";
 import ComponentConfigPage, {
   configLoader,
@@ -18,6 +18,7 @@ import CssEditor from "./components/StylesConfiguration/CssEditor";
 import ProjectHome from "./components/ProjectHome";
 import ProjectComponents from "./components/ProjectComponents";
 import ProjectRouting from "./components/ProjectRouting";
+import RouteTreeView from "./components/ProjectRouting2";
 import Styles from "./components/StylesConfiguration/Styles";
 import Code from "./components/Code";
 import Settings from "./components/Settings/Settings";
@@ -26,6 +27,7 @@ import FolderStructureConfig from "./components/FolderStructureSection/FolderStr
 // import FolderTemplate from "./components/FolderTemplateSelect/FolderTemplate";
 import Resources from "./components/ResourcesConfiguration/Resources";
 import CustomPackage from "./components/CustomPackages/CustomPackage";
+import SchemaSettings from "./features/api_client/components/views/EditView/SchemaSettings";
 
 export const router = createBrowserRouter([
   {
@@ -35,7 +37,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ProjectHome /> },
       { path: "pages", element: <ProjectComponents /> },
-      { path: "routing", element: <ProjectRouting /> },
+      { path: "oldRoutingPage", element: <ProjectRouting /> },
+      { path: "routing", element: <RouteTreeView /> },
       { path: "services", element: <ApiClientRoot /> },
       { path: "constants", element: <ReduxConfig /> },
       { path: "folderstructure", element: <FolderStructureConfig /> },
@@ -55,6 +58,7 @@ export const router = createBrowserRouter([
       { path: "apps", element: <DependencyConfig /> },
       { path: "settings", element: <Settings /> },
       { path: "resources", element: <Resources /> },
+      { path: "schema", element: <SchemaSettings /> },
     ],
   },
   {
@@ -97,6 +101,10 @@ export const router = createBrowserRouter([
   {
     path: "editor/:projectName/service",
     element: <ApiClientRoot />,
+  },
+  {
+    path: "editor/:projectName/schema",
+    element: <SchemaSettings />,
   },
 ]);
 

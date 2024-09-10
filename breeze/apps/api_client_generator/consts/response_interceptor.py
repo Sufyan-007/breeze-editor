@@ -1,6 +1,6 @@
 RESPONSE_INTERCEPTOR = """
     // Add a response interceptor
-    api.interceptors.response.use((response) => { 
+    localInstance.interceptors.response.use((response) => { 
         // block to handle success case
         return response
     }, function (error) { 

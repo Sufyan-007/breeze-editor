@@ -90,6 +90,8 @@ class AppGenerator:
         # Set base path for the components
         self.setup_base_path_for_comps()
 
+        self.add_sandbox()
+
         # Modify main component (App.js)
         self.modify_main_component()
 
@@ -217,6 +219,80 @@ class AppGenerator:
         ProjectGenerationProgress.store_process(project_name, process_react_install, "install_specific_react_version")
         process_react_install.wait()
 
+    def add_sandbox(self):
+        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/SandBox.js", "w") as component_file:
+            component_code = """
+                import React, { useState, useEffect, Fragment } from "react";
+                const SandBox = () => {
+                    const [MyComponent, setMyComponent] = useState(() => () => <div>Sandbox</div>);
+                    const [inputVal, setInputVal] = useState("");
+                    const [componentDir, setComponentDir] = useState("");
+                    const [customProps, setCustomProps] = useState({});
+
+                    useEffect(() => {
+                        const handleMessage = (event) => {
+                            if (event.origin === "http://localhost:3000" || true) {
+                                if (event.data.type === "resource") {
+                                    const resource = event.data.resource;
+                                    if (resource.type === "component") {
+                                        setComponentDir(resource.component.containingFile);
+                                    }
+                                    if (resource.type === "props") {
+                                        setCustomProps(resource.props);
+                                    }
+                                }
+                            }
+                        };
+                        window.parent.postMessage(
+                            { source: "APP", type: "request", request: { type: "component" } },
+                            "*",
+                        );
+                        window.parent.postMessage(
+                            { source: "APP", type: "request", request: { type: "props" } },
+                            "*",
+                        );
+
+                        window.addEventListener("message", handleMessage);
+
+                        return () => {
+                            window.removeEventListener("message", handleMessage);
+                        };
+                    }, []);
+
+                    useEffect(() => {
+                        const loader = async () => {
+                            try {
+                                const comp = await import(`${componentDir}`);
+                                setMyComponent(() => comp.default || comp);
+                                console.log(comp)
+                            } catch (error) {
+                                console.error("Failed to load component:", error);
+                            }
+                        };
+
+                        if (componentDir) {
+                            loader();
+                        }
+                    }, [componentDir]);
+
+                    return (
+                        <Fragment>
+                            <div className="container-fluid" id="SandBox">
+                                
+                                <MyComponent {...customProps} id="SandBox-1-1" />
+
+                            </div>
+                        </Fragment>
+                    );
+                };
+
+                export default SandBox;
+
+            """
+
+            formatted_code = format_by_prettier(component_code)
+            component_file.write(formatted_code)
+        
 
     def modify_main_component(self):
         default_comp_config = self.comp_config[self.app_config['defaultComponent']]

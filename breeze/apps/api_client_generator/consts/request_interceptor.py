@@ -1,6 +1,6 @@
 REQUEST_INTERCEPTOR = """
     // Add a request interceptor
-    api.interceptors.request.use(
+    localInstance.interceptors.request.use(
     (config) => {
         const token = {FETCH_TOKEN};
         if (token) {
@@ -10,5 +10,7 @@ REQUEST_INTERCEPTOR = """
     },
     (error) => Promise.reject(error)
     );    
+    
+    
 """
 

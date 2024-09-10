@@ -5,6 +5,9 @@ from ..validators import required_validator
 
 @dataclass
 class ApiModel:
+    type : str = CustomizedAttr((str),[])
+    isAsync : bool = CustomizedAttr((bool),[])
+    parameters: list = CustomizedAttr((list),[])
     id : str = CustomizedAttr((str),[required_validator])
     operation_id: str = CustomizedAttr((str),[required_validator])
     tags: str = CustomizedAttr((str),[required_validator])
@@ -12,8 +15,9 @@ class ApiModel:
     response : list = CustomizedAttr(list,[required_validator])
     summary : str =  CustomizedAttr((str),[])
     is_authentication_api: bool = CustomizedAttr((bool),[])
-    # errors  = {}
+    is_open_api: bool = CustomizedAttr((bool),[])
     errors : dict = CustomizedAttr((dict), [])
+    # source: str = CustomizedAttr((str),[])
 
    
 
@@ -27,7 +31,11 @@ class ApiModel:
         for rs in self.response:
             responses.append(rs.as_dict() if rs else None) 
         
+            
         return {
+            'type': self.type,
+            'isAsync': self.isAsync,
+            'parameters': self.parameters if self.parameters else None, 
             'id': self.id,
             'operation_id': self.operation_id,
             'tags' : self.tags,
@@ -35,6 +43,7 @@ class ApiModel:
             'response': responses,
             'summary' : self.summary,
             'is_authentication_api' : self.is_authentication_api,
-            'errors': self.errors if self.errors else None
+            'is_open_api' : self.is_open_api,
+            'errors': self.errors 
         }
     

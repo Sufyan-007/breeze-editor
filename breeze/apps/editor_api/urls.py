@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AppBasicConfigReader, ConfigReader, GetAttributes
+from .views import AppBasicConfigReader, ConfigReader, GetAttributes, SchemaMapper
 from .views import ComponentWriter
 from .views import RoutingReader
 from .views import NewComponentWriter
@@ -76,6 +76,7 @@ urlpatterns = [
         
         # FUNCTION GENERATION TESTING
         path("ast-parser/",ASTParser.as_view()),
+        path("schema-mapper/",SchemaMapper.as_view()),
         
         # Resources 
         path('file-upload/', FileHandle.as_view()),

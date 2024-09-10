@@ -15,7 +15,7 @@ class ApiClientGenerator(View):
 
     def post(self, request, collectionType, appName):
         project_name = appName
-        folder_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json"
+        folder_path = f"{CONFIG_PATH}/{project_name}/api_client_intermediate_json" 
         filename = ''
         try:
             json_file = request.FILES['file']
@@ -31,6 +31,7 @@ class ApiClientGenerator(View):
                 for model in api_models:
                     model_dict[model.id] = model.as_dict()
                 full_file_path = os.path.join(folder_path, filename)
+                
                 append_to_dict_file(full_file_path,model_dict)
                 
                 return JsonResponse({"data": model_dict, "filename": filename}, status=201)
@@ -41,25 +42,40 @@ class ApiClientGenerator(View):
                 
                 ## for auth.json
                 security_schemes_models = converted_data.get("security_schemes_models")
-                auth_file = "auth.json"
+                # security_schemes_models = result.get("security_schemes_models")
+                swagger_metadata_key = converted_data.get("id")
+                swagger_metadata_config_path = f"{CONFIG_PATH}/{project_name}/swagger_metadata.json"
+                with open(swagger_metadata_config_path, "r") as file:
+                        swagger_metadata_content = json.load(file)
+                
                 auth_model_dict = {}
                 for model in security_schemes_models:
                     auth_model_dict[model.id] = model.as_dict()    
-                full_auth_file_path = os.path.join(folder_path, auth_file)
-                append_to_dict_file(full_auth_file_path,auth_model_dict)
+                swagger_metadata_content[swagger_metadata_key]["auth_apis"] = auth_model_dict
+                append_to_dict_file(swagger_metadata_config_path,swagger_metadata_content)
                 
                 ## for other models
                 tag_models = converted_data.get("tag_models")
-                resultant_filename = []
-                model_dict = {}
+                # resultant_filename = []
+                files_with_apis = []
+                api_models_folder_path = folder_path + f"/{swagger_metadata_key}"
+                if not os.path.exists(api_models_folder_path):
+                    os.makedirs(api_models_folder_path)
                 for tag, api_models in tag_models.items():
+                    function_with_errors = set()
+                    model_dict = {}
                     filename = tag+".json"
-                    full_file_path = os.path.join(folder_path, filename)
-                    resultant_filename.append(filename)
+                    full_file_path = os.path.join(api_models_folder_path, filename)
+                    # resultant_filename.append(filename)
                     for model in api_models:
-                        model_dict[model.id] = model.as_dict()
+                        model_as_dict = model.as_dict()
+                        model_dict[model.id] = model_as_dict
+                        if len(model_as_dict["errors"]["root_errors"])>0:
+                            function_with_errors.add(model.operation_id)
+                    function_with_errors_list = list(function_with_errors)
+                    files_with_apis.append({"filename": tag, "apis": model_dict, "errors": function_with_errors_list})
                     append_to_dict_file(full_file_path,model_dict)
-                return JsonResponse({"data": model_dict, "filename": resultant_filename}, status=201)
+                return JsonResponse({"files_with_apis": files_with_apis}, status=201)
             elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
                 converted_data = WebsocketConverter.prepare_api_models(json_data)
                 error_obj = converted_data.get("error_obj",{})
@@ -84,38 +100,83 @@ class ApiClientGenerator(View):
         
         
     
-    def get(self, request, projectName,files_only):
-        folder_path = f"{CONFIG_PATH}/{projectName}/generated_intermediate_json"
+    def get(self, request, projectName, files_only):
+        api_folder_path = f"{CONFIG_PATH}/{projectName}/api_client_intermediate_json"
+        auth_api_folder_path = f"{CONFIG_PATH}/{projectName}/swagger_metadata.json"
         files_with_apis = []
+        swagger_metadata = {}
 
         try:
-            # Get list of files in the folder
-            files = os.listdir(folder_path)
-            if files_only and files_only == 'true':
-                return JsonResponse({"files":  files}, status=200)
-            
-            for filename in files:
-                full_file_path = os.path.join(folder_path, filename)
-                result_arr = []
-                # Read the file
-                with open(full_file_path, "r") as file:
-                    api_models = json.load(file)
-                    for data in api_models.values():
-                        result_arr.append({
-                            "id" : data.get("id"),
-                            "operation_id" : data.get("operation_id"),
-                        })
-                filename_without_extension = os.path.splitext(filename)[0]
-
-                # Append file name and APIs to the list
-                files_with_apis.append({
-                    "filename": filename_without_extension,
-                    "apis": api_models
+            # Load authentication API data from Swagger metadata
+            auth_api_data = []
+            with open(auth_api_folder_path, "r") as file:
+                swagger_metadata = json.load(file)
+            if "custom" not in swagger_metadata:
+                swagger_metadata["custom"] = {"title": "custom_module", "description": "custom_description", "auth_apis":{}}
+                append_to_dict_file(auth_api_folder_path, swagger_metadata)
+                
+            for key, value in swagger_metadata.items():
+                apis = []
+                # if key == "custom":
+                #     continue
+                auth_apis = value.get("auth_apis", {})
+                for k, v in auth_apis.items():
+                    apis.append(v)
+                auth_api_data.append({
+                    "model_id": key,
+                    "apis": apis,
+                    "title": value.get("title")
                 })
+                
+            custom_module_path = os.path.join(api_folder_path, "custom")
+            os.makedirs(custom_module_path, exist_ok=True)
+            
+            subfolders = [f for f in os.listdir(api_folder_path) if os.path.isdir(os.path.join(api_folder_path, f))]
+            for subfolder in subfolders:
+                subfolder_path = os.path.join(api_folder_path, subfolder)
+                subfolder_data = {
+                    "subfolder": subfolder,
+                    "files": [],
+                    "title": ""
+                }
+                for key, value in swagger_metadata.items():
+                        if key == subfolder:
+                            subfolder_data["title"] = value.get("title")
+                            break
 
-            return JsonResponse({"files_with_apis": files_with_apis}, status=200)
+                # List and process files in each subfolder
+                files = [f for f in os.listdir(subfolder_path) if os.path.isfile(os.path.join(subfolder_path, f))]
+                for filename in files:
+                    full_file_path = os.path.join(subfolder_path, filename)
+                    function_with_errors = set()
+                    result_arr = []
+                    
+                    if filename != "allSchemas.json":
+                        with open(full_file_path, "r") as file:
+                            api_models = json.load(file)
+                            for data in api_models.values():
+                                data_errors = data.get('errors', {})
+                                if data_errors and len(data_errors.get("root_errors", [])) > 0:
+                                    function_with_errors.add(data.get("operation_id"))
+                                result_arr.append({
+                                    "id": data.get("id"),
+                                    "operation_id": data.get("operation_id"),
+                                })
+                    
+                    filename_without_extension = os.path.splitext(filename)[0]
+                    function_with_errors_list = list(function_with_errors)
+                    
+                    subfolder_data["files"].append({
+                        "filename": filename_without_extension,
+                        "apis": api_models,
+                        "errors": function_with_errors_list
+                    })
+
+                files_with_apis.append(subfolder_data)
+
+            return JsonResponse({"files_with_apis": files_with_apis, "auth_api_files": auth_api_data}, status=200)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-        
-        #gijson-auth.json appname
+            
+            #gijson-auth.json appname

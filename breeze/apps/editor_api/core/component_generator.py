@@ -161,6 +161,7 @@ class ComponentGenerator():
         def generate_other_var_code(var):
             datatype = var["body"].get("datatype")
             default_value = var["body"].get("defaultValue", "")
+            declaration_type = var["body"].get("declarationType", "const")
             
             if datatype == "STRING":
                 formatted_value = f'"{default_value}"'
@@ -169,53 +170,43 @@ class ComponentGenerator():
             else:
                 formatted_value = f'{default_value}'
             
-            return f'const {var.get("name")} = {formatted_value};'
+            if declaration_type == 'const' or default_value:
+                return f'{declaration_type} {var.get("name")} = {formatted_value};'
+            else:
+                return f'{declaration_type} {var.get("name")};'
                     
         props_vars_declaration = ', '.join([f'{var["name"]}={var["body"]["defaultValue"]}' if var["body"].get("defaultValue") else var["name"] for var in props_vars])
-        
+        if props_vars_declaration != "":
+            props_vars_declaration = "{" + props_vars_declaration +"}"
         import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
         
         def generate_function_code(func):
-            function_generator = FunctionParser()
+            all_resources = []
+            all_resources.extend(resources)
+            all_resources.extend(props_vars)
+            function_generator = FunctionParser(all_resources)
             function_code = function_generator.generate_statement_code(func)
             return function_code     
            
         def generate_lifecycle_code(lifecycle):
             lifecycle_type = lifecycle['body']['lifecycleType']
-            function_body = lifecycle['body'].get('functionBody', '')
-            return_body = lifecycle['body'].get('returnBody', '')
+            lifecycle_body = lifecycle['body'].get('lifecycleBody', '')
+            lifecycle_body_code = generate_function_code(lifecycle_body)
             dependent_vars = lifecycle['body'].get('dependentVars', [])
             dependencies = ', '.join(dependent_vars) if dependent_vars else ''
             
             if lifecycle_type == 'onEveryMount':
                 return f"""
-                    React.useEffect(() => {{
-                        {lifecycle['body']['functionBody']}
-                    }});
+                    React.useEffect({lifecycle_body_code});
                 """
+            elif lifecycle_type == 'onInitialMount':
+                return f"""
+                    React.useEffect({lifecycle_body_code}, []);
+                    """
             elif lifecycle_type == 'onComponentMount':
                 return f"""
-                    React.useEffect(() => {{
-                        {function_body}
-                    }}, [{dependencies}]);
+                    React.useEffect({lifecycle_body_code}, [{dependencies}]);
                     """
-            elif lifecycle_type == 'onMountAndUnmount':
-                return f"""
-                    React.useEffect(() => {{
-                        {function_body}
-                        return () => {{
-                           {return_body}
-                        }};
-                    }}, [{dependencies}]);
-                """
-            elif lifecycle_type == 'onUnmount':
-                return f"""
-                    React.useEffect(() => {{
-                        return () => {{
-                           {return_body}
-                        }};
-                    }}, [{dependencies}]);
-                """
             else:
                 raise ValueError(f"Unknown lifecycle type: {lifecycle_type}")
         
@@ -223,15 +214,12 @@ class ComponentGenerator():
             hook_name = hook['name']
             hook_type = hook['body']['type']
             hook_body = hook['body']['hookBody']
-            hook_params = hook['body'].get('hookParams', []) if hook_type == 'useCallback' else ''
-            params = ', '.join(hook_params) if hook_params else ''
+            hook_body_code = generate_function_code(hook_body)
             dependent_vars = hook['body'].get('dependentVars', [])
             dependencies = ', '.join(dependent_vars) if dependent_vars else ''
 
             hook_code = f"""
-                const {hook_name} = React.{hook_type}(({params}) => {{
-                    {hook_body}
-                }}, [{dependencies}]);
+                const {hook_name} = React.{hook_type}({hook_body_code}, [{dependencies}]);
             """
 
             return hook_code
@@ -261,7 +249,7 @@ class ComponentGenerator():
             import React, {{ useState, Fragment }} from 'react';
             {import_stats}
 
-            const {name} = ({{ {props_vars_declaration} }}) => {{
+            const {name} = ( {props_vars_declaration} ) => {{
                 {resources_code}
                 return (
                     {html_code}

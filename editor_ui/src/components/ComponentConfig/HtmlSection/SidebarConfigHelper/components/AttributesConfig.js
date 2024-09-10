@@ -16,23 +16,31 @@ const AttributesConfig = ({
   attributeOptions,
   handleSelectAttributeChange,
   customStyles,
+  getPropDataType,
+  allVariables
 }) => {
   const [checkbox, setCheckbox] = useState(false);
+  const [availableVar, setAvailablevar] = useState();
   useEffect(() => {
     if (
       inputField.type === "FUNCTION" &&
       inputField.$ref === undefined &&
       inputField.value !== ""
     ) {
-      setCheckbox(true);
-    } else if (
-      inputField.type !== "FUNCTION" &&
-      inputField.$ref !== undefined
-    ) {
-      setCheckbox(true);
+       setCheckbox(true);
     }
-  }, [inputField]);
+    else if( inputField.value!=='' && inputField.$ref === undefined )
+      setCheckbox(true);
 
+
+  }, [inputField]);
+  useEffect(() => {
+    const propDataType = getPropDataType(inputField.key)|| "STRING";
+    const filteredDatatypes = allVariables.filter((item) => {
+      return item.body.datatype.toUpperCase() === propDataType;
+    });
+    setAvailablevar(filteredDatatypes);
+  }, [allVariables, checkbox, getPropDataType]);
   return (
     <>
       {" "}
@@ -51,9 +59,10 @@ const AttributesConfig = ({
                   return {
                     ...deafult,
                     borderColor: "rgb(73, 80, 87)",
-                    backgroundColor: "#303033",
+                    backgroundColor: "#212529 ",
                     color: "white",
                     paddingRight: "0px",
+                    fontSize: "small"
                   };
                 },
 
@@ -62,6 +71,7 @@ const AttributesConfig = ({
                   marginRight: "5px",
                   paddingLeft: "0px",
                 }),
+               
               }}
               components={{
                 IndicatorSeparator: () => null,
@@ -100,16 +110,16 @@ const AttributesConfig = ({
                 Select a binding
               </option>
 
-              {availableFunctions &&
-                availableFunctions.map((functions, index) => (
-                  <option key={index} value={functions.id}>
-                    {functions.name}
+              {availableVar &&
+                availableVar.map((varData, index) => (
+                  <option key={index} value={varData.id}>
+                    {varData.name}
                   </option>
                 ))}
             </Form.Select>
           )}
           {inputField.type === "LITERAL" &&
-            (checkbox === true ? (
+            (checkbox === false ? (
               <Form.Select
                 size="sm"
                 style={{
@@ -131,8 +141,8 @@ const AttributesConfig = ({
                   Select a binding
                 </option>
 
-                {availableFunctions &&
-                  availableFunctions.map((functions, index) => (
+                {availableVar &&
+                  availableVar.map((functions, index) => (
                     <option key={index} value={functions.id}>
                       {functions.name}
                     </option>
@@ -162,6 +172,7 @@ const AttributesConfig = ({
 
                   handleAttributeChange(inputField.key, valuesString);
                 }}
+
                 styles={{
                   container: (provided) => ({
                     ...provided,
@@ -175,35 +186,73 @@ const AttributesConfig = ({
                 }}
               />
             ) : (
-              <Form.Control
-                type="text"
-                size="sm"
-                style={{ borderColor: "rgb(73, 80, 87)" }}
-                placeholder="value"
-                value={inputField?.value}
-                className="bg-dark text-light "
-                onChange={(e) => {
-                  e.preventDefault();
-                  handleAttributeChange(inputField.key, e.target.value);
-                }}
-              />
+              <MonacoEditor
+              defaultValue={inputField?.value || ""}
+              height="75px"
+             
+              onChange={(body) => {
+                handleAttributeChange(inputField.key, body);
+              }}
+              id={`Literal-${inputField.key}`}
+              placeholderText="To denote expressions, use curly braces {}"
+            ></MonacoEditor>
             ))}
-          {inputField.type === "BOOLEAN" &&
-            (checkbox === false ? (
-              <Form.Select
+
+            { inputField.type === "NUMERIC" &&
+               ( checkbox===false ?(
+                <Form.Select
                 size="sm"
-                onChange={(e) => {
-                  handleAttributeChange(inputField.key, e.target.value);
+                style={{
+                  borderColor: "rgb(73, 80, 87)",
+                  backgroundColor: "rgb(37 39 42) ",
+                  color: "white",
                 }}
-                style={{ borderColor: "rgb(73, 80, 87)" }}
-                defaultValue={true}
-                value={inputField.value || "false"}
-                //   value={selectedAttributes[attribute].value}
-                className="bg-dark text-light "
+                onChange={(event) => {
+                  addRefToAttribute(
+                    "predefined",
+                    event,
+                    inputField.key,
+                    "VARIABLE"
+                  );
+                }}
+                value={inputField.$ref}
               >
-                <option value="false">false</option>
-                <option value="true">true</option>
+                <option value="" disabled selected hidden>
+                  Select a binding
+                </option>
+
+                {availableVar &&
+                  availableVar.map((functions, index) => (
+                    <option key={index} value={functions.id}>
+                      {functions.name}
+                    </option>
+                  ))}
               </Form.Select>
+               ):<MonacoEditor
+               defaultValue={inputField?.value || ""}
+               height="75px"
+              
+               onChange={(body) => {
+                 handleAttributeChange(inputField.key, body);
+               }}
+               id={`Numeric-${inputField.key}`}
+             ></MonacoEditor>)
+
+            }
+          {inputField.type === "BOOLEAN" &&
+            (checkbox === true ? (
+              
+              <MonacoEditor
+              defaultValue={inputField?.value || ""}
+              height="75px"
+             
+              onChange={(body) => {
+                handleAttributeChange(inputField.key, body);
+              }}
+              id={`Boolean-${inputField.key}`}
+              placeholderText="Enter a boolean value or boolean expression"
+
+            ></MonacoEditor>
             ) : (
               <Form.Select
                 style={{
@@ -226,8 +275,8 @@ const AttributesConfig = ({
                   Select a binding
                 </option>
 
-                {availableFunctions &&
-                  availableFunctions.map((functions, index) => (
+                {availableVar &&
+                  availableVar.map((functions, index) => (
                     <option key={index} value={functions.id}>
                       {functions.name}
                     </option>
@@ -272,13 +321,14 @@ const AttributesConfig = ({
           )}
         </Form.Group>
         <div className="d-flex me-1">
+        <div className="checkbox-container" title="custom value"> 
+
           <Form.Check
             inline
             type="checkbox"
             style={{ marginRight: ".6rem" }}
             checked={checkbox}
             disabled={inputField.key === ""}
-            custom
             className="attribute-config-checkbox"
             onChange={() => {
               const attributeValue  = {
@@ -288,6 +338,7 @@ const AttributesConfig = ({
               setCheckbox(!checkbox);
             }}
           />
+          </div>
           <div
             className=""
             style={{

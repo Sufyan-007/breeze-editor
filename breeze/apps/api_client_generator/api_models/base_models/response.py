@@ -13,6 +13,7 @@ class Response:
     description: str = CustomizedAttr((str),[])
     schema: dict = CustomizedAttr((dict),[])
     # errors  = {}
+    token_store: dict = CustomizedAttr((dict),[])
     errors : dict = CustomizedAttr((dict), [])
 
 
@@ -30,5 +31,6 @@ class Response:
             'raw_content': self.raw_content,
             'file': self.file,
             'description': self.description,
+            'token_store': self.token_store,
             'errors': self.errors if self.errors else None
         }

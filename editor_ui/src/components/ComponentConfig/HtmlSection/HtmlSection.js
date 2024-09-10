@@ -7,6 +7,8 @@ import { useParams } from "react-router"
 import AddElements from "./AddElements"
 import ActionsConfig from "../ConfigSection/ActionsConfig"
 import { useWindowDimension } from '../../../hooks/useWindowDimension'
+import ToasterComponent from "../../../common/display/d.toast";
+import Emoji from "../../../common/display/d.emoji";
 
 export const DragContext = createContext({
   messageListener: null,
@@ -17,7 +19,7 @@ export const TestPropsContext = createContext({});
 export default function HtmlSection() {
   const { componentConfig } = useContext(ComponentContext);
   const [iframeSrc, setIframeSrc] = useState(
-    `${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port
+    `${process.env.REACT_APP_GENERATED_PROJECT_DOMAIN}:` + componentConfig.port+'/breeze/sandbox'
   );
   const srcInput = useRef();
   const [selected, setSelected] = useState(0);
@@ -27,11 +29,35 @@ export default function HtmlSection() {
     return new MessageListenerService(projectName, componentName);
   }, [projectName, componentName]);
 
+  const [toasterObject, setToasterObject] = useState({});
+  const [showToaster, setShowToaster] = useState(false);
+  const closeToaster = () => {
+    setShowToaster(false);
+    setToasterObject({});
+  };
+  const { toasterDetails, showToast } = window.history.state.usr || {};
+  
   const [testProps, setTestProps] = useState({ prop1: "xyz" });
 
   useEffect(() => {
     console.log("Testing")
   }, [iframeSrc]);
+
+  useEffect(()=>{
+    console.log(componentConfig)
+  },[componentName,componentConfig])
+  
+  useEffect(() => {
+    if (showToast) {
+      setShowToaster(true);
+      let toasterDetailsData = {...toasterDetails}
+      if (toasterDetails.emojiSymbol) {
+        toasterDetailsData = {...toasterDetailsData, toastBody: (<> <Emoji symbol={'0x1F60A'} /> {toasterDetails.toastBody}</>)}
+      } 
+      setToasterObject(toasterDetailsData);
+      window.history.replaceState({...window.history.state, usr:null}, document.title);
+    }
+  }, [showToast, toasterDetails])
 
   const setIframeSource = () => {
     const newValue = srcInput.current.value;
@@ -43,7 +69,7 @@ export default function HtmlSection() {
     }
   };
 
-  const [windowWidth, windowHeight] = useWindowDimension();
+  const {windowWidth, windowHeight} = useWindowDimension();
 
   useEffect(() => {
     const handler = (message) => {
@@ -144,19 +170,27 @@ export default function HtmlSection() {
             {selected === 0 && windowWidth ? (
               <>
                 <div className="row">
-                  <div className=" d-flex" style={{ overflowY: 'auto', height: `${(windowHeight - 154) / 2}px` }}>
+                  <div
+                    className=" d-flex"
+                    style={{
+                      overflowY: "auto",
+                      height: `${(windowHeight - 154) / 2}px`,
+                    }}
+                  >
                     <div className="col" style={{}}>
                       <HtmlTree
                         htmlId={componentName}
                         config={componentConfig}
                         className="row my-1"
-
                       />
                     </div>
                   </div>
-                  <div className=" d-flex border-top border-3 border-black" style={{ height: `${(windowHeight - 74) / 2}px` }}>
+                  <div
+                    className=" d-flex border-top border-3 border-black"
+                    style={{ height: `${(windowHeight - 74) / 2}px` }}
+                  >
                     <div className="col">
-                      <div className="m-1 h-75" >
+                      <div className="m-1 h-75">
                         <AddElements />
                       </div>
                     </div>
@@ -185,9 +219,10 @@ export default function HtmlSection() {
                 />
                 <button
                   className="Button bg-primary text-light rounded"
-                  
                   onClick={setIframeSource}
-                >GO</button>
+                >
+                  GO
+                </button>
               </div>
             </div>
             <iframe
@@ -204,6 +239,18 @@ export default function HtmlSection() {
             ></iframe>
           </div>
           <ElementConfigSidebar />
+          <ToasterComponent
+            showToaster={showToaster}
+            toastTitle={toasterObject.toastTitle || ""}
+            toastBody={toasterObject.toastBody || ""}
+            variant={toasterObject.variant}
+            bodyFontColor={toasterObject.bodyFontColor}
+            position={toasterObject.position}
+            delay={toasterObject.delay}
+            autohide={toasterObject.autohide}
+            closeButton={toasterObject.closeButton || true}
+            onClose={() => closeToaster()}
+          />
         </div>
       </DragContext.Provider>
     </TestPropsContext.Provider>

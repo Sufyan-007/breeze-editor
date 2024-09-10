@@ -5,7 +5,8 @@ import os
 import json
 
 from ..api_models import MethodsEnum,AuthApiTypeEnum,AuthTypeEnum
-
+from common.utils.app_consts import CONFIG_PATH, CONFIG_FILES_PATH
+from common.utils.config_reader import read_config_file
 from ..utils.content_type_and_mode import get_content_type_and_mode
 from ..utils.set_response_status import set_response_status
 from ..utils.jsonencoder import EnhancedJSONEncoder
@@ -13,19 +14,21 @@ from ..utils.uuid_as_key import generate_uuid_as_key
 from ..utils.api_model_loader import ApiModelLoader
 from ..api_models.custom_exception import CustomeException
 from common.utils.app_consts import CONFIG_PATH
+# from ..api.create_auth_interceptors import create_auth_interceptors
+from ..utils.append_dict_file import append_to_dict_file
 class OpenapiConverter:
     def __init__(self):
-        pass
-        
+        # self.project_name = project_name
+        pass        
 
     ## headers remaining
-    def create_request_json(self,path, path_data, operation, meta_data,security_schemes_models=[]):
+    def create_request_json(self,path, path_data, operation, meta_data,module_id,security_schemes_models=[]):
         method = operation.strip().upper()
         
         auth_data = self._create_auth_arr_json(path_data, meta_data=meta_data,security_schemes_models=security_schemes_models)
         url_data = self._create_url_json(path,meta_data)
         parameters = self._create_parameters_json(path_data.get("parameters"))
-        arr_body_data = self._create_body_arr_json(path_data.get("requestBody", {}), meta_data= meta_data)
+        arr_body_data = self._create_body_arr_json(path_data.get("requestBody", {}), meta_data= meta_data, module_id=module_id)
         request_obj = {
             "method":MethodsEnum[method].name, 
             "auth":auth_data, 
@@ -121,7 +124,7 @@ class OpenapiConverter:
         if parameter_data and len(parameter_data) > 0:
             for param in parameter_data:
                 parameters.append({
-                    "param_in": param.get("in").strip().upper(),
+                    "param_in": param.get("in","").strip(),
                     "name":param.get("name"),
                     "type":param.get("schema").get("type").strip().upper(),
                     "required":param.get("required"),
@@ -151,7 +154,7 @@ class OpenapiConverter:
     
 
     ## creat schme remaining
-    def _create_body_arr_json(self, body_data, meta_data):
+    def _create_body_arr_json(self, body_data, meta_data,module_id):
         arr_body = []
         file = None
         schema_name = None
@@ -162,7 +165,9 @@ class OpenapiConverter:
         required = False
         if body_data:
             required = body_data.get("required", False)
-            for content_type_str, content in body_data.get("content", {}).items():
+            for i, (content_type_str, content) in enumerate(body_data.get("content", {}).items()):
+                if i > 0:
+                    break  # Exit loop after the first iteration
                 content_type = content_type_str.strip().upper()
                 is_anonymous = False
                 schema = content.get("schema",{})
@@ -171,6 +176,11 @@ class OpenapiConverter:
                     'properties': {},
                     'required': []
                 }
+                if "$ref" in schema: 
+                    schema_name = schema.get("$ref",None)
+                    schema_name = schema_name.split('/')[-1]
+                # schema_id = self.get_schema_id_by_name(schema_name, module_id)
+               
                 if "$ref" in schema: 
                     schema_name = schema.get("$ref",None)
                     schema_name = schema_name.split('/')[-1]
@@ -226,7 +236,14 @@ class OpenapiConverter:
     def _create_headers(self, header_data):
         pass
     
-
+    
+    # def get_schema_id_by_name(self,schema, module_id):
+    #     schema_file_path = f"{CONFIG_PATH}/{self.project_name}/swagger_schema/{module_id}.json"
+    #     with open(schema_file_path, 'r')as file:
+    #         schema_content = json.load(file)
+    #     for key,value in schema_content.items():
+    #         if value.get("name")== schema:
+    #             return key
     ## need to complete
     def _create_schema(self, schema_name, components_schemas, seen=None):
         if seen is None:
@@ -327,16 +344,21 @@ class OpenapiConverter:
     def generate_json_for_security_schema(self,schema_name,schema_data,meta_data):
         auth_obj = {
             "tags" : "auth",
-            "auth" : None,
-            "url" : None,
+            # "url" : None,
             "body" : None,
+            # "access_token_request" : {"method" : "POST"},
+            # "refresh_token_request" : {"method" : "POST"},
             "request" : {"method" : "POST"},
+            # "access_token_response" : [],
+            # "refresh_token_response" : [],
             "response" : [],
             "token_store" : None,
             "authentication_type" : "BASIC",
-            "is_authorization_url" : False,
-            "flow" : None,
-            "token_store": None
+            # "is_authorization_url" : False,
+            # "flow" : None,
+            "token_store": None,
+            "summary":"",
+            "is_authentication_api" : False
 
         }
 
@@ -357,80 +379,95 @@ class OpenapiConverter:
             br_auth_login["auth_api_type"] = "LOGIN"
             auth_api_objects.append(br_auth_login)
 
-            br_auth_refresh = copy.deepcopy(auth_obj)            
-            br_auth_refresh["id"] = generate_uuid_as_key()
-            br_auth_refresh["operation_id"] =schema_name+"_refresh"
-            br_auth_refresh["authentication_type"] = "BEARER"
-            br_auth_refresh["auth_api_type"] = "REFRESH"
-            auth_api_objects.append(br_auth_refresh)
+            # br_auth_refresh = copy.deepcopy(auth_obj)            
+            # br_auth_refresh["id"] = generate_uuid_as_key()
+            # br_auth_refresh["operation_id"] =schema_name+"_refresh"
+            # br_auth_refresh["authentication_type"] = "BEARER"
+            # br_auth_refresh["auth_api_type"] = "REFRESH"
+            # auth_api_objects.append(br_auth_refresh)
+            
+            
+        elif schema_name.lower() == "api_key":
+            br_auth_login = copy.deepcopy(auth_obj)
+            br_auth_login["id"] = generate_uuid_as_key()
+            br_auth_login["operation_id"] =schema_name+"_login"
+            br_auth_login["authentication_type"] = "APIKEY"
+            br_auth_login["auth_api_type"] = "LOGIN"
+            auth_api_objects.append(br_auth_login)
 
-        else:
-            type = schema_data.get("type")
-            if type == "oauth2":
-                flows = schema_data.get("flows",{})
-                for flow_type,obj in flows.items():
-                    if flow_type == "implicit" or flow_type == "authorizationCode":
-                        if "authorizationUrl" in obj and obj.get("authorizationUrl") is not None:
-                            o2_auth_login = copy.deepcopy(auth_obj)
-                            o2_auth_login["id"] = generate_uuid_as_key()
-                            o2_auth_login["operation_id"] =schema_name+"_implicit"
-                            o2_auth_login["authentication_type"] = "OAUTH2"
-                            o2_auth_login["auth_api_type"] = "LOGIN"
-                            authorizationUrl = obj.get("authorizationUrl") 
-                            url = {
-                                "baseurl": authorizationUrl, 
-                                "host": [],
-                                "protocol": '', 
-                                "port": "",
-                                "path": [],
-                                "url_env":""
-                            }
-                            o2_auth_login["request"]["method"] = "POST"
-                            o2_auth_login["request"]["url"] = url                            
-                            auth_api_objects.append(o2_auth_login)
+            # br_auth_refresh = copy.deepcopy(auth_obj)            
+            # br_auth_refresh["id"] = generate_uuid_as_key()
+            # br_auth_refresh["operation_id"] =schema_name+"_refresh"
+            # br_auth_refresh["authentication_type"] = "APIKEY"
+            # br_auth_refresh["auth_api_type"] = "REFRESH"
+            # auth_api_objects.append(br_auth_refresh)
+        # else:
+        #     type = schema_data.get("type")
+        #     if type == "oauth2":
+        #         flows = schema_data.get("flows",{})
+        #         for flow_type,obj in flows.items():
+        #             if flow_type == "implicit" or flow_type == "authorizationCode":
+        #                 if "authorizationUrl" in obj and obj.get("authorizationUrl") is not None:
+        #                     o2_auth_login = copy.deepcopy(auth_obj)
+        #                     o2_auth_login["id"] = generate_uuid_as_key()
+        #                     o2_auth_login["operation_id"] =schema_name+"_implicit"
+        #                     o2_auth_login["authentication_type"] = "OAUTH2"
+        #                     o2_auth_login["auth_api_type"] = "LOGIN"
+        #                     authorizationUrl = obj.get("authorizationUrl") 
+        #                     url = {
+        #                         "baseurl": authorizationUrl, 
+        #                         "host": [],
+        #                         "protocol": '', 
+        #                         "port": "",
+        #                         "path": [],
+        #                         "url_env":""
+        #                     }
+        #                     o2_auth_login["request"]["method"] = "POST"
+        #                     o2_auth_login["request"]["url"] = url                            
+        #                     auth_api_objects.append(o2_auth_login)
 
                     
-                    elif flow_type == "password" or flow_type == "clientCredentials":
-                        if "tokenUrl" in obj and obj.get("tokenUrl") is not None:
-                            tokenUrl = obj.get("tokenUrl") 
+        #             elif flow_type == "password" or flow_type == "clientCredentials":
+        #                 if "tokenUrl" in obj and obj.get("tokenUrl") is not None:
+        #                     tokenUrl = obj.get("tokenUrl") 
                             
-                            o2_auth_login_p = copy.deepcopy(auth_obj)
-                            o2_auth_login_p["id"] = generate_uuid_as_key()
-                            o2_auth_login_p["operation_id"] =schema_name+"_password"
-                            o2_auth_login_p["authentication_type"] = "OAUTH2"
-                            o2_auth_login_p["auth_api_type"] = "LOGIN"
-                            url = {
-                                "baseurl": tokenUrl, 
-                                "host": [],
-                                "protocol": '', 
-                                "port": "",
-                                "path": [],
-                                "url_env":""
-                            }
-                            o2_auth_login_p["request"]["method"] = "POST"
-                            o2_auth_login_p["request"]["url"] = url                            
-                            authorizationUrl = obj.get("authorizationUrl") 
-                            auth_api_objects.append(o2_auth_login_p)
+        #                     o2_auth_login_p = copy.deepcopy(auth_obj)
+        #                     o2_auth_login_p["id"] = generate_uuid_as_key()
+        #                     o2_auth_login_p["operation_id"] =schema_name+"_password"
+        #                     o2_auth_login_p["authentication_type"] = "OAUTH2"
+        #                     o2_auth_login_p["auth_api_type"] = "LOGIN"
+        #                     url = {
+        #                         "baseurl": tokenUrl, 
+        #                         "host": [],
+        #                         "protocol": '', 
+        #                         "port": "",
+        #                         "path": [],
+        #                         "url_env":""
+        #                     }
+        #                     o2_auth_login_p["request"]["method"] = "POST"
+        #                     o2_auth_login_p["request"]["url"] = url                            
+        #                     authorizationUrl = obj.get("authorizationUrl") 
+        #                     auth_api_objects.append(o2_auth_login_p)
 
-                        if "refreshUrl" in obj and obj.get("refreshUrl") is not None:
-                            refreshUrl = obj.get("refreshUrl") 
-                            o2_auth_rf = copy.deepcopy(auth_obj)
-                            o2_auth_rf["id"] = generate_uuid_as_key()
-                            o2_auth_rf["operation_id"] =schema_name+"_password"
-                            o2_auth_rf["authentication_type"] = "OAUTH2"
-                            o2_auth_rf["auth_api_type"] = "LOGIN"
-                            url = {
-                                "baseurl": refreshUrl, 
-                                "host": [],
-                                "protocol": '', 
-                                "port": "",
-                                "path": [],
-                                "url_env":""
-                            }
-                            o2_auth_rf["request"]["method"] = "POST"
-                            o2_auth_rf["request"]["url"] = url                            
-                            authorizationUrl = obj.get("authorizationUrl") 
-                            auth_api_objects.append(o2_auth_rf)
+        #                 if "refreshUrl" in obj and obj.get("refreshUrl") is not None:
+        #                     refreshUrl = obj.get("refreshUrl") 
+        #                     o2_auth_rf = copy.deepcopy(auth_obj)
+        #                     o2_auth_rf["id"] = generate_uuid_as_key()
+        #                     o2_auth_rf["operation_id"] =schema_name+"_password"
+        #                     o2_auth_rf["authentication_type"] = "OAUTH2"
+        #                     o2_auth_rf["auth_api_type"] = "LOGIN"
+        #                     url = {
+        #                         "baseurl": refreshUrl, 
+        #                         "host": [],
+        #                         "protocol": '', 
+        #                         "port": "",
+        #                         "path": [],
+        #                         "url_env":""
+        #                     }
+        #                     o2_auth_rf["request"]["method"] = "POST"
+        #                     o2_auth_rf["request"]["url"] = url                            
+        #                     authorizationUrl = obj.get("authorizationUrl") 
+        #                     auth_api_objects.append(o2_auth_rf)
 
         return auth_api_objects        
 
@@ -454,28 +491,37 @@ class OpenapiConverter:
 
     ## complete        
     
-    def append_auth_json(self,auth_models, appName):
+    def append_auth_json(self,auth_model, appName,moduleId):
         ##first load existing file data into json
         # Read JSON file
         project_name = appName
-        folder_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json"
-        filename = "auth.json"
-        full_file_path = os.path.join(folder_path, filename)
+        folder_path = f"{CONFIG_PATH}/{project_name}/swagger_metadata.json"
+        # filename = "auth.json"
+        # full_file_path = os.path.join(folder_path)
         json_data = {}
-        with open(full_file_path) as fp:
+        with open(folder_path) as fp:
             json_data = json.load(fp)
-            ## append to existing json data 
-            for model in auth_models:
-                key = model.get("id")
-                json_data[key] = model
+            auth_api_data = json_data[moduleId].get("auth_apis", {})
             
+            ## append to existing json data 
+            # for model in auth_api_data:
+            #     key = model.get("id")
+            #     auth_api_data[key] = model
+            
+            auth_api_data[auth_model.get("id")] = auth_model
+            json_data[moduleId]["auth_apis"] = auth_api_data
             ## write all data back to file
-            with open(full_file_path, "w") as file:
+            with open(folder_path, "w") as file:
                 json.dump(json_data,file, cls=EnhancedJSONEncoder)
             
 
     ## complete
     def prepare_api_models(self,json_data, project_name):
+        app_config_dir = f"{CONFIG_PATH}/{project_name}"
+        app_config = read_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
+        app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
+
+        swagger_metadata_file_path = f"{app_config_dir}/swagger_metadata.json" 
         api_model_loader = ApiModelLoader()
         tag_models = {}
         security_schemes_models = []
@@ -484,14 +530,48 @@ class OpenapiConverter:
                 return 
 
             openapi_data = yaml.safe_load(json_data)
-            avalilable_schemas = openapi_data.get("components").get("schemas")
-            schema_file_path = f"{CONFIG_PATH}/{project_name}/generated_intermediate_json/allSchemas.json"
+            meta_data = openapi_data.get("info",{})
+            meta_data["auth_apis"] = {}
+            if not os.path.exists(swagger_metadata_file_path):
+                with open(swagger_metadata_file_path, "w") as file:
+                    json.dump({"custom_schemas": {"title": "custom_schemas"}}, file)
+            with open(swagger_metadata_file_path, "r") as file:
+                swagger_metadata_file_content = json.load(file)
+            swagger_metadata_id = generate_uuid_as_key()
+            swagger_metadata_file_content[swagger_metadata_id] = meta_data
+            append_to_dict_file(swagger_metadata_file_path, swagger_metadata_file_content)
+            
+            avalilable_schemas = openapi_data.get("components").get("schemas", {})
+            structured_schema_data = {}
+            for key, val in avalilable_schemas.items():
+                id = generate_uuid_as_key()
+                val["name"]= key
+                structured_schema_data[id] = val
+                
+            custom_schemas_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/custom_schemas.json"
+            if not os.path.exists(custom_schemas_file_path):
+                with open(custom_schemas_file_path, "w+") as file:
+                    json.dump({}, file)
+            schema_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/{swagger_metadata_id}.json"
+            
+            if not os.path.exists(schema_file_path):
+                with open(schema_file_path, "w+") as file:
+                    json.dump({}, file)
+            with open(schema_file_path, "w+") as file:
+                json.dump(structured_schema_data,file, cls=EnhancedJSONEncoder)
+                
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
+            
+            # create auth interceptors 
+            
+            # create_auth_interceptors( security_schemes= security_schemes, path=app_config['APP_SOURCE_DIR'] )
+                
+                
             security_schemes_models = self.handle_security_schema(security_schemes,openapi_data) #remaining
             # error_obj["auth_error"] = auth_data["auth_errors"]
             
             tags_map = self.classified_tags_and_method(openapi_data) 
-            converted_json_tags_mapping = self.convert_to_json_data_model(tags_map,openapi_data,security_schemes_models)
+            converted_json_tags_mapping = self.convert_to_json_data_model(tags_map,openapi_data, swagger_metadata_id,security_schemes_models)
             ## now load these json obj to api models
             for tag,arr_obj in converted_json_tags_mapping.items():
                 for obj in arr_obj:
@@ -503,9 +583,9 @@ class OpenapiConverter:
                             tag_models[tag] = [api_model] 
                     except Exception as e:
                         print(traceback.format_exc())
-            with open(schema_file_path, "w") as file:
-                json.dump(avalilable_schemas,file, cls=EnhancedJSONEncoder)
+            
             return  {
+                "id": swagger_metadata_id,
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,
             }
@@ -544,24 +624,31 @@ class OpenapiConverter:
     ## done
     ## it will return the tags mapping with json object of api model
     
-    def convert_to_json_data_model(self,tags_map,meta_data,security_schemes_models=[]):
+    def convert_to_json_data_model(self,tags_map,meta_data,module_id,security_schemes_models=[]):
         tag_mappings = {}
         for tag, tag_operations in tags_map.items():
             for path, operation, operation_data in tag_operations:
                 try:
+                    # from here we need to handle the single generation
+                    # if operation_data.get("requestBody").get("content")
                     request_obj = self.create_request_json(
                         path=path,
                         path_data=operation_data,
                         operation=operation,
                         meta_data=meta_data,
-                        security_schemes_models = security_schemes_models
+                        security_schemes_models = security_schemes_models,
+                        module_id=module_id
                     )
                     response_arr = self.create_response_arr_json(
                         path_data=operation_data,
                         meta_data=meta_data
                     )
+                    # parameters = self.create_function_parameters_json(request_obj)
                     id = generate_uuid_as_key()
                     api_model_obj = {
+                        "type": "FUNCTION",
+                        "isAsync": True,
+                        "parameters": [],
                         "id" : id,
                         "operation_id":operation_data.get("operationId","function_name"),
                         "tags" :tag,
@@ -592,6 +679,13 @@ class OpenapiConverter:
                         # self.errors["path_errors"][f"{path}-{operation}"].append(str(e))
                     print(traceback.format_exc())
         return tag_mappings
+    
+    # def create_function_parameters_json(self, request_data):
+    #     parameters = request_data.get('parameters')
+    #     headers = request_data.get('headers')
+    #     url = request_data.get('url')
+        
+        
 
 
 
