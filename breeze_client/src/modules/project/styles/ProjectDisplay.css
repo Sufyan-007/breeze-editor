@@ -34,7 +34,7 @@
 }
 
 .project-top-bar .btn-group .btn:hover {
-    background-color: var(--color-subtext);
+    background-color: var(--color-background);
 }
 
 .project-top-bar .second-group {

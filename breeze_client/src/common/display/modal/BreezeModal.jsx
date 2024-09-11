@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import './Modal.css';
+import './BreezeModal.css';
 
 const CustomModal = ({ isOpen, onClose, header, footer, size = 'lg', children }) => {
   if (!isOpen) return null;

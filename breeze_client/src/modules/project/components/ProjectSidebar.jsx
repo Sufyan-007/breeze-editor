@@ -1,10 +1,33 @@
+import { useState } from 'react';
+import { BreezeTreeView } from '../../../common/display';
 import SettingsIcon from '../../../assets/svgs/SettingsIcon.svg';
 import StackIcon from '../../../assets/svgs/StackIcon.svg';
 import RestartClockIcon from '../../../assets/svgs/RestartClockIcon.svg';
 import AppsIcon from '../../../assets/svgs/AppsIcon.svg';
+import treeData from '../constants/DirectoryStructure';
 import '../styles/ProjectSidebar.css';
 
 function ProjectSidebar() {
+  const [expandedNodes, setExpandedNodes] = useState({});
+  const [state1, setState1] = useState('');
+  const [state2, setState2] = useState('');
+
+  const getLogged = (val) => {
+    console.log(val);
+  };
+
+  const states = { state1, state2 };
+  const methods = { setState1, setState2, getLogged };
+
+  const toggleNode = (nodeId) => {
+    setExpandedNodes((prevExpandedNodes) => ({
+      ...prevExpandedNodes,
+      [nodeId]: !prevExpandedNodes[nodeId],
+    }));
+  };
+
+  //Remaining : dynamic directory management operations and icon mapping as per type.
+
   return (
     <>
       <div>
@@ -20,8 +43,23 @@ function ProjectSidebar() {
             </button>
           </div>
         </div>
-        <form className="sidebar-search"></form>
-        <ul className="sidebar-nav"></ul>
+        <form className="sidebar-search">
+          <input
+            className="form-control br-background-secondary"
+            type="text"
+            placeholder="Search"
+            aria-label="Search"
+          />
+        </form>
+        <ul className="sidebar-nav">
+          <BreezeTreeView
+            treeDataObject={treeData}
+            expandedNodes={expandedNodes}
+            toggleNode={toggleNode}
+            parentStates={states}
+            parentMethods={methods}
+          />
+        </ul>
       </div>
       <div className="bottom-nav py-2">
         <a href="#">

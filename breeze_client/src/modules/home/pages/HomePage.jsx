@@ -13,7 +13,7 @@ import bootstrapLogo from '../../../assets/svgs/bootstrap-logo.svg';
 import chakraUI from '../../../assets/svgs/chakra-ui-logo.svg';
 import materialUI from '../../../assets/svgs/material-ui-logo.svg';
 import reactBootstrap from '../../../assets/svgs/react-bootstrap-logo.svg';
-import CustomModal from '../../../common/modal/Modal';
+import { BreezeModal } from '../../../common/display';
 
 function HomePage() {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -83,7 +83,7 @@ function HomePage() {
         </div>
 
         {/* custom modal */}
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} header={modalHeader} footer={modalFooter}>
+        <BreezeModal isOpen={isModalOpen} onClose={closeModal} header={modalHeader} footer={modalFooter}>
           <form className="home-custom-form">
             <div className="row">
               <div className="col-md-6">
@@ -228,7 +228,7 @@ function HomePage() {
             </div>
           </form>
           <hr className="m-0" />
-        </CustomModal>
+        </BreezeModal>
       </div>
     </div>
   );
