@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from '../modules/authentication/pages/login/Login';
-import LandingPage from '../modules/landingPage/pages/LandingPage';
 import ProjectPage from '../modules/project/pages/ProjectPage';
+import HomePage from '../modules/home/pages/HomePage';
 
 const checkAccessToken = () => {
   const token = localStorage.getItem('accessToken');
@@ -15,14 +15,14 @@ export const router = createBrowserRouter([
   },
   {
     path: '/home',
-    element: <LandingPage />,
+    element: <HomePage />,
   },
   {
     path: '/login',
     element: <Login />,
   },
   {
-    path: '/project/:projectName',
+    path: '/project',
     element: <ProjectPage />,
   },
 ]);
