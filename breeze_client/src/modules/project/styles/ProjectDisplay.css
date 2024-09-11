@@ -13,14 +13,15 @@
 .project-top-bar .custom-nav .nav-link {
     padding: 3px;
     font-size: 0.625rem;
+    color: var(--color-text);
 }
 
 .project-top-bar .custom-nav .nav-link:hover {
-    background-color: rgba(165, 165, 164, 0.2);
+    background-color: var(--color-background);
 }
 
 .project-top-bar .custom-nav .nav-link.active {
-    background-color: #006EB9;
+    background-color: var(--color-blue);
     color: rgba(255, 255, 255, 0.9);
 }
 
@@ -29,13 +30,13 @@
 }
 
 .project-top-bar .btn-group .btn {
-    color: #A5A5A4;
+    color: var(--color-text);
 }
 
 .project-top-bar .btn-group .btn:hover {
-    background-color: rgba(165, 165, 164, 0.2);
+    background-color: var(--color-subtext);
 }
 
 .project-top-bar .second-group {
-    border-left: solid 2px #A5A5A4;
+    border-left: solid 2px var(--color-text);
 }
