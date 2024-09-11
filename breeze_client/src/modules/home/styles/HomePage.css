@@ -1,11 +1,13 @@
 .home-project-card {
   border: var(--project-card-border);
   border-radius: 6px;
+  cursor: pointer;
 }
 
 .home-new-card {
   border: #D8D7DD 2px dotted;
   border-radius: 6px;
+  cursor: pointer;
 }
 
 .home-badge {
@@ -41,29 +43,7 @@
   display: flex;
   flex-wrap: wrap;
   row-gap: 0.25rem;
-}
-
-.home-modal-box .home-btn:active {
-  border: none;
-}
-
-.home-modal-box .home-modal-btn {
-  display: flex;
-  align-items: center;
-}
-
-.home-modal-box .home-modal-btn:active {
-  border: none;
-}
-
-.home-modal-box:hover {
-  background-color: rgba(165, 165, 164, 0.2);
-  cursor: pointer;
-}
-
-.home-modal-box:focus {
-  background-color: rgba(165, 165, 164, 0.5);
-}
+} 
 
 .home-action-buttons {
   display: flex;

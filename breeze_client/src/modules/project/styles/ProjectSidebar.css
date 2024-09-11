@@ -34,6 +34,26 @@
     margin-bottom: 2px;
 }
 
+#sidebar .sidebar-search {
+    display: flex;
+    margin: 0.75rem 0.375rem;
+    position: relative;
+}
+
+#sidebar .sidebar-search .form-control {
+    border: none;
+}
+
+#sidebar .sidebar-search .form-control:focus {
+    border: none;
+    box-shadow: none;
+}
+
+#sidebar .sidebar-nav {
+    padding: 0;
+    overflow-y: auto;
+}
+
 #sidebar .bottom-nav {
 
     display: flex;
