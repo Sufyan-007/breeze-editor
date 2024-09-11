@@ -7,9 +7,11 @@ function Layout({ sidebar, mainContent, currentPage = 'project' }) {
       <Navbar currentPage={currentPage} />
 
       <div className="wrapper br-background-secondary">
-        <aside id="sidebar" className="br-background-primary">
-          {sidebar}
-        </aside>
+        {sidebar && (
+          <aside id="sidebar" className="br-background-primary">
+            {sidebar}
+          </aside>
+        )}
         <div className="main">
           <main className="content">{mainContent}</main>
         </div>
@@ -19,7 +21,7 @@ function Layout({ sidebar, mainContent, currentPage = 'project' }) {
 }
 
 Layout.propTypes = {
-  sidebar: PropTypes.node.isRequired,
+  sidebar: PropTypes.node,
   mainContent: PropTypes.node.isRequired,
   currentPage: PropTypes.string,
 };

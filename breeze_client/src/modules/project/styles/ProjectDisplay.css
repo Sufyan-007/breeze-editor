@@ -1,0 +1,41 @@
+.project-top-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.625rem;
+    padding: 0.75rem 0.375rem;
+}
+
+.project-top-bar .custom-nav {
+    padding: 0.18rem;
+    align-items: center;
+}
+
+.project-top-bar .custom-nav .nav-link {
+    padding: 3px;
+    font-size: 0.625rem;
+}
+
+.project-top-bar .custom-nav .nav-link:hover {
+    background-color: rgba(165, 165, 164, 0.2);
+}
+
+.project-top-bar .custom-nav .nav-link.active {
+    background-color: #006EB9;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.project-top-bar .btn-group {
+    border-radius: 0;
+}
+
+.project-top-bar .btn-group .btn {
+    color: #A5A5A4;
+}
+
+.project-top-bar .btn-group .btn:hover {
+    background-color: rgba(165, 165, 164, 0.2);
+}
+
+.project-top-bar .second-group {
+    border-left: solid 2px #A5A5A4;
+}
