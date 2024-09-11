@@ -14,6 +14,8 @@ import chakraUI from '../../../assets/svgs/chakra-ui-logo.svg';
 import materialUI from '../../../assets/svgs/material-ui-logo.svg';
 import reactBootstrap from '../../../assets/svgs/react-bootstrap-logo.svg';
 import { BreezeModal } from '../../../common/display';
+import ProjectCard from '../components/ProjectCard';
+import { router } from '../../../routes/routing';
 
 function HomePage() {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -41,6 +43,11 @@ function HomePage() {
     ],
   };
 
+  const handleOpenProject = () => {
+    setModalOpen(true);
+    router.navigate('/project');
+  };
+
   return (
     <div className="container-fluid vh-100 p-0 br-background-secondary">
       <Navbar />
@@ -51,35 +58,16 @@ function HomePage() {
         </div>
 
         <div className="row m-0 gap-2">
-          <div className="col-md-3 m-0 p-0 home-project-card br-background-primary">
-            <div className="right-side rounded pb-3">
-              <div className="d-flex justify-content-between p-3">
-                <div className="d-flex justify-content-start">
-                  <img src={VectorIcon} className="mx-2" alt="icon" />
-                  <span className="med-font text-nowrap ms-2 br-text-primary">ABDM Connector</span>
-                </div>
-                <div className="home-action-buttons">
-                  <i className="bi bi-caret-right br-text-primary"></i>
-                  <i className="bi bi-three-dots-vertical br-text-primary"></i>{' '}
-                </div>
-              </div>
-              <div className="card mx-3">
-                <img src={ABDMLoginPage} alt="ABDM Login" />
-              </div>
-            </div>
-          </div>
+          {/* Regular Project Card */}
+          <ProjectCard
+            projectName="ABDM Connector"
+            projectImageSrc={ABDMLoginPage}
+            iconSrc={VectorIcon}
+            onClick={handleOpenProject}
+          />
 
-          <div className="home-new-card col-md-3 m-0 p-0">
-            <div
-              className="home-modal-box rounded h-100 d-flex align-items-center justify-content-center"
-              onClick={openModal}
-            >
-              <button type="button" className="btn modal-btn btn-theme color-text">
-                <i className="bi bi-plus-circle br-text-primary"></i>
-                <span className="ms-1 med-font fw-bold br-text-primary">Create new project</span>
-              </button>
-            </div>
-          </div>
+          {/* Create New Project Card */}
+          <ProjectCard isCreateNew={true} onClick={openModal} />
         </div>
 
         {/* custom modal */}
@@ -121,12 +109,7 @@ function HomePage() {
                     Description
                   </label>
                   <div className="form-floating">
-                    <textarea
-                      className="form-control"
-                      placeholder="Leave a comment here"
-                      id="description"
-                      style={{ height: '100px' }}
-                    ></textarea>
+                    <textarea className="form-control" id="description" style={{ height: '100px' }}></textarea>
                   </div>
                 </div>
               </div>

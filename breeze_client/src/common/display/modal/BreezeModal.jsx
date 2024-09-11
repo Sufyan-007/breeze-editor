@@ -1,11 +1,40 @@
 import PropTypes from 'prop-types';
 import './BreezeModal.css';
+import { useEffect, useRef } from 'react';
 
 const CustomModal = ({ isOpen, onClose, header, footer, size = 'lg', children }) => {
-  if (!isOpen) return null;
+  const ref = useRef();
+
+  const handleClose = (e) => {
+    if (e.target.classList.contains('fade')) {
+      onClose();
+    }
+  };
+
+  useEffect(() => {
+    const div = ref.current;
+    if (isOpen) {
+      div.style.display = 'block';
+      setTimeout(() => {
+        div.classList.add('show');
+      }, 50);
+    } else {
+      div.classList.remove('show');
+      setTimeout(() => {
+        div.style.display = 'none';
+      }, 100);
+    }
+  }, [isOpen, ref]);
 
   return (
-    <div className={`modal modal-${size} fade show`} style={{ display: 'block' }} tabIndex="-1">
+    <div
+      className={`modal modal-${size} fade `}
+      style={{ display: 'none' }}
+      ref={ref}
+      aria-hidden={true}
+      tabIndex="-1"
+      onClick={handleClose}
+    >
       <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content p-1">
           {/* Header */}
