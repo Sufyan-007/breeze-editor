@@ -25,7 +25,7 @@ import schema from "../assets/icons/schema.svg";
 import folder from "../assets/icons/folder.svg";
 import apps from "../assets/icons/apps.svg";
 import upload from "../assets/icons/upload.svg";
-import zip from "../assets/icons/zip.png";
+import zipFileIcon from "../assets/icons/zipFileIcon.png";
 import ProjectSidebar from "./ProjectSidebar";
 import { router } from "../App";
 
@@ -65,7 +65,7 @@ export default function ProjectPage() {
     { id: 8, name: "Settings", icon: settings, path: "settings" },
     { id: 9, name: "Resources", icon: upload, path: "resources" },
     { id: 10, name: "Folder Structure", icon: folder , path:"folderstructure"},
-    { id: 12, name: "Custom Package", icon:zip, path:"custompackage"},
+    { id: 12, name: "Custom Package", icon:zipFileIcon, path:"custompackage"},
     { id: 11, name: "Schema", icon: schema, path: "schema" },
   ];
 
