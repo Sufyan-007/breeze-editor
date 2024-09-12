@@ -7,11 +7,7 @@ function Layout({ sidebar, mainContent, currentPage = 'project' }) {
       <Navbar currentPage={currentPage} />
 
       <div className="wrapper br-background-secondary">
-        {sidebar && (
-          <aside id="sidebar" className="br-background-primary">
-            {sidebar}
-          </aside>
-        )}
+        {sidebar}
         <div className="main">
           <main className="content">{mainContent}</main>
         </div>
