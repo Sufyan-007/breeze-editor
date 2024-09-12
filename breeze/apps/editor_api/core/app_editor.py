@@ -1,3 +1,4 @@
+import os, uuid
 import shutil
 import random
 import string
@@ -19,13 +20,14 @@ import copy
 import subprocess
 from .project_generation_progress import ProjectGenerationProgress
 from .helpers.dependencies_manager import DependencyManager
-
-
+from apps.api_client_generator.utils.uuid_as_key import generate_uuid_as_key
+from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
     "name": "$NAME",
-    "containingFile": "components/$NAME.js",
+    "file_id":"$FILE_ID",
+    # "containingFile":"components/$NAME",
     "propsVars": [],
     "resources": [],
     "componentType" : "CUSTOM",
@@ -98,6 +100,8 @@ class AppEditor:
     
     def __init__(self,project_name):
         # self.project_name = project_name
+        
+        self.project_name= project_name
         self.app_config_dir = f"{CONFIG_PATH}/{project_name}"
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{project_name}"
         self.read_config()
@@ -143,7 +147,7 @@ class AppEditor:
        ProjectGenerationProgress.store_process(project_name, process, "installing_dependencies")
        process.wait()
        if package_json['dependencies'].get('bootstrap') is not None:
-           DependencyManager().handle_bootstrap(app_config=self.app_config)
+           DependencyManager().handle_bootstrap(self.directory_manager.get_path_from_file_id("PROJECT_ROOT_FILE"))
 
     def update_package_in_dependencies(self, package_name, package_version):
         # Check if dependencies key exists
@@ -188,11 +192,15 @@ class AppEditor:
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
         self.app_config['APP_CONFIG_PATH'] = self.app_config_dir
+        
         # Read config of component written in component_config file
         self.comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['COMPONENT_CONFIG'])
         # Read component config from different files and prepare map of config for all
         
         self.usage_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['USAGE_CONFIG'])
+      
+        self.directory_management_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
+
         
         # self.prepare_comp_config()
         self.context_comp_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CONTEXT_COMPONENT_CONFIG'])
@@ -202,34 +210,20 @@ class AppEditor:
         self.app_config['CSS_CONFIG'] = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CSS_CONFIG'])
         # self.prepare_path_mappings() 
         
+        self.directory_manager = DirectoryManagementGenerator(self.project_name)
+        
+        self.app_root_comp_path = self.directory_manager.get_path_from_file_id("MAIN_COMPONENT") 
+        
         self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
     
     
     def modify_main_component(self):
-        default_comp_config = self.comp_config[self.app_config['defaultComponent']]
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-            component_code = f"""
-                import React from 'react';
-                {gen_single_import(default_comp_config['name'], default_comp_config['containingFile'])}
-
-                function App() {{
-                    return (
-                        <{default_comp_config['name']} />
-                    );
-                }}
-
-                export default App;
-            """
-
-            formatted_code = format_by_prettier(component_code)
-            component_file.write(formatted_code)
         route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
         react_code = route_handler.handle_routing_code()
         print("------")
         print(react_code)
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-            formatted_code = format_by_prettier(react_code)
-            component_file.write(formatted_code)
+        
+        self.directory_manager.save_file("MAIN_COMPONENT",react_code)
     
     
     
@@ -257,7 +251,8 @@ class AppEditor:
     # Triggers re-write of the <comp>.js file in generated project
     # Differes from write_components in app_generator, only for writing single specified component
     def write_component(self,comp):
-        
+        print(comp, "comp")
+       
         # Updating component_config.json
         print(comp['name'])
         used_route = comp.get('route_path', None)
@@ -266,6 +261,7 @@ class AppEditor:
         self.comp_config[comp['name']] = comp
         comp_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['COMPONENT_CONFIG']}"
         write_file(f"{comp_config_path}.json", json.dumps(self.comp_config))
+
         conf=copy.deepcopy(self.comp_config)
         
         # Writing target component in generated project 
@@ -277,6 +273,7 @@ class AppEditor:
             all_reducer_config=self.reducer_config
             # mapping_config=self.mapping_config
             )
+        print(comp_generator,"222222")
         comp_generator.write_component(comp)
         if self.usage_config == {}:
             self.usage_config = {
@@ -319,14 +316,35 @@ class AppEditor:
     # Creates a new component based on NEW_COMP_FORMAT with given name 
     # use write_component() to make changes
     def add_component(self ,name, comp_type, route_path):
+        print(name, comp_type , "name , comp_type 33333333")
         name=name.replace(' ',"")
         comp=copy.deepcopy(NEW_COMP_FORMAT)
+        
+        
+        
+        file_name = name + (".tsx" if self.app_config.get("language")=="typescript" else ".jsx")
+        
+        
+        node = self.directory_manager.add_node_to_config(
+            parent_id="COMPONENTS",
+            tag="COMPONENT",
+            node_type="FILE",
+            name=file_name
+        )
         replace_variable(comp,"$NAME",name)
+        replace_variable(comp, "$FILE_ID", node["id"])
+        
         comp["type"] = comp_type
+        # self.add_component_directory_management(file_name,file_id)
         comp["route_path"] = route_path
+        
         config=self.write_component(comp)
         
         return {"config":config, "comp":name}
+         
+            
+    
+    
     
     def post_success_function(self, config):
         # Function to run after a successful post request
@@ -344,9 +362,8 @@ class AppEditor:
         try:
             route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
             react_code = route_handler.handle_routing_code()
-            with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-                formatted_code = format_by_prettier(react_code)
-                component_file.write(formatted_code)
+            self.directory_manager.save_file("MAIN_COMPONENT",react_code)
+            
             return {'case': True, 'res' : { 'config': self.routing_config, 'helper_data' : self.routing_helper_data}}
         except Exception as e:
             print("Error while processing and saving config file.")
@@ -780,10 +797,10 @@ class AppEditor:
             "paths":{},
             "components":{"schemas":{}}
         }
-        try:
+        if os.path.exists(f"{self.app_config['APP_CONFIG_PATH']}/yaml/sample_swagger.yml"):
             with open(f"{self.app_config['APP_CONFIG_PATH']}/yaml/sample_swagger.yml") as file:
                 service_config = yaml.full_load(file)
-        except:
+        else:
             print ("Failed to load service config file")
         return service_config
     
@@ -800,4 +817,4 @@ class AppEditor:
         return service_config
     
     def write_style_files(self):
-        StyleHandler.generate_styles_code(self.app_config)
+        StyleHandler.generate_styles_code(self.app_config, self.directory_management_config)

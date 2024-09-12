@@ -7,20 +7,9 @@ import shutil
 import re
 from .files_upload_service import FileService
 # JSON input with custom configurations and default component name
-config_input = '''
-{
-    "name": "my_react_app",
-    "description": "A custom React app",
-    "author": "Your Name",
-    "defaultComponent": "MyDefaultComponent"
-}
-'''
-
-config = json.loads(config_input)
-project_name = config["name"]
 
 from common.utils.config_reader import read_config_file, read_file_json, write_file
-from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
+from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH, JSX_TEMPLATE_PATH,TSX_TEMPLATE_PATH
 from .component_generator import ComponentGenerator, gen_single_import
 from .api_client_generator import GenerateAPIClient
 from .helpers.api_parameters_mapping import APIParametersMapping
@@ -36,7 +25,7 @@ from .helpers.dependencies_manager import DependencyManager
 from .helpers.style_handler import StyleHandler
 import sys
 import pathlib
-
+from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
 # APP_CONFIG_PATH =  f"{CONFIG_PATH}/{sys.argv[1]}"
 # print("-------------", APP_CONFIG_PATH)
 
@@ -49,13 +38,15 @@ class AppGenerator:
     routing_config = None
     reducer_config = None
     redux_store_config = None
-
+    
 
     def __init__(self, app_config_dir, logo=None):
         self.app_config_dir = f"{CONFIG_PATH}/{app_config_dir}"
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{app_config_dir}"
         self.read_configs()
         self.logo = logo
+        self.directory_manager= DirectoryManagementGenerator(self.project_name)
+        
     def read_configs(self):
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
@@ -71,13 +62,14 @@ class AppGenerator:
         self.redux_store_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['REDUX_STORE_CONFIG'])
         self.app_config['MAPPINGS'] = {}
         self.app_config['CSS_CONFIG'] = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CSS_CONFIG'])
+        
+        self.project_name = self.app_config['name']
         # self.prepare_path_mappings() 
         # self.prepare_mapping_config()
 
         self.routing_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
 
     def generate_app(self):
-        project_name = self.app_config['name']
 
         # Create React App using create-react-app 
         self.create_react_app()
@@ -85,8 +77,6 @@ class AppGenerator:
         # Install dependecies
         self.install_dependencies()
        
-       #create directory
-        self.create_directory_management_file()
         # Set base path for the components
         self.setup_base_path_for_comps()
 
@@ -106,8 +96,6 @@ class AppGenerator:
         # Write css
         self.write_style_files()
 
-        # Write All components
-        self.write_components()
 
         # Write All services
         self.write_services()
@@ -181,46 +169,23 @@ class AppGenerator:
 
     def create_react_app(self):
         project_name = self.app_config['name']
-        app_config_dump = json.dumps(self.app_config)
-        process = subprocess.Popen(
-            " ".join([
-                "npx",
-                "create-react-app",
-                project_name,
-                "--template",
-                "cra-template",
-                "--use-npm",
-            ]), shell=True,
-            cwd=self.app_config["path"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            text=True,
-        )
-        ProjectGenerationProgress.store_process(project_name, process, "create_react_app")
-        process.wait()
+        destination_path = self.app_config['path']
+        src_folder = TSX_TEMPLATE_PATH if self.app_config.get("language")=="typescript" else JSX_TEMPLATE_PATH
         
-        # Step 2: Install specific versions of React, React-DOM
-        specific_version = "18.3.1"
-
-        process_react_install = subprocess.Popen(
-            [
-                "npm",
-                "install",
-                f"react@{specific_version}",
-                f"react-dom@{specific_version}"
-            ],
-            cwd=os.path.join(self.app_config["path"], project_name),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            text=True,
-        )
-        ProjectGenerationProgress.store_process(project_name, process_react_install, "install_specific_react_version")
-        process_react_install.wait()
+        for item in os.listdir(src_folder):
+            src_item = os.path.join(src_folder, item)
+            dest_item = os.path.join(destination_path, item)
+            
+            if os.path.isdir(src_item):
+                # If it's a directory, copy it recursively
+                shutil.copytree(src_item, dest_item)
+            else:
+                # If it's a file, copy it
+                shutil.copy2(src_item, dest_item)
+        
 
     def add_sandbox(self):
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/SandBox.js", "w") as component_file:
+        with open(f"{self.app_config['path']}/src/SandBox.jsx", "w") as component_file:
             component_code = """
                 import React, { useState, useEffect, Fragment } from "react";
                 const SandBox = () => {
@@ -262,7 +227,7 @@ class AppGenerator:
                     useEffect(() => {
                         const loader = async () => {
                             try {
-                                const comp = await import(`${componentDir}`);
+                                const comp = await import(`/${componentDir}`);
                                 setMyComponent(() => comp.default || comp);
                                 console.log(comp)
                             } catch (error) {
@@ -295,33 +260,18 @@ class AppGenerator:
         
 
     def modify_main_component(self):
-        default_comp_config = self.comp_config[self.app_config['defaultComponent']]
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-            component_code = f"""
-                import React from 'react';
-                {gen_single_import(default_comp_config['name'], default_comp_config['containingFile'])}
+        
 
-                function App() {{
-                    return (
-                        <{default_comp_config['name']} />
-                    );
-                }}
-
-                export default App;
-            """
-
-            formatted_code = format_by_prettier(component_code)
-            component_file.write(formatted_code)
         route_handler = RouteHandler(self.app_config, self.routing_config, self.comp_config)
         react_code = route_handler.handle_routing_code()
         print("------")
         print(react_code)
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/src/App.js", "w") as component_file:
-            formatted_code = format_by_prettier(react_code)
-            component_file.write(formatted_code)     
+        
+        self.directory_manager.save_file("MAIN_COMPONENT",react_code)
+        
 
     def setup_base_path_for_comps(self):
-        with open(f"{self.app_config['path']}/{self.app_config['name']}/jsconfig.json", "w+") as jsconfig_file:
+        with open(f"{self.app_config['path']}/jsconfig.json", "w+") as jsconfig_file:
             conf = f'''{{
                 "compilerOptions": {{
                     "baseUrl": "src"
@@ -338,23 +288,24 @@ class AppGenerator:
     def install_dependencies(self):
         project_name = self.app_config['name']
         app_dependencies = self.app_config['dependencies']
-        package_json = read_file_json(f"{self.app_config['path']}/{self.app_config['name']}/package.json")
+        package_json_path = self.directory_manager.get_path_from_file_id("PACKAGE_CONFIG")
+        
+        package_json = read_file_json(package_json_path)
 
         print(package_json)
         for dep in app_dependencies:
             package_json['dependencies'][dep] = app_dependencies[dep]  
         
-        package_json['devDependencies'] = {}
         package_json['devDependencies']['web-vitals'] = "^3.5.0"
 
-        package_json['devDependencies']['env-cmd'] = "^10.1.0"
-
-        write_file(f"{self.app_config['path']}/{self.app_config['name']}/package.json", json.dumps(package_json))
+        package_json['scripts']['dev'] = "vite --mode default"
+        package_json['name'] = self.project_name
+        self.directory_manager.save_file("PACKAGE_CONFIG",json.dumps(package_json),formatted=False)
 
         # subprocess.run(["npm", "install"], cwd=f"{self.app_config['path']}/{self.app_config['name']}")
         process = subprocess.Popen(
             " ".join(["npm", "install"]), shell=True,
-            cwd=f"{self.app_config['path']}/{self.app_config['name']}",
+            cwd=self.app_config['path'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
@@ -363,7 +314,7 @@ class AppGenerator:
         ProjectGenerationProgress.store_process(project_name, process, "installing_dependencies")
         process.wait()
         if package_json['dependencies'].get('bootstrap') is not None:
-            DependencyManager().handle_bootstrap(app_config=self.app_config)
+            DependencyManager().handle_bootstrap(self.directory_manager.get_path_from_file_id("PROJECT_ROOT_FILE"))
 
     def prepare_comp_config(self):
         comp_paths = self.read_components_configs_path()
@@ -395,116 +346,41 @@ class AppGenerator:
         redux_store_generator.write_all_store()
         
     def create_styles_file(self):
-        write_file(self.app_config["APP_SOURCE_DIR"] + "/styles.js", '')
-        
-    def create_directory_management_file(self):
-        selected_template = "temp2.json"
-
-        templates_path = f"breeze/apps/directory_management/const/{selected_template}"
-   
-        if not os.path.exists(templates_path):
-            raise FileNotFoundError(f"Template file {templates_path} does not exist")
-
-        with open(templates_path, 'r') as template_file:
-            template_content = json.load(template_file)
-
-        directory_management_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "directory_management.json")
-
-        with open(directory_management_path, 'w') as dir_mgmt_file:
-            json.dump(template_content, dir_mgmt_file, indent=4)
-        
-        #call the function to update component_config.json
-        self.update_component_config(selected_template, template_content)
-        
-        # Create directories and files based on the template
-        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
-        self.create_structure(project_path, template_content)
+        self.directory_manager.save_file("ALL_STYLES_FILE","")
      
-   
-    def update_component_config(self, selected_template, template_content):
-        components_config_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "component_config.json")
-        # Initialize an empty list to store component config
-        component_configs = []
+    #create project file structure based on the pre defined folder structure
+    # def create_directory_structure(self):
         
-        # Iterate over the template_content dictionary to find files tagged as COMPONENTS
-        for file_id, file_info in template_content.items():
+    #     directory_management_path = os.path.join(self.app_config['APP_CONFIG_PATH'], "directory_management.json")
 
-            new_id = str(uuid.uuid4())
-            if file_info['type'] == 'FILE' and file_info['tag'] == 'COMPONENTS':
-                # Extract the component name from the file name (without the .js extension)
-                component_name = os.path.splitext(file_info['name'])[0]
-              
-                component_config = {
-                    new_id: {
-                        "name": component_name,
-                        "id": component_name.upper(),
-                        "file_id":new_id,
-                        "imports": {
-                            "components": [],
-                            "other": []
-                        },
-                        "propsVars": [],
-                        "resources": [],
-                        "html": {"_id": component_name},
-                        "wrapper_store": None,
-                        "html_elements": {
-                            component_name: {
-                                "type": "Element",
-                                "elementType": "HTML",
-                                "typeId": "DIV",
-                                "tagName": "div",
-                                "attributes": {
-                                    "className": {"type": "LITERAL", "value": ""},
-                                    "id": {"type": "LITERAL", "value": ""}
-                                },
-                                "children": [{"_id": f"{new_id}-0"}]
-                            },
-                            f"{new_id}-0": {"type": "text", "text": "Hello world"}
-                        },
-                        
-                    }
-                }
-                component_configs.append(component_config)
-                print(component_configs,"combined configs")
+    #     with open(directory_management_path, 'r') as dir_mgmt_file:
+    #         structure = json.load(dir_mgmt_file)
         
-        # Load existing component_config.json if it exists
-        existing_config = {}
-        if os.path.exists(components_config_path):
-            with open(components_config_path, 'r') as comp_config_file:
-                existing_config = json.load(comp_config_file)
+    #     base_path = os.path.join(self.app_config['path'], self.app_config['name'])
+    #     # Create a map of ID to path
+    #     id_to_path = {}
 
-        # Update existing_config with new component_configs
-        for config in component_configs:
-            existing_config.update(config)
+    #     for item_id, item in structure.items():
+    #         # Create the path based on lineage
+    #         path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
+    #         print(path_parts,"path parts")
+    #         current_path = os.path.join(*path_parts)
+    #         print(current_path,"current path")
 
-        # Write updated component_config.json
-        with open(components_config_path, 'w') as comp_config_file:
-            json.dump(existing_config, comp_config_file, indent=4)
-       
-    def create_structure(self, base_path, structure):
-        # Create a map of ID to path
-        id_to_path = {}
+    #         if item['type'] == 'DIRECTORY':
+    #             os.makedirs(current_path, exist_ok=True)
+    #         elif item['type'] == 'FILE':
+    #             # Create a file 
+    #             with open(current_path, 'w') as file:
+    #                 file.write(f"// {item['name']} content")
 
-        for item_id, item in structure.items():
-            # Create the path based on lineage
-            path_parts = [base_path] + [structure[ancestor]['name'] for ancestor in item['lineage']] + [item['name']]
-            current_path = os.path.join(*path_parts)
+    #         # Map the ID to the created path
+    #         id_to_path[item_id] = current_path
 
-            if item['type'] == 'DIRECTORY':
-                os.makedirs(current_path, exist_ok=True)
-            elif item['type'] == 'FILE':
-                # Create a file 
-                with open(current_path, 'w') as file:
-                    file.write(f"// {item['name']} content")
-
-            # Map the ID to the created path
-            id_to_path[item_id] = current_path
-
-        print("Project structure created successfully.")
+    #     print("Project structure created successfully.")
 
     def modify_index_html_with_project_name(self):
-        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
-        index_html_path = os.path.join(project_path, 'public', 'index.html')
+        index_html_path = self.directory_manager.get_path_from_file_id("INDEX_HTML")
     
         # Modify the index.html to reference the new project name
         with open(index_html_path, 'r') as index_file:
@@ -521,15 +397,14 @@ class AppGenerator:
 
 
     def modify_index_html_with_logo(self):
-        project_path = os.path.join(self.app_config['path'], self.app_config['name'])
-        index_html_path = os.path.join(project_path, 'public', 'index.html')
+        index_html_path =  self.directory_manager.get_path_from_file_id("INDEX_HTML")
 
         logo_id = self.app_config.get('logo')
         logo_file_name = self.app_config.get('logo_file_name', 'default.ico')  
         project_name = self.app_config['name']
 
         # Define the public logo path
-        public_logo_path = os.path.join(project_path, 'public', logo_file_name)
+        public_logo_path = os.path.join(self.app_config['path'], 'public', logo_file_name)
 
         if logo_id:
             # Download the file
@@ -544,10 +419,11 @@ class AppGenerator:
                     index_content = index_file.read()
 
                 modified_content = re.sub(
-                    r'<link rel="icon" href="%PUBLIC_URL%/.*?" />',
-                    f'<link rel="icon" href="%PUBLIC_URL%/{logo_file_name}" />',
-                    index_content
+                r'<link rel="icon" type="image/svg\+xml" href=".*?" />',
+                f'<link rel="icon" type="image/svg+xml" href="/{logo_file_name}" />',
+                index_content
                 )
+
 
                 with open(index_html_path, 'w') as index_file:
                     index_file.write(modified_content)
@@ -566,10 +442,11 @@ class AppGenerator:
                 index_content = index_file.read()
 
             modified_content = re.sub(
-                r'<link rel="icon" href="%PUBLIC_URL%/.*?" />',
-                '<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />',
-                index_content
+            r'<link rel="icon" type="image/svg\+xml" href=".*?" />',
+            '<link rel="icon" type="image/svg+xml" href="/vite.svg" />',
+            index_content
             )
+
 
             with open(index_html_path, 'w') as index_file:
                 index_file.write(modified_content)

@@ -15,7 +15,6 @@ const AddNewEnvironment = ({ envVariables, envNames, onSubmit, onClose, resetFor
     }
   }, [resetForm]);
 
-  
   const handleEnvNameChange = (e) => {
     const value = e.target.value;
     const isValid = /^[a-zA-Z0-9]+$/.test(value);

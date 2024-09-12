@@ -4,10 +4,10 @@ class DependencyManager:
     def __init__(self):
         pass
 
-    def handle_bootstrap(self, app_config):
+    def handle_bootstrap(self, root_comp_path):
         import_line = "import 'bootstrap/dist/css/bootstrap.css';"
         
-        with open(f"{app_config['path']}/{app_config['name']}/src/index.js", "r+") as component_file:
+        with open(root_comp_path, "r+") as component_file:
             print(component_file)
             file_code = component_file.read()
 

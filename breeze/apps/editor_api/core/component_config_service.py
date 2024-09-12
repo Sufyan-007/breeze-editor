@@ -56,21 +56,23 @@ class ComponentConfigService:
     
     def add_child_html(self,component,parent_html_id,child):
         parent_html= self.comp_config.get(component).get("html_elements").get(parent_html_id)
-        if parent_html["elementType"] =="HTML" or parent_html["elementType"] =="THIRD_PARTY" or parent_html["element"]=="CUSTOM":
-            print(parent_html)
-            children = parent_html["children"]
-            new_elem_id = parent_html_id+"-"+ str(max([int(child["_id"].split("-")[-1]) for child in children],default=0)+1)
-            
-            child_config = HtmlConfigGenerator.generate_config(child,new_elem_id)
-            children.append({"_id":new_elem_id})
-            self.comp_config[component]["html_elements"][new_elem_id] = child_config
+        if parent_html["type"]=="Element":
+            if parent_html["elementType"] =="HTML" or parent_html["elementType"] =="THIRD_PARTY" or parent_html["element"]=="CUSTOM":
+                print(parent_html)
+                children = parent_html["children"]
+                new_elem_id = parent_html_id+"-"+ str(max([int(child["_id"].split("-")[-1]) for child in children],default=0)+1)
                 
-            appEditor=AppEditor(self.projectId)
-            appEditor.write_component(self.comp_config.get(component))
-            return new_elem_id,child_config,parent_html
+                child_config = HtmlConfigGenerator.generate_config(child,new_elem_id)
+                children.append({"_id":new_elem_id})
+                self.comp_config[component]["html_elements"][new_elem_id] = child_config
+                    
+                appEditor=AppEditor(self.projectId)
+                appEditor.write_component(self.comp_config.get(component))
+                return new_elem_id,child_config,parent_html
+            else:
+                raise NotImplementedError()
         else:
             raise NotImplementedError()
-
     def generate_id(self, resource_type):
         type_map = {
             "propsVars": "PROP_VARS",
