@@ -1,0 +1,80 @@
+{
+    "SRC": {
+      "name": "src",
+      "lineage": [],
+      "id": "SRC",
+      "tag": "ROOT",
+      "type": "DIRECTORY"
+    },
+    "COMPONENTS": {
+      "name": "components",
+      "lineage": ["SRC"],
+      "id": "COMPONENTS",
+      "tag": "COMPONENTS",
+      "type": "DIRECTORY"
+    },
+    "DEFAULT_COMP":{
+        "name":"Main.jsx",
+        "lineage":["SRC","COMPONENTS"],
+        "id": "DEFAULT_COMP",
+        "tag":"COMPONENTS",
+        "type":"FILE"
+    },
+    "SERVICES": {
+      "name": "services",
+      "lineage": ["SRC"],
+      "id":"SERVICES",
+      "tag": "SERVICES",
+      "type": "DIRECTORY"
+    },
+    "PROJECT_ROOT_FILE": {
+      "name": "main.jsx",
+      "lineage": ["SRC"],
+      "id": "PROJECT_ROOT_FILE",
+      "tag": "ROOT",
+      "type": "FILE"
+    },
+    "MAIN_COMPONENT": {
+      "name": "App.jsx",
+      "lineage": ["SRC"],
+      "id": "MAIN_COMPONENT",
+      "tag": "ROOT",
+      "type": "FILE"
+    },
+    "ASSETS": {
+      "name": "assets",
+      "lineage": ["SRC"],
+      "id": "ASSETS",
+      "tag": "ASSETS",
+      "type": "DIRECTORY"
+    },
+    "PACKAGE_CONFIG":{
+        "name":"package.json",
+        "lineage":[],
+        "id":"PACKAGE_CONFIG",
+        "tag":"PACKAGE_CONFIG",
+        "type":"FILE"
+    },
+    "INDEX_HTML":{
+        "name":"index.html",
+        "lineage":[],
+        "id":"INDEX_HTML",
+        "tag":"INDEX_HTML",
+        "type":"FILE"
+    },
+    "STYLES": {
+      "name": "styles",
+      "lineage": ["SRC"],
+      "id": "STYLES",
+      "tag": "STYLES",
+      "type": "DIRECTORY"
+    },
+    "ALL_STYLES_FILE":{
+      "name":"styles.js",
+      "lineage":[],
+      "id":"ALL_STYLES_FILE",
+      "tag":"ALL_STYLES_FILE",
+      "type":"FILE"
+  }
+  }
+  

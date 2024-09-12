@@ -13,6 +13,7 @@ from .views import ProjectDetailsConfig
 from .views import AppStartup
 from .core import consumers
 from .views import ComponentReader
+from .views import ComponentPath
 # from .views import CSSConfig
 # from .views import CSSConfigReader
 # from .views import CSSFileDownloadView
@@ -32,6 +33,7 @@ from .views import ResourceConfig
 from .views import EnvironementSettings
 from .views import SetEnvironment
 from .views import ASTParser
+from .views import CustomPackage
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -39,6 +41,7 @@ urlpatterns = [
         path('write-config/<str:param>/',ComponentWriter.as_view()),
         path('read-router-config/<str:param>/',RoutingReader.as_view()),
         path('add-component/<str:param>/',NewComponentWriter.as_view()),
+       
         path('handle-base-route/<str:param>/',RoutingWriter.as_view()),
         path('handle-child-route/<str:param>/',ChildRouteHandler.as_view()),
         path('read-reducers/<str:param>/',ReducerConfig.as_view()),
@@ -54,6 +57,7 @@ urlpatterns = [
         path('update-project-details/',ProjectDetailsConfig.as_view()),
         path('run-project/<str:param>/',AppStartup.as_view()),
         path('get-components/<str:param>/',ComponentReader.as_view()),
+        path('get-file-path/<str:param>/',ComponentPath.as_view()),
         path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
         
         ## New APIs 
@@ -86,5 +90,9 @@ urlpatterns = [
 
         path('environment-settings/<str:projectName>', EnvironementSettings.as_view()),
         path('set-environment/<str:projectName>', SetEnvironment.as_view()),
+        
+        #custom packages 
+        path('custom-package-upload/<str:projectName>',CustomPackage.as_view()),
+        
 ]
 

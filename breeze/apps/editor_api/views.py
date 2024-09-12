@@ -26,7 +26,7 @@ from .core.helpers.function_ast_parser import FunctionParser
 from .core.app_generator import AppGenerator
 from .core.helpers.schema_mapper import get_schema_mapping
 from .core.environment_settings_config_service import EnvironmentSettingsConfigService 
-
+from .core.custom_package_service import CustomPackageService
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
     def post(self, request, projectName):
@@ -147,14 +147,15 @@ class RoutingReader(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class NewComponentWriter(APIView):
     def post(self, request, param):
+        print(param,"param when new component added ")
         data = json.loads(request.body.decode("utf-8"))
+        print(data["name"],data["type"],"1111111")
         try:
             app_component_writer = AppEditor(param)
             res = app_component_writer.add_component(
-                data["name"], data["type"], data['route'])
-            print("djfvnskjvnsri",res)
+                data["name"], data["type"], data["route"])
             update_components()
-
+            print(res,"see the response for add component")
             return JsonResponse(res)
         except:
             return JsonResponse({}, status=500)
@@ -329,7 +330,6 @@ class ProjectConfig(APIView):
 
         data['defaultComponent'] = "Main"
         data["projectName"] = data["name"]
-        # data["selectedTemplate"]= data["selectedTemplate"]
         data["name"] = data['name'].lower().replace(" ", "_")
         path = data["projectPath"]
         data["current_environment"] = ""
@@ -337,7 +337,7 @@ class ProjectConfig(APIView):
             os.path.dirname(os.getcwd()), path)
 
         # os.makedirs(generated_paths,exist_ok=True)
-        data["path"] = os.path.join(generated_paths)
+        data["path"] = os.path.join(generated_paths,data["name"])
         if (data["name"] in GenerateProject.get_projects().keys()):
             return JsonResponse({"error": "Application name should be unique."}, status=400)
        
@@ -411,16 +411,16 @@ class ProjectDetailsConfig(APIView):
 
                 # renaming all the affected folders
                 try:
-                    os.rename(f"{old_config['path']}/{old_config['name']}",
-                      f"{old_config['path']}/{app_basic_config['name']}")
-                    os.rename(f"{CONFIG_PATH}/{old_config['name']}", f"{CONFIG_PATH}/{app_basic_config['name']}")
+                    os.rename(f"{old_config['path']}",
+                      f"{old_config['path']}")
+                    os.rename(f"{CONFIG_PATH}", f"{CONFIG_PATH}")
 
                     # renaming the project's name in its package.json & package-lock.json files
                     package_json_path = os.path.join(
-                        f"{app_basic_config['path']}/{app_basic_config['name']}", 'package.json'
+                        f"{app_basic_config['path']}", 'package.json'
                     )
                     package_lock_json_path = os.path.join(
-                        f"{app_basic_config['path']}/{app_basic_config['name']}", 'package-lock.json'
+                        f"{app_basic_config['path']}", 'package-lock.json'
                     )
 
                     with open(package_json_path, 'r') as package_json_file:
@@ -511,6 +511,15 @@ class ComponentReader(APIView):
         except:
             return JsonResponse({}, status=404)
 
+class ComponentPath(APIView):
+    def get(self,request, param):
+        try:
+            config_reader = ConfigService(param)
+            file_path_info = config_reader.get_file_path()
+            return JsonResponse(file_path_info,status=200)
+        except:
+            return JsonResponse({}, status=404)
+        
 @method_decorator(csrf_exempt, name='dispatch')
 class StylesConfig(APIView):
     def post(self, request):
@@ -739,6 +748,7 @@ class ComponentConfigWriter(APIView):
             data = json.loads(request.body.decode("utf-8"))
             project_id = data["projectId"]
             component_id = data["componentId"]
+            
             if not project_id or not component_id:
                 return JsonResponse({"error": "project_id and component_id are required"}, status=400)
             
@@ -900,10 +910,62 @@ class SetEnvironment(APIView):
             env_name = data.get('environmentName')
             environment_settings_service = EnvironmentSettingsConfigService(projectName)
             environment_settings_service.set_environment(env_name)
-            if env_name == "default (.env)":
+            if env_name == "dev (default)":
                 return JsonResponse({'status': 'success', 'message': 'Environment default has been set as active'}, status=200)
 
             return JsonResponse({'status': 'success', 'message': f'Environment {env_name} has been set as active'}, status=200)
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': 'Server error'}, status=500)
+        
+class CustomPackage(APIView):
+    def post(self,request, projectName):
+        try:
+            file = request.FILES.get('file')
+            print(file,"file")
+            fileName = request.POST.get("filename")
+            print(fileName,"fileName")
+            if not file:
+                return JsonResponse({'error': 'No file provided.'}, status=400)
+            
+            CustomPackageService.upload_file(file,fileName, projectName)
+            return JsonResponse({
+                'message':'File uploaded successfully',
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error':str(e)},status=500)
+            
+    def get(self,request,  projectName):
+        try:
+            if not projectName:
+                return JsonResponse({'error': 'Project name is required.'}, status=400)
+
+            else:
+                print("inside else")
+                # Retrieve all custom packages for the project
+                zip_files_info = CustomPackageService.get_zip_files(projectName)
+
+                return JsonResponse(zip_files_info, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete(self, request, projectName):
+        try:
+            data= json.loads(request.body)
+            fileName = data.get("fileName")
+            
+            if not projectName:
+                return JsonResponse({'error':'project name required'}, status=400)
+            
+            if not fileName:
+                return JsonResponse({'error':'file name is required'},status= 400)
+            
+            custom_service = CustomPackageService()
+            custom_service.delete_file(fileName,projectName)
+            
+            return JsonResponse({
+                'message':"File deleted successfully"
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error':str(e)}, status=500)
+            
