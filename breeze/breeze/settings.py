@@ -25,8 +25,6 @@ SECRET_KEY = 'django-insecure-hh4qly@tb_ebux-dwzbzxikco5+!%=0$phbk9^%%w-@3(1hfr^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,6 +40,7 @@ INSTALLED_APPS = [
     'apps.configuration_reader',
     'apps.code_generator',
     'apps.api_client_generator',
+    'apps.authentication',
     'rest_framework_swagger',       # Swagger 
     'drf_yasg',
     "corsheaders",
@@ -63,6 +62,17 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = False
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'apps.authentication.authentication.CustomTokenAuthentication',
+    ),
+    # uncomment below class when we need to run all APIs only after being 
+    # authenticated so that no one can access APIs if he/she isn't logged in 
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -72,7 +82,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'allow_cidr.middleware.AllowCIDRMiddleware'
 ]
 
