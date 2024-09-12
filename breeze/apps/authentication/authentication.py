@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 import json
+import uuid
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from .utils import get_auth_file_path
@@ -16,7 +17,7 @@ class CustomTokenAuthentication(BaseAuthentication):
         auth_file_path = get_auth_file_path()
 
         try:
-            with open(auth_file_path, 'r') as file:
+            with open(auth_file_path, 'r+') as file:
                 auth_data = json.load(file)
         except FileNotFoundError:
             return None
@@ -27,10 +28,21 @@ class CustomTokenAuthentication(BaseAuthentication):
 
         expiry = datetime.fromisoformat(token_data['expiry'])
         if timezone.now() > expiry:
+            # Generate a new token and transfer the existing data
+            new_token = str(uuid.uuid4())
+            token_data['expiry'] = (timezone.now() + timedelta(hours=1)).isoformat()  # Update expiry or adjust as needed
+            auth_data[new_token] = token_data
+            
+            # Delete the old token
             del auth_data[token]
-            with open(auth_file_path, 'w') as file:
-                json.dump(auth_data, file)
-            raise AuthenticationFailed('Token has expired.')
+            
+            # Save the updated auth_data back to the file
+            file.seek(0)
+            json.dump(auth_data, file)
+            file.truncate()
+            
+            # Raise an authentication error with the new token, so the client knows they need to update
+            raise AuthenticationFailed({'message': 'Token has expired. Use new token.', 'new_token': new_token})
 
         return (token_data['username'], None)
 
