@@ -1,6 +1,7 @@
 import '../styles/ProjectDisplay.css';
+import PropTypes from 'prop-types';
 
-function TopBar() {
+function TopBar({ onTabChange, activeTab }) {
   return (
     <div className="br-background-primary rounded project-top-bar">
       <div className="col-md-4 d-xl-block d-none">
@@ -10,14 +11,13 @@ function TopBar() {
         <ul className="nav nav-pills custom-nav rounded br-background-secondary" id="pills-tab" role="tablist">
           <li className="nav-item me-2" role="presentation">
             <button
-              className="nav-link"
+              className={`nav-link ${activeTab === 'code' ? 'active' : ''}`}
               id="pills-home-tab"
-              data-bs-toggle="pill"
-              data-bs-target="#pills-home"
               type="button"
               role="tab"
               aria-controls="pills-home"
-              aria-selected="false"
+              aria-selected={activeTab === 'code'}
+              onClick={() => onTabChange('code')}
             >
               <i className="bi bi-code-slash me-1"></i>
               Code
@@ -25,14 +25,13 @@ function TopBar() {
           </li>
           <li className="nav-item" role="presentation">
             <button
-              className="nav-link active"
+              className={`nav-link ${activeTab === 'preview' ? 'active' : ''}`}
               id="pills-profile-tab"
-              data-bs-toggle="pill"
-              data-bs-target="#pills-profile"
               type="button"
               role="tab"
               aria-controls="pills-profile"
-              aria-selected="true"
+              aria-selected={activeTab === 'preview'}
+              onClick={() => onTabChange('preview')}
             >
               <i className="bi bi-eye me-1"></i>
               Preview
@@ -77,5 +76,10 @@ function TopBar() {
     </div>
   );
 }
+
+TopBar.propTypes = {
+  onTabChange: PropTypes.func,
+  activeTab: PropTypes.string,
+};
 
 export default TopBar;
