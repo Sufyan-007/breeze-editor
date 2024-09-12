@@ -24,8 +24,6 @@ SECRET_KEY = 'django-insecure-hh4qly@tb_ebux-dwzbzxikco5+!%=0$phbk9^%%w-@3(1hfr^
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-# turn DEBUG = False for testing authentication 
-
 
 # Application definition
 

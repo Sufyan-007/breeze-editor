@@ -3,6 +3,7 @@ from django.utils import timezone
 import json
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from .utils import get_auth_file_path
 
 class CustomTokenAuthentication(BaseAuthentication):
     def authenticate(self, request):
@@ -12,9 +13,10 @@ class CustomTokenAuthentication(BaseAuthentication):
             return None
 
         token = token.replace('Token ', '')
+        auth_file_path = get_auth_file_path()
 
         try:
-            with open('path/to/auth.json', 'r') as file:
+            with open(auth_file_path, 'r') as file:
                 auth_data = json.load(file)
         except FileNotFoundError:
             return None
@@ -26,7 +28,7 @@ class CustomTokenAuthentication(BaseAuthentication):
         expiry = datetime.fromisoformat(token_data['expiry'])
         if timezone.now() > expiry:
             del auth_data[token]
-            with open('path/to/auth.json', 'w') as file:
+            with open(auth_file_path, 'w') as file:
                 json.dump(auth_data, file)
             raise AuthenticationFailed('Token has expired.')
 
