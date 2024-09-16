@@ -1,0 +1,1 @@
+1. manage json configs for specific project
