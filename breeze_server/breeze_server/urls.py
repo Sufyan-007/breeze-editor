@@ -30,15 +30,14 @@ schema_view = get_schema_view(
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('code-generator/', include('apps.code_generator.urls')),
     path('client-app-generator/', include('apps.client_app_generator.urls')),
-    path('project/', include('apps.project.urls')),
-    path('config/', include('apps.project_config.urls')),
-    path('route/', include('apps.route.urls')),
-    path('usage/', include('apps.usage.urls')),
+    path('project/', include('apps.project_management.urls')),
+    path('config/', include('apps.project_config_management.urls')),
+    path('route/', include('apps.route_management.urls')),
+    path('usage/', include('apps.usage_management.urls')),
     path('directory-management/',include('apps.directory_management.urls')),
     path('api/auth/',include('apps.authentication.urls')),
     
