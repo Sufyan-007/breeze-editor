@@ -84,11 +84,6 @@ function RenderObject({
     updateParent(null, null);
   };
   const [isExpanded, setIsExpanded] = useState(false);
-  // const cardStyle = {
-  //   backgroundColor: isExpanded ? "#343a40" : "#212529",
-  //   border: "1px solid rgba(128, 128, 128, 0.5)",
-  //   marginLeft: marginLeft,
-  // };
   const cardStyle = {
     backgroundColor: cardStyles[depth % cardStyles.length].backgroundColor,
     border: `1px solid ${cardStyles[depth % cardStyles.length].borderColor}`,
@@ -135,10 +130,15 @@ function RenderObject({
                   <option value="string">String</option>
                   <option value="integer">Integer</option>
                   <option value="array">Array</option>
-                  <option value="object">Object</option>
+                  <option value="any">Any</option>
+                  {schemaList && schemaList.map((name, index) => (
+                      <option key={index} value={name.name}>
+                        {name.name}
+                      </option>
+                    ))}
                 </Form.Control>
               </div>
-              {val.type !== "object" ? (
+              {val.type === "string" || val.type === "integer" ? (
                 <div style={{ width: "30%" }}>
                   {/* <Form.Label>Example:</Form.Label> */}
                   <Form.Control
@@ -154,32 +154,35 @@ function RenderObject({
                     }}
                   />
                 </div>
-              ) : (
-                <div style={{ width: "30%" }}>
-                  {/* <Form.Label>Object Type:</Form.Label> */}
-                  <Form.Control
-                    as="select"
-                    className="text-white"
-                    size="sm"
-                    style={{
-                      backgroundColor: "#212529",
-                      border: "1px solid rgba(128, 128, 128, 0.5)",
-                    }}
-                    value={val.objectType}
-                    onChange={(e) =>
-                      handleChanges("objectType", e.target.value)
-                    }>
-                    <option value="">Select</option>
-                    <option value="any">Any</option>
-                    <option value="custom">Custom</option>
-                    {schemaList && schemaList.map((name, index) => (
-                      <option key={index} value={name.name}>
-                        {name.name}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </div>
-              )}
+              ) :
+              //  (
+              //   <div style={{ width: "30%" }}>
+              //     {/* <Form.Label>Object Type:</Form.Label> */}
+              //     <Form.Control
+              //       as="select"
+              //       className="text-white"
+              //       size="sm"
+              //       style={{
+              //         backgroundColor: "#212529",
+              //         border: "1px solid rgba(128, 128, 128, 0.5)",
+              //       }}
+              //       value={val.objectType}
+              //       onChange={(e) =>
+              //         handleChanges("objectType", e.target.value)
+              //       }>
+              //       <option value="">Select</option>
+              //       <option value="any">Any</option>
+              //       <option value="custom">Custom</option>
+              //       {schemaList && schemaList.map((name, index) => (
+              //         <option key={index} value={name.name}>
+              //           {name.name}
+              //         </option>
+              //       ))}
+              //     </Form.Control>
+              //   </div>
+              // )
+              null
+              }
             </>
           ) : (
             <span>{name}</span>

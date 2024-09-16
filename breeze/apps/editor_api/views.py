@@ -1,6 +1,5 @@
 
-import subprocess
-import threading
+import subprocess, requests, threading
 from django.http import JsonResponse, Http404, FileResponse
 import json
 from .core.app_editor import AppEditor
@@ -26,6 +25,7 @@ from .core.helpers.function_ast_parser import FunctionParser
 from .core.app_generator import AppGenerator
 from .core.helpers.schema_mapper import get_schema_mapping
 from .core.environment_settings_config_service import EnvironmentSettingsConfigService 
+from .core.custom_package_service import CustomPackageService
 
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
@@ -45,7 +45,15 @@ class AddPackage(APIView):
             
             # Add the package and version to the app_basic_config.json file
             app_editor.add_package_to_dependencies(package_name, package_version)
-            
+        
+            #external Api call 
+            api_url = "http://127.0.0.1:4000/"
+            payload = {
+                "fileName":package_name,
+                "fileVersion":package_version
+            }
+            trigger_api(api_url, payload)
+
             return JsonResponse({'message': 'Package added successfully'}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
@@ -907,3 +915,80 @@ class SetEnvironment(APIView):
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': 'Server error'}, status=500)
+        
+class CustomPackage(APIView):
+    def post(self,request, projectName):
+        try:
+            file = request.FILES.get('file')
+            fileName = request.POST.get("filename")
+            if not file:
+                return JsonResponse({'error': 'No file provided.'}, status=400)
+            
+            #upload the file
+            CustomPackageService.upload_file(file,fileName, projectName)
+            
+            #after the file is uploaded , call the express API
+            api_url = "http://127.0.0.1:4000/custom"
+            payload = {
+                "projName":projectName, 
+                "zipFileName":fileName
+            }
+            trigger_api(api_url, payload)
+            
+            print("returning response to user ")
+            return JsonResponse({'message': 'File uploaded successfully'}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'error':str(e)},status=500)
+            
+    def get(self,request,  projectName):
+        try:
+            if not projectName:
+                return JsonResponse({'error': 'Project name is required.'}, status=400)
+
+            else:
+                print("inside else")
+                # Retrieve all custom packages for the project
+                zip_files_info = CustomPackageService.get_zip_files(projectName)
+
+                return JsonResponse(zip_files_info, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete(self, request, projectName):
+        try:
+            data= json.loads(request.body)
+            fileName = data.get("fileName")
+            
+            if not projectName:
+                return JsonResponse({'error':'project name required'}, status=400)
+            
+            if not fileName:
+                return JsonResponse({'error':'file name is required'},status= 400)
+            
+            custom_service = CustomPackageService()
+            custom_service.delete_file(fileName,projectName)
+            
+            return JsonResponse({
+                'message':"File deleted successfully"
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({'error':str(e)}, status=500)
+
+
+def call_external_api_async(api_url, payload):
+    print("starting api call in background")
+    try:
+        response = requests.post(api_url, json=payload)
+        if response.status_code == 200:
+            print("external api call successful")
+        else:
+            print(f"Failed to call external API: {response.text}")
+    except Exception as e:
+        print(f"Error during external API call: {str(e)}")
+    print("API call finished")
+    
+def trigger_api(api_url, payload):
+    print("Triggering API call in background thread...")
+    threading.Thread(target=call_external_api_async,args=(api_url,payload)).start()
+        

@@ -8,3 +8,4 @@ channels
 tinycss2
 django-allow-cidr
 flatten-json
+PyExecJS

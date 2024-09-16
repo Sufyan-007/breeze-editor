@@ -105,10 +105,11 @@ class SchemaSettings(View):
         try:
             data = json.loads(request.body.decode("utf-8"))
             schema_details = data.get("details")
+            schema_name = schema_details.get("name")
             # schema_file_path = os.path.join(CONFIG_PATH, projectName, "swagger_schema",".json")
             schema_file_path = f"{CONFIG_PATH}/{projectName}/swagger_schema/{moduleId}.json"
             
-            if not schema_details.get("name"):
+            if not schema_name:
                 return JsonResponse({"error": "Schema Name is required "})
             try:
                 with open(schema_file_path, "r") as file:
@@ -119,8 +120,14 @@ class SchemaSettings(View):
             if schema_id:
                 if schema_id not in schema_data:
                     return JsonResponse({"error": f"Schema '{schema_details.get('name')}' not found for editing"})
+                for key, value in schema_data.items():
+                    if value.get("name") == schema_name:
+                        return JsonResponse({"error": f"Schema '{schema_details.get('name')}' already exists"})
                 schema_data[schema_id] = schema_details
             else:
+                for key, value in schema_data.items():
+                    if value.get("name") == schema_name:
+                        return JsonResponse({"error": f"Schema '{schema_details.get('name')}' already exists"})
                 id = generate_uuid_as_key()
                 schema_data[id] = schema_details
             append_to_dict_file(schema_file_path, schema_data)

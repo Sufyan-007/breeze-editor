@@ -231,7 +231,7 @@ class AppGenerator:
 
                     useEffect(() => {
                         const handleMessage = (event) => {
-                            if (event.origin === "http://localhost:3000") {
+                            if (event.origin === "http://localhost:3000" || true) {
                                 if (event.data.type === "resource") {
                                     const resource = event.data.resource;
                                     if (resource.type === "component") {

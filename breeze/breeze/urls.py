@@ -41,7 +41,10 @@ urlpatterns = [
     path('api/swagger', schema_view.with_ui('swagger', cache_timeout=0),
          name='schema-swagger-ui'),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
-    path('directory-management/',include('apps.directory_management.urls'))
+    path('directory-management/',include('apps.directory_management.urls')),
+    path('api/breeze-core/',include('apps.breeze_core.urls')),
+    path('api/auth/',include('apps.authentication.urls')),
+    
 ]
 
 

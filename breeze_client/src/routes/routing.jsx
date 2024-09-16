@@ -1,26 +1,28 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from '../modules/authentication/pages/login/Login';
-import LandingPage from '../modules/landingPage/pages/LandingPage';
-import TestingSelectField from '../modules/justTestingNewComponents/TestingSelectField';
-import TestingComponent from '../common/form_builder/TestingComponent';
+import ProjectPage from '../modules/project/pages/ProjectPage';
+import HomePage from '../modules/home/pages/HomePage';
+
+const checkAccessToken = () => {
+  const token = localStorage.getItem('accessToken');
+  return token !== null;
+};
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <LandingPage />,
+    element: checkAccessToken() ? <Navigate to="/home" /> : <Navigate to="/login" />,
   },
   {
-    path: '/TestingComps',
-    children: [
-      { path: 'selectField', element: <TestingSelectField /> },
-      {
-        path: 'form-builder',
-        element: <TestingComponent />,
-      },
-    ],
+    path: '/home',
+    element: <HomePage />,
   },
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/project',
+    element: <ProjectPage />,
   },
 ]);
