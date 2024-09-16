@@ -108,3 +108,7 @@
   display: flex;
   align-items: center;
 }
+
+.br-offcanvas {
+  z-index: 10001 !important;
+}
