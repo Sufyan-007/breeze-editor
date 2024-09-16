@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 
-function CustomCheckBoxField({ name, onChange, className, value, ...rest }) {
+function CustomCheckBoxField({ name, onChange, className, value, config, ...rest }) {
   return (
-    <div className={className?.wrapper}>
-      <label className={className?.label}>{name}</label>
+    <div className={className ? className : config.className}>
+      <label className={className ? className : config.className}>{name}</label>
       <input type="checkbox" name={name} checked={value} onChange={onChange} {...rest} />
     </div>
   );

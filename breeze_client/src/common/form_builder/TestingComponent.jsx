@@ -1,64 +1,81 @@
 import { useEffect, useState } from 'react';
 import CustomFormBuilder from './CustomFormBuilder';
-import { sampleMap, loginMappings } from './mappings/TestMappings';
-
+import { lifeCycleConfigMapping, NestedMapping } from './mappings/TestMappings';
 const TestingComponent = () => {
-  const [userData, setUserData] = useState({
+  const [user, setUser] = useState({
     name: '',
-    age: 0,
     role: '',
-    gender: '',
-    subscribed: false,
+    age: 90,
+    interests: ['a', 'b', 'c'],
+    sampleRecord: {
+      a: 'abv',
+      b: 'abvasd',
+      c: 'ghjk',
+    },
   });
-  const [loginData, setLoginData] = useState({
-    username: '',
-    password: '',
-    rememberMe: true,
+  const [formErrors, setFormErrors] = useState([]);
+  const [formState, setFormState] = useState({
+    name: '',
+    type: 'lifecycle',
+    body: {
+      lifecycleType: 'onInitialMount',
+      dependentVars: [],
+      lifecycleBody: {
+        name: '',
+        type: 'function',
+        parameters: [],
+        isAnonymous: true,
+        isAsync: false,
+        bodyConfig: {
+          type: 'BLOCK',
+          statements: [],
+        },
+      },
+      description: '',
+    },
   });
-
-  const handleFormValueChange = ({ name, value }) => {
-    setUserData((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
-  };
-  const handleLoginChange = ({ name, value }) => {
-    setLoginData((prevValues) => ({
-      ...prevValues,
-      [name]: value,
+  const handleFormChange = (key, value) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      body: {
+        ...prevState.body,
+        [key]: value,
+      },
     }));
   };
   useEffect(() => {
-    console.log(userData, 'new user data');
-    console.log(loginData, 'new login data');
-  }, [userData, loginData]);
+    // console.log(user, 'new user data');
+    console.log(formState, 'formstate');
+  }, [formState]);
 
-  const customStyles = {
-    form: 'login-custom-form',
-    fieldWrapper: 'login-form-box',
-    label: 'login-text login-med-font mb-1 br-text-primary',
-    input: 'form-control',
-    button: { padding: '8px 16px', fontSize: '16px', backgroundColor: 'gray' },
-    select: { padding: '8px', fontSize: '16px' },
-  };
+  function someFunc() {
+    setUser((state) => {
+      state.role = 'admin';
+      state.name = 'John';
+      state.interests = ['a', 'b', 'c'];
+      return { ...state };
+    });
+  }
 
   return (
     <div>
       <h1>Custom Form Builder</h1>
       <h2>Sample</h2>
       <CustomFormBuilder
-        config={sampleMap}
-        formValues={userData}
-        onFormValueChange={handleFormValueChange}
-        styles={customStyles}
+        config={NestedMapping}
+        value={user}
+        otherStates={{ MyCondition: formErrors.length < 0 }}
+        metaData={user}
+        onChange={setUser}
       />
-      <h2>Login Form</h2>
-      <CustomFormBuilder
-        config={loginMappings}
-        formValues={loginData}
-        onFormValueChange={handleLoginChange}
-        styles={customStyles}
-      />
+      {/* <CustomFormBuilder
+        config={lifeCycleConfigMapping}
+        value={formState}
+        otherStates={null}
+        metaData={formState}
+        onChange={setFormState}
+      /> */}
+      <button onClick={someFunc}>Reset States</button>
     </div>
   );
 };
