@@ -44,8 +44,9 @@ const EnvironmentSettings = () => {
   const [tempEnvName, setTempEnvName] = useState(""); 
   const containerRef = useRef(null);
   const { projectName } = useParams();
-  const defaultEnvName = "default (.env)";
-  const prefix = "REACT_APP_";
+  const defaultEnvName = "dev (default)";
+  const prefix = 'VITE_'
+
 
 
   const handleEditEnvName = (envName) => {
@@ -129,7 +130,7 @@ const EnvironmentSettings = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await getAppBasicConfig(projectName);
-      setSelectedEnvName(data.current_environment || "default (.env)");
+      setSelectedEnvName(data.current_environment || "dev (default)");
       fetchEnvironments();
     };
 
@@ -605,8 +606,7 @@ const EnvironmentSettings = () => {
           envVariables={envVariables}
           envNames={envNames}
           onSubmit={handleOffcanvasSubmit}
-          onClose={() => setIsOffcanvasOpen(false)}
-          resetForm={!isOffcanvasOpen}
+          onClose={()=>setIsOffcanvasOpen(false)}
         />
       </Offcanvas>
       <Toast
