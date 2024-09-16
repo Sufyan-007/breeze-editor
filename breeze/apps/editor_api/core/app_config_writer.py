@@ -1,8 +1,9 @@
-from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
+from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH, TSX_DIRECTORY_CONFIG,JSX_DIRECTORY_CONFIG
 from common.utils.file_helper import read_json_file, write_file, create_parent_dir_if_not_exists
 import json,os
 from common.utils.request_code import REQUEST
 from .generate_project import GenerateProject
+from apps.api_client_generator.utils.uuid_as_key import generate_uuid_as_key
 from .app_startup_manager import start_app
 
 class AppConfigWriter:
@@ -58,7 +59,7 @@ class AppConfigWriter:
             app_config['defaultComponent'] : {
                 "name": app_config['defaultComponent'],
                 "id":app_config['defaultComponent'].upper(),
-                "containingFile": f"components/{app_config['defaultComponent']}.js",
+                "file_id":"DEFAULT_COMP",
                 "imports": {
                     "components": [
                     ],
@@ -91,6 +92,40 @@ class AppConfigWriter:
 
         write_file(f"{comp_config}.json", json.dumps(main_comp_config))
 
+    def create_directory_management_file(self,app_config):
+        if app_config.get('languages') =="typescript":
+            template_path=TSX_DIRECTORY_CONFIG
+        else:
+            template_path= JSX_DIRECTORY_CONFIG
+        
+        
+        if not os.path.exists(template_path):
+            raise FileNotFoundError(f"Template file {template_path} does not exist")
+
+        with open(template_path, 'r') as template_file:
+            template_content = json.load(template_file)
+            
+        app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
+        
+        directory_management_path =  f"{app_config_dir}/{CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT']}.json"
+        print(directory_management_path,"directory management file path")
+        with open(directory_management_path, 'w') as dir_mgmt_file:
+            json.dump(template_content, dir_mgmt_file, indent=4)
+        
+    def update_directory_management_file(self,app_config):
+        app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
+        directory_management_path =  f"{app_config_dir}/{CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT']}"
+        
+        directory_management_config = read_json_file(directory_management_path)
+        
+        default_comp_name = app_config['defaultComponent']+ (".tsx" if app_config.get("language") == "typescript" else ".jsx")
+        
+        directory_management_config["DEFAULT_COMP"]["name"] = default_comp_name
+        
+        write_file(f"{directory_management_path}.json", json.dumps(directory_management_config))
+        
+        
+    
     def create_or_update_app_config(self, data):
         if data["name"]=="":
             raise ValueError("Name must be specified")
@@ -108,7 +143,7 @@ class AppConfigWriter:
 
         # Read old config
         try:
-            app_current_config = read_json_file(app_config_path)
+            app_current_config = read_json_file(app_config_path,return_empty=True)
         except FileNotFoundError as e:
             print(e)
             app_current_config = {}
@@ -129,9 +164,12 @@ class AppConfigWriter:
         # write configuration
             
         write_file(f"{app_config_path}.json", json.dumps(app_current_config))
-
-        self.write_basic_main_comp_config(app_current_config)
-
+        
+        self.create_directory_management_file(app_current_config)
+        
+        self.update_directory_management_file(app_current_config)
+        self.write_basic_main_comp_config(app_current_config )
+        
         self.write_basic_config_files(app_current_config)
 
         GenerateProject.generate_project(app_current_config, app_current_config.get("logo"))

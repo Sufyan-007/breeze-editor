@@ -12,13 +12,13 @@ class EnvironmentSettingsConfigService:
         self.app_config_dir = f"{CONFIG_PATH}/{project_name}"
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         self.config_file_path = os.path.join(self.app_config_dir, 'environment_settings.json')
-        self.env_directory = os.path.join(self.app_config['path'], self.app_config['name'])
-        self.package_json_path = os.path.join(f"{self.app_config['path']}/{self.app_config['name']}", 'package.json')
+        self.env_directory = os.path.join(self.app_config['path'])
+        self.package_json_path = os.path.join(f"{self.app_config['path']}", 'package.json')
         
     def save_file(self, env_name, env_values, env_vars):
         try:
-            env_file_path = os.path.join(self.env_directory, f"{env_name}.env")
-            if env_name == 'default (.env)':
+            env_file_path = os.path.join(self.env_directory, f".env.{env_name}")
+            if env_name == 'dev (default)':
                 env_file_path = os.path.join(self.env_directory, ".env")
             create_parent_dir_if_not_exists(os.path.dirname(env_file_path))
             with open(env_file_path, 'w') as file:
@@ -38,24 +38,15 @@ class EnvironmentSettingsConfigService:
 
             scripts = package_json_data.get("scripts", {})
 
-            # Get the old and new environment names from the config
-            old_env_name = config.get("old_env_name")
-            new_env_name = config.get("new_env_name")
+            environments = config.get("environments", {})
 
-            if old_env_name:
-                # Remove the old environment script if it exists
-                old_script_name = f"start:{old_env_name}"
-                if old_script_name in scripts:
-                    del scripts[old_script_name]
-
-            package_json_data["scripts"] = scripts
-
-            if new_env_name and new_env_name != 'default (.env)':
-                # Add or update the new environment script
-                new_script_name = f"start:{new_env_name}"
-                command = f"env-cmd -f {new_env_name}.env react-scripts start"
-                if new_script_name not in scripts:
-                    scripts[new_script_name] = command
+            for env_name in environments.keys():
+                script_name = f"start:{env_name}"
+                if env_name == 'default (.env)':
+                    continue
+                command = f"env-cmd -f {env_name}.env react-scripts start"
+                if script_name not in scripts:
+                    scripts[script_name] = command
 
             package_json_data["scripts"] = scripts
 
@@ -276,7 +267,7 @@ class EnvironmentSettingsConfigService:
 
     def delete_config(self, env_name):
         try:
-            if env_name == 'default (.env)':
+            if env_name == 'dev (default)':
                 raise Exception("Cannot delete the default environment")
     
             if env_name == self.app_config.get('current_environment'):
@@ -287,7 +278,7 @@ class EnvironmentSettingsConfigService:
             if env_name in config["environments"]:
                 del config["environments"][env_name]
                 self.write_config_file(self.config_file_path, config)
-                env_file_path = os.path.join(self.env_directory, f"{env_name}.env")
+                env_file_path = os.path.join(self.env_directory, f".env.{env_name}")
                 if os.path.exists(env_file_path):
                     os.remove(env_file_path)
                 self.remove_script_from_package_json(env_name)

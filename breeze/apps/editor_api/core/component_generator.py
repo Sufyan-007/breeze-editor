@@ -6,6 +6,11 @@ from .helpers.html_generator import HTMLGenerator
 from .helpers.import_helper import ImportHelper
 from .helpers.api_parameters_mapping import APIParametersMapping
 from .helpers.function_ast_parser import FunctionParser
+from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from common.utils.file_utils import create_parent_dir_if_not_exists
+from common.utils.formatter import format_raw_val
+
+
 
 def generate_imports_code(component_config, all_config,all_store_config,all_reducer_config):
     # print(component_config)
@@ -60,25 +65,54 @@ def gen_single_import(import_name, file_path):
         import_statement = f'import {import_name} from \'{comp_path}\';'
         return import_statement
 
-from common.utils.file_utils import create_parent_dir_if_not_exists, get_dir_path_from_file
-from common.utils.app_consts import NEW_LINE_CHAR
-from common.utils.formatter import format_val,format_raw_val
+
 
 
 class ComponentGenerator():
-    app_config = None
-    src_dir = None
+    
+    def __new__(cls, app_config, all_comp_config,all_context_comp_config={},all_store_config={},all_reducer_config={}):
+        if cls is ComponentGenerator:
+            if app_config.get('language') =="typescript":
+                return ComponentGenerator_TSX(app_config, all_comp_config,all_context_comp_config,all_store_config,all_reducer_config)
+            else:
+                return ComponentGenerator_JSX(app_config, all_comp_config,all_context_comp_config,all_store_config,all_reducer_config)
+        return super().__new__(cls)
+    
+    def __init__(self, app_config, all_comp_config,all_context_comp_config={},all_store_config={},all_reducer_config={}):
+        if not hasattr(self, '_initialized'):
+            self._initialized = True
+            super().__init__(app_config, all_comp_config,all_context_comp_config,all_store_config,all_reducer_config)
+
+    def write_all_components(self):
+        raise NotImplementedError()
+    
+    def write_all_contexts(self):
+        raise NotImplementedError()
+    
+    def write_component(self, comp_config):
+        raise NotImplementedError()
+
+    def generate_react_component_code(self, config):
+        raise NotImplementedError()
+
+
+
+from .component_generator_tsx import ComponentGenerator_TSX
+
+class ComponentGenerator_JSX(ComponentGenerator):
 
     def __init__(self, app_config, all_comp_config,all_context_comp_config={},all_store_config={},all_reducer_config={}):
-        self.app_config = app_config
-        self.all_comp_config = all_comp_config
-        self.all_store_config = all_store_config
-        self.all_context_comp_config = all_context_comp_config
-        self.src_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
-        self.app_config['APP_SOURCE_DIR'] = self.src_dir 
-        self.all_reducer_config = all_reducer_config
-        # self.mapping_config = mapping_config
-        self.components_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
+        if not hasattr(self, '_initialized'):
+            self._initialized = True
+            self.app_config = app_config
+            self.all_comp_config = all_comp_config
+            self.all_store_config = all_store_config
+            self.all_context_comp_config = all_context_comp_config
+            self.src_dir = f"{app_config['path']}/{app_config['components_src_dir']}"
+            self.app_config['APP_SOURCE_DIR'] = self.src_dir 
+            self.all_reducer_config = all_reducer_config
+            # self.mapping_config = mapping_config
+            self.components_dir = f"{app_config['path']}/{app_config['components_src_dir']}"
 
     def write_all_components(self):
         configs =  list(self.all_comp_config.values())
@@ -93,28 +127,29 @@ class ComponentGenerator():
             self.write_component(component_config)
     
     def write_component(self, comp_config):
+    
+        #generate react component code
         react_component_code = self.generate_react_component_code(comp_config)
-        # print(react_component_code)
-
-        # Get the output file name from the JSON configuration
-        output_file = f"{self.src_dir}/{comp_config['containingFile']}"
-
-        # print("REACTCOMPONENT")
-        # print(react_component_code)
-
-        formatted_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=react_component_code, text=True)
-        # formatted_code = react_component_code
         
-        # Create parent dir if not exists
-        create_parent_dir_if_not_exists(output_file)
-
-        # print("output file", output_file)
-        # Write the component code to the specified output file
-        with open(output_file, 'w') as file:
-            file.write(formatted_code)
-
-
-        # print(f"React component code has been written to '{react_component_code}'")
+        file_id = comp_config.get("file_id")
+        
+        directory_management_service = DirectoryManagementGenerator(self.app_config["name"])
+        directory_management_service.save_file(file_id,react_component_code)
+        # # file_path = directory_management_service.get_path_from_file_id(file_id)
+        # # Get the output file name from the JSON configuration
+        # output_file = f"{self.src_dir}/{comp_config['containingFile']}"
+        # output_file = f"{file_path}"
+        # # print("REACTCOMPONENT")
+        # # print(react_component_code)
+        # formatted_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=react_component_code, text=True)
+        # # formatted_code = react_component_code
+        # # Create parent dir if not exists
+        # create_parent_dir_if_not_exists(output_file)
+        # # print("output file", output_file)
+        # # Write the component code to the specified output file
+        # with open(output_file, 'w') as file:
+        #     file.write(formatted_code)
+        print(f"React component code has been written to '{react_component_code}'")
 
     def generate_react_component_code(self, config):
         # component_uuid = config['component_uuid']

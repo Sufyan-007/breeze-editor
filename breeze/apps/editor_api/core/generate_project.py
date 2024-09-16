@@ -3,7 +3,7 @@ import subprocess,os,shutil
 from common.utils.config_reader import read_config_file
 from .app_generator import AppGenerator 
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
-class GenerateProject:
+class   GenerateProject:
     def __init__(self):
         pass
 

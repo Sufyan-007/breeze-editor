@@ -21,7 +21,14 @@ CONFIG_FILES_PATH = {
     'USAGE_CONFIG' : 'usage_config',
     'SWAGGER_CONFIG' : 'swagger_metadata',
     'ENVIRONMENT_SETTINGS' : 'environment_settings',
+    'DIRECTORY_MANAGEMENT':'directory_management'
 }
+
+
+JSX_TEMPLATE_PATH = "project_templates/jsx_template"
+TSX_TEMPLATE_PATH = "project_templates/tsx_template"
+JSX_DIRECTORY_CONFIG = "project_templates/jsx_directory.json"
+TSX_DIRECTORY_CONFIG = "project_templates/tsx_directory.json"
 
 NEW_LINE_CHAR = "\n"
 

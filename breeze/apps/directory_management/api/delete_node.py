@@ -8,6 +8,8 @@ class DeleteNode(View):
 
         config_path = os.path.join(CONFIG_PATH, projectName, 'directory_management.json')
         component_config_path =os.path.join(CONFIG_PATH, projectName, 'component_config.json')
+        uploaded_resources_config_path = os.path.join(CONFIG_PATH, projectName, 'uploaded_resources_config.json')
+        
         
         # Load the current folder configuration from the JSON file
         with open(config_path, 'r') as file:
@@ -48,7 +50,20 @@ class DeleteNode(View):
                 # Save the updated component configuration back to the JSON file
                 with open(component_config_path, 'w') as component_file:
                     json.dump(component_data, component_file, indent=4)
+            
+            # Check if the node_id exists in uploaded_resources_config.json and delete it
+            try:
+                with open(uploaded_resources_config_path, 'r') as uploaded_resources_file:
+                    uploaded_resources_data = json.load(uploaded_resources_file)
+            except FileNotFoundError:
+                uploaded_resources_data = {}
 
+            if str(node_id) in uploaded_resources_data:
+                del uploaded_resources_data[str(node_id)]
+
+                # Save the updated uploaded_resources_config.json
+                with open(uploaded_resources_config_path, 'w') as uploaded_resources_file:
+                    json.dump(uploaded_resources_data, uploaded_resources_file, indent=4)
             
             return JsonResponse({'status': 'success', 'message': 'Node and its children deleted successfully'})
         else:
