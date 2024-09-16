@@ -1,1 +1,0 @@
-1. pass any json config and create react code from it

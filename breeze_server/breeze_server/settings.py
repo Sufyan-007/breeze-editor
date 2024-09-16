@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.authentication',
     'apps.code_generator',
-    'apps.react_app_generator',
+    'apps.client_app_generator',
     'apps.directory_management',
     'apps.project_management',
     'apps.project_config_management',
