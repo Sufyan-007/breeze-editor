@@ -19,7 +19,9 @@ const uploadZipFile = async (formData, projectName) => {
     }
     submitData.append("file", formData.file);
 
+    
     try {
+ 
       const response = await fetch(
         `${BASE_URL}/editor/custom-package-upload/${projectName}`,
         {

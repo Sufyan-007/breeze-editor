@@ -327,7 +327,7 @@ export default function CreateApp({ ...props }) {
                           Language
                         </option>
                         <option value="javascript">Javascript</option>
-                        <option value="typescript" disabled>
+                        <option value="typescript">
                           TypeScript
                         </option>
                       </select>
