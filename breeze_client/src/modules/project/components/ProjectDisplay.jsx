@@ -12,7 +12,6 @@ function ProjectDisplay() {
   };
 
   useEffect(() => {
-    console.log('projectTheme::>>', projectTheme);
     setCodeEditorTheme(projectTheme);
   }, [projectTheme]);
 
