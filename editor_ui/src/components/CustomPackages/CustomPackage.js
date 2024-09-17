@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router";
-import { Table, Toast } from "react-bootstrap";
+import { Table,Toast } from "react-bootstrap";
 import CustomPackageModel from "./CustomPackageModel";
 import {
   uploadZipFile,
   fetchZipFiles,
-  deleteFile,
+  deleteFile
 } from "../../services/CustomPackageService";
 import deleteicon from "../../assets/icons/delete-trash.svg";
+import { get, set } from "react-hook-form";
 import ConfirmationModal from "../common/ConfirmationModal";
 
 function CustomPackage() {
   const [showToast, setShowToast] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const[ showDeleteModal, setShowDeleteModal] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [zipFiles, setZipFiles] = useState({});
   const [fileToDelete, setFileToDelete] = useState(null);
@@ -91,8 +92,8 @@ function CustomPackage() {
       setFileToDelete(null);
     }
   };
-
-  console.log(zipFiles, "zip files");
+ 
+console.log(zipFiles,"zip files")
   return (
     <div>
       <div className="container-fluid text-white">

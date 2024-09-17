@@ -1,23 +1,27 @@
 from common.utils.path_extractor import get_path_without_ext
+from ....directory_management.core.directory_management_service import DirectoryManagementGenerator
 
 class ImportHelper:
     def __init__(self):
         pass
 
     @staticmethod
-    def generate_imports_code(component_config, all_config,all_store_config, all_reducer_config, app_configs={}):
+    def generate_imports_code(component_config, all_config,all_store_config, all_reducer_config, app_config={}):
         # print(component_config)
         imported_components = component_config['imports'].get('components',[])
         imported_store = component_config['imports'].get('store',[]) 
     
         import_statements = []
+        
+        directory_management_service = DirectoryManagementGenerator(app_config["name"])
 
         # Handle import for components
         for ic in imported_components:
             related_comp = all_config[ic]
-            comp_path = get_path_without_ext(related_comp['containingFile'])
+            path = directory_management_service.get_path_from_file_id(related_comp["file_id"],relative_path=True)
+            comp_path = get_path_without_ext(path)
 
-            import_statement = f'import {related_comp["name"]} from \'{comp_path}\';'
+            import_statement = f'import {related_comp["name"]} from \'/{comp_path}\';'
             import_statements.append(import_statement)
 
         # Handle import for redux store
@@ -67,7 +71,7 @@ class ImportHelper:
 
             print("CSSSSSSSSSS")
             if imp['TYPE'] == 'CUSTOM':
-                imp_path = app_configs['CSS_CONFIG'][imp['from']]['containingFile']
+                imp_path = app_config['CSS_CONFIG'][imp['from']]['containingFile']
                 import_statement = f'import \'{imp_path}\' ; '
 
                 import_statements.append(import_statement)

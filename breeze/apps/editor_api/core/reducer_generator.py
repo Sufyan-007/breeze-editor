@@ -16,7 +16,7 @@ class ReducerGenerator():
     def __init__(self, app_config, all_reducer_config):
         self.app_config = app_config
         self.all_reducer_config = all_reducer_config
-        self.reducer_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
+        self.reducer_dir = f"{app_config['path']}/{app_config['components_src_dir']}"
 
     def write_all_reducers(self):
         configs =  list(self.all_reducer_config.values())
