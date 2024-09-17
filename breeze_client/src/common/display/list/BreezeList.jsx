@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './BreezeList.css';
 import PropTypes from 'prop-types';
 
-const CustomMenu = ({ items = [], onItemClick, isSearchable = 'true' }) => {
+const CustomMenu = ({ items = [], onItemClick, isSearchable = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredItems, setFilteredItems] = useState(items);
 

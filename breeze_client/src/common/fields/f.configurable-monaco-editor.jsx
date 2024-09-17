@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
-import { BreezeOffCanvas, BreezeList } from '../display';
+import { BreezeOffcanvas, BreezeList } from '../display';
 
 const items = ['+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
 
@@ -104,19 +104,19 @@ const ConfigurableMonacoEditor = ({
             zIndex: 1000,
           }}
         >
-          <BreezeList items={items} onItemClick={handleMenuItemClick} isSearchable="true" />
+          <BreezeList items={items} onItemClick={handleMenuItemClick} isSearchable={true} />
         </div>
       )}
 
       {/* Breeze Off-Canvas */}
-      <BreezeOffCanvas
+      <BreezeOffcanvas
         show={showOffCanvas}
         onClose={() => setShowOffCanvas(false)}
         title="Configuration"
         placement="end"
       >
         <p>{offCanvasContent}</p>
-      </BreezeOffCanvas>
+      </BreezeOffcanvas>
     </div>
   );
 };
