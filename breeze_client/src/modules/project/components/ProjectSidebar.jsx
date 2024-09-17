@@ -11,6 +11,11 @@ function ProjectSidebar() {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [state1, setState1] = useState('');
   const [state2, setState2] = useState('');
+  const [show, setShow] = useState(true);
+
+  const toggleSidebar = () => {
+    setShow(!show);
+  };
 
   const getLogged = (val) => {
     console.log(val);
@@ -28,8 +33,17 @@ function ProjectSidebar() {
 
   //Remaining : dynamic directory management operations and icon mapping as per type.
 
+  if (!show) {
+    return (
+      <div>
+        <div className="collapsed-sidebar-button br-background-primary" onClick={toggleSidebar}>
+          <i className="bi bi-box-arrow-in-right br-text-primary"></i>
+        </div>
+      </div>
+    );
+  }
   return (
-    <>
+    <aside id="sidebar" className="br-background-primary">
       <div>
         <div className="sidebar-header d-flex justify-content-between align-items-center">
           <h2 className="mb-0 med-font br-text-primary collapsible">PROJECT</h2>
@@ -38,7 +52,12 @@ function ProjectSidebar() {
               <i className="small-font bi bi-plus-circle"></i>
               <span className="small-font ms-1">Add</span>
             </span>
-            <button className="btn toggle-btn btn-theme br-text-primary p-0" type="button" data-bs-theme="dark">
+            <button
+              className="btn toggle-btn btn-theme br-text-primary p-0"
+              type="button"
+              data-bs-theme="dark"
+              onClick={toggleSidebar}
+            >
               <i className="large-font bi bi-box-arrow-in-left"></i>
             </button>
           </div>
@@ -78,7 +97,7 @@ function ProjectSidebar() {
           Run
         </a>
       </div>
-    </>
+    </aside>
   );
 }
 

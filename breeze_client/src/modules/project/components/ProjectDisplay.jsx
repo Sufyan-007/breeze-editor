@@ -1,29 +1,75 @@
 import TopBar from './TopBar';
-import Editor from '../../../assets/images/ABDM Login Page 1(2).png';
-import LoginPage from '../../../assets/images/image 1.png';
+import { useEffect, useState } from 'react';
+import ConfigDisplay from './ConfigDisplay';
+import ConfigurableMonacoEditor from '../../../common/fields/f.configurable-monaco-editor';
 
 function ProjectDisplay() {
+  const projectTheme = localStorage.getItem('theme') === 'light' ? 'vs' : 'vs-dark';
+  const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
+  const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
+  const item = { type: 'component' }; // TO DO : Dynamic after api integration
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+  useEffect(() => {
+    setCodeEditorTheme(projectTheme);
+  }, [projectTheme]);
+
   return (
-    <div className="mb-3">
-      <TopBar />
-      <div className="tab-content" id="pills-tabContent">
-        <div className="tab-pane fade" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-          <div className="img-container">
-            <img src={Editor} alt="preview" />
-          </div>
-        </div>
-        <div
-          className="tab-pane fade active show"
-          id="pills-profile"
-          role="tabpanel"
-          aria-labelledby="pills-profile-tab"
-        >
-          <div className="img-container">
-            <img src={LoginPage} alt="preview" />
-          </div>
+    <>
+      <div className="mb-3">
+        <TopBar onTabChange={handleTabChange} activeTab={activeTab} item={item} />
+
+        <div className="tab-content" id="pills-tabContent">
+          {activeTab === 'code' && (
+            <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+              <div className="editor-container">
+                <ConfigurableMonacoEditor
+                  defaultValue="// Monaco editor init"
+                  height="520px"
+                  language="javascript"
+                  theme={codeEditorTheme}
+                />
+              </div>
+            </div>
+          )}
+
+          {item.type === 'component'
+            ? activeTab === 'preview' && (
+                <div
+                  className="tab-pane fade show active"
+                  id="pills-preview"
+                  role="tabpanel"
+                  aria-labelledby="pills-preview-tab"
+                >
+                  <div className="iframe-container">
+                    <iframe
+                      src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}`}
+                      title="Preview"
+                      width="100%"
+                      height="520px"
+                      frameBorder="0"
+                    ></iframe>
+                  </div>
+                </div>
+              )
+            : activeTab === 'config' && (
+                <div
+                  className="tab-pane fade show active"
+                  id="pills-config"
+                  role="tabpanel"
+                  aria-labelledby="pills-config-tab"
+                >
+                  <div className="config-container">
+                    <ConfigDisplay />
+                  </div>
+                </div>
+              )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
