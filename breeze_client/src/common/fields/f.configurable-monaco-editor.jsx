@@ -1,0 +1,136 @@
+import { useEffect, useRef, useState } from 'react';
+import * as monaco from 'monaco-editor';
+import PropTypes from 'prop-types';
+import BreezeOffCanvas from '../display/offcanvas/BreezeOffcanvas';
+import BreezeList from '../display/list/BreezeList';
+
+const items = ['+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
+
+const ConfigurableMonacoEditor = ({
+  defaultValue = '',
+  height = '500px',
+  width = '100%',
+  language = 'javascript',
+  theme = 'vs-dark',
+  onChange,
+  readOnlyMode = false,
+}) => {
+  const editorRef = useRef(null);
+  const [editor, setEditor] = useState(null);
+  const [showOffCanvas, setShowOffCanvas] = useState(false);
+  const [offCanvasContent, setOffCanvasContent] = useState('');
+  const [showMenu, setShowMenu] = useState(false);
+  const [value] = useState(defaultValue);
+
+  useEffect(() => {
+    if (editor && editor.getValue() !== defaultValue) {
+      editor.setValue(defaultValue);
+    }
+  }, [editor, defaultValue]);
+  useEffect(() => {
+    if (editor && onChange) {
+      editor.onDidChangeModelContent(() => {
+        onChange(editor.getValue());
+      });
+    }
+  }, [editor, onChange]);
+
+  useEffect(() => {
+    const editorInstance = monaco.editor.create(editorRef.current, {
+      value: value,
+      language: language,
+      theme: theme,
+      readOnly: readOnlyMode,
+    });
+
+    setEditor(editorInstance);
+
+    // Show custom menu on alt+enter
+    const handleKeyDown = (event) => {
+      if (event.altKey && event.key === 'Enter') {
+        event.preventDefault();
+        setShowMenu(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    editorInstance.onMouseDown((event) => {
+      if (event.event.detail === 2) {
+        const position = event.target.position;
+        const word = editorInstance.getModel().getWordAtPosition(position);
+        if (word && word.word === 'CustomMenu') {
+          setShowOffCanvas(true);
+          setShowMenu(false);
+          setOffCanvasContent('Custom menu Configuration');
+        }
+      }
+    });
+
+    const handleClickOutside = (event) => {
+      if (showMenu && !event.target.closest('#customMenu')) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+      editorInstance.dispose();
+    };
+  }, [showMenu, language, theme, readOnlyMode, value]);
+
+  const handleMenuItemClick = (item) => {
+    setOffCanvasContent(`${item} Configuration`);
+    setShowOffCanvas(true);
+    setShowMenu(false);
+  };
+
+  return (
+    <div>
+      <div ref={editorRef} style={{ height, width }}></div>
+
+      {/* Custom Menu */}
+      {showMenu && (
+        <div
+          id="customMenu"
+          style={{
+            display: 'block',
+            position: 'absolute',
+            top: '300px',
+            right: '400px',
+            borderRadius: '5px',
+            zIndex: 1000,
+          }}
+        >
+          <BreezeList items={items} onItemClick={handleMenuItemClick} isSearchable="true" />
+        </div>
+      )}
+
+      {/* Breeze Off-Canvas */}
+      <BreezeOffCanvas
+        show={showOffCanvas}
+        onClose={() => setShowOffCanvas(false)}
+        title="Configuration"
+        placement="end"
+      >
+        <p>{offCanvasContent}</p>
+      </BreezeOffCanvas>
+    </div>
+  );
+};
+
+ConfigurableMonacoEditor.propTypes = {
+  defaultValue: PropTypes.string,
+  height: PropTypes.string,
+  width: PropTypes.string,
+  language: PropTypes.string,
+  theme: PropTypes.string,
+  onChange: PropTypes.func,
+  id: PropTypes.string,
+  readOnlyMode: PropTypes.bool,
+};
+
+export default ConfigurableMonacoEditor;

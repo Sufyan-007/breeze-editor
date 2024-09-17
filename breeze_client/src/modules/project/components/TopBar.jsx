@@ -1,7 +1,7 @@
 import '../styles/ProjectDisplay.css';
 import PropTypes from 'prop-types';
 
-function TopBar({ onTabChange, activeTab }) {
+function TopBar({ onTabChange, activeTab, item }) {
   return (
     <div className="br-background-primary rounded project-top-bar">
       <div className="col-md-4 d-xl-block d-none">
@@ -23,20 +23,37 @@ function TopBar({ onTabChange, activeTab }) {
               Code
             </button>
           </li>
-          <li className="nav-item" role="presentation">
-            <button
-              className={`nav-link ${activeTab === 'preview' ? 'active' : ''}`}
-              id="pills-profile-tab"
-              type="button"
-              role="tab"
-              aria-controls="pills-profile"
-              aria-selected={activeTab === 'preview'}
-              onClick={() => onTabChange('preview')}
-            >
-              <i className="bi bi-eye me-1"></i>
-              Preview
-            </button>
-          </li>
+          {item.type === 'component' ? (
+            <li className="nav-item" role="presentation">
+              <button
+                className={`nav-link ${activeTab === 'preview' ? 'active' : ''}`}
+                id="pills-profile-tab"
+                type="button"
+                role="tab"
+                aria-controls="pills-profile"
+                aria-selected={activeTab === 'preview'}
+                onClick={() => onTabChange('preview')}
+              >
+                <i className="bi bi-eye me-1"></i>
+                Preview
+              </button>
+            </li>
+          ) : (
+            <li className="nav-item" role="presentation">
+              <button
+                className={`nav-link ${activeTab === 'config' ? 'active' : ''}`}
+                id="pills-profile-tab"
+                type="button"
+                role="tab"
+                aria-controls="pills-profile"
+                aria-selected={activeTab === 'config'}
+                onClick={() => onTabChange('config')}
+              >
+                <i className="bi bi-eye me-1"></i>
+                Config
+              </button>
+            </li>
+          )}
         </ul>
       </div>
       <div className="col-md-4 col-sm-6 d-flex justify-content-end">
@@ -80,6 +97,7 @@ function TopBar({ onTabChange, activeTab }) {
 TopBar.propTypes = {
   onTabChange: PropTypes.func,
   activeTab: PropTypes.string,
+  item: PropTypes.object.isRequired,
 };
 
 export default TopBar;

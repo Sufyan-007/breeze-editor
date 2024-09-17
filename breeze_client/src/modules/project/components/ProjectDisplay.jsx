@@ -1,11 +1,13 @@
 import TopBar from './TopBar';
-import MonacoEditor from '../../../common/fields/f.monaco-editor';
 import { useEffect, useState } from 'react';
+import ConfigDisplay from './ConfigDisplay';
+import ConfigurableMonacoEditor from '../../../common/fields/f.configurable-monaco-editor';
 
 function ProjectDisplay() {
   const projectTheme = localStorage.getItem('theme') === 'light' ? 'vs' : 'vs-dark';
-  const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview'
+  const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
+  const item = { type: 'component' }; // TO DO : Dynamic after api integration
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -16,41 +18,58 @@ function ProjectDisplay() {
   }, [projectTheme]);
 
   return (
-    <div className="mb-3">
-      <TopBar onTabChange={handleTabChange} activeTab={activeTab} />
+    <>
+      <div className="mb-3">
+        <TopBar onTabChange={handleTabChange} activeTab={activeTab} item={item} />
 
-      <div className="tab-content" id="pills-tabContent">
-        {activeTab === 'code' ? (
-          <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-            <div className="editor-container">
-              <MonacoEditor
-                height="520px"
-                language="javascript"
-                defaultValue="// Write your code here"
-                theme={codeEditorTheme}
-              />
+        <div className="tab-content" id="pills-tabContent">
+          {activeTab === 'code' && (
+            <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+              <div className="editor-container">
+                <ConfigurableMonacoEditor
+                  defaultValue="// Monaco editor init"
+                  height="520px"
+                  language="javascript"
+                  theme={codeEditorTheme}
+                />
+              </div>
             </div>
-          </div>
-        ) : (
-          <div
-            className="tab-pane fade show active"
-            id="pills-profile"
-            role="tabpanel"
-            aria-labelledby="pills-profile-tab"
-          >
-            <div className="iframe-container">
-              <iframe
-                src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}`}
-                title="Preview"
-                width="100%"
-                height="520px"
-                frameBorder="0"
-              ></iframe>
-            </div>
-          </div>
-        )}
+          )}
+
+          {item.type === 'component'
+            ? activeTab === 'preview' && (
+                <div
+                  className="tab-pane fade show active"
+                  id="pills-preview"
+                  role="tabpanel"
+                  aria-labelledby="pills-preview-tab"
+                >
+                  <div className="iframe-container">
+                    <iframe
+                      src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}`}
+                      title="Preview"
+                      width="100%"
+                      height="520px"
+                      frameBorder="0"
+                    ></iframe>
+                  </div>
+                </div>
+              )
+            : activeTab === 'config' && (
+                <div
+                  className="tab-pane fade show active"
+                  id="pills-config"
+                  role="tabpanel"
+                  aria-labelledby="pills-config-tab"
+                >
+                  <div className="config-container">
+                    <ConfigDisplay />
+                  </div>
+                </div>
+              )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
