@@ -63,7 +63,7 @@ function ProjectDisplay() {
                   aria-labelledby="pills-config-tab"
                 >
                   <div className="config-container">
-                    <ConfigDisplay />
+                    <ConfigDisplay configType={item.type} />
                   </div>
                 </div>
               )}
