@@ -51,6 +51,7 @@ function CustomButtonField({
 }
 
 CustomButtonField.propTypes = {
+  config: PropTypes.any,
   label: PropTypes.string,
   onClick: PropTypes.func,
   type: PropTypes.oneOf(['button', 'submit', 'reset']),

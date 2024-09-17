@@ -1,15 +1,17 @@
 import PropTypes from 'prop-types';
 export const CustomTextInput = ({ name, value, onChange, config, ...rest }) => {
-  console.log('input ==>>', config, value);
   return (
-    <input
-      type="text"
-      name={name}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={config.className}
-      {...rest}
-    />
+    <div className={config.groupClass || 'form-group'}>
+      {config.label && <label className={config.labelClass || 'form-label'}>{config.label}</label>}
+      <input
+        type="text"
+        name={name}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={config.className || 'form-control'}
+        {...rest}
+      />
+    </div>
   );
 };
 

@@ -12,7 +12,7 @@ function CustomRecordBuilder({ config, value, metaData, otherStates, onChange, s
     ? evaluateConditions(config.condition.conditions, metaData, config.condition.operation, otherStates)
     : true;
   return (
-    <div>
+    <div className={config.groupClass || 'form-group'}>
       {shouldRenderObject &&
         Object.entries(value).map(([key, value]) => {
           return (

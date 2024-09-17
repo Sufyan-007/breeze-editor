@@ -12,7 +12,7 @@ function CustomObjectBuilder({ config, value, onChange, styles, metaData, otherS
     : true;
 
   return (
-    <div>
+    <div className={config.groupClass || 'form-group'}>
       {shouldRenderObject && (
         <>
           {Object.entries(config.properties).map(([key, fieldConfig]) => {
@@ -26,17 +26,15 @@ function CustomObjectBuilder({ config, value, onChange, styles, metaData, otherS
               : true;
 
             return shouldRenderField ? (
-              <div key={key}>
-                <CustomFormBuilder
-                  config={fieldConfig}
-                  value={value[key]}
-                  onChange={(updatedValue) => internalChange(key, updatedValue)}
-                  styles={styles}
-                  metaData={metaData}
-                  otherStates={otherStates}
-                  {...rest}
-                />
-              </div>
+              <CustomFormBuilder
+                config={fieldConfig}
+                value={value[key]}
+                onChange={(updatedValue) => internalChange(key, updatedValue)}
+                styles={styles}
+                metaData={metaData}
+                otherStates={otherStates}
+                {...rest}
+              />
             ) : null;
           })}
         </>

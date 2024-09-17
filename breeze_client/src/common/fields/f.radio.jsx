@@ -1,18 +1,18 @@
 import PropTypes from 'prop-types';
 
-function CustomRadioButtonField({ name, value, onChange, className, options, config, ...rest }) {
+function CustomRadioButtonField({ name, value, onChange, options, config, ...rest }) {
   const availableOptions = options ? options : config.options;
   return (
-    <div className={className ? className : config.className}>
+    <div className={config.groupClass || 'form-group'}>
       {availableOptions.map((option, index) => (
-        <label key={index} className={className ? className : config.className}>
+        <label key={index} className={config.labelClass || 'form-label'}>
           <input
             type="radio"
             name={name}
             value={option.value}
             checked={value === option.value}
             onChange={(e) => onChange(e.target.value)}
-            className={className ? className : config.className}
+            className={config.className || ''}
             {...rest}
           />
           {option.label}
@@ -23,6 +23,7 @@ function CustomRadioButtonField({ name, value, onChange, className, options, con
 }
 
 CustomRadioButtonField.propTypes = {
+  config: PropTypes.any,
   name: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,

@@ -66,7 +66,6 @@ const evaluateBinaryCondition = (condition, value) => {
 
 export const evaluateConditions = (conditions, value, operation, otherStates) => {
   const results = conditions.map((cond) => {
-    console.log(cond.conditionType, 'conditionType');
     if (cond.conditionType === 'ORDINARY') {
       if (cond.type === 'UNARY') {
         return evaluateUnaryCondition(cond, value);

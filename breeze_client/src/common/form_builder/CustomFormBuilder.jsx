@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-// import { validateField } from './utils/Validations';
+import { validateField } from './utils/Validations';
 import CustomButtonField from '../fields/f.button';
 import CustomSelectField from '../fields/f.testSelect';
 import CustomCheckBoxField from '../fields/f.checkbox';
@@ -25,7 +25,8 @@ const Components = {
 
 function CustomFormBuilder({ config, value, onChange, styles, metaData, otherStates, ...rest }) {
   const type = config.type;
-  // const error = config.validation ? validateField(value, config.validation) : '';
+  const errors = config.validation ? validateField(value, config.validation) : [];
+
   const CustomComponent = Components[type] || Components.TEXT;
   const condition = config.condition;
   const shouldRender = condition
@@ -36,8 +37,8 @@ function CustomFormBuilder({ config, value, onChange, styles, metaData, otherSta
       return (
         <>
           {((condition && shouldRender) || !condition) && (
-            <>
-              <label>{config.label}</label>
+            <div className={config.groupClass || 'form-group'}>
+              {config.label && <label className={config.labelClass || 'form-label'}>{config.label}</label>}
               <CustomObjectBuilder
                 styles={styles}
                 config={config}
@@ -46,7 +47,7 @@ function CustomFormBuilder({ config, value, onChange, styles, metaData, otherSta
                 metaData={metaData}
                 otherStates={otherStates}
               />
-            </>
+            </div>
           )}
         </>
       );
@@ -56,8 +57,8 @@ function CustomFormBuilder({ config, value, onChange, styles, metaData, otherSta
       return (
         <>
           {((condition && shouldRender) || !condition) && (
-            <>
-              <label>{config.label}</label>
+            <div className={config.groupClass || 'form-group'}>
+              <label className={config.labelClass || 'form-label'}>{config.label}</label>
               <CustomArrayBuilder
                 styles={styles}
                 config={config}
@@ -66,7 +67,7 @@ function CustomFormBuilder({ config, value, onChange, styles, metaData, otherSta
                 metaData={metaData}
                 otherStates={otherStates}
               />
-            </>
+            </div>
           )}
         </>
       );
@@ -96,16 +97,28 @@ function CustomFormBuilder({ config, value, onChange, styles, metaData, otherSta
       <>
         {((condition && shouldRender) || !condition) && (
           <>
-            <label>{config.label}</label>
             <CustomComponent
-              styles={styles}
+              style={config.styles}
               config={config}
               value={value}
+              defaultValue={value}
               onChange={onChange}
               metaData={metaData}
               otherStates={otherStates}
               {...rest}
             />
+
+            {errors.length > 0 && (
+              <div>
+                <ul className="error-messages">
+                  {errors.map((error, index) => (
+                    <li key={index} className="text-danger">
+                      {error}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </>
         )}
       </>
