@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
-import BreezeOffCanvas from '../display/offcanvas/BreezeOffcanvas';
-import BreezeList from '../display/list/BreezeList';
+import { BreezeOffCanvas, BreezeList } from '../display';
 
 const items = ['+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
 
