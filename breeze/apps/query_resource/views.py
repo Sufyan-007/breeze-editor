@@ -3,7 +3,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from .core.query_resource_service2 import QueryResourceService
-
+from .core.resource_version_service import GetResourceVersion
 class QueryResource(APIView):
     
     def post(self, request, projectName):
@@ -39,3 +39,19 @@ class QueryResource(APIView):
 
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+class GetVersion(APIView):
+    def post(self, request, projectName):
+        data = json.loads(request.body)
+        category = data.get('category')
+        resource = data.get('resource', None)
+        
+        if not category:
+            return JsonResponse({'error': "Category is required"}, status=400)
+        
+        get_resource_version = GetResourceVersion(projectName)
+        
+        resource_version_data , status = get_resource_version.get_version(resource, category)
+        
+        return JsonResponse(resource_version_data,status= status)
+        

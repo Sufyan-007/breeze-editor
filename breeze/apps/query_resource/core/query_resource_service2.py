@@ -1,6 +1,4 @@
 import os
-import json
-import operator
 from common.utils.app_consts import CONFIG_PATH
 from common.utils.file_helper_temp import read_json_file
 
@@ -13,7 +11,8 @@ class QueryResourceService:
         try:
             if resource:
                 ob_config_data = {}
-                config_data = read_json_file(self.project_name, category.lower(),resource,version="latest")
+                config_data = read_json_file(self.project_name, category.lower(),resource,version="5")
+                print(config_data,"config data ")
                 ob_config_data[resource] = config_data
                 return ob_config_data
             else:
