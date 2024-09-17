@@ -40,3 +40,7 @@
 .project-top-bar .second-group {
     border-left: solid 2px var(--color-text);
 }
+
+.project-display-container {
+    height: calc(100vh - 123px);
+}
