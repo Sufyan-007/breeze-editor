@@ -6,7 +6,7 @@ from apps.common.utils.path_extractor import get_path_without_ext
 import yaml
 
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists, get_dir_path_from_file
-from breeze_server.apps.common.constants.consts import NEW_LINE_CHAR
+from apps.common.constants.consts import NEW_LINE_CHAR
 from apps.common.utils.formatter import format_val
 
 

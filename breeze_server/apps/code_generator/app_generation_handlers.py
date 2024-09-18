@@ -8,7 +8,7 @@ import re
 from apps.common.utils.file_helpers import file_handler
 # JSON input with custom configurations and default component name
 from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file
-from breeze_server.apps.common.constants.consts import CONFIG_FILES_PATH, JSX_TEMPLATE_PATH, TSX_TEMPLATE_PATH
+from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_TEMPLATE_PATH, TSX_TEMPLATE_PATH
 from apps.common.constants.consts import CONFIG_PATH
 
 from .component_generator import ComponentGenerator, gen_single_import

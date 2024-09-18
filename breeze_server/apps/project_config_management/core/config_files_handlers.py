@@ -1,7 +1,7 @@
 from apps.common.constants.consts import CONFIG_PATH
 import json,os
 from apps.common.utils.react_request_code import REQUEST
-from breeze_server.apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
+from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
 from apps.common.utils.file_helpers.json_handler import read_json_file, write_json_file
 
 

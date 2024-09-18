@@ -3,7 +3,7 @@ import subprocess
 import os
 from apps.common.utils.path_extractor import get_path_without_ext
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists, get_dir_path_from_file
-from breeze_server.apps.common.constants.consts import NEW_LINE_CHAR
+from apps.common.constants.consts import NEW_LINE_CHAR
 from apps.common.utils.formatter import format_val
 
 def generate_imports_code(store_config, all_reducer_config):

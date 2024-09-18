@@ -1,7 +1,7 @@
 import json
 import uuid, shutil
 import os
-from breeze_server.apps.common.constants.consts import CONFIG_FILES_PATH
+from apps.common.constants.consts import CONFIG_FILES_PATH
 from apps.common.constants.consts import CONFIG_PATH
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists
 from apps.common.utils.formatter import format_by_prettier

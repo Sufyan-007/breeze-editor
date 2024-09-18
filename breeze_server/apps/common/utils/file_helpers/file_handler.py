@@ -1,6 +1,6 @@
 import os
 import uuid
-from breeze_server.apps.common.constants.consts import GLOBAL_RESOURCES_PATH
+from apps.common.constants.consts import GLOBAL_RESOURCES_PATH
 from apps.common.constants.consts import CONFIG_PATH
 from .dir_handler import create_parent_dir_if_not_exists 
 

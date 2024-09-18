@@ -1,6 +1,6 @@
 from .function_code_generator import FunctionCodeGenerator
 from apps.common.utils.path_extractor import get_path_without_ext
-from breeze_server.apps.common.constants.consts import NEW_LINE_CHAR, CONFIG_FILES_PATH
+from apps.common.constants.consts import NEW_LINE_CHAR, CONFIG_FILES_PATH
 from apps.common.constants.consts import CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import write_json_file
 import json

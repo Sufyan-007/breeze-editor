@@ -1,4 +1,8 @@
 from django.urls import path
+from .views import config_writer
+from .views import get_file_path
+from .route_management.views import manage_routes
+from .api_client_management.views import manage_api_client
 
 urlpatterns = [
     
@@ -12,13 +16,13 @@ urlpatterns = [
     # reducers
     # context
     # 
-    path('write-resource-config', ),
+    path('write-resource-config', config_writer.manage_configs),
     
     # to manage whole route scenario individually
-    path('manage-routes', ),
+    path('manage-routes', manage_routes.manage_routes),
     
     # to manage whole API client scenario individually
-    path('manage-api-client', ),
+    path('manage-api-client', manage_api_client.manage_api_client),
     # ......./api-client-generator/fetch-all-intermediates
     # ......./api-client-generator/edit-module-name/
     # ......./api-client-generator/convert-standard-json
@@ -29,7 +33,7 @@ urlpatterns = [
     
     
     # APIs with derived data
-    path('get-file-path', ),
+    path('get-file-path', get_file_path.get_file_path),
 ]
 
 # new endpoint -> /editor/get-file-path
