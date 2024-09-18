@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import CustomZipPackage from '../../third_party/pages/CustomZipPackage'
 
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {
@@ -6,7 +7,8 @@ function ConfigDisplay({ configType }) {
       case 'routing':
         return <>Routing Config Screen</>;
       case 'third-party':
-        return <>Third party Config Screen</>;
+        return <CustomZipPackage/>;
+        // return <>Third party config</>;
       case 'services':
         return <>Services Config Screen</>;
       default:

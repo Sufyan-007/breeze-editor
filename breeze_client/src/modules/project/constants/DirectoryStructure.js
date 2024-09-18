@@ -45,6 +45,10 @@ const treeData = [
     id: 5,
     name: 'package.json',
   },
+  {
+    id: 6,
+    name: 'tpconfig.json'
+  }
 ];
 
 export default treeData;

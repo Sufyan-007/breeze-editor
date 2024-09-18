@@ -7,7 +7,7 @@ function ProjectDisplay() {
   const projectTheme = localStorage.getItem('theme') === 'light' ? 'vs' : 'vs-dark';
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
-  const item = { type: 'component' }; // TO DO : Dynamic after api integration
+  const item = { type: 'third-party' }; // TO DO : Dynamic after api integration
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);

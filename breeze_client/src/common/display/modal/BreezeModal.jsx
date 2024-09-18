@@ -1,3 +1,4 @@
+
 import PropTypes from 'prop-types';
 import './BreezeModal.css';
 import { useEffect, useRef } from 'react';
