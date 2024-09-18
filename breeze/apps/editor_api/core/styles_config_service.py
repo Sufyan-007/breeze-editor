@@ -4,6 +4,9 @@ import tinycss2
 import json
 from .app_editor import AppEditor
 import os
+from ...directory_management.core.directory_management_service import (
+    DirectoryManagementGenerator,
+)
 
 
 class StylesConfigService:
@@ -18,6 +21,9 @@ class StylesConfigService:
         )
         self.app_config["APP_SOURCE_DIR"] = (
             f"{self.app_config['path']}/{self.app_config['name']}/{self.app_config['components_src_dir']}"
+        )
+        self.directory_management_config = read_config_file(
+            self.app_config_dir, CONFIG_FILES_PATH["DIRECTORY_MANAGEMENT"]
         )
 
     def extract_class_names(rules):
@@ -42,18 +48,21 @@ class StylesConfigService:
         if missing_fields:
             raise ValueError(f"Missing fields: {', '.join(missing_fields)}")
 
+        directory_manager = DirectoryManagementGenerator(self.projectId)
+        new_node = directory_manager.add_node_to_config(
+            "STYLES", "FILE", "SRC", "STYLE_FILE", data["css_filename"]
+        )
         css_name = data["css_name"]
         is_update = css_name in self.css_config
         if css_name in self.css_config:
             filePath = os.path.join(
                 self.app_config["APP_SOURCE_DIR"],
                 self.css_config[css_name]["file_path"],
-                self.css_config[css_name]["css_filename"] + ".css",
+                self.css_config[css_name]["css_filename"],
             )
             os.remove(filePath)
         self.css_config[css_name] = {
-            "css_filename": data.get("css_filename", css_name),
-            "file_path": data.get("file_path", "styles"),
+            "file_id": new_node["id"],
             "css_content": data.get("css_content", ""),
             "description": data.get("description", ""),
         }
@@ -74,7 +83,25 @@ class StylesConfigService:
         if css_name:
             if css_name not in self.css_config:
                 return ValueError(f"CSS with name '{css_name}' does not exist.")
-            return self.css_config[css_name]
+            
+            css_data = self.css_config[css_name]
+            file_id = css_data.get("file_id")
+            if not file_id or file_id not in self.directory_management_config:
+                return ValueError(f"File ID '{file_id}' does not exist in directory management config.")
+            
+            file_data = self.directory_management_config[file_id]
+            css_filename = file_data.get("name")
+            lineage = file_data.get("lineage", [])
+            file_path = "styles" if lineage == ["SRC", "STYLES"] else "/".join(lineage).lower()
+
+            return {
+                "file_id": file_id,
+                "css_filename": css_filename,
+                "file_path": file_path,
+                "css_content": css_data["css_content"],
+                "description": css_data["description"]
+            }
+        
         return self.css_config
 
     def delete_styles(self, css_name):
@@ -84,7 +111,7 @@ class StylesConfigService:
         filePath = os.path.join(
             self.app_config["APP_SOURCE_DIR"],
             self.css_config[css_name]["file_path"],
-            self.css_config[css_name]["css_filename"] + ".css",
+            self.css_config[css_name]["css_filename"],
         )
         os.remove(filePath)
         del self.css_config[css_name]

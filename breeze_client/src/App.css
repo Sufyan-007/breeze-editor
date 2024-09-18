@@ -76,14 +76,14 @@
   color: var(--color-tertiary) !important;
 }
 
-.wrapper {
+.br-wrapper {
   align-items: stretch;
   display: flex;
   width: 100%;
   height: calc(100vh - 43px);
 }
 
-.main {
+.br-main {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 43px);
@@ -92,7 +92,7 @@
   transition: all 0.35s ease-in-out;
 }
 
-.main .content {
+.br-main .br-content {
   flex: 1;
   margin: 10px 0;
   max-width: 100vw;

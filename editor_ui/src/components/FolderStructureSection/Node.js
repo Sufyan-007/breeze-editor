@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../css/folder.css";
 import pencilIcon from "../../assets/icons/edit.svg";
 import deleteIcon from "../../assets/icons/delete.svg";
@@ -7,21 +7,21 @@ import tickIcon from "../../assets/icons/tick.svg";
 import uploadIcon from "../../assets/icons/upload.svg";
 import addFolder from "../../assets/icons/addFolder.svg";
 import addFile from "../../assets/icons/addFile.svg";
-import ResourcesUploadModal from "../ResourcesConfiguration/ResourcesUploadModal";
-import { uploadFile } from "../../services/ResourceUploadService.js";
-import { fetchFolderConfig } from "../../services/DirectoryManagementService";
-import { useParams } from "react-router";
+
 const Node = ({
   node,
   style,
   dragHandle,
   onCreate,
   onRename,
-  onDelete,
+  // onDelete,
+  onUpload,
   onSelectPath,
   resourceUpload,
   selectedNode,
   setSelectedNode,
+  onAdd
+  
 }) => {
   const nodeName =
     typeof node.data.name === "string"
@@ -30,15 +30,8 @@ const Node = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(nodeName);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [currentFolderPath, setCurrentFolderPath] = useState("");
-  const [show, setShow] = useState(false);
-  const [path, setPath] = useState("");
-  const [isSelected, setIsSelected] = useState(false); // State to track if node is selected
-  const [toastMessage, setToastMessage] = useState("");
   const [expanded, setIsExpanded] = useState("");
-  const { projectName } = useParams();
+
 
   const handleHover = (hoverState) => setIsHovered(hoverState);
 
@@ -52,13 +45,11 @@ const Node = ({
         return <span style={{ fontSize: "14px" }}>📃</span>;
     }
   };
-  const handleAddFolder = () => {
-    onCreate(node.id, "DIRECTORY", node.data.lineage, node.data.tag);
-  };
 
-  const handleAddFile = () => {
-    onCreate(node.id, "FILE", node.data.lineage, node.data.tag);
-  };
+  const handleAdd = (e,type) => {
+    e.stopPropagation()
+    onAdd(node.id,node, type)
+  }
 
   const handleRename = () => {
     setIsEditing(true);
@@ -77,12 +68,6 @@ const Node = ({
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete ${nodeName}?`)) {
-      onDelete(node.id);
-    }
-  };
-
   const constructFolderPath = (node) => {
     let path = [];
     let currentNode = node;
@@ -90,17 +75,13 @@ const Node = ({
       path.unshift(currentNode.data.name);
       currentNode = currentNode.parent;
     }
-    return path.join("/").slice(1);
+    return path.join("/");
   };
 
   const handleUploadClick = () => {
     const folderPath = constructFolderPath(node);
-    setCurrentFolderPath(folderPath);
-    setIsModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
+    onUpload(folderPath)
+    
   };
 
   const handlePath = () => {
@@ -110,26 +91,17 @@ const Node = ({
     }
   };
 
-  const handleUpload = async (formData) => {
-    try {
-      const result = await uploadFile(formData, projectName);
-      if (result.message) {
-        setToastMessage("File uploaded successfully");
-      } else {
-        setToastMessage(result.error || "Upload failed.");
-      }
-      setShowToast(true);
-      setIsModalVisible(false);
-      fetchFolderConfig(projectName);
-    } catch (error) {
-      setToastMessage("An error occurred while adding the File.");
-      setShowToast(true);
-    }
-  };
   const handleToggle = () => {
     node.toggle();
     setIsExpanded(!expanded);
   };
+
+  // const handleDeleteClick = (e) => {
+  //   e.stopPropagation();
+  //   onDelete(node.id, node);
+  // };
+
+  
   return (
     <div
       style={style}
@@ -218,8 +190,8 @@ const Node = ({
                   type="button"
                   className="icon-button"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddFolder();
+                   
+                    handleAdd(e, "DIRECTORY");
                   }}
                 >
                   <img
@@ -229,7 +201,7 @@ const Node = ({
                     height="20"
                   />
                 </button>
-               
+
                 <button
                   type="button"
                   className="icon-button"
@@ -243,37 +215,46 @@ const Node = ({
 
                 {!resourceUpload && (
                   <>
-                   <button
-                  type="button"
-                  className="icon-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddFile();
-                  }}
-                >
-                  <img src={addFile} alt="Add Folder" width="15" height="20" />
-                </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleUploadClick();
-                    }}
-                    className="icon-button"
-                  >
-                    <img src={uploadIcon} alt="Upload" width="15" height="20" />
-                  </button>
+                    <button
+                      type="button"
+                      className="icon-button"
+                      onClick={(e) => {
+                        
+                        handleAdd(e,"FILE");
+                      }}
+                    >
+                      <img
+                        src={addFile}
+                        alt="Add Folder"
+                        width="15"
+                        height="20"
+                      />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUploadClick();
+                      }}
+                      className="icon-button"
+                    >
+                      <img
+                        src={uploadIcon}
+                        alt="Upload"
+                        width="15"
+                        height="20"
+                      />
+                    </button>
                   </>
                 )}
-                <button
+                {/* <button
                   type="button"
                   className="icon-button"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete();
+                    handleDeleteClick(e);
                   }}
                 >
                   <img src={deleteIcon} alt="Delete" width="15" height="20" />
-                </button>
+                </button> */}
               </>
             ) : (
               <>
@@ -289,12 +270,11 @@ const Node = ({
                     >
                       <img src={pencilIcon} alt="Edit" width="15" height="20" />
                     </button>
-                    <button
+                    {/* <button
                       type="button"
                       className="icon-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete();
+                      onClick ={(e)=>{
+                        handleDeleteClick(e)
                       }}
                     >
                       <img
@@ -303,7 +283,7 @@ const Node = ({
                         width="15"
                         height="20"
                       />
-                    </button>
+                    </button> */}
                   </>
                 )}
               </>
@@ -311,14 +291,6 @@ const Node = ({
           </span>
         )}
       </div>
-      {isModalVisible && (
-        <ResourcesUploadModal
-          show={isModalVisible}
-          onHide={handleCloseModal}
-          onSubmit={handleUpload}
-          path={currentFolderPath}
-        />
-      )}
     </div>
   );
 };

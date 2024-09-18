@@ -1,54 +1,54 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Col, Row } from "react-bootstrap";
 
-function CustomPackageModel({ show, onHide, onSubmit }) {
-  const [formData, setFormData] = useState({
-    filename: "",
-    description: "",
-    file: null,
-  });
-  const [error, setError] = useState("");
+function CustomPackageModel({show, onHide, onSubmit}) {
+      const [formData, setFormData] = useState({
+        filename: "",
+        description: "",
+        file: null,
+      });
+      const [error, setError] = useState("");
 
-  const handleChange = (event) => {
-    const { name, value, files } = event.target;
-    if (files) {
-      const file = files[0];
+       const handleChange = (event) => {
+         const { name, value, files } = event.target;
+         if (files) {
+           const file = files[0];
 
-      // Check if the file size exceeds 5MB (5 * 1024 * 1024 bytes)
-      if (file.size > 5 * 1024 * 1024) {
-        setError("File size exceeds 5MB. Please select a smaller file.");
-        return;
-      }
+           // Check if the file size exceeds 5MB (5 * 1024 * 1024 bytes)
+           if (file.size > 5 * 1024 * 1024) {
+             setError("File size exceeds 5MB. Please select a smaller file.");
+             return;
+           }
 
-      setFormData((prevData) => ({
-        ...prevData,
-        filename: file.name,
-        [name]: file,
-        lastModified: new Date(file.lastModified), //store the last modified date
-      }));
-      setError(""); //clear error if file is within the size limit
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
-  };
+           setFormData((prevData) => ({
+             ...prevData,
+             filename: file.name,
+             [name]: file,
+             lastModified: new Date(file.lastModified)  //store the last modified date 
+           }));
+           setError(""); //clear error if file is within the size limit 
+         } else {
+           setFormData((prevData) => ({
+             ...prevData,
+             [name]: value,
+           }));
+         }
+       };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    onSubmit(formData);
-    resetForm();
-    onHide();
-  };
+        const handleSubmit = (event) => {
+          event.preventDefault();
+          onSubmit(formData);
+          resetForm();
+          onHide();
+        };
 
-  const resetForm = () => {
-    setFormData({
-      filename: "",
-      description: "",
-      file: null,
-    });
-  };
+         const resetForm = () => {
+           setFormData({
+             filename: "",
+             description: "",
+             file: null,
+           });
+         };
 
   return (
     <Modal
@@ -133,4 +133,4 @@ function CustomPackageModel({ show, onHide, onSubmit }) {
   );
 }
 
-export default CustomPackageModel;
+export default CustomPackageModel

@@ -1,6 +1,12 @@
 import PropTypes from 'prop-types';
 
-function ProjectCard({ isCreateNew, projectName, projectImageSrc, iconSrc, onClick }) {
+function ProjectCard({
+  isCreateNew = false,
+  projectName = 'project',
+  projectImageSrc = '',
+  iconSrc = '',
+  onClick = () => {},
+}) {
   return (
     <div
       className={`col-md-3 m-0 p-0 br-background-primary ${isCreateNew ? 'home-new-card br-background-secondary' : 'home-project-card'}`}
@@ -39,14 +45,6 @@ ProjectCard.propTypes = {
   projectImageSrc: PropTypes.string,
   iconSrc: PropTypes.string,
   onClick: PropTypes.func,
-};
-
-ProjectCard.defaultProps = {
-  isCreateNew: false,
-  projectName: '',
-  projectImageSrc: '',
-  iconSrc: '',
-  onClick: () => {},
 };
 
 export default ProjectCard;

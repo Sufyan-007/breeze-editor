@@ -6,7 +6,7 @@ launch.json
 app_consts.py
 package-lock.json
 */.vscode
-
+/venv
 /configurations
 /generated_projects
 /uploaded_css
@@ -17,3 +17,5 @@ editor_ui/package-lock.json
 /third_party_package_parser/node_modules
 /third_party_configs
 third_party_configs/*
+breeze_server/.env
+sample_configs/
