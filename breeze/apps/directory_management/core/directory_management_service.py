@@ -16,9 +16,7 @@ class DirectoryManagementGenerator:
         self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['components_src_dir']}"
         self.directory_management_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
     
-    def reload_config(self):
-        self.directory_management_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
-        
+    
     def load_config(self,config_path):
         with open(config_path, 'r') as file:
             return json.load(file)
@@ -112,8 +110,6 @@ class DirectoryManagementGenerator:
                     with open(self.component_config_path, 'w') as component_file:
                         json.dump(component_data, component_file, indent=4)
                 
-                # Rename the file/folder in the generated React app
-                self.reload_config()
             
               
                 new_path = os.path.join(os.path.dirname(old_path), new_name)
