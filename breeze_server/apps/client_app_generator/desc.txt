@@ -1,2 +1,0 @@
-1. for a given react code make a react app out of it.
-2. reload the app to show newly created module
