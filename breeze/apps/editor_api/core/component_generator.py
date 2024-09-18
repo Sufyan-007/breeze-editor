@@ -162,7 +162,7 @@ class ComponentGenerator_JSX(ComponentGenerator):
         resources = config['resources']
         html_config = config['html']
         generator = HTMLGenerator(config)
-        html_code = generator.generateHTML(html_config)
+        html_code,html_code_tree = generator.generateHTML(html_config)
 
         # print(html_code)
 
@@ -213,7 +213,7 @@ class ComponentGenerator_JSX(ComponentGenerator):
         props_vars_declaration = ', '.join([f'{var["name"]}={var["body"]["defaultValue"]}' if var["body"].get("defaultValue") else var["name"] for var in props_vars])
         if props_vars_declaration != "":
             props_vars_declaration = "{" + props_vars_declaration +"}"
-        import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
+        import_stats,import_statement_tree = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
         
         def generate_function_code(func):
             all_resources = []
@@ -261,6 +261,7 @@ class ComponentGenerator_JSX(ComponentGenerator):
     
         def generate_resources_code(resources):
             resources_code = []
+            resource_code_tree=[]
             for resource in resources:
                 if resource['type'] == 'stateVars':
                     resources_code.append(generate_state_var_code(resource))
@@ -275,10 +276,51 @@ class ComponentGenerator_JSX(ComponentGenerator):
                 elif resource['type'] == 'hook':
                     resources_code.append(generate_hook_code(resource))
                 # Add more resource types if needed
-
-            return '\n'.join(resources_code)
+                resource_code_tree.append({
+                    "type": resource['type'],
+                    "statementType" : "SINGLE",
+                    "code" : resources_code,
+                    "id": resource['id']
+                })
+            return '\n'.join(resources_code),resource_code_tree
         
-        resources_code = generate_resources_code(resources)
+        resources_code,resource_code_tree = generate_resources_code(resources)
+        
+        code_tree=[]
+        
+        code_tree.append({
+            "type" : "ALL_IMPORTS",
+            "statementType" : "STATEMENTS",
+            "children" :import_statement_tree
+        })
+        
+        code_tree.append({
+            "type" : "REACT_COMPONENT",
+            "statementType" : "WRAP",
+            "prefix" : f"const {name} = ( {props_vars_declaration} ) => {{",
+            "children" :[
+                {
+                    "type" : "ALL_RESOURCES",
+                    "statementType" : "STATEMENTS",
+                    "children" : resource_code_tree
+                },
+                {
+                    "type" : "RETURN_HTML_TREE",
+                    "statementType" : "WRAP",
+                    "prefix" : "return(",
+                    "children" : html_code_tree,
+                    "suffix" : ")"
+                }
+                ],
+
+            "suffix" : f"}}",
+        })
+        code_tree.append({
+            "type" : "EXPORT",
+            "statementType" : "SINGLE",
+            "code" : f"export default {name};"
+            
+        })
         
         react_component = f"""
             import React, {{ useState, Fragment }} from 'react';
@@ -294,4 +336,7 @@ class ComponentGenerator_JSX(ComponentGenerator):
             export default {name};
             """
 
+        
+        with open("/home/sufyan/Documents/Projects/breezeRepo/generated_projects/test.json", "w") as test_file:
+            test_file.write(json.dumps(code_tree))
         return react_component

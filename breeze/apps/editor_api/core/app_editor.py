@@ -36,12 +36,6 @@ NEW_COMP_FORMAT={
     "wrapper_store": None,
     "imports": { "components": [], "other": [
         {
-            "TYPE": "THIRD_PARTY",
-            "from": "react-bootstrap",
-            "import_entity": "Container",
-            "import_type": "SINGLE"
-        },
-        {
           "TYPE": "THIRD_PARTY",
           "from": "react",
           "import_entity": "useEffect",
