@@ -32,15 +32,23 @@ schema_view = get_schema_view(
 )
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('code-generator/', include('apps.code_generator.urls')),
-    path('client-app-generator/', include('apps.client_app_generator.urls')),
-    path('project/', include('apps.project_management.urls')),
-    path('config/', include('apps.project_config_management.urls')),
-    path('route/', include('apps.route_management.urls')),
-    path('usage/', include('apps.usage_management.urls')),
-    path('directory-management/',include('apps.directory_management.urls')),
+    path('api/project/', include('apps.project_management.urls')),
+    path('api/code-gen/', include('apps.code_generator.urls')),
+    path('api/config-editor/<str:param>/',include('apps.project_config_management.urls')),
     path('api/auth/',include('apps.authentication.urls')),
-    
 ]
+
+
+# create get-project/id - /editor/read-app-basic-config
+# query_resource - [
+    # /editor/get-components/, 
+    # /config-reader/get-global-components
+    # /editor/get-global-html-config/, 
+    # /config-reader/get-state-vars/
+    # /editor/read-router-config
+    # /editor/read-services
+    # /editor/read-redux-store 
+    # /editor/read-reducers/
+    # .../editor/read-services
 
 
