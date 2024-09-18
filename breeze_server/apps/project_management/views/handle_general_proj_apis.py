@@ -1,12 +1,13 @@
-import os
-from apps.common.consts import CONFIG_FILES_PATH
-from apps.common.device_spec_consts import CONFIG_PATH
+import os, json
+import shutil
+from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
 from apps.common.utils.file_helpers.file_handler import upload_file
 from apps.project_config_management.views.config_writer import create_or_update_app_config
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
-def get_all(self):
+def get_all(request, api_res=True):
     project_names = os.listdir(CONFIG_PATH)
     projects={}
     for project_name in project_names:
@@ -14,10 +15,14 @@ def get_all(self):
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         app_config['project_name'] = project_name
         projects[project_name]=app_config
-    return JsonResponse(projects, status=200)
+    if api_res:
+        return JsonResponse(projects, status=200)
+    else:
+        return projects
 
-def add(self, request):
-    data = request.POST.copy()
+@csrf_exempt
+def add(request):
+    data = json.loads(request.body.decode("utf-8"))
     logo_file = request.FILES.get('logo')
 
     data['defaultComponent'] = "Main"
@@ -30,8 +35,8 @@ def add(self, request):
         os.path.dirname(os.getcwd()), path)
 
     # os.makedirs(generated_paths,exist_ok=True)
-    data["path"] = os.path.join(generated_paths)
-    if (data["name"] in get_all().keys()):
+    data["path"] = os.path.join(generated_paths, data["name"])
+    if (data["name"] in get_all("", api_res=False).keys()):
         return JsonResponse({"error": "Application name should be unique."}, status=400)
     
     if logo_file:
@@ -48,5 +53,23 @@ def add(self, request):
     response = {"name": data["name"]}
     return JsonResponse(response, status=200)
 
-def delete(param):
-    pass
+@csrf_exempt
+def delete(request, param):
+    # for the time being param will be project_name instead of ID
+    print(param)
+    project_name = param
+    app_config_dir = f"{CONFIG_PATH}/{project_name}"
+    try:
+        app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
+        generated_project_path = app_config['path']
+    except:
+        raise FileNotFoundError("Could not find project '{project_name}")
+    print(app_config_dir)
+    print(generated_project_path)
+    shutil.rmtree(app_config_dir)
+    try:
+        shutil.rmtree(generated_project_path,ignore_errors=False)
+    except Exception as e:
+        print("error occured: ", e)
+        return JsonResponse({"message": "Failed to delete the project"}, status=200)
+    return JsonResponse({"message": f"{project_name} deleted successfully"}, status=200)

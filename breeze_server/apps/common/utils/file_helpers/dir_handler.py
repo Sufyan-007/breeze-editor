@@ -5,6 +5,7 @@ def get_dir_path_from_file(file_path):
     return os.path.dirname(file_path)
 
 def create_parent_dir_if_not_exists(dir_path):
+    dir_path = Path(dir_path).parent
     Path(dir_path).mkdir(parents=True, exist_ok=True)
     
 def create_dir_if_not_exists(full_path):

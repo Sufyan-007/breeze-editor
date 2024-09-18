@@ -15,7 +15,7 @@ function ConfigDisplay({ configType }) {
         return <div>Select a configuration type</div>;
     }
   };
-  return <div className="vh-100 br-background-primary br-text-primary">{renderConfigScreen()}</div>;
+  return <div className="br-background-primary br-text-primary h-100">{renderConfigScreen()}</div>;
 }
 
 ConfigDisplay.propTypes = {

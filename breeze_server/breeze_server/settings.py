@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'apps.directory_management',
     'apps.project_management',
     'apps.project_config_management',
-    'apps.route_management',
     'apps.usage_management',
     'rest_framework_swagger',       # Swagger 
     'drf_yasg',

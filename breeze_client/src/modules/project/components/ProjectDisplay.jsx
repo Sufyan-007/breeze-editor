@@ -28,7 +28,7 @@ function ProjectDisplay() {
               <div className="editor-container">
                 <ConfigurableMonacoEditor
                   defaultValue="// Monaco editor init"
-                  height="520px"
+                  height="calc(100vh - 123px)"
                   language="javascript"
                   theme={codeEditorTheme}
                 />
@@ -44,12 +44,12 @@ function ProjectDisplay() {
                   role="tabpanel"
                   aria-labelledby="pills-preview-tab"
                 >
-                  <div className="iframe-container">
+                  <div className="project-display-container iframe-container">
                     <iframe
                       src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}`}
                       title="Preview"
                       width="100%"
-                      height="520px"
+                      height="100%"
                       frameBorder="0"
                     ></iframe>
                   </div>
@@ -62,7 +62,7 @@ function ProjectDisplay() {
                   role="tabpanel"
                   aria-labelledby="pills-config-tab"
                 >
-                  <div className="config-container">
+                  <div className="project-display-container config-container">
                     <ConfigDisplay configType={item.type} />
                   </div>
                 </div>
