@@ -20,12 +20,46 @@ const filesData = [
     fileName: 'presentation.pptx',
     lastModified: '2024-09-08 09:30 AM',
   },
+  {
+    fileName: 'report.pdf',
+    lastModified: '2024-09-15 10:15 AM',
+  },
+  {
+    fileName: 'project_plan.docx',
+    lastModified: '2024-09-12 03:45 PM',
+  },
+  {
+    fileName: 'budget.xlsx',
+    lastModified: '2024-09-10 11:22 AM',
+  },
+  {
+    fileName: 'presentation.pptx',
+    lastModified: '2024-09-08 09:30 AM',
+  },
+  {
+    fileName: 'report.pdf',
+    lastModified: '2024-09-15 10:15 AM',
+  },
+  {
+    fileName: 'project_plan.docx',
+    lastModified: '2024-09-12 03:45 PM',
+  },
+  {
+    fileName: 'budget.xlsx',
+    lastModified: '2024-09-10 11:22 AM',
+  },
+  {
+    fileName: 'presentation.pptx',
+    lastModified: '2024-09-08 09:30 AM',
+  }
 ];
 
 function CustomZipPackagePage() {
   const [showModal, setShowModal] = useState(false);
    const [showDeleteModal, setShowDeleteModal] = useState(false);
    const [fileToDelete, setFileToDelete] = useState(null);
+   const [currentPage, setCurrentPage] = useState(1);
+   const [pageSize] = useState(10);
   const [formData, setFormData] = useState({
     filename: '',
     description: '',
@@ -45,6 +79,7 @@ function CustomZipPackagePage() {
       render: (value) => new Date(value).toLocaleString(),
       width: '40%',
     },
+
   ];
 
   const actions = (item) => (
@@ -111,6 +146,12 @@ function CustomZipPackagePage() {
     }
   };
 
+  const handlePageChange = (newPage) => {
+     if (newPage > 0 && newPage <= Math.ceil(filesData.length / pageSize)) {
+       setCurrentPage(newPage);
+     }
+  }
+
   const header = { title: 'Upload File' };
   const footer = {
     buttons: [
@@ -159,9 +200,9 @@ function CustomZipPackagePage() {
           columns={columns}
           data={filesData}
           actions={actions}
-          currentPage={1}
-          pageSize={10}
-          onPageChange={(page) => console.log(`Page: ${page}`)}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
           sortBy="filename"
           sortDirection="asc"
           actionPlacement={'end'}
