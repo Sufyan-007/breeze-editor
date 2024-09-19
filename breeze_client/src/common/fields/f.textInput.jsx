@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-export const CustomTextInput = ({ name, value, onChange, config, ...rest }) => {
+function CustomTextInput({ name, value, onChange, config, className, ...rest }) {
   return (
     <div className={config.groupClass || 'form-group'}>
       {config.label && <label className={config.labelClass || 'form-label'}>{config.label}</label>}
@@ -8,19 +8,19 @@ export const CustomTextInput = ({ name, value, onChange, config, ...rest }) => {
         name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={config.className || 'form-control'}
+        className={config ? (config.className ? config.className : 'form-control') : className}
         {...rest}
       />
     </div>
   );
-};
+}
 
 CustomTextInput.propTypes = {
   config: PropTypes.any,
   name: PropTypes.string.isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  className: PropTypes.shape({
-    input: PropTypes.string,
-  }),
+  className: PropTypes.string,
 };
+
+export default CustomTextInput;

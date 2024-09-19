@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 
-function CustomCheckBoxField({ name, onChange, value, config, ...rest }) {
+function CustomCheckBoxField({ name, onChange, value, config, className, ...rest }) {
   return (
     <div className={config.groupClass || 'form-check'}>
       {config.label && <label className={config.labelClass || 'form-check-label'}>{config.label}</label>}
@@ -8,7 +8,7 @@ function CustomCheckBoxField({ name, onChange, value, config, ...rest }) {
         type="checkbox"
         name={name}
         checked={value}
-        className={config.className || 'form-check-input'}
+        className={config ? (config.className ? config.className : 'form-check-input') : className}
         onChange={(e) => onChange(e.target.checked)}
         {...rest}
       />
@@ -21,6 +21,7 @@ CustomCheckBoxField.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.bool.isRequired,
+  className: PropTypes.string,
 };
 
 export default CustomCheckBoxField;

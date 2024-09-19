@@ -1,17 +1,15 @@
 import PropTypes from 'prop-types';
 
-function CustomSelectField({ config, name, value, onChange, options, ...rest }) {
+function CustomSelectField({ config, name, value, onChange, options, className, ...rest }) {
   const availableOptions = options ? options : config.options;
-  console.log(availableOptions, 'available options: ');
-
   return (
-    <div className={config.groupClass || 'form-group m-1'}>
+    <div className={config.groupClass || 'form-group'}>
       {config.label && <label className={config.labelClass || 'form-label'}>{config.label}</label>}
       <select
         name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={config.className || 'form-control m-1'}
+        className={config ? (config.className ? config.className : 'form-control') : className}
         {...rest}
       >
         {availableOptions.map((option, index) => (
@@ -29,6 +27,7 @@ CustomSelectField.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  className: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,

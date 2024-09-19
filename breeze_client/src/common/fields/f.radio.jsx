@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 
-function CustomRadioButtonField({ name, value, onChange, options, config, ...rest }) {
+function CustomRadioButtonField({ name, value, onChange, options, config, className, ...rest }) {
   const availableOptions = options ? options : config.options;
   return (
     <div className={config.groupClass || 'form-group'}>
@@ -12,7 +12,7 @@ function CustomRadioButtonField({ name, value, onChange, options, config, ...res
             value={option.value}
             checked={value === option.value}
             onChange={(e) => onChange(e.target.value)}
-            className={config.className || ''}
+            className={config ? (config.className ? config.className : 'form-control') : className}
             {...rest}
           />
           {option.label}
