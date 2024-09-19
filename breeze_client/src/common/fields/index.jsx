@@ -5,6 +5,7 @@ import CustomNumberInput from './f.numericInput';
 import CustomTextInput from './f.textInput';
 import CustomRadioButtonField from './f.radio';
 import CustomSelectField from './f.select';
+import CustomTextArea from './f.textarea';
 
 export {
   CustomButtonField,
@@ -14,4 +15,5 @@ export {
   CustomTextInput,
   CustomRadioButtonField,
   CustomSelectField,
+  CustomTextArea,
 };
