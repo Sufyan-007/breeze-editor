@@ -7,9 +7,33 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 @csrf_exempt
 @require_POST
+@swagger_auto_schema(
+    method='post',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "username":openapi.Schema(type=openapi.TYPE_STRING),
+            "email":openapi.Schema(type=openapi.FORMAT_EMAIL),
+            "password":openapi.Schema(type=openapi.FORMAT_PASSWORD)
+        },
+        required=['username','password','email']
+    ),
+    responses={
+                201:openapi.Response(
+                    description='created',
+                    schema=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={'accessToken':openapi.Schema(type=openapi.TYPE_STRING)}
+                    )
+                )
+            },
+    tags=['Auth']
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
