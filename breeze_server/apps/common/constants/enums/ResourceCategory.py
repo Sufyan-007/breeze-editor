@@ -1,0 +1,1 @@
+# will have different entities stored as enum for common resource API
