@@ -1,27 +1,28 @@
 import { useContext } from 'react';
-import darkLightModeSwitch from '../../../../assets/svgs/dark-light-mode-switch.svg';
-import DeveloperActivityAmico from '../../../../assets/images/Developer activity-amico 1.png';
-import BreezeStudio from '../../../../assets/images/Breeze Studio.png';
+import logos from '../../../../assets/svgs/index';
+import images from '../../../../assets/images/index';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import '../../styles/authentication_module.css';
+import { router } from '../../../../routes/routing';
 function Login() {
   const { toggleTheme } = useContext(ThemeContext);
   const handleSubmit = (event) => {
     event.preventDefault();
+    router.navigate('/home');
   };
   return (
     <div className="h-100 container-fluid br-background-primary">
       <div className="row h-100 overflow-auto">
         <div className="col-8 left-side d-block br-background-secondary">
           <div className="login-img-fluid">
-            <img src={DeveloperActivityAmico} alt="Developer Activity Amico" />
+            <img src={images.DeveloperActivityAmico} alt="Developer Activity Amico" />
           </div>
         </div>
 
         <div className="col-4 right-side d-flex flex-column justify-content-between">
           <div className="login-header">
             <div className="logo">
-              <img src={BreezeStudio} alt="Breeze Studio Logo" />
+              <img src={images.BreezeStudio} alt="Breeze Studio Logo" />
             </div>
             <div className="theme-switch">
               <button
@@ -30,7 +31,7 @@ function Login() {
                 onClick={toggleTheme}
                 title="Toggle dark/light mode"
               >
-                <img src={darkLightModeSwitch} alt="Toggle dark/light mode" />
+                <img src={logos.darkLightModeSwitch} alt="Toggle dark/light mode" />
               </button>
             </div>
           </div>

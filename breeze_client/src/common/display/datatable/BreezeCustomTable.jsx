@@ -1,6 +1,4 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
-
 const CustomTable = ({
   resource,
   fields,
@@ -8,8 +6,8 @@ const CustomTable = ({
   data: passedData,
   actions,
   tableClass = 'table table-bordered table-dark table-responsive',
-  headerClass = 'text-start',
-  rowClass = 'text-start',
+  headerClass = 'text-center',
+  rowClass = 'text-center',
   headerDataClass = 'br-background-primary br-text-primary',
   cellDataClass = 'br-background-primary br-text-primary',
   currentPage = 1,
@@ -142,7 +140,7 @@ const CustomTable = ({
           Page {currentPage} of {Math.ceil(data?.length / pageSize)}
         </span>
         <button
-          className="btn br-text-primary med-font"
+          className="btn btn-secondary"
           disabled={currentPage * pageSize >= data?.length}
           onClick={() => onPageChange(currentPage + 1)}
         >
