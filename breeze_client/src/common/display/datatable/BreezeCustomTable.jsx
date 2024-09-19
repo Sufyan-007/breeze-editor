@@ -132,7 +132,7 @@ const CustomTable = ({
       </table>
       <div className="pagination-controls d-flex justify-content-between align-items-center">
         <button
-          className="btn btn-secondary"
+          className="btn br-text-primary med-font"
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
@@ -142,7 +142,7 @@ const CustomTable = ({
           Page {currentPage} of {Math.ceil(data?.length / pageSize)}
         </span>
         <button
-          className="btn btn-secondary"
+          className="btn br-text-primary med-font"
           disabled={currentPage * pageSize >= data?.length}
           onClick={() => onPageChange(currentPage + 1)}
         >

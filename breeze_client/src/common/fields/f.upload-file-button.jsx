@@ -1,0 +1,129 @@
+import React, { useRef, useState } from 'react';
+import PropTypes from 'prop-types';
+
+function CustomFileUploadField({
+  onFileSelect = () => {},
+  label = 'Choose File',
+  accept = '*',
+  disabled = false,
+  style = {},
+  className = '',
+  icon = null,
+  autoFocus = false,
+  formTarget = '',
+  contentEditable = false,
+  contextMenu = '',
+  draggable = false,
+  hidden = false,
+  id = '',
+  lang = '',
+  spellCheck = true,
+  tabIndex = 0,
+  title = '',
+  translate = 'yes',
+  config = {},
+  multiple = false,
+  ...eventHandlers
+}) {
+  const fileInputRef = useRef(null);
+  const [selectedFileName, setSelectedFileName] = useState('No file chosen');
+
+  //handle file selection
+  const handleFileChange = (event) => {
+    const files = event.target.files;
+    const fileName = multiple ? [...files].map((file) => file.name).join(', ') : files[0]?.name || 'No file chosen';
+
+    setSelectedFileName(fileName);
+    onFileSelect(multiple ? [...files] : files[0]);
+  };
+
+  //trigger the hidden file input
+  const handleClick = () => {
+    if (!disabled) fileInputRef.current.click();
+  };
+
+  return (
+    <div>
+      <label>{label}</label>
+      <div className="file-upload-wrapper">
+        <button
+          type="button"
+          onClick={handleClick}
+          disabled={disabled}
+          style={{
+            borderColor: '#666666',
+            color: '#333333',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            ...style,
+            width: '100%',
+          }}
+          className={className ? className : config.className}
+          autoFocus={autoFocus}
+          formTarget={formTarget}
+          contentEditable={contentEditable}
+          contextMenu={contextMenu}
+          draggable={draggable}
+          hidden={hidden}
+          id={id}
+          lang={lang}
+          spellCheck={spellCheck}
+          tabIndex={tabIndex}
+          title={title}
+          translate={translate}
+          {...eventHandlers}
+        >
+          {icon && <span style={{ marginRight: '10px' }}>{icon}</span>}
+          {label}
+          <span
+            style={{
+              display: 'inline-block',
+              textAlign: 'left',
+              marginLeft: '20px',
+              color: '#666666', // Grey text color for file name
+            }}
+          >
+            {selectedFileName}
+          </span>
+        </button>
+      </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+        accept={accept}
+        multiple={multiple}
+        disabled={disabled}
+      />
+    </div>
+  );
+}
+
+CustomFileUploadField.propTypes = {
+  onFileSelect: PropTypes.func.isRequired,
+  label: PropTypes.string,
+  accept: PropTypes.string,
+  disabled: PropTypes.bool,
+  style: PropTypes.object,
+  className: PropTypes.string,
+  icon: PropTypes.node,
+  autoFocus: PropTypes.bool,
+  formTarget: PropTypes.oneOf(['_self', '_blank', '_parent', '_top']),
+  contentEditable: PropTypes.bool,
+  contextMenu: PropTypes.string,
+  draggable: PropTypes.bool, 
+  hidden: PropTypes.bool, 
+  id: PropTypes.string, 
+  lang: PropTypes.string, 
+  spellCheck: PropTypes.bool, 
+  tabIndex: PropTypes.number, 
+  title: PropTypes.string, 
+  translate: PropTypes.oneOf(['yes', 'no']),
+  config: PropTypes.object, // Custom config object for classes
+  multiple: PropTypes.bool, // Allow multiple file uploads
+};
+
+export default CustomFileUploadField;

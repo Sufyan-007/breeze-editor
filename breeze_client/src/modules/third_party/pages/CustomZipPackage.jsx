@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import deleteicon from "../../../assets/svgs/deleteIcon.svg"
+import deleteicon from '../../../assets/svgs/deleteIcon.svg';
 import { BreezeTable, BreezeModal } from '../../../common/display/index';
 import '../styles/CustomZipPackage.css';
+import CustomTextInput from '../../../common/fields/f.textInput';
+import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
 
 const filesData = [
   {
@@ -51,15 +53,15 @@ const filesData = [
   {
     fileName: 'presentation.pptx',
     lastModified: '2024-09-08 09:30 AM',
-  }
+  },
 ];
 
 function CustomZipPackagePage() {
   const [showModal, setShowModal] = useState(false);
-   const [showDeleteModal, setShowDeleteModal] = useState(false);
-   const [fileToDelete, setFileToDelete] = useState(null);
-   const [currentPage, setCurrentPage] = useState(1);
-   const [pageSize] = useState(10);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
   const [formData, setFormData] = useState({
     filename: '',
     description: '',
@@ -79,28 +81,25 @@ function CustomZipPackagePage() {
       render: (value) => new Date(value).toLocaleString(),
       width: '40%',
     },
-
   ];
 
   const actions = (item) => (
-    <img
-      src={deleteicon}
-      height="30px"
-      width="30px"
+    <i
+      class="bi bi-trash"
       alt="Delete icon"
       onClick={() => {
         setFileToDelete(item);
         setShowDeleteModal(true);
       }}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: 'pointer', color: 'red', fontSize: '18px'}}
     />
   );
 
   const handleDelete = () => {
     console.log('Deleting file:', fileToDelete.fileName);
     // Implement the actual file deletion logic here
-    setShowDeleteModal(false); // Close modal after deletion
-    setFileToDelete(null); // Reset file to delete
+    setShowDeleteModal(false); 
+    setFileToDelete(null); 
   };
 
   const handleModal = () => {
@@ -147,23 +146,32 @@ function CustomZipPackagePage() {
   };
 
   const handlePageChange = (newPage) => {
-     if (newPage > 0 && newPage <= Math.ceil(filesData.length / pageSize)) {
-       setCurrentPage(newPage);
-     }
-  }
+    if (newPage > 0 && newPage <= Math.ceil(filesData.length / pageSize)) {
+      setCurrentPage(newPage);
+    }
+  };
 
+  const handleFileSelect = (file) => {
+    if (file) {
+      setFormData((prevData) => ({
+        ...prevData,
+        file,
+        filename: file.name, // Set file name once file is selected
+      }));
+    }
+  }
   const header = { title: 'Upload File' };
   const footer = {
     buttons: [
       {
-        label: 'Upload',
-        onClick: handleSubmit,
-        className: 'btn btn-success',
-      },
-      {
         label: 'Cancel',
         onClick: () => setShowModal(false),
-        className: 'btn btn-secondary',
+        className: 'btn br-text-primary med-font',
+      },
+      {
+        label: 'Upload',
+        onClick: handleSubmit,
+        className: 'btn br-text-primary btn-filled med-font',
       },
     ],
   };
@@ -172,14 +180,14 @@ function CustomZipPackagePage() {
   const deleteModalFooter = {
     buttons: [
       {
-        label: 'Delete',
-        onClick: handleDelete,
-        className: 'btn btn-danger',
-      },
-      {
         label: 'Cancel',
         onClick: () => setShowDeleteModal(false),
-        className: 'btn btn-secondary',
+        className: 'btn br-text-primary med-font',
+      },
+      {
+        label: 'Delete',
+        onClick: handleDelete,
+        className: 'btn br-text-primary med-font btn-delete',
       },
     ],
   };
@@ -195,7 +203,7 @@ function CustomZipPackagePage() {
             </button>
           </div>
         </div>
-        
+
         <BreezeTable
           columns={columns}
           data={filesData}
@@ -211,29 +219,52 @@ function CustomZipPackagePage() {
       <BreezeModal isOpen={showModal} onClose={() => setShowModal(false)} header={header} footer={footer}>
         <form onSubmit={handleSubmit}>
           {error && <p className="text-danger">{error}</p>}
-          <div className='row'>
-          <div className=" col mb-3">
-            <label>Choose File</label>
-            <input type="file" name="file" required onChange={handleChange} accept=".zip" />
+          <div className="row">
+            <div className=" col mb-3">
+              <CustomFileUploadField
+                onFileSelect={handleFileSelect}
+                label="Choose File"
+                accept=".zip"
+                className="btn br-text-primary med-font"
+              />
+            </div>
           </div>
-          </div>
-          <div className='row'>
-          <div className="col mb-3">
-            <label>Description</label>
-            <input type="text" name="description" value={formData.description} onChange={handleChange} required />
-          </div>
+
+          <div className="row">
+            <div className="col mb-3">
+              <CustomTextInput
+                name="description"
+                value={formData.description}
+                onChange={(value) => handleChange({ target: { name: 'description', value } })}
+                config={{
+                  label: 'Description',
+                  className: 'form-control',
+                }}
+                required
+              />
+            </div>
           </div>
           {formData.filename && (
             <div className="mb-3">
-              <label>File Name</label>
-              <input type="text" value={formData.filename} name="filename" onChange={handleChange} readOnly />
+              <CustomTextInput
+                name="filename"
+                value={formData.filename}
+                onChange={(value) => handleChange({ target: { name: 'filename', value } })}
+                config={{
+                  label: 'File Name',
+                  className: 'form-control',
+                  groupClass: 'form-group',
+                  labelClass: 'form-label',
+                }}
+                readOnly
+              />
             </div>
           )}
         </form>
       </BreezeModal>
 
-      <BreezeModal 
-      isOpen={showDeleteModal}
+      <BreezeModal
+        isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         header={deleteModalHeader}
         footer={deleteModalFooter}

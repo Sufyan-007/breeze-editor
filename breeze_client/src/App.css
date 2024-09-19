@@ -25,6 +25,12 @@
 .color-blue:hover {
   color: var(--color-blue-hover);
 }
+.color-red {
+  color: var(--color-red)
+}
+.color-red:hover{
+  color: var(--color-red-hover)
+}
 
 .navbar {
   height: 2.6875rem;
@@ -76,6 +82,23 @@
   color: var(--color-tertiary) !important;
 }
 
+.btn-delete {
+  background-color: var(--color-red) !important;
+  color: var(--color-white) !important;
+  border-radius: 3px;
+  border:0 ;
+} 
+.btn-delete:hover{
+  background-color: var(--color-red-hover) !important;
+  border: solid 2px var(--color-red) !important;
+  color: var(--color-tertiary) !important;
+}
+.btn-filled:active {
+  background-color: var(--color-red-hover) !important;
+  border: solid 2px var(--color-red) !important;
+  color: var(--color-tertiary) !important;
+}
+
 .br-wrapper {
   align-items: stretch;
   display: flex;
@@ -108,3 +131,4 @@
   display: flex;
   align-items: center;
 }
+

@@ -4,6 +4,9 @@
   --color-blue: #006EB9;
   --color-blue-hover: #035891;
   --color-white: #fff;
+  --color-red: #d9534f;
+  --color-red-hover:#b30000;
+
 }
 
 body.dark {
