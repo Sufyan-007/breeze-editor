@@ -6,11 +6,9 @@ import ThemeContext from '../../../../contexts/ThemeContext';
 import '../../styles/authentication_module.css';
 function Login() {
   const { toggleTheme } = useContext(ThemeContext);
-
   const handleSubmit = (event) => {
     event.preventDefault();
   };
-
   return (
     <div className="h-100 container-fluid br-background-primary">
       <div className="row h-100 overflow-auto">
