@@ -1,15 +1,20 @@
 import TopBar from './TopBar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ConfigDisplay from './ConfigDisplay';
 import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
+import PropTypes from 'prop-types';
 
-function ProjectDisplay() {
+function ProjectDisplay({ selectedNode }) {
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   const item = { type: 'component' }; // TO DO : Dynamic after api integration
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
+
+  useEffect(() => {
+    console.log(selectedNode);
+  }, [selectedNode]);
 
   return (
     <>
@@ -65,5 +70,9 @@ function ProjectDisplay() {
     </>
   );
 }
+
+ProjectDisplay.propTypes = {
+  selectedNode: PropTypes.string,
+};
 
 export default ProjectDisplay;

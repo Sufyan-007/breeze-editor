@@ -1,18 +1,8 @@
 import { useState } from 'react';
 import '../styles/HomePage.css';
 import Navbar from '../../../common/navbar/Navbar';
-import VectorIcon from '../../../assets/images/Vector.png';
-import ABDMLoginPage from '../../../assets/images/ABDM Login Page 1.png';
-import reactLogo from '../../../assets/svgs/react-logo.svg';
-import tsLogo from '../../../assets/svgs/typescript-logo.svg';
-import vueLogo from '../../../assets/svgs/vue-logo.svg';
-import viteLogo from '../../../assets/svgs/vite-logo.svg';
-import jsLogo from '../../../assets/svgs/javascript-logo.svg';
-import angularLogo from '../../../assets/svgs/angular-logo.svg';
-import bootstrapLogo from '../../../assets/svgs/bootstrap-logo.svg';
-import chakraUI from '../../../assets/svgs/chakra-ui-logo.svg';
-import materialUI from '../../../assets/svgs/material-ui-logo.svg';
-import reactBootstrap from '../../../assets/svgs/react-bootstrap-logo.svg';
+import logos from '../../../assets/svgs/index';
+import images from '../../../assets/images/index';
 import { BreezeModal } from '../../../common/display';
 import ProjectCard from '../components/ProjectCard';
 import { router } from '../../../routes/routing';
@@ -61,8 +51,8 @@ function HomePage() {
           {/* Regular Project Card */}
           <ProjectCard
             projectName="ABDM Connector"
-            projectImageSrc={ABDMLoginPage}
-            iconSrc={VectorIcon}
+            projectImageSrc={images.ABDMLoginPage}
+            iconSrc={images.VectorIcon}
             onClick={handleOpenProject}
           />
 
@@ -121,15 +111,15 @@ function HomePage() {
                 </label>
                 <div className="home-badges-wrapper">
                   <span className="home-badge home-home-theme-badge home-badge-active">
-                    <img src={reactLogo} alt="React logo" />
+                    <img src={logos.reactLogo} alt="React logo" />
                     <span className="med-font ms-1">React</span>
                   </span>
                   <span className="home-badge home-theme-badge">
-                    <img src={vueLogo} alt="Vue logo" />
+                    <img src={logos.vueLogo} alt="Vue logo" />
                     <span className="med-font ms-1">Vue</span>
                   </span>
                   <span className="home-badge home-theme-badge">
-                    <img src={angularLogo} alt="Angular logo" />
+                    <img src={logos.angularLogo} alt="Angular logo" />
                     <span className="med-font ms-1">Angular</span>
                   </span>
                 </div>
@@ -142,11 +132,11 @@ function HomePage() {
                 </label>
                 <div className="home-badges-wrapper">
                   <span className="home-badge home-theme-badge">
-                    <img src={jsLogo} alt="JavaScript logo" />
+                    <img src={logos.jsLogo} alt="JavaScript logo" />
                     <span className="med-font ms-1">JavaScript</span>
                   </span>
                   <span className="home-badge home-theme-badge">
-                    <img src={tsLogo} alt="TypeScript logo" />
+                    <img src={logos.tsLogo} alt="TypeScript logo" />
                     <span className="med-font ms-1">TypeScript</span>
                   </span>
                 </div>
@@ -159,19 +149,19 @@ function HomePage() {
                 </label>
                 <div className="home-badges-wrapper">
                   <span className="home-badge home-theme-badge">
-                    <img src={bootstrapLogo} alt="Bootstrap logo" />
+                    <img src={logos.bootstrapLogo} alt="Bootstrap logo" />
                     <span className="med-font ms-1">Bootstrap</span>
                   </span>
                   <span className="home-badge home-theme-badge">
-                    <img src={reactBootstrap} alt="React Bootstrap logo" />
+                    <img src={logos.reactBootstrap} alt="React Bootstrap logo" />
                     <span className="med-font ms-1">React Bootstrap</span>
                   </span>
                   <span className="home-badge home-theme-badge">
-                    <img src={chakraUI} alt="Chakra UI logo" />
+                    <img src={logos.chakraUI} alt="Chakra UI logo" />
                     <span className="med-font ms-1">Chakra UI</span>
                   </span>
                   <span className="home-badge home-theme-badge">
-                    <img src={materialUI} alt="Material UI logo" />
+                    <img src={logos.materialUI} alt="Material UI logo" />
                     <span className="med-font ms-1">Material UI</span>
                   </span>
                 </div>
@@ -184,11 +174,11 @@ function HomePage() {
                 </label>
                 <div className="home-badges-wrapper">
                   <span className="home-badge home-theme-badge">
-                    <img src={reactLogo} alt="Create React App logo" />
+                    <img src={logos.reactLogo} alt="Create React App logo" />
                     <span className="med-font ms-1">Create React App</span>
                   </span>
                   <span className="home-badge home-theme-badge">
-                    <img src={viteLogo} alt="Vite logo" />
+                    <img src={logos.viteLogo} alt="Vite logo" />
                     <span className="med-font ms-1">Vite</span>
                   </span>
                 </div>
