@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
-import { BreezeOffcanvas, BreezeList } from '../display';
+import { BreezeOffcanvas, BreezeList } from '../../../common/display';
+import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
+import ThemeContext from '../../../contexts/ThemeContext';
+import VariableConfigForm from '../../component-configuration/components/config-forms/VariableConfigForm';
 
 const items = ['+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
 
@@ -10,7 +13,6 @@ const ConfigurableMonacoEditor = ({
   height = '500px',
   width = '100%',
   language = 'javascript',
-  theme = 'vs-dark',
   onChange,
   readOnlyMode = false,
 }) => {
@@ -20,12 +22,15 @@ const ConfigurableMonacoEditor = ({
   const [offCanvasContent, setOffCanvasContent] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [value] = useState(defaultValue);
+  const { theme } = useContext(ThemeContext);
+  const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
 
   useEffect(() => {
     if (editor && editor.getValue() !== defaultValue) {
       editor.setValue(defaultValue);
     }
   }, [editor, defaultValue]);
+
   useEffect(() => {
     if (editor && onChange) {
       editor.onDidChangeModelContent(() => {
@@ -38,7 +43,7 @@ const ConfigurableMonacoEditor = ({
     const editorInstance = monaco.editor.create(editorRef.current, {
       value: value,
       language: language,
-      theme: theme,
+      theme: projectTheme,
       readOnly: readOnlyMode,
     });
 
@@ -54,18 +59,6 @@ const ConfigurableMonacoEditor = ({
 
     document.addEventListener('keydown', handleKeyDown);
 
-    editorInstance.onMouseDown((event) => {
-      if (event.event.detail === 2) {
-        const position = event.target.position;
-        const word = editorInstance.getModel().getWordAtPosition(position);
-        if (word && word.word === 'CustomMenu') {
-          setShowOffCanvas(true);
-          setShowMenu(false);
-          setOffCanvasContent('Custom menu Configuration');
-        }
-      }
-    });
-
     const handleClickOutside = (event) => {
       if (showMenu && !event.target.closest('#customMenu')) {
         setShowMenu(false);
@@ -79,10 +72,22 @@ const ConfigurableMonacoEditor = ({
       document.removeEventListener('mousedown', handleClickOutside);
       editorInstance.dispose();
     };
-  }, [showMenu, language, theme, readOnlyMode, value]);
+  }, [language, readOnlyMode, value, projectTheme]);
 
   const handleMenuItemClick = (item) => {
-    setOffCanvasContent(`${item} Configuration`);
+    let contentComponent;
+    switch (item) {
+      case '+ Props':
+        contentComponent = <PropConfigForm />;
+        break;
+      case '+ Variable':
+        contentComponent = <VariableConfigForm />;
+        break;
+      default:
+        contentComponent = null;
+    }
+
+    setOffCanvasContent(contentComponent);
     setShowOffCanvas(true);
     setShowMenu(false);
   };
@@ -98,8 +103,8 @@ const ConfigurableMonacoEditor = ({
           style={{
             display: 'block',
             position: 'absolute',
-            top: '300px',
-            right: '400px',
+            top: '50%',
+            right: '40%',
             borderRadius: '5px',
             zIndex: 1000,
           }}
@@ -112,10 +117,10 @@ const ConfigurableMonacoEditor = ({
       <BreezeOffcanvas
         show={showOffCanvas}
         onClose={() => setShowOffCanvas(false)}
-        title="Configuration"
+        title="Component Configuration"
         placement="end"
       >
-        <p>{offCanvasContent}</p>
+        <div>{offCanvasContent}</div>
       </BreezeOffcanvas>
     </div>
   );
@@ -126,7 +131,6 @@ ConfigurableMonacoEditor.propTypes = {
   height: PropTypes.string,
   width: PropTypes.string,
   language: PropTypes.string,
-  theme: PropTypes.string,
   onChange: PropTypes.func,
   id: PropTypes.string,
   readOnlyMode: PropTypes.bool,
