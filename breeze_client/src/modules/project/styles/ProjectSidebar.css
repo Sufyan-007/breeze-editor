@@ -95,3 +95,20 @@
     padding: 13px 10px 13px 6px;
     cursor: pointer;
 }
+.selected-node {
+    background-color: #d3e2f4;
+    border-radius: 4px;
+  }
+  .tree-node.dragging {
+    opacity: 0.5;
+  }
+  
+  .tree-node.drop-target {
+    border: 2px dashed #007bff;
+  }
+  .root-drop-zone {
+    margin-bottom: 10px;
+    text-align: center;
+    line-height: 50px;
+    color: #888;
+  }
