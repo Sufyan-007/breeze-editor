@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'apps.project_management',
     'apps.project_config_management',
     'apps.usage_management',
+    'apps.project_config_management.route_management',
+    'apps.project_config_management.api_client_management',
     'rest_framework_swagger',       # Swagger 
     'drf_yasg',
     "corsheaders",

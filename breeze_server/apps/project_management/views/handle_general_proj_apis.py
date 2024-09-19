@@ -21,6 +21,10 @@ def get_all(request, api_res=True):
         return projects
 
 @csrf_exempt
+def get_a_project(request, param):
+    return ""
+
+@csrf_exempt
 def add(request):
     data = json.loads(request.body.decode("utf-8"))
     logo_file = request.FILES.get('logo')
