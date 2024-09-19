@@ -57,38 +57,40 @@ function TopBar({ onTabChange, activeTab, item }) {
         </ul>
       </div>
       <div className="col-md-4 col-sm-6 d-flex justify-content-end">
-        <div className="d-flex" role="toolbar" aria-label="Toolbar with button groups">
-          <div className="btn-group me-3" role="group" aria-label="First group">
-            <button type="button" className="btn selected-tab py-0 px-2">
-              <i className="bi bi-display"></i>
-            </button>
-            <button type="button" className="btn py-0 px-2">
-              <i className="bi bi-laptop"></i>
-            </button>
-            <button type="button" className="btn py-0 px-2">
-              <i className="bi bi-tablet"></i>
-            </button>
-            <button type="button" className="btn py-0 px-2">
-              <i className="bi bi-phone"></i>
-            </button>
+        {activeTab === 'preview' && (
+          <div className="d-flex" role="toolbar" aria-label="Toolbar with button groups">
+            <div className="btn-group me-3" role="group" aria-label="First group">
+              <button type="button" className="btn selected-tab py-0 px-2">
+                <i className="bi bi-display"></i>
+              </button>
+              <button type="button" className="btn py-0 px-2">
+                <i className="bi bi-laptop"></i>
+              </button>
+              <button type="button" className="btn py-0 px-2">
+                <i className="bi bi-tablet"></i>
+              </button>
+              <button type="button" className="btn py-0 px-2">
+                <i className="bi bi-phone"></i>
+              </button>
+            </div>
+            <div className="btn-group second-group me-3" role="group" aria-label="Second group">
+              <button type="button" className="btn btn-size color-text p-0 ms-3">
+                -
+              </button>
+              <button type="button" className="btn color-text med-font py-0">
+                100%
+              </button>
+              <button type="button" className="btn btn-size color-text p-0">
+                +
+              </button>
+            </div>
+            <div className="btn-group" role="group" aria-label="Third group">
+              <button type="button" className="btn color-text py-0">
+                <i className="bi bi-arrow-clockwise"></i>
+              </button>
+            </div>
           </div>
-          <div className="btn-group second-group me-3" role="group" aria-label="Second group">
-            <button type="button" className="btn btn-size color-text p-0 ms-3">
-              -
-            </button>
-            <button type="button" className="btn color-text med-font py-0">
-              100%
-            </button>
-            <button type="button" className="btn btn-size color-text p-0">
-              +
-            </button>
-          </div>
-          <div className="btn-group" role="group" aria-label="Third group">
-            <button type="button" className="btn color-text py-0">
-              <i className="bi bi-arrow-clockwise"></i>
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
