@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import deleteicon from "../../../assets/svgs/deleteIcon.svg"
 import { BreezeTable, BreezeModal } from '../../../common/display/index';
 import '../styles/CustomZipPackage.css';
 
@@ -23,6 +24,8 @@ const filesData = [
 
 function CustomZipPackagePage() {
   const [showModal, setShowModal] = useState(false);
+   const [showDeleteModal, setShowDeleteModal] = useState(false);
+   const [fileToDelete, setFileToDelete] = useState(null);
   const [formData, setFormData] = useState({
     filename: '',
     description: '',
@@ -45,10 +48,25 @@ function CustomZipPackagePage() {
   ];
 
   const actions = (item) => (
-    <button className="btn btn-danger" onClick={() => onDelete(item)}>
-      Delete
-    </button>
+    <img
+      src={deleteicon}
+      height="30px"
+      width="30px"
+      alt="Delete icon"
+      onClick={() => {
+        setFileToDelete(item);
+        setShowDeleteModal(true);
+      }}
+      style={{ cursor: 'pointer' }}
+    />
   );
+
+  const handleDelete = () => {
+    console.log('Deleting file:', fileToDelete.fileName);
+    // Implement the actual file deletion logic here
+    setShowDeleteModal(false); // Close modal after deletion
+    setFileToDelete(null); // Reset file to delete
+  };
 
   const handleModal = () => {
     setShowModal(true);
@@ -108,6 +126,23 @@ function CustomZipPackagePage() {
       },
     ],
   };
+
+  const deleteModalHeader = { title: 'Confirm Deletion?' };
+  const deleteModalFooter = {
+    buttons: [
+      {
+        label: 'Delete',
+        onClick: handleDelete,
+        className: 'btn btn-danger',
+      },
+      {
+        label: 'Cancel',
+        onClick: () => setShowDeleteModal(false),
+        className: 'btn btn-secondary',
+      },
+    ],
+  };
+
   return (
     <div>
       <div className="container-fluid text-white">
@@ -119,13 +154,12 @@ function CustomZipPackagePage() {
             </button>
           </div>
         </div>
+        
         <BreezeTable
           columns={columns}
           data={filesData}
           actions={actions}
           currentPage={1}
-          // tableClass="table table-responsive br-background-primary"
-          // rowClass="br-background-primary"
           pageSize={10}
           onPageChange={(page) => console.log(`Page: ${page}`)}
           sortBy="filename"
@@ -136,17 +170,17 @@ function CustomZipPackagePage() {
       <BreezeModal isOpen={showModal} onClose={() => setShowModal(false)} header={header} footer={footer}>
         <form onSubmit={handleSubmit}>
           {error && <p className="text-danger">{error}</p>}
-          <div className="row">
-            <div className=" col mb-3">
-              <label>Choose File</label>
-              <input type="file" name="file" required onChange={handleChange} accept=".zip" />
-            </div>
+          <div className='row'>
+          <div className=" col mb-3">
+            <label>Choose File</label>
+            <input type="file" name="file" required onChange={handleChange} accept=".zip" />
           </div>
-          <div className="row">
-            <div className="col mb-3">
-              <label>Description</label>
-              <input type="text" name="description" value={formData.description} onChange={handleChange} required />
-            </div>
+          </div>
+          <div className='row'>
+          <div className="col mb-3">
+            <label>Description</label>
+            <input type="text" name="description" value={formData.description} onChange={handleChange} required />
+          </div>
           </div>
           {formData.filename && (
             <div className="mb-3">
@@ -155,6 +189,15 @@ function CustomZipPackagePage() {
             </div>
           )}
         </form>
+      </BreezeModal>
+
+      <BreezeModal 
+      isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        header={deleteModalHeader}
+        footer={deleteModalFooter}
+      >
+        <p>Are you sure you want to delete {fileToDelete?.fileName}?</p>
       </BreezeModal>
     </div>
   );
