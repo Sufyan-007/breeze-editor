@@ -1,7 +1,9 @@
 import PropTypes from 'prop-types';
 function CustomNumberInput({ name, value, onChange, config, className, ...rest }) {
   <div className={config.groupClass || 'form-check'}>
-    {config.label && <label className={config.labelClass || 'form-check-label'}>{config.label}</label>}
+    {config.label && (
+      <label className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>{config.label}</label>
+    )}
     <input
       type="number"
       name={name}
