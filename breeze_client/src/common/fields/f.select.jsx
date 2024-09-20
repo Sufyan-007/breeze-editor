@@ -4,12 +4,16 @@ function CustomSelectField({ config, name, value, onChange, options, className, 
   const availableOptions = options ? options : config.options;
   return (
     <div className={config.groupClass || 'form-group'}>
-      {config.label && <label className={config.labelClass || 'form-label'}>{config.label}</label>}
+      {config.label && (
+        <label className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>{config.label}</label>
+      )}
       <select
         name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={config ? (config.className ? config.className : 'form-control') : className}
+        className={
+          config ? (config.className ? config.className : 'form-select br-form-select form-select-sm') : className
+        }
         {...rest}
       >
         {availableOptions.map((option, index) => (
