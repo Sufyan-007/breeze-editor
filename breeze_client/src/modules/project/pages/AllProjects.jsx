@@ -1,14 +1,31 @@
-import { useState } from 'react';
-import '../styles/HomePage.css';
+import { useEffect, useState } from 'react';
+import '../styles/AllProjects.css';
 import Navbar from '../../../common/navbar/Navbar';
 import logos from '../../../assets/svgs/index';
 import images from '../../../assets/images/index';
 import { BreezeModal } from '../../../common/display';
 import ProjectCard from '../components/ProjectCard';
 import { router } from '../../../routes/routing';
+import { getAllProjects } from '../services/projectService';
 
-function HomePage() {
+function AllProjects() {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
+  // const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Fetch projects when component mounts
+    const fetchProjects = async () => {
+      try {
+        const projectsData = await getAllProjects();
+        setProjects(Object.values(projectsData));
+      } catch (error) {
+        console.log(error);
+        // setError(error.message);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   const openModal = () => setModalOpen(true);
   const closeModal = () => setModalOpen(false);
@@ -35,6 +52,7 @@ function HomePage() {
 
   const handleOpenProject = () => {
     setModalOpen(true);
+    // router.navigate(`/project/${projectName}`);
     router.navigate('/project');
   };
 
@@ -48,19 +66,17 @@ function HomePage() {
         </div>
 
         <div className="row m-0 gap-2">
-          {/* Regular Project Card */}
-          <ProjectCard
-            projectName="ABDM Connector"
-            projectImageSrc={images.ABDMLoginPage}
-            iconSrc={images.VectorIcon}
-            onClick={handleOpenProject}
-          />
-
-          {/* Create New Project Card */}
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.project_name}
+              projectName={project.project_name}
+              projectImageSrc={images.ABDMLoginPage}
+              iconSrc={images.VectorIcon}
+              onClick={() => handleOpenProject(project.project_name)}
+            />
+          ))}
           <ProjectCard isCreateNew={true} onClick={openModal} />
         </div>
-
-        {/* custom modal */}
         <BreezeModal isOpen={isModalOpen} onClose={closeModal} header={modalHeader} footer={modalFooter}>
           <form className="home-custom-form">
             <div className="row">
@@ -207,4 +223,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default AllProjects;

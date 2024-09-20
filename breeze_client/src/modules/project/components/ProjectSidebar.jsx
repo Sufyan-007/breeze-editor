@@ -33,8 +33,9 @@ function ProjectSidebar({ setSelectedNode }) {
   };
 
   const handleNodeClick = (nodeId) => {
+    const selectedNode = findSelectedNode(treedata, nodeId);
     setSelectedNodeId(nodeId);
-    setSelectedNode(nodeId);
+    setSelectedNode(selectedNode);
   };
 
   const handleAddButtonClick = () => {
@@ -48,10 +49,16 @@ function ProjectSidebar({ setSelectedNode }) {
   };
 
   const findSelectedNode = (nodes, nodeId) => {
+    if (!Array.isArray(nodes)) return null;
+
     for (const node of nodes) {
       if (node.id === nodeId) return node;
-      const childNode = findSelectedNode(node.children, nodeId);
-      if (childNode) return childNode;
+
+      if (Array.isArray(node.children)) {
+        // Check if node.children is an array
+        const childNode = findSelectedNode(node.children, nodeId);
+        if (childNode) return childNode;
+      }
     }
     return null;
   };
