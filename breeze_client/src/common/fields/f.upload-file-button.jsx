@@ -43,9 +43,8 @@ function CustomFileUploadField({
   };
 
   return (
-    <div>
-      <label>{label}</label>
-      <div className="file-upload-wrapper">
+    <div className={config.groupClass || 'form-group'}>
+      {config.label && <label className="form-label br-text-primary med-font fw-semibold">{label}</label>} 
         <button
           type="button"
           onClick={handleClick}
@@ -76,24 +75,27 @@ function CustomFileUploadField({
           {...eventHandlers}
         >
           {icon && <span style={{ marginRight: '10px' }}>{icon}</span>}
-          {label}
+          <label>{label}</label>
           <span
             style={{
               display: 'inline-block',
               textAlign: 'left',
               marginLeft: '20px',
-              color: '#666666', // Grey text color for file name
+              color: '#666666',
             }}
           >
             {selectedFileName}
           </span>
         </button>
-      </div>
+    
       <input
         type="file"
         ref={fileInputRef}
         style={{ display: 'none' }}
         onChange={handleFileChange}
+        className={
+          config ? (config.className ? config.className : 'form-control br-form-control form-control-sm') : className
+        }
         accept={accept}
         multiple={multiple}
         disabled={disabled}
