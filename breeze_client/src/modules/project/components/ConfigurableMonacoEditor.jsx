@@ -2,11 +2,12 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
 import { BreezeOffcanvas, BreezeList } from '../../../common/display';
-import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
 import ThemeContext from '../../../contexts/ThemeContext';
+import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
 import VariableConfigForm from '../../component-configuration/components/config-forms/VariableConfigForm';
+import ImportConfigForm from '../../component-configuration/components/config-forms/ImportConfigForm';
 
-const items = ['+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
+const items = ['+ Imports', '+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
 
 const ConfigurableMonacoEditor = ({
   defaultValue = '',
@@ -77,6 +78,9 @@ const ConfigurableMonacoEditor = ({
   const handleMenuItemClick = (item) => {
     let contentComponent;
     switch (item) {
+      case '+ Imports':
+        contentComponent = <ImportConfigForm onSubmit={() => {}} />;
+        break;
       case '+ Props':
         contentComponent = <PropConfigForm onSubmit={() => {}} />;
         break;

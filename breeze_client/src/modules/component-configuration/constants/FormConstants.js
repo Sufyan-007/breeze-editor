@@ -18,3 +18,14 @@ export const DeclarationTypes = [
   { label: 'let', value: 'let' },
   { label: 'var', value: 'var' },
 ];
+
+export const ImportTypes = [
+  { label: 'Single', value: 'single' },
+  { label: 'Full', value: 'full' },
+];
+
+export const ImportCategories = [
+  { label: 'Component', value: 'component' },
+  { label: 'Services', value: 'services' },
+  { label: 'Third Party', value: 'thirdparty' },
+];

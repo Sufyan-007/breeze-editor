@@ -15,6 +15,13 @@ export const initialVariableConfig = {
   description: '',
 };
 
+export const initialImportConfig = {
+  importEntity: '',
+  importFrom: '',
+  importType: 'single',
+  category: 'component',
+};
+
 export const initialFunctionConfig = {};
 export const initialParamConfig = {};
 export const initialLifecycleConfig = {};
