@@ -131,7 +131,13 @@ const treeData = [
   },
   {
     id: 6,
-    name: 'tpconfig.json'
+    name: 'tpconfig',
+    extension:'json',
+    type:'FILE',
+    children:[],
+    wasOpen:false,
+    tag:'',
+    parentId: null
   }
 ];
 
