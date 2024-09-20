@@ -1,28 +1,58 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from '../modules/authentication/pages/login/Login';
 import ProjectPage from '../modules/project/pages/ProjectPage';
-import HomePage from '../modules/home/pages/HomePage';
+import AllProjects from '../modules/project/pages/AllProjects';
+import PropTypes from 'prop-types';
 
-const checkAccessToken = () => {
-  const token = localStorage.getItem('accessToken');
-  return token !== null;
+const isAuthenticated = () => {
+  return !!localStorage.getItem('accessToken');
 };
 
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+  const authenticated = isAuthenticated();
+  if (!authenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+const LoginPageWrapper = () => {
+  if (isAuthenticated()) {
+    localStorage.removeItem('accessToken');
+  }
+  return <Login />;
+};
+
+// Router configuration
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: checkAccessToken() ? <Navigate to="/home" /> : <Navigate to="/login" />,
+    element: <Navigate to={isAuthenticated() ? '/all-projects' : '/login'} />,
   },
   {
-    path: '/home',
-    element: <HomePage />,
+    path: '/all-projects',
+    element: (
+      <ProtectedRoute>
+        <AllProjects />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/login',
-    element: <Login />,
+    element: <LoginPageWrapper />,
   },
   {
     path: '/project',
-    element: <ProjectPage />,
+    element: (
+      <ProtectedRoute>
+        <ProjectPage />
+      </ProtectedRoute>
+    ),
   },
 ]);

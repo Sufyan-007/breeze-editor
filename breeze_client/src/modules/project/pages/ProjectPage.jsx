@@ -7,7 +7,7 @@ import { useState } from 'react';
 
 function ProjectPage() {
   const projectStatus = useSelector((state) => state.project.status);
-  const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedNode, setSelectedNode] = useState({});
 
   return (
     <div>

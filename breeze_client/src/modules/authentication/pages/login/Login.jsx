@@ -1,15 +1,41 @@
-import { useContext } from 'react';
+import { useContext, useRef, useState } from 'react';
 import logos from '../../../../assets/svgs/index';
 import images from '../../../../assets/images/index';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import '../../styles/authentication_module.css';
 import { router } from '../../../../routes/routing';
+import { login } from '../../services/authService';
+
 function Login() {
   const { toggleTheme } = useContext(ThemeContext);
+  const [errorMessage, setErrorMessage] = useState('');
+  const usernameRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  const handleLogin = async (username, password) => {
+    try {
+      const { accessToken } = await login(username, password);
+      console.log('Logged in successfully. Token:', accessToken);
+      // Save token to local storage or state management
+      localStorage.setItem('accessToken', accessToken);
+      // Navigate to home after successful login
+      router.navigate('/all-projects');
+    } catch (error) {
+      setErrorMessage('Invalid username or password');
+      console.error('Login error:', error.message);
+    }
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    router.navigate('/home');
+    setErrorMessage('');
+
+    const username = usernameRef.current.value;
+    const password = passwordRef.current.value;
+
+    handleLogin(username, password);
   };
+
   return (
     <div className="h-100 container-fluid br-background-primary">
       <div className="row h-100 overflow-auto">
@@ -40,7 +66,7 @@ function Login() {
             <div className="login-form">
               <h2 className="login-text br-text-tertiary">Welcome to Breeze Studio</h2>
               <h3 className="mb-4 login-med-font br-text-primary">Your one-stop React -MS</h3>
-              <form className="login-custom-form">
+              <form className="login-custom-form" onSubmit={handleSubmit}>
                 <div className="mb-3 login-form-box">
                   <label htmlFor="username" className="login-text login-med-font mb-1 br-text-primary">
                     Username
@@ -51,6 +77,7 @@ function Login() {
                     className="form-control br-text-primary"
                     id="username"
                     name="username"
+                    ref={usernameRef}
                     required
                   />
                 </div>
@@ -64,9 +91,11 @@ function Login() {
                     placeholder="Enter Password"
                     id="password"
                     name="password"
+                    ref={passwordRef}
                     required
                   />
                 </div>
+                {errorMessage && <p className="text-danger">{errorMessage}</p>}
                 <div className="mb-3">
                   <input type="checkbox" id="rememberMe" />
                   <label className="login-small-font px-1 br-text-primary" htmlFor="rememberMe">
@@ -76,7 +105,7 @@ function Login() {
                     Forgot Password?
                   </a>
                 </div>
-                <button className="login-button btn-filled w-100 mb-3" onClick={handleSubmit}>
+                <button type="submit" className="login-button btn-filled w-100 mb-3">
                   Sign In
                 </button>
               </form>
