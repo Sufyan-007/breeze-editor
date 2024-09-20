@@ -49,22 +49,6 @@
     color: var(--color-tertiary) !important;
 }
 
-.btn-filled {
-    background-color: var(--color-blue) !important;
-    color: var(--color-white) !important;
-}
-
-.btn-filled:hover {
-    background-color: var(--color-blue-hover) !important;
-    color: var(--color-tertiary) !important;
-}
-
-.btn-filled:active {
-    background-color: var(--color-blue-hover) !important;
-    border: solid 2px var(--color-blue) !important;
-    color: var(--color-tertiary) !important;
-}
-
 .fade {
     background: rgba(0, 0, 0, 0.5);
 }
