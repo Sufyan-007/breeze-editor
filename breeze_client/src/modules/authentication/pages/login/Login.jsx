@@ -1,14 +1,39 @@
-import { useContext } from 'react';
-import darkLightModeSwitch from '../../../../assets/svgs/dark-light-mode-switch.svg';
-import DeveloperActivityAmico from '../../../../assets/images/Developer activity-amico 1.png';
-import BreezeStudio from '../../../../assets/images/Breeze Studio.png';
+import { useContext, useRef, useState } from 'react';
+import logos from '../../../../assets/svgs/index';
+import images from '../../../../assets/images/index';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import '../../styles/authentication_module.css';
+import { router } from '../../../../routes/routing';
+import { login } from '../../services/authService';
+
 function Login() {
   const { toggleTheme } = useContext(ThemeContext);
+  const [errorMessage, setErrorMessage] = useState('');
+  const usernameRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  const handleLogin = async (username, password) => {
+    try {
+      const { accessToken } = await login(username, password);
+      console.log('Logged in successfully. Token:', accessToken);
+      // Save token to local storage or state management
+      localStorage.setItem('accessToken', accessToken);
+      // Navigate to home after successful login
+      router.navigate('/all-projects');
+    } catch (error) {
+      setErrorMessage('Invalid username or password');
+      console.error('Login error:', error.message);
+    }
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    setErrorMessage('');
+
+    const username = usernameRef.current.value;
+    const password = passwordRef.current.value;
+
+    handleLogin(username, password);
   };
 
   return (
@@ -16,14 +41,14 @@ function Login() {
       <div className="row h-100 overflow-auto">
         <div className="col-8 left-side d-block br-background-secondary">
           <div className="login-img-fluid">
-            <img src={DeveloperActivityAmico} alt="Developer Activity Amico" />
+            <img src={images.DeveloperActivityAmico} alt="Developer Activity Amico" />
           </div>
         </div>
 
         <div className="col-4 right-side d-flex flex-column justify-content-between">
           <div className="login-header">
             <div className="logo">
-              <img src={BreezeStudio} alt="Breeze Studio Logo" />
+              <img src={images.BreezeStudio} alt="Breeze Studio Logo" />
             </div>
             <div className="theme-switch">
               <button
@@ -32,7 +57,7 @@ function Login() {
                 onClick={toggleTheme}
                 title="Toggle dark/light mode"
               >
-                <img src={darkLightModeSwitch} alt="Toggle dark/light mode" />
+                <img src={logos.darkLightModeSwitch} alt="Toggle dark/light mode" />
               </button>
             </div>
           </div>
@@ -41,7 +66,7 @@ function Login() {
             <div className="login-form">
               <h2 className="login-text br-text-tertiary">Welcome to Breeze Studio</h2>
               <h3 className="mb-4 login-med-font br-text-primary">Your one-stop React -MS</h3>
-              <form className="login-custom-form">
+              <form className="login-custom-form" onSubmit={handleSubmit}>
                 <div className="mb-3 login-form-box">
                   <label htmlFor="username" className="login-text login-med-font mb-1 br-text-primary">
                     Username
@@ -52,6 +77,7 @@ function Login() {
                     className="form-control br-text-primary"
                     id="username"
                     name="username"
+                    ref={usernameRef}
                     required
                   />
                 </div>
@@ -65,9 +91,11 @@ function Login() {
                     placeholder="Enter Password"
                     id="password"
                     name="password"
+                    ref={passwordRef}
                     required
                   />
                 </div>
+                {errorMessage && <p className="text-danger">{errorMessage}</p>}
                 <div className="mb-3">
                   <input type="checkbox" id="rememberMe" />
                   <label className="login-small-font px-1 br-text-primary" htmlFor="rememberMe">
@@ -77,7 +105,7 @@ function Login() {
                     Forgot Password?
                   </a>
                 </div>
-                <button className="login-button btn-filled w-100 mb-3" onClick={handleSubmit}>
+                <button type="submit" className="login-button btn-filled w-100 mb-3">
                   Sign In
                 </button>
               </form>

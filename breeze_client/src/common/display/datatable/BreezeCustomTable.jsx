@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-
 const CustomTable = ({
   columns,
   data,
@@ -7,31 +6,28 @@ const CustomTable = ({
   tableClass = 'table table-bordered table-dark table-responsive',
   headerClass = 'text-center',
   rowClass = 'text-center',
+  headerDataClass = 'br-background-primary br-text-primary',
+  cellDataClass = 'br-background-primary br-text-primary',
   currentPage = 1,
   pageSize = 10,
   onPageChange,
   sortBy,
   sortDirection = 'asc',
   onSort,
-  filters = {},
-  onFilterChange,
   onRowSelect,
   selectedRows = [],
+  actionPlacement = null,
 }) => {
   const handleSort = (column) => {
     const direction = sortBy === column && sortDirection === 'asc' ? 'desc' : 'asc';
-    onSort(column, direction);
-  };
-
-  const handleFilterChange = (column, value) => {
-    onFilterChange(column, value);
+    onSort && onSort(column, direction);
   };
 
   const handleRowSelect = (item) => {
-    onRowSelect(item);
+    onRowSelect && onRowSelect(item);
   };
 
-  const paginatedData = data.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginatedData = data?.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div>
@@ -39,53 +35,35 @@ const CustomTable = ({
         <thead>
           <tr className={headerClass}>
             {onRowSelect && <th>Select</th>}
+            {actionPlacement === 'start' || actionPlacement === 'both' ? (
+              <th className={headerDataClass}>Actions</th>
+            ) : null}
             {columns.map((column, index) => (
               <th
+                className={headerDataClass}
                 key={index}
-                style={{ width: column.width || 'auto', cursor: 'pointer' }}
-                onClick={() => handleSort(column.accessor)}
+                style={{
+                  width: column.width || 'auto',
+                  cursor: onSort ? 'pointer' : 'default',
+                  textAlign: column.align || 'left',
+                }}
+                onClick={onSort ? () => handleSort(column.accessor) : undefined}
               >
-                {column.header}
-                {sortBy === column.accessor && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
+                {column.headerRenderer ? column.headerRenderer() : column.header}
+                {onSort && sortBy === column.accessor && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
               </th>
             ))}
-            {actions && <th>Actions</th>}
-          </tr>
-          {/* Filters row */}
-          <tr>
-            {onRowSelect && <td></td>}
-            {columns.map((column, index) => (
-              <td key={index}>
-                {filters[column.accessor] &&
-                  (column.filterType === 'select' ? (
-                    <select
-                      value={filters[column.accessor]}
-                      onChange={(e) => handleFilterChange(column.accessor, e.target.value)}
-                    >
-                      {column.filterOptions.map((option, i) => (
-                        <option key={i} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type="text"
-                      value={filters[column.accessor]}
-                      onChange={(e) => handleFilterChange(column.accessor, e.target.value)}
-                    />
-                  ))}
-              </td>
-            ))}
-            {actions && <td></td>}
+            {actionPlacement === 'end' || actionPlacement === 'both' ? (
+              <th className={headerDataClass}>Actions</th>
+            ) : null}
           </tr>
         </thead>
         <tbody>
-          {paginatedData.length > 0 ? (
-            paginatedData.map((item, rowIndex) => (
+          {paginatedData?.length > 0 ? (
+            paginatedData?.map((item, rowIndex) => (
               <tr key={rowIndex} className={rowClass}>
                 {onRowSelect && (
-                  <td>
+                  <td className={cellDataClass}>
                     <input
                       type="checkbox"
                       checked={selectedRows.includes(item)}
@@ -93,24 +71,29 @@ const CustomTable = ({
                     />
                   </td>
                 )}
+                {actionPlacement === 'start' || actionPlacement === 'both' ? <td>{actions && actions(item)}</td> : null}
                 {columns.map((column, colIndex) => (
-                  <td key={colIndex} title={column.tooltip ? column.tooltip(item) : ''}>
+                  <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
                     {column.render ? column.render(item[column.accessor], item) : item[column.accessor]}
                   </td>
                 ))}
-                {actions && <td>{actions(item)}</td>}
+                {actionPlacement === 'end' || actionPlacement === 'both' ? (
+                  <td className={cellDataClass}>{actions && actions(item)}</td>
+                ) : null}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length + (actions ? 1 : 0) + (onRowSelect ? 1 : 0)} className="text-center">
+              <td
+                colSpan={columns.length + (actions ? 1 : 0) + (onRowSelect ? 1 : 0)}
+                className={`text-center ${cellDataClass}`}
+              >
                 ---- No data found ----
               </td>
             </tr>
           )}
         </tbody>
       </table>
-      {/* Pagination Controls */}
       <div className="pagination-controls d-flex justify-content-between align-items-center">
         <button
           className="btn btn-secondary"
@@ -120,11 +103,11 @@ const CustomTable = ({
           Previous
         </button>
         <span>
-          Page {currentPage} of {Math.ceil(data.length / pageSize)}
+          Page {currentPage} of {Math.ceil(data?.length / pageSize)}
         </span>
         <button
           className="btn btn-secondary"
-          disabled={currentPage * pageSize >= data.length}
+          disabled={currentPage * pageSize >= data?.length}
           onClick={() => onPageChange(currentPage + 1)}
         >
           Next
@@ -135,32 +118,34 @@ const CustomTable = ({
 };
 
 CustomTable.propTypes = {
+  resource: PropTypes.string,
+  fields: PropTypes.arrayOf(PropTypes.string),
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       header: PropTypes.string.isRequired,
       accessor: PropTypes.string.isRequired,
       width: PropTypes.string,
-      tooltip: PropTypes.func,
       filterType: PropTypes.oneOf(['text', 'select']),
       filterOptions: PropTypes.arrayOf(PropTypes.string),
       render: PropTypes.func,
     })
-  ).isRequired,
-  data: PropTypes.arrayOf(PropTypes.object).isRequired,
+  ),
+  data: PropTypes.arrayOf(PropTypes.object),
   actions: PropTypes.func,
   tableClass: PropTypes.string,
   headerClass: PropTypes.string,
   rowClass: PropTypes.string,
+  cellDataClass: PropTypes.string,
+  headerDataClass: PropTypes.string,
   currentPage: PropTypes.number,
   pageSize: PropTypes.number,
   onPageChange: PropTypes.func,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.oneOf(['asc', 'desc']),
   onSort: PropTypes.func,
-  filters: PropTypes.object,
-  onFilterChange: PropTypes.func,
   onRowSelect: PropTypes.func,
   selectedRows: PropTypes.arrayOf(PropTypes.object),
+  actionPlacement: PropTypes.oneOf(['start', 'end', 'both']),
 };
 
 export default CustomTable;

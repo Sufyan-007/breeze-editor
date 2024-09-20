@@ -1,12 +1,11 @@
 import TopBar from './TopBar';
 import { useEffect, useState } from 'react';
 import ConfigDisplay from './ConfigDisplay';
-import ConfigurableMonacoEditor from '../../../common/fields/f.configurable-monaco-editor';
+import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
+import PropTypes from 'prop-types';
 
-function ProjectDisplay() {
-  const projectTheme = localStorage.getItem('theme') === 'light' ? 'vs' : 'vs-dark';
+function ProjectDisplay({ selectedNode }) {
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
-  const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
   const item = { type: 'component' }; // TO DO : Dynamic after api integration
 
   const handleTabChange = (tab) => {
@@ -14,8 +13,8 @@ function ProjectDisplay() {
   };
 
   useEffect(() => {
-    setCodeEditorTheme(projectTheme);
-  }, [projectTheme]);
+    console.log(selectedNode);
+  }, [selectedNode]);
 
   return (
     <>
@@ -30,7 +29,6 @@ function ProjectDisplay() {
                   defaultValue="// Monaco editor init"
                   height="calc(100vh - 123px)"
                   language="javascript"
-                  theme={codeEditorTheme}
                 />
               </div>
             </div>
@@ -72,5 +70,9 @@ function ProjectDisplay() {
     </>
   );
 }
+
+ProjectDisplay.propTypes = {
+  selectedNode: PropTypes.object,
+};
 
 export default ProjectDisplay;
