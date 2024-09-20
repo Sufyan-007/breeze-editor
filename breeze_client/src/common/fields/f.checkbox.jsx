@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 function CustomCheckBoxField({ name, onChange, value, config, className, ...rest }) {
   return (
     <div className={config.groupClass || 'form-check'}>
-      {config.label && <label className={config.labelClass || 'form-check-label'}>{config.label}</label>}
+      {config.label && (
+        <label className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>{config.label}</label>
+      )}
       <input
         type="checkbox"
         name={name}
         checked={value}
-        className={config ? (config.className ? config.className : 'form-check-input') : className}
+        className={config ? (config.className ? config.className : 'form-check-input br-form-check-input') : className}
         onChange={(e) => onChange(e.target.checked)}
         {...rest}
       />

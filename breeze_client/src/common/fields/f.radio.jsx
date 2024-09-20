@@ -5,7 +5,7 @@ function CustomRadioButtonField({ name, value, onChange, options, config, classN
   return (
     <div className={config.groupClass || 'form-group'}>
       {availableOptions.map((option, index) => (
-        <label key={index} className={config.labelClass || 'form-label'}>
+        <label key={index} className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>
           <input
             type="radio"
             name={name}

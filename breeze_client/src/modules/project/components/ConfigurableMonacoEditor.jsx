@@ -78,10 +78,10 @@ const ConfigurableMonacoEditor = ({
     let contentComponent;
     switch (item) {
       case '+ Props':
-        contentComponent = <PropConfigForm />;
+        contentComponent = <PropConfigForm onSubmit={() => {}} />;
         break;
       case '+ Variable':
-        contentComponent = <VariableConfigForm />;
+        contentComponent = <VariableConfigForm onSubmit={() => {}} />;
         break;
       default:
         contentComponent = null;
@@ -120,7 +120,7 @@ const ConfigurableMonacoEditor = ({
         title="Component Configuration"
         placement="end"
       >
-        <div>{offCanvasContent}</div>
+        <>{offCanvasContent}</>
       </BreezeOffcanvas>
     </div>
   );
