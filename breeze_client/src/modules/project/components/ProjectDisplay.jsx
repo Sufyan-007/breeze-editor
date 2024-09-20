@@ -73,7 +73,7 @@ function ProjectDisplay({ selectedNode }) {
 }
 
 ProjectDisplay.propTypes = {
-  selectedNode: PropTypes.string,
+  selectedNode: PropTypes.object,
 };
 
 export default ProjectDisplay;
