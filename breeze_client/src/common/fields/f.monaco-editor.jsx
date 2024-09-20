@@ -23,11 +23,17 @@ function MonacoEditor({
   }, [editor, defaultValue]);
 
   useEffect(() => {
+    var addedCallback;
     if (editor && onChange) {
-      editor.onDidChangeModelContent(() => {
+      addedCallback = editor.onDidChangeModelContent(() => {
         onChange(editor.getValue());
       });
     }
+    return () => {
+      if (addedCallback) {
+        addedCallback.dispose();
+      }
+    };
   }, [editor, onChange]);
 
   useEffect(() => {
