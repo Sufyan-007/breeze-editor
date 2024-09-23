@@ -1,1 +1,8 @@
-# will have different entities stored as enum for common resource API
+from enum import Enum
+
+class ResourceCategory(Enum):
+    COMPONENTS = 'components'
+    SERVICES = 'services'
+    THIRD_PARTY = 'third_party'
+
+

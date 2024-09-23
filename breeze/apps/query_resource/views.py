@@ -10,11 +10,11 @@ class QueryResource(APIView):
         try:   
             data = json.loads(request.body)
             category = data.get('category')
-            resource = data.get('resource', None)
+            resource = data.get('resource', 'index')
             select = data.get('select', [])
             filter_criteria = data.get('filter_criteria', None)
             order = data.get('order',None)
-            limit = data.get("limit",None)
+            limit = data.get('limit',None)
             offset = data.get('offset',None)
 
             if not category:
@@ -23,6 +23,9 @@ class QueryResource(APIView):
             query_resource_service = QueryResourceService(projectName)
             selected_data = query_resource_service.get_json_config_data(resource, category)
         
+            if select:
+                selected_data = [{key: item[key] for key in select if key in item} for item in selected_data]
+
             if selected_data is None:
                 return JsonResponse({'error': "Could not load the configuration data"}, status=500)
 

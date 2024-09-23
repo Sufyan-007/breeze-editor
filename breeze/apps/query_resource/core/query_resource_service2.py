@@ -1,6 +1,9 @@
 import os
-from common.utils.app_consts import CONFIG_PATH
+import json
+from common.utils.app_consts import CONFIG_PATH,THIRD_PARTY_CONFIG_PATH
 from common.utils.file_helper_temp import read_json_file
+from common.utils.file_helper import read_json_file as read_third_party_json_file
+
 
 class QueryResourceService:
     def __init__(self,project_name):
@@ -9,28 +12,24 @@ class QueryResourceService:
         
     def get_json_config_data(self,resource,category):
         try:
-            if resource:
-                ob_config_data = {}
-                config_data = read_json_file(self.project_name, category.lower(),resource,version="5")
-                print(config_data,"config data ")
-                ob_config_data[resource] = config_data
-                return ob_config_data
-            else:
-                if category:
-                    all_resources = self.get_all_resources_for_category(self.project_name,category.lower())
-                
-                    all_config_data = {}
-                    
-                    for res in all_resources:
-                        config_data = read_json_file(self.project_name, category.lower(), res, version="latest")
-                        all_config_data[res] = config_data
-                    
-                
-            
-                    return all_config_data
-                else:
-                    raise ValueError("Category must be specified when resource is not provided.")
-            
+           if category=='third_party':
+               
+               config_data=[]
+               config_path=os.path.join(THIRD_PARTY_CONFIG_PATH,resource)
+               print(config_path)
+
+               with open(f"{config_path}/component/index.json",'rb') as index_config:
+                   index_data = json.load(index_config)
+                   for key,value  in index_data.items():
+                       with open(f"{config_path}/component/{key}.json", "rb") as flatten_config:
+                           file_data=json.load(flatten_config)
+                           config_data.append(file_data)    
+            #    config_data=[{'id': item['_id'], 'name': item['name']} for item in config_data]
+               return config_data            
+            #    config_data=read_third_party_json_file(config_path)
+           else:
+                config_data = read_json_file(self.config_path, category.lower(),resource,version="latest")
+                return config_data
         except Exception as e:
            print(f"Error loading JSON config: {str(e)}")
            return None
