@@ -1,4 +1,5 @@
 import json
+import ast
 import time
 from pathlib import Path
 from flatten_json import flatten
@@ -8,38 +9,28 @@ import sys
 import io
 SEPARATOR = "<>"
 
+def read_file(filepath):
+    with open(f"{filepath}",'rb') as index_config:
+        file_data = json.load(index_config)
+
+        # file_data = file_data.replace("'", '"')
+        # file_data=ast.literal_eval(file_data)
+
+    return file_data
+
+
 def read_json_file(project_name,category,filename,version="latest"):
     file_path = f"{project_name}/{category}/{filename}"
     version_path = f"{project_name}/{category}/versions/{filename}"
     json_config = {}
     err = False
     err_message= ""
-    if filename == "index":
-        with open(f"{file_path}.json",'rb') as index_config:
-            index_data = json.load(index_config)
-            json_config=[]
-
-            for key,value  in index_data.items():
-                # read_json_file(project_name,category,key,version)
-
-                with open(f"{project_name}/{category}/{key}.json", "rb") as flatten_config:
-                    flatten_json = json.load(flatten_config)
-                    # print(flatten_json)  # Debugging: print the file content
-                    json_config.append(unflatten_list(flatten_json,SEPARATOR))
-
-                    # # If the file contains flattened data, unflatten it
-                    # if is_flattened(flatten_json, SEPARATOR):
-                    #     json_config = unflatten_list(flatten_json, SEPARATOR)
-                    #     print(f"Unflattened Data: {json_config}")
-                    # else:
-                    #     json_config = flatten_json
-                    #     print(f"Already Nested Data: {json_config}")
         
-    elif version == "latest":
+    if version == "latest":
         ## config file as the data of latest version already 
         with open(f"{file_path}.json","rb") as flatten_config:
             flatten_json = json.load(flatten_config)
-            print(flatten_json)
+            # print(flatten_json)
             json_config = unflatten_list(flatten_json,SEPARATOR)
             
     elif isinstance(version,int):

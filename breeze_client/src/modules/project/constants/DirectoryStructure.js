@@ -129,6 +129,10 @@ const treeData = [
     tag: '',
     parentId: null,
   },
+  {
+    id: 6,
+    name: 'tpconfig.json'
+  }
 ];
 
 export default treeData;
