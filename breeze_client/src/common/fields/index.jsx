@@ -6,6 +6,7 @@ import CustomTextInput from './f.textInput';
 import CustomRadioButtonField from './f.radio';
 import CustomSelectField from './f.select';
 import CustomTextArea from './f.textarea';
+import CustomMultiSelectField from './f.custom-multiselect';
 
 export {
   CustomButtonField,
@@ -16,4 +17,5 @@ export {
   CustomRadioButtonField,
   CustomSelectField,
   CustomTextArea,
+  CustomMultiSelectField,
 };
