@@ -5,7 +5,7 @@ from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 from common.utils.config_reader import write_file
 import json
 import re
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 class RouteHandler:
     app_config = None
     route_config = None
@@ -167,7 +167,7 @@ class RouteHandler:
         # Handle import for components
         for ic in imported_components:
             related_comp = self.comp_config[ic]
-            directory_manager= DirectoryManagementGenerator(self.app_config["name"])
+            directory_manager= DirectoryManager(self.app_config["name"])
             comp_path = directory_manager.get_path_from_file_id(related_comp["file_id"],relative_path=True)
          
             

@@ -25,7 +25,7 @@ from .helpers.dependencies_manager import DependencyManager
 from .helpers.style_handler import StyleHandler
 import sys
 import pathlib
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 # APP_CONFIG_PATH =  f"{CONFIG_PATH}/{sys.argv[1]}"
 # print("-------------", APP_CONFIG_PATH)
 
@@ -45,7 +45,7 @@ class AppGenerator:
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{app_config_dir}"
         self.read_configs()
         self.logo = logo
-        self.directory_manager= DirectoryManagementGenerator(self.project_name)
+        self.directory_manager= DirectoryManager(self.project_name)
         
     def read_configs(self):
         self.app_config = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
