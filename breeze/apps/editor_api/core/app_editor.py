@@ -21,7 +21,7 @@ import subprocess
 from .project_generation_progress import ProjectGenerationProgress
 from .helpers.dependencies_manager import DependencyManager
 from apps.api_client_generator.utils.uuid_as_key import generate_uuid_as_key
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
@@ -210,7 +210,7 @@ class AppEditor:
         self.app_config['CSS_CONFIG'] = read_config_file(self.app_config_dir, CONFIG_FILES_PATH['CSS_CONFIG'])
         # self.prepare_path_mappings() 
         
-        self.directory_manager = DirectoryManagementGenerator(self.project_name)
+        self.directory_manager = DirectoryManager(self.project_name)
         
         self.app_root_comp_path = self.directory_manager.get_path_from_file_id("MAIN_COMPONENT") 
         
@@ -322,13 +322,13 @@ class AppEditor:
         
         
         
-        file_name = name + (".tsx" if self.app_config.get("language")=="typescript" else ".jsx")
-        
+        file_name = name
         
         node = self.directory_manager.add_node_to_config(
             parent_id="COMPONENTS",
             tag="COMPONENT",
             node_type="FILE",
+            ext="SX",
             name=file_name
         )
         replace_variable(comp,"$NAME",name)

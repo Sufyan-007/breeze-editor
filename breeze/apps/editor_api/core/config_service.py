@@ -2,7 +2,7 @@ from common.utils.config_reader import read_config_file, read_file_json, write_f
 from common.utils.app_consts import CONFIG_FILES_PATH, CONFIG_PATH
 import json
 from common.utils.file_helper import create_parent_dir_if_not_exists
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 
 
 class ConfigService():
@@ -11,7 +11,7 @@ class ConfigService():
         self.project_name = project_name
         self.app_config_dir = f"{CONFIG_PATH}/{project_name}"
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{project_name}"
-        self.directory_manager = DirectoryManagementGenerator(project_name)
+        self.directory_manager = DirectoryManager(project_name)
         self.read_config()
 
     def read_config(self):
@@ -49,7 +49,7 @@ class ConfigService():
         return comp
     
     def get_file_path(self):
-        directory_manager = DirectoryManagementGenerator(self.project_name)
+        directory_manager = DirectoryManager(self.project_name)
         file_paths = {}
         # Check if comp_config is a dictionary and contains components
         if isinstance(self.comp_config, dict):
