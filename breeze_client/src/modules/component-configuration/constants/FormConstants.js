@@ -29,3 +29,20 @@ export const ImportCategories = [
   { label: 'Services', value: 'services' },
   { label: 'Third Party', value: 'thirdparty' },
 ];
+
+export const lifecycleTypes = [
+  { label: 'On Initial Mount', value: 'onInitialMount' },
+  { label: 'On Dependency', value: 'onDependency' },
+  { label: 'On Every Mount', value: 'onEveryMount' },
+];
+
+export const hookTypes = [
+  { label: 'useMemo', value: 'useMemo' },
+  { label: 'useCallback', value: 'useCallback' },
+];
+
+export const availableDependentVars = [
+  { label: 'Variable 1', value: 'var1' },
+  { label: 'Variable 2', value: 'var2' },
+  { label: 'Variable 3', value: 'var3' },
+];

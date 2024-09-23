@@ -8,7 +8,7 @@ const BreezeOffCanvas = ({
   children,
   placement = 'start',
   backdrop = true,
-  size = 'default',
+  size = '50%',
 }) => {
   return (
     <>
@@ -16,7 +16,7 @@ const BreezeOffCanvas = ({
       <div
         className={`br-offcanvas br-background-secondary br-text-tertiary offcanvas offcanvas-${placement} ${show ? 'show' : ''}`}
         tabIndex="-1"
-        style={{ visibility: show ? 'visible' : 'hidden' }}
+        style={{ visibility: show ? 'visible' : 'hidden', width: `${size}` }}
         aria-labelledby="offcanvasLabel"
         aria-hidden={!show}
         role="dialog"
@@ -38,7 +38,7 @@ const BreezeOffCanvas = ({
         </div>
 
         {/* Body */}
-        <div className={`offcanvas-body ${size}`}>{children}</div>
+        <div className={`offcanvas-body`}>{children}</div>
       </div>
 
       {/* Backdrop */}
