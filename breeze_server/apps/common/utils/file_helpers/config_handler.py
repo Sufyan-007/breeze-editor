@@ -1,6 +1,3 @@
-
-# file not used anywhere
-
 import json
 import time
 from pathlib import Path
@@ -8,17 +5,21 @@ from flatten_json import flatten
 from flatten_json import unflatten_list
 
 SEPARATOR = "<>"
-        
+
+
+
 def read_config_file(project_name,category,filename,version="latest"):
     file_path = f"{project_name}/{category}/{filename}"
+    version_path = f"{project_name}/{category}/versions/{filename}"
     json_config = {}
     err = False
     err_message= ""
+        
     if version == "latest":
         ## config file as the data of latest version already 
         with open(f"{file_path}.json","rb") as flatten_config:
             flatten_json = json.load(flatten_config)
-            print(flatten_json)
+            # print(flatten_json)
             json_config = unflatten_list(flatten_json,SEPARATOR)
             
     elif isinstance(version,int):
@@ -26,7 +27,7 @@ def read_config_file(project_name,category,filename,version="latest"):
         versions_file = Path(f"{file_path}_versions.json")
         if versions_file.is_file() and config_file.is_file():
             # files exists
-            with open(f"{file_path}_versions.json","r") as file_version_config,  open(f"{file_path}.json","r") as file_config:
+            with open(f"{version_path}_versions.json","r") as file_version_config,  open(f"{file_path}.json","r") as file_config:
                 file_version_json = json.load(file_version_config)
                 file_config_json = json.load(file_config)
                 current_version = file_version_json.get("current_version")
@@ -80,8 +81,10 @@ def read_config_file(project_name,category,filename,version="latest"):
     
 def write_config_file(project_name,category,filename,json_data):
     file_path = f"{project_name}/{category}/{filename}"
+    version_file_path = f"{project_name}/{category}/versions/{filename}"
+    
     config_file = Path(f"{file_path}.json")
-    versions_file = Path(f"{file_path}_versions.json")
+    versions_file = Path(f"{version_file_path}_versions.json")
     
     ## create flatten obj for given data
     flatten_data_json = flatten(json_data,SEPARATOR)
@@ -91,7 +94,7 @@ def write_config_file(project_name,category,filename,json_data):
     ## fist check if file is present then store and update it's version
     if versions_file.is_file() and config_file.is_file():
         # files exists
-        with open(f"{file_path}_versions.json","r") as file_version_config,  open(f"{file_path}.json","r") as file_config:
+        with open(f"{version_file_path}_versions.json","r") as file_version_config,  open(f"{file_path}.json","r") as file_config:
             file_version_json = json.load(file_version_config)
             file_config_json = json.load(file_config)
             
@@ -130,7 +133,10 @@ def write_config_file(project_name,category,filename,json_data):
         file_version_json["changes"]={}
         
     ## update both files
-    with open(f"{file_path}_versions.json", "w") as jsconfig_version_file:
+    with open(f"{version_file_path}_versions.json", "w") as jsconfig_version_file:
         jsconfig_version_file.write(json.dumps(file_version_json))
         with open(f"{file_path}.json", "w") as jsconfig_file:
             jsconfig_file.write(json.dumps(flatten_data_json))
+
+            
+
