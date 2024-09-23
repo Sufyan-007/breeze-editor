@@ -7,10 +7,11 @@ from rest_framework.permissions import AllowAny
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from ...common.constants.enums.ResourceCategory import ResourceCategory
-from ...common.utils.file_helper import read_json_file,read_file,write_json_file
+from ...common.utils.file_helpers.config_handler import read_config_file
 from ...common.constants.consts import CONFIG_PATH,THIRD_PARTY_CONFIG_PATH
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from ...common.utils.file_helpers.json_handler import read_json_file as read_file
 # from ...common.constants
 # found_keys=[]
 @swagger_auto_schema(
@@ -102,7 +103,7 @@ def manage_resource(request,param):
         
         if category in [ResourceCategory.THIRD_PARTY.value]:
             if not libname or not libversion:
-                config_path=os.path.join(THIRD_PARTY_CONFIG_PATH,'index.json')
+                config_path=os.path.join(THIRD_PARTY_CONFIG_PATH,'index')
                 selected_data=read_file(config_path)
                 return JsonResponse({"data":f"{selected_data}"},status=200) 
             else:
@@ -112,7 +113,7 @@ def manage_resource(request,param):
                     config_path=os.path.join(THIRD_PARTY_CONFIG_PATH,library,'component')
                     if not resource:
                         resource="index"
-                        config_path=os.path.join(config_path,f'{resource}.json')
+                        config_path=os.path.join(config_path,f'{resource}')
                         selected_data=read_file(config_path)
                         # print(selected_data)
                     else:
@@ -123,7 +124,7 @@ def manage_resource(request,param):
                                 if value == resource:
                                     file_name=key
                                     break
-                        config_path=os.path.join(config_path,f'{file_name}.json')
+                        config_path=os.path.join(config_path,f'{file_name}')
                         selected_data=read_file(config_path)
                 except Exception as e:
                     return JsonResponse({"error":"Error while read third_party data"},status=400)
@@ -134,6 +135,7 @@ def manage_resource(request,param):
             
             else:
                 try:
+                    selected_data=selected_data["data"]
                     selected_data = {key: get_nested_value(selected_data, key) for key in select}
                 except Exception as e:
                     return JsonResponse({"error2":str(e)},status = 400)
@@ -146,7 +148,7 @@ def manage_resource(request,param):
 def get_json_config_data(resource, category, projectname):
     try:
         config_path=os.path.join(CONFIG_PATH,projectname)
-        config_data = read_json_file(config_path, category.lower(),resource,version="latest")
+        config_data = read_config_file(config_path, category.lower(),resource,version="latest")
         return config_data
     except Exception as e:
         print(f"Error loading JSON config: {str(e)}")
