@@ -27,7 +27,7 @@ class DirectoryManager:
             f.write(content)
 
 
-    def add_node_to_config(self, parent_id, tag,name, node_type="FILE",ext="", file_id=None,isProtected=False):
+    def add_node_to_config(self, parent_id, tag,name, node_type="FILE",ext="", file_id=None, entity_id = "",isProtected=False):
         
         parent_node = self.directory_management_config.get(parent_id,None)
         
@@ -70,6 +70,7 @@ class DirectoryManager:
             "id": new_id,
             "tag": tag.upper(),
             "type": node_type.upper(),
+            "entityId" : entity_id,
         }|({"children":[]} if node_type=="DIRECTORY" else {"extension":ext})
         
         self.directory_management_config[new_id] = new_node
@@ -103,3 +104,23 @@ class DirectoryManager:
                 return os.path.join(self.app_config['path'], name)
         else:
             return os.path.join(self.get_path_from_file_id(entry["parentId"]), name)
+        
+        
+        
+    def get_directory_configs(self,id,depth=0,allChildren=False,withPreferences=False):
+        directories = {}
+        conf = self.directory_management_config.get(id)
+        if conf:
+            directories[id] = conf
+        else:
+            raise KeyError("Id does not exist")
+            
+        
+        if depth >0:
+            for child in conf.get("children", []):
+                childConfigs = self.get_directory_configs(child,depth=depth-1)
+                print(childConfigs)
+                directories = directories|childConfigs
+                
+        
+        return directories
