@@ -1,4 +1,9 @@
 {
+    "ROOT":{
+      "children":[
+        "SRC","PACKAGE_CONFIG","ALL_STYLES_FILE","INDEX_HTML"
+      ]
+    },
     "SRC": {
       "name": "src",
       "parentId": "ROOT",
@@ -19,6 +24,7 @@
         "name":"Main",
         "extension":"SX",
         "parentId":"COMPONENTS",
+        "entityId":"MAIN",
         "id": "DEFAULT_COMP",
         "tag":"COMPONENTS",
         "type":"FILE"
@@ -44,7 +50,7 @@
       "parentId": "SRC",
       "extension":"SX",
       "id": "MAIN_COMPONENT",
-      "tag": "ROOT",
+      "tag": "ROOT_COMPONENT",
       "type": "FILE"
     },
     "ASSETS": {

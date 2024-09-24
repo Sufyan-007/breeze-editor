@@ -38,7 +38,9 @@ class GetFolderConfig(APIView):
             return JsonResponse({'error': 'projectname query parameter is required'}, status=400)
         try:
             directoryManager = DirectoryManager(projectName)
-            return JsonResponse({ "data":directoryManager.get_path_from_file_id(body.get('id'))})
+            id = body.get('id')
+            depth = body.get('depth',0)
+            return JsonResponse(directoryManager.get_directory_configs(id,depth=depth))
             
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error decoding JSON'}, status=500)
