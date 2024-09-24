@@ -15,9 +15,7 @@ function CustomZipPackagePage() {
   const [fileToDelete, setFileToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
-  // const projectName = 'testing2';
-
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const projectName = 'testing2';
   const [formData, setFormData] = useState({
     filename: '',
     description: '',
@@ -54,9 +52,13 @@ function CustomZipPackagePage() {
   );
 
   const handleDelete = () => {
+    
     if (fileToDelete) {
+      console.log(fileToDelete.fileName, 'file to delete in comp');
       // Dispatch delete action
-      dispatch(deleteZipFileAction({ projectName: projectName, fileName: fileToDelete.name }));
+      dispatch(deleteZipFileAction({ fileName: fileToDelete.fileName, projectName: projectName })).then(()=>{
+        dispatch(fetchZipFilesAction(projectName));
+      });
     }
     setShowDeleteModal(false);
     setFileToDelete(null);
@@ -138,9 +140,8 @@ function CustomZipPackagePage() {
   };
 
   const handleFileSelect = (file) => {
-    console.log(file, 'file in handleFileSelect');
     if (file) {
-      setUploadedFiles(file);
+      
 
       setFormData((prevData) => ({
         ...prevData,

@@ -29,9 +29,10 @@ export const fetchZipFilesAction = createAsyncThunk('zip/fetchZipFiles', async (
 // Action to delete a zip file
 export const deleteZipFileAction = createAsyncThunk(
   'zip/deleteZipFile',
-  async ({ file, projectName }, { rejectWithValue }) => {
+  async ({ fileName, projectName }, { rejectWithValue }) => {
     try {
-      const result = await deleteFile(file, projectName);
+      console.log(fileName , projectName, "file to delete in action");
+      const result = await deleteFile(fileName, projectName);
       return result;
     } catch (error) {
       return rejectWithValue(error.message);

@@ -41,6 +41,7 @@ const fetchZipFiles = async (projectName) => {
 
 const deleteFile = async (file, projectName) => {
   const fileName = file;
+  console.log(fileName,"filename");
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/editor/custom-package-upload/${projectName}`,

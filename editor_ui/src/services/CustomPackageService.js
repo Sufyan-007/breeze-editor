@@ -19,6 +19,7 @@ const uploadZipFile = async (formData, projectName) => {
     }
     submitData.append("file", formData.file);
 
+    console.log(submitData,"submit data");
     
     try {
  
