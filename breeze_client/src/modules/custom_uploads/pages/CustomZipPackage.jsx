@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import deleteicon from '../../../assets/svgs/deleteIcon.svg';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
 import { BreezeTable, BreezeModal } from '../../../common/display/index';
 import '../styles/CustomZipPackage.css';
 import CustomTextInput from '../../../common/fields/f.textInput';
 import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
-import filesData from '../constants/FilesData';
 import columns from '../constants/TableStructure';
+
+import { fetchZipFilesAction, uploadZipFileAction, deleteZipFileAction } from '../redux/customZipActions';
 
 function CustomZipPackagePage() {
   const [showModal, setShowModal] = useState(false);
@@ -13,6 +15,9 @@ function CustomZipPackagePage() {
   const [fileToDelete, setFileToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  // const projectName = 'testing2';
+
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [formData, setFormData] = useState({
     filename: '',
     description: '',
@@ -20,6 +25,22 @@ function CustomZipPackagePage() {
   });
   const [error, setError] = useState('');
 
+  const dispatch = useDispatch(); //Initialize dispatch
+
+  const { zipFiles, status } = useSelector((state) => state.zip);
+
+  //fetch the list of zip files on component mount
+  useEffect(() => {
+    dispatch(fetchZipFilesAction(projectName));
+  }, [dispatch, projectName]);
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  if (status === 'failed') {
+    return <div>Error: {error}</div>;
+  }
   const actions = (item) => (
     <i
       class="bi bi-trash"
@@ -33,7 +54,10 @@ function CustomZipPackagePage() {
   );
 
   const handleDelete = () => {
-    // Implement the actual file deletion logic here
+    if (fileToDelete) {
+      // Dispatch delete action
+      dispatch(deleteZipFileAction({ projectName: projectName, fileName: fileToDelete.name }));
+    }
     setShowDeleteModal(false);
     setFileToDelete(null);
   };
@@ -44,9 +68,36 @@ function CustomZipPackagePage() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Implement your file upload logic here
-    resetForm();
-    setShowModal(false);
+
+    const fileInput = document.querySelector('input[type="file"]');
+
+    if (fileInput.files.length > 0) {
+      const selectedFile = fileInput.files[0];
+
+      // Update formData with the projectId and the selected file
+      formData.projectId = projectName;
+      formData.file = selectedFile; // Set the selected file in formData
+
+      const submitData = new FormData();
+      for (const key in formData) {
+        if (formData.hasOwnProperty(key) && key !== 'file') {
+          submitData.append(key, formData[key]);
+        }
+      }
+      submitData.append('file', formData.file); // Append the file
+
+      // Dispatch the upload action
+      dispatch(uploadZipFileAction({ formData: submitData, projectName: projectName })).then(() => {
+        // Fetch updated list of zip files after successful upload
+        dispatch(fetchZipFilesAction(projectName));
+      });
+
+      // Reset form and hide modal
+      resetForm();
+      setShowModal(false);
+    } else {
+      setError('Please select a file.');
+    }
   };
 
   const resetForm = () => {
@@ -87,7 +138,10 @@ function CustomZipPackagePage() {
   };
 
   const handleFileSelect = (file) => {
+    console.log(file, 'file in handleFileSelect');
     if (file) {
+      setUploadedFiles(file);
+
       setFormData((prevData) => ({
         ...prevData,
         file,
@@ -126,6 +180,16 @@ function CustomZipPackagePage() {
       },
     ],
   };
+
+  // Map the folders array to the desired format
+  const folders = zipFiles?.folders || [];
+  const filesData = folders.map((folder) => ({
+    fileName: folder.name,
+    lastModified: folder.lastModified
+  }));
+
+  console.log(filesData, 'files data ');
+
   return (
     <div>
       <div className="container-fluid py-2 px-3">
@@ -184,18 +248,17 @@ function CustomZipPackagePage() {
             </div>
           </div>
           <div className="mb-3">
-              <CustomTextInput
-                name="filename"
-                value={formData.filename}
-                onChange={(value) => handleChange({ target: { name: 'filename', value } })}
-                config={{
-                  label: 'File Name',
-                  groupClass: 'form-group',
-                }}
-                required
-              />
-            </div>
-          
+            <CustomTextInput
+              name="filename"
+              value={formData.filename}
+              onChange={(value) => handleChange({ target: { name: 'filename', value } })}
+              config={{
+                label: 'File Name',
+                groupClass: 'form-group',
+              }}
+              required
+            />
+          </div>
         </form>
       </BreezeModal>
 

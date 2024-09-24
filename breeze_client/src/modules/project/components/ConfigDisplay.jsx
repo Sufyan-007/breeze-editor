@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import CustomZipPackage from '../../third_party/pages/CustomZipPackage'
+import CustomZipPackage from '../../custom_uploads/pages/CustomZipPackage'
 
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {

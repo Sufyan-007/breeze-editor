@@ -31,8 +31,9 @@ function CustomFileUploadField({
   //handle file selection
   const handleFileChange = (event) => {
     const files = event.target.files;
+    console.log(files,"files ");
     const fileName = multiple ? [...files].map((file) => file.name).join(', ') : files[0]?.name || 'No file chosen';
-
+    console.log(fileName,"file name");
     setSelectedFileName(fileName);
     onFileSelect(multiple ? [...files] : files[0]);
   };

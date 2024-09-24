@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
 const CustomTable = ({
   resource,
@@ -41,7 +41,6 @@ const CustomTable = ({
 
         const fetchedData = await response.json();
         setData(fetchedData);
-        console.log(data);
 
         const fetchedColumns = fields.map((field) => ({
           header: field.charAt(0).toUpperCase() + field.slice(1),
@@ -62,9 +61,9 @@ const CustomTable = ({
   const handleRowSelect = (item) => {
     onRowSelect && onRowSelect(item);
   };
-
+  //  console.log(data,"dataaaaaaaaaaaaaaaaa");
   const paginatedData = data?.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
+  console.log(data, 'hiiiiiiiiiii');
   return (
     <div>
       <table className={tableClass}>
@@ -97,26 +96,31 @@ const CustomTable = ({
         <tbody>
           {paginatedData?.length > 0 ? (
             paginatedData?.map((item, rowIndex) => (
-              <tr key={rowIndex} className={rowClass}>
-                {onRowSelect && (
-                  <td className={cellDataClass}>
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(item)}
-                      onChange={() => handleRowSelect(item)}
-                    />
-                  </td>
-                )}
-                {actionPlacement === 'start' || actionPlacement === 'both' ? <td>{actions && actions(item)}</td> : null}
-                {columns.map((column, colIndex) => (
-                  <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
-                    {column.render ? column.render(item[column.accessor], item) : item[column.accessor]}
-                  </td>
-                ))}
-                {actionPlacement === 'end' || actionPlacement === 'both' ? (
-                  <td className={cellDataClass}>{actions && actions(item)}</td>
-                ) : null}
-              </tr>
+              <>
+                <tr key={rowIndex} className={rowClass}>
+                  {onRowSelect && (
+                    <td className={cellDataClass}>
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(item)}
+                        onChange={() => handleRowSelect(item)}
+                      />
+                    </td>
+                  )}
+                  {actionPlacement === 'start' || actionPlacement === 'both' ? (
+                    <td>{actions && actions(item)}</td>
+                  ) : null}
+                  {columns.map((column, colIndex) => (
+                    <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
+                      {console.log(column)}
+                      {column.render ? column.render(item[column.accessor]) : item[column.accessor]}
+                    </td>
+                  ))}
+                  {actionPlacement === 'end' || actionPlacement === 'both' ? (
+                    <td className={cellDataClass}>{actions && actions(item)}</td>
+                  ) : null}
+                </tr>
+              </>
             ))
           ) : (
             <tr>

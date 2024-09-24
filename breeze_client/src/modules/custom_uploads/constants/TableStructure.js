@@ -7,8 +7,8 @@ const columns = [
   {
     header: 'Last Modified',
     accessor: 'lastModified',
-    render: (value) => new Date(value).toLocaleString(),
+    render: (value) => new Date(value).toLocaleDateString(),
     width: '40%',
   },
 ];
-export default columns
+export default columns;

@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 function ProjectDisplay({ selectedNode }) {
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   // const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
-  const item = { type: 'third-party' }; // TO DO : Dynamic after api integration
+  const item = selectedNode.id === 6 ? { type: 'third-party' } : { type: 'component' }; // TO DO : Dynamic after api integration
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);

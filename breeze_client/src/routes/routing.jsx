@@ -50,9 +50,9 @@ export const router = createBrowserRouter([
   {
     path: '/project',
     element: (
-      <ProtectedRoute>
-        <ProjectPage />
-      </ProtectedRoute>
+      // <ProtectedRoute>
+      <ProjectPage />
+      // </ProtectedRoute>
     ),
   },
 ]);
