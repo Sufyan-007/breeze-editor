@@ -10,7 +10,7 @@
       "id": "SRC",
       "tag": "ROOT",
       "type": "DIRECTORY",
-      "children":[]
+      "children":["STYLES","COMPONENTS","SERVICES","PROJECT_ROOT_FILE","MAIN_COMPONENT","ASSETS"]
     },
     "COMPONENTS": {
       "name": "components",
@@ -18,7 +18,7 @@
       "id": "COMPONENTS",
       "tag": "COMPONENTS",
       "type": "DIRECTORY",
-      "children":[]
+      "children":["DEFAULT_COMP"]
     },
     "DEFAULT_COMP":{
         "name":"Main",
