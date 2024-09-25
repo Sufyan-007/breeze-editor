@@ -2,6 +2,7 @@ from django.urls import path
 from .views import handle_general_proj_apis as proj_apis
 from .views import query_resource as que_re
 from .views import swagger_template as swag_temp
+from .communication import consumers
 
 
 urlpatterns = [
@@ -12,6 +13,7 @@ urlpatterns = [
     path('delete/<str:param>/', proj_apis.delete, name='delete_project'),
     # post request
     path('query_resource/<str:param>/', que_re.manage_resource),
+    path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
 ]
 
 

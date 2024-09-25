@@ -1,6 +1,9 @@
 from django.urls import path
-from .views.manage_routes import manage_routes
+from .views import manage_routes
 
 urlpatterns = [
-    path('manage-routes/', manage_routes),
+    path('add/', manage_routes.add_update_route),
+    path('get/', manage_routes.get_route),
+    path('update/', manage_routes.add_update_route),
+    path('delete/', manage_routes.delete_route),
 ]
