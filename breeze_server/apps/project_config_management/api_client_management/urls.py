@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import manage_api_client
+from .views.manage_api_client import generateServiceConfig
 
 urlpatterns = [
-    path('manage-api-client/', manage_api_client.manage_api_client),
+    path('convert-standard-json/<str:collectionType>/',generateServiceConfig ),
 ]
