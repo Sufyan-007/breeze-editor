@@ -3,7 +3,7 @@ from common.utils.file_utils import (
     create_parent_dir_if_not_exists,
     create_dir_if_not_exists,
 )
-from ....directory_management.core.directory_management_service import DirectoryManagementGenerator
+from ....directory_management.core.directory_management_service import DirectoryManager
 import os
 
 
@@ -47,7 +47,7 @@ class StyleHandler:
             # Fetching file path from lineage and file name from name
             # lineage = directory_config.get("lineage", [])
             # file_path = os.path.join(*[element.lower() for element in lineage]) if lineage else ""
-            directory_management_service = DirectoryManagementGenerator(app_config["name"])
+            directory_management_service = DirectoryManager(app_config["name"])
             file_path = directory_management_service.get_path_from_file_id(file_id)
             file_name = directory_config.get("name", style_id)
 
@@ -65,7 +65,7 @@ class StyleHandler:
             import_statement = f"import './styles/{file_name}';\n"
             import_statements += import_statement
 
-        directory_management_service = DirectoryManagementGenerator(app_config["name"])
+        directory_management_service = DirectoryManager(app_config["name"])
         styles_js_path = directory_management_service.get_path_from_file_id('ALL_STYLES_FILE')
         with open(styles_js_path, "w") as styles_js_file:
             styles_js_file.write(import_statements)

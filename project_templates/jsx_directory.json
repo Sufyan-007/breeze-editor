@@ -1,77 +1,94 @@
 {
+    "ROOT":{
+      "children":[
+        "SRC","PACKAGE_CONFIG","ALL_STYLES_FILE","INDEX_HTML"
+      ]
+    },
     "SRC": {
       "name": "src",
-      "lineage": [],
+      "parentId": "ROOT",
       "id": "SRC",
       "tag": "ROOT",
-      "type": "DIRECTORY"
+      "type": "DIRECTORY",
+      "children":[]
     },
     "COMPONENTS": {
       "name": "components",
-      "lineage": ["SRC"],
+      "parentId": "SRC",
       "id": "COMPONENTS",
       "tag": "COMPONENTS",
-      "type": "DIRECTORY"
+      "type": "DIRECTORY",
+      "children":[]
     },
     "DEFAULT_COMP":{
-        "name":"Main.jsx",
-        "lineage":["SRC","COMPONENTS"],
+        "name":"Main",
+        "extension":"SX",
+        "parentId":"COMPONENTS",
+        "entityId":"MAIN",
         "id": "DEFAULT_COMP",
         "tag":"COMPONENTS",
         "type":"FILE"
     },
     "SERVICES": {
       "name": "services",
-      "lineage": ["SRC"],
+      "parentId": "SRC",
       "id":"SERVICES",
       "tag": "SERVICES",
-      "type": "DIRECTORY"
+      "type": "DIRECTORY",
+      "children":[]
     },
     "PROJECT_ROOT_FILE": {
-      "name": "main.jsx",
-      "lineage": ["SRC"],
+      "name": "main",
+      "parentId": "SRC",
+      "extension":"SX",
       "id": "PROJECT_ROOT_FILE",
       "tag": "ROOT",
       "type": "FILE"
     },
     "MAIN_COMPONENT": {
-      "name": "App.jsx",
-      "lineage": ["SRC"],
+      "name": "App",
+      "parentId": "SRC",
+      "extension":"SX",
       "id": "MAIN_COMPONENT",
-      "tag": "ROOT",
+      "tag": "ROOT_COMPONENT",
       "type": "FILE"
     },
     "ASSETS": {
       "name": "assets",
-      "lineage": ["SRC"],
+      "parentId": "SRC",
       "id": "ASSETS",
       "tag": "ASSETS",
-      "type": "DIRECTORY"
+      "type": "DIRECTORY",
+      "children":[]
     },
     "PACKAGE_CONFIG":{
-        "name":"package.json",
-        "lineage":[],
+        "name":"package",
+        "extension":"json",
+        "parentId":"ROOT",
         "id":"PACKAGE_CONFIG",
         "tag":"PACKAGE_CONFIG",
         "type":"FILE"
     },
     "INDEX_HTML":{
-        "name":"index.html",
-        "lineage":[],
+        "name":"index",
+        "parentId":"ROOT",
+        "extension":"html",
         "id":"INDEX_HTML",
         "tag":"INDEX_HTML",
         "type":"FILE"
     },
     "STYLES": {
       "name": "styles",
-      "lineage": ["SRC"],
+      "parentId": "SRC",
       "id": "STYLES",
       "tag": "STYLES",
-      "type": "DIRECTORY"
+      "type": "DIRECTORY",
+      "children":[]
     },
     "ALL_STYLES_FILE":{
-      "name":"styles.js",
-      "lineage":[],
+      "name":"styles",
+      "extension":"js",
+      "parentId":"ROOT",
       "id":"ALL_STYLES_FILE",
       "tag":"ALL_STYLES_FILE",
       "type":"FILE"

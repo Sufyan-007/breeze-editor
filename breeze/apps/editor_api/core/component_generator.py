@@ -6,7 +6,7 @@ from .helpers.html_generator import HTMLGenerator
 from .helpers.import_helper import ImportHelper
 from .helpers.api_parameters_mapping import APIParametersMapping
 from .helpers.function_ast_parser import FunctionParser
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 from common.utils.file_utils import create_parent_dir_if_not_exists
 from common.utils.formatter import format_raw_val
 
@@ -133,7 +133,7 @@ class ComponentGenerator_JSX(ComponentGenerator):
         
         file_id = comp_config.get("file_id")
         
-        directory_management_service = DirectoryManagementGenerator(self.app_config["name"])
+        directory_management_service = DirectoryManager(self.app_config["name"])
         directory_management_service.save_file(file_id,react_component_code)
         # # file_path = directory_management_service.get_path_from_file_id(file_id)
         # # Get the output file name from the JSON configuration
