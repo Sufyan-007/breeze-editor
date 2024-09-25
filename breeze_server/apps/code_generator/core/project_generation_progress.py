@@ -5,14 +5,8 @@ from channels.layers import get_channel_layer
 RUNNING_PROCESSES = {}
 
 stage_progress = {
-    "create_react_app": {
-        "^Installing packages": 20,
-        "^Initialized a git repository": 50,
-        "^Created git commit": 60,
-        "^Happy hacking!": 80,
-    },
     "installing_dependencies": {
-        "^Run `npm audit` for details": 90,
+        "^Run `npm audit` for details": 70,
     },
 }
 
@@ -47,3 +41,13 @@ class ProjectGenerationProgress:
             )
         else:
             print(f"Stage '{stage}' not recognized. No progress tracking will be applied.")
+            
+    def store_func_progress(project_id, progress_amount):
+        async_to_sync(channel_layer.group_send)(
+            project_id,
+            {
+                "type": "project_progress",
+                "message": progress_amount,
+            },
+        )
+        

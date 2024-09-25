@@ -1,8 +1,6 @@
 from django.urls import path, include
-from .views import config_writer
+from .views import manage_configs
 from .views import get_file_path
-from .route_management.views import manage_routes
-from .api_client_management.views import manage_api_client
 
 urlpatterns = [
     
@@ -16,10 +14,10 @@ urlpatterns = [
     # reducers
     # context
     # 
-    path('write-resource-config/', config_writer.manage_configs),
+    path('write-resource-config/', manage_configs.manage_configs),
     
     # to manage whole route scenario individually
-    path('manage-routes/', include('apps.project_config_management.route_management.urls')),
+    path('routes/', include('apps.project_config_management.route_management.urls')),
     
     # to manage whole API client scenario individually
     path('manage-api-client/', include('apps.project_config_management.api_client_management.urls')),

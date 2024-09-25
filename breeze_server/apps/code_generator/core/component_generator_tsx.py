@@ -1,11 +1,6 @@
 from .component_generator import ComponentGenerator
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists
 import subprocess
-from apps.common.utils.path_extractor import get_path_without_ext
-from .helpers.html_generator import HTMLGenerator
-from .helpers.import_helper import ImportHelper
-from .helpers.function_ast_parser import FunctionParser
-
 
 class ComponentGenerator_TSX(ComponentGenerator):
 
