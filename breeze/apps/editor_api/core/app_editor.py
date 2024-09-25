@@ -329,6 +329,7 @@ class AppEditor:
             tag="COMPONENT",
             node_type="FILE",
             ext="SX",
+            entity_id=name,
             name=file_name
         )
         replace_variable(comp,"$NAME",name)
