@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from ...common.constants.enums.ResourceCategory import ResourceCategory
 from ...common.utils.file_helpers.config_handler import read_config_file
-from ...common.constants.consts import CONFIG_PATH,THIRD_PARTY_CONFIG_PATH
+from ...common.constants.consts import CONFIG_PATH,THIRD_PARTY_CONFIG_PATH,CLIENT_API
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from ...common.utils.file_helpers.json_handler import read_json_file as read_file
@@ -87,33 +87,42 @@ def manage_resource(request,param):
         count=data.get('count') or None
         libname=data.get('libname') or None
         libversion=data.get('libversion') or None
-    
+        module = data.get('module') or None
+        files = data.get('files') or None
+        category=category.lower()
         selected_data={}
         if not category:
             return JsonResponse({'error':'categroy is required'},status=400)
         
-        elif category not in [ResourceCategory.COMPONENTS.value , ResourceCategory.SERVICES.value , ResourceCategory.THIRD_PARTY.value]:
+        elif category not in [ResourceCategory.COMPONENTS.value , ResourceCategory.SERVICES.value , ResourceCategory.THIRD_PARTY.value,ResourceCategory.API_CLIENT.value]:
             return JsonResponse({"error":"categroy is not defined"},status = 400)
         
         if category in [ResourceCategory.COMPONENTS.value,ResourceCategory.SERVICES.value]:
             if not resource:
-                resource='index'
-            selected_data=get_json_config_data(resource, category, projectname)
+                selected_data=get_json_config_data("index", category, projectname)
+            else:
+                selected_data=get_json_config_data(resource, category, projectname)
+            
+            if selected_data:
+                selected_data=selected_data["data"]
+            else:
+                return JsonResponse({"error":"File not present"},status=400)
             # return JsonResponse({"message": f"{selected_data}"}, status=200)
         
         if category in [ResourceCategory.THIRD_PARTY.value]:
             if not libname or not libversion:
-                config_path=os.path.join(THIRD_PARTY_CONFIG_PATH,'index')
-                selected_data=read_file(config_path)
-                return JsonResponse({"data":f"{selected_data}"},status=200) 
+                if not resource:
+                    config_path=os.path.join(THIRD_PARTY_CONFIG_PATH,'index')
+                    selected_data=read_file(config_path)
+                else:
+                    return JsonResponse({"error":"libname and libversion are missing"},status=400) 
             else:
                 try:
                     library=f"{libname}@{libversion}"
                     # print(library)
                     config_path=os.path.join(THIRD_PARTY_CONFIG_PATH,library,'component')
                     if not resource:
-                        resource="index"
-                        config_path=os.path.join(config_path,f'{resource}')
+                        config_path=os.path.join(config_path,'index')
                         selected_data=read_file(config_path)
                         # print(selected_data)
                     else:
@@ -124,22 +133,74 @@ def manage_resource(request,param):
                                 if value == resource:
                                     file_name=key
                                     break
-                        config_path=os.path.join(config_path,f'{file_name}')
-                        selected_data=read_file(config_path)
+                        if(file_name):
+                            config_path=os.path.join(config_path,f'{file_name}')
+                            selected_data=read_file(config_path)
+                        else:
+                            return JsonResponse({"error":"File are not present"},status=400)
+                
                 except Exception as e:
                     return JsonResponse({"error":"Error while read third_party data"},status=400)
-                                      
-        if select:
-            if not resource:
-                return JsonResponse({"error":'Resource are not there'},status = 400)
-            
-            else:
+
+        if category in [ResourceCategory.API_CLIENT.value]:
+
+            if (module and resource and files):
                 try:
-                    selected_data=selected_data["data"]
-                    selected_data = {key: get_nested_value(selected_data, key) for key in select}
+                    config_path=os.path.join(CONFIG_PATH,'api_client_intermediate_json',module,files)
+                    selected_data=read_file(config_path)
+                    selected_data=selected_data[resource]
+                
                 except Exception as e:
-                    return JsonResponse({"error2":str(e)},status = 400)
-        
+                    return JsonResponse({"error":"resource are not present in file"},status = 400)
+
+            elif(module and files):
+                try:
+                    config_path=os.path.join(CONFIG_PATH,CLIENT_API,module,files)
+                    selected_data=read_file(config_path)
+
+                except Exception as e:
+                    return JsonResponse({"error":"files are not present in module"},status=400)
+
+            elif(module):
+                try:
+                    if not resource:
+                        config_path=os.path.join(CONFIG_PATH,CLIENT_API,module,'index')
+                        selected_data=read_file(config_path)
+                    else:
+                        return JsonResponse({"error":"files name are missing"},status=400)
+                    
+                except Exception as e:
+                    return JsonResponse({"error":"module are not present"},status=400)
+
+            elif(module or files or resource):
+                return JsonResponse({"error":"body has not all field (category->module->files->resource)"},status=400)
+
+            else:
+                config_path=os.path.join(CONFIG_PATH,CLIENT_API,'swagger_metadata')
+                selected_data=read_file(config_path)
+                # return JsonResponse({"error":'Error while fetch data from api_client'},status=400)
+
+        if select:
+            if category in [ResourceCategory.COMPONENTS.value , ResourceCategory.SERVICES.value , ResourceCategory.THIRD_PARTY.value]:
+                if not resource:
+                    return JsonResponse({"error":'Resource are not there'},status = 400)
+                else:
+                    try:
+                        # selected_data=selected_data["data"]
+                        selected_data = {key: get_nested_value(selected_data, key) for key in select}
+                    except Exception as e:
+                        return JsonResponse({"error2":str(e)},status = 400)
+
+            elif category in [ResourceCategory.API_CLIENT.value]:
+                if (module and not(files or resource)):
+                    return JsonResponse({"error":"module has no functionality of select"},status=400)
+
+                else:
+                    try:
+                        selected_data = {key: get_nested_value(selected_data, key) for key in select}
+                    except Exception as e:
+                        return JsonResponse({"error2":str(e)},status = 400)
+                
 
         return JsonResponse({'data':selected_data},status=200)
     except Exception as e:
@@ -147,8 +208,8 @@ def manage_resource(request,param):
     
 def get_json_config_data(resource, category, projectname):
     try:
-        config_path=os.path.join(CONFIG_PATH,projectname)
-        config_data = read_config_file(config_path, category.lower(),resource,version="latest")
+        # config_path=os.path.join(CONFIG_PATH,projectname)
+        config_data = read_config_file(projectname, category.lower(),resource,version="latest")
         return config_data
     except Exception as e:
         print(f"Error loading JSON config: {str(e)}")

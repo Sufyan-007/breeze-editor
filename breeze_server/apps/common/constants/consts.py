@@ -32,4 +32,5 @@ CONFIG_PATH = "configurations"
 # should be used after confirming the genration path status
 PROJECT_GENERATION_PATH = "generated_projects"
 
+CLIENT_API="api_client_intermediate_json"
 APP_CONFIG_PATH = "configurations"
