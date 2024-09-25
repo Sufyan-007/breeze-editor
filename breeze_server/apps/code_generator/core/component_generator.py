@@ -2,10 +2,9 @@ import json
 import subprocess
 import os
 from apps.common.utils.path_extractor import get_path_without_ext
-from .helpers.html_generator import HTMLGenerator
-from .helpers.import_helper import ImportHelper
-from .helpers.api_parameters_mapping import APIParametersMapping
-from .helpers.function_ast_parser import FunctionParser
+from ..utils.html_generator import HTMLGenerator
+from ..utils.import_helper import ImportHelper
+from ..utils.function_ast_parser import FunctionParser
 from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists
 from apps.common.utils.formatter import format_raw_val

@@ -1,6 +1,6 @@
 class FunctionCodeGenerator:
     @staticmethod
-    def generate_function(function_def, comp_config):
+    def generate_function(function_def):
         
         func_name = ""
         if function_def['isAnonymous'] is False:
