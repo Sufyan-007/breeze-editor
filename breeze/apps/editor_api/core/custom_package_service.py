@@ -145,7 +145,7 @@ class CustomPackageService:
             extracted_dir = os.path.join(CONFIG_PATH, self.project_name, "extracted_zip_files")
             uploaded_file_path = os.path.join(extracted_dir, fileName)
             react_app_file_path = os.path.join(self.react_app_dir, "extracted_zip_files", fileName)
-
+            customized_proj_config_path = os.path.join(CONFIG_PATH, self.project_name,"customized_proj_config",fileName)
             # Helper function to handle file/directory deletion
             def delete_path(file_path, location_name):
                 if os.path.exists(file_path):
@@ -163,6 +163,7 @@ class CustomPackageService:
             # Delete from both locations
             delete_path(uploaded_file_path, "extracted_zip_files")
             delete_path(react_app_file_path, "React app")
+            delete_path(customized_proj_config_path, "customized_proj_config")
 
         except Exception as e:
             print(f"Error deleting file or directory: {e}")

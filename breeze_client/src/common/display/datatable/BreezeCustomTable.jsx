@@ -27,7 +27,6 @@ const CustomTable = ({
 
   useEffect(() => {
     if (resource && fields) {
-      console.log(resource);
       async function fetchResourceData() {
         const queryParams = new URLSearchParams();
         fields.forEach((field) => queryParams.append('fields', field));
@@ -61,9 +60,9 @@ const CustomTable = ({
   const handleRowSelect = (item) => {
     onRowSelect && onRowSelect(item);
   };
-  //  console.log(data,"dataaaaaaaaaaaaaaaaa");
+ 
   const paginatedData = data?.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  console.log(data, 'hiiiiiiiiiii');
+
   return (
     <div>
       <table className={tableClass}>
@@ -112,7 +111,6 @@ const CustomTable = ({
                   ) : null}
                   {columns.map((column, colIndex) => (
                     <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
-                      {console.log(column)}
                       {column.render ? column.render(item[column.accessor]) : item[column.accessor]}
                     </td>
                   ))}
@@ -141,6 +139,7 @@ const CustomTable = ({
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
+          <i class="bi bi-chevron-left" style={{'font-size': '12px'}}></i>
           Previous
         </button>
         <span>
@@ -153,6 +152,7 @@ const CustomTable = ({
           onClick={() => onPageChange(currentPage + 1)}
         >
           Next
+          <i class="bi bi-chevron-right" style={{ 'font-size': '12px' }}></i>
         </button>
       </div>
     </div>

@@ -209,7 +209,6 @@ function CustomZipPackagePage() {
             data={filesData}
             actions={actions}
             currentPage={currentPage}
-            pageSize={pageSize}
             onPageChange={handlePageChange}
             sortBy="filename"
             sortDirection="asc"

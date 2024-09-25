@@ -31,7 +31,6 @@ const fetchZipFiles = async (projectName) => {
       }
     );
     const result = await response.json();
-    console.log(result, "zip files in service");
     return result;
   } catch (error) {
     console.error('Error fetching files:', error);
@@ -41,7 +40,6 @@ const fetchZipFiles = async (projectName) => {
 
 const deleteFile = async (file, projectName) => {
   const fileName = file;
-  console.log(fileName,"filename");
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/editor/custom-package-upload/${projectName}`,

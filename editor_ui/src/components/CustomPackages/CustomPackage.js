@@ -122,7 +122,7 @@ console.log(zipFiles,"zip files")
                 <tr key={index}>
                   <td>{file.name}</td>
                   <td>{file.lastModified}</td>
-                  <td style={{ textAlign: "center" }}>
+                  <td style={{ textAlign: "center.33.0" }}>
                     <img
                       src={deleteicon}
                       height="30px"
