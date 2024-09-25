@@ -3,7 +3,7 @@ import string
 from ..core.post_edit_operations import RouteHandler
 from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 
 def generate_layout_route_key():

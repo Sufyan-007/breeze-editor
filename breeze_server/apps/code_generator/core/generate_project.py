@@ -4,7 +4,7 @@ from apps.common.utils.formatter import format_by_prettier
 from apps.project_config_management.route_management.core.post_edit_operations import RouteHandler
 from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file
 from apps.common.utils.file_helpers import file_handler 
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 from .component_generator import ComponentGenerator
 from .project_generation_progress import ProjectGenerationProgress
 from ..utils.dependencies_manager import DependencyManager
@@ -167,7 +167,7 @@ def modify_main_component(app_config, routing_config):
     initialize(app_config, routing_config, comp_config_index)
     react_code = handle_routing_code(app_config, routing_config, comp_config_index, )
     
-    directory_manager= DirectoryManagementGenerator(app_config['name'])
+    directory_manager= DirectoryManager(app_config['name'])
     
     directory_manager.save_file("MAIN_COMPONENT",react_code)
     
@@ -192,7 +192,7 @@ def generate_api_client(app_config):
 def install_dependencies(app_config):
     app_dependencies = app_config['dependencies']
     project_name = app_config['name']
-    directory_manager = DirectoryManagementGenerator(project_name)
+    directory_manager = DirectoryManager(project_name)
     package_json_path = directory_manager.get_path_from_file_id("PACKAGE_CONFIG")
     
     package_json = read_json_file(package_json_path, "")
@@ -250,7 +250,7 @@ def prepare_comp_config(app_config):
     
 def modify_index_html_with_project_name(app_config):
     project_name = app_config['name']
-    directory_manager = DirectoryManagementGenerator(project_name)
+    directory_manager = DirectoryManager(project_name)
     index_html_path = directory_manager.get_path_from_file_id("INDEX_HTML")
 
     # Modify the index.html to reference the new project name
@@ -268,7 +268,7 @@ def modify_index_html_with_project_name(app_config):
 
 def modify_index_html_with_logo(app_config):
     project_name = app_config['name']
-    directory_manager = DirectoryManagementGenerator(project_name)
+    directory_manager = DirectoryManager(project_name)
     index_html_path =  directory_manager.get_path_from_file_id("INDEX_HTML")
 
     logo_id = app_config.get('logo')

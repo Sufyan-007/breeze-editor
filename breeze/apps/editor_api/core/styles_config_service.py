@@ -5,7 +5,7 @@ import json
 from .app_editor import AppEditor
 import os
 from ...directory_management.core.directory_management_service import (
-    DirectoryManagementGenerator,
+    DirectoryManager,
 )
 
 
@@ -48,9 +48,12 @@ class StylesConfigService:
         if missing_fields:
             raise ValueError(f"Missing fields: {', '.join(missing_fields)}")
 
-        directory_manager = DirectoryManagementGenerator(self.projectId)
+        directory_manager = DirectoryManager(self.projectId)
         new_node = directory_manager.add_node_to_config(
-            "STYLES", "FILE", "SRC", "STYLE_FILE", data["css_filename"]
+            parent_id="STYLES",
+            tag="STYLES",
+            name=data["css_filename"] 
+            
         )
         css_name = data["css_name"]
         is_update = css_name in self.css_config
