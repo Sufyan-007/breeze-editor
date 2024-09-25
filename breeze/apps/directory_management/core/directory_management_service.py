@@ -83,6 +83,9 @@ class DirectoryManager:
 
     def rename_node(self, node_id, new_name):
         raise NotImplementedError()
+    
+    def move_node(self, node_id, new_parent_id):
+        raise NotImplementedError()
         
 
     #get path from file_id
