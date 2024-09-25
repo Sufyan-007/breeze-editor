@@ -81,6 +81,7 @@ class DirectoryManager:
        
         return new_node
 
+    # TODO: change comp_config_path soon when require rename functionality
     def rename_node(self, node_id, new_name):
         raise NotImplementedError()
     
