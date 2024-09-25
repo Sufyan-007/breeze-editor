@@ -53,7 +53,7 @@ class DirectoryManager:
             ex = ("tsx" if self.isTypeScript else "jsx") if ext=="SX" else ext
             fullName = name + "." + ex
         
-        if fullName in os.listdir(parent_dir):
+        if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir):
             raise FileExistsError("Given file name already exists")
         
         
