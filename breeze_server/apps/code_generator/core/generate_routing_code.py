@@ -1,6 +1,6 @@
 import re
 from apps.code_generator.utils.function_code_generator import FunctionCodeGenerator
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 from apps.common.utils.path_extractor import get_path_without_ext
 from apps.common.constants.consts import NEW_LINE_CHAR, CONFIG_PATH
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
@@ -25,7 +25,7 @@ def get_routing_code(_route_config, _comp_config_index, _app_config):
     import_statements = []
     for ic_id in imported_components:
         related_comp = _comp_config_index[ic_id]
-        directory_manager= DirectoryManagementGenerator(_app_config["name"])
+        directory_manager= DirectoryManager(_app_config["name"])
         related_comp_file = read_config_file(_app_config.get('name'), ResourceCategory.COMPONENTS.value, ic_id)
         file_id = related_comp_file.get('data', {}).get(related_comp, {}).get("file_id")
         comp_path = directory_manager.get_path_from_file_id(file_id,relative_path=True)

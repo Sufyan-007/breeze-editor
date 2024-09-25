@@ -1,5 +1,5 @@
 from apps.common.utils.path_extractor import get_path_without_ext
-from apps.directory_management.core.directory_management_service import DirectoryManagementGenerator
+from apps.directory_management.core.directory_management_service import DirectoryManager
 
 class ImportHelper:
     def __init__(self):
@@ -13,7 +13,7 @@ class ImportHelper:
     
         import_statements = []
         
-        directory_management_service = DirectoryManagementGenerator(app_config["name"])
+        directory_management_service = DirectoryManager(app_config["name"])
 
         # Handle import for components
         for ic in imported_components:
