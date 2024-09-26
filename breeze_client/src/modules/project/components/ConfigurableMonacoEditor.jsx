@@ -2,11 +2,15 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
 import { BreezeOffcanvas, BreezeList } from '../../../common/display';
-import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
 import ThemeContext from '../../../contexts/ThemeContext';
+import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
 import VariableConfigForm from '../../component-configuration/components/config-forms/VariableConfigForm';
+import ImportConfigForm from '../../component-configuration/components/config-forms/ImportConfigForm';
+import FunctionConfigForm from '../../component-configuration/components/config-forms/FunctionConfigForm';
+import LifecycleConfigForm from '../../component-configuration/components/config-forms/LifecycleConfigForm';
+import HookConfigForm from '../../component-configuration/components/config-forms/HookConfigForm';
 
-const items = ['+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
+const items = ['+ Imports', '+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
 
 const ConfigurableMonacoEditor = ({
   defaultValue = '',
@@ -60,9 +64,12 @@ const ConfigurableMonacoEditor = ({
     document.addEventListener('keydown', handleKeyDown);
 
     const handleClickOutside = (event) => {
-      if (showMenu && !event.target.closest('#customMenu')) {
-        setShowMenu(false);
-      }
+      setShowMenu((state) => {
+        if (state && !event.target.closest('#customMenu')) {
+          return false;
+        }
+        return state;
+      });
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -77,11 +84,23 @@ const ConfigurableMonacoEditor = ({
   const handleMenuItemClick = (item) => {
     let contentComponent;
     switch (item) {
+      case '+ Imports':
+        contentComponent = <ImportConfigForm onSubmit={() => {}} />;
+        break;
       case '+ Props':
         contentComponent = <PropConfigForm onSubmit={() => {}} />;
         break;
       case '+ Variable':
         contentComponent = <VariableConfigForm onSubmit={() => {}} />;
+        break;
+      case '+ Function':
+        contentComponent = <FunctionConfigForm onSubmit={() => {}} />;
+        break;
+      case '+ Lifecycle':
+        contentComponent = <LifecycleConfigForm onSubmit={() => {}} />;
+        break;
+      case '+ Hook':
+        contentComponent = <HookConfigForm onSubmit={() => {}} />;
         break;
       default:
         contentComponent = null;
@@ -119,6 +138,7 @@ const ConfigurableMonacoEditor = ({
         onClose={() => setShowOffCanvas(false)}
         title="Component Configuration"
         placement="end"
+        size="40%"
       >
         <>{offCanvasContent}</>
       </BreezeOffcanvas>

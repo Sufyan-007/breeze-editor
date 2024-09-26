@@ -1,3 +1,0 @@
-OPERATION_TYPES ={
-    
-}

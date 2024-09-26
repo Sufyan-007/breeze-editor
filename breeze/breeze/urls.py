@@ -44,6 +44,7 @@ urlpatterns = [
     path('directory-management/',include('apps.directory_management.urls')),
     path('api/breeze-core/',include('apps.breeze_core.urls')),
     path('api/auth/',include('apps.authentication.urls')),
+    path('query-resource/',include('apps.query_resource.urls'))
     
 ]
 

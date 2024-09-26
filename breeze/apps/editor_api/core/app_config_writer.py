@@ -118,8 +118,7 @@ class AppConfigWriter:
         
         directory_management_config = read_json_file(directory_management_path)
         
-        default_comp_name = app_config['defaultComponent']+ (".tsx" if app_config.get("language") == "typescript" else ".jsx")
-        
+        default_comp_name = app_config['defaultComponent']
         directory_management_config["DEFAULT_COMP"]["name"] = default_comp_name
         
         write_file(f"{directory_management_path}.json", json.dumps(directory_management_config))

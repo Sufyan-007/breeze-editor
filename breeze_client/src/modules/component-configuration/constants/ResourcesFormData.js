@@ -15,7 +15,32 @@ export const initialVariableConfig = {
   description: '',
 };
 
-export const initialFunctionConfig = {};
-export const initialParamConfig = {};
-export const initialLifecycleConfig = {};
-export const initialHookConfig = {};
+export const initialImportConfig = {
+  importEntity: '',
+  importFrom: '',
+  importType: 'single',
+  category: 'component',
+};
+
+export const initialFunctionConfig = {
+  functionName: '',
+  isAsync: false,
+  isAnonymous: false,
+  description: '',
+  params: [],
+  functionBody: '',
+};
+
+export const initialLifecycleConfig = {
+  description: '',
+  lifecycleType: 'onInitialMount',
+  dependentVars: [],
+  lifecycleBody: '',
+};
+export const initialHookConfig = {
+  hookName: '',
+  hookDescription: '',
+  hookType: 'useMemo',
+  dependentVars: [],
+  functionParams: [],
+};

@@ -12,7 +12,9 @@ function CustomRadioButtonField({ name, value, onChange, options, config, classN
             value={option.value}
             checked={value === option.value}
             onChange={(e) => onChange(e.target.value)}
-            className={config ? (config.className ? config.className : 'form-control') : className}
+            className={
+              config ? (config.className ? config.className : 'form-check-input br-form-check-input') : className
+            }
             {...rest}
           />
           {option.label}
