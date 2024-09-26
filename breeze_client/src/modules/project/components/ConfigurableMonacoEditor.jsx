@@ -5,6 +5,7 @@ import { BreezeOffcanvas, BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
 import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
 import VariableConfigForm from '../../component-configuration/components/config-forms/VariableConfigForm';
+import AddELement from '../../component-configuration/components/config-forms/AddELement'
 import ImportConfigForm from '../../component-configuration/components/config-forms/ImportConfigForm';
 import FunctionConfigForm from '../../component-configuration/components/config-forms/FunctionConfigForm';
 import LifecycleConfigForm from '../../component-configuration/components/config-forms/LifecycleConfigForm';
@@ -23,7 +24,7 @@ const ConfigurableMonacoEditor = ({
   const editorRef = useRef(null);
   const [editor, setEditor] = useState(null);
   const [showOffCanvas, setShowOffCanvas] = useState(false);
-  const [offCanvasContent, setOffCanvasContent] = useState('');
+  const [OffCanvasContent, setOffCanvasContent] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [value] = useState(defaultValue);
   const { theme } = useContext(ThemeContext);
@@ -93,6 +94,9 @@ const ConfigurableMonacoEditor = ({
       case '+ Variable':
         contentComponent = <VariableConfigForm onSubmit={() => {}} />;
         break;
+      case '+ Html elements':
+          contentComponent = <AddELement />;
+        break;
       case '+ Function':
         contentComponent = <FunctionConfigForm onSubmit={() => {}} />;
         break;
@@ -140,8 +144,8 @@ const ConfigurableMonacoEditor = ({
         placement="end"
         size="40%"
       >
-        <>{offCanvasContent}</>
-      </BreezeOffcanvas>
+        <>{OffCanvasContent}</>
+        </BreezeOffcanvas>
     </div>
   );
 };
