@@ -17,7 +17,7 @@ def __init__( app_name):
     return app_config_dir,app_config
 
 def generate_react_service( app_name, filename, service_type, module_id):
-    app_config_dir, app_config = __init__(app_name)
+    _, app_config = __init__(app_name)
     map_services = {}
     if service_type == "WS":
         service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}"

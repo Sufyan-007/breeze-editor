@@ -1,9 +1,10 @@
-import traceback,json
+import traceback,json,os
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from ....common.constants.consts import CONFIG_PATH
 from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
+from ..core.intermediate_modification_helper import process_api_data,transfer_to_auth,add_auth_function
 from ..utils.api_models.custom_exception import CustomeException
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -41,6 +42,35 @@ def generateServiceConfig(request, collectionType, projectId):
             print(traceback.format_exc())
             return JsonResponse({"error": str(e)}, status=500)
         
-        
-   
+
             
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def modifyFunctionConfig(request,operation,projectId):
+    data = json.loads(request.body.decode("utf-8"))
+    filename = data.get("filename")
+    module_id = data.get("moduleId")
+    api_type = data.get("api_type")
+    api_data = data.get("api_data")
+    if api_type.lower() == "auth":
+        result = add_auth_function(auth_model=api_data,appName=projectId,moduleId=module_id)
+    else:
+        result = process_api_data(operation,api_data, filename,projectId,module_id)
+    if result:
+        return JsonResponse({"message": "Function Added Successfully" }, status=201)
+    else:
+        return JsonResponse({"message": result }, status=201)
+    
+
+def transferToAuth (request,projectId):
+    data = json.loads(request.body.decode("utf-8"))
+    filename = data.get("filename")
+    id_value = data.get("id")
+    module_id = data.get("module_id")
+    file_path = os.path.join(f"{CONFIG_PATH}/{projectId}/api_client_intermediate_json/{module_id}", f"{filename}.json")
+    target_file_path = f"{CONFIG_PATH}/{projectId}/api_client_intermediate_json/swagger_metadata.json"
+    result = transfer_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
+    return JsonResponse(result)
+    
+
+
