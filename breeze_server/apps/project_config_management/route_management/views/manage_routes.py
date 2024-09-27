@@ -5,16 +5,28 @@ from django.http import JsonResponse
 import threading
 from ..core.route_config_editor import config_editor
 from ..core.route_config_editor import process_and_save_route_config
-from apps.common.utils.tree_management import get_node,get_root_nodes
+from apps.common.utils.tree_management import get_node,get_all_path_of_node
 from apps.common.constants.enums.tree_type import TreeType
 
 
 @csrf_exempt
 @api_view(['GET'])
-def get_routes(request,param):
+def get_routes(request,project_id):
     target_id = request.GET.get('target_id', None)
-    nodes = get_node(param,TreeType["ROUTES"],target_id,depth=1)
+    nodes = get_node(project_id,TreeType["ROUTES"],target_id,depth=1)
     return JsonResponse(nodes, status=200)
+
+@csrf_exempt
+@api_view(['GET'])
+def get_all_routes_fullpath(request,project_id):
+    target_id = request.GET.get('target_id', None)
+    nodes = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id)
+    data = {
+        "nodes" : nodes
+    }
+    
+    return JsonResponse(data, status=200)
+
 
 
 
