@@ -14,7 +14,7 @@ const BreezeOffCanvas = ({
     <>
       {/* Off-canvas Element */}
       <div
-        className={`br-offcanvas br-background-secondary br-text-tertiary offcanvas offcanvas-${placement} ${show ? 'show' : ''}`}
+        className={`br-offcanvas br-background-primary br-text-tertiary offcanvas offcanvas-${placement} ${show ? 'show' : ''}`}
         tabIndex="-1"
         style={{ visibility: show ? 'visible' : 'hidden', width: `${size}` }}
         aria-labelledby="offcanvasLabel"
