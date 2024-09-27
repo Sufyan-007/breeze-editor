@@ -1,6 +1,6 @@
 import json,os,traceback
 from ..utils.append_dict_file import append_to_dict_file
-from ..utils.uuid_as_key import generate_uuid_as_key
+from ....common.utils.uuid_as_key import generate_uuid_as_key
 from .api_model_loader import ApiModelLoader
 from ....common.constants.consts import CONFIG_PATH,CLIENT_API
 

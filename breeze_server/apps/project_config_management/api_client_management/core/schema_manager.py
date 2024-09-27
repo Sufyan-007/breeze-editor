@@ -1,7 +1,7 @@
 import json
 from ..utils.append_dict_file import append_to_dict_file
-from ..utils.uuid_as_key import generate_uuid_as_key
-def delete_schema(schema_file_path,schemaId):
+from ....common.utils.uuid_as_key import generate_uuid_as_key
+def delete_schema_helper(schema_file_path,schemaId):
     try:
         with open(schema_file_path, "r+") as file:
             schema_data = json.load(file)
@@ -15,7 +15,7 @@ def delete_schema(schema_file_path,schemaId):
         return {"error": str(e)}
     
 
-def add_or_edit_schema( schema_details, schema_name, file_path, schema_id=None):
+def add_or_edit_schema_helper( schema_details, schema_name, file_path, schema_id=None):
     try: 
         if not schema_name:
             return {"error": "Schema Name is required "}

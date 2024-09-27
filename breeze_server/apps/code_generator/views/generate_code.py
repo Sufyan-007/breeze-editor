@@ -12,7 +12,7 @@ def generate_code(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])     
-def generateServiceFiles(request,projectId,type):
+def generate_service_files(request,projectId,type):
     data = json.loads(request.body.decode("utf-8"))
     filename = data.get("filename")
     module_id = data.get("moduleId")

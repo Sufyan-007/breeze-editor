@@ -8,7 +8,7 @@ from ..core.intermediate_modification_helper import process_api_data,transfer_to
 from ..utils.api_models.custom_exception import CustomeException
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def generateServiceConfig(request, collectionType, projectId):
+def generate_service_config(request, collectionType, projectId):
         project_name = projectId
         folder_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}" 
         filename = ''
@@ -46,7 +46,7 @@ def generateServiceConfig(request, collectionType, projectId):
             
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def modifyFunctionConfig(request,operation,projectId):
+def modify_function_config(request,operation,projectId):
     data = json.loads(request.body.decode("utf-8"))
     filename = data.get("filename")
     module_id = data.get("moduleId")
@@ -62,7 +62,7 @@ def modifyFunctionConfig(request,operation,projectId):
         return JsonResponse({"message": result }, status=201)
     
 
-def transferToAuth (request,projectId):
+def transfer_to_auth (request,projectId):
     data = json.loads(request.body.decode("utf-8"))
     filename = data.get("filename")
     id_value = data.get("id")

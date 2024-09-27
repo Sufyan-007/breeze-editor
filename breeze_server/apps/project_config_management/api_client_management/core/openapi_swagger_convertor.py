@@ -1,7 +1,7 @@
 import yaml,json,os,traceback,copy
 from ....common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH,CLIENT_API
 from apps.common.utils.file_helpers.json_handler import read_json_file
-from ..utils.uuid_as_key import generate_uuid_as_key
+from ....common.utils.uuid_as_key import generate_uuid_as_key
 from ..utils.json_encoder import EnhancedJSONEncoder
 from ..utils.content_type_and_mode import get_content_type_and_mode
 from ..utils.set_response_status import set_response_status
