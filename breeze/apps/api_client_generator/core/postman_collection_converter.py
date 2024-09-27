@@ -1,4 +1,4 @@
-import json
+import json,os
 import traceback
 
 from ..api_models import ModeEnum
@@ -7,6 +7,7 @@ from ..utils.content_type_and_mode import get_content_type_and_mode
 from ..utils.body_type_from_postman import get_body_type
 from ..utils.set_response_status import set_response_status
 from ..utils.uuid_as_key import generate_uuid_as_key
+from ..utils.append_dict_file import append_to_dict_file
 from ..utils.api_model_loader import ApiModelLoader
 
 class PostmanCollectionConverter:
@@ -288,3 +289,12 @@ class PostmanCollectionConverter:
             # error_obj["general_error"] = str(e)  
             # raise (CustomeException(error_obj)) 
         
+    def wrap_conversion(self,converted_data,folder_path):
+        api_models = converted_data.get("api_models",[])
+        filename = converted_data.get("filename","")+".json"
+        model_dict = {}
+        for model in api_models:
+            model_dict[model.id] = model.as_dict()
+        full_file_path = os.path.join(folder_path, filename)        
+        append_to_dict_file(full_file_path,model_dict)
+        return model_dict,filename

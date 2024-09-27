@@ -86,8 +86,6 @@ class ComponentGenerator():
     def write_all_components(self):
         raise NotImplementedError()
     
-    def write_all_contexts(self):
-        raise NotImplementedError()
     
     def write_component(self, comp_config):
         raise NotImplementedError()
@@ -120,11 +118,6 @@ class ComponentGenerator_JSX(ComponentGenerator):
         for component_config in configs:
             self.write_component(component_config)
     
-    def write_all_contexts(self):
-        configs =  list(self.all_context_comp_config.values())
-
-        for component_config in configs:
-            self.write_component(component_config)
     
     def write_component(self, comp_config):
     

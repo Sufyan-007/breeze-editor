@@ -1,5 +1,5 @@
-from apps.common.constants.consts import CONFIG_PATH
-import json,os
+from apps.common.constants.consts import CONFIG_PATH,CLIENT_API
+import json, os
 from apps.common.utils.react_request_code import REQUEST
 from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
 from apps.common.utils.file_helpers.json_handler import read_json_file, write_json_file
@@ -20,7 +20,7 @@ def add_dirs_configs(data):
     
     # for storing intermediate service config
     create_parent_dir_if_not_exists(
-        f"{app_config_dir}/api_client_intermediate_json"
+        f"{app_config_dir}/{CLIENT_API}"
     )
     
     # for storing schemas retrieved form swagger file
@@ -99,16 +99,13 @@ def write_basic_main_comp_config(app_config):
 
 def write_routing_config(app_config):
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
+    default_path_id = generate_uuid_as_key()
     basic_routing_config = {
-        "routes":
-            {
-                "/" : {
-                    "path": "/",
-                    "component_id": f"{app_config['default_comp_id']}"
-                }
-            },
-        "baseRoutes": {
-            "/": {},
+        default_path_id : {
+            "id": default_path_id,
+            "path": "/",
+            "componentId": f"{app_config['default_comp_id']}",
+            "parentId": None
         }
     }
     write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", basic_routing_config)
