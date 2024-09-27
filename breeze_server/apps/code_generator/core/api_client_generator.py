@@ -1,5 +1,5 @@
 import copy,json
-from ...common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH
+from ...common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH,CLIENT_API
 from apps.common.utils.file_helpers.json_handler import read_json_file,read_project_config_file
 from ...project_config_management.api_client_management.core.api_model_loader import ApiModelLoader
 from ...project_config_management.api_client_management.utils.api_models import TokenStoreTypeEnum,AuthApiTypeEnum,ContentEnum,ModeEnum,AuthTypeEnum,ParamsInEnum
@@ -20,14 +20,14 @@ def generate_react_service( app_name, filename, service_type, module_id):
     _, app_config = __init__(app_name)
     map_services = {}
     if service_type == "WS":
-        service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}.json"
+        service_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/{module_id}/{filename}.json"
         service_config = read_json_file(service_path)
         for key,config in service_config.items():
             model = ApiModelLoader.load_ws_model(config)
             create_websocket_hook_file(model.tags,app_config)
             
     elif service_type == "AUTH":
-        auth_service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/swagger_metadata"
+        auth_service_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/swagger_metadata"
         auth_service_content = read_json_file(auth_service_path)
         auth_apis = auth_service_content.get(module_id).get("auth_apis",{})
         for key,config in auth_apis.items():
@@ -38,7 +38,7 @@ def generate_react_service( app_name, filename, service_type, module_id):
         
         create_service_files(map_services,app_config,app_name,fileId=filename)
     else:
-        service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}"
+        service_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/{module_id}/{filename}"
         service_config = read_json_file(service_path)
         for key,config in service_config.items():
             model = ApiModelLoader.load_api_model(config)
@@ -297,7 +297,7 @@ def create_service_files( map_services,app_config,project_name,fileId):
 
 
 def retrive_token_code(auth_api_id,auth_token_id,app_name, module_id ):
-    service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/swagger_metadata"
+    service_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/swagger_metadata"
     swagger_metadata = read_json_file(service_path)
     service_config = swagger_metadata.get(module_id).get("auth_apis")
     auth_config = service_config.get(auth_api_id,None)
@@ -362,7 +362,7 @@ def generate_api_interceptor( auth, app_name,module_id):
 ## needs to think for refresh token api response
 def set_response_interceptor( auth, app_name):
     interceptor_code = REFRESH_TOKEN_API
-    auth_api_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/auth" #ToDO
+    auth_api_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/auth" #ToDO
     auth_api_config = read_json_file(auth_api_path)
     token_api_config = auth_api_config.get(auth.token_api)
     token_api_code = ""

@@ -1,7 +1,7 @@
 import traceback,json,os
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from ....common.constants.consts import CONFIG_PATH
+from ....common.constants.consts import CONFIG_PATH,CLIENT_API
 from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
 from ..core.intermediate_modification_helper import process_api_data,transfer_to_auth,add_auth_function
@@ -10,7 +10,7 @@ from ..utils.api_models.custom_exception import CustomeException
 @permission_classes([AllowAny])
 def generateServiceConfig(request, collectionType, projectId):
         project_name = projectId
-        folder_path = f"{CONFIG_PATH}/{project_name}/api_client_intermediate_json" 
+        folder_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}" 
         filename = ''
         try:
             json_file = request.FILES['file']
@@ -67,8 +67,8 @@ def transferToAuth (request,projectId):
     filename = data.get("filename")
     id_value = data.get("id")
     module_id = data.get("module_id")
-    file_path = os.path.join(f"{CONFIG_PATH}/{projectId}/api_client_intermediate_json/{module_id}", f"{filename}.json")
-    target_file_path = f"{CONFIG_PATH}/{projectId}/api_client_intermediate_json/swagger_metadata.json"
+    file_path = os.path.join(f"{CONFIG_PATH}/{projectId}/{CLIENT_API}/{module_id}", f"{filename}.json")
+    target_file_path = f"{CONFIG_PATH}/{projectId}/{CLIENT_API}/swagger_metadata.json"
     result = transfer_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
     return JsonResponse(result)
     

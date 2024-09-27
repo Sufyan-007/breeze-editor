@@ -1,5 +1,5 @@
 import yaml,json,os,traceback,copy
-from ....common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH
+from ....common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH,CLIENT_API
 from apps.common.utils.file_helpers.json_handler import read_json_file
 from ..utils.uuid_as_key import generate_uuid_as_key
 from ..utils.json_encoder import EnhancedJSONEncoder
@@ -15,7 +15,7 @@ def prepare_api_models(json_data, project_name):
         app_config = read_json_file(app_config_path)
         app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
 
-        swagger_metadata_file_path = f"{app_config_dir}/api_client_intermediate_json/swagger_metadata.json" 
+        swagger_metadata_file_path = f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json" 
         api_model_loader = ApiModelLoader()
         tag_models = {}
         security_schemes_models = []
@@ -452,7 +452,7 @@ def handle_security_schema(security_schemas,meta_data):
     
 def append_auth_json(auth_model, appName,moduleId):
         project_name = appName
-        folder_path = f"{CONFIG_PATH}/{project_name}/api_client_intermediate_json/swagger_metadata.json"
+        folder_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}/swagger_metadata.json"
         json_data = {}
         with open(folder_path) as fp:
             json_data = json.load(fp)
@@ -545,7 +545,7 @@ def convert_to_json_data_model(tags_map,meta_data,module_id,security_schemes_mod
 def wrap_conversion(converted_data, project_name, folder_path):
     security_schemes_models = converted_data.get("security_schemes_models")
     swagger_metadata_key = converted_data.get("id")
-    swagger_metadata_config_path = f"{CONFIG_PATH}/{project_name}/api_client_intermediate_json/swagger_metadata.json"
+    swagger_metadata_config_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}/swagger_metadata.json"
 
     with open(swagger_metadata_config_path, "r") as file:
         swagger_metadata_content = json.load(file)

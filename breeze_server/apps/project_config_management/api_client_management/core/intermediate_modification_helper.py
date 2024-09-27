@@ -2,14 +2,14 @@ import json,os,traceback
 from ..utils.append_dict_file import append_to_dict_file
 from ..utils.uuid_as_key import generate_uuid_as_key
 from .api_model_loader import ApiModelLoader
-from ....common.constants.consts import CONFIG_PATH
+from ....common.constants.consts import CONFIG_PATH,CLIENT_API
 
 
 def process_api_data(operation, modified_api, filename, project_name, moduleId):
     if operation == 'ADD':
         modified_api["id"] = generate_uuid_as_key()
         
-    folder_path = f"{CONFIG_PATH}/{project_name}/api_client_intermediate_json/{moduleId}"
+    folder_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}/{moduleId}"
     file_path = os.path.join(folder_path, filename) + '.json'
     
     try:
