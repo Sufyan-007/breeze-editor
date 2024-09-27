@@ -10,179 +10,79 @@ def generate_layout_route_key():
     # Generate a unique key for layout routes
     return f"/layout__{''.join(random.choices(string.ascii_lowercase + string.digits, k=9))}__"
 
-def process_and_save_route_config(project_name):
-    print("This function runs after returning a 200 response.")
+def process_and_save_route_config(project_name, routing_config={}):
+    # print("This function runs after returning a 200 response.")
     try:
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
-        routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
+        if routing_config == {}:
+            routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
         initialize, handle_routing_code = RouteHandler()
         initialize(app_config, routing_config, comp_config_index)
-        react_code = handle_routing_code()
+        react_code = handle_routing_code(app_config, routing_config, comp_config_index, )
         directory_manager= DirectoryManagementGenerator(project_name)
         directory_manager.save_file("MAIN_COMPONENT",react_code)
         
     except Exception as e:
         print("Error while processing and saving config file.")
         print("Error: ", e)
-        return {'case' : False, 'res' : 'Error while processing file'}
+        raise e
 
-def generate_full_path(route_obj):
-    if route_obj.get('parentPath') not in [None, 'none']:
-        return f"{route_obj['parentPath']}{route_obj['path']}"
+def get_full_route_path(route_obj, routing_config):
+    full_path = route_obj.get('path')
+    if route_obj.get('parentId'):
+        parent_route_obj = routing_config.get(route_obj.get('parentId'))
+        if parent_route_obj:
+            full_path = get_full_route_path(parent_route_obj, routing_config) + full_path
     else:
-        return route_obj.get('path')
-
-def get_full_parent_path_from_child_route(child_route):
-    path_length = len(child_route.get('path', ''))
-    full_path_length = len(child_route.get('fullPath', ''))
-    full_parent_path = child_route.get('fullPath', '')[:(full_path_length - path_length)] or ""
-    return full_parent_path
-
-def set_parent_initial_parent(route_obj, intial_parent_path, routing_config):
-    if route_obj.get('childRoutes'):
-        for path in route_obj.get('childRoutes').keys():
-            child_obj = routing_config["routes"][path]
-            child_obj['initialParentPath'] = intial_parent_path
-            if route_obj['path'] != child_obj['parentPath']:
-                child_obj['parentPath'] = route_obj['path']    
-            set_parent_initial_parent(child_obj, intial_parent_path, routing_config)
-                    
-def clean_dict_value(input_dict):
-    cleaned_dict = {}
-    for key, value in input_dict.items():
-        # Check if value is a string and contains extra quotes
-        if isinstance(value, str):
-            # Remove leading and trailing single or double quotes
-            cleaned_value = value.strip("'\"")
-            cleaned_dict[key] = cleaned_value
-        else:
-            cleaned_dict[key] = value
-    
-    return cleaned_dict
-
-def replace_first_instance(text, old_path, new_path):
-    index = text.find(old_path)
-    if index != -1:
-        return text[:index] + new_path + text[index + len(old_path):]
-    return text
-
-def handle_route_path_change_in_child(route_obj, prev_path, new_path, parent_path, initial_parent_path, routing_config):
-    if route_obj.get('childRoutes'):
-        keys_to_modify = [path for path in route_obj.get('childRoutes').keys()]
-        for child_path in keys_to_modify:
-            new_child_path = replace_first_instance(child_path, prev_path, new_path)
-            if routing_config['routes'].get(new_child_path):
-                return {'case': False, 'res': 'error: route with same path already exists'}
-
-            handle_route_path_change_in_child(
-                routing_config['routes'][child_path],
-                child_path,
-                new_child_path,
-                new_path,
-                initial_parent_path,
-                routing_config
-            )
-            
-            route_obj.get('childRoutes')[new_child_path] = route_obj.get('childRoutes')[child_path]
-            del route_obj.get('childRoutes')[child_path] 
-    if route_obj.get('parentPath'):
-        route_obj['parentPath'] = parent_path
-    if route_obj.get('initialParentPath'):
-        route_obj['initialParentPath'] = initial_parent_path
-
-    routing_config['routes'][new_path] = route_obj
-    del routing_config['routes'][prev_path]
-
-def replace_last_instance(text, old_path, new_path):
-    index = text.rfind(old_path)
-    if index != -1:
-        return text[:index] + new_path + text[index + len(old_path):]
-    return text
-
-def handle_route_path_change_in_child_for_child(route_obj, prev_full_path, new_full_path, routing_config):
-    if route_obj.get('childRoutes'):
-        keys_to_modify = [path for path in route_obj.get('childRoutes').keys()]
-        for child_path in keys_to_modify:
-            relative_child_path = routing_config['routes'][child_path]['path']
-            new_full_parent_path = new_full_path
-            new_child_path = new_full_parent_path + relative_child_path
-            if routing_config['routes'].get(new_child_path):
-                return {'case': False, 'res': 'error: route with same path already exists'}
-
-            handle_route_path_change_in_child_for_child(
-                routing_config['routes'][child_path],
-                child_path,
-                new_child_path,
-                routing_config
-            )
-            route_obj.get('childRoutes')[new_child_path] = route_obj.get('childRoutes')[child_path]
-            del route_obj.get('childRoutes')[child_path] 
-    routing_config['routes'][new_full_path] = route_obj
-    del routing_config['routes'][prev_full_path]
-    
-def get_config_obj(route, selected_route, routing_config, routing_helper_data):
-    # selectedRoute and RouterProviderSection are being devoid from route object
-    route_section = ['propDetails', 'advancePropDetails']
-    prop_name_map = {'parent path': 'parentPath',  "error-element": 'errorElement', "element": 'component', "elementProp": 'props'}
-    route_obj = {}
-    for section in route_section:
-        for prop in route[section]['props']:
-            # if value is empty it won't include the key in route object
-            # so we use default value while getting the key's value
-            print(prop)
-            if prop['value']:
-                if prop_name_map.get(prop['name']):
-                    prop['name'] = prop_name_map.get(prop['name'])
-                if prop.get('type') == 'key-value-pair':
-                    rectified_pair = {}
-                    for pair in prop['value']:
-                        rectified_pair.update(clean_dict_value({pair : prop['value'][pair]})) 
-                    prop['value'] = rectified_pair
-                route_obj[prop['name']] = prop['value']
-    if not route_obj.get('path', "").strip():
-        # here write a functino that returns path 
-        route_obj['path'] = generate_layout_route_key()
-    else:
+        full_path = full_path
+    return full_path
+ 
+def check_for_manadatory_route_props(route_obj):
+    if route_obj.get('path'):
         route_obj['path'] = route_obj.get('path').strip()
         route_obj['path'] = "/" + route_obj['path'].strip('/')
-    if not route_obj.get('component', "").strip():
-        route_obj['component'] = ""
     else:
-        route_obj['component'] = route_obj.get('component').strip()
-    
-    if selected_route:
-        route_obj['fullPath'] = selected_route.get('fullPath')
-        prev_route_parent_path = selected_route.get('parentPath')
-        if selected_route.get('childRoutes'):
-            route_obj['childRoutes'] = selected_route.get('childRoutes')
-        # here parentPath key has full parent path value
-        if route_obj.get('parentPath', 'none') != 'none':
-            # it is a base route converted to child -> base_edit
-            if not prev_route_parent_path:
-                route_obj['newFullParentPath'] = route_obj.get('parentPath')
-                route_obj['prevPath'] = selected_route.get('path')
-            # it is a child route updated to a child -> child_edit
-            else:
-                route_obj['prevPath'] = selected_route.get('path') 
-                route_obj['fullParentPath'] = get_full_parent_path_from_child_route(selected_route) 
-                route_obj['newFullParentPath'] = route_obj.get('parentPath')
-        else:
-            # it is a base route updated to base route -> base_edit
-            if prev_route_parent_path in [None, "none"]:
-                route_obj['newFullParentPath'] = route_obj.get('parentPath')
-                route_obj['prevPath'] = selected_route.get('path')
-            # it is a child route converted to base route -> edit_child
-            else:
-                route_obj['prevPath'] = selected_route.get('path') 
-                route_obj['fullParentPath'] = get_full_parent_path_from_child_route(selected_route) 
-                route_obj['newFullParentPath'] = route_obj.get('parentPath')
+        raise ValueError("path is missing")
+    if route_obj.get('componentId'):
+        route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
+        route_obj['componentId'] = route_obj.get('componentId').strip()
+    elif route_obj.get('redirectTo'):
+        route_obj.pop('componentId') if route_obj.get('componentId') else ''
     else:
-        if route_obj.get('parentPath', 'none') != 'none':
-            route_obj['fullParentPath'] = route_obj['parentPath']
+        raise ValueError("component or redirectTo is missing")
+        
+def get_all_full_paths(with_ids=True, project_id="", routing_config={}):
+    routing_config = get_routing_config(project_id, routing_config)
+    # get all the route objects from the routing config except the fallback element's obj
+    all_route_objects = list(get_filtered_object(routing_config, 'fallback').values())
+    all_full_paths_with_object_id = []
+    all_full_paths = []
     
-    routing_helper_data['recently_saved_route_fullpath'] = generate_full_path(route_obj)
-    if route_obj.get('parentPath', "none") != "none":
-        route_obj['parentPath'] = routing_config['routes'][route_obj['parentPath']].get('path')
-    return route_obj
+    for route_obj in all_route_objects:
+        full_path = get_full_route_path(route_obj, routing_config)
+        all_full_paths.append(full_path)
+        full_path_obj = { 'id': route_obj['id'], 'full_path': full_path}
+        all_full_paths_with_object_id.append(full_path_obj)
+    if with_ids:
+        return all_full_paths_with_object_id   
+    return all_full_paths
+    
+def validate_route_object(route_obj, project_id="", routing_config={}):
+    routing_config = get_routing_config(project_id, routing_config)
+    full_route_path = get_full_route_path(route_obj, routing_config) 
+    if full_route_path in get_all_full_paths(with_ids=False, routing_config=routing_config):
+        raise Exception("route with same path already exists")
+    
+def get_filtered_object(data, exclude_keys):
+    return {key: value for key, value in data.items() if key not in exclude_keys}
+
+
+def get_routing_config(project_id="", routing_config={}):
+    if routing_config == {}:
+        if project_id == "":
+            raise ValueError("project id is missing")
+        routing_config = read_project_config_file(f"{CONFIG_PATH}/{project_id}", CONFIG_FILES_PATH['ROUTING_CONFIG'])
+    return routing_config
+    
