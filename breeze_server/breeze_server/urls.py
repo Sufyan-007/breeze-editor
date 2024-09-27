@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/project/', include('apps.project_management.urls')),
     path('api/code-gen/<str:projectId>/', include('apps.code_generator.urls')),
     path('api/config-editor/<str:projectId>/',include('apps.project_config_management.urls')),
+    path('api/directory/<str:param>/',include('apps.directory_management.urls')),
     path('api/auth/',include('apps.authentication.urls')),
     path('api/swagger', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
