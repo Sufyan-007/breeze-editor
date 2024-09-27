@@ -1,4 +1,4 @@
-from apps.common.constants.consts import CONFIG_PATH
+from apps.common.constants.consts import CONFIG_PATH,CLIENT_API
 import json, os
 from apps.common.utils.react_request_code import REQUEST
 from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
@@ -20,7 +20,7 @@ def add_dirs_configs(data):
     
     # for storing intermediate service config
     create_parent_dir_if_not_exists(
-        f"{app_config_dir}/api_client_intermediate_json"
+        f"{app_config_dir}/{CLIENT_API}"
     )
     
     # for storing schemas retrieved form swagger file

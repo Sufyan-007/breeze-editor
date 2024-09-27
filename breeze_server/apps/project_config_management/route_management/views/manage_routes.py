@@ -1,21 +1,33 @@
 import json
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, FileResponse
-import threading
+from django.http import JsonResponse
 from ..core.route_config_editor import add_route_to_config, get_all_route_full_paths, update_route_in_config
 from ..core.route_config_editor import process_and_save_route_config, delete_route as del_route
+from django.http import JsonResponse
+from ..core.route_config_editor import process_and_save_route_config
+from apps.common.utils.tree_management import get_node,get_all_path_of_node
+from apps.common.constants.enums.tree_type import TreeType
 
 
 @csrf_exempt
 @api_view(['GET'])
-def get_all_routes(request, param):
-    try:
-        res = get_all_route_full_paths(project_id=param)
-        return JsonResponse({'all_route_full_paths':res}, status=200)
-    except Exception as e:
-        print("Error ", e)
-        return JsonResponse({'error': str(e)}, status=500)
+def get_routes(request,project_id):
+    target_id = request.GET.get('target_id', None)
+    nodes = get_node(project_id,TreeType["ROUTES"],target_id,depth=1)
+    return JsonResponse(nodes, status=200)
+
+@csrf_exempt
+@api_view(['GET'])
+def get_all_routes_fullpath(request,project_id):
+    target_id = request.GET.get('target_id', None)
+    nodes = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id)
+    data = {
+        "nodes" : nodes
+    }
+    
+    return JsonResponse(data, status=200)
+
 
 @csrf_exempt
 @api_view(['POST'])

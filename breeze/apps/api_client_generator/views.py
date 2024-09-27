@@ -24,68 +24,18 @@ class ApiClientGenerator(View):
             if collectionType.lower() == 'postman' and json_file.name.endswith('.json'):
                 postman_converter = PostmanCollectionConverter()
                 converted_data = postman_converter.prepare_api_models(json_data)
-                
-                api_models = converted_data.get("api_models",[])
-                filename = converted_data.get("filename","")+".json"
-                model_dict = {}
-                for model in api_models:
-                    model_dict[model.id] = model.as_dict()
-                full_file_path = os.path.join(folder_path, filename)
-                
-                append_to_dict_file(full_file_path,model_dict)
+                model_dict, filename = postman_converter.wrap_conversion(converted_data=converted_data, folder_path=folder_path)
                 
                 return JsonResponse({"data": model_dict, "filename": filename}, status=201)
 
             elif collectionType.lower() == 'openapi' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
                 open_api_converter = OpenapiConverter()
                 converted_data = open_api_converter.prepare_api_models(json_data, project_name)
-                
-                ## for auth.json
-                security_schemes_models = converted_data.get("security_schemes_models")
-                # security_schemes_models = result.get("security_schemes_models")
-                swagger_metadata_key = converted_data.get("id")
-                swagger_metadata_config_path = f"{CONFIG_PATH}/{project_name}/swagger_metadata.json"
-                with open(swagger_metadata_config_path, "r") as file:
-                        swagger_metadata_content = json.load(file)
-                
-                auth_model_dict = {}
-                for model in security_schemes_models:
-                    auth_model_dict[model.id] = model.as_dict()    
-                swagger_metadata_content[swagger_metadata_key]["auth_apis"] = auth_model_dict
-                append_to_dict_file(swagger_metadata_config_path,swagger_metadata_content)
-                
-                ## for other models
-                tag_models = converted_data.get("tag_models")
-                # resultant_filename = []
-                files_with_apis = []
-                api_models_folder_path = folder_path + f"/{swagger_metadata_key}"
-                if not os.path.exists(api_models_folder_path):
-                    os.makedirs(api_models_folder_path)
-                for tag, api_models in tag_models.items():
-                    function_with_errors = set()
-                    model_dict = {}
-                    filename = tag+".json"
-                    full_file_path = os.path.join(api_models_folder_path, filename)
-                    # resultant_filename.append(filename)
-                    for model in api_models:
-                        model_as_dict = model.as_dict()
-                        model_dict[model.id] = model_as_dict
-                        if len(model_as_dict["errors"]["root_errors"])>0:
-                            function_with_errors.add(model.operation_id)
-                    function_with_errors_list = list(function_with_errors)
-                    files_with_apis.append({"filename": tag, "apis": model_dict, "errors": function_with_errors_list})
-                    append_to_dict_file(full_file_path,model_dict)
+                files_with_apis = open_api_converter.wrap_conversion(converted_data=converted_data, project_name=project_name, folder_path=folder_path)
                 return JsonResponse({"files_with_apis": files_with_apis}, status=201)
+            
             elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
-                converted_data = WebsocketConverter.prepare_api_models(json_data)
-                error_obj = converted_data.get("error_obj",{})
-                model = converted_data.get("channel_obj",{})
-                filename = converted_data.get("filename","")+".json"
-                model_dict = {}
-                model_dict[model.id] = model.as_dict()
-                full_file_path = os.path.join(folder_path, filename)
-                append_to_dict_file(full_file_path,model_dict)
-                
+                model_dict,filename,error_obj = WebsocketConverter.prepare_api_models(json_data)
                 return JsonResponse({"data": model_dict, "filename": filename,"error_obj" : error_obj}, status=201)
             
             else:
@@ -102,7 +52,7 @@ class ApiClientGenerator(View):
     
     def get(self, request, projectName, files_only):
         api_folder_path = f"{CONFIG_PATH}/{projectName}/api_client_intermediate_json"
-        auth_api_folder_path = f"{CONFIG_PATH}/{projectName}/swagger_metadata.json"
+        auth_api_folder_path = f"{CONFIG_PATH}/{projectName}/api_client_intermediate_json/swagger_metadata.json"
         files_with_apis = []
         swagger_metadata = {}
 
