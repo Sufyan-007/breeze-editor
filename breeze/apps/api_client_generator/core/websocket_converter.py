@@ -11,6 +11,7 @@ from ..utils.set_response_status import set_response_status
 from ..utils.jsonencoder import EnhancedJSONEncoder
 from ..utils.uuid_as_key import generate_uuid_as_key
 from ..utils.api_model_loader import ApiModelLoader
+from ..utils.append_dict_file import append_to_dict_file
 from ..api_models.custom_exception import CustomeException
 from common.utils.app_consts import CONFIG_PATH
 
@@ -137,7 +138,7 @@ class WebsocketConverter:
 
     ## complete
     @staticmethod
-    def prepare_api_models(json_data):
+    def prepare_api_models(json_data,folder_path):
         error_obj = {
             "general_error" : [],
             "auth_error" : []
@@ -152,11 +153,16 @@ class WebsocketConverter:
             
             channel_obj,name = WebsocketConverter.convert_to_json_data_model(openapi_data,channels=channels,components=components)         
             api_model = ApiModelLoader.load_ws_model(channel_obj)
-            return  {
-                "filename" : name,
-                "channel_obj" : api_model,
-                "error_obj" : error_obj
-            }
+            model_dict = {}
+            model_dict[api_model.id] = api_model.as_dict()
+            full_file_path = os.path.join(folder_path, name)
+            append_to_dict_file(full_file_path,model_dict)
+            return model_dict,name,error_obj
+            # return  {
+            #     "filename" : name,
+            #     "channel_obj" : api_model,
+            #     "error_obj" : error_obj
+            # }
 
         except Exception as e:
             print(traceback.format_exc())
