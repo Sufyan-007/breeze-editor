@@ -1,9 +1,9 @@
 
-import os,json
+import os,copy
 from .uuid_as_key import generate_uuid_as_key
 from ..constants.consts import CONFIG_PATH,CONFIG_FILES_PATH
 from ..constants.enums.tree_type import TreeType 
-from ..utils.file_helpers.json_handler import read_project_config_file,write_json_file
+from ..utils.file_helpers.json_handler import read_project_config_file
 
 
 def get_children_up_to_depth(node_id, data, depth, current_depth=0):
@@ -175,6 +175,73 @@ def get_root_nodes(config_data):
             root_nodes.append(v)
     return root_nodes
 
-# add_node("test","directory","139c0099_f26b_4959_be78_cb746760ff5c",name="type3",type='DIRECTORY')
-# print(get_root("test"))
-# pprint.pprint(get_all_path_of_node("test","18aea09e_651e_4cc5_9a15_ad35b0132800"))
+
+
+def clone_with_new_uuid(data):
+    """
+    Clone the entire JSON structure with new UUIDs for each node.
+
+    :param data: The JSON structure (a dictionary) to clone.
+    :return: A new JSON structure with all nodes having new UUIDs.
+    """
+    # Dictionary to map old UUIDs to new UUIDs
+    uuid_mapping = {}
+
+    # First pass: Create a new UUID for each node and store in the uuid_mapping
+    cloned_data = copy.deepcopy(data)  # Deep copy to avoid modifying the original data
+    for old_id in cloned_data:
+        new_id = generate_uuid_as_key()  # Generate a new UUID
+        uuid_mapping[old_id] = new_id
+        cloned_data[old_id]['id'] = new_id  # Update the 'id' with the new UUID
+
+    # Second pass: Update parent_id and children fields with new UUIDs
+    for old_id, new_id in uuid_mapping.items():
+        node = cloned_data[old_id]
+
+        # Update parent_id
+        if node['parent_id'] in uuid_mapping:
+            node['parent_id'] = uuid_mapping[node['parent_id']]
+
+        # Update children with new UUIDs
+        if 'children' in node and isinstance(node['children'], list):
+            node['children'] = [uuid_mapping[child_id] for child_id in node['children']]
+
+    # Return the cloned data with updated UUIDs
+    return cloned_data
+
+
+
+def move_node(source_id, target_id, data):
+    """
+    Move a source node to become a child of the target node.
+
+    :param source_id: The ID of the source node to move.
+    :param target_id: The ID of the target node where the source node will be moved.
+    :param data: The JSON structure (a dictionary) representing the nodes.
+    :return: None
+    """
+    # Ensure the source and target nodes exist in the data
+    if source_id not in data or target_id not in data:
+        print("Source or target node does not exist.")
+        return
+    
+    source_node = data[source_id]
+    target_node = data[target_id]
+
+    # Find the current parent of the source node and remove the source from its children
+    current_parent_id = source_node['parent_id']
+    if current_parent_id != "null" and current_parent_id in data:
+        current_parent = data[current_parent_id]
+        if 'children' in current_parent and source_id in current_parent['children']:
+            current_parent['children'].remove(source_id)
+
+    # Update the source node's parent_id to the target node's ID
+    source_node['parent_id'] = target_id
+
+    # Add the source node to the target node's children list
+    if 'children' in target_node:
+        target_node['children'].append(source_id)
+    else:
+        target_node['children'] = [source_id]
+
+    return data
