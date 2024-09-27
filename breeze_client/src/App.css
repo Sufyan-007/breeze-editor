@@ -108,12 +108,12 @@
   margin-right: 0.625rem;
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .br-form-control,
 .br-form-select,
-.br-form-check-input,
-.br-form-switch-input {
+.br-form-check-input {
   background-color: transparent !important;
   color: var(--color-text) !important;
   border: solid 1px var(--color-background) !important;

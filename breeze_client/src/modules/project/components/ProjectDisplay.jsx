@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 
 function ProjectDisplay({ selectedNode }) {
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
-  const item = { type: 'component' }; // TO DO : Dynamic after api integration
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -19,7 +18,7 @@ function ProjectDisplay({ selectedNode }) {
   return (
     <>
       <div className="mb-3">
-        <TopBar onTabChange={handleTabChange} activeTab={activeTab} item={item} />
+        <TopBar onTabChange={handleTabChange} activeTab={activeTab} item={selectedNode} />
 
         <div className="tab-content" id="pills-tabContent">
           {activeTab === 'code' && (
@@ -34,7 +33,7 @@ function ProjectDisplay({ selectedNode }) {
             </div>
           )}
 
-          {item.type === 'component'
+          {selectedNode.tag === 'COMPONENT'
             ? activeTab === 'preview' && (
                 <div
                   className="tab-pane fade show active"
@@ -61,7 +60,7 @@ function ProjectDisplay({ selectedNode }) {
                   aria-labelledby="pills-config-tab"
                 >
                   <div className="project-display-container config-container">
-                    <ConfigDisplay configType={item.type} />
+                    <ConfigDisplay configType={selectedNode?.tag || ''} />
                   </div>
                 </div>
               )}
