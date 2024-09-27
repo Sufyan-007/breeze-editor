@@ -10,7 +10,7 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
         modified_api["id"] = generate_uuid_as_key()
         
     folder_path = f"{CONFIG_PATH}/{project_name}/api_client_intermediate_json/{moduleId}"
-    file_path = os.path.join(folder_path, filename)
+    file_path = os.path.join(folder_path, filename) + '.json'
     
     try:
         api_model = ApiModelLoader.load_api_model(modified_api)

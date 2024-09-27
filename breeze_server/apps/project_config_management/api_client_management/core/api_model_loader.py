@@ -192,7 +192,6 @@ class ApiModelLoader:
                     required=body.get("required"),
                     schema_name=body.get("schema_name"),
                     file=body.get("file"),
-                    # anonymous=body.get("anonymous"),
                     errors={}
                 )
             arr_body.append(new_body)
@@ -226,10 +225,10 @@ class ApiModelLoader:
             parameters=model_json.get("parameters",[]),
             id=model_json.get("id"),
             operation_id=model_json.get("operation_id"),
-            tags=model_json.get("tags"),  # Tags remaining
+            tags=model_json.get("tags"),  
             request=request_obj,
             response=response_obj,
-            summary=model_json.get("summary"),  # Summary later,
+            summary=model_json.get("summary"), 
             is_authentication_api=model_json.get("is_authentication_api"),
             is_open_api=model_json.get("is_open_api", False),
             errors=final_errors
@@ -240,28 +239,17 @@ class ApiModelLoader:
     @staticmethod
     def load_auth_api_model(model_json):
         api_model_loader = ApiModelLoader()
-        # access_token_request_obj = api_model_loader.load_request(request_data= model_json.get("access_token_request", {}))
-        # access_token_response_obj = api_model_loader.load_response(response_data= model_json.get("access_token_response", {}))
-        # refresh_token_request_obj = api_model_loader.load_request(request_data= model_json.get("refresh_token_request", {}))
-        # refresh_token_response_obj = api_model_loader.load_response(response_data= model_json.get("refresh_token_response", {}))
         request_obj = api_model_loader.load_request(request_data= model_json.get("request"))
         response_obj = api_model_loader.load_response(response_data= model_json.get("response"))
         api_model = AuthApiModel(
             id=model_json.get("id"),
             operation_id=model_json.get("operation_id"),
-            tags=model_json.get("tags"),  # Tags remaining
-            # access_token_request=access_token_request_obj,
-            # access_token_response=access_token_response_obj,
-            # refresh_token_request=refresh_token_request_obj,
-            # refresh_token_response=refresh_token_response_obj,
+            tags=model_json.get("tags"),  
             request = request_obj,
             response = response_obj,
-            summary=model_json.get("summary"),  # Summary later,
+            summary=model_json.get("summary"),  
             auth_api_type=AuthApiTypeEnum[model_json.get("auth_api_type", "NONE").upper()] ,
             authentication_type= AuthTypeEnum[model_json.get("authentication_type").upper()],
-            # is_authorization_url=model_json.get("is_authorization_url", ""),
-            # flow=model_json.get("flow", {}),
-            # flow_type= model_json.get("flow_type", ""),
             token_store=api_model_loader.load_token_store(model_json.get("token_store",{})),
             is_authentication_api= model_json.get("is_authentication_api", False),
             errors={}
@@ -280,7 +268,7 @@ class ApiModelLoader:
         api_model = WebsocketModel(
             id=model_json.get("id"),
             url=url,
-            tags=model_json.get("tags"),  # Tags remaining
+            tags=model_json.get("tags"),  
             publish=publish_obj,
             subscribe=subscribe_obj
         )

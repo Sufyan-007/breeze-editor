@@ -20,7 +20,7 @@ def generate_react_service( app_name, filename, service_type, module_id):
     _, app_config = __init__(app_name)
     map_services = {}
     if service_type == "WS":
-        service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}"
+        service_path = f"{CONFIG_PATH}/{app_name}/api_client_intermediate_json/{module_id}/{filename}.json"
         service_config = read_json_file(service_path)
         for key,config in service_config.items():
             model = ApiModelLoader.load_ws_model(config)
@@ -154,6 +154,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             swagger_content[module_id]["auth_apis"][new_model["id"]] = new_model
             append_to_dict_file(service_path, swagger_content)
     else:
+        service_path += '.json' #will not be needed when using common functions
         append_to_dict_file(service_path, model_to_write)
     #######################################################################################################
     
@@ -453,7 +454,8 @@ def set_request_body(model,app_name):
             if content_type == ContentEnum.JSON:
                 headers.append({"key" : "content-type","value" : ContentEnum.JSON.value})
                 if body.schema_name is None:
-                    params.append(model.operation_id)
+                    # params.append(model.operation_id)
+                    params.append("BodyDetails")
                     # value = model.operation_id
                     value = "BodyDetails"
                     schema = body.schema
@@ -489,10 +491,12 @@ def set_request_body(model,app_name):
             variable_declaration = "let bodyFormData = new FormData();"
             form_data = body.schema
             body_params = form_data
+            params.append("BodyDetails")
             for key,item in form_data.get("properties",{}).items():
-                params.append(key)
+                # params.append(key)
                 if item.get("type") == "text":
-                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s}`);"%(key,key)
+                    # variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s}`);"%(key,key)
+                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${BodyDetails.%s}`);"%(key, key)
                 else:
                     variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s}`);"%(key,key)
             raw_data = "bodyFormData"
@@ -502,9 +506,10 @@ def set_request_body(model,app_name):
             variable_declaration = "let formBody = [];"
             form_data = body.schema
             body_params = form_data
+            params.append("BodyDetails")
             for key,item in form_data.get("properties",{}).items():
-                params.append(key)
-                variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")} = ${encodeURIComponent(%s)}`);'%(key,key)
+                # params.append(key)
+                variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")} = ${encodeURIComponent(BodyDetails.%s)}`);'%(key,key)
             raw_data = "formBody"
             variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
 
@@ -535,6 +540,7 @@ def set_request_url(model,app_name):
         url = baseurl+path
     else:
         url = url_env+path
+        ######### needs to be uncommented after env settings migration ##############
         # environment_settings_service = EnvironmentSettingsConfigService(app_name)
         # config = environment_settings_service.get_config()
         # url = "${process.env.%s}" % config.get("envVars").get(url_env)  + path
@@ -552,34 +558,24 @@ def set_request_url(model,app_name):
 
             elif params.param_type == "SESSION_STORAGE":
                 query_params.append("%s=${sessionStorage.getItem('%s')}" % (params.name, params.storage_key))
-            # query_params.append("%s=${%s}"%(params.name,params.name))
-            # function_args.append(params.name)
+                
+            function_args.append('QueryParameters')
+
             
         elif params.param_in == ParamsInEnum.PATH:
             if params.param_type == "USER_INPUT":
                 new_path_params.append({"name":params.name, "type":params.type})
                 url=url.replace(f"{{{params.name}}}", f"${{PathParameters.{params.name}}}")
-                # path_params.append("${PathParameters.%s}" %(params.name)) 
             elif params.param_type == "STATIC":
                 if not params.value:
                     params.value = ""
                 url=url.replace(f"{{{params.name}}}",params.value)
-                # path_params.append("%s"%(params.value))
             elif params.param_type == "LOCAL_STORAGE":
                 url=url.replace(f"{{{params.name}}}", "${localStorage.getItem('%s')}"%(params.storage_key))
-                # path_params.append("${localStorage.getItem('%s')}"%(params.storage_key))
             elif params.param_type == "SESSION_STORAGE":
                 url=url.replace(f"{{{params.name}}}", "${sessionStorage.getItem('%s')}"%(params.storage_key))
-                # path_params.append("${sessionStorage.getItem('%s')}"%(params.storage_key))
-            # path_params.append("${%s}"%(params.name))
-            # function_args.append(params.name)
-    function_args.append('QueryParameters')
-    function_args.append('PathParameters')
-    
-    # if len(path_params) > 0:
-    #     path = '/'.join(path_params)
-    #     path = "/"+path
-    #     url = url + path
+               
+            function_args.append('PathParameters')
 
     if len(query_params) > 0:
         query = '&'.join(query_params)
