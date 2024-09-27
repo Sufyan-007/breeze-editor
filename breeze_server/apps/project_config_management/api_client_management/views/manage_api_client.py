@@ -8,8 +8,8 @@ from ..core.intermediate_modification_helper import process_api_data,transfer_to
 from ..utils.api_models.custom_exception import CustomeException
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def generate_service_config(request, collectionType, projectId):
-        project_name = projectId
+def generate_service_config(request, collectionType, project_id):
+        project_name = project_id
         folder_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}" 
         filename = ''
         try:
@@ -46,29 +46,29 @@ def generate_service_config(request, collectionType, projectId):
             
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def modify_function_config(request,operation,projectId):
+def modify_function_config(request,operation,project_id):
     data = json.loads(request.body.decode("utf-8"))
     filename = data.get("filename")
     module_id = data.get("moduleId")
     api_type = data.get("api_type")
     api_data = data.get("api_data")
     if api_type.lower() == "auth":
-        result = add_auth_function(auth_model=api_data,appName=projectId,moduleId=module_id)
+        result = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id)
     else:
-        result = process_api_data(operation,api_data, filename,projectId,module_id)
+        result = process_api_data(operation,api_data, filename,project_id,module_id)
     if result:
         return JsonResponse({"message": "Function Added Successfully" }, status=201)
     else:
         return JsonResponse({"message": result }, status=201)
     
 
-def transfer_to_auth (request,projectId):
+def transfer_to_auth (request,project_id):
     data = json.loads(request.body.decode("utf-8"))
     filename = data.get("filename")
     id_value = data.get("id")
     module_id = data.get("module_id")
-    file_path = os.path.join(f"{CONFIG_PATH}/{projectId}/{CLIENT_API}/{module_id}", f"{filename}.json")
-    target_file_path = f"{CONFIG_PATH}/{projectId}/{CLIENT_API}/swagger_metadata.json"
+    file_path = os.path.join(f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{module_id}", f"{filename}.json")
+    target_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
     result = transfer_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
     return JsonResponse(result)
     

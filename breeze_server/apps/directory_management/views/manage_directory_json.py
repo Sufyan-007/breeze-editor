@@ -8,9 +8,9 @@ from apps.common.constants.enums.tree_type import TreeType
 
 @csrf_exempt
 @api_view(['GET'])
-def get_directories(request,param):
+def get_directories(request,project_id):
     target_id = request.GET.get('target_id', None)
-    nodes = get_node(param,TreeType["DIRECTORY"],target_id,depth=1)
+    nodes = get_node(project_id,TreeType["DIRECTORY"],target_id,depth=1)
     return JsonResponse(nodes, status=200)
 
 

@@ -135,30 +135,37 @@ def get_node(project_name,category,target_id,depth=1):
     }
         
 #recursively get all path and stored it into path list
-def get_path(node_id,data,path,route):
-    if(data[node_id]['type'] == 'FILE' or len(data[node_id]['children']) == 0):
-        path.append(
-            {
-                "id":node_id,
-                "path":route +  data[node_id]['name']
-            }
-        )
-        return
-    for child_id in data[node_id]['children']:
-        get_path(child_id,data,path, route  + data[node_id]['name']+'/')
-    
+def get_path(node_id,data,route):
+    paths = []
+    if("children" not in data[node_id] or len(data[node_id]['children']) == 0):
+        return [{
+            "id":node_id,
+            "path":route + data[node_id]['name']
+        }]
+        
+    if("children" in data[node_id]):
+        for child_id in data[node_id]['children']:
+            paths += get_path(child_id,data, route + data[node_id]['name']+'/')
+    return paths
 
 # this method return node_id and its all children path 
-def get_all_path_of_node(project_name,node_id):
-    app_config_dir = f"{CONFIG_PATH}/{project_name}"
-    config_data = read_project_config_file( app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
-    if(node_id in config_data):
-        path = []
-        get_path(node_id,config_data,path,'')
-        return {node_id:path}
+def get_all_path_of_node(project_id,category,node_id):
+    app_config_dir = f"{CONFIG_PATH}/{project_id}"
+    config_data = read_project_config_file(app_config_dir, CONFIG_FILES_PATH[category.value])
+    all_paths = []
+    ## we need all paths from each and every root node
+    if node_id is None:
+        nodes = get_root_nodes(config_data)
+        for node in nodes:
+            all_paths += get_path(node.get("id"),config_data,'')
+        
+    elif node_id in config_data:
+        all_paths += get_path(node_id,config_data,'')
     else:
         return "id not found"
-    # pprint.pprint({node_id:path})
+    
+    return all_paths
+
     
 #this function return all root node 
 def get_root_nodes(config_data):

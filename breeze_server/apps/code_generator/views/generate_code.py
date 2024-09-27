@@ -12,7 +12,7 @@ def generate_code(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])     
-def generate_service_files(request,projectId,type):
+def generate_service_files(request,project_id,type):
     data = json.loads(request.body.decode("utf-8"))
     filename = data.get("filename")
     module_id = data.get("moduleId")
@@ -21,5 +21,5 @@ def generate_service_files(request,projectId,type):
         service_type = "AUTH"
     elif type == "WS":
         service_type = "WS"
-    generate_react_service(projectId,filename,service_type, module_id)
+    generate_react_service(project_id,filename,service_type, module_id)
     return JsonResponse({"list" : []}, status = 201) 
