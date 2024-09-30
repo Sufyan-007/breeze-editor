@@ -108,6 +108,7 @@
   margin-right: 0.625rem;
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .br-form-control,

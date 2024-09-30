@@ -23,7 +23,7 @@ function TopBar({ onTabChange, activeTab, item }) {
               Code
             </button>
           </li>
-          {item.type === 'component' ? (
+          {item.tag === 'COMPONENT' ? (
             <li className="nav-item" role="presentation">
               <button
                 className={`nav-link ${activeTab === 'preview' ? 'active' : ''}`}

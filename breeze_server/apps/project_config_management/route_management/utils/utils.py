@@ -21,7 +21,7 @@ def process_and_save_route_config(project_name, routing_config={}):
         initialize, handle_routing_code = RouteHandler()
         initialize(app_config, routing_config, comp_config_index)
         react_code = handle_routing_code(app_config, routing_config, comp_config_index, )
-        directory_manager= DirectoryManagementGenerator(project_name)
+        directory_manager= DirectoryManager(project_name)
         directory_manager.save_file("MAIN_COMPONENT",react_code)
         
     except Exception as e:

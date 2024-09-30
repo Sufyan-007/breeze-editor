@@ -50,10 +50,9 @@ function AllProjects() {
     ],
   };
 
-  const handleOpenProject = () => {
+  const handleOpenProject = (projectName) => {
     setModalOpen(true);
-    // router.navigate(`/project/${projectName}`);
-    router.navigate('/project');
+    router.navigate(`/project/${projectName}`);
   };
 
   return (

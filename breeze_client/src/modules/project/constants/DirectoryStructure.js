@@ -130,9 +130,15 @@ const treeData = [
     parentId: null,
   },
   {
-    id: 6,
-    name: 'tpconfig.json'
-  }
+    id: '6',
+    name: 'routing',
+    extension: 'json',
+    type: 'FILE',
+    children: [],
+    wasOpen: false,
+    tag: 'ROUTING',
+    parentId: null,
+  },
 ];
 
 export default treeData;

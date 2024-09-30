@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
+import RoutingConfig from '../../routing/pages/RoutingConfig';
 
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {
     switch (configType) {
-      case 'routing':
-        return <>Routing Config Screen</>;
+      case 'ROUTING':
+        return <RoutingConfig />;
       case 'third-party':
         return <>Third party Config Screen</>;
       case 'services':

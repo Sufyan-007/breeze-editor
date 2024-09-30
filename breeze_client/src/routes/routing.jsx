@@ -36,6 +36,10 @@ export const router = createBrowserRouter([
     element: <Navigate to={isAuthenticated() ? '/all-projects' : '/login'} />,
   },
   {
+    path: '/login',
+    element: <LoginPageWrapper />,
+  },
+  {
     path: '/all-projects',
     element: (
       <ProtectedRoute>
@@ -44,11 +48,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/login',
-    element: <LoginPageWrapper />,
-  },
-  {
-    path: '/project',
+    path: '/project/:projectName',
     element: (
       <ProtectedRoute>
         <ProjectPage />
