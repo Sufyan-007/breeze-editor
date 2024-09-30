@@ -1,33 +1,55 @@
-
 from rest_framework.views import APIView
 from django.http import JsonResponse
-import json, uuid , os
+import json
+from .core.directory_management_service import DirectoryManager
+from django.http import JsonResponse
+import json, os
 from common.utils.app_consts import CONFIG_PATH
-from .core.directory_management_service import DirectoryManagementGenerator
-class AddNode(APIView):
-    
-    def post(self,request,projectName):
-      if request.method == 'POST':
-        try:
-            data=json.loads(request.body)
-           
-            parentId = data["parentId"]
-            node_type=data["type"]
-            tag=data["tag"]
-            name = data.get("name", None)
-            
-            directory_manager = DirectoryManagementGenerator(projectName)
-            new_node = directory_manager.add_node_to_config(
-              parent_id=parentId,
-              tag=tag,
-              node_type=node_type,
-              name=name
-            )
-                        
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
-            return JsonResponse(new_node, status=201)
+
+
+class RenameNode(APIView):
+    def post(self, request, node_id, projectName):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            new_name = data.get('new_name', None)
+
+            if not new_name:
+                return JsonResponse({'status': 'error', 'message': 'New name not provided'}, status=400)
+
+            directory_manager = DirectoryManager(projectName)
+            result = directory_manager.rename_node(node_id, new_name)
+
+            if result['status'] == 'success':
+                return JsonResponse(result)
+            else:
+                return JsonResponse(result, status=404 if result['status'] == 'error' else 500)
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@method_decorator(csrf_exempt, name="dispatch")
+class GetFolderConfig(APIView):
+    def post(self , request, projectName):
+        body =  json.loads(request.body.decode("utf-8"))
+        if not projectName:
+            return JsonResponse({'error': 'projectname query parameter is required'}, status=400)
+        try:
+            directoryManager = DirectoryManager(projectName)
+            id = body.get('id')
+            depth = body.get('depth',0)
+            return JsonResponse(directoryManager.get_directory_configs(id,depth=depth))
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error decoding JSON'}, status=500)
         
-        except (json.JSONDecodeError, KeyError) as e:
-            return JsonResponse({'error': str(e)}, status=400)
         
-      return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
+        
+class MoveNode(APIView):
+    def post(self, request, projectName):
+        try:
+            raise NotImplementedError()
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

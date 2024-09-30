@@ -688,7 +688,42 @@ class OpenapiConverter:
         
 
 
-
+    def wrap_conversion(self,converted_data,project_name,folder_path):
+                security_schemes_models = converted_data.get("security_schemes_models")
+                # security_schemes_models = result.get("security_schemes_models")
+                swagger_metadata_key = converted_data.get("id")
+                swagger_metadata_config_path = f"{CONFIG_PATH}/{project_name}/swagger_metadata.json"
+                with open(swagger_metadata_config_path, "r") as file:
+                        swagger_metadata_content = json.load(file)
+                
+                auth_model_dict = {}
+                for model in security_schemes_models:
+                    auth_model_dict[model.id] = model.as_dict()    
+                swagger_metadata_content[swagger_metadata_key]["auth_apis"] = auth_model_dict
+                append_to_dict_file(swagger_metadata_config_path,swagger_metadata_content)
+                
+                ## for other models
+                tag_models = converted_data.get("tag_models")
+                # resultant_filename = []
+                files_with_apis = []
+                api_models_folder_path = folder_path + f"/{swagger_metadata_key}"
+                if not os.path.exists(api_models_folder_path):
+                    os.makedirs(api_models_folder_path)
+                for tag, api_models in tag_models.items():
+                    function_with_errors = set()
+                    model_dict = {}
+                    filename = tag+".json"
+                    full_file_path = os.path.join(api_models_folder_path, filename)
+                    # resultant_filename.append(filename)
+                    for model in api_models:
+                        model_as_dict = model.as_dict()
+                        model_dict[model.id] = model_as_dict
+                        if len(model_as_dict["errors"]["root_errors"])>0:
+                            function_with_errors.add(model.operation_id)
+                    function_with_errors_list = list(function_with_errors)
+                    files_with_apis.append({"filename": tag, "apis": model_dict, "errors": function_with_errors_list})
+                    append_to_dict_file(full_file_path,model_dict)
+                return files_with_apis
     
    
 

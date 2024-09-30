@@ -1,30 +1,78 @@
 import TopBar from './TopBar';
-import Editor from '../../../assets/images/ABDM Login Page 1(2).png';
-import LoginPage from '../../../assets/images/image 1.png';
+import { useEffect, useState } from 'react';
+import ConfigDisplay from './ConfigDisplay';
+import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
+import PropTypes from 'prop-types';
 
-function ProjectDisplay() {
+function ProjectDisplay({ selectedNode }) {
+  const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
+  const item = { type: 'component' }; // TO DO : Dynamic after api integration
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+  useEffect(() => {
+    console.log(selectedNode);
+  }, [selectedNode]);
+
   return (
-    <div className="mb-3">
-      <TopBar />
-      <div className="tab-content" id="pills-tabContent">
-        <div className="tab-pane fade" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-          <div className="img-container">
-            <img src={Editor} alt="preview" />
-          </div>
-        </div>
-        <div
-          className="tab-pane fade active show"
-          id="pills-profile"
-          role="tabpanel"
-          aria-labelledby="pills-profile-tab"
-        >
-          <div className="img-container">
-            <img src={LoginPage} alt="preview" />
-          </div>
+    <>
+      <div className="mb-3">
+        <TopBar onTabChange={handleTabChange} activeTab={activeTab} item={item} />
+
+        <div className="tab-content" id="pills-tabContent">
+          {activeTab === 'code' && (
+            <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+              <div className="editor-container">
+                <ConfigurableMonacoEditor
+                  defaultValue="// Monaco editor init"
+                  height="calc(100vh - 123px)"
+                  language="javascript"
+                />
+              </div>
+            </div>
+          )}
+
+          {item.type === 'component'
+            ? activeTab === 'preview' && (
+                <div
+                  className="tab-pane fade show active"
+                  id="pills-preview"
+                  role="tabpanel"
+                  aria-labelledby="pills-preview-tab"
+                >
+                  <div className="project-display-container iframe-container">
+                    <iframe
+                      src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}`}
+                      title="Preview"
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                    ></iframe>
+                  </div>
+                </div>
+              )
+            : activeTab === 'config' && (
+                <div
+                  className="tab-pane fade show active"
+                  id="pills-config"
+                  role="tabpanel"
+                  aria-labelledby="pills-config-tab"
+                >
+                  <div className="project-display-container config-container">
+                    <ConfigDisplay configType={item.type} />
+                  </div>
+                </div>
+              )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
+
+ProjectDisplay.propTypes = {
+  selectedNode: PropTypes.object,
+};
 
 export default ProjectDisplay;

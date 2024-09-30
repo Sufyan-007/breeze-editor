@@ -5,7 +5,7 @@
     border-radius: 10px;
     margin: 10px;
     padding: 12px 6px;
-    z-index: 1111;
+    z-index: 100;
 }
 
 #sidebar .sidebar-header {
@@ -79,11 +79,39 @@
 }
 
 #sidebar .bottom-nav a.run-btn {
-    background-color: #006EB9;
+    background-color: var(--color-blue);
     font-size: 10px;
     padding: 6px 24px;
     margin: 0 12px;
     align-content: center;
     border-radius: 3px;
     color: white;
+}
+
+.collapsed-sidebar-button {
+    height: 50px;
+    margin: 10px 10px 10px 0;
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 13px 10px 13px 6px;
+    cursor: pointer;
+}
+
+.selected-node {
+    background-color: #d3e2f4;
+    border-radius: 4px;
+}
+
+.tree-node.dragging {
+    opacity: 0.5;
+}
+
+.tree-node.drop-target {
+    border: 2px dashed #007bff;
+}
+
+.root-drop-zone {
+    margin-bottom: 10px;
+    text-align: center;
+    line-height: 50px;
+    color: #888;
 }
