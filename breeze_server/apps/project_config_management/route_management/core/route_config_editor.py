@@ -1,48 +1,8 @@
 from ..utils.utils import *
-from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH
-from apps.common.utils.file_helpers.json_handler import read_project_config_file 
-from apps.common.utils.uuid_as_key import generate_uuid_as_key
-
-def get_all_route_full_paths(project_id):
-    try:
-        """
-        Returns a list(or list of objs with ids) of all full paths
-        of all routes in the project.
-        """
-        return get_all_full_paths(project_id=project_id)
-    except Exception as e:
-        print("Error while getting all full paths")
-        print("Error ", e)
-        raise e
+from apps.common.utils.tree_management import is_target_in_hierarchy,get_all_path_of_node,move_node
+from apps.common.constants.enums.tree_type import TreeType
 
 
-def add_route_to_config(request, project_id="", _routing_config = {}):
-    try:
-        print(request)
-        route_obj = request
-        route_id = route_obj.get('id')
-        
-        # if id is present then call update method
-        if route_id:
-            return update_route_in_config(route_obj, project_id, _routing_config)
-        
-        # check for mandatory values
-        check_for_manadatory_route_props(route_obj)
-        
-        _routing_config = get_routing_config(project_id, _routing_config)
-        
-        # validate the route path
-        validate_route_object(route_obj, project_id, _routing_config)
-        
-        # add route_obj to the routing_config and return config
-        route_id = generate_uuid_as_key()
-        route_obj['id'] = route_id
-        _routing_config[route_id] = route_obj 
-        return {'config': _routing_config}
-    except Exception as e:
-        print("Error: ", e)
-        raise e
-  
 def get_previous_object_state(route_obj_id, project_id="", routing_config = {}):
     routing_config = get_routing_config(project_id, routing_config)
     prev_obj = routing_config.get(route_obj_id)
@@ -51,18 +11,33 @@ def get_previous_object_state(route_obj_id, project_id="", routing_config = {}):
     return prev_obj
       
 
+def check_for_mandatory_route_props(route_obj):
+    if route_obj.get('path'):
+        route_obj['path'] = route_obj.get('path').strip()
+        route_obj['path'] = "/" + route_obj['path'].strip('/')
+    else:
+        raise ValueError("path is missing")
+    if route_obj.get('componentId'):
+        route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
+        route_obj['componentId'] = route_obj.get('componentId').strip()
+    elif route_obj.get('redirectTo'):
+        route_obj.pop('componentId') if route_obj.get('componentId') else ''
+    else:
+        raise ValueError("component or redirectTo is missing")
+
+
+def validate_route_path(route_obj,target_id, project_id="",skip_ids=[]):
+    full_route_paths = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id,'path',skip_ids =skip_ids) 
+    for full_route_path in full_route_paths:
+        if route_obj.get("path") in full_route_path.get("path"):
+            raise Exception('route already exists..')
+    return True
+        
+
 def update_route_in_config(request, project_id="", _routing_config = {}):
     try:
-        print(request)
         route_obj = request
         route_id = route_obj.get('id')
-        
-        # if id is not present then call add method
-        if not route_id:
-            return add_route_to_config(route_obj, project_id, _routing_config)
-        
-        # check for mandatory values
-        check_for_manadatory_route_props(route_obj)
         
         _routing_config = get_routing_config(project_id, _routing_config)
             
@@ -73,17 +48,16 @@ def update_route_in_config(request, project_id="", _routing_config = {}):
         if route_obj.get('parentId', "") != "" and prev_obj == '/':
             raise Exception('default route can\'t have parent routes..')
            
-        # if previous parent is different then remove this obj's id from its child 
-        if prev_obj.get('parentId', "") != route_obj.get('parentId', ""):
-            _routing_config.get(route_obj.get('parentId')).get('children').remove(route_id)
-            
-            # if parent present then add this id to parents children's array
-            if route_obj.get('parentId'):
-                _routing_config.get(route_obj.get('parentId')).get('children', []).append(route_id)
         
-        # add new route_obj to the routing_config and return config
-        _routing_config[route_id] = route_obj 
-        return {'config': _routing_config}
+        ## if parent node is in the hierarchy of the child node then it is invalid
+        if(is_target_in_hierarchy(source_id=route_id,target_id=route_obj.get("parent_id"),data=_routing_config)):
+            raise Exception("Parent id cant be in child's lineage") 
+        
+        if validate_route_path(route_obj,route_obj.get("parentId"), project_id="",skip_ids=[route_obj.get("id")]) is True:
+
+            modified_route_config = move_node(route_obj,route_obj["parentId"],_routing_config)
+            return {'config': modified_route_config}
+    
     except Exception as e:
         print("Error: ", e)
         raise e

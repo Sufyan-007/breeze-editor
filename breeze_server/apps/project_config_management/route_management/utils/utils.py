@@ -1,8 +1,9 @@
 import random
-import string
+import string, re
 from ..core.post_edit_operations import RouteHandler
+
 from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
-from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file
+from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file, write_json_file
 from apps.directory_management.core.directory_management_service import DirectoryManager
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 
@@ -10,7 +11,7 @@ def generate_layout_route_key():
     # Generate a unique key for layout routes
     return f"/layout__{''.join(random.choices(string.ascii_lowercase + string.digits, k=9))}__"
 
-def process_and_save_route_config(project_name, routing_config={}):
+def process_route_config(project_name, routing_config={}):
     # print("This function runs after returning a 200 response.")
     try:
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
@@ -21,7 +22,7 @@ def process_and_save_route_config(project_name, routing_config={}):
         initialize, handle_routing_code = RouteHandler()
         initialize(app_config, routing_config, comp_config_index)
         react_code = handle_routing_code(app_config, routing_config, comp_config_index, )
-        directory_manager= DirectoryManagementGenerator(project_name)
+        directory_manager= DirectoryManager(project_name)
         directory_manager.save_file("MAIN_COMPONENT",react_code)
         
     except Exception as e:
@@ -29,52 +30,7 @@ def process_and_save_route_config(project_name, routing_config={}):
         print("Error: ", e)
         raise e
 
-def get_full_route_path(route_obj, routing_config):
-    full_path = route_obj.get('path')
-    if route_obj.get('parentId'):
-        parent_route_obj = routing_config.get(route_obj.get('parentId'))
-        if parent_route_obj:
-            full_path = get_full_route_path(parent_route_obj, routing_config) + full_path
-    else:
-        full_path = full_path
-    return full_path
- 
-def check_for_manadatory_route_props(route_obj):
-    if route_obj.get('path'):
-        route_obj['path'] = route_obj.get('path').strip()
-        route_obj['path'] = "/" + route_obj['path'].strip('/')
-    else:
-        raise ValueError("path is missing")
-    if route_obj.get('componentId'):
-        route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
-        route_obj['componentId'] = route_obj.get('componentId').strip()
-    elif route_obj.get('redirectTo'):
-        route_obj.pop('componentId') if route_obj.get('componentId') else ''
-    else:
-        raise ValueError("component or redirectTo is missing")
-        
-def get_all_full_paths(with_ids=True, project_id="", routing_config={}):
-    routing_config = get_routing_config(project_id, routing_config)
-    # get all the route objects from the routing config except the fallback element's obj
-    all_route_objects = list(get_filtered_object(routing_config, 'fallback').values())
-    all_full_paths_with_object_id = []
-    all_full_paths = []
-    
-    for route_obj in all_route_objects:
-        full_path = get_full_route_path(route_obj, routing_config)
-        all_full_paths.append(full_path)
-        full_path_obj = { 'id': route_obj['id'], 'full_path': full_path}
-        all_full_paths_with_object_id.append(full_path_obj)
-    if with_ids:
-        return all_full_paths_with_object_id   
-    return all_full_paths
-    
-def validate_route_object(route_obj, project_id="", routing_config={}):
-    routing_config = get_routing_config(project_id, routing_config)
-    full_route_path = get_full_route_path(route_obj, routing_config) 
-    if full_route_path in get_all_full_paths(with_ids=False, routing_config=routing_config):
-        raise Exception("route with same path already exists")
-    
+           
 def get_filtered_object(data, exclude_keys):
     return {key: value for key, value in data.items() if key not in exclude_keys}
 
@@ -86,3 +42,120 @@ def get_routing_config(project_id="", routing_config={}):
         routing_config = read_project_config_file(f"{CONFIG_PATH}/{project_id}", CONFIG_FILES_PATH['ROUTING_CONFIG'])
     return routing_config
     
+def rewrite_clean_route_config(project_name, updated_route_config):
+    for route in list(updated_route_config.values()):
+        keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
+        for key in keys_to_remove:
+            del route[key]
+        
+    # line as per this scenario: project_id and project are same for the time being
+    routing_config_path = f"{CONFIG_PATH}/{project_name}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
+    write_json_file(f"{routing_config_path}.json", updated_route_config)
+    
+def extract_function_details(js_function, id):
+    function_pattern = r'(async\s+)?(?:function\s+(\w+)\s*)?\(([^)]*)\)\s*{([^}]*)}'
+    match_function = re.search(function_pattern, js_function, re.DOTALL)
+    arrow_function_pattern = r'(async\s+)?\s*\(\s*({[^}]*}|[^)]*)\s*\)\s*=>\s*(\{.*\}|[^{]*)\s*$'
+    
+    js_Arrow_function = js_function[1:-1] if js_function.startswith('{') else js_function
+    match_arrow_function = re.search(arrow_function_pattern, js_Arrow_function, re.DOTALL)
+    if match_function:
+        is_async = bool(match_function.group(1))
+        function_name = match_function.group(2) or ''
+        parameters = match_function.group(3).strip()
+        body = match_function.group(4).strip()
+
+        if parameters:
+            if parameters.startswith('{'):
+                # Destructured parameters
+                parameter_list = []
+                for param in parameters[1:-1].split(','):
+                    name = param.split(':')[0].strip()
+                    parameter_list.append({'name': name})
+                destructured = True
+            else:
+                # Non-destructured parameters
+                parameter_list = [{'name': param.strip()} for param in parameters.split(',')]
+                destructured = False
+        else:
+            # No parameters
+            parameter_list = []
+            destructured = False
+
+    elif match_arrow_function:
+        is_async = bool(match_arrow_function.group(1))
+        function_name = ''
+        parameters = match_arrow_function.group(2).strip()
+        body = match_arrow_function.group(3).strip()
+        body_match = re.search(r'\{([^{}]*)\}$|([^{}]*)$', body)
+        if (body_match.group(1) != None):
+            body = body_match.group(1)
+        elif (body_match.group(2) != None):
+            body = body_match.group(2)
+        else:
+            body = ''
+
+        if parameters.startswith('{'):
+            # Destructured parameters
+            parameter_list = []
+            for param in parameters[1:-1].split(','):
+                name = param.split(':')[0].strip()
+                parameter_list.append({'name': name})
+            destructured = True
+        else:
+            # Non-destructured parameters
+            parameter_list = [{'name': param.strip()} for param in parameters.split(',')]
+            destructured = False
+
+    else:
+        return None  # No match found
+
+    if body.startswith('{') and body.endswith('}'):
+        body = body[1:-1]
+    return {
+        'implementation': {
+            # we are using anonymous function only but we can have 
+            # named functions as well, so keeping the name key blank 
+            # and function type anonymous for now
+            
+            'name': "",
+            'isAnonymous': True,
+            
+            # 'name': function_name,
+            # 'isAnonymous': not function_name,
+            
+            '$id': f'FUNCTIONS-{id}',
+            'parameters': {
+                'destructured': destructured,
+                'list': parameter_list
+            },
+            'isAsync': is_async,
+            'functionBody': body
+        }
+    }
+    
+def create_route_property_sub_config(function, id):
+    if function == None or function == '':
+        return None
+    elif isinstance(function, dict) and function['implementation']:
+        print("===========function===========")
+        print(function)
+        return function
+    else:
+        print("----------------extract_function_details(function)--------------------")
+        try:
+            return extract_function_details(function, id)
+        except Exception as e:
+            print("error in extract_function_details")
+            print(e)
+            print('function: ', function, 'id: ', id)
+        return None
+
+def transform_route_config(original_config):
+    for route in list(original_config.values()):
+        print("==========transform_route_config============")
+        print(route)
+        route["action"] = create_route_property_sub_config(route.get("action", None), route['path']+'-action')
+        route["loader"] = create_route_property_sub_config(route.get("loader", None), route['path']+'-loader')
+        route["lazy"] = create_route_property_sub_config(route.get("lazy", None), route['path']+'-lazy')
+        route["shouldRevalidate"] = create_route_property_sub_config(route.get("shouldRevalidate", None), route['path']+'-shouldRevalidate')
