@@ -11,8 +11,7 @@ urlpatterns = [
     path('add/', proj_apis.add, name='add_project'),
     path('delete/<str:param>/', proj_apis.delete, name='delete_project'),
     # post request
-    path('query_resource/<str:param>/', que_re.manage_resource),
-    path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
+    path('query_resource/<str:param>/', que_re.manage_resource)
 ]
 
 

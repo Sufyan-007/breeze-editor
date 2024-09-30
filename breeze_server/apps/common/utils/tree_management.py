@@ -191,6 +191,20 @@ def clone_with_new_uuid(data):
 
 
 
+def replace_node(source_id,new_id,data):
+    source_data = data[source_id]
+    source_data["id"] = new_id
+    parent_id = source_data["parentId"]
+    for i in range(len(data[parent_id]["children"])):
+        # replace key with new id
+        if data[parent_id]["children"][i] == source_id:
+            data[parent_id]["children"][i] = new_id
+
+     
+    data[new_id] = source_data
+    return data
+
+
 def move_node(source, target_id, data):
     """
     Move a source node to become a child of the target node.
