@@ -51,7 +51,6 @@ class AppConfigWriter:
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['REDUX_STORE_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['CSS_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['USAGE_CONFIG']}.json", json.dumps(usage_config))
-        write_file(f"{app_config_dir}/{CONFIG_FILES_PATH['SWAGGER_CONFIG']}.json", json.dumps({}))
         write_file(f"{app_config_dir}/react_request_code.py", REQUEST)  
 
     def write_basic_main_comp_config(self, app_config):

@@ -20,7 +20,7 @@ function ProjectDisplay({ selectedNode }) {
   return (
     <>
       <div className="mb-3">
-        <TopBar onTabChange={handleTabChange} activeTab={activeTab} item={item} />
+        <TopBar onTabChange={handleTabChange} activeTab={activeTab} item={selectedNode} />
 
         <div className="tab-content" id="pills-tabContent">
           {activeTab === 'code' && (
@@ -35,7 +35,7 @@ function ProjectDisplay({ selectedNode }) {
             </div>
           )}
 
-          {item.type === 'component'
+          {selectedNode.tag === 'COMPONENT'
             ? activeTab === 'preview' && (
                 <div
                   className="tab-pane fade show active"
@@ -62,7 +62,7 @@ function ProjectDisplay({ selectedNode }) {
                   aria-labelledby="pills-config-tab"
                 >
                   <div className="project-display-container config-container">
-                    <ConfigDisplay configType={item.type} />
+                    <ConfigDisplay configType={selectedNode?.tag || ''} />
                   </div>
                 </div>
               )}

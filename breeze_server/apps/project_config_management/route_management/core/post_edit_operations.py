@@ -4,6 +4,8 @@ from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import write_json_file
 from apps.code_generator.core.generate_routing_code import get_routing_code
 
+# TODO:
+
 def RouteHandler():
     _app_config = None
     _route_config = None
@@ -16,18 +18,10 @@ def RouteHandler():
         _app_config = app_config
         _route_config = route_config
         _comp_config_index = comp_config_index        
-    
-    def add_params_to_route_object():
-        for full_path_route_key in _route_config.get('routes'):
-            params = []
-            for i in full_path_route_key.split('/'):
-                if len(i) > 1 and i[0] == ':':
-                    params.append(i[1:])
-            _route_config['routes'][full_path_route_key]['params'] = params
       
     def rewrite_clean_route_config(updated_route_config):
-        for route in list(updated_route_config.get('routes').values()):
-            keys_to_remove = [key for key, val in route.items() if val is None or val == []]
+        for route in list(updated_route_config.values()):
+            keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
             for key in keys_to_remove:
                 del route[key]
             
@@ -134,7 +128,7 @@ def RouteHandler():
             return None
     
     def transform_route_config(original_config):
-        for route in list(original_config.get('routes').values()):
+        for route in list(original_config.values()):
             print("==========transform_route_config============")
             print(route)
             route["action"] = create_route_property_sub_config(route.get("action", None), route['path']+'-action')
@@ -146,7 +140,8 @@ def RouteHandler():
         
         # create clean and properly formatted config for code generation
         transform_route_config(_route_config)
-        add_params_to_route_object()
+        # now it isn't useful since we won't have a full path as a key
+        # add_params_to_route_object()
         rewrite_clean_route_config(_route_config)
         
         # get the generated code from code_generator module
