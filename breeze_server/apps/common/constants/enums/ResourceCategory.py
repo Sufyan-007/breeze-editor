@@ -5,5 +5,8 @@ class ResourceCategory(Enum):
     SERVICES = 'services'
     THIRD_PARTY = 'third_party'
     API_CLIENT = 'api_client'
+    CUSTOMIZED_PROJ = 'customized_proj_config' 
 
-
+class ThirdPartyLibraryKeys:
+    LIB_NAME = 'libname'
+    LIB_VERSION = 'libversion'
