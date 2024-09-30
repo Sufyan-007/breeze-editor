@@ -42,17 +42,17 @@ export const router = createBrowserRouter([
   {
     path: '/all-projects',
     element: (
-      <ProtectedRoute>
-        <AllProjects />
-      </ProtectedRoute>
+      // <ProtectedRoute>
+      <AllProjects />
+      // </ProtectedRoute>
     ),
   },
   {
     path: '/project/:projectName',
     element: (
-      <ProtectedRoute>
-        <ProjectPage />
-      </ProtectedRoute>
+      // <ProtectedRoute>
+      <ProjectPage />
+      // </ProtectedRoute>
     ),
   },
 ]);
