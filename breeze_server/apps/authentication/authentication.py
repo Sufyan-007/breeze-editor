@@ -13,7 +13,7 @@ class CustomTokenAuthentication(BaseAuthentication):
         if token is None:
             return None
 
-        token = token.replace('Token ', '')
+        token = token.replace('Bearer ', '')
         auth_file_path = get_auth_file_path()
 
         try:

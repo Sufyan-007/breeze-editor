@@ -1,0 +1,14 @@
+import { callApiClient } from '../../utils/breezeApiCall';
+
+export async function getComponents(projectName) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/query_resource/${projectName}/`;
+  const payload = {
+    category: 'components',
+  };
+  try {
+    const response = await callApiClient(url, 'POST', payload);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}

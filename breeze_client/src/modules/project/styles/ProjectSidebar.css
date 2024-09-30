@@ -97,7 +97,7 @@
 }
 
 .selected-node {
-    background-color: #d3e2f4;
+    background-color: var(--color-background);
     border-radius: 4px;
 }
 
