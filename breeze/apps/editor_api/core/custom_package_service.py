@@ -30,7 +30,19 @@ class CustomPackageService:
     def write_config_file(self, path, data):
         with open(path, "w") as file:
             json.dump(data, file, indent=4)
+    
+    def check_existing_folder(self,file_name):
+        extracted_dir = os.path.join(CONFIG_PATH, self.project_name, "extracted_zip_files")
+         # Check if the extracted_zip_folder directory exists
+        if not os.path.exists(extracted_dir):
+            return False  # If the directory doesn't exist, the folder can't exist either
 
+        # List all folders in the extracted_zip_folders directory
+        existing_folders = [f for f in os.listdir(extracted_dir) if os.path.isdir(os.path.join(extracted_dir, f))]
+
+        # Return True if a folder with the same name exists
+        return file_name in existing_folders
+        
     def upload_file(self, file, fileName):
         if self.project_name is not None:
             # Save the zip file to a temporary location

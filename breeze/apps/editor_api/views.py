@@ -932,16 +932,21 @@ class CustomPackage(APIView):
         try:
             file = request.FILES.get('file')
             fileName = request.POST.get("filename")
-            print(fileName,"file name")
+
             if not file:
                 return JsonResponse({'error': 'No file provided.'}, status=400)
-
-            # Create an instance of CustomPackageService with the project name
-            custom_service = CustomPackageService(projectName)
-            custom_service.upload_file(file, fileName)
-            
+                        
             if fileName.endswith('.zip'):
                 fileName = fileName.replace('.zip', '')
+            
+            # Create an instance of CustomPackageService with the project name
+            custom_service = CustomPackageService(projectName)    
+            
+            # Check if the folder already exists in extracted_zip_folders
+            if custom_service.check_existing_folder(fileName):
+                return JsonResponse({'error': 'A folder with this name already exists.'}, status=400)
+                    
+            custom_service.upload_file(file, fileName)
             
             #after the file is uploaded , call the express API
             api_url = f"http://127.0.0.1:{PORT}/custom"
