@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../styles/AllProjects.css';
 import Navbar from '../../../common/navbar/Navbar';
 import images from '../../../assets/images/index';
@@ -15,6 +15,7 @@ import {
   stylingOptions,
   technologyOptions,
 } from '../constants/CreateNewProjectFormConstants';
+import CustomModal from '../../../common/display/modal/BreezeModal';
 
 function AllProjects() {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -24,6 +25,12 @@ function AllProjects() {
   const [formValues, setFormValues] = useState(initialNewProjectFormConfig);
   const [nameError, setNameError] = useState('');
   const [authorError, setAuthorError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState('Uploading...');
+  const [showModal, setModalShow] = useState(false);
+  const ws = useRef(null);
+  const intervalId = useRef(null);
 
   const handleInputChange = (name, value) => {
     setFormValues({ ...formValues, [name]: value });
@@ -41,8 +48,8 @@ function AllProjects() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     let hasError = false;
+
     if (!formValues.name) {
       setNameError('Application name is required.');
       hasError = true;
@@ -52,7 +59,19 @@ function AllProjects() {
       hasError = true;
     }
     if (hasError) return;
-    console.log(formValues);
+
+    setLoading(true);
+    setModalShow(true);
+
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(
+        JSON.stringify({
+          command: 'start',
+          project_id: formValues.name.toLowerCase().replace(/ /g, '_'),
+        })
+      );
+    }
+
     try {
       const createdProject = await createProject(formValues);
       setProjects((prevProjects) => [...prevProjects, createdProject]);
@@ -60,10 +79,12 @@ function AllProjects() {
     } catch (error) {
       console.error('Error creating project:', error);
     } finally {
+      setLoading(false);
       setFormValues(initialNewProjectFormConfig);
       fetchProjects();
     }
   };
+
   const fetchProjects = async () => {
     try {
       const projectsData = await getAllProjects();
@@ -73,8 +94,65 @@ function AllProjects() {
     }
   };
 
+  const incrementProgress = () => {
+    intervalId.current = setInterval(() => {
+      setProgress((prevProgress) => {
+        if (prevProgress >= 45) {
+          clearInterval(intervalId.current);
+          intervalId.current = null;
+          return prevProgress;
+        }
+        return prevProgress + 1;
+      });
+    }, 1000);
+  };
+
   useEffect(() => {
     fetchProjects();
+    ws.current = new WebSocket(`${import.meta.env.VITE_BREEZE_BACKEND_HOST}/ws/project-progress/`);
+
+    ws.current.onopen = () => {
+      console.log('Connected to WebSocket');
+    };
+
+    ws.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      const progress = message?.progress;
+
+      if (progress === 20 && intervalId.current === null) {
+        incrementProgress();
+      } else if (progress === 50) {
+        clearInterval(intervalId.current);
+        intervalId.current = null;
+        setProgress(progress);
+      } else {
+        setProgress(progress);
+      }
+
+      const progressMessages = {
+        5: 'Initializing your project',
+        20: 'Installing Packages',
+        50: 'Configuring Services',
+        60: 'Setting up your project',
+        80: 'This might take a while',
+        90: 'Almost there...',
+      };
+
+      const relatedMessage = progressMessages[progress];
+      if (relatedMessage) {
+        setMessage(relatedMessage);
+      }
+    };
+
+    ws.current.onclose = () => {
+      console.log('Disconnected from WebSocket');
+    };
+
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+      }
+    };
   }, []);
 
   const openModal = () => setModalOpen(true);
@@ -271,6 +349,33 @@ function AllProjects() {
               </div>
             </div>
           </form>
+          {loading && (
+            <CustomModal isOpen={showModal} onClose={closeModal} header={{ title: 'Creating your project' }} size="lg">
+              <div className="text-center mt-3">
+                <div className="progress">
+                  <div
+                    className="progress-bar"
+                    role="progressbar"
+                    aria-valuenow={progress}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    style={{ width: `${progress}%` }}
+                    aria-label="project completion bar"
+                  >
+                    {progress}%
+                  </div>
+                </div>
+                <div className="d-flex justify-content-center text center">
+                  <div className="loader-wheel" style={{ marginTop: '13px' }}>
+                    <i className="bi bi-arrow-clockwise"></i>
+                  </div>
+                  <div className="progress-text mt-3" style={{ marginLeft: '10px' }}>
+                    {message}
+                  </div>
+                </div>
+              </div>
+            </CustomModal>
+          )}
           <hr className="m-0" />
         </BreezeModal>
       </div>

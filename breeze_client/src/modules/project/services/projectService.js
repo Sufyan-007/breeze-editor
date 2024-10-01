@@ -26,7 +26,7 @@ export const createProject = async (projectData) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/add/`;
   const payload = projectData;
   try {
-    const response = await callApiClient(url, 'POST', payload);
+    const response = await callApiClient(url, 'POST', payload, false, {}, false);
     return response;
   } catch (error) {
     console.error('Error creating project:', error.message);

@@ -5,17 +5,30 @@ const getAccessToken = () => {
   return localStorage.getItem('accessToken');
 };
 
-export async function callApiClient(url, method = 'GET', payload = null, isFormData = false, options = {}) {
+export async function callApiClient(
+  url,
+  method = 'GET',
+  payload = null,
+  isFormData = false,
+  options = {},
+  loader = true
+) {
   const { headers = {}, ...otherOptions } = options;
   const accessToken = getAccessToken();
 
-  const loaderContainer = document.createElement('div');
-  document.body.appendChild(loaderContainer);
+  let loaderContainer = null;
+  let root = null;
 
-  const root = createRoot(loaderContainer);
+  if (loader) {
+    loaderContainer = document.createElement('div');
+    document.body.appendChild(loaderContainer);
+    root = createRoot(loaderContainer);
+  }
 
   try {
-    root.render(<BreezeLoader />);
+    if (loader) {
+      root.render(<BreezeLoader />);
+    }
 
     const requestOptions = {
       method,
@@ -40,7 +53,9 @@ export async function callApiClient(url, method = 'GET', payload = null, isFormD
     console.error('API call error:', error);
     throw error;
   } finally {
-    root.unmount();
-    document.body.removeChild(loaderContainer);
+    if (loader) {
+      root.unmount();
+      document.body.removeChild(loaderContainer);
+    }
   }
 }
