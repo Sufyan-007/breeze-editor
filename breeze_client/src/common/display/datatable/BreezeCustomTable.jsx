@@ -143,7 +143,7 @@ const CustomTable = ({
           Previous
         </button>
         <span>
-          Page {currentPage} of {Math.ceil((data?.length || 0) / pageSize)}
+          Page {currentPage} of {Math.max(1, Math.ceil((data?.length || 0) / pageSize))}
         </span>
         <button
           className="btn br-text-primary med-font"

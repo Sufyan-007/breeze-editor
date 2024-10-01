@@ -1,6 +1,14 @@
 {
   "ROOT": {
-    "children": ["SRC", "PACKAGE_CONFIG", "ALL_STYLES_FILE", "INDEX_HTML","CUSTOM_UPLOAD"]
+    "parentId": null,
+    "id": "ROOT",
+    "children": [
+      "SRC",
+      "PACKAGE_CONFIG",
+      "ALL_STYLES_FILE",
+      "INDEX_HTML",
+      "CUSTOM_UPLOAD"
+    ]
   },
   "SRC": {
     "name": "src",
