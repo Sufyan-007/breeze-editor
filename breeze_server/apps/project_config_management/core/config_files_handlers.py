@@ -44,6 +44,7 @@ def add_dirs_configs(data):
     create_resource_directory(data['name'], ResourceCategory.COMPONENTS)
     app_current_config = write_basic_main_comp_config(app_current_config)
     write_routing_config(app_current_config)
+    write_swagger_schema_config(app_config_dir)
 
     # entries in directory management
     create_directory_management_file(app_current_config)
@@ -109,6 +110,13 @@ def write_routing_config(app_config):
     }
     write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", basic_routing_config)
 
+def write_swagger_schema_config(app_config_dir):
+    write_json_file(f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json", {
+        "custom" : {
+            "title" : "Custom",
+            "auth_apis" : {}
+        }
+    })
 
 def create_directory_management_file(app_config):
     template_path = ""
