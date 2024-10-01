@@ -6,7 +6,6 @@ from ..utils.html_generator import HTMLGenerator
 from ..utils.import_helper import ImportHelper
 from ..utils.function_ast_parser import FunctionParser
 from apps.directory_management.core.directory_management_service import DirectoryManager
-from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists
 from apps.common.utils.formatter import format_raw_val
 
 

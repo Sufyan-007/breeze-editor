@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from ..core.route_config_editor import update_route_in_config,check_for_mandatory_route_props,validate_route_path
 from ..core.route_config_editor import process_route_config, delete_route as del_route, transform_route_config, rewrite_clean_route_config
 from django.http import JsonResponse
-from apps.common.utils.tree_management import get_node,get_all_path_of_node,add_node
+from apps.common.utils.tree_management import get_node,get_all_path_of_node, add_node
 from apps.common.constants.enums.tree_type import TreeType
 
 
@@ -34,8 +34,8 @@ def add_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
     try:
         check_for_mandatory_route_props(route_obj=data)
-        if validate_route_path(data,data.get("parentId"), project_id) is True:    
-            config_data = add_node(project_id,TreeType["ROUTES"],data.get("parentId"),data)
+        if validate_route_path(data, data.get("parentId"), project_id) is True:    
+            config_data = add_node(project_id, TreeType["ROUTES"].value, data.get("parentId"), data)
             # create clean and properly formatted config for code generation
             transform_route_config(config_data)
             # now it isn't useful since we won't have a full path as a key
@@ -54,7 +54,13 @@ def update_route(request, project_id):
     try:
         check_for_mandatory_route_props(route_obj=data)
         res = update_route_in_config(data, project_id)
-        process_route_config(project_id, res['config'])
+        config_data = res['config']
+        # create clean and properly formatted config for code generation
+        transform_route_config(config_data)
+        # now it isn't useful since we won't have a full path as a key
+        # add_params_to_route_object()
+        rewrite_clean_route_config(project_id, config_data)
+        process_route_config(project_id, config_data)
         return JsonResponse(res, status=200)
     except Exception as e:
         print("Error ", e)

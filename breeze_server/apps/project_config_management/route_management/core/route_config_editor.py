@@ -53,13 +53,23 @@ def update_route_in_config(request, project_id="", _routing_config = {}):
         if(is_target_in_hierarchy(source_id=route_id,target_id=route_obj.get("parent_id"),data=_routing_config)):
             raise Exception("Parent id cant be in child's lineage") 
         
-        if validate_route_path(route_obj,route_obj.get("parentId"), project_id="",skip_ids=[route_obj.get("id")]) is True:
-
-            modified_route_config = move_node(route_obj,route_obj["parentId"],_routing_config)
-            return {'config': modified_route_config}
-    
+        if validate_route_path(route_obj,route_obj.get("parentId"), project_id, skip_ids=[route_obj.get("id")]) is True:
+            new_parent_id = route_obj.get("parentId", "")
+            old_parent_id = prev_obj.get('parentId', "")
+            if new_parent_id != old_parent_id:
+                modified_route_config = move_node(route_obj, new_parent_id, _routing_config)
+                if modified_route_config.get('err'):
+                    raise Exception('invalid route id..')
+                return {'config': modified_route_config.get("data")}
+            else:
+                _routing_config[route_obj.get("id")] = route_obj
+                return {'config': _routing_config}
+                
+                
     except Exception as e:
         print("Error: ", e)
+        import traceback 
+        print(traceback.format_exc())
         raise e
    
 def delete_all_child(route_id, project_id="", routing_config = {}):
