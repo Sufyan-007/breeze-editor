@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { fetchFolderConfig } from './directory_actions';
+import breezeConfigData from '../../modules/project/constants/DirectoryStructure';
 
 const initialState = {
   directoryConfig: {},
@@ -28,6 +29,7 @@ const directorySlice = createSlice({
         state.directoryConfig = {
           ...state.directoryConfig,
           ...configs,
+          ...breezeConfigData,
         };
       })
       .addCase(fetchFolderConfig.rejected, (state, action) => {
