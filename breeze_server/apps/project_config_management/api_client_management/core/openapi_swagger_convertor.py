@@ -28,7 +28,7 @@ def prepare_api_models(json_data, project_name):
             meta_data["auth_apis"] = {}
             if not os.path.exists(swagger_metadata_file_path):
                 with open(swagger_metadata_file_path, "w") as file:
-                    json.dump({"custom_schemas": {"title": "custom_schemas"}}, file)
+                    json.dump({"custom": {"title": "custom"}}, file)
             with open(swagger_metadata_file_path, "r") as file:
                 swagger_metadata_file_content = json.load(file)
             swagger_metadata_id = generate_uuid_as_key()
