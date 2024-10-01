@@ -38,7 +38,7 @@ def get_children_up_to_depth(node_id, data, depth, current_depth=0):
 
 
 #this function will create a new node or add node to target_id node
-def add_node(project_name,category,target_id,**data):
+def add_node( project_name, category, target_id, data):
     config_dir = os.path.join(CONFIG_PATH, project_name)
     config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category])
     if "id" not in data:
@@ -49,13 +49,15 @@ def add_node(project_name,category,target_id,**data):
     if(target_id is None or target_id not in config_data):
         data['parentId'] = None
         config_data[data['id']] = data
-        return data
+        return config_data
     else:
         data['parentId'] = target_id
         config_data[data['id']] = data
+        if not config_data[target_id].get('children'):
+            config_data[target_id]['children'] = []
         config_data[target_id]['children'].append(data['id'])
     
-    return config_data
+        return config_data
 
 def is_target_in_hierarchy(source_id, target_id, data):
     """
@@ -97,7 +99,7 @@ def get_node(project_name,category,target_id,depth=1):
     config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category.value])
     nodes = []
     ## if target is none then this will give all the root nodes
-    if(target_id == None):
+    if(target_id in [None, ""]):
         nodes = get_root_nodes(config_data)
     else:
         node = config_data.get(target_id,None)
@@ -124,7 +126,8 @@ def get_path(node_id,data,route,prop_name,skip_ids=[]):
     if("children" in data[node_id]):
         for child_id in data[node_id]['children']:
             if child_id not in skip_ids:
-                paths += get_path(child_id,data, route + data[node_id][prop_name]+'/',skip_ids=skip_ids)
+                route = route + data[node_id][prop_name]
+                paths += get_path(child_id, data, route, prop_name, skip_ids=skip_ids)
     return paths
 
 # this method return node_id and its all children path 
@@ -133,14 +136,14 @@ def get_all_path_of_node(project_id,category,node_id,prop_name,skip_ids=[]):
     config_data = read_project_config_file(app_config_dir, CONFIG_FILES_PATH[category.value])
     all_paths = []
     ## we need all paths from each and every root node
-    if node_id is None:
+    if node_id in [None, ""]:
         nodes = get_root_nodes(config_data)
         for node in nodes:
             if(node.get("id") not in skip_ids):
-                all_paths += get_path(node.get("id"),config_data,'',prop_name)
+                all_paths += get_path(node.get("id"),config_data,'',prop_name, skip_ids=[])
         
     elif node_id in config_data:
-        all_paths += get_path(node_id,config_data,'',skip_ids=skip_ids)
+        all_paths += get_path(node_id,config_data,'',prop_name,skip_ids=skip_ids)
     else:
         return "id not found"
     
@@ -151,7 +154,7 @@ def get_all_path_of_node(project_id,category,node_id,prop_name,skip_ids=[]):
 def get_root_nodes(config_data):
     root_nodes = [] 
     for k,v in config_data.items():
-        if v['parentId'] == None:
+        if v.get('parentId') in [None, ""]:
             root_nodes.append(v)
     return root_nodes
 
@@ -174,13 +177,13 @@ def clone_with_new_uuid(data):
         uuid_mapping[old_id] = new_id
         cloned_data[old_id]['id'] = new_id  # Update the 'id' with the new UUID
 
-    # Second pass: Update parent_id and children fields with new UUIDs
+    # Second pass: Update parentId and children fields with new UUIDs
     for old_id, new_id in uuid_mapping.items():
         node = cloned_data[old_id]
 
         # Update parent_id
-        if node['parentId'] in uuid_mapping:
-            node['parentId'] = uuid_mapping[node['parentId']]
+        if node.get('parentId') in uuid_mapping:
+            node['parentId'] = uuid_mapping[node.get('parentId')]
 
         # Update children with new UUIDs
         if 'children' in node and isinstance(node['children'], list):
@@ -194,7 +197,7 @@ def clone_with_new_uuid(data):
 def replace_node(source_id,new_id,data):
     source_data = data[source_id]
     source_data["id"] = new_id
-    parent_id = source_data["parentId"]
+    parent_id = source_data.get('parentId')
     for i in range(len(data[parent_id]["children"])):
         # replace key with new id
         if data[parent_id]["children"][i] == source_id:
@@ -205,7 +208,7 @@ def replace_node(source_id,new_id,data):
     return data
 
 
-def move_node(source, target_id, data):
+def move_node(source_node, target_id, data):
     """
     Move a source node to become a child of the target node.
 
@@ -215,35 +218,47 @@ def move_node(source, target_id, data):
     :return: None
     """
     # Ensure the source and target nodes exist in the data
-    source_id = source.get("id")
-    if source_id not in data or target_id not in data:
+    source_id = source_node.get("id")
+    if source_id not in data:
         print("Source or target node does not exist.")
         return {
             "err" : True,
-            "message" : "Id not found"
+            "message" : "Id not found",
+            "data": data
         }
     
-    source_node = data[source_id]
-    for prop in source:
-        if prop != "parentId" and source != "id":
-            source_node[prop] = source[prop] 
-    target_node = data[target_id]
-
-    # Find the current parent of the source node and remove the source from its children
-    current_parent_id = source_node['parentId']
-    if current_parent_id != "null" and current_parent_id in data:
-        current_parent = data[current_parent_id]
-        if 'children' in current_parent and source_id in current_parent['children']:
-            current_parent['children'].remove(source_id)
-
-    # Update the source node's parent_id to the target node's ID
-    source_node['parentId'] = target_id
+    old_source_node = data[source_id]
     
-    # Add the source node to the target node's children list
-    if 'children' in target_node:
-        target_node['children'].append(source_id)
+
+    ## make a root
+    if target_id in [None, ""]:
+        old_parent_id = old_source_node.get("parentId")
+        old_parent_node = data[old_parent_id]
+        if "children" in old_parent_node:
+            old_parent_node.get("children").remove(source_id)
+
+        source_node["parentId"] = None
+        data[source_id] = source_node
+        
     else:
-        target_node['children'] = [source_id]
+        old_parent_id = old_source_node.get("parentId")
+        if old_parent_id is None:
+            pass
+        else:
+            if old_parent_id in data:
+                old_parent_node = data[old_parent_id]
+                if 'children' in old_parent_node and source_id in old_parent_node['children']:
+                    old_parent_node['children'].remove(source_id)
+
+        target_node = data[target_id]
+        if 'children' in target_node:
+            target_node['children'].append(source_id)
+        else:
+            target_node['children'] = [source_id]
+        
+        source_node['parentId'] = target_id
+        data[source_id] = source_node
+
 
     return {
             "data" : data,
