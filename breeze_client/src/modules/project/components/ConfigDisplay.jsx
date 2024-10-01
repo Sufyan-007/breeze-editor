@@ -6,7 +6,7 @@ function ConfigDisplay({ configType }) {
     switch (configType) {
       case 'ROUTING':
         return <RoutingConfig />;
-      case 'third-party':
+      case 'CUSTOM_UPLOAD':
         return <>Third party Config Screen</>;
       case 'SERVICE-CONFIG':
         return <ServiceConfiguration />;

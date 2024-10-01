@@ -7,9 +7,9 @@ import {
   CustomButtonField,
 } from '../../../common/fields';
 import PropTypes from 'prop-types';
-import { availableElements, availableRoutes, initialRoutingConfig } from '../constants/RoutingConstants';
+import { availableRoutes, initialRoutingConfig } from '../constants/RoutingConstants';
 
-function RoutingConfigForm({ onSubmit, initialData }) {
+function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
   const [formData, setFormData] = useState(initialData);
   const [basicDetailsOpen, setBasicDetailsOpen] = useState(true);
   const [advancedDetailsOpen, setAdvancedDetailsOpen] = useState(false);
@@ -37,7 +37,6 @@ function RoutingConfigForm({ onSubmit, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Route Form Data:', formData);
     onSubmit(formData);
     setFormData(initialRoutingConfig);
   };
@@ -78,7 +77,7 @@ function RoutingConfigForm({ onSubmit, initialData }) {
               name="element"
               value={formData.element}
               onChange={(value) => handleChange('element', value)}
-              options={availableElements}
+              options={availableComponents}
               config={{ label: 'Element', groupClass: 'form-group mb-2' }}
             />
 
@@ -144,7 +143,7 @@ function RoutingConfigForm({ onSubmit, initialData }) {
               name="errorElement"
               value={formData.errorElement}
               onChange={(value) => handleChange('errorElement', value)}
-              options={availableElements}
+              options={availableComponents}
               config={{
                 label: 'Error Element',
                 groupClass: 'form-group mb-2',
@@ -185,6 +184,7 @@ function RoutingConfigForm({ onSubmit, initialData }) {
 RoutingConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   initialData: PropTypes.object,
+  availableComponents: PropTypes.array,
 };
 
 export default RoutingConfigForm;
