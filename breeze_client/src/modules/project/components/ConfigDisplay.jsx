@@ -1,17 +1,15 @@
 import PropTypes from 'prop-types';
 import RoutingConfig from '../../routing/pages/RoutingConfig';
-import CustomZipPackage from '../../custom_uploads/pages/CustomZipPackage'
-
+import ServiceConfiguration from '../../service-configuration/pages/ServiceConfiguration';
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {
     switch (configType) {
       case 'ROUTING':
         return <RoutingConfig />;
-      case 'CUSTOMUPLOAD':
-        return <CustomZipPackage/>;
-    
-      case 'services':
-        return <>Services Config Screen</>;
+      case 'CUSTOM_UPLOAD':
+        return <>Third party Config Screen</>;
+      case 'SERVICE-CONFIG':
+        return <ServiceConfiguration />;
       default:
         return <div>Select a configuration type</div>;
     }

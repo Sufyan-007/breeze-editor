@@ -16,7 +16,7 @@ def get_all(request):
     return JsonResponse(projects, status=200)
 
 @csrf_exempt
-def get_a_project(request, param):
+def get_a_project(request, project_id):
     return ""
 
 @csrf_exempt
@@ -50,10 +50,8 @@ def add(request):
         
 
 @csrf_exempt
-def delete(request, param):
-    # for the time being param will be project_name instead of ID
-    project_name = param
-    app_config_dir = f"{CONFIG_PATH}/{project_name}"
+def delete(request, project_id):
+    app_config_dir = f"{CONFIG_PATH}/{project_id}"
     try:
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         generated_project_path = app_config['path']
@@ -65,4 +63,5 @@ def delete(request, param):
     except Exception as e:
         print("error occured: ", e)
         return JsonResponse({"message": "Failed to delete the project"}, status=500)
-    return JsonResponse({"message": f"{project_name} deleted successfully"}, status=200)
+    # here parent_id is parent name itself 
+    return JsonResponse({"message": f"{project_id} deleted successfully"}, status=200)

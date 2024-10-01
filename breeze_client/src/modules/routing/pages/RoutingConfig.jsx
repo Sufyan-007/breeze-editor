@@ -1,22 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RoutingConfigForm from '../components/RoutingConfigForm';
 import '../styles/styles.css';
-import {
-  availableElements,
-  initialRoutingConfig,
-  routerProviderData,
-  routingTreeData,
-} from '../constants/RoutingConstants';
+import { initialRoutingConfig, routerProviderData, routingTreeData } from '../constants/RoutingConstants';
 import { BreezeTree } from '../../../common/display';
 import { CustomButtonField, CustomTextInput } from '../../../common/fields';
 import RouterProviderForm from '../components/RouterProviderForm';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { fetchComponents } from '../../../redux/components/componentActions';
 
 function RoutingConfig() {
+  const dispatch = useDispatch();
+  const { projectName } = useParams();
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isNewRoute, setIsNewRoute] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showRouterProviderForm, setShowRouterProviderForm] = useState(false);
+  const { components } = useSelector((state) => state.component);
+
+  useEffect(() => {
+    dispatch(fetchComponents({ projectName }));
+  }, [dispatch, projectName]);
+
+  const transformedComponents = components?.data
+    ? Object.entries(components.data).map(([key, value]) => ({
+        label: value,
+        value: key,
+      }))
+    : [];
 
   const handleNodeClick = (route) => {
     setShowRouterProviderForm(false);
@@ -109,7 +121,11 @@ function RoutingConfig() {
 
           {isEditing || isNewRoute ? (
             <div className="">
-              <RoutingConfigForm onSubmit={handleFormSubmit} initialData={selectedRoute} />
+              <RoutingConfigForm
+                onSubmit={handleFormSubmit}
+                initialData={selectedRoute}
+                availableComponents={transformedComponents}
+              />
             </div>
           ) : (
             <p className="br-text-primary">Select a route from the tree or click Add Route to create a new route.</p>
@@ -119,7 +135,7 @@ function RoutingConfig() {
             <div className="mb-4">
               <RouterProviderForm
                 initialData={routerProviderData}
-                availableComponents={availableElements}
+                availableComponents={transformedComponents}
                 onSubmit={handleRouterProviderSubmit}
               />
             </div>

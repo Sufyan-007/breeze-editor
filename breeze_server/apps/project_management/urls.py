@@ -9,9 +9,9 @@ from .views.custom_uploads import delete_custom_package
 
 urlpatterns = [
     path('get-all/', proj_apis.get_all, name='get_all_project'),
-    path('get/<str:param>/', proj_apis.get_a_project, name='get_a_project'),
+    path('get/<str:project_id>/', proj_apis.get_a_project, name='get_a_project'),
     path('add/', proj_apis.add, name='add_project'),
-    path('delete/<str:param>/', proj_apis.delete, name='delete_project'),
+    path('delete/<str:project_id>/', proj_apis.delete, name='delete_project'),
     # post request
     path('query_resource/<str:param>/', que_re.manage_resource)
     #custom uplaods
