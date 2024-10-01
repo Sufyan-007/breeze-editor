@@ -53,7 +53,7 @@ def modify_function_config(request,operation,project_id):
     api_type = data.get("api_type")
     api_data = data.get("api_data")
     if api_type.lower() == "auth":
-        result = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id)
+        result = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id,operation=operation)
     else:
         result = process_api_data(operation,api_data, filename,project_id,module_id)
     if result:
@@ -61,7 +61,8 @@ def modify_function_config(request,operation,project_id):
     else:
         return JsonResponse({"message": result }, status=201)
     
-
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def transfer_to_auth (request,project_id):
     data = json.loads(request.body.decode("utf-8"))
     filename = data.get("filename")
@@ -72,5 +73,60 @@ def transfer_to_auth (request,project_id):
     result = transfer_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
     return JsonResponse(result)
     
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def edit_module_title(request, project_id):
+        data = json.loads(request.body)
+        new_title = data.get("title")
+        module_id = data.get("moduleId")
+        file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
+        if not os.path.exists(file_path):
+            return JsonResponse({"message": "Module not found"}, status=404)
+        with open(file_path, "r") as file:
+            swagger_metadata = json.load(file)
+        if module_id not in swagger_metadata:
+            return JsonResponse({"message": "Module not found"}, status=404)
+        for id, value in swagger_metadata.items():
+            if value["title"] == new_title:
+                return JsonResponse({"message": "Module name should be unique"}, status=404)
+        module_data = swagger_metadata[module_id]
+        module_data["title"] = new_title
+        swagger_metadata[module_id] = module_data
+        with open(file_path, "w") as file:
+            json.dump(swagger_metadata, file, indent=4)
+        return JsonResponse({"message": "Module name edited Successfully"}, status=404)
+    
+    
+    
+def get_response_token( request, project_id,apiId, moduleId):
+        try:
+            file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
+            if not os.path.exists(file_path):
+                return JsonResponse({"error": "File not found"}, status=404)
 
+            result = {}
+            with open(file_path, "r") as file:
+                file_content = json.load(file)
+                result = None
+                auth_apis = file_content.get(moduleId).get("auth_apis",{})
+                if apiId == 'null':
+                    result = []
+                    for key, api in auth_apis.items():
+                        response_tokens = ''
+                        for res in api.get("response", []):
+                            if res:
+                                if res.get("status") == 'S_200':
+                                    response_tokens = res.get("token_store")
+                        result.append({
+                            "id" : key,
+                            "operation_id" : api.get("operation_id"),
+                            "response_tokens": response_tokens,
+                        })
+                else:
+                    result = auth_apis.get(apiId)
+                    
+            return JsonResponse({"data": result}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
 

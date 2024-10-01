@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 
 function CustomCheckBoxField({ name, onChange, value, config, className, ...rest }) {
   return (
-    <div className={config.groupClass || 'form-check'}>
-      {config.label && (
+    <div className={config ? config.groupClass : 'form-check'}>
+      {config && config.label && (
         <label className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>{config.label}</label>
       )}
       <input

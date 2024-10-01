@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import RoutingConfig from '../../routing/pages/RoutingConfig';
-
+import ServiceConfiguration from '../../service-configuration/pages/ServiceConfiguration';
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {
     switch (configType) {
@@ -8,8 +8,8 @@ function ConfigDisplay({ configType }) {
         return <RoutingConfig />;
       case 'third-party':
         return <>Third party Config Screen</>;
-      case 'services':
-        return <>Services Config Screen</>;
+      case 'SERVICE-CONFIG':
+        return <ServiceConfiguration />;
       default:
         return <div>Select a configuration type</div>;
     }
