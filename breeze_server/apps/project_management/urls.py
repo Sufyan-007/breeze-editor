@@ -2,6 +2,7 @@ from django.urls import path
 from .views import handle_general_proj_apis as proj_apis
 from .views import query_resource as que_re
 from .views import swagger_template as swag_temp
+from .views import env_apis as env_manage
 from .communication import consumers
 from .views.custom_uploads import add_custom_package
 from .views.custom_uploads import get_custom_packages
@@ -14,10 +15,13 @@ urlpatterns = [
     path('delete/<str:project_id>/', proj_apis.delete, name='delete_project'),
     # post request
     path('query_resource/<str:param>/', que_re.manage_resource),
-    #custom uplaods
+    path('environment-settings/<str:project_id>/', env_manage.get_env_config),
+    path('set-environment/<str:project_id>/', env_manage.set_env),
+    path('get-metadata/<str:project_id>/', proj_apis.get_proj_metadata),
     path('custom-package-upload/<str:projectName>', add_custom_package),
     path('custom-package/<str:projectName>', get_custom_packages),
     path('custom-package-delete/<str:projectName>', delete_custom_package),
+    
 ]
 
 
