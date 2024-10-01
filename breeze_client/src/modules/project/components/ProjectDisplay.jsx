@@ -9,6 +9,8 @@ function ProjectDisplay() {
   const { selectedNode } = useTreeContext();
 
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
+  // const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
+  // const item = selectedNode.id === 7 ? { type: 'third-party' } : { type: 'component' }; // TO DO : Dynamic after api integration
 
   const availableTabs = getAvailableTabs(selectedNode?.tag);
 

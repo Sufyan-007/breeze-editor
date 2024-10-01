@@ -26,6 +26,8 @@ from .core.app_generator import AppGenerator
 from .core.helpers.schema_mapper import get_schema_mapping
 from .core.environment_settings_config_service import EnvironmentSettingsConfigService 
 from .core.custom_package_service import CustomPackageService
+from common.consts.consts import PORT
+
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
     def post(self, request, projectName):
@@ -46,12 +48,12 @@ class AddPackage(APIView):
             app_editor.add_package_to_dependencies(package_name, package_version)
         
             #external Api call 
-            api_url = "http://127.0.0.1:4000/"
+            api_url = f"http://127.0.0.1:{PORT}/custom"
             payload = {
                 "fileName":package_name,
                 "fileVersion":package_version
             }
-            trigger_api(api_url, payload)
+            self.trigger_api(api_url, payload)
 
             return JsonResponse({'message': 'Package added successfully'}, status=200)
         except Exception as e:
@@ -924,55 +926,90 @@ class SetEnvironment(APIView):
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': 'Server error'}, status=500)
-        
+
 class CustomPackage(APIView):
-    def post(self,request, projectName):
+    def post(self, request, projectName):
         try:
             file = request.FILES.get('file')
-            print(file,"file")
             fileName = request.POST.get("filename")
-            print(fileName,"fileName")
+
             if not file:
                 return JsonResponse({'error': 'No file provided.'}, status=400)
+                        
+            if fileName.endswith('.zip'):
+                fileName = fileName.replace('.zip', '')
             
-            CustomPackageService.upload_file(file,fileName, projectName)
+            # Create an instance of CustomPackageService with the project name
+            custom_service = CustomPackageService(projectName)    
+            
+            # Check if the folder already exists in extracted_zip_folders
+            if custom_service.check_existing_folder(fileName):
+                return JsonResponse({'error': 'A folder with this name already exists.'}, status=400)
+                    
+            custom_service.upload_file(file, fileName)
+            
+            #after the file is uploaded , call the express API
+            api_url = f"http://127.0.0.1:{PORT}/custom"
+            payload = {
+                "projName":projectName, 
+                "fileName":fileName
+            }
+            self.trigger_api(api_url, payload)
+
             return JsonResponse({
-                'message':'File uploaded successfully',
+                'message': 'File uploaded successfully',
             }, status=200)
         except Exception as e:
-            return JsonResponse({'error':str(e)},status=500)
-            
-    def get(self,request,  projectName):
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def get(self, request, projectName):
         try:
             if not projectName:
                 return JsonResponse({'error': 'Project name is required.'}, status=400)
 
-            else:
-                print("inside else")
-                # Retrieve all custom packages for the project
-                zip_files_info = CustomPackageService.get_zip_files(projectName)
+            # Create an instance of CustomPackageService with the project name
+            custom_service = CustomPackageService(projectName)
 
-                return JsonResponse(zip_files_info, status=200)
+            # Retrieve all custom packages for the project
+            zip_files_info = custom_service.get_zip_files()
+
+            return JsonResponse(zip_files_info, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
     def delete(self, request, projectName):
         try:
-            data= json.loads(request.body)
+            data = json.loads(request.body)
             fileName = data.get("fileName")
             
             if not projectName:
-                return JsonResponse({'error':'project name required'}, status=400)
-            
+                return JsonResponse({'error': 'Project name is required'}, status=400)
+
             if not fileName:
-                return JsonResponse({'error':'file name is required'},status= 400)
-            
-            custom_service = CustomPackageService()
-            custom_service.delete_file(fileName,projectName)
-            
+                return JsonResponse({'error': 'File name is required'}, status=400)
+
+            # Create an instance of CustomPackageService with the project name
+            custom_service = CustomPackageService(projectName)
+            custom_service.delete_file(fileName)
+
             return JsonResponse({
-                'message':"File deleted successfully"
+                'message': "File deleted successfully"
             }, status=200)
         except Exception as e:
-            return JsonResponse({'error':str(e)}, status=500)
-            
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def call_external_api_async(self,api_url, payload):
+        print("starting api call in background")
+        try:
+            response = requests.post(api_url, json=payload)
+            if response.status_code == 200:
+                print("external api call successful")
+            else:
+                print(f"Failed to call external API: {response.text}")
+        except Exception as e:
+            print(f"Error during external API call: {str(e)}")
+        print("API call finished")
+        
+    def trigger_api(self,api_url, payload):
+        print("Triggering API call in background thread...")
+        threading.Thread(target=self.call_external_api_async,args=(api_url,payload)).start()
