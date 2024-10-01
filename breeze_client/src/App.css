@@ -134,6 +134,10 @@
   cursor: pointer;
 }
 
+.breeze-badge-active {
+  background-color: var(--color-blue) !important;
+  color: var(--color-white) !important;
+}
 
 .br-form-control,
 .br-form-select,

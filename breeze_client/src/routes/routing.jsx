@@ -42,9 +42,9 @@ export const router = createBrowserRouter([
   {
     path: '/all-projects',
     element: (
-      <ProtectedRoute>
-        <AllProjects />
-      </ProtectedRoute>
+      // <ProtectedRoute>
+      <AllProjects />
+      // </ProtectedRoute>
     ),
   },
   {

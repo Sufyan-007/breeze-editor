@@ -24,4 +24,6 @@ CONFIG_PATH = "configurations"
 PROJECT_GENERATION_PATH = "generated_projects"
 
 CLIENT_API="api_client_intermediate_json"
+CUSTOMIZED_PROJ ="customized_proj_config"
+
 APP_CONFIG_PATH = "configurations"
