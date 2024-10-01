@@ -5,7 +5,7 @@ import AuthSettings from './AuthSettings';
 import UrlSettings from './UrlSettings';
 import BodySettings from './BodySettings';
 // import { useParams } from 'react-router';
-import { fetchEnvironmentSettings } from '../services/EnvironmentSettingsService';
+// import { fetchEnvironmentSettings } from '../services/EnvironmentSettingsService';
 
 function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, requestType, moduleId }) {
   const [request, setRequest] = useState(requestData);
@@ -15,16 +15,16 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
   const [envVars, setEnvVars] = useState({});
   // const { projectName } = useParams();
 
-  const getEnvironments = useCallback(async () => {
-    const result = await fetchEnvironmentSettings('creator');
-    if (result && result.config) {
-      setEnvVars(result.config.envVars);
-    }
-  }, []);
+  // const getEnvironments = useCallback(async () => {
+  //   const result = await fetchEnvironmentSettings('creator');
+  //   if (result && result.config) {
+  //     setEnvVars(result.config.envVars);
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    getEnvironments();
-  }, [getEnvironments]);
+  // useEffect(() => {
+  //   getEnvironments();
+  // }, [getEnvironments]);
 
   useEffect(() => {
     if (apiData.is_open_api) {

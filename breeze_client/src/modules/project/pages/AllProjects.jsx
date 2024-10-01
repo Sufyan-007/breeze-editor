@@ -109,7 +109,7 @@ function AllProjects() {
 
   useEffect(() => {
     fetchProjects();
-    ws.current = new WebSocket(`${import.meta.env.VITE_BREEZE_BACKEND_HOST}/ws/project-progress/`);
+    ws.current = new WebSocket(`${import.meta.env.VITE_SOCKET_URL}/ws/project-progress/`);
 
     ws.current.onopen = () => {
       console.log('Connected to WebSocket');
