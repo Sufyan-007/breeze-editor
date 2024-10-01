@@ -20,6 +20,8 @@ import vueLogo from './vue-logo.svg';
 import viteLogo from './vite-logo.svg';
 import routesLogo from './routes-logo.svg';
 import apiClientLogo from './api-client-logo.svg';
+import postmanLogo from './postman.svg';
+import swaggerLogo from './swagger.svg';
 
 export default {
   angularLogo,
@@ -44,4 +46,6 @@ export default {
   viteLogo,
   routesLogo,
   apiClientLogo,
+  swaggerLogo,
+  postmanLogo,
 };
