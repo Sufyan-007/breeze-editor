@@ -7,9 +7,9 @@ function ConfigDisplay({ configType }) {
     switch (configType) {
       case 'ROUTING':
         return <RoutingConfig />;
-      case 'third-party':
+      case 'CUSTOMUPLOAD':
         return <CustomZipPackage/>;
-        // return <>Third party config</>;
+    
       case 'services':
         return <>Services Config Screen</>;
       default:

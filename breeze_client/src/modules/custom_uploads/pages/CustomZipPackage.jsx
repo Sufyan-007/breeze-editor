@@ -15,7 +15,7 @@ function CustomZipPackagePage() {
   const [fileToDelete, setFileToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
-  const projectName = 'testing2';
+  const { projectName } = useParams();
   const [formData, setFormData] = useState({
     filename: '',
     description: '',

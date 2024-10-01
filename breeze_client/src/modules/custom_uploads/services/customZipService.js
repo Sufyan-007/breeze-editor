@@ -3,7 +3,7 @@ const uploadZipFile = async (submitData, projectName) => {
     try {
  
       const response = await fetch(
-        `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/editor/custom-package-upload/${projectName}`,
+        `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package-upload/${projectName}`,
         {
           method: 'POST',
           body: submitData,
@@ -22,7 +22,7 @@ const uploadZipFile = async (submitData, projectName) => {
 const fetchZipFiles = async (projectName) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/editor/custom-package-upload/${projectName}`,
+      `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package/${projectName}`,
       {
         method: 'GET',
         headers: {
@@ -42,7 +42,7 @@ const deleteFile = async (file, projectName) => {
   const fileName = file;
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/editor/custom-package-upload/${projectName}`,
+      `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package-delete/${projectName}`,
       {
         method: 'DELETE',
         headers: {
