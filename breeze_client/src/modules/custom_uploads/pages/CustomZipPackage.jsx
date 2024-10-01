@@ -8,13 +8,13 @@ import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
 import columns from '../constants/TableStructure';
 
 import { fetchZipFilesAction, uploadZipFileAction, deleteZipFileAction } from '../redux/customZipActions';
+import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions';
 
 function CustomZipPackagePage() {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
   const { projectName } = useParams();
   const [formData, setFormData] = useState({
     filename: '',
@@ -33,11 +33,11 @@ function CustomZipPackagePage() {
   }, [dispatch, projectName]);
 
   if (status === 'loading') {
-    return <div>Loading...</div>;
+    return ;
   }
 
   if (status === 'failed') {
-    return <div>Error: {error}</div>;
+    return;
   }
   const actions = (item) => (
     <i
@@ -52,11 +52,9 @@ function CustomZipPackagePage() {
   );
 
   const handleDelete = () => {
-    
     if (fileToDelete) {
-      console.log(fileToDelete.fileName, 'file to delete in comp');
       // Dispatch delete action
-      dispatch(deleteZipFileAction({ fileName: fileToDelete.fileName, projectName: projectName })).then(()=>{
+      dispatch(deleteZipFileAction({ fileName: fileToDelete.fileName, projectName: projectName })).then(() => {
         dispatch(fetchZipFilesAction(projectName));
       });
     }
@@ -92,6 +90,7 @@ function CustomZipPackagePage() {
       dispatch(uploadZipFileAction({ formData: submitData, projectName: projectName })).then(() => {
         // Fetch updated list of zip files after successful upload
         dispatch(fetchZipFilesAction(projectName));
+        dispatch(fetchFolderConfig({ id, projectName })).unwrap();
       });
 
       // Reset form and hide modal
@@ -141,8 +140,6 @@ function CustomZipPackagePage() {
 
   const handleFileSelect = (file) => {
     if (file) {
-      
-
       setFormData((prevData) => ({
         ...prevData,
         file,
@@ -186,10 +183,10 @@ function CustomZipPackagePage() {
   const folders = zipFiles?.folders || [];
   const filesData = folders.map((folder) => ({
     fileName: folder.name,
-    lastModified: folder.lastModified
+    lastModified: folder.lastModified,
   }));
 
-  console.log(filesData, 'files data ');
+
 
   return (
     <div>

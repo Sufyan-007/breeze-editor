@@ -13,7 +13,7 @@ urlpatterns = [
     path('add/', proj_apis.add, name='add_project'),
     path('delete/<str:project_id>/', proj_apis.delete, name='delete_project'),
     # post request
-    path('query_resource/<str:param>/', que_re.manage_resource)
+    path('query_resource/<str:param>/', que_re.manage_resource),
     #custom uplaods
     path('custom-package-upload/<str:projectName>', add_custom_package),
     path('custom-package/<str:projectName>', get_custom_packages),

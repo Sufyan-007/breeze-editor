@@ -1,6 +1,6 @@
 {
   "ROOT": {
-    "children": ["SRC", "PACKAGE_CONFIG", "ALL_STYLES_FILE", "INDEX_HTML","CUSTOM_UPLOADS"]
+    "children": ["SRC", "PACKAGE_CONFIG", "ALL_STYLES_FILE", "INDEX_HTML","CUSTOM_UPLOAD"]
   },
   "SRC": {
     "name": "src",
@@ -98,11 +98,12 @@
     "tag": "ALL_STYLES_FILE",
     "type": "FILE"
   },
-  "CUSTOM_UPLOADS": {
-    "name": "custom_uploads",
+  "CUSTOM_UPLOAD": {
+    "name": "custom_upload",
     "parentId": "ROOT",
-    "id":"CUSTOM_UPLOADS",
-    "tag":"CUSTOM_UPLOADS",
+    "id":"CUSTOM_UPLOAD",
+    "children":[],
+    "tag":"CUSTOM_UPLOAD",
     "type":"DIRECTORY"
   }
 }

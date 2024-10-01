@@ -139,11 +139,11 @@ const CustomTable = ({
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
-          <i class="bi bi-chevron-left" style={{'font-size': '12px'}}></i>
+          <i class="bi bi-chevron-left" style={{ 'font-size': '12px' }}></i>
           Previous
         </button>
         <span>
-          Page {currentPage} of {Math.ceil(data?.length || 0 / pageSize)}
+          Page {currentPage} of {Math.ceil((data?.length || 0) / pageSize)}
         </span>
         <button
           className="btn br-text-primary med-font"

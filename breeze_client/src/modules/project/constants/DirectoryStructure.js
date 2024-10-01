@@ -19,9 +19,9 @@ const breezeConfigData = {
     tag: 'SERVICE-CONFIG',
     parentId: null,
   },
-  'resource-config': {
-    id: 'resource-config',
-    name: 'resource-config',
+  'custom-upload': {
+    id: 'custom-upload',
+    name: 'custom-upload',
     extension: '',
     type: 'FILE',
     children: [],
