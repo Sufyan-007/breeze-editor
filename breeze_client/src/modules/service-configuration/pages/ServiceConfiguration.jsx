@@ -14,7 +14,7 @@ import {
   editModuleName,
 } from '../services/IntermediateServices';
 
-function Test() {
+function ServiceConfiguration() {
   const [apiList, setApiList] = useState([]);
   const [selectedApi, setSelectedApi] = useState({});
   const [selectedAuthApi, setSelectedAuthApi] = useState({});
@@ -324,4 +324,4 @@ function Test() {
   );
 }
 
-export default Test;
+export default ServiceConfiguration;
