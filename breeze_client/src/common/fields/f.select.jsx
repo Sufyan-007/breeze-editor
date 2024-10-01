@@ -23,11 +23,12 @@ function CustomSelectField({ config, name, value, onChange, options, className, 
         }
         {...rest}
       >
-        {availableOptions.map((option, index) => (
-          <option key={index} value={option.value} data-source={option.dataSource}>
-            {option.label}
-          </option>
-        ))}
+        {availableOptions &&
+          availableOptions.map((option, index) => (
+            <option key={index} value={option.value} data-source={option.dataSource}>
+              {option.label}
+            </option>
+          ))}
       </select>
     </div>
   );

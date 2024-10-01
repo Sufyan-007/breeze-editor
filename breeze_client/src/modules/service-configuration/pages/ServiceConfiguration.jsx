@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-// import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import ImportApi from '../components/ImportApi';
 import GeneralSettingsCard from '../components/GeneralSettingsCard';
 import RequestSettings from '../components/RequestSettings';
@@ -18,7 +18,7 @@ function ServiceConfiguration() {
   const [apiList, setApiList] = useState([]);
   const [selectedApi, setSelectedApi] = useState({});
   const [selectedAuthApi, setSelectedAuthApi] = useState({});
-  // const { projectName } = useParams();
+  const { projectName } = useParams();
   const [view, setView] = useState('TEST');
   const [selectedFile, setSelectedFile] = useState(null);
   const [show, setShow] = useState(true);
@@ -28,7 +28,7 @@ function ServiceConfiguration() {
   const [transformedOptions, setTransformedOptions] = useState([]);
   const fetchServiceList = useCallback(async () => {
     try {
-      const result = await fetchIntermediates('abcc', { category: 'api_client' });
+      const result = await fetchIntermediates(projectName, { category: 'api_client' });
       const apiList = Object.entries(result.data).map(([key, value]) => ({
         id: key,
         title: value.title,
@@ -43,11 +43,11 @@ function ServiceConfiguration() {
     } catch (error) {
       console.error('Error generating react service:', error);
     }
-  }, []);
+  }, [projectName]);
 
   const generateServiceFile = async (fileType, filename, moduleId) => {
     try {
-      const result = await generateService(fileType, 'abcc', { filename, moduleId });
+      const result = await generateService(fileType, projectName, { filename, moduleId });
       console.log(result, 'result');
     } catch (error) {
       console.error('Error generate react service:', error);
@@ -74,7 +74,7 @@ function ServiceConfiguration() {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await convertSwagger('abcc', fileType, formData);
+      const response = await convertSwagger(projectName, fileType, formData);
       if (response.files_with_apis) {
         fetchServiceList();
         setShow(false);
@@ -105,13 +105,13 @@ function ServiceConfiguration() {
     let operation = selectedApiModel.id ? 'UPDATE' : 'ADD';
     if (isAuthApi) {
       selectedApiModel.tags = 'auth';
-      await editFunctionConfig('abcc', operation, {
+      await editFunctionConfig(projectName, operation, {
         moduleId: selectedModule.id,
         api_type: 'AUTH',
         api_data: selectedApiModel,
       });
     } else {
-      await editFunctionConfig('abcc', operation, {
+      await editFunctionConfig(projectName, operation, {
         moduleId: selectedModule.id,
         api_type: 'ORDINARY',
         api_data: selectedApiModel,
@@ -170,7 +170,7 @@ function ServiceConfiguration() {
 
   const saveTitle = async (oldTitle, moduleId, newTitle) => {
     if (oldTitle !== newTitle) {
-      const result = await editModuleName('abcc', { title: newTitle, moduleId: moduleId });
+      const result = await editModuleName(projectName, { title: newTitle, moduleId: moduleId });
       if (result.message) {
         setShowToast(true);
         setErrorMessage(result.message);

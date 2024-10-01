@@ -1,16 +1,16 @@
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
-// import { useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { CustomSelectField } from '../../../common/fields';
 import { getResponseTokens } from '../services/IntermediateServices';
 
 function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
   const [auth, setAuth] = useState(authData ? (authData[0] ? authData[0] : {}) : {});
   const [loginApis, setLoginApis] = useState([]);
-  // const { projectName } = useParams();
+  const { projectName } = useParams();
 
   const setAuthApis = useCallback(async (moduleId) => {
-    const result = await getResponseTokens('abcc', moduleId, null);
+    const result = await getResponseTokens(projectName, moduleId, null);
     let login_api = [];
     for (let api of result.data) {
       if (api.response_tokens) {

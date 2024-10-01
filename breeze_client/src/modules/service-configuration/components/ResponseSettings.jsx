@@ -388,10 +388,13 @@ function ResponseForm({ label, value, onChange, options }) {
         config={{ label: label, groupClass: 'form-group mb-2 mx-2 w-50' }}
         value={value}
         onChange={onChange}
-        options={options.map((option) => ({
-          value: option.id ? option.id : option,
-          label: option.name ? option.name : option,
-        }))}
+        options={
+          options &&
+          options.map((option) => ({
+            value: option.id ? option.id : option,
+            label: option.name ? option.name : option,
+          }))
+        }
       />
     </div>
   );
