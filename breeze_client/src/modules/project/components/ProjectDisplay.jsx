@@ -1,19 +1,19 @@
 import TopBar from './TopBar';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ConfigDisplay from './ConfigDisplay';
 import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
-import PropTypes from 'prop-types';
+import { useTreeContext } from '../context/TreeContext';
 
-function ProjectDisplay({ selectedNode }) {
+function ProjectDisplay() {
+  const { selectedNode } = useTreeContext();
+
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
-  useEffect(() => {
-    console.log(selectedNode);
-  }, [selectedNode]);
+  console.log(selectedNode);
 
   return (
     <>
@@ -33,7 +33,7 @@ function ProjectDisplay({ selectedNode }) {
             </div>
           )}
 
-          {selectedNode.tag === 'COMPONENT'
+          {selectedNode.tag === 'COMPONENTS'
             ? activeTab === 'preview' && (
                 <div
                   className="tab-pane fade show active"
@@ -69,9 +69,5 @@ function ProjectDisplay({ selectedNode }) {
     </>
   );
 }
-
-ProjectDisplay.propTypes = {
-  selectedNode: PropTypes.object,
-};
 
 export default ProjectDisplay;

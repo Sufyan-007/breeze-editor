@@ -23,14 +23,9 @@
   color: var(--badge-text-color);
 }
 
-.home-badge-active {
-  background-color: #006EB9;
-  color: #fff;
-}
-
 .home-custom-form .home-form-box .form-control {
   background-color: transparent !important;
-  color: #A5A5A4;
+  color: var(--color-text);
   border: solid 1px rgba(165, 165, 164, 0.5);
 }
 .home-block {

@@ -1,5 +1,5 @@
 import BreezeModal from '../display/modal/BreezeModal';
-import BreezeTreeView from '../display/tree_view/BreezeTreeView';
+import BreezeTreeView from '../../modules/project/components/projectDirectory/BreezeTreeView';
 import BreezeOffcanvas from '../display/offcanvas/BreezeOffcanvas';
 import BreezeList from '../display/list/BreezeList';
 import BreezeLoader from './loader/BreezeLoader';
