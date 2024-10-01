@@ -11,14 +11,6 @@ def generate_layout_route_key():
     # Generate a unique key for layout routes
     return f"/layout__{''.join(random.choices(string.ascii_lowercase + string.digits, k=9))}__"
 
-def include_all_routes_accessory_data(project_name, nodes):
-    app_config_dir = f"{CONFIG_PATH}/{project_name}"
-    comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
-    
-    for route_obj in nodes:
-        route_obj['componentName'] = comp_config_index[route_obj['componentId']]
-    return nodes
-
 def process_route_config(project_name, routing_config={}):
     # print("This function runs after returning a 200 response.")
     try:
@@ -37,6 +29,7 @@ def process_route_config(project_name, routing_config={}):
         print("Error while processing and saving config file.")
         print("Error: ", e)
         raise e
+
            
 def get_filtered_object(data, exclude_keys):
     return {key: value for key, value in data.items() if key not in exclude_keys}
