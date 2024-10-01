@@ -20,9 +20,20 @@ def get_a_project(request, project_id):
     return ""
 
 @csrf_exempt
+@api_view(['GET'])
+def get_proj_metadata(request, project_id):
+    try:
+        app_config_dir = f"{CONFIG_PATH}/{project_id}"
+        app_config = read_project_config_file(
+            app_config_dir, CONFIG_FILES_PATH['APP_CONFIG']
+        )
+        return JsonResponse(app_config, status=200)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=500)
+    
+@csrf_exempt
 @api_view(['POST'])
 def add(request):
-    
     try:
         ## 1) Load proj data from UI
         ## 2) Validate proj data
@@ -50,6 +61,7 @@ def add(request):
         
 
 @csrf_exempt
+@api_view(['DELETE'])
 def delete(request, project_id):
     app_config_dir = f"{CONFIG_PATH}/{project_id}"
     try:

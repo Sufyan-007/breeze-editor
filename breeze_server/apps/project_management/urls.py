@@ -2,6 +2,7 @@ from django.urls import path
 from .views import handle_general_proj_apis as proj_apis
 from .views import query_resource as que_re
 from .views import swagger_template as swag_temp
+from .views import env_apis as env_manage
 from .communication import consumers
 
 
@@ -11,7 +12,11 @@ urlpatterns = [
     path('add/', proj_apis.add, name='add_project'),
     path('delete/<str:project_id>/', proj_apis.delete, name='delete_project'),
     # post request
-    path('query_resource/<str:param>/', que_re.manage_resource)
+    path('query_resource/<str:param>/', que_re.manage_resource),
+    path('environment-settings/<str:project_id>/', env_manage.get_env_config),
+    path('set-environment/<str:project_id>/', env_manage.set_env),
+    path('get-metadata/<str:project_id>/', proj_apis.get_proj_metadata),
+    
 ]
 
 
