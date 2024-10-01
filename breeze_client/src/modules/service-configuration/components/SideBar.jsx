@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { CustomTextInput } from '../../../common/fields';
 import { fetchIntermediates } from '../services/IntermediateServices';
 import PropTypes from 'prop-types';
+import { useParams } from 'react-router-dom';
 function SideBar({
   apiList,
   setView,
@@ -12,6 +13,7 @@ function SideBar({
   setSelectedAuthApi,
   generateService,
 }) {
+  const { projectName } = useParams();
   const [expandedModules, setExpandedModules] = useState([]);
   const [editingModule, setEditingModule] = useState(null);
   const [newModuleTitle, setNewModuleTitle] = useState('');
@@ -47,7 +49,7 @@ function SideBar({
 
   const fetchFilesAndFunctions = useCallback(async (payload, isAuth = null, selectedModule = null) => {
     try {
-      const result = await fetchIntermediates('abcc', payload);
+      const result = await fetchIntermediates(projectName, payload);
       if (isAuth) {
         const authApis = Object.entries(result.data)
           .filter(([key, value]) => key === selectedModule)
