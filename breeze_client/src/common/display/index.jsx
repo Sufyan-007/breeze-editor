@@ -1,8 +1,9 @@
 import BreezeModal from '../display/modal/BreezeModal';
-import BreezeTreeView from '../display/tree_view/BreezeTreeView';
+import BreezeTreeView from '../../modules/project/components/projectDirectory/BreezeTreeView';
 import BreezeOffcanvas from '../display/offcanvas/BreezeOffcanvas';
 import BreezeList from '../display/list/BreezeList';
 import BreezeLoader from './loader/BreezeLoader';
-import BreezeContextMenu from "./context-menu/BreezeContextMenu";
+import BreezeContextMenu from './context-menu/BreezeContextMenu';
+import BreezeTree from './tree/BreezeTree';
 
-export { BreezeTreeView, BreezeModal, BreezeOffcanvas, BreezeList, BreezeContextMenu , BreezeLoader };
+export { BreezeTreeView, BreezeModal, BreezeOffcanvas, BreezeList, BreezeContextMenu, BreezeLoader, BreezeTree };

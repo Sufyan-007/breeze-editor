@@ -2,10 +2,10 @@ import json
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-import threading
-from ..core.route_config_editor import config_editor
-from ..core.route_config_editor import process_and_save_route_config
-from apps.common.utils.tree_management import get_node,get_all_path_of_node
+from ..core.route_config_editor import update_route_in_config,check_for_mandatory_route_props,validate_route_path
+from ..core.route_config_editor import process_route_config, delete_route as del_route, transform_route_config, rewrite_clean_route_config
+from django.http import JsonResponse
+from apps.common.utils.tree_management import get_node,get_all_path_of_node,add_node
 from apps.common.constants.enums.tree_type import TreeType
 
 
@@ -20,7 +20,7 @@ def get_routes(request,project_id):
 @api_view(['GET'])
 def get_all_routes_fullpath(request,project_id):
     target_id = request.GET.get('target_id', None)
-    nodes = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id)
+    nodes = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id,'path')
     data = {
         "nodes" : nodes
     }
@@ -28,42 +28,47 @@ def get_all_routes_fullpath(request,project_id):
     return JsonResponse(data, status=200)
 
 
-
-
 @csrf_exempt
 @api_view(['POST'])
-def add_update_route(request, param):
+def add_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
-    project_name = param
     try:
-        initialize, add_edit_base_route, add_edit_route = config_editor()
-        initialize(project_name)
-        if data.get('addCompRoute'):
-            res = add_edit_base_route(data)
-        else:
-            res = add_edit_route(data)
-        if res['case']:
-            threading.Thread(target=process_and_save_route_config, args=(project_name, )).start()
-            return JsonResponse(res['res'], status=200)
-        else:
-            return JsonResponse(res['res'], status=400, safe=False)
+        check_for_mandatory_route_props(route_obj=data)
+        if validate_route_path(data,data.get("parentId"), project_id) is True:    
+            config_data = add_node(project_id,TreeType["ROUTES"],data.get("parentId"),data)
+            # create clean and properly formatted config for code generation
+            transform_route_config(config_data)
+            # now it isn't useful since we won't have a full path as a key
+            # add_params_to_route_object()
+            rewrite_clean_route_config(project_id, config_data)
+            process_route_config(project_id)
+            return JsonResponse(data, status=200)
+    except Exception as e:
+        print("Error ", e)
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@api_view(['PUT'])
+def update_route(request, project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    try:
+        check_for_mandatory_route_props(route_obj=data)
+        res = update_route_in_config(data, project_id)
+        process_route_config(project_id, res['config'])
+        return JsonResponse(res, status=200)
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
     
 @csrf_exempt
-def delete_route(request, param):
+@api_view(['DELETE'])
+def delete_route(request, project_id):
     try:
         data = json.loads(request.body.decode("utf-8"))
-        initialize, delete_route = config_editor()
-        initialize(project_name=param)
-        res = delete_route(data)
-        if res['case']:
-            threading.Thread(target=process_and_save_route_config, args=(res['res'], )).start()
-            return JsonResponse(res['res'], status=200)
-        else:
-            return JsonResponse(res['res'], status=400, safe=False)
+        res = del_route(data.get('id'), project_id)
+        process_route_config(project_id, res['config'])
+        return JsonResponse(res, status=200)
     except Exception as e:
         print("Error ", e)
-        return JsonResponse(e, status=500)  
+        return JsonResponse({'error': str(e)}, status=500)
 

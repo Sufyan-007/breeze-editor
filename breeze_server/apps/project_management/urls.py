@@ -7,13 +7,11 @@ from .communication import consumers
 
 urlpatterns = [
     path('get-all/', proj_apis.get_all, name='get_all_project'),
-    path('add-dummny/', swag_temp.add, name='add-dummy_project'),
     path('get/<str:param>/', proj_apis.get_a_project, name='get_a_project'),
     path('add/', proj_apis.add, name='add_project'),
     path('delete/<str:param>/', proj_apis.delete, name='delete_project'),
     # post request
-    path('query_resource/<str:param>/', que_re.manage_resource),
-    path('ws/yourpath/', consumers.EchoConsumer.as_asgi()),
+    path('query_resource/<str:param>/', que_re.manage_resource)
 ]
 
 

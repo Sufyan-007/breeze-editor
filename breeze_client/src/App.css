@@ -108,6 +108,12 @@
   margin-right: 0.625rem;
   display: flex;
   align-items: center;
+  cursor: pointer;
+}
+
+.breeze-badge-active {
+  background-color: var(--color-blue) !important;
+  color: var(--color-white) !important;
 }
 
 .br-form-control,

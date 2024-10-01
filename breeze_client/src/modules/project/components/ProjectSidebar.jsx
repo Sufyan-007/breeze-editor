@@ -1,167 +1,154 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BreezeTreeView } from '../../../common/display';
-import treeData from '../constants/DirectoryStructure';
 import '../styles/ProjectSidebar.css';
 import logos from '../../../assets/svgs/index';
-import DropdownMenu from './DropdownMenu';
-import PropTypes from 'prop-types';
+import { useTreeContext } from '../context/TreeContext';
+import CustomContextMenu from '../../../common/display/context-menu/BreezeContextMenu';
+import { addFileOptions } from '../constants/contextMenuOptions';
+import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
-function ProjectSidebar({ setSelectedNode }) {
-  const [treedata, setTreeData] = useState(treeData);
+function ProjectSidebar() {
+  const { directoryConfig } = useSelector((state) => state.directory);
   const [draggedNode, setDraggedNode] = useState(null);
   const [expandedNodes, setExpandedNodes] = useState({});
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [show, setShow] = useState(true);
+  const contextMenuRef = useRef(null);
 
-  const toggleSidebar = () => {
-    setShow(!show);
-  };
+  const { selectedNodeId, setSelectedNode, setSelectedNodeId } = useTreeContext();
+  const { projectName } = useParams();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const id = 'ROOT';
+    dispatch(fetchFolderConfig({ id, projectName })).unwrap();
+  }, [dispatch]);
 
-  const options = [
-    { label: 'Components', icon: <img src={logos.componentsLogo} alt="Components" /> },
-    { label: 'Services', icon: <img src={logos.servicesLogo} alt="Services" /> },
-    { label: 'Routes', icon: <img src={logos.routesLogo} alt="Routes" /> },
-    { label: 'ApiClients', icon: <i className="bi bi-file-earmark-code" /> },
-  ];
-
-  const toggleNode = (nodeId) => {
-    setExpandedNodes((prevExpandedNodes) => ({
-      ...prevExpandedNodes,
-      [nodeId]: !prevExpandedNodes[nodeId],
+  const toggleNode = async (nodeId) => {
+    const isNodeExpanded = expandedNodes[nodeId];
+    const node = directoryConfig[nodeId];
+    const children = node?.children || [];
+    const areAllChildrenLoaded = children.every((childId) => directoryConfig[childId]);
+    if (!isNodeExpanded && !areAllChildrenLoaded) {
+      try {
+        await dispatch(fetchFolderConfig({ id: nodeId, projectName })).unwrap();
+      } catch (error) {
+        console.error('Error fetching children for node:', nodeId, error);
+      }
+    }
+    setExpandedNodes((prev) => ({
+      ...prev,
+      [nodeId]: !isNodeExpanded,
     }));
   };
 
+  // const updateNodeState = (nodeId, updatedData) => {
+  //   setTreeData((prev) => {
+  //     const updatedChildren = updatedData[nodeId]?.children || [];
+  //     const newChildren = updatedChildren.reduce((acc, childId) => {
+  //       if (updatedData[childId]) {
+  //         acc[childId] = updatedData[childId];
+  //       }
+  //       return acc;
+  //     }, {});
+
+  //     return {
+  //       ...prev,
+  //       [nodeId]: {
+  //         ...prev[nodeId],
+  //         ...updatedData[nodeId],
+  //         children: updatedChildren,
+  //       },
+  //       ...newChildren,
+  //     };
+  //   });
+  // };
+
   const handleNodeClick = (nodeId) => {
-    const selectedNode = findSelectedNode(treedata, nodeId);
+    const selectedNode = directoryConfig[nodeId];
     setSelectedNodeId(nodeId);
     setSelectedNode(selectedNode);
   };
 
-  const handleAddButtonClick = () => {
-    const selectedNode = findSelectedNode(treeData, selectedNodeId);
-
-    if (selectedNode?.type === 'DIRECTORY') {
-      setDropdownVisible((prev) => !prev);
-    } else {
-      setDropdownVisible(false);
-    }
-  };
-
-  const findSelectedNode = (nodes, nodeId) => {
-    if (!Array.isArray(nodes)) return null;
-
-    for (const node of nodes) {
-      if (node.id === nodeId) return node;
-
-      if (Array.isArray(node.children)) {
-        // Check if node.children is an array
-        const childNode = findSelectedNode(node.children, nodeId);
-        if (childNode) return childNode;
-      }
-    }
-    return null;
-  };
-
-  const handleDropdownOptionClick = (option) => {
-    if (['Components', 'Services', 'Routes', 'ApiClients'].includes(option)) {
-      addNodeToTree({ type: 'FILE', parentId: selectedNodeId });
-      setDropdownVisible(false);
-    }
+  const handleContextMenuSelection = () => {
+    addNodeToTree({ type: 'FILE', parentId: selectedNodeId });
   };
 
   const addNodeToTree = ({ type, parentId }) => {
-    setTreeData((prevTreeData) => [
-      ...prevTreeData,
-      {
-        id: Date.now().toString(),
-        name: '',
-        tempName: '',
-        isEditing: true,
-        isNew: true,
-        type,
-        parentId,
-        children: [],
-      },
-    ]);
-    setExpandedNodes((prev) => ({
-      ...prev,
-      [parentId]: true,
-    }));
+    // setTreeData((prevTreeData) => [
+    //   ...prevTreeData,
+    //   {
+    //     id: Date.now().toString(),
+    //     name: '',
+    //     tempName: '',
+    //     isEditing: true,
+    //     isNew: true,
+    //     type,
+    //     parentId,
+    //     children: [],
+    //   },
+    // ]);
+    // setExpandedNodes((prev) => ({
+    //   ...prev,
+    //   [parentId]: true,
+    // }));
   };
 
   const handleDragStart = (node) => setDraggedNode(node);
 
   const handleDrop = (destinationNode) => {
-    if (!draggedNode) return;
-
-    setTreeData((prevTreeData) =>
-      prevTreeData.map((node) => {
-        if (node.id === draggedNode.id) {
-          return { ...draggedNode, parentId: destinationNode ? destinationNode.id : null };
-        }
-        return node;
-      })
-    );
-
-    setDraggedNode(null);
+    // if (!draggedNode) return;
+    // const newParentId = destinationNode?.type === 'FILE' ? destinationNode.parentId : destinationNode?.id || null;
+    // setTreeData((prev) => ({
+    //   ...prev,
+    //   [draggedNode.id]: {
+    //     ...draggedNode,
+    //     parentId: newParentId,
+    //   },
+    // }));
+    // setDraggedNode(null);
   };
 
-  const handleRename = (nodeId) => {
-    updateNodeState(nodeId, { isEditing: true, tempName: (node) => node.name });
+  const handleRename = (nodeId, newName) => {
+    // function yet to be discorvered
   };
 
   const handleInputChange = (nodeId, value) => {
-    updateNodeState(nodeId, { tempName: value });
+    // updateNodeState(nodeId, { tempName: value });
   };
 
   const handleInputSubmit = (nodeId) => {
-    updateNodeState(nodeId, { name: (node) => node.tempName, isEditing: false, tempName: '' });
+    // updateNodeState(nodeId, { name: treeData[nodeId].tempName, isEditing: false, tempName: '' });
   };
 
   const handleInputCancel = (nodeId) => {
-    updateNodeState(nodeId, { isEditing: false, tempName: (node) => node.name });
+    // const node = treeData[nodeId];
+    // if (node) {
+    //   if (node.isEditing && !node.name) {
+    //     handleRemoveNode(nodeId);
+    //   } else {
+    //     updateNodeState(nodeId, { isEditing: false, tempName: node.name });
+    //   }
+    // }
   };
 
   const handleRemoveNode = (nodeId) => {
-    setTreeData((prevTreeData) => removeNode(prevTreeData, nodeId));
+    // const parentNode = directoryConfig[directoryConfig[nodeId].parentId];
+    // setTreeData((prevTreeData) => {
+    //   const newTreeData = { ...prevTreeData };
+    //   delete newTreeData[nodeId];
+    //   newTreeData[parentNode.id].children = parentNode.children.filter((id) => id !== nodeId);
+    //   return newTreeData;
+    // });
   };
 
-  const removeNode = (nodes, id) =>
-    nodes.filter((node) => {
-      if (node.id === id) return false;
-      if (node.children) node.children = removeNode(node.children, id);
-      return true;
-    });
+  const toggleSidebar = () => setShow((prev) => !prev);
 
-  const updateNodeState = (nodeId, updates) => {
-    setTreeData((prevTreeData) => {
-      const updateNode = (nodes) =>
-        nodes.map((node) => {
-          if (node.id === nodeId) {
-            return {
-              ...node,
-              ...Object.fromEntries(
-                Object.entries(updates).map(([key, value]) => [key, typeof value === 'function' ? value(node) : value])
-              ),
-            };
-          }
-          if (node.children) {
-            return { ...node, children: updateNode(node.children) };
-          }
-          return node;
-        });
-      return updateNode(prevTreeData);
-    });
-  };
-
-  // Add specific file and folder functions
   const handleAddFile = (parentId) => addNodeToTree({ type: 'FILE', parentId });
   const handleAddFolder = (parentId) => addNodeToTree({ type: 'DIRECTORY', parentId });
 
-  const states = { selectedNodeId };
   const methods = {
-    setSelectedNodeId: handleNodeClick,
+    handleNodeClick,
     handleDragStart,
     handleDrop,
     handleInputChange,
@@ -171,6 +158,7 @@ function ProjectSidebar({ setSelectedNode }) {
     handleRename,
     handleAddFile,
     handleAddFolder,
+    addNodeToTree,
   };
 
   if (!show) {
@@ -195,14 +183,20 @@ function ProjectSidebar({ setSelectedNode }) {
           <div className="sidebar-header d-flex justify-content-between align-items-center">
             <h2 className="mb-0 med-font br-text-primary collapsible">PROJECT</h2>
             <div className="sidebar-action-buttons">
-              <span className="badge breeze-badge collapsible" onClick={handleAddButtonClick}>
+              <span
+                className="badge breeze-badge collapsible"
+                onClick={(e) => {
+                  contextMenuRef.current?.handleEvent(e);
+                }}
+              >
                 <i className="small-font bi bi-plus-circle"></i>
                 <span className="small-font ms-1">Add</span>
               </span>
-              <DropdownMenu
-                dropdownVisible={dropdownVisible}
-                options={options}
-                onOptionClick={handleDropdownOptionClick}
+              <CustomContextMenu
+                ref={contextMenuRef}
+                menuItems={addFileOptions(selectedNodeId, handleContextMenuSelection)}
+                onSelection={handleContextMenuSelection}
+                defaultOrientation={{ right: true, bottom: true }}
               />
               <button
                 className="btn toggle-btn btn-theme br-text-primary p-0"
@@ -224,10 +218,9 @@ function ProjectSidebar({ setSelectedNode }) {
           </form>
           <ul className="sidebar-nav">
             <BreezeTreeView
-              treeDataObject={treedata}
+              treeDataObject={directoryConfig}
               expandedNodes={expandedNodes}
               toggleNode={toggleNode}
-              parentStates={states}
               parentMethods={methods}
             />
           </ul>
@@ -253,9 +246,5 @@ function ProjectSidebar({ setSelectedNode }) {
     </aside>
   );
 }
-
-ProjectSidebar.propTypes = {
-  setSelectedNode: PropTypes.func.isRequired,
-};
 
 export default ProjectSidebar;

@@ -10,10 +10,10 @@ def load_proj_data(proj_data_request):
     data["projectName"] = data["name"]
     # data["selectedTemplate"]= data["selectedTemplate"]
     data["name"] = data['name'].lower().replace(" ", "_")
-    path = data["projectPath"]
+    # path = data["projectPath"]
     data["current_environment"] = ""
     generated_paths = os.path.join(
-        os.path.dirname(os.getcwd()), path)
+        os.path.dirname(os.getcwd()), 'generated_projects')
 
     # os.makedirs(generated_paths,exist_ok=True)
     data["path"] = os.path.join(generated_paths, data["name"])

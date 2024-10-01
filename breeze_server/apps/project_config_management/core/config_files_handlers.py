@@ -1,13 +1,12 @@
 from apps.common.constants.consts import CONFIG_PATH,CLIENT_API
-import json,os
-from apps.common.utils.react_request_code import REQUEST
+import json, os
 from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
 from apps.common.utils.file_helpers.json_handler import read_json_file, write_json_file
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists, create_dir_if_not_exists
 from apps.common.utils.file_helpers.config_handler import write_config_file
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.utils.uuid_as_key import generate_uuid_as_key 
-
+from apps.common.utils.tree_management import replace_node
 
 def add_dirs_configs(data):
     if data["name"] == "":
@@ -58,7 +57,7 @@ def write_basic_main_comp_config(app_config):
         app_config['defaultComponent'] : {
             "name": name,
             "id": _id,
-            "file_id":"DEFAULT_COMP",
+            "file_id":_id,
             "imports": {
                 "components": [
                 ],
@@ -99,27 +98,26 @@ def write_basic_main_comp_config(app_config):
 
 def write_routing_config(app_config):
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
+    default_path_id = generate_uuid_as_key()
     basic_routing_config = {
-        "routes":
-            {
-                "/" : {
-                    "path": "/",
-                    "component_id": f"{app_config['default_comp_id']}"
-                }
-            },
-        "baseRoutes": {
-            "/": {},
+        default_path_id : {
+            "id": default_path_id,
+            "path": "/",
+            "componentId": f"{app_config['default_comp_id']}",
+            "parentId": None
         }
     }
     write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", basic_routing_config)
 
 
 def create_directory_management_file(app_config):
+    template_path = ""
+    template_content = ""
     if app_config.get('languages') =="typescript":
         template_path=TSX_DIRECTORY_CONFIG
     else:
         template_path= JSX_DIRECTORY_CONFIG
-
+    
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Template file {template_path} does not exist")
 
@@ -139,10 +137,12 @@ def update_directory_management_file(app_config):
     directory_management_config = read_json_file(directory_management_path)
     comp_index_file = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
     default_comp_name = comp_index_file[app_config['default_comp_id']] + (".tsx" if app_config.get("language") == "typescript" else ".jsx")
+    main_comp_id = app_config['default_comp_id']
+    template_content = replace_node("DEFAULT_COMP",main_comp_id,directory_management_config)
     
-    directory_management_config["DEFAULT_COMP"]["name"] = default_comp_name
+    template_content[main_comp_id]["name"] = default_comp_name
     
-    write_json_file(f"{directory_management_path}.json", directory_management_config)
+    write_json_file(f"{directory_management_path}.json", template_content)
     
 # expecting enum object and project name i.e. is currently an ID itself
 def create_resource_directory(project_id, resource_category):
