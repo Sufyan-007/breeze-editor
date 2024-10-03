@@ -36,7 +36,7 @@ def add_route(request, project_id):
     try:
         check_for_mandatory_route_props(route_obj=data)
         if validate_route_path(data, data.get("parentId"), project_id) is True:    
-            config_data = add_node(project_id, TreeType["ROUTES"].value, data.get("parentId"), data)
+            config_data,node_id = add_node(project_id, TreeType["ROUTES"].value, data.get("parentId"), data)
             # create clean and properly formatted config for code generation
             transform_route_config(config_data)
             # now it isn't useful since we won't have a full path as a key
@@ -44,7 +44,7 @@ def add_route(request, project_id):
             rewrite_clean_route_config(project_id, config_data)
             process_route_config(project_id)
             include_all_routes_accessory_data(project_id, list(config_data.values()))
-            return JsonResponse(config_data, status=200)
+            return JsonResponse(config_data.get(node_id), status=200)
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
