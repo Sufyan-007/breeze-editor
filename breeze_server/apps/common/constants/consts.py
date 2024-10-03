@@ -7,6 +7,9 @@ CONFIG_FILES_PATH = {
     'ROUTING_CONFIG' : 'routing_config',
     'CSS_CONFIG' : 'css_config',
     'DIRECTORY_MANAGEMENT':'directory_management',
+    'SWAGGER_CONFIG' : 'swagger_metadata',
+    'RESOURCE_CONFIG' : 'uploaded_resources_config',
+    'ENVIRONMENT_SETTINGS' : 'environment_settings',
 }
 
 JSX_TEMPLATE_PATH = "project_templates/jsx_template"

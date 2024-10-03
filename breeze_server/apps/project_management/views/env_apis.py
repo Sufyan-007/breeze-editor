@@ -3,7 +3,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
 from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
-from ..core.environment_management import set_environment
+from ..core.environment_management import set_environment, generate_config_from_payload, delete_proj_env, get_env_config
+from ..core.environment_management import delete_env_variable, update_env_vars, update_environment_name
 from django.http import JsonResponse
 
 
@@ -23,9 +24,10 @@ def set_env(request, project_id):
     
 @csrf_exempt
 @api_view(['GET'])
-def get_env_config(request, project_id):
+def get_environment_config(request, project_id):
     try:
-        pass
+        env_config = get_env_config(project_id)
+        return JsonResponse({'status': 'success', 'config': env_config}, status=200)
     except Exception as e:
         print(f"Error: {e}")
         return JsonResponse({'error': 'Server error'}, status=500)
@@ -34,26 +36,62 @@ def get_env_config(request, project_id):
 @api_view(['POST'])
 def add_env_config(request, project_id):
     try:
-        pass
+        data = json.loads(request.body.decode("utf-8"))
+        env_config = generate_config_from_payload(project_id, data)
+        return JsonResponse({'status': 'success', 'config': env_config, 'message': 'Environment settings saved successfully'}, status=200)
+    except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
-        print(f"Error: {e}")
-        return JsonResponse({'error': 'Server error'}, status=500)
-    
+        return JsonResponse({'error': str(e)}, status=500)
     
 @csrf_exempt
 @api_view(['PUT'])
 def update_env_config(request, project_id):
     try:
-        pass
+        data = json.loads(request.body)
+        variable_id = data.get('envVariableId')
+        env_vars = data.get('envVars')
+        env_name = env_vars.get('name')
+        env_values = env_vars.get('values')
+
+
+        if variable_id:
+            # Update environment variable
+            update_env_vars(project_id, variable_id, env_name, env_values)
+        elif env_name:
+            # Update environment name
+            old_env_name = data.get('oldEnvName')  # Assuming the old environment name is sent in the request
+            update_environment_name(project_id, old_env_name, env_name)
+
+        return JsonResponse({'status': 'success', 'message': 'Environment settings updated successfully'}, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
-        print(f"Error: {e}")
-        return JsonResponse({'error': 'Server error'}, status=500)
-    
+        return JsonResponse({'error': str(e)}, status=500)
+
 @csrf_exempt
 @api_view(['DELETE'])
 def delete_env_config(request, project_id):
     try:
-        pass
+        data = json.loads(request.body)
+        env_name = data.get('envName')
+        env_variable_id = data.get('envVariableId')
+
+        if env_name:
+            # Handle environment deletion
+            delete_proj_env(project_id, env_name)
+            return JsonResponse({'status': 'success', 'message': f'Environment "{env_name}" deleted successfully'}, status=200)
+
+        elif env_variable_id:
+            # Handle environment variable deletion
+            env_var_name = delete_env_variable(project_id, env_variable_id)
+            return JsonResponse({'status': 'success', 'message': f'Environment variable "{env_var_name}" deleted successfully'}, status=200)
+        else:
+            return JsonResponse({'error': 'No valid identifier provided'}, status=400)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
-        print(f"Error: {e}")
-        return JsonResponse({'error': 'Server error'}, status=500)
+        return JsonResponse({'error': str(e)}, status=500)
+    
+    
