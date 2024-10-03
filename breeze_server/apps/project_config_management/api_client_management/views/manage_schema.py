@@ -4,8 +4,19 @@ from ....common.constants.consts import CONFIG_PATH
 from ..core.schema_manager import add_or_edit_schema_helper, delete_schema_helper
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from ..swagger_schema.manage_schema_schema import add_or_edit_swagger_schema,delete_schema_swagger
+from drf_yasg.utils import swagger_auto_schema
 
-
+@swagger_auto_schema(
+    methods=['post','put'],
+    request_body=add_or_edit_swagger_schema['rb'],
+    responses={
+        201:add_or_edit_swagger_schema['response_201'],
+        400:add_or_edit_swagger_schema['response_400'],
+        500:add_or_edit_swagger_schema['response_500']
+    },
+    tags=['manage-api-client']
+)
 @api_view(['POST', 'PUT'])
 @permission_classes([AllowAny])
 def add_or_edit_schema(request,project_id):
@@ -22,7 +33,16 @@ def add_or_edit_schema(request,project_id):
     return JsonResponse(result)
 
 
-
+@swagger_auto_schema(
+    method='delete',
+    request_body=delete_schema_swagger['rb'],
+    responses={
+        204:delete_schema_swagger['response_204'],
+        400:delete_schema_swagger['response_400'],
+        500:delete_schema_swagger['response_500']
+    },
+    tags=['manage-api-client']
+)
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
 def delete_schema(request,project_id):

@@ -8,46 +8,17 @@ from django.views.decorators.http import require_POST
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from ..swagger_schema.login_schema import login_schema
+
 
 @csrf_exempt
 @require_POST
 @swagger_auto_schema(
     method='post',
-    request_body = openapi.Schema(
-        type = openapi.TYPE_OBJECT,
-        properties = {
-            'username':openapi.Schema(type = openapi.TYPE_STRING),
-            'password':openapi.Schema(type = openapi.FORMAT_PASSWORD)
-        },
-        required = ['username','password']
-    ),
-    manual_parameters = [
-        openapi.Parameter(
-            name = 'device_id',
-            in_ = openapi.IN_PATH,
-            type = openapi.TYPE_STRING,
-            description = "It is the ID of the device from where the user is logged in."
-        )
-    ],
+    request_body = login_schema['rb'],
     responses = {
-                200:openapi.Response(
-                   description='Success',
-                    schema=openapi.Schema(
-                       type=openapi.TYPE_OBJECT,
-                       properties={'accessToken':openapi.Schema(type=openapi.TYPE_STRING)}
-                    ),
-                ),
-                400:openapi.Response(
-                    description="Bad Request",
-                    schema=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={'error':openapi.Schema(type=openapi.TYPE_STRING)}
-                    ),
-                    examples={'application/json':{'error':'Invalid credentials'}}
-                    
-                    
-                )
+                200:login_schema['response_200'],
+                400:login_schema['response_400']
     },
     tags=['Auth']
 )
