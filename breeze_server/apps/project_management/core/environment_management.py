@@ -171,11 +171,12 @@ def update_env_vars(project_id, variable_id, updated_name, updated_values):
         app_config_dir = f"{CONFIG_PATH}/{project_id}"
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ENVIRONMENT_SETTINGS']}.json", config)
-        edit_package_json_file(config)
+        edit_package_json_file(project_id, config)
         for env_name, env_values in config["environments"].items():
-            save_file(env_name, env_values, config["envVars"])
+            save_file(project_id, env_name, env_values, config["envVars"])
 
         start_app(app_config, forceRestart=True)
+        return config
 
     except Exception as e:
         raise Exception(f"Error updating config: {e}")
@@ -224,14 +225,15 @@ def update_environment_name(project_id, old_env_name, new_env_name):
             os.remove(env_file_path)
 
         # Update the package.json file
-        edit_package_json_file(temp_config)
+        edit_package_json_file(project_id, temp_config)
 
         # Save environment files
         for env_name, env_values in config["environments"].items():
-            save_file(env_name, env_values, config["envVars"])
+            save_file(project_id, env_name, env_values, config["envVars"])
 
         # Restart the application
         start_app(app_config, forceRestart=True)
+        return config
 
     except Exception as e:
         raise Exception(f"Error updating environment name: {e}")
@@ -257,6 +259,7 @@ def delete_proj_env(project_id, env_name):
             if os.path.exists(env_file_path):
                 os.remove(env_file_path)
             remove_script_from_package_json(app_config['path'], env_name)
+            return config
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Error deleting environment config: {e}")
     except Exception as e:
@@ -308,7 +311,7 @@ def delete_env_variable(project_id, env_variable_id):
             for env_name, env_values in config["environments"].items():
                 save_file(project_id, env_name, env_values, config["envVars"])
 
-            return env_var_name
+            return {'env_var_name':env_var_name, 'config': config}
         else:
             raise Exception(f"Environment variable ID '{env_variable_id}' not found")
     except FileNotFoundError as e:

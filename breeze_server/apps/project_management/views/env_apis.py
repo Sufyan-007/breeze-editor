@@ -1,13 +1,11 @@
 import json
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from apps.common.utils.file_helpers.json_handler import read_project_config_file
-from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
 from ..core.environment_management import set_environment, generate_config_from_payload, delete_proj_env, get_env_config
 from ..core.environment_management import delete_env_variable, update_env_vars, update_environment_name
 from django.http import JsonResponse
 from drf_yasg.utils import swagger_auto_schema
-from ..swagger_schema.env_apis_schema import set_env_schema,get_env_config_schema
+from ..swagger_schema.env_apis_schema import set_env_schema
 
 @swagger_auto_schema(
     method='post',
@@ -85,13 +83,13 @@ def update_env_config(request, project_id):
 
         if variable_id:
             # Update environment variable
-            update_env_vars(project_id, variable_id, env_name, env_values)
-        elif env_name:
+            config = update_env_vars(project_id, variable_id, env_name, env_values)
+        if env_name:
             # Update environment name
             old_env_name = data.get('oldEnvName')  # Assuming the old environment name is sent in the request
-            update_environment_name(project_id, old_env_name, env_name)
+            config = update_environment_name(project_id, old_env_name, env_name)
 
-        return JsonResponse({'status': 'success', 'message': 'Environment settings updated successfully'}, status=200)
+        return JsonResponse({'status': 'success', 'message': 'Environment settings updated successfully', 'config': config}, status=200)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
@@ -113,13 +111,13 @@ def delete_env_config(request, project_id):
 
         if env_name:
             # Handle environment deletion
-            delete_proj_env(project_id, env_name)
-            return JsonResponse({'status': 'success', 'message': f'Environment "{env_name}" deleted successfully'}, status=200)
+            config = delete_proj_env(project_id, env_name)
+            return JsonResponse({'status': 'success', 'message': f'Environment "{env_name}" deleted successfully', 'config': config}, status=200)
 
         elif env_variable_id:
             # Handle environment variable deletion
-            env_var_name = delete_env_variable(project_id, env_variable_id)
-            return JsonResponse({'status': 'success', 'message': f'Environment variable "{env_var_name}" deleted successfully'}, status=200)
+            res = delete_env_variable(project_id, env_variable_id)
+            return JsonResponse({'status': 'success', 'message': f'Environment variable "{res["env_var_name"]}" deleted successfully', 'config': res['config']}, status=200)
         else:
             return JsonResponse({'error': 'No valid identifier provided'}, status=400)
         
