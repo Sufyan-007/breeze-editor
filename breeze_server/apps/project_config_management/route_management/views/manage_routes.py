@@ -8,8 +8,19 @@ from ..core.route_config_editor import rewrite_clean_route_config, include_all_r
 from django.http import JsonResponse
 from apps.common.utils.tree_management import get_node,get_all_path_of_node, add_node
 from apps.common.constants.enums.tree_type import TreeType
+from drf_yasg.utils import swagger_auto_schema
+from ..swagger_schema.manage_routes_schema import get_routes_schema,get_all_routes_fullpath_schema,add_route_schema,update_route_schema,delete_route_schema
 
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=get_routes_schema['parameters'],
+    responses={
+        200:get_routes_schema['response_200'],
+        400:get_routes_schema['response_400']
+    },
+    tags=['routes']
+)
 @csrf_exempt
 @api_view(['GET'])
 def get_all_child_routes(request,project_id):
@@ -19,6 +30,15 @@ def get_all_child_routes(request,project_id):
     include_all_routes_accessory_data(project_id, nodes.get('children'))
     return JsonResponse(nodes, status=200)
 
+
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=get_all_routes_fullpath_schema['parameters'],
+    responses={
+        200:get_all_routes_fullpath_schema['response_200']
+    },
+    tags=['routes']
+)
 @csrf_exempt
 @api_view(['GET'])
 def get_all_routes_fullpath(request,project_id):
@@ -29,6 +49,15 @@ def get_all_routes_fullpath(request,project_id):
     }
     return JsonResponse(data, status=200)
 
+@swagger_auto_schema(
+    method='post',
+    request_body=add_route_schema['rb'],
+    responses={
+        200:'ok',
+        500:add_route_schema['response_500']
+    },
+    tags=['routes']
+)
 @csrf_exempt
 @api_view(['POST'])
 def add_route(request, project_id):
@@ -49,6 +78,15 @@ def add_route(request, project_id):
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
 
+@swagger_auto_schema(
+    method='put',
+    request_body=update_route_schema['rb'],
+    responses={
+        200:'ok',
+        500:update_route_schema['response_500']
+    },
+    tags=['routes']
+)
 @csrf_exempt
 @api_view(['PUT'])
 def update_route(request, project_id):
@@ -68,7 +106,16 @@ def update_route(request, project_id):
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
-    
+
+@swagger_auto_schema(
+    method='delete',
+    request_body=delete_route_schema['rb'],
+    responses={
+        200:delete_route_schema['response_200'],
+        500:delete_route_schema['response_500']
+    },
+    tags=['routes']
+)
 @csrf_exempt
 @api_view(['DELETE'])
 def delete_route(request, project_id):

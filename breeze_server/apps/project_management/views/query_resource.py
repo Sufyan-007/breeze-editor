@@ -10,7 +10,7 @@ from ...common.constants.enums.ResourceCategory import ResourceCategory,ThirdPar
 from ...common.utils.file_helpers.config_handler import read_config_file
 from ...common.constants.consts import CONFIG_PATH,THIRD_PARTY_CONFIG_PATH,CLIENT_API,CUSTOMIZED_PROJ
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from ..swagger_schema.query_resource_schema import manage_resource_schema
 from ...common.utils.file_helpers.json_handler import read_json_file as read_file
 # from ...common.constants
 # found_keys=[]
@@ -19,60 +19,13 @@ from ...common.utils.file_helpers.json_handler import read_json_file as read_fil
 
 @swagger_auto_schema(
         method='post',
-        manual_parameters=[
-            openapi.Parameter(
-                name='param',
-                in_=openapi.IN_PATH,
-                description='name of project',
-                type=openapi.TYPE_STRING,
-            )
-        ],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "category":openapi.Schema(type = openapi.TYPE_STRING),
-                "resource":openapi.Schema(type = openapi.TYPE_STRING),
-                "select":openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(
-                        type= openapi.TYPE_STRING
-                    )
-                ),
-                "filter": openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "operation":openapi.Schema(type = openapi.TYPE_STRING),
-                        "condition":openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type = openapi.TYPE_STRING
-                            )
-                        )
-                    }
-                ),
-                "order":openapi.Schema(type = openapi.TYPE_STRING),
-                "limit": openapi.Schema(type = openapi.TYPE_STRING),
-                "offset": openapi.Schema(type = openapi.TYPE_STRING),
-                "count": openapi.Schema(type = openapi.TYPE_STRING),
-                "libname":openapi.Schema(type = openapi.TYPE_STRING),
-                "libversion":openapi.Schema(type = openapi.TYPE_STRING),
-                "module":openapi.Schema(type = openapi.TYPE_STRING),
-                "files":openapi.Schema(type = openapi.TYPE_STRING)
-            }
-        ),
-        
-
+        manual_parameters=manage_resource_schema['parameters'],
+        request_body=manage_resource_schema['rb'],
         responses={
-            200:openapi.Response(
-                description='returned successfully',
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-
-                    }
-                )
-            )
-        }
+            200:manage_resource_schema['response_200'],
+            500:manage_resource_schema['response_500'] 
+        },
+        tags=['query']
 )
 @csrf_exempt
 @require_POST

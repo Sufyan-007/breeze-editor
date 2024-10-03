@@ -6,6 +6,19 @@ from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
 from ..core.intermediate_modification_helper import process_api_data,transfer_to_auth,add_auth_function
 from ..utils.api_models.custom_exception import CustomeException
+from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+@swagger_auto_schema(
+    method='post',
+    request_body=generate_service_config_schema['rb'],
+    responses={
+        201:generate_service_config_schema['response_201'],
+        500:generate_service_config_schema['response_501']
+    },
+    tags=['manage-api-client']
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def generate_service_config(request, collectionType, project_id):
@@ -43,7 +56,14 @@ def generate_service_config(request, collectionType, project_id):
             return JsonResponse({"error": str(e)}, status=500)
         
 
-            
+@swagger_auto_schema(
+    method='post',
+    request_body=modify_function_config_schema['rb'],
+    responses={
+            201:modify_function_config_schema['response_201']
+        },
+    tags=['manage-api-client']
+) 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def modify_function_config(request,operation,project_id):
@@ -60,10 +80,18 @@ def modify_function_config(request,operation,project_id):
         return JsonResponse({"message": "Function Added Successfully" }, status=201)
     else:
         return JsonResponse({"message": result }, status=201)
-    
+
+@swagger_auto_schema(
+    method='post',
+    request_body=transfer_to_auth_schema['rb'],
+    responses={
+        200:transfer_to_auth_schema['response_201']
+    },
+    tags=['manage-api-client']
+)   
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def transfer_to_auth (request,project_id):
+def transfer_to_auth(request,project_id):
     data = json.loads(request.body.decode("utf-8"))
     filename = data.get("filename")
     id_value = data.get("id")
@@ -72,7 +100,16 @@ def transfer_to_auth (request,project_id):
     target_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
     result = transfer_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
     return JsonResponse(result)
-    
+
+@swagger_auto_schema(
+    method='post',
+    request_body=edit_module_title_schema['rb'],
+    responses={
+        200:edit_module_title_schema['response_200'],
+        400:edit_module_title_schema['response_400']
+    },
+    tags=['manage-api-client']
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def edit_module_title(request, project_id):
@@ -94,7 +131,7 @@ def edit_module_title(request, project_id):
         swagger_metadata[module_id] = module_data
         with open(file_path, "w") as file:
             json.dump(swagger_metadata, file, indent=4)
-        return JsonResponse({"message": "Module name edited Successfully"}, status=404)
+        return JsonResponse({"message": "Module name edited Successfully"}, status=200)
     
     
     

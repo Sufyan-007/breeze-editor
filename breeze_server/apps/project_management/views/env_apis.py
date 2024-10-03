@@ -6,8 +6,18 @@ from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
 from ..core.environment_management import set_environment, generate_config_from_payload, delete_proj_env, get_env_config
 from ..core.environment_management import delete_env_variable, update_env_vars, update_environment_name
 from django.http import JsonResponse
+from drf_yasg.utils import swagger_auto_schema
+from ..swagger_schema.env_apis_schema import set_env_schema,get_env_config_schema
 
-
+@swagger_auto_schema(
+    method='post',
+    request_body=set_env_schema['rb'],
+    responses={
+        200:set_env_schema['response_200'],
+        500:set_env_schema['response_500']
+    },
+    tags=['environment']
+)
 @csrf_exempt
 @api_view(['POST'])
 def set_env(request, project_id):
@@ -21,7 +31,13 @@ def set_env(request, project_id):
     except Exception as e:
         print(f"Error: {e}")
         return JsonResponse({'error': 'Server error'}, status=500)
-    
+
+@swagger_auto_schema(
+    method='get',
+    request_body=None,
+    responses=None,
+    tags=['environment']
+)
 @csrf_exempt
 @api_view(['GET'])
 def get_environment_config(request, project_id):
@@ -31,7 +47,13 @@ def get_environment_config(request, project_id):
     except Exception as e:
         print(f"Error: {e}")
         return JsonResponse({'error': 'Server error'}, status=500)
-    
+
+@swagger_auto_schema(
+    method='post',
+    request_body=None,
+    responses=None,
+    tags=['environment']
+)
 @csrf_exempt
 @api_view(['POST'])
 def add_env_config(request, project_id):
@@ -44,6 +66,12 @@ def add_env_config(request, project_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
     
+@swagger_auto_schema(
+    method='put',
+    request_body=None,
+    responses=None,
+    tags=['environment']
+)
 @csrf_exempt
 @api_view(['PUT'])
 def update_env_config(request, project_id):
@@ -69,6 +97,12 @@ def update_env_config(request, project_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@swagger_auto_schema(
+    method='delete',
+    request_body=None,
+    responses=None,
+    tags=['environment']
+)
 @csrf_exempt
 @api_view(['DELETE'])
 def delete_env_config(request, project_id):

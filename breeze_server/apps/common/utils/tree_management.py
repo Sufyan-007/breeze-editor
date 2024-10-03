@@ -108,7 +108,7 @@ def get_node(project_name,category,target_id,depth=1):
             nodes = get_children_up_to_depth(node.get("id"), config_data, depth, current_depth=0)
             
         else:
-            print("Id not found")
+            return {'error':'Id not found'}
     return {
         'node':target_id,
         'children':nodes
