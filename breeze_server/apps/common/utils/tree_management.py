@@ -49,7 +49,7 @@ def add_node( project_name, category, target_id, data):
     if(target_id is None or target_id not in config_data):
         data['parentId'] = None
         config_data[data['id']] = data
-        return config_data
+        return config_data,data['id']
     else:
         data['parentId'] = target_id
         config_data[data['id']] = data
@@ -57,7 +57,7 @@ def add_node( project_name, category, target_id, data):
             config_data[target_id]['children'] = []
         config_data[target_id]['children'].append(data['id'])
     
-        return config_data
+        return config_data,data['id']
 
 def is_target_in_hierarchy(source_id, target_id, data):
     """
@@ -124,6 +124,10 @@ def get_path(node_id,data,route,prop_name,skip_ids=[]):
         }]
         
     if("children" in data[node_id]):
+        paths.append({
+            "id":node_id,
+            "path":route + data[node_id][prop_name]
+        })
         for child_id in data[node_id]['children']:
             if child_id not in skip_ids:
                 route = route + data[node_id][prop_name]
