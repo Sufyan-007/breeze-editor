@@ -58,8 +58,8 @@ def update_route_in_config(request, project_id="", _routing_config = {}):
            
         
         ## if parent node is in the hierarchy of the child node then it is invalid
-        if(is_target_in_hierarchy(source_id=route_id,target_id=route_obj.get("parent_id"),data=_routing_config)):
-            raise Exception("Parent id cant be in child's lineage") 
+        if(is_target_in_hierarchy(source_id=route_id,target_id=route_obj.get("parentId"),data=_routing_config)):
+            raise Exception("Parent cant be in child's lineage") 
         
         if validate_route_path(route_obj,route_obj.get("parentId"), project_id, skip_ids=[route_obj.get("id")]) is True:
             new_parent_id = route_obj.get("parentId", "")

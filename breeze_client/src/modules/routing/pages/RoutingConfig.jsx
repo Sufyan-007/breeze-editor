@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
 import RoutingConfigForm from '../components/RoutingConfigForm';
 import '../styles/styles.css';
-import { initialRoutingConfig, routerProviderData, routingTreeData } from '../constants/RoutingConstants';
+import { initialRoutingConfig, routerProviderData } from '../constants/RoutingConstants';
 import { BreezeTree } from '../../../common/display';
 import { CustomButtonField, CustomTextInput } from '../../../common/fields';
 import RouterProviderForm from '../components/RouterProviderForm';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { fetchComponents } from '../../../redux/components/componentActions';
+import {
+  fetchRoutingConfig,
+  addRouteConfig,
+  updateRouteConfig,
+  deleteRouteConfig,
+} from '../../../redux/routing/routingActions';
 
 function RoutingConfig() {
   const dispatch = useDispatch();
@@ -18,22 +24,31 @@ function RoutingConfig() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showRouterProviderForm, setShowRouterProviderForm] = useState(false);
   const { components } = useSelector((state) => state.component);
+  const { routingConfig, status } = useSelector((state) => state.routing);
 
   useEffect(() => {
     dispatch(fetchComponents({ projectName }));
+    dispatch(fetchRoutingConfig({ projectName }));
   }, [dispatch, projectName]);
 
   const transformedComponents = components?.data
-    ? Object.entries(components.data).map(([key, value]) => ({
-        label: value,
-        value: key,
-      }))
-    : [];
+    ? [
+        { label: 'Select component', value: '' },
+        ...Object.entries(components.data).map(([key, value]) => ({
+          label: value,
+          value: key,
+        })),
+      ]
+    : [{ label: 'Select component', value: '' }];
 
   const handleNodeClick = (route) => {
     setShowRouterProviderForm(false);
     setSelectedRoute(route);
     setIsEditing(true);
+  };
+
+  const fetchChildren = async (parentId) => {
+    dispatch(fetchRoutingConfig({ projectName, parentId }));
   };
 
   const handleAddRoute = () => {
@@ -43,26 +58,31 @@ function RoutingConfig() {
     setSelectedRoute(initialRoutingConfig);
   };
 
-  const handleFormSubmit = (routeData) => {
-    console.log('Route data submitted:', routeData);
-    setIsEditing(false);
-    setIsNewRoute(false);
-  };
+  const handleFormSubmit = async (routeData) => {
+    try {
+      if (isNewRoute) {
+        await dispatch(addRouteConfig({ projectName, payload: routeData }));
+      } else if (isEditing) {
+        await dispatch(updateRouteConfig({ projectName, payload: routeData }));
+      }
 
-  const handleDeleteRoute = () => {
-    if (selectedRoute) {
-      console.log(`Deleted route: ${selectedRoute.routePath}`);
-      setSelectedRoute(initialRoutingConfig);
+      await dispatch(fetchRoutingConfig({ projectName }));
+    } catch (error) {
+      console.error('Error submitting route data:', error);
+    } finally {
       setIsEditing(false);
+      setIsNewRoute(false);
     }
   };
 
-  const renderTreeNode = (node) => {
-    return (
-      <div className="med-font">
-        <i className="bi bi-diagram-2"></i> <span className="fw-bold">{node.routePath}</span> - {node.element}
-      </div>
-    );
+  const handleDeleteRoute = async () => {
+    if (selectedRoute) {
+      const id = selectedRoute.id;
+      await dispatch(deleteRouteConfig({ projectName, payload: { id } }));
+      setSelectedRoute(initialRoutingConfig);
+      setIsEditing(false);
+      await dispatch(fetchRoutingConfig({ projectName }));
+    }
   };
 
   const handleSearch = (value) => {
@@ -95,7 +115,9 @@ function RoutingConfig() {
             />
           </div>
           <div className="routing-tree">
-            <BreezeTree data={routingTreeData} renderNode={renderTreeNode} handleNodeClick={handleNodeClick} />
+            {status === 'succeeded' && (
+              <BreezeTree data={routingConfig} fetchChildren={fetchChildren} handleNodeClick={handleNodeClick} />
+            )}
           </div>
         </div>
 
