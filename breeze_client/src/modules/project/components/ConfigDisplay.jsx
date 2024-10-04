@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import RoutingConfig from '../../routing/pages/RoutingConfig';
 import ServiceConfiguration from '../../service-configuration/pages/ServiceConfiguration';
 import CustomZipPackagePage from '../../custom_uploads/pages/CustomZipPackage';
+import Settings from '../../settings/pages/Settings';
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {
     switch (configType) {
@@ -11,6 +12,8 @@ function ConfigDisplay({ configType }) {
         return <CustomZipPackagePage />;
       case 'SERVICE-CONFIG':
         return <ServiceConfiguration />;
+      case 'SETTINGS':
+        return <Settings />;
       default:
         return <div>Select a configuration type</div>;
     }
