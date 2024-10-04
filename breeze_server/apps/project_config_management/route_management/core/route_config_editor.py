@@ -37,7 +37,7 @@ def check_for_mandatory_route_props(route_obj, project_id):
 def validate_route_path(route_obj,target_id, project_id="",skip_ids=[]):
     full_route_paths = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id,'path',skip_ids =skip_ids) 
     for full_route_path in full_route_paths:
-        if route_obj.get("path") in full_route_path.get("path"):
+        if route_obj.get("path") == full_route_path.get("path"):
             raise Exception('route already exists..')
     return True
         
