@@ -10,7 +10,7 @@ const rootReducer = combineReducers({
   project: projectReducer,
   routing: routingReducer,
   component: componentReducer,
-  zip : customZipReducers,
+  zip: customZipReducers,
   directory: directory_reducers,
   // Add other module reducers here
 });

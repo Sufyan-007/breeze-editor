@@ -7,12 +7,16 @@ import {
   CustomButtonField,
 } from '../../../common/fields';
 import PropTypes from 'prop-types';
-import { availableRoutes, initialRoutingConfig } from '../constants/RoutingConstants';
+import { initialRoutingConfig } from '../constants/RoutingConstants';
+import { getAllRoutesFullPath } from '../../../services/routing/routingService';
+import { useParams } from 'react-router-dom';
 
 function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
   const [formData, setFormData] = useState(initialData);
   const [basicDetailsOpen, setBasicDetailsOpen] = useState(true);
   const [advancedDetailsOpen, setAdvancedDetailsOpen] = useState(false);
+  const [availableRoutes, setAvailableRoutes] = useState([{ label: 'Select Route', value: '' }]);
+  const { projectName } = useParams();
 
   useEffect(() => {
     if (initialData) {
@@ -27,10 +31,24 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
     });
   };
 
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      const res = await getAllRoutesFullPath(projectName);
+      const formattedRoutes = res?.nodes
+        .map((node) => ({
+          label: node.path,
+          value: node.id,
+        }))
+        .filter((route) => route.label !== '/');
+      setAvailableRoutes([{ label: 'Select Route', value: '' }, ...formattedRoutes]);
+    };
+    fetchRoutes();
+  }, [projectName]);
+
   const handlePropChange = (index, prop, value) => {
     setFormData((prevData) => {
       const updatedProps = [...prevData.props];
-      updatedProps[index] = { ...updatedProps[index], [prop]: value }; // update the specific prop
+      updatedProps[index] = { ...updatedProps[index], [prop]: value };
       return { ...prevData, props: updatedProps };
     });
   };
@@ -59,30 +77,30 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
         {basicDetailsOpen && (
           <div className="m-1">
             <CustomSelectField
-              name="parentPath"
-              value={formData.parentPath}
-              onChange={(value) => handleChange('parentPath', value)}
+              name="parentId"
+              value={formData.parentId || ''}
+              onChange={(value) => handleChange('parentId', value)}
               options={availableRoutes}
               config={{ label: 'Parent Path', groupClass: 'form-group mb-2' }}
             />
 
             <CustomTextInput
-              name="routePath"
-              value={formData.routePath}
-              onChange={(value) => handleChange('routePath', value)}
+              name="path"
+              value={formData.path || ''}
+              onChange={(value) => handleChange('path', value)}
               config={{ label: 'Route Path', groupClass: 'form-group mb-2' }}
             />
 
             <CustomSelectField
-              name="element"
-              value={formData.element}
-              onChange={(value) => handleChange('element', value)}
+              name="componentId"
+              value={formData.componentId || ''}
+              onChange={(value) => handleChange('componentId', value)}
               options={availableComponents}
               config={{ label: 'Element', groupClass: 'form-group mb-2' }}
             />
 
             <label className="form-label br-text-primary med-font fw-semibold">Props</label>
-            {formData.props.length > 0 ? (
+            {formData.props && formData.props.length > 0 ? (
               formData.props.map((prop, index) => (
                 <div key={index} className="">
                   <CustomTextInput
@@ -118,7 +136,7 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
             <div className="d-flex">
               <CustomSwitchField
                 name="index"
-                checked={formData.index}
+                checked={formData.index || false}
                 onChange={(value) => handleChange('index', value)}
                 config={{
                   label: 'Index',
@@ -129,7 +147,7 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
 
               <CustomSwitchField
                 name="caseSensitive"
-                checked={formData.caseSensitive}
+                checked={formData.caseSensitive || false}
                 onChange={(value) => handleChange('caseSensitive', value)}
                 config={{
                   label: 'Case Sensitive',
@@ -140,9 +158,9 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
             </div>
 
             <CustomSelectField
-              name="errorElement"
-              value={formData.errorElement}
-              onChange={(value) => handleChange('errorElement', value)}
+              name="errorElementId"
+              value={formData.errorElementId || ''}
+              onChange={(value) => handleChange('errorElementId', value)}
               options={availableComponents}
               config={{
                 label: 'Error Element',
@@ -152,21 +170,21 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
 
             <CustomTextArea
               name="loader"
-              value={formData.loader}
+              value={formData.loader || ''}
               onChange={(value) => handleChange('loader', value)}
               config={{ label: 'Loader', groupClass: 'form-group mb-2' }}
             />
 
             <CustomTextArea
               name="action"
-              value={formData.action}
+              value={formData.action || ''}
               onChange={(value) => handleChange('action', value)}
               config={{ label: 'Action', groupClass: 'form-group mb-2' }}
             />
 
             <CustomTextArea
               name="lazy"
-              value={formData.lazy}
+              value={formData.lazy || ''}
               onChange={(value) => handleChange('lazy', value)}
               config={{ label: 'Lazy', groupClass: 'form-group mb-2' }}
             />
