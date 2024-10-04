@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from ..core.route_config_editor import update_route_in_config,check_for_mandatory_route_props,validate_route_path
-from ..core.route_config_editor import process_route_config, delete_route as del_route, transform_route_config
-from ..core.route_config_editor import rewrite_clean_route_config, include_all_routes_accessory_data
+from ..utils.utils import process_route_config, include_all_routes_accessory_data, transform_route_config, rewrite_clean_route_config
+from ..core.route_config_editor import delete_route as del_route
 from django.http import JsonResponse
 from apps.common.utils.tree_management import get_node,get_all_path_of_node, add_node
 from apps.common.constants.enums.tree_type import TreeType
@@ -63,7 +63,7 @@ def get_all_routes_fullpath(request,project_id):
 def add_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
     try:
-        check_for_mandatory_route_props(route_obj=data)
+        check_for_mandatory_route_props(data, project_id)
         if validate_route_path(data, data.get("parentId"), project_id) is True:    
             config_data,node_id = add_node(project_id, TreeType["ROUTES"].value, data.get("parentId"), data)
             # create clean and properly formatted config for code generation
@@ -92,7 +92,7 @@ def add_route(request, project_id):
 def update_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
     try:
-        check_for_mandatory_route_props(route_obj=data)
+        check_for_mandatory_route_props(data, project_id)
         res = update_route_in_config(data, project_id)
         config_data = res['config']
         # create clean and properly formatted config for code generation
