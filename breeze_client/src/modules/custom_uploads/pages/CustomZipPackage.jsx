@@ -33,7 +33,7 @@ function CustomZipPackagePage() {
   }, [dispatch, projectName]);
 
   if (status === 'loading') {
-    return ;
+    return;
   }
 
   if (status === 'failed') {
@@ -66,7 +66,7 @@ function CustomZipPackagePage() {
     setShowModal(true);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const fileInput = document.querySelector('input[type="file"]');
@@ -86,16 +86,22 @@ function CustomZipPackagePage() {
       }
       submitData.append('file', formData.file); // Append the file
 
-      // Dispatch the upload action
-      dispatch(uploadZipFileAction({ formData: submitData, projectName: projectName })).then(() => {
-        // Fetch updated list of zip files after successful upload
-        dispatch(fetchZipFilesAction(projectName));
-        dispatch(fetchFolderConfig({ id, projectName })).unwrap();
-      });
+      try {
+        // Dispatch the action to upload the zip file
+        await dispatch(uploadZipFileAction({ formData: submitData, projectName }));
+        setShowModal(false);
+        // Fetch the updated list of zip files after the upload completes
+        await dispatch(fetchZipFilesAction(projectName));
 
-      // Reset form and hide modal
-      resetForm();
-      setShowModal(false);
+        // Fetch the updated folder configuration
+        await dispatch(fetchFolderConfig({ id:'ROOT' , projectName })).unwrap();
+
+        // Reset the form and close the modal
+        resetForm();
+        // setShowModal(false);
+      } catch (error) {
+        console.error('Error during file upload or fetching folder config:', error);
+      }
     } else {
       setError('Please select a file.');
     }
@@ -185,8 +191,6 @@ function CustomZipPackagePage() {
     fileName: folder.name,
     lastModified: folder.lastModified,
   }));
-
-
 
   return (
     <div>
