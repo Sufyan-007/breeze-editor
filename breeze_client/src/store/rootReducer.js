@@ -1,5 +1,5 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import projectReducer from '../modules/project/redux/projectReducers';
+import projectReducer from '../redux/project/projectReducers';
 import routingReducer from '../redux/routing/routingReducer';
 import componentReducer from '../redux/components/componentReducer';
 import customZipReducers from '../modules/custom_uploads/redux/customZipReducers';
