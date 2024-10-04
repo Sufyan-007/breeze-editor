@@ -53,7 +53,7 @@ def update_route_in_config(request, project_id="", _routing_config = {}):
         prev_obj = get_previous_object_state(route_id, project_id, _routing_config)
         if prev_obj.get('path') == '/' and route_obj.get('path') != '/':
             raise Exception('default path can\'t be edited..')
-        if route_obj.get('parentId', "") != "" and prev_obj == '/':
+        if route_obj.get('parentId', "") != "" and prev_obj.get('path') == '/':
             raise Exception('default route can\'t have parent routes..')
            
         

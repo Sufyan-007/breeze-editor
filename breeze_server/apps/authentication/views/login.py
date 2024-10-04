@@ -25,41 +25,47 @@ from ..swagger_schema.login_schema import login_schema
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
-    data = json.loads(request.body)
-    print("login_data")
-    print(data)
-    username = data.get('username')
-    password = data.get('password')
-
-    auth_file_path = get_auth_file_path()
     try:
-        with open(auth_file_path, 'r') as file:
-            auth_data = json.load(file)
-    except FileNotFoundError:
-        return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        data = json.loads(request.body)
+        print("login_data")
+        print(data)
+        username = data.get('username')
+        password = data.get('password')
 
-    # Find existing token for username
-    existing_token = None
-    for token, info in auth_data.items():
-        if info['username'] == username and info['password'] == password:
-            existing_token = token
-            break
+        auth_file_path = get_auth_file_path()
+        try:
+            with open(auth_file_path, 'r') as file:
+                auth_data = json.load(file)
+        except FileNotFoundError:
+            return JsonResponse({'error': 'something went wrong'}, status=500)
 
-    if existing_token:
-        # Remove old token
-        del auth_data[existing_token]
-    
-    # Generate new token
-    token = generate_token()
-    token_data = {
-        'username': username,
-        'password': password,
-        'expiry': get_expiry_timestamp().isoformat()
-    }
-    
-    auth_data[token] = token_data
+        # Find existing token for username
+        existing_token = None
+        for token, info in auth_data.items():
+            if info['username'] == username and info['password'] == password:
+                existing_token = token
+                break
 
-    with open(auth_file_path, 'w') as file:
-        json.dump(auth_data, file)
+        if existing_token:
+            # Remove old token
+            del auth_data[existing_token]
+        else:
+            return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        
+        # Generate new token
+        token = generate_token()
+        token_data = {
+            'username': username,
+            'password': password,
+            'expiry': get_expiry_timestamp().isoformat()
+        }
+        
+        auth_data[token] = token_data
 
-    return JsonResponse({'accessToken': token}, status=200)
+        with open(auth_file_path, 'w') as file:
+            json.dump(auth_data, file)
+
+        return JsonResponse({'accessToken': token}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
