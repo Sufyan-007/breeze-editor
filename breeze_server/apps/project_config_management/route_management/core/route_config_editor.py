@@ -9,7 +9,7 @@ def get_previous_object_state(route_obj_id, project_id="", routing_config = {}):
     routing_config = get_routing_config(project_id, routing_config)
     prev_obj = routing_config.get(route_obj_id)
     if not prev_obj:
-        raise Exception('invalid object id..')
+        raise Exception('invalid route id..')
     return prev_obj
       
 
@@ -51,7 +51,7 @@ def update_route_in_config(request, project_id="", _routing_config = {}):
             
         # get updated_object's previous state
         prev_obj = get_previous_object_state(route_id, project_id, _routing_config)
-        if prev_obj.get('path') == '/' and route_obj != '/':
+        if prev_obj.get('path') == '/' and route_obj.get('path') != '/':
             raise Exception('default path can\'t be edited..')
         if route_obj.get('parentId', "") != "" and prev_obj == '/':
             raise Exception('default route can\'t have parent routes..')

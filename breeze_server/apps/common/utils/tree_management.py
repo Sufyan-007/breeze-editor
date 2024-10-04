@@ -128,9 +128,9 @@ def get_path(node_id,data,route,prop_name,skip_ids=[]):
             "id":node_id,
             "path":route + data[node_id][prop_name]
         })
+        route = route + data[node_id][prop_name]
         for child_id in data[node_id]['children']:
             if child_id not in skip_ids:
-                route = route + data[node_id][prop_name]
                 paths += get_path(child_id, data, route, prop_name, skip_ids=skip_ids)
     return paths
 
