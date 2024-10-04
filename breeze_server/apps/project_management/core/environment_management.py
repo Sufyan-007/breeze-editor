@@ -58,7 +58,10 @@ def edit_package_json_file(project_id, config):
             script_name = f"start:{env_name}"
             if env_name == 'default (.env)':
                 continue
-            command = f"env-cmd -f {env_name}.env react-scripts start"
+            if app_config.get('buildTool', "") == "create-react-app":
+                command = f"env-cmd -f {env_name}.env react-scripts start"
+            else:
+                command = f"vite --mode {env_name}"
             if script_name not in scripts:
                 scripts[script_name] = command
 

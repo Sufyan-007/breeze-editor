@@ -52,7 +52,7 @@ function CustomButtonField({
 
 CustomButtonField.propTypes = {
   config: PropTypes.any,
-  label: PropTypes.string,
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   onClick: PropTypes.func,
   type: PropTypes.oneOf(['button', 'submit', 'reset']),
   disabled: PropTypes.bool,

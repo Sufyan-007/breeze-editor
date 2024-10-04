@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+// import { useState, useEffect } from 'react';
 
 const CustomTable = ({
-  resource,
-  fields,
-  columns: passedColumns,
-  data: passedData,
+  // resource,
+  // fields,
+  columns,
+  data,
   actions,
   tableClass = 'table table-bordered table-dark table-responsive',
   headerClass = 'text-center',
@@ -22,35 +22,35 @@ const CustomTable = ({
   selectedRows = [],
   actionPlacement = null,
 }) => {
-  const [data, setData] = useState(passedData || []);
-  const [columns, setColumns] = useState(passedColumns || []);
+  // const [data, setData] = useState(passedData || []);
+  // const [columns, setColumns] = useState(passedColumns || []);
 
-  useEffect(() => {
-    if (resource && fields) {
-      async function fetchResourceData() {
-        const queryParams = new URLSearchParams();
-        fields.forEach((field) => queryParams.append('fields', field));
+  // useEffect(() => {
+  //   if (resource && fields) {
+  //     async function fetchResourceData() {
+  //       const queryParams = new URLSearchParams();
+  //       fields.forEach((field) => queryParams.append('fields', field));
 
-        const response = await fetch(`http://localhost:8000/editor/resource/${resource}/?${queryParams.toString()}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+  //       const response = await fetch(`http://localhost:8000/editor/resource/${resource}/?${queryParams.toString()}`, {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
 
-        const fetchedData = await response.json();
-        setData(fetchedData);
+  //       const fetchedData = await response.json();
+  //       setData(fetchedData);
 
-        const fetchedColumns = fields.map((field) => ({
-          header: field.charAt(0).toUpperCase() + field.slice(1),
-          accessor: field,
-        }));
-        setColumns(fetchedColumns);
-      }
+  //       const fetchedColumns = fields.map((field) => ({
+  //         header: field.charAt(0).toUpperCase() + field.slice(1),
+  //         accessor: field,
+  //       }));
+  //       setColumns(fetchedColumns);
+  //     }
 
-      fetchResourceData();
-    }
-  }, [resource, fields]);
+  //     fetchResourceData();
+  //   }
+  // }, [resource, fields]);
 
   const handleSort = (column) => {
     const direction = sortBy === column && sortDirection === 'asc' ? 'desc' : 'asc';
@@ -60,7 +60,7 @@ const CustomTable = ({
   const handleRowSelect = (item) => {
     onRowSelect && onRowSelect(item);
   };
- 
+
   const paginatedData = data?.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
@@ -96,7 +96,7 @@ const CustomTable = ({
           {paginatedData?.length > 0 ? (
             paginatedData?.map((item, rowIndex) => (
               <>
-                <tr key={rowIndex} className={rowClass}>
+                <tr key={item.id || rowIndex} className={rowClass}>
                   {onRowSelect && (
                     <td className={cellDataClass}>
                       <input
@@ -139,7 +139,7 @@ const CustomTable = ({
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
-          <i class="bi bi-chevron-left" style={{ 'font-size': '12px' }}></i>
+          <i className="bi bi-chevron-left" style={{ fontSize: '12px' }}></i>
           Previous
         </button>
         <span>
@@ -152,7 +152,7 @@ const CustomTable = ({
           onClick={() => onPageChange(currentPage + 1)}
         >
           Next
-          <i class="bi bi-chevron-right" style={{ 'font-size': '12px' }}></i>
+          <i className="bi bi-chevron-right" style={{ fontSize: '12px' }}></i>
         </button>
       </div>
     </div>
