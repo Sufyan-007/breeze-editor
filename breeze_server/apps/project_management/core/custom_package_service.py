@@ -101,15 +101,15 @@ def extract_zip_file(project_name, zip_file_path, fileName):
                 os.makedirs(folder_for_files, exist_ok=True)
                 zip_ref.extractall(folder_for_files)
         
-        print("start")
+       
         #generate JSON structure of the uploaded zip files
         directory_manager = DirectoryManager(project_name)
         result = create_json_structure(directory_manager,zip_dir_path,parent_id="CUSTOM_UPLOAD",tag="ZIP")
-        print(result,"result")
+      
         
         app_config, react_app_dir = get_project_config(project_name)
         
-        print(react_app_dir,"react app dir ")
+
         
         if not os.path.exists(react_app_dir):
             os.makedirs(react_app_dir)
@@ -118,7 +118,7 @@ def extract_zip_file(project_name, zip_file_path, fileName):
             destination_path = os.path.join(react_app_dir, folder_name)
             shutil.copytree(folder_for_files, destination_path)
         else:
-            destination_path = os.path.join(react_app_dir, "extracted_zip_files")
+            destination_path = os.path.join(react_app_dir, "custom_uploads")
             shutil.copytree(extract_dir, destination_path, dirs_exist_ok=True)
         
         print(f"Extracted files to {extract_dir}")
