@@ -14,6 +14,8 @@ function ConfigDisplay({ configType }) {
         return <ServiceConfiguration />;
       case 'SETTINGS':
         return <Settings />;
+      case 'PACKAGE_CONFIG':
+        return <>package.json</>;
       default:
         return <div>Select a configuration type</div>;
     }

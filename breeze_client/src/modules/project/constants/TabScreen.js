@@ -7,11 +7,13 @@ export const getAvailableTabs = (tag) => {
     case 'SERVICE-CONFIG':
       return ['config'];
     case 'ROUTING':
-      return ['config'];
+      return ['config', 'code'];
     case 'CUSTOM_UPLOAD':
       return ['config'];
     case 'SETTINGS':
       return ['config'];
+    case 'PACKAGE_CONFIG':
+      return ['code', 'config'];
     default:
       return ['code', 'preview'];
   }

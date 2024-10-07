@@ -64,8 +64,7 @@ function Login() {
 
           <div className="login-form-container px-xxl-5 p-md-4 px-1 mt-4 mt-lg-0">
             <div className="login-form">
-              <h2 className="login-text br-text-tertiary">Welcome to Breeze Studio</h2>
-              <h3 className="mb-4 login-med-font br-text-primary">Your one-stop React -MS</h3>
+              <h2 className="login-text br-text-tertiary mb-3">Welcome to Breeze Studio</h2>
               <form className="login-custom-form" onSubmit={handleSubmit}>
                 <div className="mb-3 login-form-box">
                   <label htmlFor="username" className="login-text login-med-font mb-1 br-text-primary">
@@ -96,14 +95,8 @@ function Login() {
                   />
                 </div>
                 {errorMessage && <p className="text-danger">{errorMessage}</p>}
-                <div className="mb-3">
-                  <input type="checkbox" id="rememberMe" />
-                  <label className="login-small-font px-1 br-text-primary" htmlFor="rememberMe">
-                    Remember this device
-                  </label>
-                  <a href="forget-3.html" className="text-decoration-none float-end login-small-font mt-1">
-                    Forgot Password?
-                  </a>
+                <div className="">
+                  <a className="text-decoration-none float-end login-small-font mb-3">Forgot Password?</a>
                 </div>
                 <button type="submit" className="login-button btn-filled w-100 mb-3">
                   Sign In

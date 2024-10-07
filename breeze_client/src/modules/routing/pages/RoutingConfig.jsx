@@ -3,7 +3,7 @@ import RoutingConfigForm from '../components/RoutingConfigForm';
 import '../styles/styles.css';
 import { initialRoutingConfig, routerProviderData } from '../constants/RoutingConstants';
 import { BreezeTree } from '../../../common/display';
-import { CustomButtonField, CustomTextInput } from '../../../common/fields';
+import { CustomTextInput } from '../../../common/fields';
 import RouterProviderForm from '../components/RouterProviderForm';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -61,12 +61,12 @@ function RoutingConfig() {
   const handleFormSubmit = async (routeData) => {
     try {
       if (isNewRoute) {
-        await dispatch(addRouteConfig({ projectName, payload: routeData }));
+        await dispatch(addRouteConfig({ projectName, payload: routeData })).unwrap();
       } else if (isEditing) {
-        await dispatch(updateRouteConfig({ projectName, payload: routeData }));
+        await dispatch(updateRouteConfig({ projectName, payload: routeData })).unwrap();
       }
 
-      await dispatch(fetchRoutingConfig({ projectName }));
+      await dispatch(fetchRoutingConfig({ projectName })).unwrap();
     } catch (error) {
       console.error('Error submitting route data:', error);
     } finally {
@@ -104,7 +104,17 @@ function RoutingConfig() {
     <div className="h-100">
       <div className="row mx-0 h-100">
         <div className="col-4 p-2 br-routing-config-display border-end border-secondary">
-          <h6 className="br-text-primary fw-bold">Route Configuration</h6>
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 className="br-text-primary fw-bold">Route Configuration</h6>
+            </div>
+            <div className="mb-2">
+              <span className="badge breeze-badge collapsible" onClick={handleAddRoute}>
+                <i className="small-font bi bi-plus-circle"></i>
+                <span className="small-font ms-1">Add</span>
+              </span>
+            </div>
+          </div>
           <div className="px-2 py-1">
             <CustomTextInput
               name="searchRoute"
@@ -124,20 +134,16 @@ function RoutingConfig() {
         <div className="col-8 p-2 br-routing-config-display">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <div>
-              <span className="badge breeze-badge p-2" onClick={handleRouterProviderClick}>
+              <span className="badge breeze-badge" onClick={handleRouterProviderClick}>
                 <span className="med-font">
                   <i className="bi bi-gear me-1"></i>Router Provider
                 </span>
               </span>
             </div>
             <div>
-              <CustomButtonField
-                type="button"
-                label="New Route"
-                className="btn btn-filled me-2"
-                onClick={handleAddRoute}
-              />
-              {isEditing && <i className="bi bi-trash3-fill btn btn-outline-danger" onClick={handleDeleteRoute}></i>}
+              {isEditing && (
+                <i className="bi bi-trash3-fill btn btn-sm btn-outline-danger" onClick={handleDeleteRoute}></i>
+              )}
             </div>
           </div>
 
