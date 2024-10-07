@@ -11,19 +11,39 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os,json
+import environ
+from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+def str_to_bool(s):
+    if s.lower() == "true":
+        return True
+    elif s.lower() == "false":
+        return False
+    else:
+        raise ValueError("Invalid boolean string")
+
+def str_to_array(s):
+    arr = []
+    if len(s.split(",")) > 0:
+        for item in s.split(","):
+            arr.append(str(item))
+    else:
+        arr = [s]
+    return arr
+        
+load_dotenv()
+environment = os.getenv('RUN_ENV', 'dev')
+
+env = environ.Env()
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
+path=os.path.join(BASE_DIR, '.env.%s'%(environment))    
+load_dotenv(path)
+    
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-hh4qly@tb_ebux-dwzbzxikco5+!%=0$phbk9^%%w-@3(1hfr^'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 # Application definition
 
@@ -50,32 +70,6 @@ INSTALLED_APPS = [
     "corsheaders",
                       # Yet Another Swagger generator
 ]
-CORS_ALLOW_ALL_ORIGINS = True
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "192.1.150.148"
-]
-ALLOWED_CIDR_NETS = ['192.1.0.0/16']
-
-CSRF_COOKIE_SECURE = True
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1",
-    "http://localhost",
-    "http://192.1.150.148:8000"
-]
-CORS_ALLOW_CREDENTIALS = False
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'apps.authentication.authentication.CustomTokenAuthentication',
-    ),
-    # uncomment below class when we need to run all APIs only after being 
-    # authenticated so that no one can access APIs if he/she isn't logged in 
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ),
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -111,18 +105,6 @@ WSGI_APPLICATION = 'breeze_server.wsgi.application'
 ASGI_APPLICATION = 'breeze_server.asgi.application'
 
 
-
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -142,25 +124,68 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.1/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
-STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'DEFAULT_FIELD_INSPECTORS': [
+        'drf_yasg.inspectors.CamelCaseJSONFilter',
+        'drf_yasg.inspectors.InlineSerializerInspector',
+        'drf_yasg.inspectors.RelatedFieldInspector',
+        'drf_yasg.inspectors.ChoiceFieldInspector',
+        'drf_yasg.inspectors.FileFieldInspector',
+        'drf_yasg.inspectors.DictFieldInspector',
+        'drf_yasg.inspectors.SimpleFieldInspector',
+        'drf_yasg.inspectors.StringDefaultFieldInspector',
+    ],
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+ }
+
+REST_FRAMEWORK = {
+    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+    #     'apps.authentication.authentication.CustomTokenAuthentication',
+    # ),
+    # uncomment below class when we need to run all APIs only after being 
+    # authenticated so that no one can access APIs if he/she isn't logged in 
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
+ROOT_URLCONF = 'breeze_server.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'breeze_server.wsgi.application'
+ASGI_APPLICATION = 'breeze_server.asgi.application'
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SWAGGER_SETTINGS = {
@@ -187,3 +212,45 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv("SECRET_KEY") 
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = str_to_bool(os.getenv("DEBUG")) 
+
+CORS_ALLOW_ALL_ORIGINS = str_to_bool(os.getenv("CORS_ALLOW_ALL_ORIGINS")) 
+
+ALLOWED_HOSTS = str_to_array(os.getenv("ALLOWED_HOSTS")) 
+
+ALLOWED_CIDR_NETS = str_to_array(os.getenv("ALLOWED_CIDR_NETS")) 
+ 
+CSRF_COOKIE_SECURE = str_to_bool(os.getenv("CSRF_COOKIE_SECURE"))
+CORS_ALLOWED_ORIGINS = str_to_array(os.getenv("CORS_ALLOWED_ORIGINS")) 
+CORS_ALLOW_CREDENTIALS = str_to_bool(os.getenv("CORS_ALLOW_CREDENTIALS")) 
+
+
+DATABASES = {
+   'default' : json.loads(os.getenv("DATABASES",'{}')) 
+}
+LANGUAGE_CODE = os.getenv("LANGUAGE_CODE") 
+TIME_ZONE = os.getenv("TIME_ZONE") 
+USE_I18N = str_to_bool(os.getenv("USE_I18N")) 
+USE_TZ = str_to_bool(os.getenv("USE_TZ")) 
+STATIC_URL = os.getenv("STATIC_URL") 
+

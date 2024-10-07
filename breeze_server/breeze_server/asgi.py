@@ -13,7 +13,10 @@ from channels.auth import AuthMiddlewareStack
 from django.core.asgi import get_asgi_application
 import apps.project_management.communication.routing
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'breeze_server.settings')
+from dotenv import load_dotenv
+settings_env = 'breeze_server.settings'
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_env)
+load_dotenv()
 
 asgi_app = get_asgi_application()
 application = ProtocolTypeRouter({
