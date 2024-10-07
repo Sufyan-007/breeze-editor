@@ -84,7 +84,7 @@ app.post('/custom', (req, res) => {
   const projName =  `${project}/extracted_zip_files`;
   const zipFileName = req.body.fileName;
   const directoryPath = path.join(CONFIG_PATH, projName, zipFileName);
-  console.log(directoryPath,"directory path");
+
   
   if (fs.existsSync(directoryPath)) {
     if(extractAllComponentDetails(directoryPath,zipFileName,"file",project)){
