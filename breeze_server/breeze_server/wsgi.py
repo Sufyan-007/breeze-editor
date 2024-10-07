@@ -10,7 +10,11 @@ https://docs.djangoproject.com/en/4.1/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
+from dotenv import load_dotenv
+load_dotenv()
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'breeze_server.settings')
-
+settings_env =os.environ.get("RUN_ENV") 
+settings_env = 'breeze_server.settings.%s'%(settings_env)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_env)
+    
 application = get_wsgi_application()
