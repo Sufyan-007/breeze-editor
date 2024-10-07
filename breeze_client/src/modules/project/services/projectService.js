@@ -33,3 +33,13 @@ export const createProject = async (projectData) => {
     throw error;
   }
 };
+
+export async function getAppBasicConfig(projectName) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/get-metadata/${projectName}/`;
+  try {
+    const response = await callApiClient(url, 'GET');
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}

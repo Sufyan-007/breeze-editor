@@ -15,8 +15,11 @@ urlpatterns = [
     path('delete/<str:project_id>/', proj_apis.delete, name='delete_project'),
     # post request
     path('query_resource/<str:param>/', que_re.manage_resource),
-    path('environment-settings/<str:project_id>/', env_manage.get_env_config),
-    path('set-environment/<str:project_id>/', env_manage.set_env),
+    path('get-env-settings/<str:project_id>/', env_manage.get_environment_config),
+    path('add-env-settings/<str:project_id>/', env_manage.add_env_config),
+    path('update-env-settings/<str:project_id>/', env_manage.update_env_config),
+    path('delete-env-settings/<str:project_id>/', env_manage.delete_env_config),
+    path('set-proj-env/<str:project_id>/', env_manage.set_env),
     path('get-metadata/<str:project_id>/', proj_apis.get_proj_metadata),
     path('custom-package-upload/<str:projectName>', add_custom_package),
     path('custom-package/<str:projectName>', get_custom_packages),

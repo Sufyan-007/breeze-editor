@@ -21,7 +21,7 @@ const breezeConfigData = {
   },
   'custom-upload': {
     id: 'custom-upload',
-    name: 'custom-upload',
+    name: 'custom-upload-config',
     extension: '',
     type: 'FILE',
     children: [],

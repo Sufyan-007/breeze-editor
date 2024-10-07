@@ -1,44 +1,54 @@
+import { useState } from 'react';
 import PropTypes from 'prop-types';
-import './BreezeTree.css';
 
-const TreeNode = ({ node, allNodes, renderNode, getChildNodes, onNodeClick, onNodeExpand, expandedNodes }) => {
-  const isExpanded = expandedNodes.includes(node.id);
-  const children = getChildNodes(node.id, allNodes);
+const TreeNode = ({ node, fetchChildren, data, handleNodeClick }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleExpand = async () => {
+    if (!isExpanded && node.children && node.children.length > 0) {
+      setIsLoading(true);
+      await fetchChildren(node.id);
+      setIsLoading(false);
+    }
+    setIsExpanded(!isExpanded);
+  };
 
   return (
-    <div className="ps-2">
-      <div
-        style={{
-          cursor: 'pointer',
-          alignItems: 'center',
-        }}
-        className="d-flex justify-content-between pe-2 br-tree-node"
-        onClick={() => onNodeClick(node)}
-      >
-        <div>{renderNode(node)}</div>
+    <div style={{ marginLeft: '10px' }}>
+      <div className="d-flex justify-content-between">
         <div>
-          {children.length > 0 && (
-            <span className="br-text-primary" onClick={() => onNodeExpand(node.id)}>
-              {isExpanded ? '-' : '+'}
-            </span>
+          <span onClick={() => handleNodeClick(node)} style={{ cursor: 'pointer' }}>
+            <i className="bi bi-diagram-2 med-font me-1"></i>
+            {node.path} - {node.componentName}
+          </span>
+        </div>
+        <div>
+          {node.children && node.children.length > 0 && (
+            <>
+              <span className="mx-3" onClick={handleExpand} style={{ cursor: 'pointer' }}>
+                {isExpanded ? '-' : '+'}
+              </span>
+              {isLoading && <span>Loading...</span>}
+            </>
           )}
         </div>
       </div>
 
-      {isExpanded && (
+      {node.children && (
         <div>
-          {children.map((childNode) => (
-            <TreeNode
-              key={childNode.id}
-              node={childNode}
-              allNodes={allNodes}
-              renderNode={renderNode}
-              getChildNodes={getChildNodes}
-              onNodeClick={onNodeClick}
-              onNodeExpand={onNodeExpand}
-              expandedNodes={expandedNodes}
-            />
-          ))}
+          {node.children.map(
+            (childId) =>
+              data[childId] && (
+                <TreeNode
+                  key={childId}
+                  node={data[childId]}
+                  fetchChildren={fetchChildren}
+                  data={data}
+                  handleNodeClick={handleNodeClick}
+                />
+              )
+          )}
         </div>
       )}
     </div>
@@ -46,27 +56,9 @@ const TreeNode = ({ node, allNodes, renderNode, getChildNodes, onNodeClick, onNo
 };
 
 TreeNode.propTypes = {
-  node: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string,
-    routePath: PropTypes.string,
-    element: PropTypes.string,
-    children: PropTypes.array,
-  }).isRequired,
-  allNodes: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string,
-      routePath: PropTypes.string,
-      element: PropTypes.string,
-      children: PropTypes.array,
-    })
-  ).isRequired,
-  renderNode: PropTypes.func.isRequired,
-  getChildNodes: PropTypes.func.isRequired,
-  onNodeClick: PropTypes.func.isRequired,
-  onNodeExpand: PropTypes.func.isRequired,
-  expandedNodes: PropTypes.arrayOf(PropTypes.string).isRequired,
+  node: PropTypes.object,
+  fetchChildren: PropTypes.func,
+  data: PropTypes.object,
+  handleNodeClick: PropTypes.func,
 };
-
 export default TreeNode;

@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { fetchProjectConfig } from './projectActions';
 
 const initialState = {
-  projectConfig: null,
+  projectConfig: {},
   status: 'ready',
   error: null,
 };

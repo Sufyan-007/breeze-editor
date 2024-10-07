@@ -5,10 +5,10 @@ export const initialNewProjectFormConfig = {
   author: '',
   projectLogo: null,
   description: '',
-  technology: '',
-  language: '',
-  styling: '',
-  buildTool: '',
+  technology: 'React',
+  language: 'JavaScript',
+  styling: 'React Bootstrap',
+  buildTool: 'Vite',
   layout: '',
 };
 
@@ -20,7 +20,7 @@ export const technologyOptions = [
 
 export const languageOptions = [
   { label: 'JavaScript', logo: logos.jsLogo },
-  // { label: 'TypeScript', logo: logos.tsLogo },
+  { label: 'TypeScript', logo: logos.tsLogo },
 ];
 
 export const stylingOptions = [
