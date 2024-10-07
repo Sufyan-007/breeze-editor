@@ -28,6 +28,8 @@ from .core.environment_settings_config_service import EnvironmentSettingsConfigS
 from .core.custom_package_service import CustomPackageService
 from common.consts.consts import PORT
 
+import pickle
+
 @method_decorator(csrf_exempt,name="dispatch")
 class AddPackage(APIView):
     def post(self, request, projectName):
@@ -1013,3 +1015,18 @@ class CustomPackage(APIView):
     def trigger_api(self,api_url, payload):
         print("Triggering API call in background thread...")
         threading.Thread(target=self.call_external_api_async,args=(api_url,payload)).start()
+
+class GetCodeConfig(APIView):
+    def post(self, request,projectName):
+        data = json.loads(request.body)
+        fileType = data["type"]
+        if fileType == "COMPONENTS":
+            compId = data["compId"]
+            path = f"{CONFIG_PATH}/{projectName}/pickles/{compId}.bytes"
+            with open(path, "rb") as file:
+                codeTree = pickle.load(file)
+            
+            code = codeTree[data["index"]]
+            if code:
+                code["children"] = None
+            return JsonResponse({"related_config":code}, status=200)
