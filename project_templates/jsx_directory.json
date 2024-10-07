@@ -1,97 +1,118 @@
 {
-    "ROOT":{
-      "children":[
-        "SRC","PACKAGE_CONFIG","ALL_STYLES_FILE","INDEX_HTML"
-      ]
-    },
-    "SRC": {
-      "name": "src",
-      "parentId": "ROOT",
-      "id": "SRC",
-      "tag": "ROOT",
-      "type": "DIRECTORY",
-      "children":["STYLES","COMPONENTS","SERVICES","PROJECT_ROOT_FILE","MAIN_COMPONENT","ASSETS"]
-    },
-    "COMPONENTS": {
-      "name": "components",
-      "parentId": "SRC",
-      "id": "COMPONENTS",
-      "tag": "COMPONENTS",
-      "type": "DIRECTORY",
-      "children":["DEFAULT_COMP"]
-    },
-    "DEFAULT_COMP":{
-        "name":"Main",
-        "extension":"SX",
-        "parentId":"COMPONENTS",
-        "entityId":"MAIN",
-        "id": "DEFAULT_COMP",
-        "tag":"COMPONENTS",
-        "type":"FILE"
-    },
-    "SERVICES": {
-      "name": "services",
-      "parentId": "SRC",
-      "id":"SERVICES",
-      "tag": "SERVICES",
-      "type": "DIRECTORY",
-      "children":[]
-    },
-    "PROJECT_ROOT_FILE": {
-      "name": "main",
-      "parentId": "SRC",
-      "extension":"SX",
-      "id": "PROJECT_ROOT_FILE",
-      "tag": "ROOT",
-      "type": "FILE"
-    },
-    "MAIN_COMPONENT": {
-      "name": "App",
-      "parentId": "SRC",
-      "extension":"SX",
-      "id": "MAIN_COMPONENT",
-      "tag": "ROOT_COMPONENT",
-      "type": "FILE"
-    },
-    "ASSETS": {
-      "name": "assets",
-      "parentId": "SRC",
-      "id": "ASSETS",
-      "tag": "ASSETS",
-      "type": "DIRECTORY",
-      "children":[]
-    },
-    "PACKAGE_CONFIG":{
-        "name":"package",
-        "extension":"json",
-        "parentId":"ROOT",
-        "id":"PACKAGE_CONFIG",
-        "tag":"PACKAGE_CONFIG",
-        "type":"FILE"
-    },
-    "INDEX_HTML":{
-        "name":"index",
-        "parentId":"ROOT",
-        "extension":"html",
-        "id":"INDEX_HTML",
-        "tag":"INDEX_HTML",
-        "type":"FILE"
-    },
-    "STYLES": {
-      "name": "styles",
-      "parentId": "SRC",
-      "id": "STYLES",
-      "tag": "STYLES",
-      "type": "DIRECTORY",
-      "children":[]
-    },
-    "ALL_STYLES_FILE":{
-      "name":"styles",
-      "extension":"js",
-      "parentId":"ROOT",
-      "id":"ALL_STYLES_FILE",
-      "tag":"ALL_STYLES_FILE",
-      "type":"FILE"
+  "ROOT": {
+    "parentId": null,
+    "id": "ROOT",
+    "children": [
+      "SRC",
+      "PACKAGE_CONFIG",
+      "ALL_STYLES_FILE",
+      "INDEX_HTML",
+      "CUSTOM_UPLOAD"
+    ]
+  },
+  "SRC": {
+    "name": "src",
+    "parentId": "ROOT",
+    "id": "SRC",
+    "tag": "ROOT",
+    "type": "DIRECTORY",
+    "children": [
+      "STYLES",
+      "COMPONENTS",
+      "SERVICES",
+      "PROJECT_ROOT_FILE",
+      "MAIN_COMPONENT",
+      "ASSETS"
+    ]
+  },
+  "COMPONENTS": {
+    "name": "components",
+    "parentId": "SRC",
+    "id": "COMPONENTS",
+    "tag": "COMPONENTS",
+    "type": "DIRECTORY",
+    "children": ["DEFAULT_COMP"]
+  },
+  "DEFAULT_COMP": {
+    "name": "Main",
+    "extension": "SX",
+    "parentId": "COMPONENTS",
+    "entityId": "MAIN",
+    "id": "DEFAULT_COMP",
+    "tag": "COMPONENTS",
+    "type": "FILE"
+  },
+  "SERVICES": {
+    "name": "services",
+    "parentId": "SRC",
+    "id": "SERVICES",
+    "tag": "SERVICES",
+    "type": "DIRECTORY",
+    "children": []
+  },
+  "PROJECT_ROOT_FILE": {
+    "name": "main",
+    "parentId": "SRC",
+    "extension": "SX",
+    "id": "PROJECT_ROOT_FILE",
+    "tag": "ROOT",
+    "type": "FILE"
+  },
+  "MAIN_COMPONENT": {
+    "name": "App",
+    "parentId": "SRC",
+    "extension": "SX",
+    "id": "MAIN_COMPONENT",
+    "tag": "ROOT_COMPONENT",
+    "type": "FILE"
+  },
+  "ASSETS": {
+    "name": "assets",
+    "parentId": "SRC",
+    "id": "ASSETS",
+    "tag": "ASSETS",
+    "type": "DIRECTORY",
+    "children": []
+  },
+  "PACKAGE_CONFIG": {
+    "name": "package",
+    "extension": "json",
+    "parentId": "ROOT",
+    "id": "PACKAGE_CONFIG",
+    "tag": "PACKAGE_CONFIG",
+    "type": "FILE"
+  },
+  "INDEX_HTML": {
+    "name": "index",
+    "parentId": "ROOT",
+    "extension": "html",
+    "id": "INDEX_HTML",
+    "tag": "INDEX_HTML",
+    "type": "FILE"
+  },
+  "STYLES": {
+    "name": "styles",
+    "parentId": "SRC",
+    "id": "STYLES",
+    "tag": "STYLES",
+    "type": "DIRECTORY",
+    "children": []
+  },
+  "ALL_STYLES_FILE": {
+    "name": "styles",
+    "extension": "js",
+    "parentId": "ROOT",
+    "id": "ALL_STYLES_FILE",
+    "tag": "ALL_STYLES_FILE",
+    "type": "FILE"
+  },
+  "CUSTOM_UPLOAD": {
+    "name": "custom_upload",
+    "parentId": "ROOT",
+    "id":"CUSTOM_UPLOAD",
+    "children":[],
+    "tag":"CUSTOM_UPLOAD",
+    "type":"DIRECTORY"
   }
-  }
+}
   

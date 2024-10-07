@@ -1,7 +1,7 @@
 import '../styles/ProjectDisplay.css';
 import PropTypes from 'prop-types';
 
-function TopBar({ onTabChange, activeTab, item }) {
+function TopBar({ onTabChange, activeTab, availableTabs }) {
   return (
     <div className="br-background-primary rounded project-top-bar">
       <div className="col-md-4 d-xl-block d-none">
@@ -9,28 +9,30 @@ function TopBar({ onTabChange, activeTab, item }) {
       </div>
       <div className="col-md-4 col-sm-6 d-flex justify-content-xl-center justify-content-start">
         <ul className="nav nav-pills custom-nav rounded br-background-secondary" id="pills-tab" role="tablist">
-          <li className="nav-item me-2" role="presentation">
-            <button
-              className={`nav-link ${activeTab === 'code' ? 'active' : ''}`}
-              id="pills-home-tab"
-              type="button"
-              role="tab"
-              aria-controls="pills-home"
-              aria-selected={activeTab === 'code'}
-              onClick={() => onTabChange('code')}
-            >
-              <i className="bi bi-code-slash me-1"></i>
-              Code
-            </button>
-          </li>
-          {item.type === 'component' ? (
+          {availableTabs.includes('code') && (
+            <li className="nav-item me-2" role="presentation">
+              <button
+                className={`nav-link ${activeTab === 'code' ? 'active' : ''}`}
+                id="pills-home-tab"
+                type="button"
+                role="tab"
+                aria-controls="pills-home"
+                aria-selected={activeTab === 'code'}
+                onClick={() => onTabChange('code')}
+              >
+                <i className="bi bi-code-slash me-1"></i>
+                Code
+              </button>
+            </li>
+          )}
+          {availableTabs.includes('preview') && (
             <li className="nav-item" role="presentation">
               <button
                 className={`nav-link ${activeTab === 'preview' ? 'active' : ''}`}
-                id="pills-profile-tab"
+                id="pills-preview-tab"
                 type="button"
                 role="tab"
-                aria-controls="pills-profile"
+                aria-controls="pills-preview"
                 aria-selected={activeTab === 'preview'}
                 onClick={() => onTabChange('preview')}
               >
@@ -38,24 +40,26 @@ function TopBar({ onTabChange, activeTab, item }) {
                 Preview
               </button>
             </li>
-          ) : (
+          )}
+          {availableTabs.includes('config') && (
             <li className="nav-item" role="presentation">
               <button
                 className={`nav-link ${activeTab === 'config' ? 'active' : ''}`}
-                id="pills-profile-tab"
+                id="pills-config-tab"
                 type="button"
                 role="tab"
-                aria-controls="pills-profile"
+                aria-controls="pills-config"
                 aria-selected={activeTab === 'config'}
                 onClick={() => onTabChange('config')}
               >
-                <i className="bi bi-eye me-1"></i>
+                <i className="bi bi-gear me-1"></i>
                 Config
               </button>
             </li>
           )}
         </ul>
       </div>
+
       <div className="col-md-4 col-sm-6 d-flex justify-content-end">
         {activeTab === 'preview' && (
           <div className="d-flex" role="toolbar" aria-label="Toolbar with button groups">
@@ -99,7 +103,7 @@ function TopBar({ onTabChange, activeTab, item }) {
 TopBar.propTypes = {
   onTabChange: PropTypes.func,
   activeTab: PropTypes.string,
-  item: PropTypes.object.isRequired,
+  availableTabs: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default TopBar;

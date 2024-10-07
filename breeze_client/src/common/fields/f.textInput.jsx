@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 function CustomTextInput({ name, value, onChange, config, className, placeholder, ...rest }) {
   return (
-    <div className={config.groupClass || 'form-group'}>
-      {config.label && (
+    <div className={config ? config.groupClass : 'form-group'}>
+      {config && config.label && (
         <label className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>{config.label}</label>
       )}
       <input

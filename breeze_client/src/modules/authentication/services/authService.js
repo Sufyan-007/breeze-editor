@@ -12,6 +12,9 @@ export const login = async (username, password) => {
     });
 
     const data = await response.json();
+    if (data.error) {
+      throw new Error('Invalid credentials');
+    }
     return data;
   } catch (error) {
     console.error('Login failed', error.message);

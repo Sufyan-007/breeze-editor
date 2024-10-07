@@ -24,7 +24,7 @@ def login(request):
         with open(auth_file_path, 'r') as file:
             auth_data = json.load(file)
     except FileNotFoundError:
-        return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        return JsonResponse({'error': 'something went wrong'}, status=500)
 
     # Find existing token for username
     existing_token = None
@@ -36,6 +36,8 @@ def login(request):
     if existing_token:
         # Remove old token
         del auth_data[existing_token]
+    else:
+        return JsonResponse({'error': 'Invalid credentials'}, status=400)
     
     # Generate new token
     token = generate_token()

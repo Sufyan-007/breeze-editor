@@ -1,5 +1,9 @@
 import PropTypes from 'prop-types';
+// import { useState, useEffect } from 'react';
+
 const CustomTable = ({
+  // resource,
+  // fields,
   columns,
   data,
   actions,
@@ -18,6 +22,36 @@ const CustomTable = ({
   selectedRows = [],
   actionPlacement = null,
 }) => {
+  // const [data, setData] = useState(passedData || []);
+  // const [columns, setColumns] = useState(passedColumns || []);
+
+  // useEffect(() => {
+  //   if (resource && fields) {
+  //     async function fetchResourceData() {
+  //       const queryParams = new URLSearchParams();
+  //       fields.forEach((field) => queryParams.append('fields', field));
+
+  //       const response = await fetch(`http://localhost:8000/editor/resource/${resource}/?${queryParams.toString()}`, {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
+
+  //       const fetchedData = await response.json();
+  //       setData(fetchedData);
+
+  //       const fetchedColumns = fields.map((field) => ({
+  //         header: field.charAt(0).toUpperCase() + field.slice(1),
+  //         accessor: field,
+  //       }));
+  //       setColumns(fetchedColumns);
+  //     }
+
+  //     fetchResourceData();
+  //   }
+  // }, [resource, fields]);
+
   const handleSort = (column) => {
     const direction = sortBy === column && sortDirection === 'asc' ? 'desc' : 'asc';
     onSort && onSort(column, direction);
@@ -61,26 +95,30 @@ const CustomTable = ({
         <tbody>
           {paginatedData?.length > 0 ? (
             paginatedData?.map((item, rowIndex) => (
-              <tr key={rowIndex} className={rowClass}>
-                {onRowSelect && (
-                  <td className={cellDataClass}>
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(item)}
-                      onChange={() => handleRowSelect(item)}
-                    />
-                  </td>
-                )}
-                {actionPlacement === 'start' || actionPlacement === 'both' ? <td>{actions && actions(item)}</td> : null}
-                {columns.map((column, colIndex) => (
-                  <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
-                    {column.render ? column.render(item[column.accessor], item) : item[column.accessor]}
-                  </td>
-                ))}
-                {actionPlacement === 'end' || actionPlacement === 'both' ? (
-                  <td className={cellDataClass}>{actions && actions(item)}</td>
-                ) : null}
-              </tr>
+              <>
+                <tr key={item.id || rowIndex} className={rowClass}>
+                  {onRowSelect && (
+                    <td className={cellDataClass}>
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(item)}
+                        onChange={() => handleRowSelect(item)}
+                      />
+                    </td>
+                  )}
+                  {actionPlacement === 'start' || actionPlacement === 'both' ? (
+                    <td>{actions && actions(item)}</td>
+                  ) : null}
+                  {columns.map((column, colIndex) => (
+                    <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
+                      {column.render ? column.render(item[column.accessor]) : item[column.accessor]}
+                    </td>
+                  ))}
+                  {actionPlacement === 'end' || actionPlacement === 'both' ? (
+                    <td className={cellDataClass}>{actions && actions(item)}</td>
+                  ) : null}
+                </tr>
+              </>
             ))
           ) : (
             <tr>
@@ -96,21 +134,25 @@ const CustomTable = ({
       </table>
       <div className="pagination-controls d-flex justify-content-between align-items-center">
         <button
-          className="btn btn-secondary"
+          className="btn br-text-primary med-font"
+          style={{ border: '0' }}
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
+          <i className="bi bi-chevron-left" style={{ fontSize: '12px' }}></i>
           Previous
         </button>
         <span>
-          Page {currentPage} of {Math.ceil(data?.length / pageSize)}
+          Page {currentPage} of {Math.max(1, Math.ceil((data?.length || 0) / pageSize))}
         </span>
         <button
-          className="btn btn-secondary"
+          className="btn br-text-primary med-font"
+          style={{ border: '0' }}
           disabled={currentPage * pageSize >= data?.length}
           onClick={() => onPageChange(currentPage + 1)}
         >
           Next
+          <i className="bi bi-chevron-right" style={{ fontSize: '12px' }}></i>
         </button>
       </div>
     </div>

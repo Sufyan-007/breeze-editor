@@ -9,6 +9,8 @@ CONFIG_FILES_PATH = {
 
 
 }
+#port number for third_party breeze server
+PORT = 4000;
 
 APP_CONFIG_PATH = "configurations"
 

@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.settings-settings {
+  display: flex;
+}
+
+.settings-sidebar {
+  height: 80vh;
+  width: 350px;
+  padding: 20px;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+
+.settings-sidebar-header {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  margin-top: 8px;
+}
+
+.settings-sidebar-suboptions {
+  margin-bottom: 20px;
+}
+
+.settings-sidebar-item {
+  margin-bottom: 10px;
+  padding: 5px 0px 5px 0px;
+}
+
+.settings-sidebar-item.active {
+  background-color: #ffffff;
+  color: black;
+  border-radius: 25px;
+}
+
+.settings-content {
+  margin-left: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.settings-integration-image {
+  width: 300px;
+  height: 80px;
+}
+
+.settings-img-thumbnail {
+  display: block;
+  margin: 10px 0;
+}
+
+.settings-delete-logo-button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  right: 35%;
+  z-index: 10;
+}
+
+.settings-logo-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-upload-icon {
+  font-size: 24px;
+  color: #ccc;
+}
+
+.settings-no-outline-button {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.settings-input-with-prefix {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.settings-input-with-prefix span {
+  position: absolute;
+  left: 10px;
+  color: #ccc;
+}
+
+.settings-padding-vite {
+  padding-left: 52px;
+}
+
+.settings-padding-react {
+  padding-left: 102px;
+}

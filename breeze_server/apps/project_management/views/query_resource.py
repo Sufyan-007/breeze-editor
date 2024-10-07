@@ -6,67 +6,26 @@ from django.views.decorators.http import require_POST
 from rest_framework.permissions import AllowAny
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
-from ...common.constants.enums.ResourceCategory import ResourceCategory
+from ...common.constants.enums.ResourceCategory import ResourceCategory,ThirdPartyLibraryKeys
 from ...common.utils.file_helpers.config_handler import read_config_file
-from ...common.constants.consts import CONFIG_PATH,THIRD_PARTY_CONFIG_PATH,CLIENT_API
+from ...common.constants.consts import CONFIG_PATH,THIRD_PARTY_CONFIG_PATH,CLIENT_API,CUSTOMIZED_PROJ
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from ..swagger_schema.query_resource_schema import manage_resource_schema
 from ...common.utils.file_helpers.json_handler import read_json_file as read_file
 # from ...common.constants
 # found_keys=[]
+
+
+
 @swagger_auto_schema(
         method='post',
-        manual_parameters=[
-            openapi.Parameter(
-                name=openapi.TYPE_STRING,
-                in_=openapi.IN_PATH,
-                description='name of project',
-                type=openapi.TYPE_STRING,
-            )
-        ],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "catagory":openapi.Schema(type = openapi.TYPE_STRING),
-                "resource":openapi.Schema(type = openapi.TYPE_STRING),
-                "select":openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(
-                        type= openapi.TYPE_STRING
-                    )
-                ),
-                "filter": openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "operation":openapi.Schema(type = openapi.TYPE_STRING),
-                        "condition":openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type = openapi.TYPE_STRING
-                            )
-                        )
-                    }
-                ),
-                "order":openapi.Schema(type = openapi.TYPE_STRING),
-                "limit": openapi.Schema(type = openapi.TYPE_STRING),
-                "offset": openapi.Schema(type = openapi.TYPE_STRING),
-                "count": openapi.Schema(type = openapi.TYPE_STRING),
-                "libname":openapi.Schema(type = openapi.TYPE_STRING),
-                "libversion":openapi.Schema(type = openapi.TYPE_STRING),
-            }
-        )
-
-        # responses={
-        #     200:openapi.Response(
-        #         description='returned successfully',
-        #         schema=openapi.Schema(
-        #             type=openapi.TYPE_OBJECT,
-        #             properties={
-
-        #             }
-        #         )
-        #     )
-        # }
+        manual_parameters=manage_resource_schema['parameters'],
+        request_body=manage_resource_schema['rb'],
+        responses={
+            200:manage_resource_schema['response_200'],
+            500:manage_resource_schema['response_500'] 
+        },
+        tags=['query']
 )
 @csrf_exempt
 @require_POST
@@ -92,10 +51,11 @@ def manage_resource(request,param):
         category=category.lower()
         selected_data={}
         if not category:
-            return JsonResponse({'error':'categroy is required'},status=400)
+            return JsonResponse({'error':'category is required'},status=400)
         
-        elif category not in [ResourceCategory.COMPONENTS.value , ResourceCategory.SERVICES.value , ResourceCategory.THIRD_PARTY.value,ResourceCategory.API_CLIENT.value]:
-            return JsonResponse({"error":"categroy is not defined"},status = 400)
+        # elif category not in [ResourceCategory.COMPONENTS.value , ResourceCategory.SERVICES.value , ResourceCategory.THIRD_PARTY.value,ResourceCategory.API_CLIENT.value]:
+        elif category not in ResourceCategory._value2member_map_:
+            return JsonResponse({"error":"category is not defined"},status = 400)
         
         if category in [ResourceCategory.COMPONENTS.value,ResourceCategory.SERVICES.value]:
             if not resource:
@@ -146,7 +106,7 @@ def manage_resource(request,param):
 
             if (module and resource and files):
                 try:
-                    config_path=os.path.join(CONFIG_PATH,'api_client_intermediate_json',module,files)
+                    config_path=os.path.join(CONFIG_PATH,projectname,CLIENT_API,module,files)
                     selected_data=read_file(config_path)
                     selected_data=selected_data[resource]
                 
@@ -155,7 +115,7 @@ def manage_resource(request,param):
 
             elif(module and files):
                 try:
-                    config_path=os.path.join(CONFIG_PATH,CLIENT_API,module,files)
+                    config_path=os.path.join(CONFIG_PATH,projectname,CLIENT_API,module,files)
                     selected_data=read_file(config_path)
 
                 except Exception as e:
@@ -164,7 +124,7 @@ def manage_resource(request,param):
             elif(module):
                 try:
                     if not resource:
-                        config_path=os.path.join(CONFIG_PATH,CLIENT_API,module,'index')
+                        config_path=os.path.join(CONFIG_PATH,projectname,CLIENT_API,module,'index')
                         selected_data=read_file(config_path)
                     else:
                         return JsonResponse({"error":"files name are missing"},status=400)
@@ -176,12 +136,29 @@ def manage_resource(request,param):
                 return JsonResponse({"error":"body has not all field (category->module->files->resource)"},status=400)
 
             else:
-                config_path=os.path.join(CONFIG_PATH,CLIENT_API,'swagger_metadata')
+                config_path=os.path.join(CONFIG_PATH,projectname,CLIENT_API,'swagger_metadata')
                 selected_data=read_file(config_path)
                 # return JsonResponse({"error":'Error while fetch data from api_client'},status=400)
 
+        if category in [ResourceCategory.CUSTOMIZED_PROJ.value]:
+            if not libname:
+                return JsonResponse({"error":"Enter Folder name as libname"},status = 400)
+            
+            folder_name = libname
+            if not resource:
+                config_path = os.path.join(CONFIG_PATH,projectname,CUSTOMIZED_PROJ,folder_name,'index')
+                selected_data=read_file(config_path)
+            elif resource:
+                try:
+                    config_path = os.path.join(CONFIG_PATH,projectname,CUSTOMIZED_PROJ,folder_name,resource)
+                    selected_data=read_file(config_path)
+
+                except Exception as e:
+                    return JsonResponse({"error":"File not present"},status = 400)
+            # selected_data = read_file(config_path)
+
         if select:
-            if category in [ResourceCategory.COMPONENTS.value , ResourceCategory.SERVICES.value , ResourceCategory.THIRD_PARTY.value]:
+            if category in [ResourceCategory.COMPONENTS.value , ResourceCategory.SERVICES.value , ResourceCategory.THIRD_PARTY.value, ResourceCategory.CUSTOMIZED_PROJ.value]:
                 if not resource:
                     return JsonResponse({"error":'Resource are not there'},status = 400)
                 else:

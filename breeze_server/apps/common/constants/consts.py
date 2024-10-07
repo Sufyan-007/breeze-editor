@@ -7,6 +7,9 @@ CONFIG_FILES_PATH = {
     'ROUTING_CONFIG' : 'routing_config',
     'CSS_CONFIG' : 'css_config',
     'DIRECTORY_MANAGEMENT':'directory_management',
+    'SWAGGER_CONFIG' : 'swagger_metadata',
+    'RESOURCE_CONFIG' : 'uploaded_resources_config',
+    'ENVIRONMENT_SETTINGS' : 'environment_settings',
 }
 
 JSX_TEMPLATE_PATH = "project_templates/jsx_template"
@@ -20,8 +23,11 @@ THIRD_PARTY_CONFIG_PATH = "third_party_configs"
 
 CONFIG_PATH = "configurations"
 
+PORT= 4000
 # should be used after confirming the genration path status
 PROJECT_GENERATION_PATH = "generated_projects"
 
 CLIENT_API="api_client_intermediate_json"
+CUSTOMIZED_PROJ ="customized_proj_config"
+
 APP_CONFIG_PATH = "configurations"

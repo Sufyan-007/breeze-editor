@@ -5,7 +5,7 @@ import BreezeStudio from '../../assets/images/Breeze Studio.png';
 import Avatar from '../../assets/images/Ellipse 1.png';
 import VectorIcon from '../../assets/images/Vector.png';
 import darkLightModeSwitch from '../../assets/svgs/dark-light-mode-switch.svg';
-function Navbar({ currentPage = 'index' }) {
+function Navbar({ currentPage = 'index', projectName = '' }) {
   const { toggleTheme } = useContext(ThemeContext);
 
   return (
@@ -25,7 +25,7 @@ function Navbar({ currentPage = 'index' }) {
           {currentPage === 'project' && (
             <li className="breadcrumb-item active d-flex align-items-center" aria-current="page">
               <img src={VectorIcon} className="mx-2" alt="icon" />
-              <span className="med-font fw-semibold br-text-primary">ABDM Connector</span>
+              <span className="med-font fw-semibold br-text-primary">{projectName}</span>
             </li>
           )}
         </ol>
@@ -54,6 +54,7 @@ function Navbar({ currentPage = 'index' }) {
 
 Navbar.propTypes = {
   currentPage: PropTypes.string,
+  projectName: PropTypes.string,
 };
 
 export default Navbar;
