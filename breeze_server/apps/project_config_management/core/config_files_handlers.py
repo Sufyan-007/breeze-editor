@@ -2,7 +2,7 @@ from apps.common.constants.consts import CONFIG_PATH,CLIENT_API
 import json, os
 from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
 from apps.common.utils.file_helpers.json_handler import read_json_file, write_json_file
-from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists, create_dir_if_not_exists
+from apps.common.utils.file_helpers.dir_handler import  create_dir_if_not_exists
 from apps.common.utils.file_helpers.config_handler import write_config_file
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.utils.uuid_as_key import generate_uuid_as_key 
@@ -15,16 +15,16 @@ def add_dirs_configs(data):
     app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
     
     # Create Dir if not exists for config folder
-    create_parent_dir_if_not_exists(app_config_dir)
+    create_dir_if_not_exists(app_config_dir)
     
     # for storing intermediate service config
-    create_parent_dir_if_not_exists(
+    create_dir_if_not_exists(
         f"{app_config_dir}/{CLIENT_API}"
     )
     
     # for storing schemas retrieved form swagger file
-    create_parent_dir_if_not_exists(f"{app_config_dir}/swagger_schema")
-    create_parent_dir_if_not_exists(data["path"])
+    create_dir_if_not_exists(f"{app_config_dir}/swagger_schema")
+    create_dir_if_not_exists(data["path"])
 
     app_current_config = data
     app_current_config['components_src_dir'] = 'src'

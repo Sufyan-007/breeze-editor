@@ -6,12 +6,12 @@ import zipfile
 import json
 from datetime import datetime, timezone
 from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH
-from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists
+from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists,create_dir_if_not_exists
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
 from apps.directory_management.core.directory_management_service import DirectoryManager
 from .custom_uploads_directory_config import create_json_structure, save_json_to_file
 def save_extracted_file(file, path):
-    create_parent_dir_if_not_exists(os.path.dirname(path))
+    create_parent_dir_if_not_exists(path)
 
     with open(path, "wb") as destination:
         for chunk in file.chunks():
@@ -47,7 +47,7 @@ def upload_file(project_name, file, fileName):
         
         # Save the zip file to a temporary location
         temp_dir = os.path.join(CONFIG_PATH, project_name, "temp")
-        create_parent_dir_if_not_exists(temp_dir)
+        create_dir_if_not_exists(temp_dir)
         temp_zip_path = os.path.join(temp_dir, fileName)
         save_extracted_file(file, temp_zip_path)
 

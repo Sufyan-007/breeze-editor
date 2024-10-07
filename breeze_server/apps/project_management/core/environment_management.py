@@ -67,7 +67,7 @@ def edit_package_json_file(project_id, config):
 
         package_json_data["scripts"] = scripts
 
-        create_parent_dir_if_not_exists(os.path.dirname(package_json_path))
+        create_parent_dir_if_not_exists(package_json_path)
 
         with open(package_json_path, 'w') as package_json_file:
             json.dump(package_json_data, package_json_file, indent=4)
@@ -88,7 +88,7 @@ def save_file(project_id, env_name, env_values, env_vars):
         env_file_path = os.path.join(env_directory, f".env.{env_name}")
         if env_name == 'dev (default)':
             env_file_path = os.path.join(env_directory, ".env")
-        create_parent_dir_if_not_exists(os.path.dirname(env_file_path))
+        create_parent_dir_if_not_exists(env_file_path)
         with open(env_file_path, 'w') as file:
             for var_id, value in env_values.items():
                 var_name = env_vars.get(var_id, var_id)
@@ -285,7 +285,7 @@ def remove_script_from_package_json(app_config_path, env_name):
 
         package_json_data["scripts"] = scripts
 
-        create_parent_dir_if_not_exists(os.path.dirname(package_json_path))
+        create_parent_dir_if_not_exists(package_json_path)
 
         with open(package_json_path, 'w') as package_json_file:
             json.dump(package_json_data, package_json_file, indent=4)
