@@ -190,11 +190,6 @@ function AllProjects() {
     <div className="container-fluid vh-100 p-0 br-background-secondary">
       <Navbar />
       <div className="home-main-content">
-        <div className="home-title">
-          <h2 className="xlarge-font br-text-tertiary">Welcome, John</h2>
-          <h2 className="mb-3 large-font color-text br-text-primary">Select a Project</h2>
-        </div>
-
         <div className="row m-0 gap-2">
           {projects.map((project) => (
             <ProjectCard
