@@ -109,6 +109,13 @@ class DirectoryManager:
             return os.path.join(self.get_path_from_file_id(entry["parentId"]), name)
         
         
+    def get_file_content(self,id):
+        path = self.get_path_from_file_id(id)
+        with open(path,"r") as f:
+            content = f.read()
+        return content
+
+        
         
     def get_directory_configs(self,id,depth=0,allChildren=False,withPreferences=False):
         directories = {}

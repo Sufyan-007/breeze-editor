@@ -9,6 +9,8 @@ from .helpers.function_ast_parser import FunctionParser
 from apps.directory_management.core.directory_management_service import DirectoryManager
 from common.utils.file_utils import create_parent_dir_if_not_exists
 from common.utils.formatter import format_raw_val
+import pickle
+from .helpers.code_indexing import get_code_index,generate_code
 
 
 
@@ -122,28 +124,20 @@ class ComponentGenerator_JSX(ComponentGenerator):
     def write_component(self, comp_config):
     
         #generate react component code
-        react_component_code = self.generate_react_component_code(comp_config)
+        react_component_code, code_tree = self.generate_react_component_code(comp_config)
         
         file_id = comp_config.get("file_id")
         
         directory_management_service = DirectoryManager(self.app_config["name"])
         directory_management_service.save_file(file_id,react_component_code)
-        # # file_path = directory_management_service.get_path_from_file_id(file_id)
-        # # Get the output file name from the JSON configuration
-        # output_file = f"{self.src_dir}/{comp_config['containingFile']}"
-        # output_file = f"{file_path}"
-        # # print("REACTCOMPONENT")
-        # # print(react_component_code)
-        # formatted_code = subprocess.check_output(" ".join(['npx', 'prettier', '--parser', 'babel']), shell=True, input=react_component_code, text=True)
-        # # formatted_code = react_component_code
-        # # Create parent dir if not exists
-        # create_parent_dir_if_not_exists(output_file)
-        # # print("output file", output_file)
-        # # Write the component code to the specified output file
-        # with open(output_file, 'w') as file:
-        #     file.write(formatted_code)
+        
+        content = directory_management_service.get_file_content(file_id)
+        generate_code(code_tree)
+        code_tree = get_code_index(code_tree, content)
+        
         print(f"React component code has been written to '{react_component_code}'")
-
+        return code_tree
+        
     def generate_react_component_code(self, config):
         # component_uuid = config['component_uuid']
         all_config = self.all_comp_config
@@ -161,6 +155,16 @@ class ComponentGenerator_JSX(ComponentGenerator):
 
         wrapper_store = config.get("wrapper_store",None)
         if not wrapper_store :
+            html_code_tree = {
+                "type" : "REACT_COMPONENT",
+                "statementType" : "WRAP",
+                "prefix" : f"<Fragment>",
+                "children" :[
+                    html_code_tree
+                    ],
+
+                "suffix" : f"</Fragment>",
+            }
             html_code = "<Fragment>%s</Fragment>"%(html_code)
         else:
             if "store" in config["imports"]:
@@ -301,7 +305,7 @@ class ComponentGenerator_JSX(ComponentGenerator):
                     "type" : "RETURN_HTML_TREE",
                     "statementType" : "WRAP",
                     "prefix" : "return(",
-                    "children" : html_code_tree,
+                    "children" : [html_code_tree],
                     "suffix" : ")"
                 }
                 ],
@@ -332,4 +336,4 @@ class ComponentGenerator_JSX(ComponentGenerator):
         
         with open("/home/sufyan/Documents/Projects/breezeRepo/generated_projects/test.json", "w") as test_file:
             test_file.write(json.dumps(code_tree))
-        return react_component
+        return react_component, code_tree

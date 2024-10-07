@@ -22,6 +22,7 @@ from .project_generation_progress import ProjectGenerationProgress
 from .helpers.dependencies_manager import DependencyManager
 from apps.api_client_generator.utils.uuid_as_key import generate_uuid_as_key
 from apps.directory_management.core.directory_management_service import DirectoryManager
+import pickle
 
 ## should be added later to common.utils.app_consts
 NEW_COMP_FORMAT={
@@ -82,21 +83,20 @@ NEW_COMP_FORMAT={
 
 class AppEditor:
     
-    app_config_dir = None
-    app_config = {}
-    comp_config = {}
-    usage_config = {}
-    routing_helper_data = {}
-    # mapping_config = {}
-    routing_config = None
-    reducer_config = None
-    redux_store_config = None
+    
     
     def __init__(self,project_name):
         # self.project_name = project_name
-        
+        self.comp_config = {}
+        self.usage_config = {}
+        self.routing_helper_data = {}
+        # mapping_config = {}
+        self.routing_config = None
+        self.reducer_config = None
+        self.redux_store_config = None
         self.project_name= project_name
         self.app_config_dir = f"{CONFIG_PATH}/{project_name}"
+        self.app_config = {}
         self.app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{project_name}"
         self.read_config()
         
@@ -268,7 +268,15 @@ class AppEditor:
             # mapping_config=self.mapping_config
             )
         print(comp_generator,"222222")
-        comp_generator.write_component(comp)
+        code_tree = comp_generator.write_component(comp)
+        
+        pickle_dir = f"{self.app_config_dir}/pickles/{comp['name']}.bytes"
+        
+        create_parent_dir_if_not_exists(f"{self.app_config_dir}/pickles/")
+        
+        with open(pickle_dir,"wb") as file:
+            pickle.dump(code_tree, file)
+        
         if self.usage_config == {}:
             self.usage_config = {
                 "components": {
