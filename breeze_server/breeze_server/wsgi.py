@@ -13,8 +13,7 @@ from django.core.wsgi import get_wsgi_application
 from dotenv import load_dotenv
 load_dotenv()
 
-settings_env =os.environ.get("RUN_ENV") 
-settings_env = 'breeze_server.settings.%s'%(settings_env)
+settings_env = 'breeze_server.settings'
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_env)
     
 application = get_wsgi_application()

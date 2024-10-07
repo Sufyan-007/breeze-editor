@@ -14,11 +14,10 @@ from django.core.asgi import get_asgi_application
 import apps.project_management.communication.routing
 
 from dotenv import load_dotenv
-load_dotenv()
-settings_env =os.environ.get("RUN_ENV") 
-settings_env = 'breeze_server.settings.%s'%(settings_env)
+settings_env = 'breeze_server.settings'
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_env)
-    
+load_dotenv()
+
 asgi_app = get_asgi_application()
 application = ProtocolTypeRouter({
   "http": asgi_app,

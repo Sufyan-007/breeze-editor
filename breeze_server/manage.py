@@ -4,30 +4,28 @@ import os
 import sys
 from dotenv import load_dotenv
 import environ
+from pathlib import Path
 
 
 def main():
     """Run administrative tasks."""
     load_dotenv()
-    settings_env =os.environ.get("RUN_ENV") 
-
-    env = environ.Env()
-    environ.Env.read_env()
-    run_env =env('RUN_ENV') 
-    print(settings_env)
-    settings_env = 'breeze_server.settings.%s'%(run_env)
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_env)
+    environment =os.environ.get("RUN_ENV") 
     
-    # Set default host and port from environment variables
-    run_env =run_env.upper()
-    host_key = run_env+"_SERVER_HOST" 
-    host = env(host_key)
-    port_key = run_env+ "_SERVER_PORT"
-    port = env(port_key)
+    BASE_DIR = Path(__file__).resolve().parent
+    path=os.path.join(BASE_DIR, '.env.%s'%(environment))
+    
+    load_dotenv(path)
+    
+    host = os.getenv("SERVER_HOST")
+    port = os.getenv("SERVER_PORT")
     server = f'{host}:{port}'
+    
+    settings_env = 'breeze_server.settings'
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_env)
+
     if server not in sys.argv:
         sys.argv += [server]
-
     try:
         from django.core.management import execute_from_command_line
         execute_from_command_line(sys.argv)
