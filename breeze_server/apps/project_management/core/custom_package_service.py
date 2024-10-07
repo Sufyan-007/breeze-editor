@@ -41,28 +41,33 @@ def check_existing_folder(project_name, file_name):
     # Return True if a folder with the same name exists
     return file_name in existing_folders
 
+
 def upload_file(project_name, file, fileName):
-    if project_name is not None:
-        app_config, react_app_dir = get_project_config(project_name)
-        
+    if project_name is not None:       
         # Save the zip file to a temporary location
         temp_dir = os.path.join(CONFIG_PATH, project_name, "temp")
         create_parent_dir_if_not_exists(temp_dir)
         temp_zip_path = os.path.join(temp_dir, fileName)
+        print(temp_zip_path, "temp zip path")
         save_extracted_file(file, temp_zip_path)
 
+        try:
+            extract_result = extract_zip_file(project_name, temp_zip_path, fileName)
+            if 'error' in extract_result:
+                raise Exception(extract_result['error'])
+            
+            os.remove(temp_zip_path)
 
-        # After saving the file, extract its contents
-        extract_result = extract_zip_file(project_name, temp_zip_path, fileName)
-        if 'error' in extract_result:
-            raise Exception(extract_result['error'])
-
-        # Clean up: Remove the zip file after extraction
-        os.remove(temp_zip_path)
-        return extract_result  # Returning the result of extraction
-
+            return extract_result  
+        
+        finally:
+            #deleting the temp dir
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+                print(f"{temp_dir} has been removed")
     else:
         raise Exception('Project name is required to upload and extract files.')
+
 
 def extract_zip_file(project_name, zip_file_path, fileName):
     try:

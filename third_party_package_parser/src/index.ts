@@ -4,7 +4,7 @@ import express from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
 import {extractAllComponentDetails,getDeclarationFiles,install_library,getInstalledVersion,updateLibraryStatus, checkForLib } from './parse_library';
-import {CUSTOM_DIRECTORY_PATH, DIRECTORY_PATH, PORT} from './consts';
+import { CONFIG_PATH,THIRD_PARTY_PACKAGE_PARSER, PORT} from './consts';
 // import { fileURLToPath } from 'url';
 // import { dirname } from 'path';
 
@@ -30,7 +30,7 @@ app.post('/', (req, res) => {
       // if library version not present it will find by getintalledversion
       libraryVersion = libraryVersion ? libraryVersion : getInstalledVersion(libraryName);
       
-      const directoryPath = path.join( DIRECTORY_PATH, 'node_modules', libraryName);
+      const directoryPath = path.join( THIRD_PARTY_PACKAGE_PARSER, 'node_modules', libraryName);
       
       if(!checkForLib(libraryName,libraryVersion)){  
           if (fs.existsSync(directoryPath)) {
@@ -83,7 +83,8 @@ app.post('/custom', (req, res) => {
   const project = req.body.projName;
   const projName =  `${project}/extracted_zip_files`;
   const zipFileName = req.body.fileName;
-  const directoryPath = path.join(CUSTOM_DIRECTORY_PATH, projName, zipFileName);
+  const directoryPath = path.join(CONFIG_PATH, projName, zipFileName);
+  console.log(directoryPath,"directory path");
   
   if (fs.existsSync(directoryPath)) {
     if(extractAllComponentDetails(directoryPath,zipFileName,"file",project)){
