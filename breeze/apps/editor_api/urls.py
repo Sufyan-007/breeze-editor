@@ -34,6 +34,7 @@ from .views import EnvironementSettings
 from .views import SetEnvironment
 from .views import ASTParser
 from .views import CustomPackage
+from .views import GetCodeConfig
 
 urlpatterns = [
         path('read-config/<str:param>/',ConfigReader.as_view()),
@@ -93,5 +94,7 @@ urlpatterns = [
         
         #custom packages 
         path('custom-package-upload/<str:projectName>',CustomPackage.as_view()),
+        
+        path('get-code-config/<str:projectName>',GetCodeConfig.as_view()),
 ]
 
