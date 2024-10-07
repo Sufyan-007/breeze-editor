@@ -53,3 +53,8 @@ class MoveNode(APIView):
             raise NotImplementedError()
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+class GetCode(APIView):
+    def get(self, request,projectName,fileId):
+        directoryManager = DirectoryManager(projectName)
+        return JsonResponse({'code':directoryManager.get_file_content(fileId)},status=200)
