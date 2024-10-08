@@ -4,15 +4,38 @@ import ConfigDisplay from './ConfigDisplay';
 import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
 import { useTreeContext } from '../context/TreeContext';
 import { getAvailableTabs, initCode } from '../constants/TabScreen';
+import { useParams } from 'react-router-dom';
 
 function ProjectDisplay() {
   const { selectedNode } = useTreeContext();
-
+  const { projectName } = useParams();
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
-  // const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
-  // const item = selectedNode.id === 7 ? { type: 'third-party' } : { type: 'component' }; // TO DO : Dynamic after api integration
+  const [editorCode, setEditorCode] = useState('');
 
   const availableTabs = getAvailableTabs(selectedNode?.tag);
+  console.log('selectedNode::>>', selectedNode);
+  //to do : add in services.
+  useEffect(() => {
+    if (selectedNode && projectName) {
+      const fetchCode = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:8000/api/directory/${projectName}/get-code/${selectedNode.id}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setEditorCode(data.code);
+          } else {
+            console.error('Failed to fetch code:', response.statusText);
+          }
+        } catch (error) {
+          console.error('Error fetching code:', error);
+        }
+      };
+
+      fetchCode();
+    }
+  }, [selectedNode, projectName]);
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {
@@ -33,7 +56,11 @@ function ProjectDisplay() {
           {activeTab === 'code' && (
             <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
               <div className="editor-container">
-                <ConfigurableMonacoEditor defaultValue={initCode} height="calc(100vh - 123px)" language="javascript" />
+                <ConfigurableMonacoEditor
+                  defaultValue={editorCode ? editorCode : '//Fetching Code'}
+                  height="calc(100vh - 123px)"
+                  language="javascript"
+                />
               </div>
             </div>
           )}

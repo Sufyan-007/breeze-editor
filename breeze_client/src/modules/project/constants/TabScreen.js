@@ -13,7 +13,7 @@ export const getAvailableTabs = (tag) => {
     case 'SETTINGS':
       return ['config'];
     case 'PACKAGE_CONFIG':
-      return ['code', 'config'];
+      return ['config', 'code'];
     default:
       return ['code', 'preview'];
   }

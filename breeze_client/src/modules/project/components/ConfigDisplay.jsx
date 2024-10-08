@@ -3,6 +3,7 @@ import RoutingConfig from '../../routing/pages/RoutingConfig';
 import ServiceConfiguration from '../../service-configuration/pages/ServiceConfiguration';
 import CustomZipPackagePage from '../../custom_uploads/pages/CustomZipPackage';
 import Settings from '../../settings/pages/Settings';
+import ThirdPartyDependencyConfig from '../../third-party-dependencies/pages/ThirdPartyDependencyConfig';
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {
     switch (configType) {
@@ -15,7 +16,7 @@ function ConfigDisplay({ configType }) {
       case 'SETTINGS':
         return <Settings />;
       case 'PACKAGE_CONFIG':
-        return <>package.json</>;
+        return <ThirdPartyDependencyConfig />;
       default:
         return <div>Select a configuration type</div>;
     }
