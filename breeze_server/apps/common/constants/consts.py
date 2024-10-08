@@ -23,11 +23,12 @@ THIRD_PARTY_CONFIG_PATH = "third_party_configs"
 
 CONFIG_PATH = "configurations"
 
-PORT= 4000
+PORT = 4000
 # should be used after confirming the genration path status
 PROJECT_GENERATION_PATH = "generated_projects"
 
-CLIENT_API="api_client_intermediate_json"
-CUSTOMIZED_PROJ ="customized_proj_config"
+CLIENT_API = "api_client_intermediate_json"
+CUSTOMIZED_PROJ = "customized_proj_config"
+MODEL = "models"
 
 APP_CONFIG_PATH = "configurations"
