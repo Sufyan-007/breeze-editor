@@ -3,7 +3,6 @@
 import os
 import sys
 from dotenv import load_dotenv
-import environ
 from pathlib import Path
 
 
