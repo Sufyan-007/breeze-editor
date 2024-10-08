@@ -19,3 +19,4 @@ editor_ui/package-lock.json
 third_party_configs/*
 breeze_server/.env
 sample_configs/
+*.sqlite3
