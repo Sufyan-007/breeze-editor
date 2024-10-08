@@ -48,19 +48,21 @@ def login(request):
 
         if existing_token:
             # Remove old token
-            del auth_data[existing_token]
+            # del auth_data[existing_token]
+            pass
         else:
             return JsonResponse({'error': 'Invalid credentials'}, status=400)
         
         # Generate new token
-        token = generate_token()
+        # token = generate_token()
         token_data = {
             'username': username,
             'password': password,
             'expiry': get_expiry_timestamp().isoformat()
         }
         
-        auth_data[token] = token_data
+        # auth_data[token] = token_data
+        auth_data[existing_token] = token_data
 
         with open(auth_file_path, 'w') as file:
             json.dump(auth_data, file)
