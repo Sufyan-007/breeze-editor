@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os,json
-import environ
 from dotenv import load_dotenv
 
 
@@ -34,12 +33,6 @@ def str_to_array(s):
     return arr
         
 load_dotenv()
-environment = os.getenv('RUN_ENV', 'dev')
-
-env = environ.Env()
-BASE_DIR = Path(__file__).resolve().parent.parent
-path=os.path.join(BASE_DIR, '.env.%s'%(environment))    
-load_dotenv(path)
     
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
