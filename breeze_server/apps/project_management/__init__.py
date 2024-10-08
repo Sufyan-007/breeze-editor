@@ -1,6 +1,7 @@
 import os
+import sys
 
-if os.environ.get('RUN_MAIN' ):
+if os.environ.get('RUN_MAIN' ) or "--noreload" in sys.argv:
     from .utils.get_all_projects import get_all_projects
     from .communication.app_startup_manager import start_app
     projects = get_all_projects()
