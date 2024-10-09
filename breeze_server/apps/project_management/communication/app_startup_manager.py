@@ -44,11 +44,10 @@ def run_project_threaded(project_id,port,project_path, env_name):
     env['BROWSER'] =  "NONE"
     channel_layer = get_channel_layer()
     
-    if env_name == '' or env_name == 'default (.env)':
-        process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
-    else:
-        process = subprocess.Popen(" ".join(['npm', f'run start:{env_name}','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
-    
+    if not env_name or env_name == 'dev (default)':
+        env_name = 'dev'
+
+    process = subprocess.Popen(" ".join(['npm', 'run', f'{env_name}', '--', '--host', '0.0.0.0', '--port', str(port)]), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
     status_mapping = {
     b'webpack compiled successfully': "RUNNING",
     b'Compiled with warnings': "RUNNING", # WARNING
@@ -58,10 +57,8 @@ def run_project_threaded(project_id,port,project_path, env_name):
 
     while True:
         output = process.stdout.readline()
-        if output:
-            # print(project_id)
-            # print("====================", output, "===================")
-            
+        if output: 
+           
             for key, status in status_mapping.items():
                 if output.startswith(key):
                     RUNNING_APPS[project_id]['status'] = status
@@ -72,12 +69,12 @@ def run_project_threaded(project_id,port,project_path, env_name):
                             "message": {"project_id": project_id, "status": status},
                         }
                     )
-                pass
 
 
 def start_app(app_config, forceRestart=False):
+    
     project_id = app_config["name"]
-    env_name = app_config.get("current_environment","")
+    env_name = app_config.get("current_environment", "")
     project_path = app_config["path"]
     if project_id in RUNNING_APPS and not forceRestart:
         pass

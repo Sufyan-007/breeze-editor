@@ -55,7 +55,8 @@ def add_node( project_name, category, target_id, data):
         config_data[data['id']] = data
         if not config_data[target_id].get('children'):
             config_data[target_id]['children'] = []
-        config_data[target_id]['children'].append(data['id'])
+        if not data['id'] in config_data[target_id]['children']:
+            config_data[target_id]['children'].append(data['id'])
     
         return config_data,data['id']
 

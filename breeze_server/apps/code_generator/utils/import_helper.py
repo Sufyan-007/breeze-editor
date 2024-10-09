@@ -6,7 +6,7 @@ class ImportHelper:
         pass
 
     @staticmethod
-    def generate_imports_code(component_config, all_config,all_store_config, all_reducer_config, app_config={}):
+    def generate_imports_code(component_config, comp_config_index, all_store_config, all_reducer_config, app_config={}):
         # print(component_config)
         imported_components = component_config['imports'].get('components',[])
         imported_store = component_config['imports'].get('store',[]) 
@@ -17,7 +17,7 @@ class ImportHelper:
 
         # Handle import for components
         for ic in imported_components:
-            related_comp = all_config[ic]
+            related_comp = comp_config_index[ic]
             path = directory_management_service.get_path_from_file_id(related_comp["file_id"],relative_path=True)
             comp_path = get_path_without_ext(path)
 
@@ -79,7 +79,7 @@ class ImportHelper:
         return '\n'.join(import_statements)
 
     @staticmethod
-    def handle_import(component_config, all_config, all_store_config):
+    def handle_import(component_config, comp_config_index, all_store_config):
         pass
 
     @staticmethod
