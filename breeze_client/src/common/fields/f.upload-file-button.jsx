@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 function CustomFileUploadField({
   onFileSelect = () => {},
-  label = 'Choose File',
   accept = '*',
   disabled = false,
   style = {},
@@ -45,7 +44,7 @@ function CustomFileUploadField({
 
   return (
     <div className={config.groupClass || 'form-group'}>
-      {config.label && <label className="form-label br-text-primary med-font fw-semibold">{label}</label>} 
+      {config.outerlabel && <label className="form-label br-text-primary med-font fw-semibold">{config.outerlabel}</label>} 
         <button
           type="button"
           onClick={handleClick}
@@ -76,7 +75,7 @@ function CustomFileUploadField({
           {...eventHandlers}
         >
           {icon && <span style={{ marginRight: '10px' }}>{icon}</span>}
-          <label>{label}</label>
+          <label>{config.innerlabel}</label>
           <span
             style={{
               display: 'inline-block',
