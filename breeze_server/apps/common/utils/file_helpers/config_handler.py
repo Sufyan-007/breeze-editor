@@ -3,8 +3,8 @@ import time
 from pathlib import Path
 from flatten_json import flatten
 from flatten_json import unflatten_list
-from apps.common.constants.consts import CONFIG_PATH
-from apps.common.utils.file_helpers.json_handler import write_json_file
+from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH
+from apps.common.utils.file_helpers.json_handler import write_json_file, read_project_config_file
 
 SEPARATOR = "<>"
 
@@ -144,4 +144,10 @@ def write_config_file(project_name,category,filename,json_data):
             index_file_content[filename] = json_data.get('name')
             write_json_file(INDEX_FILE_PATH, index_file_content)
             
-
+def get_breeze_config_file(project_id, config_type='APP_CONFIG'):
+    path = f"{CONFIG_PATH}/{project_id}"
+    config = read_project_config_file(
+        path, CONFIG_FILES_PATH[config_type]
+    )
+    return config
+    

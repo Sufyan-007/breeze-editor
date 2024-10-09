@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-function CustomTextInput({ name, value, onChange, config, className, placeholder, ...rest }) {
+function CustomTextInput({ name, value, onChange, config, className, placeholder = '', ...rest }) {
   return (
     <div className={config ? config.groupClass : 'form-group'}>
       {config && config.label && (
@@ -14,6 +14,7 @@ function CustomTextInput({ name, value, onChange, config, className, placeholder
           config ? (config.className ? config.className : 'form-control br-form-control form-control-sm') : className
         }
         placeholder={placeholder}
+        disabled={config?.disabled || false}
         {...rest}
       />
     </div>
