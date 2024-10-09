@@ -5,13 +5,10 @@ export const getAvailableTabs = (tag) => {
     case 'MODULE':
       return ['code', 'config'];
     case 'SERVICE-CONFIG':
-      return ['config'];
-    case 'ROUTING':
-      return ['config', 'code'];
     case 'CUSTOM_UPLOAD':
-      return ['config'];
     case 'SETTINGS':
       return ['config'];
+    case 'ROUTING':
     case 'PACKAGE_CONFIG':
       return ['config', 'code'];
     default:
@@ -19,22 +16,21 @@ export const getAvailableTabs = (tag) => {
   }
 };
 
-export const initCode = `import { RouterProvider } from 'react-router-dom';
-import './App.css';
-import { router } from './routes/routing';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { Provider } from 'react-redux';
-import breezeStore from './store/breezeStore';
-
-function App() {
-  return (
-    <Provider store={breezeStore}>
-      <ThemeProvider>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </Provider>
-  );
-}
-
-export default App;
-`;
+export const getLanguageFromExtension = (extension) => {
+  switch (extension) {
+    case 'js':
+    case 'jsx':
+      return 'javascript';
+    case 'ts':
+    case 'tsx':
+      return 'typescript';
+    case 'html':
+      return 'html';
+    case 'css':
+      return 'css';
+    case 'json':
+      return 'json';
+    default:
+      return 'javascript';
+  }
+};

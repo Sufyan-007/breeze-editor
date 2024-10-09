@@ -3,32 +3,32 @@ import { useState, useEffect } from 'react';
 import ConfigDisplay from './ConfigDisplay';
 import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
 import { useTreeContext } from '../context/TreeContext';
-import { getAvailableTabs, initCode } from '../constants/TabScreen';
+import { getAvailableTabs, getLanguageFromExtension } from '../constants/TabScreen';
 import { useParams } from 'react-router-dom';
+import { getFileCode } from '../services/projectService';
 
 function ProjectDisplay() {
   const { selectedNode } = useTreeContext();
   const { projectName } = useParams();
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
-  const [editorCode, setEditorCode] = useState('');
+  const [editorCode, setEditorCode] = useState('// Loading..');
+  const [editorLanguage, setEditorLanguage] = useState('javascript');
 
   const availableTabs = getAvailableTabs(selectedNode?.tag);
-  console.log('selectedNode::>>', selectedNode);
-  //to do : add in services.
+
   useEffect(() => {
-    if (selectedNode && projectName) {
+    if (selectedNode?.id && !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) && projectName) {
       const fetchCode = async () => {
         try {
-          const response = await fetch(
-            `http://localhost:8000/api/directory/${projectName}/get-code/${selectedNode.id}`
-          );
-          if (response.ok) {
-            const data = await response.json();
+          const data = await getFileCode(projectName, selectedNode.id);
+          if (data.code) {
+            setEditorLanguage(getLanguageFromExtension(selectedNode?.extension));
             setEditorCode(data.code);
           } else {
-            console.error('Failed to fetch code:', response.statusText);
+            setEditorCode('// Loading...');
           }
         } catch (error) {
+          setEditorCode('// Loading...');
           console.error('Error fetching code:', error);
         }
       };
@@ -57,9 +57,9 @@ function ProjectDisplay() {
             <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
               <div className="editor-container">
                 <ConfigurableMonacoEditor
-                  defaultValue={editorCode ? editorCode : '//Fetching Code'}
+                  defaultValue={editorCode ? editorCode : '// Loading...'}
                   height="calc(100vh - 123px)"
-                  language="javascript"
+                  language={editorLanguage}
                 />
               </div>
             </div>

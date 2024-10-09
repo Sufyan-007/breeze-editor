@@ -43,3 +43,13 @@ export async function getAppBasicConfig(projectName) {
     console.log(error);
   }
 }
+
+export async function getFileCode(projectName, id) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/get-code/${id}`;
+  try {
+    const response = await callApiClient(url, 'GET');
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
