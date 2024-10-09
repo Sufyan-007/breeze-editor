@@ -10,7 +10,6 @@ echo "Starting Node.js server in staging mode..."
 npm run staging --prefix ./third_party_package_parser/ &
 
 # start breeze_client server
-# TODO: for the time being same as dev environment
 npm run staging --prefix ./breeze_client/ &
 
 # Wait for all 3 servers to start
