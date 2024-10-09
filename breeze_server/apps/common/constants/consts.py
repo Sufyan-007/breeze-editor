@@ -27,6 +27,7 @@ PORT= 4000
 # should be used after confirming the genration path status
 PROJECT_GENERATION_PATH = "generated_projects"
 
+CUSTOM_UPLOADS = "custom_uploads"
 CLIENT_API="api_client_intermediate_json"
 CUSTOMIZED_PROJ ="customized_proj_config"
 

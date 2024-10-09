@@ -5,7 +5,7 @@ import shutil
 import zipfile
 import json
 from datetime import datetime, timezone
-from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH
+from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH, CUSTOM_UPLOADS
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
 from apps.directory_management.core.directory_management_service import DirectoryManager
@@ -29,14 +29,17 @@ def write_config_file(path, data):
         json.dump(data, file, indent=4)
 
 def check_existing_folder(project_name, file_name):
-    extracted_dir = os.path.join(CONFIG_PATH, project_name, "extracted_zip_files")
+    app_config, react_app_dir = get_project_config(project_name)
+       
+    destination_path = os.path.join(react_app_dir, CUSTOM_UPLOADS, file_name)
+    
     
     # Check if the extracted_zip_folder directory exists
-    if not os.path.exists(extracted_dir):
+    if not os.path.exists(destination_path):
         return False  # If the directory doesn't exist, the folder can't exist either
 
     # List all folders in the extracted_zip_folders directory
-    existing_folders = [f for f in os.listdir(extracted_dir) if os.path.isdir(os.path.join(extracted_dir, f))]
+    existing_folders = [f for f in os.listdir(destination_path) if os.path.isdir(os.path.join(destination_path, f))]
 
     # Return True if a folder with the same name exists
     return file_name in existing_folders
@@ -48,7 +51,6 @@ def upload_file(project_name, file, fileName):
         temp_dir = os.path.join(CONFIG_PATH, project_name, "temp")
         create_parent_dir_if_not_exists(temp_dir)
         temp_zip_path = os.path.join(temp_dir, fileName)
-        print(temp_zip_path, "temp zip path")
         save_extracted_file(file, temp_zip_path)
 
         try:
@@ -71,79 +73,69 @@ def upload_file(project_name, file, fileName):
 
 def extract_zip_file(project_name, zip_file_path, fileName):
     try:
-        extract_dir = os.path.join(CONFIG_PATH, project_name, "extracted_zip_files")
-        zip_dir_path = os.path.join(extract_dir,fileName)
-        # Ensure the extraction directory exists
-        if not os.path.exists(extract_dir):
-            os.makedirs(extract_dir)
+        # Directory for the React app
+        app_config, react_app_dir = get_project_config(project_name)
+        
+        # Ensure the React app directory exists
+        if not os.path.exists(react_app_dir):
+            os.makedirs(react_app_dir)
             
+        custom_uploads_dir = os.path.join(react_app_dir, CUSTOM_UPLOADS)
+        if not os.path.exists(custom_uploads_dir):
+            os.makedirs(custom_uploads_dir)
 
         folder_name = os.path.splitext(fileName)[0]
-        folder_for_files = os.path.join(extract_dir, folder_name)
-        
+        destination_path = os.path.join(custom_uploads_dir, folder_name)
+
         contains_folder = False
         
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+            # Check if the zip contains a folder
             for zip_info in zip_ref.infolist():
                 if zip_info.is_dir():
                     contains_folder = True
                     break
-                
+
+            # If the zip does not contain a folder, create a folder in the React app and extract files
             if not contains_folder:
-                os.makedirs(folder_for_files, exist_ok=True)
+                os.makedirs(destination_path, exist_ok=True)
                 for zip_info in zip_ref.infolist():
-                    extracted_path = os.path.join(folder_for_files, zip_info.filename)
+                    extracted_path = os.path.join(destination_path, zip_info.filename)
                     if zip_info.is_dir():
                         os.makedirs(extracted_path, exist_ok=True)
                     else:
-                        zip_ref.extract(zip_info, folder_for_files)
+                        zip_ref.extract(zip_info, destination_path)
             else:
-                os.makedirs(folder_for_files, exist_ok=True)
-                zip_ref.extractall(folder_for_files)
-        
-       
-        #generate JSON structure of the uploaded zip files
-        directory_manager = DirectoryManager(project_name)
-        result = create_json_structure(directory_manager,zip_dir_path,parent_id="CUSTOM_UPLOAD",tag="ZIP")
-      
-        
-        app_config, react_app_dir = get_project_config(project_name)
-        
+                # If the zip contains a folder, extract everything directly into the destination path
+                zip_ref.extractall(destination_path)
 
-        
-        if not os.path.exists(react_app_dir):
-            os.makedirs(react_app_dir)
-        
-        if not contains_folder:
-            destination_path = os.path.join(react_app_dir, folder_name)
-            shutil.copytree(folder_for_files, destination_path)
-        else:
-            destination_path = os.path.join(react_app_dir, "custom_uploads")
-            shutil.copytree(extract_dir, destination_path, dirs_exist_ok=True)
-        
-        print(f"Extracted files to {extract_dir}")
-        return {'message': 'Files extracted successfully.', 'extracted_to': extract_dir}
-    
+        # Generate JSON structure of the uploaded zip files (optional step based on your app's requirement)
+        directory_manager = DirectoryManager(project_name)
+        result = create_json_structure(directory_manager, destination_path, parent_id="CUSTOM_UPLOAD", tag="ZIP")
+
+        print(f"Extracted files to {destination_path}")
+        return {'message': 'Files extracted successfully.'}
+
     except Exception as e:
         print(f"An error occurred while extracting the zip file: {str(e)}")
         return {'error': str(e)}
 
 def get_zip_files(project_name):
     try:
-        extracted_dir = os.path.join(CONFIG_PATH, project_name, "extracted_zip_files")
-    
-        if not os.path.exists(extracted_dir):
+        app_config, react_app_dir = get_project_config(project_name)
+        custom_uploads_path = os.path.join(react_app_dir,CUSTOM_UPLOADS)
+        if not os.path.exists(custom_uploads_path):
             return {'folders': []}
 
         extracted_folders = [
             {
                 "name": folder,
                 "lastModified": datetime.fromtimestamp(
-                    os.path.getmtime(os.path.join(extracted_dir, folder))
+                    os.path.getmtime(os.path.join(custom_uploads_path, folder))
                 ).astimezone(timezone.utc).strftime('%Y-%m-%d ')
             }
-            for folder in os.listdir(extracted_dir)
-            if os.path.isdir(os.path.join(extracted_dir, folder))
+            for folder in os.listdir(custom_uploads_path)
+            if os.path.isdir(os.path.join(custom_uploads_path, folder))
         ]
         
         return {
@@ -151,7 +143,7 @@ def get_zip_files(project_name):
         }
     except Exception as e:
         raise Exception(f"An error occurred while retrieving extracted folders: {str(e)}")
-        
+                
 def delete_file(project_name, fileName):
     try:
         app_config, react_app_dir = get_project_config(project_name)
@@ -181,3 +173,27 @@ def delete_file(project_name, fileName):
     except Exception as e:
         print(f"Error deleting file or directory: {e}")
 
+def get_components(project_name,selected_zip_file):
+    base_path = os.path.join(CONFIG_PATH, project_name, 'customized_proj_config', selected_zip_file)
+    
+    index_file_path =  os.path.join(base_path, 'index.json')
+    
+    try:
+        # Check if the index.json file exists
+        if os.path.exists(index_file_path):
+            # Open and read the index.json file
+            with open(index_file_path, 'r') as file:
+                index_data = json.load(file)
+
+            # Extract the component names (values) from the JSON object
+            component_names = list(index_data.values())
+            print(component_names,"component names")
+            return component_names
+        else:
+            print(f"index.json file not found at: {index_file_path}")
+            return None
+
+    except Exception as e:
+        print(f"Error occurred while reading components: {str(e)}")
+        return None
+    
