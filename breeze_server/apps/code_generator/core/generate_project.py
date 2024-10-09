@@ -204,7 +204,7 @@ def install_dependencies(app_config):
 
     package_json['scripts']['dev'] = "vite --mode default"
     package_json['name'] = project_name
-    directory_manager.save_file("PACKAGE_CONFIG",json.dumps(package_json),formatted=False)
+    directory_manager.save_file("PACKAGE_CONFIG",json.dumps(package_json),formatted=True)
 
     # subprocess.run(["npm", "install"], cwd=f"{app_config['path']}/{app_config['name']}")
     process = subprocess.Popen(
