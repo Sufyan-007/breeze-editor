@@ -10,6 +10,8 @@ export const getAvailableTabs = (tag) => {
       return ['config', 'code'];
     case 'CUSTOM_UPLOAD':
       return ['config'];
+    case 'SCHEMAS':
+      return ['config'];
     case 'SETTINGS':
       return ['config'];
     case 'PACKAGE_CONFIG':

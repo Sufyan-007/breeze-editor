@@ -5,6 +5,7 @@ from ....common.constants.consts import CONFIG_PATH,CLIENT_API
 from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
 from ..core.intermediate_modification_helper import process_api_data,transfer_to_auth,add_auth_function
+from ..core.module_manager import add_module_helper,edit_module_title_helper
 from ..utils.api_models.custom_exception import CustomeException
 from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema
 from drf_yasg.utils import swagger_auto_schema
@@ -116,23 +117,10 @@ def edit_module_title(request, project_id):
         data = json.loads(request.body)
         new_title = data.get("title")
         module_id = data.get("moduleId")
-        file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
-        if not os.path.exists(file_path):
-            return JsonResponse({"message": "Module not found"}, status=404)
-        with open(file_path, "r") as file:
-            swagger_metadata = json.load(file)
-        if module_id not in swagger_metadata:
-            return JsonResponse({"message": "Module not found"}, status=404)
-        for id, value in swagger_metadata.items():
-            if value["title"] == new_title:
-                return JsonResponse({"message": "Module name should be unique"}, status=404)
-        module_data = swagger_metadata[module_id]
-        module_data["title"] = new_title
-        swagger_metadata[module_id] = module_data
-        with open(file_path, "w") as file:
-            json.dump(swagger_metadata, file, indent=4)
-        return JsonResponse({"message": "Module name edited Successfully"}, status=200)
-    
+        swagger_metadata_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
+        swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/swagger_schema/index.json"
+        result = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
+        return JsonResponse(result)
     
     
 def get_response_token( request, project_id,apiId, moduleId):
@@ -140,7 +128,8 @@ def get_response_token( request, project_id,apiId, moduleId):
             file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
             if not os.path.exists(file_path):
                 return JsonResponse({"error": "File not found"}, status=404)
-
+            if moduleId=='null' or moduleId == 'undefined' or apiId == 'null' or apiId == 'undefined':
+                return JsonResponse({"error": "Module ID or API ID not provided"}, status=400)
             result = {}
             with open(file_path, "r") as file:
                 file_content = json.load(file)
@@ -167,3 +156,17 @@ def get_response_token( request, project_id,apiId, moduleId):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def add_module(request,project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    module_name = data.get("name")
+    module_description = data.get("description")
+    if not module_name or not module_description:
+        return JsonResponse({"error": "Module name and description are required."}, status=400)
+    swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
+    swagger_schema_path = f"{CONFIG_PATH}/{project_id}/swagger_schema"
+    result = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
+    return JsonResponse(result)

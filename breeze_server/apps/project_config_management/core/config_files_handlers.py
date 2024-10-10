@@ -24,6 +24,7 @@ def add_dirs_configs(data):
     
     # for storing schemas retrieved form swagger file
     create_dir_if_not_exists(f"{app_config_dir}/swagger_schema")
+    write_json_file(f"{app_config_dir}/swagger_schema/index.json", {})
     create_dir_if_not_exists(data["path"])
 
     app_current_config = data
@@ -112,11 +113,7 @@ def write_routing_config(app_config):
 
 def write_swagger_schema_config(app_config_dir):
     write_json_file(f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json", {
-        "custom" : {
-            "title" : "Custom",
-            "auth_apis" : {}
-        }
-    })
+})
 
 def create_directory_management_file(app_config):
     template_path = ""

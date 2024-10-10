@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 // import { getApiSchemaDetails } from '../services/ApiService';
 // import { useParams } from 'react-router';
 import { CustomSelectField, CustomTextInput } from '../../../common/fields';
+import { RESPONSE_OPTIONS } from '../constants/Content-Types';
 
 const responseObject = {
   content_type: '',
@@ -176,7 +177,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                     label="Content Type"
                     value={res.content_type}
                     onChange={(e) => handleInputChange(index, 'content_type', e.target.value)}
-                    options={['TEXT', 'JSON', 'HTML']}
+                    options={RESPONSE_OPTIONS}
                   />
                   <ResponseForm
                     label="Status"
@@ -302,13 +303,18 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
             label="Content Type"
             value={newResponse.content_type}
             onChange={(e) => setNewResponse({ ...newResponse, content_type: e })}
-            options={['TEXT', 'JSON', 'HTML']}
+            options={RESPONSE_OPTIONS}
           />
           <ResponseForm
             label="Status"
             value={newResponse.status}
             onChange={(e) => setNewResponse({ ...newResponse, status: e })}
-            options={['S_200', 'S_400', 'S_404', 'S_500']}
+            options={[
+              { label: 'S_200', value: 'S_200' },
+              { label: 'S_400', value: 'S_400' },
+              { label: 'S_404', value: 'S_404' },
+              { label: 'S_500', value: 'S_500' },
+            ]}
           />
           <ResponseForm
             label="Schema"
@@ -354,7 +360,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                               value={newResponse.token_store[`${prop.name}`]?.store_in || ''}
                               onChange={(e) => handlePropertyChange(prop.name, 'store_in', e)}
                               options={[
-                                { label: 'Select', value: '' },
+                                // { label: 'Select', value: '' },
                                 { label: 'DontSave', value: 'DontSave' },
                                 { label: 'COOKIE', value: 'COOKIE' },
                                 { label: 'LOCAL STORAGE', value: 'LOCAL_STORAGE' },
@@ -383,20 +389,16 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
 
 function ResponseForm({ label, value, onChange, options }) {
   return (
-    <div className="mx-1" style={{ width: '30%' }}>
-      <CustomSelectField
-        config={{ label: label, groupClass: 'form-group mb-2 mx-2 w-50' }}
-        value={value}
-        onChange={onChange}
-        options={
-          options &&
-          options.map((option) => ({
-            value: option.id ? option.id : option,
-            label: option.name ? option.name : option,
-          }))
-        }
-      />
-    </div>
+    <>
+      <div className="mx-1" style={{ width: '30%' }}>
+        <CustomSelectField
+          config={{ label: label, groupClass: 'form-group mb-2 mx-2 w-50' }}
+          value={value}
+          onChange={onChange}
+          options={options}
+        />
+      </div>
+    </>
   );
 }
 ResponseSettings.propTypes = {
