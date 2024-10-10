@@ -4,6 +4,7 @@ import * as fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import { Project, SourceFile } from "ts-morph";
 import { execSync } from "child_process";
+import { CUSTOMIZED_PROJ_CONFIG, CONFIG_PATH } from "./consts"
 
 const fileTypes: string[] = [".d.ts", ".js", ".ts"];
 // Utility function to get all TypeScript declaration files
@@ -443,7 +444,7 @@ function getCustomStoreDir(projName:string|null): string | null {
         currentDir = parentDir;
     }
 
-    return path.join(currentDir,`breezeui/configurations/${projName}/customized_proj_config`);
+    return path.join(currentDir,`${CONFIG_PATH}/${projName}/${CUSTOMIZED_PROJ_CONFIG}`);
 }
 
 function createComponentDir(baseDir: string,type:string): string {

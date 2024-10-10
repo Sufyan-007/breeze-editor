@@ -5,7 +5,7 @@ import { BreezeOffcanvas, BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
 import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
 import VariableConfigForm from '../../component-configuration/components/config-forms/VariableConfigForm';
-import AddELement from '../../component-configuration/components/config-forms/AddELement'
+import AddELement from '../../component-configuration/components/config-forms/AddELement';
 import ImportConfigForm from '../../component-configuration/components/config-forms/ImportConfigForm';
 import FunctionConfigForm from '../../component-configuration/components/config-forms/FunctionConfigForm';
 import LifecycleConfigForm from '../../component-configuration/components/config-forms/LifecycleConfigForm';
@@ -95,7 +95,7 @@ const ConfigurableMonacoEditor = ({
         contentComponent = <VariableConfigForm onSubmit={() => {}} />;
         break;
       case '+ Html elements':
-          contentComponent = <AddELement />;
+        contentComponent = <AddELement />;
         break;
       case '+ Function':
         contentComponent = <FunctionConfigForm onSubmit={() => {}} />;
@@ -145,7 +145,7 @@ const ConfigurableMonacoEditor = ({
         size="40%"
       >
         <>{OffCanvasContent}</>
-        </BreezeOffcanvas>
+      </BreezeOffcanvas>
     </div>
   );
 };

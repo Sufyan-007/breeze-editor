@@ -1,10 +1,11 @@
 
-import json
+import json, os
 import threading
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
+from dotenv import load_dotenv
 from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file
 from apps.common.constants.consts import PORT  
 from drf_yasg.utils import swagger_auto_schema
@@ -39,7 +40,9 @@ def add_custom_package(request, projectName):
         upload_file(projectName, file, fileName)
 
         # After the file is uploaded, call the external API asynchronously
-        api_url = f"http://127.0.0.1:{PORT}/custom"
+        load_dotenv()
+        SERVER_HOST = os.getenv("SERVER_HOST") 
+        api_url = f"http://{SERVER_HOST}:{PORT}/custom"
         payload = {
             "projName": projectName,
             "fileName": fileName

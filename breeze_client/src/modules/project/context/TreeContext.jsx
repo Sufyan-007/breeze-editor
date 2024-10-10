@@ -9,8 +9,15 @@ export const useTreeContext = () => useContext(TreeContext);
 
 // Provider component to wrap the tree components
 export const TreeProvider = ({ children }) => {
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
-  const [selectedNode, setSelectedNode] = useState({});
+  const [selectedNodeId, setSelectedNodeId] = useState('INDEX_HTML');
+  const [selectedNode, setSelectedNode] = useState({
+    name: 'index',
+    parentId: 'ROOT',
+    extension: 'html',
+    id: 'INDEX_HTML',
+    tag: 'INDEX_HTML',
+    type: 'FILE',
+  });
 
   const contextValue = {
     selectedNodeId,

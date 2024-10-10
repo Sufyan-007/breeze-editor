@@ -3,16 +3,39 @@ import { useState, useEffect } from 'react';
 import ConfigDisplay from './ConfigDisplay';
 import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
 import { useTreeContext } from '../context/TreeContext';
-import { getAvailableTabs, initCode } from '../constants/TabScreen';
+import { getAvailableTabs, getLanguageFromExtension } from '../constants/TabScreen';
+import { useParams } from 'react-router-dom';
+import { getFileCode } from '../services/projectService';
 
 function ProjectDisplay() {
   const { selectedNode } = useTreeContext();
-
+  const { projectName } = useParams();
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
-  // const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
-  // const item = selectedNode.id === 7 ? { type: 'third-party' } : { type: 'component' }; // TO DO : Dynamic after api integration
+  const [editorCode, setEditorCode] = useState('// Loading..');
+  const [editorLanguage, setEditorLanguage] = useState('javascript');
 
   const availableTabs = getAvailableTabs(selectedNode?.tag);
+
+  useEffect(() => {
+    if (selectedNode?.id && !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) && projectName) {
+      const fetchCode = async () => {
+        try {
+          const data = await getFileCode(projectName, selectedNode.id);
+          if (data.code) {
+            setEditorLanguage(getLanguageFromExtension(selectedNode?.extension));
+            setEditorCode(data.code);
+          } else {
+            setEditorCode('// Loading...');
+          }
+        } catch (error) {
+          setEditorCode('// Loading...');
+          console.error('Error fetching code:', error);
+        }
+      };
+
+      fetchCode();
+    }
+  }, [selectedNode, projectName]);
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {
@@ -33,7 +56,11 @@ function ProjectDisplay() {
           {activeTab === 'code' && (
             <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
               <div className="editor-container">
-                <ConfigurableMonacoEditor defaultValue={initCode} height="calc(100vh - 123px)" language="javascript" />
+                <ConfigurableMonacoEditor
+                  defaultValue={editorCode ? editorCode : '// Loading...'}
+                  height="calc(100vh - 123px)"
+                  language={editorLanguage}
+                />
               </div>
             </div>
           )}
