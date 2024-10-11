@@ -4,7 +4,7 @@ from apps.common.utils.file_helpers.json_handler import read_json_file,read_proj
 from ...project_config_management.api_client_management.core.api_model_loader import ApiModelLoader
 from ...project_config_management.api_client_management.utils.api_models import TokenStoreTypeEnum,AuthApiTypeEnum,ContentEnum,ModeEnum,AuthTypeEnum,ParamsInEnum
 from ...project_config_management.api_client_management.utils.append_dict_file import append_to_dict_file
-from ...common.utils.file_helpers.file_handler import create_parent_dir_if_not_exists
+from ...common.utils.file_helpers.dir_handler import create_dir_if_not_exists
 from ...common.utils.file_helpers.json_handler import write_json_file
 from ...directory_management.core.directory_management_service import DirectoryManager
 from ...project_config_management.api_client_management.consts import WEBSOCKET_HOOK,RESPONSE_INTERCEPTOR,RESPONSE_STATUS_CONDITION,REQUEST_INTERCEPTOR,REFRESH_TOKEN_API
@@ -281,7 +281,7 @@ def create_service_files( map_services,app_config,project_name,fileId):
     parent_folder_name = "service"
     folder_name= "module1"
     content = "import axios from 'axios'\n"
-    create_parent_dir_if_not_exists(f"{app_config['APP_SOURCE_DIR']}/{parent_folder_name}/{folder_name}")
+    create_dir_if_not_exists(f"{app_config['APP_SOURCE_DIR']}/{parent_folder_name}/{folder_name}")
     for tag, func_arr in map_services.items():
         for func in func_arr:
             content += "\n"

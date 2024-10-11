@@ -3,13 +3,21 @@
 import express from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as dotenv from 'dotenv';
 import {extractAllComponentDetails,getDeclarationFiles,install_library,getInstalledVersion,updateLibraryStatus, checkForLib } from './parse_library';
-import { CONFIG_PATH,THIRD_PARTY_PACKAGE_PARSER, PORT} from './consts';
+import { GENERATED_PROJECTS, UPLOADED_ZIP_DIR } from './consts';
 // import { fileURLToPath } from 'url';
 // import { dirname } from 'path';
 
-const app = express();
+// Load the environment variables from the specified .env file
+dotenv.config({ path: process.env.dotenv_config_path });
 
+// Determine which environment-specific file to load based on NODE_ENV
+const env = process.env.NODE_ENV || 'development'; // Default to 'development'
+
+const app = express();
+const PORT = Number(process.env.PORT) || 4000;
+const HOST = process.env.HOST || "localhost";
 app.use(express.json());
 
 let resp = {
@@ -22,7 +30,6 @@ app.post('/', (req, res) => {
   const libraryName=req.body.fileName;
   let libraryVersion=req.body.fileVersion;
   
-  
   // install packages
   let result = install_library(libraryName,libraryVersion);
   if(result.statusCode==200){
@@ -30,7 +37,7 @@ app.post('/', (req, res) => {
       // if library version not present it will find by getintalledversion
       libraryVersion = libraryVersion ? libraryVersion : getInstalledVersion(libraryName);
       
-      const directoryPath = path.join( THIRD_PARTY_PACKAGE_PARSER, 'node_modules', libraryName);
+      const directoryPath = path.join( process.cwd(), 'node_modules', libraryName);
       
       if(!checkForLib(libraryName,libraryVersion)){  
           if (fs.existsSync(directoryPath)) {
@@ -81,10 +88,10 @@ app.post('/', (req, res) => {
 
 app.post('/custom', (req, res) => {
   const project = req.body.projName;
-  const projName =  `${project}/extracted_zip_files`;
+  const projName =  `${project}`;
   const zipFileName = req.body.fileName;
-  const directoryPath = path.join(CONFIG_PATH, projName, zipFileName);
-
+  
+  const directoryPath = path.join(GENERATED_PROJECTS, projName, UPLOADED_ZIP_DIR, zipFileName);
   
   if (fs.existsSync(directoryPath)) {
     if(extractAllComponentDetails(directoryPath,zipFileName,"file",project)){
@@ -108,18 +115,8 @@ app.post('/custom', (req, res) => {
   }
 });
 
-app.post('/upload', async (req, res) => {
-  
-  let srcFolderPath = "/home/yash/Documents/Projects/temp"
-  // Extract and process component details
-  // extractAllComponentDetails(srcFolderPath, 'userProject/temp',"file");
-  
-  res.send('Uploaded and processed successfully.');  
-});
-
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Server is running on http://${HOST}:${PORT}`);
 });
 
 

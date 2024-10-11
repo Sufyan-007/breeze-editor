@@ -8,4 +8,4 @@ const filesData = [
     lastModified: '2024-09-12 03:45 PM',
   },
 ];
-export default filesData
+export default filesData;

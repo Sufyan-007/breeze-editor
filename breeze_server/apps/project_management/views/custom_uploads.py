@@ -1,13 +1,25 @@
 
-import json
+import json, os
 import threading
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
+from dotenv import load_dotenv
 from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file
 from apps.common.constants.consts import PORT  
+from drf_yasg.utils import swagger_auto_schema
+from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
 
+@swagger_auto_schema(
+    method='post',
+    request_body=add_custom_package_schema['rb'],
+    responses={
+        200:add_custom_package_schema['response_200'],
+        500:add_custom_package_schema['response_500']
+    },
+    tags=['resources']
+)
 @csrf_exempt
 @api_view(['POST'])
 def add_custom_package(request, projectName):
@@ -28,7 +40,9 @@ def add_custom_package(request, projectName):
         upload_file(projectName, file, fileName)
 
         # After the file is uploaded, call the external API asynchronously
-        api_url = f"http://127.0.0.1:{PORT}/custom"
+        load_dotenv()
+        SERVER_HOST = os.getenv("SERVER_HOST") 
+        api_url = f"http://{SERVER_HOST}:{PORT}/custom"
         payload = {
             "projName": projectName,
             "fileName": fileName
@@ -41,6 +55,16 @@ def add_custom_package(request, projectName):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@swagger_auto_schema(
+    method='get',
+    request_body=None,
+    responses={
+        200:get_custom_package_schema['response_200'],
+        500:get_custom_package_schema['response_500'],
+        400:get_custom_package_schema['response_400']
+    },
+    tags=['resources']
+)
 @csrf_exempt
 @api_view(['GET'])
 def get_custom_packages(request, projectName):
@@ -55,6 +79,16 @@ def get_custom_packages(request, projectName):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@swagger_auto_schema(
+    method='delete',
+    request_body=delete_custom_package_schema['rb'],
+    responses={
+        200:delete_custom_package_schema['response_200'],
+        400:delete_custom_package_schema['response_400'],
+        500:delete_custom_package_schema['response_500']
+    },
+    tags=['resources']
+)
 @csrf_exempt
 @api_view(['DELETE'])
 def delete_custom_package(request, projectName):

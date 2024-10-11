@@ -9,10 +9,13 @@ import columns from '../constants/TableStructure';
 
 import { fetchZipFilesAction, uploadZipFileAction, deleteZipFileAction } from '../redux/customZipActions';
 import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions';
+import BreezeOffCanvas from '../../../common/display/offcanvas/BreezeOffcanvas';
 
 function CustomZipPackagePage() {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showOffCanvas, setShowOffCanvas] = useState(false);
+  const [selectedFilename, setSelectedFilename] = useState(null);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { projectName } = useParams();
@@ -40,15 +43,28 @@ function CustomZipPackagePage() {
     return;
   }
   const actions = (item) => (
-    <i
-      class="bi bi-trash"
-      alt="Delete icon"
-      onClick={() => {
-        setFileToDelete(item);
-        setShowDeleteModal(true);
-      }}
-      style={{ cursor: 'pointer', color: 'red', fontSize: '18px' }}
-    />
+    <>
+      <i
+        className="bi bi-trash"
+        alt="Delete icon"
+        onClick={() => {
+          setFileToDelete(item);
+          setShowDeleteModal(true);
+        }}
+        style={{ cursor: 'pointer', color: 'red', fontSize: '18px', marginRight: '20px' }}
+      />
+      <i
+        className="bi bi-three-dots-vertical"
+        alt="Options icon"
+        onClick={async () => {
+          setSelectedFilename(item);
+          setShowOffCanvas(true);
+
+          await dispatch(fetchZipFileComponentsAction({ selectedFilename: item.fileName, projectName }));
+        }}
+        style={{ cursor: 'pointer', fontSize: '18px' }}
+      />
+    </>
   );
 
   const handleDelete = () => {
@@ -66,6 +82,8 @@ function CustomZipPackagePage() {
     setShowModal(true);
   };
 
+  const handleOffCanvasClose = () => setShowOffCanvas(false);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -80,7 +98,7 @@ function CustomZipPackagePage() {
 
       const submitData = new FormData();
       for (const key in formData) {
-        if (formData.hasOwnProperty(key) && key !== 'file') {
+        if (Object.property.hasOwnProperty.call(formData, key) && key !== 'file') {
           submitData.append(key, formData[key]);
         }
       }
@@ -94,7 +112,7 @@ function CustomZipPackagePage() {
         await dispatch(fetchZipFilesAction(projectName));
 
         // Fetch the updated folder configuration
-        await dispatch(fetchFolderConfig({ id:'ROOT' , projectName })).unwrap();
+        await dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
 
         // Reset the form and close the modal
         resetForm();
@@ -224,9 +242,25 @@ function CustomZipPackagePage() {
             <div className="col mb-3">
               <CustomFileUploadField
                 onFileSelect={handleFileSelect}
+                style={{
+                  borderColor: '#666666',
+                  color: 'br-text-primary',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                }}
+                spanStyle={{
+                  display: 'inline-block',
+                  textAlign: 'left',
+                  marginLeft: '20px',
+                  color: 'br-text-primary',
+                }}
                 accept=".zip"
                 config={{
-                  label: 'Choose File',
+                  innerlabel: 'Choose File',
+                  outerlabel: 'Choose File',
                   groupClass: 'form-group',
                   className: 'btn br-text-primary med-font',
                 }}
@@ -271,6 +305,22 @@ function CustomZipPackagePage() {
       >
         <p>Are you sure you want to delete {fileToDelete?.fileName}?</p>
       </BreezeModal>
+
+      <BreezeOffCanvas
+        show={showOffCanvas}
+        onClose={handleOffCanvasClose}
+        title="Components List"
+        placement="end"
+        size="50%"
+      >
+        <div>
+          {/* <ul>
+            {components.map((component, index) => (
+              <button key={index}>{component}</button>
+            ))}
+          </ul> */}
+        </div>
+      </BreezeOffCanvas>
     </div>
   );
 }

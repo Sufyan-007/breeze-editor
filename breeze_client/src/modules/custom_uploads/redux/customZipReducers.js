@@ -2,10 +2,11 @@ import { createSlice } from '@reduxjs/toolkit';
 import { uploadZipFileAction, fetchZipFilesAction, deleteZipFileAction } from './customZipActions';
 
 const initialState = {
-  zipFiles: [], 
-  status: 'idle', 
+  zipFiles: [],
+  status: 'idle',
   error: null,
-  uploadMessage: null, 
+  uploadMessage: null,
+  components: [],
 };
 
 const zipSlice = createSlice({
@@ -19,7 +20,6 @@ const zipSlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchZipFilesAction.fulfilled, (state, action) => {
-        console.log('fetched zip files payload', action.payload);
         state.status = 'succeeded';
         state.zipFiles = action.payload;
       })
@@ -33,7 +33,7 @@ const zipSlice = createSlice({
       .addCase(uploadZipFileAction.pending, (state) => {
         state.status = 'loading';
         state.uploadMessage = null;
-        state.errorrror = null;
+        state.error = null;
       })
       .addCase(uploadZipFileAction.fulfilled, (state, action) => {
         state.status = 'succeeded';
@@ -50,8 +50,8 @@ const zipSlice = createSlice({
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(deleteZipFileAction.fulfilled, (state, action) => {
-        state.status = 'succeeded'
+      .addCase(deleteZipFileAction.fulfilled, (state) => {
+        state.status = 'succeeded';
       })
       .addCase(deleteZipFileAction.rejected, (state, action) => {
         state.status = 'failed';

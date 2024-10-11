@@ -1,10 +1,9 @@
+import path from "path";
+
 export const INDEX_FILE_NAME: string = 'index.json';
-export const PORT: number = 4000;
-// export const DIRECTORY_PATH: string =
-//   "/home/varanpreet/Desktop/breezeui/third_party_package_parser";
-
-export const CONFIG_PATH = "configurations"
-
-
-export const THIRD_PARTY_PACKAGE_PARSER = "third_party_package_parser"
-
+export const DIRECTORY_PATH: string = "third_party_package_parser";
+let rootParentDir = path.dirname(path.dirname(process.cwd()))
+export const GENERATED_PROJECTS: string = `${rootParentDir}`+"/generated_projects";
+export const CONFIG_PATH: string = "breezeui/configurations";
+export const CUSTOMIZED_PROJ_CONFIG:string = "customized_proj_config"
+export const UPLOADED_ZIP_DIR:string = "extracted_zip_files"
