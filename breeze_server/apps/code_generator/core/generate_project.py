@@ -14,8 +14,9 @@ from .new_component_generator import write_component, write_app_component
 from .project_generation_progress import ProjectGenerationProgress
 from ..utils.dependencies_manager import DependencyManager
 from ..utils import static_code
+from apps.project_management.core.resource_upload_service import save_file
 
-def generate_project(project_config, logo=None):
+def generate_project(project_config):
     
     project_name = project_config['name']
     app_config_dir = f"{CONFIG_PATH}/{project_name}"
@@ -52,11 +53,15 @@ def generate_project(project_config, logo=None):
     except:
         print("----------------------")
         print("No YAML file")
-
     modify_index_html_with_project_name(app_config)
 
     # Conditionally modify index.html with logo
-    if logo:
+    project_id = app_config.get('name')
+    logoId = app_config.get('logoId')
+    if logoId:
+        directory_manager = DirectoryManager(project_name=project_id)
+        image_path = directory_manager.get_path_from_file_id(logoId)
+        save_file(project_id, logoId, image_path)
         modify_index_html_with_logo(app_config)
         
 # create a new project by copying the present template 
@@ -273,8 +278,13 @@ def modify_index_html_with_logo(app_config):
     directory_manager = DirectoryManager(project_name)
     index_html_path =  directory_manager.get_path_from_file_id("INDEX_HTML")
 
-    logo_id = app_config.get('logo')
-    logo_file_name = app_config.get('logo_file_name', 'default.ico')  
+    logo_id = app_config.get('logoId')
+    app_config_dir = f"{CONFIG_PATH}/{project_name}"
+    resource_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['RESOURCE_CONFIG']}"
+
+    resource_config_file = read_json_file(resource_config_path)
+    logo_object = resource_config_file.get(logo_id)
+    logo_file_name = logo_object.get('name', 'default.ico')  
 
     # Define the public logo path
     public_logo_path = os.path.join(app_config['path'], 'public', logo_file_name)

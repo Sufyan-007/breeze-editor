@@ -24,9 +24,8 @@ export const getFolderConfig = async (id = null, projectName) => {
 
 export const createProject = async (projectData) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/add/`;
-  const payload = projectData;
   try {
-    const response = await callApiClient(url, 'POST', payload, false, {}, false);
+    const response = await callApiClient(url, 'POST', projectData, true, {}, false);
     return response;
   } catch (error) {
     console.error('Error creating project:', error.message);

@@ -24,8 +24,16 @@ def set_env(request, project_id):
         env_name = data.get('environmentName')
         set_environment(env_name, project_id)
         if env_name == "dev (default)":
-            return JsonResponse({'status': 'success', 'message': 'Environment default has been set as active'}, status=200)
-        return JsonResponse({'status': 'success', 'message': f'Environment {env_name} has been set as active'}, status=200)
+            return JsonResponse({
+                'status': 'success', 
+                'message': 'Environment default has been set as active', 
+                'config': {'environmentName': 'dev (default)'}
+            }, status=200)
+        return JsonResponse({
+            'status': 'success', 
+            'message': f'Environment {env_name} has been set as active', 
+            'config': {'environmentName': env_name}
+        }, status=200)
     except Exception as e:
         print(f"Error: {e}")
         return JsonResponse({'error': 'Server error'}, status=500)
@@ -84,7 +92,7 @@ def update_env_config(request, project_id):
         if variable_id:
             # Update environment variable
             config = update_env_vars(project_id, variable_id, env_name, env_values)
-        if env_name:
+        elif env_name:
             # Update environment name
             old_env_name = data.get('oldEnvName')  # Assuming the old environment name is sent in the request
             config = update_environment_name(project_id, old_env_name, env_name)
