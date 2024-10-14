@@ -6,7 +6,7 @@ export async function getComponents(projectName) {
     category: 'components',
   };
   try {
-    const response = await callApiClient(url, 'POST', payload);
+    const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
     return response;
   } catch (error) {
     console.log(error);

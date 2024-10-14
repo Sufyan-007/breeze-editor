@@ -3,7 +3,7 @@ import { callApiClient } from '../../../utils/breezeApiCall';
 const uploadZipFile = async (submitData, projectName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package-upload/${projectName}`;
   try {
-    const response = await callApiClient(url, 'POST',  submitData, true);
+    const response = await callApiClient(url, 'POST', submitData, true);
     return response;
   } catch (error) {
     console.error('error uploading file:', error);
@@ -14,7 +14,7 @@ const uploadZipFile = async (submitData, projectName) => {
 const fetchZipFiles = async (projectName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package/${projectName}`;
   try {
-    const response = await callApiClient(url,'GET');
+    const response = await callApiClient(url, 'GET');
     return response;
   } catch (error) {
     console.error('Error fetching files:', error);
