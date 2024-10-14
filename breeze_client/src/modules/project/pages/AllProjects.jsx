@@ -191,8 +191,6 @@ function AllProjects() {
     fetchProjects();
   };
 
-  console.log('projects::>>', projects);
-
   return (
     <div className="container-fluid vh-100 p-0 br-background-secondary">
       <Navbar />
@@ -200,12 +198,12 @@ function AllProjects() {
         <div className="row m-0 gap-2">
           {projects.map((project) => (
             <ProjectCard
-              key={project.projectName}
+              key={project.name}
               projectName={project.projectName}
               projectImageSrc={images.ABDMLoginPage}
               iconSrc={images.VectorIcon}
-              onClick={() => handleOpenProject(project.projectName)}
-              onDelete={() => handleDeleteProject(project.projectName)}
+              onClick={() => handleOpenProject(project.name)}
+              onDelete={() => handleDeleteProject(project.name)}
             />
           ))}
           <ProjectCard isCreateNew={true} onClick={openModal} />

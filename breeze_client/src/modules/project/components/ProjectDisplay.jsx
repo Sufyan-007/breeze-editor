@@ -84,7 +84,7 @@ function ProjectDisplay() {
             >
               <div className="project-display-container iframe-container">
                 <iframe
-                  src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}`}
+                  src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}:${projectPort}`}
                   title="Preview"
                   width="100%"
                   height="100%"
