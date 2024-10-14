@@ -11,7 +11,7 @@ class CustomTokenAuthentication(BaseAuthentication):
         print("authenticate")
         token = request.headers.get('Authorization', None)
         if token is None:
-            return None
+            raise AuthenticationFailed('Invalid token.')
 
         token = token.replace('Bearer ', '')
         auth_file_path = get_auth_file_path()
@@ -27,22 +27,22 @@ class CustomTokenAuthentication(BaseAuthentication):
             raise AuthenticationFailed('Invalid token.')
 
         expiry = datetime.fromisoformat(token_data['expiry'])
-        if timezone.now() > expiry:
-            # Generate a new token and transfer the existing data
-            new_token = str(uuid.uuid4())
-            token_data['expiry'] = (timezone.now() + timedelta(hours=1)).isoformat()  # Update expiry or adjust as needed
-            auth_data[new_token] = token_data
+        # if timezone.now() > expiry:
+        #     # Generate a new token and transfer the existing data
+        #     new_token = str(uuid.uuid4())
+        #     token_data['expiry'] = (timezone.now() + timedelta(hours=1)).isoformat()  # Update expiry or adjust as needed
+        #     auth_data[new_token] = token_data
             
-            # Delete the old token
-            del auth_data[token]
+        #     # Delete the old token
+        #     del auth_data[token]
             
-            # Save the updated auth_data back to the file
-            file.seek(0)
-            json.dump(auth_data, file)
-            file.truncate()
+        #     # Save the updated auth_data back to the file
+        #     file.seek(0)
+        #     json.dump(auth_data, file)
+        #     file.truncate()
             
-            # Raise an authentication error with the new token, so the client knows they need to update
-            raise AuthenticationFailed({'message': 'Token has expired. Use new token.', 'new_token': new_token})
+        #     # Raise an authentication error with the new token, so the client knows they need to update
+        #     raise AuthenticationFailed({'message': 'Token has expired. Use new token.', 'new_token': new_token})
 
         return (token_data['username'], None)
 

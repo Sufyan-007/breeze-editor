@@ -14,7 +14,7 @@ def set_environment(env_name, project_id):
         app_config = read_project_config_file(
             app_config_dir, CONFIG_FILES_PATH['APP_CONFIG']
         )
-        app_config["current_environment"] = env_name
+        app_config["currentEnvironment"] = env_name
         write_json_file(f"{app_config_path}.json", app_config)
         start_app(app_config, forceRestart=True)
     except FileNotFoundError as e:
@@ -250,7 +250,7 @@ def delete_proj_env(project_id, env_name):
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         env_directory = app_config['path']
         
-        if env_name == app_config.get('current_environment'):
+        if env_name == app_config.get('currentEnvironment'):
             raise Exception(f"Cannot delete the current environment '{env_name}'")
 
         config = get_env_config(project_id)

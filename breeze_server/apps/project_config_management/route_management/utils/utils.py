@@ -1,6 +1,6 @@
 import random
 import string, re
-from ..core.post_edit_operations import RouteHandler
+from ..core.post_edit_operations import get_routing_code
 
 from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file, write_json_file
@@ -20,18 +20,15 @@ def include_all_routes_accessory_data(project_name, nodes):
     return nodes
 
 def process_route_config(project_name, routing_config={}):
-    # print("This function runs after returning a 200 response.")
     try:
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
         if routing_config == {}:
             routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
-        initialize, handle_routing_code = RouteHandler()
-        initialize(app_config, routing_config, comp_config_index)
-        react_code = handle_routing_code(app_config, routing_config, comp_config_index, )
+        react_code = get_routing_code(app_config, routing_config, comp_config_index, )
         directory_manager= DirectoryManager(project_name)
-        directory_manager.save_file("MAIN_COMPONENT",react_code)
+        directory_manager.save_file("ROUTE_COMPONENT",react_code)
         
     except Exception as e:
         print("Error while processing and saving config file.")

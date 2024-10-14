@@ -66,6 +66,14 @@
     "tag": "ROOT_COMPONENT",
     "type": "FILE"
   },
+  "ROUTE_COMPONENT": {
+    "name": "Routing",
+    "parentId": "SRC",
+    "extension": "SX",
+    "id": "ROUTE_COMPONENT",
+    "tag": "ROOT_COMPONENT",
+    "type": "FILE"
+  },
   "ASSETS": {
     "name": "assets",
     "parentId": "SRC",

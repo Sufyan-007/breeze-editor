@@ -13,7 +13,7 @@ def __init__( app_name):
     app_config = read_project_config_file(
         app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
     app_config['APP_CONFIG_PATH'] = f"{CONFIG_PATH}/{app_name}"
-    app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
+    app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['componentsSrcDir']}"
     return app_config_dir,app_config
 
 def generate_react_service( app_name, filename, service_type, module_id):

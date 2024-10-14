@@ -13,7 +13,7 @@ class DirectoryManager:
         self.directory_config_path= os.path.join(CONFIG_PATH, self.project_name, 'directory_management.json')
         self.component_config_path = os.path.join(CONFIG_PATH, self.project_name, 'component_config.json')
         self.app_config = read_project_config_file(self.app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
-        self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['components_src_dir']}"
+        self.app_config['APP_SOURCE_DIR'] = f"{self.app_config['path']}/{self.app_config['componentsSrcDir']}"
         self.directory_management_config = read_project_config_file(self.app_config_dir, CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT'])
         self.language = self.app_config.get('language',"javascript")
         self.isTypeScript = self.language == 'typescript'
@@ -106,7 +106,7 @@ class DirectoryManager:
             else:
                 return os.path.join(self.app_config['path'], name)
         else:
-            return os.path.join(self.get_path_from_file_id(entry["parentId"]), name)
+            return os.path.join(self.get_path_from_file_id(entry["parentId"], relative_path=relative_path), name)
         
         
     def get_file_content(self,id):

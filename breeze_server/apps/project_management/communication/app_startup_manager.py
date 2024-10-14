@@ -74,7 +74,7 @@ def run_project_threaded(project_id,port,project_path, env_name):
 def start_app(app_config, forceRestart=False):
     
     project_id = app_config["name"]
-    env_name = app_config.get("current_environment", "")
+    env_name = app_config.get("currentEnvironment", "")
     project_path = app_config["path"]
     if project_id in RUNNING_APPS and not forceRestart:
         pass
