@@ -87,7 +87,6 @@ def add(request):
         500:delete_schema['response_500']
     }
 ) 
-@api_view(['DELETE'])
 @csrf_exempt
 @api_view(['DELETE'])
 def delete(request, project_id):

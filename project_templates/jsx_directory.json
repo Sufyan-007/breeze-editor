@@ -22,7 +22,8 @@
       "SERVICES",
       "PROJECT_ROOT_FILE",
       "MAIN_COMPONENT",
-      "ASSETS"
+      "ASSETS",
+      "ROUTE_COMPONENT"
     ]
   },
   "COMPONENTS": {
@@ -71,8 +72,9 @@
     "parentId": "SRC",
     "extension": "SX",
     "id": "ROUTE_COMPONENT",
-    "tag": "ROOT_COMPONENT",
-    "type": "FILE"
+    "tag": "ROUTING",
+    "type": "FILE",
+    "wasOpen":false
   },
   "ASSETS": {
     "name": "assets",
