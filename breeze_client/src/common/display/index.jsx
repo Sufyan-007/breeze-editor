@@ -5,6 +5,17 @@ import BreezeList from '../display/list/BreezeList';
 import BreezeLoader from './loader/BreezeLoader';
 import BreezeContextMenu from './context-menu/BreezeContextMenu';
 import BreezeTree from './tree/BreezeTree';
-import BreezeTable from '../display/datatable/BreezeCustomTable'
+import BreezeTable from '../display/datatable/BreezeCustomTable';
+import BreezeToaster from './toaster/BreezeToaster';
 
-export { BreezeTreeView, BreezeModal, BreezeOffcanvas, BreezeList, BreezeContextMenu, BreezeLoader, BreezeTable, BreezeTree };
+export {
+  BreezeTreeView,
+  BreezeModal,
+  BreezeOffcanvas,
+  BreezeList,
+  BreezeContextMenu,
+  BreezeLoader,
+  BreezeTable,
+  BreezeTree,
+  BreezeToaster,
+};
