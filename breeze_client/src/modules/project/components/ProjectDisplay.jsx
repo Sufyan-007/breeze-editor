@@ -1,11 +1,11 @@
 import TopBar from './TopBar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ConfigDisplay from './ConfigDisplay';
 import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
 import { useTreeContext } from '../context/TreeContext';
 import { getAvailableTabs, getLanguageFromExtension } from '../constants/TabScreen';
 import { useParams } from 'react-router-dom';
-import { getFileCode } from '../services/projectService';
+import { getFileCode, getProjectPort } from '../services/projectService';
 
 function ProjectDisplay() {
   const { selectedNode } = useTreeContext();
@@ -13,8 +13,18 @@ function ProjectDisplay() {
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   const [editorCode, setEditorCode] = useState('// Loading..');
   const [editorLanguage, setEditorLanguage] = useState('javascript');
+  const [projectPort, setProjectPort] = useState(3000);
 
   const availableTabs = getAvailableTabs(selectedNode?.tag);
+
+  const fetchPort = useCallback(async () => {
+    const port = await getProjectPort(projectName);
+    setProjectPort(port.port);
+  }, [projectName]);
+
+  useEffect(() => {
+    fetchPort();
+  }, [fetchPort]);
 
   useEffect(() => {
     if (selectedNode?.id && !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) && projectName) {

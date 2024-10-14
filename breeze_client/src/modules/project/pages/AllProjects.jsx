@@ -5,7 +5,7 @@ import images from '../../../assets/images/index';
 import { BreezeModal } from '../../../common/display';
 import ProjectCard from '../components/ProjectCard';
 import { router } from '../../../routes/routing';
-import { createProject, getAllProjects } from '../services/projectService';
+import { createProject, deleteProject, getAllProjects } from '../services/projectService';
 import { CustomTextInput } from '../../../common/fields';
 
 import {
@@ -186,6 +186,13 @@ function AllProjects() {
     router.navigate(`/project/${projectName}`);
   };
 
+  const handleDeleteProject = async (projectName) => {
+    await deleteProject(projectName);
+    fetchProjects();
+  };
+
+  console.log('projects::>>', projects);
+
   return (
     <div className="container-fluid vh-100 p-0 br-background-secondary">
       <Navbar />
@@ -193,11 +200,12 @@ function AllProjects() {
         <div className="row m-0 gap-2">
           {projects.map((project) => (
             <ProjectCard
-              key={project.project_name}
-              projectName={project.project_name}
+              key={project.projectName}
+              projectName={project.projectName}
               projectImageSrc={images.ABDMLoginPage}
               iconSrc={images.VectorIcon}
-              onClick={() => handleOpenProject(project.project_name)}
+              onClick={() => handleOpenProject(project.projectName)}
+              onDelete={() => handleDeleteProject(project.projectName)}
             />
           ))}
           <ProjectCard isCreateNew={true} onClick={openModal} />

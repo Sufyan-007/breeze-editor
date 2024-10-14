@@ -1,4 +1,4 @@
-import { BreezeLoader } from '../common/display';
+import { BreezeLoader, BreezeToaster } from '../common/display';
 import { createRoot } from 'react-dom/client';
 
 const getAccessToken = () => {
@@ -11,19 +11,26 @@ export async function callApiClient(
   payload = null,
   isFormData = false,
   options = {},
-  loader = true
+  loader = true,
+  showToaster = true
 ) {
   const { headers = {}, ...otherOptions } = options;
   const accessToken = getAccessToken();
 
   let loaderContainer = null;
   let root = null;
+  let toasterContainer = null;
+  let toasterRoot = null;
 
   if (loader) {
     loaderContainer = document.createElement('div');
     document.body.appendChild(loaderContainer);
     root = createRoot(loaderContainer);
   }
+
+  toasterContainer = document.createElement('div');
+  document.body.appendChild(toasterContainer);
+  toasterRoot = createRoot(toasterContainer);
 
   try {
     if (loader) {
@@ -48,14 +55,31 @@ export async function callApiClient(
     }
 
     const responseData = await response.json();
+
+    if (showToaster && ['PUT', 'POST', 'DELETE'].includes(method.toUpperCase())) {
+      toasterRoot.render(<BreezeToaster message="Operation successful!" type="success" />);
+    }
+
     return responseData;
   } catch (error) {
     console.error('API call error:', error);
+
+    if (showToaster && ['PUT', 'POST', 'DELETE'].includes(method.toUpperCase())) {
+      toasterRoot.render(<BreezeToaster message="Operation failed. Please try again." type="error" />);
+    }
+
     throw error;
   } finally {
     if (loader) {
       root.unmount();
       document.body.removeChild(loaderContainer);
+    }
+
+    if (toasterRoot) {
+      setTimeout(() => {
+        toasterRoot.unmount();
+        document.body.removeChild(toasterContainer);
+      }, 3000);
     }
   }
 }
