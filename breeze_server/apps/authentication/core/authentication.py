@@ -4,12 +4,17 @@ import json
 import uuid
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-from .utils import get_auth_file_path
+from ..utils import get_auth_file_path
+from ..auth_consts import EXEMPT_URLS
 
 class CustomTokenAuthentication(BaseAuthentication):
     def authenticate(self, request):
         print("authenticate")
+        if request.path in EXEMPT_URLS:
+            return None
         token = request.headers.get('Authorization', None)
+        print(request.method)
+        # request.method = 'DELETE'
         if token is None:
             raise AuthenticationFailed('Invalid token.')
 

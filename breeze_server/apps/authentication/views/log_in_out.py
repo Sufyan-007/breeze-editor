@@ -5,8 +5,7 @@ from ..utils import get_expiry_timestamp
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from rest_framework.permissions import AllowAny
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.login_schema import login_schema
 
@@ -22,7 +21,6 @@ from ..swagger_schema.login_schema import login_schema
     tags=['Auth']
 )
 @api_view(['POST'])
-@permission_classes([AllowAny])
 def login(request):
     try:
         data = json.loads(request.body)
@@ -77,7 +75,6 @@ def login(request):
 @csrf_exempt
 @require_POST
 @api_view(['POST'])
-@permission_classes([AllowAny])
 def logout(request):
     try:
         del request.session['auth_token']

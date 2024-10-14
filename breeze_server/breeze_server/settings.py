@@ -143,8 +143,8 @@ SWAGGER_SETTINGS = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'apps.authentication.authentication.CustomTokenAuthentication',
-    )
+        'apps.authentication.core.authentication.CustomTokenAuthentication',
+    ),
 }
 
 CHANNEL_LAYERS = {

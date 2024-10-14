@@ -28,7 +28,7 @@ def generate_project(project_config, logo=None):
     ProjectGenerationProgress.store_func_progress(app_config['name'], 20)
 
     # Install dependecies
-    install_dependencies(app_config)
+    # install_dependencies(app_config)
     
     # Set base path for the components
     setup_base_path_for_comps(app_config)
