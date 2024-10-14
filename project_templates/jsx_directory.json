@@ -82,6 +82,30 @@
     "id": "ASSETS",
     "tag": "ASSETS",
     "type": "DIRECTORY",
+    "children": ["IMAGES", "SVGS", "FONTS"]
+  },
+  "IMAGES": {
+    "name": "images",
+    "parentId": "ASSETS",
+    "id": "IMAGES",
+    "tag": "IMAGES",
+    "type": "DIRECTORY",
+    "children": []
+  },
+  "SVGS": {
+    "name": "svgs",
+    "parentId": "ASSETS",
+    "id": "SVGS",
+    "tag": "SVGS",
+    "type": "DIRECTORY",
+    "children": []
+  },
+  "FONTS": {
+    "name": "fonts",
+    "parentId": "ASSETS",
+    "id": "FONTS",
+    "tag": "FONTS",
+    "type": "DIRECTORY",
     "children": []
   },
   "PACKAGE_CONFIG": {
