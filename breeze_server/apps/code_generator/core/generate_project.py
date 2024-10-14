@@ -1,32 +1,27 @@
 import os, shutil, re, json, subprocess, pathlib
+
 from apps.common.constants.consts import JSX_TEMPLATE_PATH, TSX_TEMPLATE_PATH, CONFIG_FILES_PATH, CONFIG_PATH
 from apps.common.utils.formatter import format_by_prettier
-from apps.project_config_management.route_management.core.post_edit_operations import RouteHandler
 from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file
+from apps.common.utils.file_helpers.config_handler import read_config_file
 from apps.common.utils.file_helpers import file_handler 
+from apps.common.constants.enums.ResourceCategory import ResourceCategory
+
+from apps.project_config_management.route_management.core.post_edit_operations import get_routing_code
 from apps.directory_management.core.directory_management_service import DirectoryManager
-from .component_generator import ComponentGenerator
+
+from .new_component_generator import write_component, write_app_component
 from .project_generation_progress import ProjectGenerationProgress
 from ..utils.dependencies_manager import DependencyManager
-from apps.common.constants.enums.ResourceCategory import ResourceCategory
+from ..utils import static_code
 
 def generate_project(project_config, logo=None):
     
     project_name = project_config['name']
-    app_config_dir = ""
-    app_config = {}
-    routing_config = {}
+    app_config_dir = f"{CONFIG_PATH}/{project_name}"
+    app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
+    routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
     
-    def initialize():
-        nonlocal app_config_dir
-        nonlocal app_config
-        nonlocal routing_config 
-        app_config_dir = f"{CONFIG_PATH}/{project_name}"
-        app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
-        routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
-    
-    # get all the required initial data
-    initialize()
     ProjectGenerationProgress.store_func_progress(app_config['name'], 10)
     # Create React App using create-react-app 
     create_react_app(app_config)
@@ -43,7 +38,7 @@ def generate_project(project_config, logo=None):
     ProjectGenerationProgress.store_func_progress(app_config['name'], 90)
 
     # Modify main component (App.js)
-    modify_main_component(app_config, routing_config)
+    write_main_app_and_routing_component(app_config, routing_config)
 
     # the required main component is already created so no need to
     # implement this function as no other component is present or required
@@ -158,19 +153,26 @@ def add_sandbox(app_config):
     
 # it add main component to route_config with "/" path and to component_config
 # name it to -> 
-def modify_main_component(app_config, routing_config):
+def write_main_app_and_routing_component(app_config, routing_config):
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
     
     comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
     routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
-    initialize, handle_routing_code = RouteHandler()
-    initialize(app_config, routing_config, comp_config_index)
-    react_code = handle_routing_code(app_config, routing_config, comp_config_index, )
+    main_comp_config_obj = read_config_file(app_config['name'], ResourceCategory.COMPONENTS.value, app_config['defaultCompId'])
+    main_comp_config_data = main_comp_config_obj.get('data')[comp_config_index[app_config['defaultCompId']]]
+    
+    # write Main.jsx component (in src/components folder of generated project)
+    write_component(app_config, main_comp_config_data, comp_config_index)
     
     directory_manager= DirectoryManager(app_config['name'])
     
-    directory_manager.save_file("MAIN_COMPONENT",react_code)
-    
+    # write App.jsx component (in src/components folder of generated project)
+    app_comp_code = static_code.Root_App_Code
+    directory_manager.save_file("MAIN_COMPONENT", app_comp_code)
+        
+    # write Routing.jsx component (in src/components folder of generated project)
+    routing_code = get_routing_code(app_config, routing_config, comp_config_index, )
+    directory_manager.save_file("ROUTE_COMPONENT", routing_code)
 
 def setup_base_path_for_comps(app_config):
     with open(f"{app_config['path']}/jsconfig.json", "w+") as jsconfig_file:

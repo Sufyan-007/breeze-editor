@@ -27,7 +27,7 @@ def add_dirs_configs(data):
     create_dir_if_not_exists(data["path"])
 
     app_current_config = data
-    app_current_config['components_src_dir'] = 'src'
+    app_current_config['componentsSrcDir'] = 'src'
     app_current_config["dependencies"] = {
         "react-router-dom": "*",
         "bootstrap": "^5.3.2",
@@ -88,7 +88,7 @@ def write_basic_main_comp_config(app_config):
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
 
     app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
-    app_config['default_comp_id'] = _id
+    app_config['defaultCompId'] = _id
     del app_config['defaultComponent']
     write_json_file(f"{app_config_path}.json", app_config)
     write_config_file( f"{app_config['name']}", ResourceCategory.COMPONENTS.value, f"{_id}", main_comp_config)
@@ -104,7 +104,7 @@ def write_routing_config(app_config):
         default_path_id : {
             "id": default_path_id,
             "path": "/",
-            "componentId": f"{app_config['default_comp_id']}",
+            "componentId": f"{app_config['defaultCompId']}",
             "parentId": None
         }
     }
@@ -144,8 +144,8 @@ def update_directory_management_file(app_config):
     
     directory_management_config = read_json_file(directory_management_path)
     comp_index_file = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
-    default_comp_name = comp_index_file[app_config['default_comp_id']] + (".tsx" if app_config.get("language") == "typescript" else ".jsx")
-    main_comp_id = app_config['default_comp_id']
+    default_comp_name = comp_index_file[app_config['defaultCompId']]
+    main_comp_id = app_config['defaultCompId']
     template_content = replace_node("DEFAULT_COMP",main_comp_id,directory_management_config)
     
     template_content[main_comp_id]["name"] = default_comp_name

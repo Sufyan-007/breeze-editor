@@ -10,7 +10,6 @@ from rest_framework.decorators import api_view, permission_classes
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.login_schema import login_schema
 
-
 @csrf_exempt
 @require_POST
 @swagger_auto_schema(
@@ -66,8 +65,23 @@ def login(request):
 
         with open(auth_file_path, 'w') as file:
             json.dump(auth_data, file)
-
-        return JsonResponse({'accessToken': token}, status=200)
+            
+        # request.session['auth_token'] = token
+        # request.session.set_expiry(None)
+        return JsonResponse({'accessToken': token, 'username': token_data['username']}, status=200)
 
     except Exception as e:
+        print('Error: ', e)
+        return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+@require_POST
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def logout(request):
+    try:
+        del request.session['auth_token']
+        return JsonResponse({'detail': 'loged out successfully.'}, status=200)
+    except Exception as e:
+        print('Error: ', e)
         return JsonResponse({'error': str(e)}, status=500)

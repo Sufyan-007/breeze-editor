@@ -8,6 +8,5 @@ def get_all_projects():
     for project_name in project_names:
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
-        app_config['project_name'] = project_name
         projects[project_name]=app_config
     return projects
