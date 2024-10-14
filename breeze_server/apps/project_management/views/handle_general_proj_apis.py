@@ -57,12 +57,11 @@ def add(request):
         ## 1) Load proj data from UI
         ## 2) Validate proj data
         data = load_proj_data(request)
-        
         ## 3) Write proj data (app_config.json)
         ## 4) Create default directories objects for given template
         ## 5) Create default config for the main component via proj_config_management
         ## 6) Create default config for the route for main comp via proj_config_management
-        app_current_config = add_dirs_configs(data)
+        app_current_config = add_dirs_configs(data, request)
             
         ## 7) Replace the content for the related code in the template file
         ## 8) Create all the files in the targeted new app

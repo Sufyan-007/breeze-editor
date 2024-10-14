@@ -3,7 +3,7 @@ from apps.common.utils.file_helpers.file_handler import upload_file
 from .get_all_projects import get_all_projects
 
 def load_proj_data(proj_data_request):
-    data = json.loads(proj_data_request.body.decode("utf-8"))
+    data = proj_data_request.POST.dict()
     logo_file = proj_data_request.FILES.get('logo')
 
     data['defaultComponent'] = "Main"
@@ -22,6 +22,9 @@ def load_proj_data(proj_data_request):
     
     if logo_file:
         logo_file_id = upload_file(logo_file, data["name"])
-        data["logo"] = logo_file_id
-        data["logo_file_name"] = logo_file.name
+        data["logoId"] = logo_file_id
+    else:
+        data["logoId"] = None
+    if data.get('logo'):
+        del data['logo']
     return data

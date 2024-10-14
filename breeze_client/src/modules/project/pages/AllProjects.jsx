@@ -6,7 +6,7 @@ import { BreezeModal } from '../../../common/display';
 import ProjectCard from '../components/ProjectCard';
 import { router } from '../../../routes/routing';
 import { createProject, deleteProject, getAllProjects } from '../services/projectService';
-import { CustomTextInput } from '../../../common/fields';
+import { CustomTextArea, CustomTextInput } from '../../../common/fields';
 
 import {
   buildToolOptions,
@@ -17,7 +17,7 @@ import {
 } from '../constants/CreateNewProjectFormConstants';
 import CustomModal from '../../../common/display/modal/BreezeModal';
 
-function AllProjects() {
+const AllProjects = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   // const [error, setError] = useState(null);
@@ -34,16 +34,28 @@ function AllProjects() {
 
   const handleInputChange = (name, value) => {
     setFormValues({ ...formValues, [name]: value });
-
     if (name === 'name') setNameError('');
     if (name === 'author') setAuthorError('');
   };
 
   const handleBadgeSelection = (name, selectedValue) => {
-    setFormValues((prevFormValues) => ({
-      ...prevFormValues,
-      [name]: prevFormValues[name] === selectedValue ? '' : selectedValue,
-    }));
+    setFormValues((prevFormValues) => {
+      if (name === 'styling') {
+        const currentStyling = prevFormValues.styling;
+        const isSelected = currentStyling.includes(selectedValue);
+        return {
+          ...prevFormValues,
+          styling: isSelected
+            ? currentStyling.filter((item) => item !== selectedValue)
+            : [...currentStyling, selectedValue],
+        };
+      } else {
+        return {
+          ...prevFormValues,
+          [name]: prevFormValues[name] === selectedValue ? '' : selectedValue,
+        };
+      }
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -71,10 +83,12 @@ function AllProjects() {
         })
       );
     }
-
+    const formData = new FormData();
+    Object.keys(formValues).forEach((key) => {
+      formData.append(key, formValues[key]);
+    });
     try {
-      const createdProject = await createProject(formValues);
-      setProjects((prevProjects) => [...prevProjects, createdProject]);
+      await createProject(formData);
       setModalOpen(false);
     } catch (error) {
       console.error('Error creating project:', error);
@@ -239,36 +253,36 @@ function AllProjects() {
             <div className="row">
               <div className="col-md-6">
                 <div className="mb-3 home-form-box">
-                  <label htmlFor="projectLogo" className="med-font color-text mb-1 fw-semibold">
+                  <label htmlFor="logo" className="med-font color-text mb-1 fw-semibold">
                     Upload image for project logo
                   </label>
                   <input
                     type="file"
                     className="form-control"
-                    id="projectLogo"
-                    onChange={(e) => handleInputChange('projectLogo', e.target.files[0])}
+                    accept="image/*"
+                    id="logo"
+                    onChange={(e) => handleInputChange('logo', e.target.files[0])}
                   />
                   <p className="color-text small-font">Suggested dimensions: 512x512</p>
                 </div>
               </div>
               <div className="col-md-6">
                 <div className="mb-3 home-form-box">
-                  <label htmlFor="description" className="med-font color-text mb-1 fw-semibold">
-                    Description
-                  </label>
-                  <textarea
-                    className="form-control"
-                    id="description"
-                    style={{ height: '100px' }}
+                  <CustomTextArea
+                    name="description"
                     value={formValues.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    onChange={(value) => handleInputChange('description', value)}
+                    config={{ label: 'Description' }}
+                    required
                   />
                 </div>
               </div>
             </div>
             <div className="row">
               <div className="mb-3 home-form-box">
-                <label className="med-font color-text mb-1 fw-semibold">Technology</label>
+                <label className="med-font color-text mb-1 fw-semibold">
+                  Technology <span className="text-danger"> *</span>
+                </label>
                 <div className="home-badges-wrapper">
                   {technologyOptions.map((option) => (
                     <span
@@ -285,7 +299,9 @@ function AllProjects() {
             </div>
             <div className="row">
               <div className="mb-3 home-form-box">
-                <label className="med-font color-text mb-1 fw-semibold">Language</label>
+                <label className="med-font color-text mb-1 fw-semibold">
+                  Language <span className="text-danger"> *</span>
+                </label>
                 <div className="home-badges-wrapper">
                   {languageOptions.map((option) => (
                     <span
@@ -306,7 +322,7 @@ function AllProjects() {
                 <div className="home-badges-wrapper">
                   {stylingOptions.map((option) => (
                     <span
-                      className={`home-badge home-theme-badge ${formValues.styling === option.label ? 'breeze-badge-active' : ''}`}
+                      className={`home-badge home-theme-badge ${formValues.styling.includes(option.label) ? 'breeze-badge-active' : ''}`}
                       key={option.label}
                       onClick={() => handleBadgeSelection('styling', option.label)}
                     >
@@ -319,7 +335,9 @@ function AllProjects() {
             </div>
             <div className="row">
               <div className="mb-3 home-form-box">
-                <label className="med-font color-text mb-1 fw-semibold">Build Tool</label>
+                <label className="med-font color-text mb-1 fw-semibold">
+                  Build Tool <span className="text-danger"> *</span>
+                </label>
                 <div className="home-badges-wrapper">
                   {buildToolOptions.map((option) => (
                     <span
@@ -382,6 +400,6 @@ function AllProjects() {
       </div>
     </div>
   );
-}
+};
 
 export default AllProjects;

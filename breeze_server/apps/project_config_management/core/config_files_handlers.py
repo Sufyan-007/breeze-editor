@@ -7,8 +7,8 @@ from apps.common.utils.file_helpers.config_handler import write_config_file
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.utils.uuid_as_key import generate_uuid_as_key 
 from apps.common.utils.tree_management import replace_node
-
-def add_dirs_configs(data):
+from apps.project_management.core.resource_upload_service import update_config
+def add_dirs_configs(data, proj_data_request):
     if data["name"] == "":
         raise ValueError("Name must be specified")
     app_config_dir = f"{CONFIG_PATH}/{data['name']}"
@@ -49,6 +49,7 @@ def add_dirs_configs(data):
     # entries in directory management
     create_directory_management_file(app_current_config)
     update_directory_management_file(app_current_config)
+    write_resource_config(app_current_config, proj_data_request)
     return app_current_config
 
 def write_basic_main_comp_config(app_config):
@@ -117,6 +118,16 @@ def write_swagger_schema_config(app_config_dir):
             "auth_apis" : {}
         }
     })
+
+def write_resource_config(app_current_config, proj_data_request):
+    logo_file = proj_data_request.FILES.get('logo')
+    write_json_file(f"{CONFIG_PATH}/{app_current_config['name']}/{CONFIG_FILES_PATH['RESOURCE_CONFIG']}.json", {})
+    if logo_file:
+        project_id = app_current_config['name']
+        file_name = logo_file.name
+        file_id = app_current_config['logoId']
+        description = "Project Logo"
+        return update_config(project_id, file_name, description, file_id)
 
 def create_directory_management_file(app_config):
     template_path = ""
