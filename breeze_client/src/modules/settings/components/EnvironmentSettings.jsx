@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import AddNewEnvironment from './AddNewEnvironment';
-import {
-  fetchEnvironmentSettings,
-  saveEnvironmentSettings,
-  setEnvironment,
-  deleteEnvironmentOrVariable,
-  editEnvironmentSettings,
-} from '../services/EnvironmentSettingsService';
 import { useParams } from 'react-router';
 import CustomTable from '../../../common/display/datatable/BreezeCustomTable';
 import { CustomButtonField, CustomCheckBoxField, CustomTextInput } from '../../../common/fields';
 import CustomModal from '../../../common/display/modal/BreezeModal';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import BreezeOffCanvas from '../../../common/display/offcanvas/BreezeOffcanvas';
+import {
+  deleteEnvironmentConfig,
+  editEnvironmentConfig,
+  fetchEnvironmentConfig,
+  saveEnvironmentConfig,
+  setEnvironmentConfig,
+} from '../../../redux/settings/settingsActions';
 
 const EnvironmentSettings = () => {
   const [envVariables, setEnvVariables] = useState([]);
@@ -35,15 +35,18 @@ const EnvironmentSettings = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [shouldSave, setShouldSave] = useState(false);
-  const [selectedEnvName, setSelectedEnvName] = useState(null);
   const [editEnvName, setEditEnvName] = useState(null);
   const [tempEnvName, setTempEnvName] = useState('');
   const containerRef = useRef(null);
   const { projectName } = useParams();
   const defaultEnvName = 'dev (default)';
   const { projectConfig } = useSelector((state) => state.project);
+  const { environmentSettingsConfig, currentSetEnvironment } = useSelector((state) => state.environment);
+
+  const dispatch = useDispatch();
+
   let prefix;
-  if (!projectConfig.buildTool || projectConfig.buildTool === 'Vite') {
+  if (!projectConfig?.buildTool || projectConfig.buildTool === 'Vite') {
     prefix = 'VITE_';
   } else {
     prefix = 'REACT_APP_';
@@ -93,41 +96,32 @@ const EnvironmentSettings = () => {
 
   const fetchEnvironments = async () => {
     try {
-      const data = await fetchEnvironmentSettings(projectName);
-      const env = data.config;
-      const envVars = Object.entries(env.envVars).map(([id, name]) => ({
-        id,
-        name,
-        values: {},
-      }));
-      const envNames = Object.keys(env.environments);
-
-      if (!envNames.includes(defaultEnvName)) {
-        envNames.push(defaultEnvName);
-        env.environments[defaultEnvName] = {};
-      }
-
-      const updatedEnvVars = envVars.map((variable) => {
-        const values = {};
-        envNames.forEach((envName) => {
-          values[envName] = env.environments[envName][variable.id] || '';
-        });
-        return { ...variable, values };
-      });
-
-      updatedEnvVars.reverse();
-
-      setEnvVariables(updatedEnvVars);
-      setEnvNames(envNames);
+      dispatch(fetchEnvironmentConfig({ projectName }));
     } catch (error) {
       console.error('Error fetching files:', error);
     }
   };
 
   useEffect(() => {
+    if (
+      !environmentSettingsConfig ||
+      (Object.keys(environmentSettingsConfig.envVars).length === 0 &&
+        Object.keys(environmentSettingsConfig.envNames).length === 0)
+    ) {
+      return;
+    }
+    const updatedEnvVars = environmentSettingsConfig.envVars.map((variable) => ({
+      ...variable,
+      values: variable.values || {},
+    }));
+    updatedEnvVars.reverse();
+
+    setEnvVariables(updatedEnvVars);
+    setEnvNames(environmentSettingsConfig.envNames);
+  }, [environmentSettingsConfig]);
+
+  useEffect(() => {
     const fetchData = async () => {
-      // const data = await getAppBasicConfig(projectName);
-      setSelectedEnvName(projectConfig.current_environment || 'dev (default)');
       fetchEnvironments();
     };
 
@@ -165,7 +159,7 @@ const EnvironmentSettings = () => {
   };
 
   const isUUID = (id) => {
-    const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    const uuidPattern = /^[0-9a-fA-F]{8}[-_][0-9a-fA-F]{4}[-_][0-9a-fA-F]{4}[-_][0-9a-fA-F]{4}[-_][0-9a-fA-F]{12}$/;
     return uuidPattern.test(id);
   };
 
@@ -192,14 +186,17 @@ const EnvironmentSettings = () => {
         // Find the updated variable
         const updatedVariable = updatedVariables.find((variable) => variable.id === id);
 
-        const result = await editEnvironmentSettings(projectName, id, updatedVariable, envNames);
-
+        const result = await dispatch(
+          editEnvironmentConfig({ projectName, editVariableId: id, envVars: updatedVariable, environments: envNames })
+        ).unwrap();
+        console.log(result);
         if (result.status === 'success') {
           setEnvVariables(updatedVariables);
           setEditVariableId(null);
           setEditTempValues({});
           setToastMessage(result.message);
           setShowToast(true);
+          fetchEnvironments();
         } else {
           setToastMessage('Failed to update environment settings');
           setShowToast(true);
@@ -209,7 +206,6 @@ const EnvironmentSettings = () => {
         setToastMessage('An error occurred while saving');
         setShowToast(true);
       }
-      setShouldSave(true);
     } else {
       setEnvVariables(
         envVariables.map((variable) =>
@@ -280,8 +276,7 @@ const EnvironmentSettings = () => {
   };
 
   const handleEnvironmentModalOk = async () => {
-    setSelectedEnvName(pendingEnvName);
-    const response = await setEnvironment(projectName, pendingEnvName);
+    const response = await dispatch(setEnvironmentConfig({ projectName, environmentName: pendingEnvName })).unwrap();
     setToastMessage(response.message);
     setShowToast(true);
     setShowEnvironmentChangeModal(false);
@@ -316,9 +311,8 @@ const EnvironmentSettings = () => {
         environments[envName][`${variable.id}`] = variable.values[envName];
       });
     });
-
     try {
-      const response = await saveEnvironmentSettings(projectName, envVars, environments);
+      const response = await dispatch(saveEnvironmentConfig({ projectName, envVars, environments })).unwrap();
       setToastMessage(response.message);
       setShowToast(true);
       console.log('Environment settings saved successfully');
@@ -331,23 +325,26 @@ const EnvironmentSettings = () => {
 
   const handleSaveEnvName = async () => {
     try {
-      const result = await editEnvironmentSettings(
-        projectName,
-        null, // No variable ID, as we are editing the environment name
-        null, // No envVars, as we're not editing the variables
-        null, // No environments, as we're not editing the variables
-        editEnvName, // The old environment name
-        tempEnvName // The new environment name
-      );
-
+      const result = await dispatch(
+        editEnvironmentConfig({
+          projectName,
+          editVariableId: null, // No variable ID, as we're editing the environment name
+          envVars: null, // No envVars
+          environments: null, // No environments
+          oldEnvName: editEnvName, // The old environment name
+          newEnvName: tempEnvName, // The new environment name
+        })
+      ).unwrap();
       if (result.status === 'success') {
-        // Update the state with the new environment name
-        const updatedEnvNames = envNames.map((envName) => (envName === editEnvName ? tempEnvName : envName));
-        setEnvNames(updatedEnvNames);
         setEditEnvName(null);
         setTempEnvName('');
         setToastMessage(result.message);
         setShowToast(true);
+        console.log(currentSetEnvironment, editEnvName);
+        if (currentSetEnvironment === editEnvName) {
+          dispatch(setEnvironmentConfig({ projectName, environmentName: tempEnvName }));
+        }
+        fetchEnvironments();
       } else {
         setToastMessage('Failed to update environment name');
         setShowToast(true);
@@ -357,12 +354,11 @@ const EnvironmentSettings = () => {
       setToastMessage('An error occurred while saving');
       setShowToast(true);
     }
-    setShouldSave(true);
   };
 
   const handleDelete = async ({ envName, envVariableId }) => {
     try {
-      const response = await deleteEnvironmentOrVariable(projectName, envName, envVariableId);
+      const response = await dispatch(deleteEnvironmentConfig({ projectName, envName, envVariableId })).unwrap();
       if (response.error) {
         setToastMessage(response.error);
         setShowToast(true);
@@ -395,7 +391,6 @@ const EnvironmentSettings = () => {
   };
 
   const isEditingOrAdding = editVariableId !== null || isOffcanvasOpen;
-
   const columns = [
     {
       header: 'Actions',
@@ -409,60 +404,71 @@ const EnvironmentSettings = () => {
       accessor: 'variableName',
       align: 'left',
     },
-    ...envNames.map((envName) => ({
-      header: envName,
-      accessor: envName,
-      align: 'left',
-      headerRenderer: () => (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {editEnvName === envName ? (
-            <>
-              <CustomTextInput
-                name="tempEnvName"
-                value={tempEnvName}
-                onChange={setTempEnvName}
-                className="bg-dark text-light me-2"
-                placeholder="Edit Environment Name"
-              />
-              <CustomButtonField
-                label={<i className="bi bi-check2" />}
-                onClick={handleSaveEnvName}
-                className="btn toggle-btn br-text-primary"
-              />
-              <CustomButtonField
-                label={<i className="bi bi-x" />}
-                onClick={handleCancelEnvName}
-                className="btn toggle-btn br-text-primary"
-              />
-            </>
-          ) : (
-            <>
-              <span>{envName}</span>
-              <div className="d-flex align-items-center">
-                <CustomCheckBoxField
-                  name={envName}
-                  value={selectedEnvName === envName}
-                  onChange={() => handleEnvironmentChange(envName)}
-                  config={{
-                    className: 'form-check-input me-2',
-                  }}
-                />
-                <CustomButtonField
-                  label={<i className="bi bi-pencil" />}
-                  onClick={() => handleEditEnvName(envName)}
-                  className="btn toggle-btn br-text-primary"
-                />
-                <CustomButtonField
-                  label={<i className="bi bi-trash" />}
-                  onClick={() => handleDeleteEnvironment(envName)}
-                  className="btn btn-outline-danger btn-sm settings-no-outline-button"
-                />
-              </div>
-            </>
-          )}
-        </div>
-      ),
-    })),
+    ...(Array.isArray(envNames)
+      ? envNames.map((envName) => ({
+          header: envName,
+          accessor: envName,
+          align: 'left',
+          headerRenderer: () => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {editEnvName === envName ? (
+                <>
+                  <CustomTextInput
+                    name="tempEnvName"
+                    value={tempEnvName}
+                    onChange={setTempEnvName}
+                    className="bg-dark text-light me-2"
+                    placeholder="Edit Environment Name"
+                  />
+                  <CustomButtonField
+                    label={<i className="bi bi-check2" />}
+                    onClick={handleSaveEnvName}
+                    className="btn toggle-btn br-text-primary"
+                  />
+                  <CustomButtonField
+                    label={<i className="bi bi-x" />}
+                    onClick={handleCancelEnvName}
+                    className="btn toggle-btn br-text-primary"
+                  />
+                </>
+              ) : (
+                <>
+                  <span>{envName}</span>
+                  <div className="d-flex align-items-center">
+                    <CustomCheckBoxField
+                      name={envName}
+                      value={currentSetEnvironment ? currentSetEnvironment === envName : envName === defaultEnvName}
+                      onChange={() => {
+                        if (
+                          (currentSetEnvironment && currentSetEnvironment !== envName) ||
+                          (!currentSetEnvironment && envName !== defaultEnvName)
+                        ) {
+                          handleEnvironmentChange(envName);
+                        }
+                      }}
+                      className="form-check-input me-2"
+                    />
+                    {envName !== defaultEnvName && (
+                      <>
+                        <CustomButtonField
+                          label={<i className="bi bi-pencil" />}
+                          onClick={() => handleEditEnvName(envName)}
+                          className="btn toggle-btn br-text-primary"
+                        />
+                        <CustomButtonField
+                          label={<i className="bi bi-trash" />}
+                          onClick={() => handleDeleteEnvironment(envName)}
+                          className="btn btn-outline-danger btn-sm settings-no-outline-button"
+                        />
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          ),
+        }))
+      : []),
   ];
 
   const data = envVariables.map((variable) => ({
@@ -514,24 +520,26 @@ const EnvironmentSettings = () => {
       ) : (
         variable.name
       ),
-    ...envNames.reduce(
-      (acc, envName) => ({
-        ...acc,
-        [envName]:
-          editVariableId === variable.id ? (
-            <CustomTextInput
-              name={`envValue_${envName}`}
-              value={editTempValues.values[envName] || ''}
-              onChange={(e) => handleVariableChange(variable.id, envName, e)}
-              className="br-form-control"
-              placeholder="Enter value"
-            />
-          ) : (
-            variable.values[envName] || ''
-          ),
-      }),
-      {}
-    ),
+    ...(Array.isArray(envNames)
+      ? envNames.reduce(
+          (acc, envName) => ({
+            ...acc,
+            [envName]:
+              editVariableId === variable.id ? (
+                <CustomTextInput
+                  name={`envValue_${envName}`}
+                  value={editTempValues.values[envName] || ''}
+                  onChange={(e) => handleVariableChange(variable.id, envName, e)}
+                  className="br-form-control"
+                  placeholder="Enter value"
+                />
+              ) : (
+                variable.values[envName] || ''
+              ),
+          }),
+          {}
+        )
+      : {}),
   }));
 
   return (
@@ -567,21 +575,6 @@ const EnvironmentSettings = () => {
           onClose={() => setIsOffcanvasOpen(false)}
         />
       </BreezeOffCanvas>
-      {/* <Toast
-        onClose={() => setShowToast(false)}
-        show={showToast}
-        delay={3000}
-        autohide
-        style={{
-          position: 'fixed',
-          top: 20,
-          right: 20,
-        }}
-      >
-        <Toast.Header>
-          <strong className="me-auto">{toastMessage}</strong>
-        </Toast.Header>
-      </Toast> */}
       <CustomModal
         isOpen={showWarningModal}
         onClose={() => setShowWarningModal(false)}

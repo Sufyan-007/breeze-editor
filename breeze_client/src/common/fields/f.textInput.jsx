@@ -1,9 +1,11 @@
 import PropTypes from 'prop-types';
-function CustomTextInput({ name, value, onChange, config, className, placeholder = '', ...rest }) {
+function CustomTextInput({ name, value, onChange, config, className, placeholder = '', required, ...rest }) {
   return (
     <div className={config ? config.groupClass : 'form-group'}>
       {config && config.label && (
-        <label className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>{config.label}</label>
+        <label className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>
+          {config.label} {required && <span className="text-danger"> *</span>}
+        </label>
       )}
       <input
         type="text"
@@ -28,6 +30,7 @@ CustomTextInput.propTypes = {
   onChange: PropTypes.func.isRequired,
   className: PropTypes.string,
   placeholder: PropTypes.string,
+  required: PropTypes.bool,
 };
 
 export default CustomTextInput;
