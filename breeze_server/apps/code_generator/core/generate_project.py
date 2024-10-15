@@ -203,7 +203,7 @@ def install_dependencies(app_config):
     package_json_path = directory_manager.get_path_from_file_id("PACKAGE_CONFIG")
     
     package_json = read_json_file(package_json_path, "")
-
+    package_json['dependencies'] = {}
     for dep in app_dependencies:
         package_json['dependencies'][dep] = app_dependencies[dep]  
     
