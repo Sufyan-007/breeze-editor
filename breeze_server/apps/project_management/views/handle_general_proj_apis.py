@@ -58,6 +58,8 @@ def add(request):
         ## 1) Load proj data from UI
         ## 2) Validate proj data
         data = load_proj_data(request)
+        if "errors" in data:
+            return JsonResponse(data, status=400)
         ## 3) Write proj data (app_config.json)
         ## 4) Create default directories objects for given template
         ## 5) Create default config for the main component via proj_config_management
