@@ -17,6 +17,7 @@ from ...common.constants.consts import (
     CLIENT_API,
     CUSTOMIZED_PROJ,
     MODEL,
+    INDEX,
 )
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.query_resource_schema import manage_resource_schema
@@ -41,6 +42,10 @@ from ...common.utils.file_helpers.json_handler import read_json_file as read_fil
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def manage_resource(request, param):
+    
+    
+    
+    
     try:
         projectname = param
         data = json.loads(request.body)
@@ -73,7 +78,7 @@ def manage_resource(request, param):
             ResourceCategory.SERVICES.value,
         ]:
             if not resource:
-                selected_data = get_json_config_data("index", category, projectname)
+                selected_data = get_json_config_data(INDEX, category, projectname)
             else:
                 selected_data = get_json_config_data(resource, category, projectname)
 
@@ -86,7 +91,7 @@ def manage_resource(request, param):
         if category in [ResourceCategory.THIRD_PARTY.value]:
             if not libname or not libversion:
                 if not resource:
-                    config_path = os.path.join(THIRD_PARTY_CONFIG_PATH, "index")
+                    config_path = os.path.join(THIRD_PARTY_CONFIG_PATH,INDEX)
                     selected_data = read_file(config_path)
                 else:
                     return JsonResponse(
@@ -100,12 +105,12 @@ def manage_resource(request, param):
                         THIRD_PARTY_CONFIG_PATH, library, "component"
                     )
                     if not resource:
-                        config_path = os.path.join(config_path, "index")
+                        config_path = os.path.join(config_path, INDEX)
                         selected_data = read_file(config_path)
                         # print(selected_data)
                     else:
                         file_name = ""
-                        with open(f"{config_path}/index.json", "rb") as index_config:
+                        with open(f"{config_path}/{INDEX}.json", "rb") as index_config:
                             index_data = json.load(index_config)
                             for key, value in index_data.items():
                                 if value == resource:
@@ -155,7 +160,7 @@ def manage_resource(request, param):
                 try:
                     if not resource:
                         config_path = os.path.join(
-                            CONFIG_PATH, projectname, CLIENT_API, module, "index"
+                            CONFIG_PATH, projectname, CLIENT_API, module, INDEX
                         )
                         selected_data = read_file(config_path)
                     else:
@@ -190,7 +195,7 @@ def manage_resource(request, param):
             folder_name = libname
             if not resource:
                 config_path = os.path.join(
-                    CONFIG_PATH, projectname, CUSTOMIZED_PROJ, folder_name, "index"
+                    CONFIG_PATH, projectname, CUSTOMIZED_PROJ, folder_name, INDEX
                 )
                 selected_data = read_file(config_path)
             elif resource:
@@ -210,7 +215,7 @@ def manage_resource(request, param):
                     return JsonResponse(
                         {"error": "please provide module first"}, status=400
                     )
-                config_path = os.path.join(CONFIG_PATH, projectname, MODEL, "index")
+                config_path = os.path.join(CONFIG_PATH, projectname, MODEL, INDEX)
                 selected_data = read_file(config_path)
                 # return JsonResponse({"error":"resource are misseing"},status = 400)
 
