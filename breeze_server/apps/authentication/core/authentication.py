@@ -13,8 +13,6 @@ class CustomTokenAuthentication(BaseAuthentication):
         if request.path in EXEMPT_URLS:
             return None
         token = request.headers.get('Authorization', None)
-        print(request.method)
-        # request.method = 'DELETE'
         if token is None:
             raise AuthenticationFailed('Invalid token.')
 

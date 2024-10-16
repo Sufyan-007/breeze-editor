@@ -31,7 +31,9 @@ def add_dirs_configs(data, proj_data_request):
     app_current_config["dependencies"] = {
         "react-router-dom": "*",
         "bootstrap": "^5.3.2",
-        "react-bootstrap": "*"
+        "react-bootstrap": "*",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
     }
     
 

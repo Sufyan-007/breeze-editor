@@ -29,6 +29,8 @@ get_all_schema = {
                         'react-router-dom': openapi.Schema(type=openapi.TYPE_STRING, description="Version of React Router DOM"),
                         'bootstrap': openapi.Schema(type=openapi.TYPE_STRING, description="Version of Bootstrap"),
                         'react-bootstrap': openapi.Schema(type=openapi.TYPE_STRING, description="Version of React Bootstrap"),
+                        "react": openapi.Schema(type=openapi.TYPE_STRING, description="Version of React"),
+                        "react-dom": openapi.Schema(type=openapi.TYPE_STRING, description="Version of React Dom")
                     }
                 ),
     },
