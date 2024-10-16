@@ -1,18 +1,21 @@
 import os
+import shutil
 from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists, create_dir_if_not_exists
 from apps.common.utils.file_helpers.json_handler import read_project_config_file, write_json_file
 from apps.directory_management.core.directory_management_service import DirectoryManager
 
-def save_file(project_id, file_id, path):
-        file_path_full = os.path.join(CONFIG_PATH, project_id, 'uploaded_assets', file_id)
-        
-        with open(file_path_full, 'rb') as f:
-            file_content = f.read()
-        create_parent_dir_if_not_exists(path)
-        # final_path = os.path.join(path, file_name)
-        with open(path, 'wb') as destination:
-            destination.write(file_content)
+
+def save_file(project_id, file_id, destination_path):
+    # Full path to the source file
+    file_path_full = os.path.join(CONFIG_PATH, project_id, 'uploaded_assets', file_id)
+    
+    # Create the parent directory for the destination if it doesn't exist
+    create_parent_dir_if_not_exists(destination_path)
+    
+    # Use shutil.copy to copy the file
+    shutil.copy(file_path_full, destination_path)
+
 
 def update_config(project_id, file_name, description, file_id=None, parentFolderId = "IMAGES"):
     app_config_dir = f"{CONFIG_PATH}/{project_id}"

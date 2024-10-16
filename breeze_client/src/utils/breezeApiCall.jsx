@@ -49,7 +49,7 @@ export async function callApiClient(
     };
 
     const response = await fetch(url, requestOptions);
-
+    console.log(response);
     if (!response.ok) {
       throw new Error(`API call failed with status ${response.status}`);
     }
