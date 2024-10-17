@@ -1027,6 +1027,6 @@ class GetCodeConfig(APIView):
                 codeTree = pickle.load(file)
             
             code = codeTree[data["index"]]
-            if code:
-                code["children"] = None
+            if code.get("children"):
+                del code["children"]
             return JsonResponse({"related_config":code}, status=200)
