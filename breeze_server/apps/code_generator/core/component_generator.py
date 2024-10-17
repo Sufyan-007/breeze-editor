@@ -160,12 +160,20 @@ class ComponentGenerator_JSX(ComponentGenerator):
         resources = config['resources']
         html_config = config['html']
         generator = HTMLGenerator(config)
-        html_code = generator.generateHTML(html_config)
+        html_code,html_code_tree = generator.generateHTML(html_config)
 
         # print(html_code)
 
         wrapper_store = config.get("wrapper_store",None)
         if not wrapper_store :
+            html_code_tree = {
+                "type" : "HTML_WRAP",
+                # "statementType" : "NA",
+                "code" : f"<Fragment> {html_code} </Fragment>",
+                "children" :[
+                    html_code_tree
+                    ],
+            }
             html_code = "<Fragment>%s</Fragment>"%(html_code)
         else:
             if "store" in config["imports"]:
@@ -211,7 +219,7 @@ class ComponentGenerator_JSX(ComponentGenerator):
         props_vars_declaration = ', '.join([f'{var["name"]}={var["body"]["defaultValue"]}' if var["body"].get("defaultValue") else var["name"] for var in props_vars])
         if props_vars_declaration != "":
             props_vars_declaration = "{" + props_vars_declaration +"}"
-        import_stats = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
+        import_stats,import_statement_tree = ImportHelper.generate_imports_code(config, all_config,all_store_config,all_reducer_config, self.app_config)
         
         def generate_function_code(func):
             all_resources = []
@@ -259,24 +267,72 @@ class ComponentGenerator_JSX(ComponentGenerator):
     
         def generate_resources_code(resources):
             resources_code = []
+            resource_code_tree=[]
             for resource in resources:
                 if resource['type'] == 'stateVars':
-                    resources_code.append(generate_state_var_code(resource))
+                    code = generate_state_var_code(resource)
                 elif resource['type'] == 'refVars':
-                    resources_code.append(generate_ref_var_code(resource))
+                    code = generate_ref_var_code(resource)
                 elif resource['type'] == 'otherVars':
-                    resources_code.append(generate_other_var_code(resource))
+                    code = generate_other_var_code(resource)
                 elif resource['type'] == 'function':
-                    resources_code.append(generate_function_code(resource))
+                    code = generate_function_code(resource)
                 elif resource['type'] == 'lifecycle':
-                    resources_code.append(generate_lifecycle_code(resource))
+                    code = generate_lifecycle_code(resource)
                 elif resource['type'] == 'hook':
-                    resources_code.append(generate_hook_code(resource))
+                    code =generate_hook_code(resource)
                 # Add more resource types if needed
-
-            return '\n'.join(resources_code)
+                resources_code.append(code)
+                resource_code_tree.append({
+                    "type": resource['type'],
+                    "statementType" : "SINGLE",
+                    "code" : code,
+                    "id": resource['id']
+                })
+            return '\n'.join(resources_code),resource_code_tree
         
-        resources_code = generate_resources_code(resources)
+        resources_code,resource_code_tree = generate_resources_code(resources)
+        
+        code_tree=[]
+        
+        code_tree.append({
+            "type" : "ALL_IMPORTS",
+            # "statementType" : "NA",
+            "children" :import_statement_tree,
+            "code": "import React, { useState, Fragment } from 'react';" + "".join([x["code"] for x in import_statement_tree])
+        })
+        
+        all_resources = {
+            "type" : "ALL_RESOURCES",
+            # "statementType" : "NA",
+            "children" : resource_code_tree,
+            "code":"".join([x["code"] for x in resource_code_tree])
+        }
+        
+        html_tree={
+            "type" : "RETURN_HTML_TREE",
+            # "statementType" : "NA",
+            "code": f"return ( { html_code_tree['code'] } )", 
+            "children" : [html_code_tree],
+            
+        }
+        
+        code_tree.append({
+            "type" : "REACT_COMPONENT",
+            # "statementType" : "NA",
+            "code" : f"const {name} = ( {props_vars_declaration} ) => {{ {all_resources['code']} {html_tree['code']} }}",
+            "children" :[
+                all_resources,
+                html_tree
+                ],
+
+        })
+        code_tree.append({
+            "type" : "EXPORT",
+            # "statementType" : "NA",
+            "code" : f"export default {name};"
+            
+        })
         
         react_component = f"""
             import React, {{ useState, Fragment }} from 'react';
@@ -292,4 +348,5 @@ class ComponentGenerator_JSX(ComponentGenerator):
             export default {name};
             """
 
-        return react_component
+        
+        return react_component, code_tree
