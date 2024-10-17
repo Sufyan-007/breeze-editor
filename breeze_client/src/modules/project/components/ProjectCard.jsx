@@ -8,6 +8,7 @@ function ProjectCard({
   iconSrc = '',
   onClick = () => {},
   onDelete = () => {},
+  projectStatus = 'Fetching..',
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -56,7 +57,7 @@ function ProjectCard({
             </div>
             <div className="home-action-buttons position-relative" ref={menuRef}>
               <span className="badge breeze-badge">
-                <span className="med-font">Running</span>
+                <span className="med-font">{projectStatus}</span>
               </span>
               <i
                 className="bi bi-three-dots-vertical br-text-primary"
@@ -95,6 +96,7 @@ ProjectCard.propTypes = {
   iconSrc: PropTypes.string,
   onClick: PropTypes.func,
   onDelete: PropTypes.func,
+  projectStatus: PropTypes.string,
 };
 
 export default ProjectCard;

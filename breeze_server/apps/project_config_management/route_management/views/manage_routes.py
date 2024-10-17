@@ -73,7 +73,7 @@ def add_route(request, project_id):
             rewrite_clean_route_config(project_id, config_data)
             process_route_config(project_id)
             include_all_routes_accessory_data(project_id, list(config_data.values()))
-            return JsonResponse(config_data.get(node_id), status=200)
+            return JsonResponse(config_data, status=200)
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)

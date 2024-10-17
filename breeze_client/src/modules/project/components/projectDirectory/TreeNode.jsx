@@ -4,6 +4,7 @@ import '../../styles/BreezeTreeView.css';
 import { useTreeContext } from '../../context/TreeContext';
 import CustomContextMenu from '../../../../common/display/context-menu/BreezeContextMenu';
 import { addFileOptions, fileOptions, folderOptions } from '../../constants/contextMenuOptions';
+import { getIconClass } from '../../constants/ExtensionBasedIcon';
 
 function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChildren, isExpanded, parentMethods }) {
   const { selectedNodeId } = useTreeContext();
@@ -111,7 +112,7 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
           {node.type === 'DIRECTORY' ? (
             <i className={`bi ${isExpanded(node.id) ? 'bi-folder2-open' : 'bi-folder'} br-text-primary`} />
           ) : (
-            <i className={`bi bi-filetype-${node.extension === 'SX' ? 'js' : 'jsx'} br-text-primary`} />
+            <i className={`bi ${getIconClass(node?.extension)} br-text-primary`} />
           )}
         </span>
         <span className="tree-node-content">
@@ -136,7 +137,7 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
           ) : (
             <>
               {node.name}
-              {node.extension && <span>.{node.extension}</span>}
+              {node.extension && <span>.{node.extension === 'SX' ? 'jsx' : node.extension}</span>}
             </>
           )}
         </span>
