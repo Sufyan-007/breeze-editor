@@ -45,7 +45,7 @@ function ProjectDisplay() {
 
       fetchCode();
     }
-  }, [selectedNode, projectName]);
+  }, [selectedNode, projectName, activeTab]);
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {
