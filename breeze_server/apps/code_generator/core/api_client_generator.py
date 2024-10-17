@@ -16,7 +16,7 @@ def __init__( app_name):
     app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
     return app_config_dir,app_config
 
-def generate_react_service( app_name, filename, service_type, module_id):
+def generate_react_service( app_name, filename, service_type, module_id, module_name=''):
     _, app_config = __init__(app_name)
     map_services = {}
     if service_type == "WS":
@@ -36,7 +36,7 @@ def generate_react_service( app_name, filename, service_type, module_id):
             
             map_services = _manage_service_tags(model.tags, react_functions, map_services)
         
-        create_service_files(map_services,app_config,app_name,fileId=filename)
+        create_service_files(map_services,app_name,fileId=filename,module_id=module_id, module_name=module_name)
     else:
         service_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/{module_id}/{filename}"
         service_config = read_json_file(service_path)
@@ -46,7 +46,7 @@ def generate_react_service( app_name, filename, service_type, module_id):
             
             map_services = _manage_service_tags(model.tags, react_functions, map_services)
         
-        create_service_files(map_services,app_config,app_name,fileId=filename)
+        create_service_files(map_services,app_name,fileId=filename, module_id=module_id, module_name=module_name)
         
 def create_websocket_hook_file( filename, app_config):
     # preprare new service file for each tag
@@ -276,17 +276,36 @@ def _manage_service_tags( tags, react_functions, map_services):
             map_services[tags] = react_functions
     return map_services
 
-def create_service_files( map_services,app_config,project_name,fileId):
+def create_service_files( map_services,project_name,fileId,module_id, module_name):
     # preprare new service file for each tag
-    parent_folder_name = "service"
-    folder_name= "module1"
+    # parent_folder_name = "service"
+    # folder_name= "module1"
     content = "import axios from 'axios'\n"
-    create_dir_if_not_exists(f"{app_config['APP_SOURCE_DIR']}/{parent_folder_name}/{folder_name}")
+    # create_dir_if_not_exists(f"{app_config['APP_SOURCE_DIR']}/{parent_folder_name}/{folder_name}")
+    directory_manager = DirectoryManager(project_name=project_name)
+    # newNode = directory_manager.add_node_to_config(
+    #     parent_id= "SERVICES",
+    #     tag= "SERVICES",
+    #     name=module_name,
+    #     node_type="DIRECTORY",
+    #     file_id= module_id,
+    #     entity_id=module_id,
+    #     isProtected=False
+    # )
     for tag, func_arr in map_services.items():
+        newNode = directory_manager.add_node_to_config(
+            parent_id= module_id,
+            tag= "SERVICES",
+            name= tag,
+            node_type="FILE",
+            file_id= fileId ,
+            entity_id=fileId,
+            isProtected=False,
+            ext="SX"
+        )
         for func in func_arr:
             content += "\n"
             content += func
-        directory_manager = DirectoryManager(project_name=project_name)
         directory_manager.save_file(file_id=fileId,content=content)
     print("services generated.............")
 
@@ -333,6 +352,8 @@ def generate_api_interceptor( auth, app_name,module_id):
     auth_code = ""
     interceptor_code = REQUEST_INTERCEPTOR
     token = retrive_token_code(auth.login_api, auth.token_id, app_name,module_id)
+    if token == '':
+        token = "''"
     interceptor_code = interceptor_code.replace("{FETCH_TOKEN}",token)
     if type == AuthTypeEnum.BASIC:
         auth_code = "config.headers.Authorization = `Basic ${token}`;"
@@ -496,7 +517,7 @@ def set_request_body(model,app_name):
                 # params.append(key)
                 if item.get("type") == "text":
                     # variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s}`);"%(key,key)
-                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${BodyDetails.%s}`);"%(key, key)
+                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${BodyDetails['%s']}`);"%(key, key)
                 else:
                     variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s}`);"%(key,key)
             raw_data = "bodyFormData"
@@ -509,7 +530,7 @@ def set_request_body(model,app_name):
             params.append("BodyDetails")
             for key,item in form_data.get("properties",{}).items():
                 # params.append(key)
-                variable_declaration = "\n" + variable_declaration+'formBody.push(`${encodeURIComponent("%s")} = ${encodeURIComponent(BodyDetails.%s)}`);'%(key,key)
+                variable_declaration = "\n" + variable_declaration+"formBody.push(`${encodeURIComponent('%s')} = ${encodeURIComponent(BodyDetails['%s']`)});"%(key,key)
             raw_data = "formBody"
             variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
 

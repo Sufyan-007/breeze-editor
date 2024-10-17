@@ -8,7 +8,8 @@ from ..utils.set_response_status import set_response_status
 from ..utils.append_dict_file import append_to_dict_file
 from .api_model_loader import ApiModelLoader
 from ..utils.api_models import MethodsEnum,AuthApiTypeEnum,AuthTypeEnum
-from ....directory_management.core.directory_management_service import DirectoryManager
+from ..utils.schema_conversion import convert_type_to_config, generate_ids,object_converter
+from ....common.utils.replace_variable import replace_variable
 def prepare_api_models(json_data, project_name):
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
@@ -26,55 +27,43 @@ def prepare_api_models(json_data, project_name):
             openapi_data = yaml.safe_load(json_data)
             meta_data = openapi_data.get("info",{})
             meta_data["auth_apis"] = {}
-            # if not os.path.exists(swagger_metadata_file_path):
-            #     with open(swagger_metadata_file_path, "w") as file:
-            #         json.dump({"custom": {"title": "custom"}}, file)
             with open(swagger_metadata_file_path, "r") as file:
                 swagger_metadata_file_content = json.load(file)
             swagger_metadata_id = generate_uuid_as_key()
             
-            directory_manager = DirectoryManager(project_name=project_name)
-            newNode = directory_manager.add_node_to_config(
-                parent_id= "SERVICES",
-                tag= "SERVICES",
-                name=meta_data.get("title", ""),
-                node_type="DIRECTORY",
-                file_id= swagger_metadata_id,
-                entity_id=swagger_metadata_id,
-                isProtected=False
-            )
-                
             swagger_metadata_file_content[swagger_metadata_id] = meta_data
             append_to_dict_file(swagger_metadata_file_path, swagger_metadata_file_content)
-            # write_json_file(swagger_metadata_file_path, swagger_metadata_file_content)
             
-            #write in the swagger_schema index file 
             swagger_schema_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/index.json";
             with open(swagger_schema_path, 'r') as file:
                 schema_data = json.load(file)
             schema_data[swagger_metadata_id] = meta_data.get("title")
             append_to_dict_file(swagger_schema_path, schema_data)
             
-            
+            ########### schema extraction #############
             avalilable_schemas = openapi_data.get("components").get("schemas", {})
+            
             structured_schema_data = {}
             for key, val in avalilable_schemas.items():
-                id = generate_uuid_as_key()
-                val["name"]= key
-                structured_schema_data[id] = val
+                if "properties" in val:
+                    structured_schema_data[key] = object_converter(val)
+                    structured_schema_data[key]["schemaType"] = "modals"
+                    
+                else:
+                    structured_schema_data[key] = convert_type_to_config(val)
+                    structured_schema_data[key]["schemaType"] = "combined_schema"
+                    
                 
-            # custom_schemas_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/custom_schemas.json"
-            # if not os.path.exists(custom_schemas_file_path):
-            #     with open(custom_schemas_file_path, "w+") as file:
-            #         json.dump({}, file)
+            schema_with_ids =  generate_ids(structured_schema_data)
+            
+            for key, val in schema_with_ids.items():
+                replace_variable(schema_with_ids, f"#/components/schemas/{val['name']}",key)
             schema_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/{swagger_metadata_id}.json"
             
-            if not os.path.exists(schema_file_path):
-                with open(schema_file_path, "w+") as file:
-                    json.dump({}, file)
-            with open(schema_file_path, "w+") as file:
-                json.dump(structured_schema_data,file, cls=EnhancedJSONEncoder)
+            with open(schema_file_path, "w") as file:
+                json.dump(schema_with_ids,file, cls=EnhancedJSONEncoder)
                 
+            ###### auth related details ########
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
                 
             security_schemes_models = handle_security_schema(security_schemes,openapi_data) 
@@ -97,6 +86,7 @@ def prepare_api_models(json_data, project_name):
                 "id": swagger_metadata_id,
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,
+                "title": meta_data.get("title", '')
             }
 
         except Exception as e:
@@ -594,34 +584,39 @@ def wrap_conversion(converted_data, project_name, folder_path):
         index_content = json.load(file)
 
     for tag, api_models in tag_models.items():
+        is_error_present = False
         function_with_errors = set()
         model_dict = {}
         unique_id = generate_uuid_as_key()
         filename = f"{unique_id}.json"
         full_file_path = os.path.join(api_models_folder_path, filename)
-        directory_manager = DirectoryManager(project_name=project_name)
-        newNode = directory_manager.add_node_to_config(
-            parent_id= swagger_metadata_key,
-            tag= "SERVICES",
-            name= tag,
-            node_type="FILE",
-            file_id= unique_id ,
-            entity_id=unique_id,
-            isProtected=False,
-            ext="SX"
-        )
+        
+        ########## this also needs to be done after generation #########
+        
+        # directory_manager = DirectoryManager(project_name=project_name)
+        # newNode = directory_manager.add_node_to_config(
+        #     parent_id= swagger_metadata_key,
+        #     tag= "SERVICES",
+        #     name= tag,
+        #     node_type="FILE",
+        #     file_id= unique_id ,
+        #     entity_id=unique_id,
+        #     isProtected=False,
+        #     ext="SX"
+        # )
         for model in api_models:
             model_as_dict = model.as_dict()
             model_dict[model.id] = model_as_dict
             if len(model_as_dict["errors"]["root_errors"]) > 0:
                 function_with_errors.add(model.operation_id)
+                is_error_present = True
 
         function_with_errors_list = list(function_with_errors)
-        files_with_apis.append({"filename": tag, "apis": model_dict, "errors": function_with_errors_list})
+        files_with_apis.append({"filename": tag, "apis": model_dict, "errors": function_with_errors_list, "fileId": unique_id})
         append_to_dict_file(full_file_path, model_dict)
         index_content[unique_id] = {"file": tag}
 
     with open(api_models_index_file_path, "w") as file:
         json.dump(index_content, file)
 
-    return files_with_apis
+    return files_with_apis, is_error_present
