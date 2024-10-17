@@ -10,7 +10,7 @@ from apps.directory_management.core.directory_management_service import Director
 from common.utils.file_utils import create_parent_dir_if_not_exists
 from common.utils.formatter import format_raw_val
 import pickle
-from .helpers.code_indexing import get_code_index,generate_code
+from .helpers.code_indexing import get_code_index
 
 
 
@@ -132,7 +132,7 @@ class ComponentGenerator_JSX(ComponentGenerator):
         directory_management_service.save_file(file_id,react_component_code)
         
         content = directory_management_service.get_file_content(file_id)
-        generate_code(code_tree)
+        # generate_code(code_tree)
         code_tree = get_code_index(code_tree, content)
         
         print(f"React component code has been written to '{react_component_code}'")
@@ -156,14 +156,12 @@ class ComponentGenerator_JSX(ComponentGenerator):
         wrapper_store = config.get("wrapper_store",None)
         if not wrapper_store :
             html_code_tree = {
-                "type" : "REACT_COMPONENT",
-                "statementType" : "WRAP",
-                "prefix" : f"<Fragment>",
+                "type" : "HTML_WRAP",
+                # "statementType" : "NA",
+                "code" : f"<Fragment> {html_code} </Fragment>",
                 "children" :[
                     html_code_tree
                     ],
-
-                "suffix" : f"</Fragment>",
             }
             html_code = "<Fragment>%s</Fragment>"%(html_code)
         else:
@@ -261,22 +259,23 @@ class ComponentGenerator_JSX(ComponentGenerator):
             resource_code_tree=[]
             for resource in resources:
                 if resource['type'] == 'stateVars':
-                    resources_code.append(generate_state_var_code(resource))
+                    code = generate_state_var_code(resource)
                 elif resource['type'] == 'refVars':
-                    resources_code.append(generate_ref_var_code(resource))
+                    code = generate_ref_var_code(resource)
                 elif resource['type'] == 'otherVars':
-                    resources_code.append(generate_other_var_code(resource))
+                    code = generate_other_var_code(resource)
                 elif resource['type'] == 'function':
-                    resources_code.append(generate_function_code(resource))
+                    code = generate_function_code(resource)
                 elif resource['type'] == 'lifecycle':
-                    resources_code.append(generate_lifecycle_code(resource))
+                    code = generate_lifecycle_code(resource)
                 elif resource['type'] == 'hook':
-                    resources_code.append(generate_hook_code(resource))
+                    code =generate_hook_code(resource)
                 # Add more resource types if needed
+                resources_code.append(code)
                 resource_code_tree.append({
                     "type": resource['type'],
                     "statementType" : "SINGLE",
-                    "code" : resources_code,
+                    "code" : code,
                     "id": resource['id']
                 })
             return '\n'.join(resources_code),resource_code_tree
@@ -287,34 +286,39 @@ class ComponentGenerator_JSX(ComponentGenerator):
         
         code_tree.append({
             "type" : "ALL_IMPORTS",
-            "statementType" : "STATEMENTS",
-            "children" :import_statement_tree
+            # "statementType" : "NA",
+            "children" :import_statement_tree,
+            "code": "import React, { useState, Fragment } from 'react';" + "".join([x["code"] for x in import_statement_tree])
         })
+        
+        all_resources = {
+            "type" : "ALL_RESOURCES",
+            # "statementType" : "NA",
+            "children" : resource_code_tree,
+            "code":"".join([x["code"] for x in resource_code_tree])
+        }
+        
+        html_tree={
+            "type" : "RETURN_HTML_TREE",
+            # "statementType" : "NA",
+            "code": f"return ( { html_code_tree['code'] } )", 
+            "children" : [html_code_tree],
+            
+        }
         
         code_tree.append({
             "type" : "REACT_COMPONENT",
-            "statementType" : "WRAP",
-            "prefix" : f"const {name} = ( {props_vars_declaration} ) => {{",
+            # "statementType" : "NA",
+            "code" : f"const {name} = ( {props_vars_declaration} ) => {{ {all_resources['code']} {html_tree['code']} }}",
             "children" :[
-                {
-                    "type" : "ALL_RESOURCES",
-                    "statementType" : "STATEMENTS",
-                    "children" : resource_code_tree
-                },
-                {
-                    "type" : "RETURN_HTML_TREE",
-                    "statementType" : "WRAP",
-                    "prefix" : "return(",
-                    "children" : [html_code_tree],
-                    "suffix" : ")"
-                }
+                all_resources,
+                html_tree
                 ],
 
-            "suffix" : f"}}",
         })
         code_tree.append({
             "type" : "EXPORT",
-            "statementType" : "SINGLE",
+            # "statementType" : "NA",
             "code" : f"export default {name};"
             
         })

@@ -137,9 +137,9 @@ class HTMLGenerator:
             if not children:
                 tree = {
                     "type" : "HTML",
-                    "statementType" : "SINGLE",
+                    # "statementType" : "NA",
                     "code" : f'{open_tag}{close_tag}',
-                    "id" : config_id
+                    "id" : config_id["_id"]
                 }
                 return f'{open_tag}{close_tag}', tree
 
@@ -153,20 +153,19 @@ class HTMLGenerator:
             inner_html = ''.join(inner_html)
             tree = {
                 "type" : "HTML",
-                "statementType" : "WRAP",
-                "prefix" : f'{open_tag}',
+                # "statementType" : "NA",
+                "code":f'{open_tag}{inner_html}{close_tag}',
                 "children" : inner_code_tree,
-                "suffix" : f'{close_tag}',
-                "id" : config_id
+                "id" : config_id["_id"]
             }
             return f'{open_tag}{inner_html}{close_tag}' , tree
 
         elif config.get('type') == 'text':
             tree = {
                 "type" : "HTML",
-                "statementType" : "SINGLE",
+                # "statementType" : "NA",
                 "code" : config['text'],
-                "id" : config_id
+                "id" : config_id["_id"]
             }
             return config['text'],tree
         
