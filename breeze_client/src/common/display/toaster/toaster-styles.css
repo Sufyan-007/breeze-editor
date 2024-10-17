@@ -1,0 +1,30 @@
+.br-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 250px;
+  max-width: 400px;
+  z-index: 4050;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.br-toast-success {
+  background-color: #28a745;
+}
+
+.br-toast-error {
+  background-color: #dc3545;
+}
+
+.br-toast-warning {
+  background-color: #ffc107;
+  color: black;
+}
+
+.br-toast-info {
+  background-color: #17a2b8;
+}

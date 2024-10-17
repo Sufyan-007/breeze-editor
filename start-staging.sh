@@ -22,17 +22,17 @@ kill_port $THIRD_PARTY_PACKAGE_PARSER_PORT
 kill_port $BREEZE_CLIENT_PORT
 kill_port $BREEZE_SERVER_PORT
 
-# Start Python server
-echo "Starting Python server in staging mode..."
+# Start breeze_server server
+echo "Starting breeze_server server in staging mode..."
 export RUN_ENV=staging
-python3 breeze_server/manage.py runserver &
+nohup python3 breeze_server/manage.py runserver &> breeze_server.log &
 
-# Start Node.js server
-echo "Starting Node.js server in staging mode..."
-npm run staging --prefix ./third_party_package_parser/ &
+# Start third_party_package_parser server
+echo "Starting third_party_package_parser server in staging mode..."
+nohup npm run staging --prefix ./third_party_package_parser/ &> third_party_package_parser.log &
 
 # start breeze_client server
-npm run staging --prefix ./breeze_client/ &
+nohup npm run staging --prefix ./breeze_client/ &> breeze_client.log &
 
 # Wait for all 3 servers to start
 wait

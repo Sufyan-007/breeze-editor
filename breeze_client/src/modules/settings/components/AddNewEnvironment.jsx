@@ -108,7 +108,7 @@ const AddNewEnvironment = ({ envVariables, envNames, onSubmit, onClose }) => {
 AddNewEnvironment.propTypes = {
   envVariables: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired,
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
       name: PropTypes.string.isRequired,
     })
   ).isRequired,

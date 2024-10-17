@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router';
 // import Toast from 'react-bootstrap/Toast';
 // import ToastContainer from 'react-bootstrap/ToastContainer';
 import { initialGeneralSettingsConfig } from '../constants/SettingsFormConstants';
-import { getAppBasicConfig } from '../../project/services/projectService';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjectConfig } from '../../../redux/project/projectActions';
 
@@ -25,7 +24,7 @@ const GeneralSettings = () => {
 
   const fileInputRef = useRef(null);
   const { projectConfig } = useSelector((state) => state.project);
-  console.log(projectConfig);
+  // console.log(projectConfig);
 
   const dispatch = useDispatch();
 
@@ -45,12 +44,12 @@ const GeneralSettings = () => {
           description: res.description,
         });
 
-        if (res.logo && res.logo !== 'null' && res.logo !== '') {
-          const logoUrl = `http://localhost:8000/editor/file-upload/${res.name}/${res.logo}`;
-          setLogoPreview(logoUrl);
-        } else {
-          setLogoPreview('');
-        }
+        // if (res.logo && res.logo !== 'null' && res.logo !== '') {
+        //   const logoUrl = `http://localhost:8000/editor/file-upload/${res.name}/${res.logo}`;
+        //   setLogoPreview(logoUrl);
+        // } else {
+        //   setLogoPreview('');
+        // }
       });
   }, [projectName]);
 

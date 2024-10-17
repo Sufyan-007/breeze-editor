@@ -95,30 +95,26 @@ const CustomTable = ({
         <tbody>
           {paginatedData?.length > 0 ? (
             paginatedData?.map((item, rowIndex) => (
-              <>
-                <tr key={item.id || rowIndex} className={rowClass}>
-                  {onRowSelect && (
-                    <td className={cellDataClass}>
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.includes(item)}
-                        onChange={() => handleRowSelect(item)}
-                      />
-                    </td>
-                  )}
-                  {actionPlacement === 'start' || actionPlacement === 'both' ? (
-                    <td>{actions && actions(item)}</td>
-                  ) : null}
-                  {columns.map((column, colIndex) => (
-                    <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
-                      {column.render ? column.render(item[column.accessor]) : item[column.accessor]}
-                    </td>
-                  ))}
-                  {actionPlacement === 'end' || actionPlacement === 'both' ? (
-                    <td className={cellDataClass}>{actions && actions(item)}</td>
-                  ) : null}
-                </tr>
-              </>
+              <tr key={item.id || rowIndex} className={rowClass}>
+                {onRowSelect && (
+                  <td className={cellDataClass}>
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(item)}
+                      onChange={() => handleRowSelect(item)}
+                    />
+                  </td>
+                )}
+                {actionPlacement === 'start' || actionPlacement === 'both' ? <td>{actions && actions(item)}</td> : null}
+                {columns.map((column, colIndex) => (
+                  <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
+                    {column.render ? column.render(item[column.accessor]) : item[column.accessor]}
+                  </td>
+                ))}
+                {actionPlacement === 'end' || actionPlacement === 'both' ? (
+                  <td className={cellDataClass}>{actions && actions(item)}</td>
+                ) : null}
+              </tr>
             ))
           ) : (
             <tr>

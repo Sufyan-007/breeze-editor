@@ -17,40 +17,24 @@ export const fetchDependencyVersions = async (packageName) => {
 
 export async function getThirdPartyDependencies(projectName) {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/get-third-party-dependency/${projectName}/`;
-  try {
-    const response = await callApiClient(url, 'GET');
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await callApiClient(url, 'GET');
+  return response;
 }
 
 export async function addThirdPartyDependency(projectName, payload) {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/add-third-party-dependency/${projectName}/`;
-  try {
-    const response = await callApiClient(url, 'POST', payload);
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await callApiClient(url, 'POST', payload);
+  return response;
 }
 
 export async function updateThirdPartyDependency(projectName, payload) {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/update-third-party-dependency/${projectName}/`;
-  try {
-    const response = await callApiClient(url, 'PUT', payload);
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await callApiClient(url, 'PUT', payload);
+  return response;
 }
 
 export async function deleteThirdPartyDependency(projectName, payload) {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/delete-third-party-dependency/${projectName}/`;
-  try {
-    const response = await callApiClient(url, 'DELETE', payload);
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await callApiClient(url, 'DELETE', payload);
+  return response;
 }

@@ -28,6 +28,7 @@
   color: var(--color-text);
   border: solid 1px rgba(165, 165, 164, 0.5);
 }
+
 .home-block {
   width: 7rem;
   height: 5rem;
@@ -38,7 +39,7 @@
   display: flex;
   flex-wrap: wrap;
   row-gap: 0.25rem;
-} 
+}
 
 .home-action-buttons {
   display: flex;
@@ -51,4 +52,13 @@
 
 .home-main-content .home-title:hover {
   cursor: default;
+}
+
+.project-card-dropdown-item:active {
+  background-color: var(--color-secondary) !important;
+}
+
+.project-card-dropdown-item:hover {
+  background-color: var(--color-secondary) !important;
+
 }

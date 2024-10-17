@@ -1,98 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import '../styles/AllProjects.css';
 import Navbar from '../../../common/navbar/Navbar';
 import images from '../../../assets/images/index';
-import { BreezeModal } from '../../../common/display';
 import ProjectCard from '../components/ProjectCard';
 import { router } from '../../../routes/routing';
-import { createProject, getAllProjects } from '../services/projectService';
-import { CustomTextInput } from '../../../common/fields';
+import { createProject, deleteProject, getAllProjects } from '../services/projectService';
+import CreateProjectForm from '../components/CreateProjectForm';
+import { BreezeModal } from '../../../common/display';
 
-import {
-  buildToolOptions,
-  initialNewProjectFormConfig,
-  languageOptions,
-  stylingOptions,
-  technologyOptions,
-} from '../constants/CreateNewProjectFormConstants';
-import CustomModal from '../../../common/display/modal/BreezeModal';
-
-function AllProjects() {
-  const [isModalOpen, setModalOpen] = useState(false);
+const AllProjects = () => {
   const [projects, setProjects] = useState([]);
-  // const [error, setError] = useState(null);
-
-  const [formValues, setFormValues] = useState(initialNewProjectFormConfig);
-  const [nameError, setNameError] = useState('');
-  const [authorError, setAuthorError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState('Uploading...');
-  const [showModal, setModalShow] = useState(false);
+  const [isLoaderModalOpen, setLoaderModalOpen] = useState(false);
   const ws = useRef(null);
   const intervalId = useRef(null);
-
-  const handleInputChange = (name, value) => {
-    setFormValues({ ...formValues, [name]: value });
-
-    if (name === 'name') setNameError('');
-    if (name === 'author') setAuthorError('');
-  };
-
-  const handleBadgeSelection = (name, selectedValue) => {
-    setFormValues((prevFormValues) => ({
-      ...prevFormValues,
-      [name]: prevFormValues[name] === selectedValue ? '' : selectedValue,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let hasError = false;
-
-    if (!formValues.name) {
-      setNameError('Application name is required.');
-      hasError = true;
-    }
-    if (!formValues.author) {
-      setAuthorError('Author name is required.');
-      hasError = true;
-    }
-    if (hasError) return;
-
-    setLoading(true);
-    setModalShow(true);
-
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(
-        JSON.stringify({
-          command: 'start',
-          project_id: formValues.name.toLowerCase().replace(/ /g, '_'),
-        })
-      );
-    }
-
-    try {
-      const createdProject = await createProject(formValues);
-      setProjects((prevProjects) => [...prevProjects, createdProject]);
-      setModalOpen(false);
-    } catch (error) {
-      console.error('Error creating project:', error);
-    } finally {
-      setLoading(false);
-      setFormValues(initialNewProjectFormConfig);
-      fetchProjects();
-    }
-  };
-
-  const fetchProjects = async () => {
-    try {
-      const projectsData = await getAllProjects();
-      setProjects(Object.values(projectsData));
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const incrementProgress = () => {
     intervalId.current = setInterval(() => {
@@ -107,8 +31,59 @@ function AllProjects() {
     }, 1000);
   };
 
+  const handleSubmit = async (formValues) => {
+    setLoading(true);
+    setIsCreateProjectModalOpen(false);
+    setLoaderModalOpen(true);
+
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(
+        JSON.stringify({
+          command: 'start',
+          project_id: formValues.name.toLowerCase().replace(/ /g, '_'),
+        })
+      );
+    }
+
+    const formData = new FormData();
+    Object.keys(formValues).forEach((key) => {
+      formData.append(key, formValues[key]);
+    });
+
+    try {
+      await createProject(formData);
+      fetchProjects();
+    } catch (error) {
+      const validationErrors = error.response?.data?.errors;
+      console.log(validationErrors);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const projectsData = await getAllProjects();
+      setProjects(Object.values(projectsData));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const openModal = () => setIsCreateProjectModalOpen(true);
+
+  const handleOpenProject = (projectName) => {
+    router.navigate(`/project/${projectName}`);
+  };
+
+  const handleDeleteProject = async (projectName) => {
+    await deleteProject(projectName);
+    fetchProjects();
+  };
+
   useEffect(() => {
     fetchProjects();
+
     ws.current = new WebSocket(`${import.meta.env.VITE_SOCKET_URL}/ws/project-progress/`);
 
     ws.current.onopen = () => {
@@ -116,17 +91,17 @@ function AllProjects() {
     };
 
     ws.current.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      const progress = message?.progress;
+      const messageData = JSON.parse(event.data);
+      const progressData = messageData?.progress;
 
-      if (progress === 20 && intervalId.current === null) {
+      if (progressData === 20 && intervalId.current === null) {
         incrementProgress();
-      } else if (progress === 50) {
+      } else if (progressData === 50) {
         clearInterval(intervalId.current);
         intervalId.current = null;
-        setProgress(progress);
+        setProgress(progressData);
       } else {
-        setProgress(progress);
+        setProgress(progressData);
       }
 
       const progressMessages = {
@@ -138,7 +113,7 @@ function AllProjects() {
         90: 'Almost there...',
       };
 
-      const relatedMessage = progressMessages[progress];
+      const relatedMessage = progressMessages[progressData];
       if (relatedMessage) {
         setMessage(relatedMessage);
       }
@@ -152,38 +127,14 @@ function AllProjects() {
       if (ws.current) {
         ws.current.close();
       }
+      if (intervalId.current) {
+        clearInterval(intervalId.current);
+      }
     };
   }, []);
 
-  const openModal = () => setModalOpen(true);
   const closeModal = () => {
-    setModalOpen(false);
-    setFormValues(initialNewProjectFormConfig);
-  };
-
-  const modalHeader = {
-    title: 'Create New Project',
-    showCloseButton: true,
-  };
-
-  const modalFooter = {
-    buttons: [
-      {
-        label: 'Cancel',
-        onClick: closeModal,
-        className: 'btn br-text-primary med-font',
-      },
-      {
-        label: 'Create',
-        onClick: handleSubmit,
-        className: 'btn btn-filled med-font',
-      },
-    ],
-  };
-
-  const handleOpenProject = (projectName) => {
-    setModalOpen(true);
-    router.navigate(`/project/${projectName}`);
+    setLoaderModalOpen(false);
   };
 
   return (
@@ -193,189 +144,56 @@ function AllProjects() {
         <div className="row m-0 gap-2">
           {projects.map((project) => (
             <ProjectCard
-              key={project.project_name}
-              projectName={project.project_name}
+              key={project.name}
+              projectName={project.projectName}
               projectImageSrc={images.ABDMLoginPage}
               iconSrc={images.VectorIcon}
-              onClick={() => handleOpenProject(project.project_name)}
+              onClick={() => handleOpenProject(project.name)}
+              onDelete={() => handleDeleteProject(project.name)}
             />
           ))}
           <ProjectCard isCreateNew={true} onClick={openModal} />
         </div>
-        <BreezeModal isOpen={isModalOpen} onClose={closeModal} header={modalHeader} footer={modalFooter}>
-          <form className="home-custom-form" onSubmit={handleSubmit}>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3 home-form-box">
-                  <CustomTextInput
-                    name="name"
-                    value={formValues.name}
-                    onChange={(value) => handleInputChange('name', value)}
-                    config={{ label: 'Application Name' }}
-                    required
-                  />
-                  {nameError && <p className="small-font text-danger">{nameError}</p>}
+        <CreateProjectForm
+          handleSubmit={handleSubmit}
+          isCreateProjectModalOpen={isCreateProjectModalOpen}
+          setIsCreateProjectModalOpen={setIsCreateProjectModalOpen}
+        />
+        {loading && (
+          <BreezeModal
+            isOpen={isLoaderModalOpen}
+            onClose={closeModal}
+            header={{ title: 'Creating your project' }}
+            size="lg"
+          >
+            <div className="text-center mt-3">
+              <div className="progress">
+                <div
+                  className="progress-bar"
+                  role="progressbar"
+                  aria-valuenow={progress}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  style={{ width: `${progress}%` }}
+                  aria-label="project completion bar"
+                >
+                  {progress}%
                 </div>
               </div>
-              <div className="col-md-6">
-                <div className="mb-3 home-form-box">
-                  <CustomTextInput
-                    name="author"
-                    value={formValues.author}
-                    onChange={(value) => handleInputChange('author', value)}
-                    config={{ label: 'Author' }}
-                    required
-                  />
-                  {authorError && <p className="small-font text-danger">{authorError}</p>}
+              <div className="d-flex justify-content-center text-center">
+                <div className="loader-wheel" style={{ marginTop: '13px' }}>
+                  <i className="bi bi-arrow-clockwise"></i>
                 </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="mb-3 home-form-box">
-                  <label htmlFor="projectLogo" className="med-font color-text mb-1 fw-semibold">
-                    Upload image for project logo
-                  </label>
-                  <input
-                    type="file"
-                    className="form-control"
-                    id="projectLogo"
-                    onChange={(e) => handleInputChange('projectLogo', e.target.files[0])}
-                  />
-                  <p className="color-text small-font">Suggested dimensions: 512x512</p>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="mb-3 home-form-box">
-                  <label htmlFor="description" className="med-font color-text mb-1 fw-semibold">
-                    Description
-                  </label>
-                  <textarea
-                    className="form-control"
-                    id="description"
-                    style={{ height: '100px' }}
-                    value={formValues.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                  />
+                <div className="progress-text mt-3" style={{ marginLeft: '10px' }}>
+                  {message}
                 </div>
               </div>
             </div>
-            <div className="row">
-              <div className="mb-3 home-form-box">
-                <label className="med-font color-text mb-1 fw-semibold">Technology</label>
-                <div className="home-badges-wrapper">
-                  {technologyOptions.map((option) => (
-                    <span
-                      className={`home-badge home-theme-badge ${formValues.technology === option.label ? 'breeze-badge-active' : ''}`}
-                      key={option.label}
-                      onClick={() => handleBadgeSelection('technology', option.label)}
-                    >
-                      <img src={option.logo} alt={`${option.label} logo`} />
-                      <span className="med-font ms-1">{option.label}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="mb-3 home-form-box">
-                <label className="med-font color-text mb-1 fw-semibold">Language</label>
-                <div className="home-badges-wrapper">
-                  {languageOptions.map((option) => (
-                    <span
-                      className={`home-badge home-theme-badge ${formValues.language === option.label ? 'breeze-badge-active' : ''}`}
-                      key={option.label}
-                      onClick={() => handleBadgeSelection('language', option.label)}
-                    >
-                      <img src={option.logo} alt={`${option.label} logo`} />
-                      <span className="med-font ms-1">{option.label}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="mb-3 home-form-box">
-                <label className="med-font color-text mb-1 fw-semibold">Styling Components</label>
-                <div className="home-badges-wrapper">
-                  {stylingOptions.map((option) => (
-                    <span
-                      className={`home-badge home-theme-badge ${formValues.styling === option.label ? 'breeze-badge-active' : ''}`}
-                      key={option.label}
-                      onClick={() => handleBadgeSelection('styling', option.label)}
-                    >
-                      <img src={option.logo} alt={`${option.label} logo`} />
-                      <span className="med-font ms-1">{option.label}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="mb-3 home-form-box">
-                <label className="med-font color-text mb-1 fw-semibold">Build Tool</label>
-                <div className="home-badges-wrapper">
-                  {buildToolOptions.map((option) => (
-                    <span
-                      className={`home-badge home-theme-badge ${formValues.buildTool === option.label ? 'breeze-badge-active' : ''}`}
-                      key={option.label}
-                      onClick={() => handleBadgeSelection('buildTool', option.label)}
-                    >
-                      <img src={option.logo} alt={`${option.label} logo`} />
-                      <span className="med-font ms-1">{option.label}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="mb-3 home-form-box">
-                <label htmlFor="layout" className="med-font color-text mb-1 fw-semibold">
-                  Layout
-                </label>
-                <div className="home-badges-wrapper">
-                  <span className="home-badge home-theme-badge">
-                    <div className="home-block"></div>
-                  </span>
-                  <span className="home-badge home-theme-badge">
-                    <div className="home-block"></div>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </form>
-          {loading && (
-            <CustomModal isOpen={showModal} onClose={closeModal} header={{ title: 'Creating your project' }} size="lg">
-              <div className="text-center mt-3">
-                <div className="progress">
-                  <div
-                    className="progress-bar"
-                    role="progressbar"
-                    aria-valuenow={progress}
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    style={{ width: `${progress}%` }}
-                    aria-label="project completion bar"
-                  >
-                    {progress}%
-                  </div>
-                </div>
-                <div className="d-flex justify-content-center text center">
-                  <div className="loader-wheel" style={{ marginTop: '13px' }}>
-                    <i className="bi bi-arrow-clockwise"></i>
-                  </div>
-                  <div className="progress-text mt-3" style={{ marginLeft: '10px' }}>
-                    {message}
-                  </div>
-                </div>
-              </div>
-            </CustomModal>
-          )}
-          <hr className="m-0" />
-        </BreezeModal>
+          </BreezeModal>
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default AllProjects;

@@ -6,5 +6,6 @@ from rest_framework.decorators import api_view
 def get_port(request,project_id):
     try:
         return JsonResponse({"port":RUNNING_APPS[project_id]["port"]},status=200)
-    except:
-        return JsonResponse({},status=500)
+    except Exception as e:
+        print("Failed to get port for: ", e)
+        return JsonResponse({'error': str(e)},status=500)

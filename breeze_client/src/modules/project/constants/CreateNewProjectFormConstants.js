@@ -3,11 +3,11 @@ import logos from '../../../assets/svgs/index';
 export const initialNewProjectFormConfig = {
   name: '',
   author: '',
-  projectLogo: null,
+  logo: null,
   description: '',
   technology: 'React',
   language: 'JavaScript',
-  styling: 'React Bootstrap',
+  styling: ['React Bootstrap'],
   buildTool: 'Vite',
   layout: '',
 };

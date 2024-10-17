@@ -8,30 +8,31 @@ get_all_schema = {
             description='name of project',
             type=openapi.TYPE_OBJECT,
             properties={
-        'name': openapi.Schema(type=openapi.TYPE_STRING, description="The name of the project"),
-        'description': openapi.Schema(type=openapi.TYPE_STRING, description="Description of the project", nullable=True),
-        'author': openapi.Schema(type=openapi.TYPE_STRING, description="Author of the project", nullable=True),
-        'framework': openapi.Schema(type=openapi.TYPE_STRING, description="The framework used (e.g., React)"),
-        'language': openapi.Schema(type=openapi.TYPE_STRING, description="Programming language (e.g., JavaScript)"),
-        'styling': openapi.Schema(type=openapi.TYPE_STRING, description="Styling framework or library used (e.g., Bootstrap)"),
-        'buildTool': openapi.Schema(type=openapi.TYPE_STRING, description="The build tool for the project (e.g., Create React App)"),
-        'logo': openapi.Schema(type=openapi.TYPE_STRING, description="URL or path to the logo", nullable=True),
-        'projectPath': openapi.Schema(type=openapi.TYPE_STRING, description="The path where the project will be located"),
-        'defaultComponent': openapi.Schema(type=openapi.TYPE_STRING, description="The default component of the project"),
-        'projectName': openapi.Schema(type=openapi.TYPE_STRING, description="The project name"),
-        'current_environment': openapi.Schema(type=openapi.TYPE_STRING, description="Current environment for the project", nullable=True),
-        'path': openapi.Schema(type=openapi.TYPE_STRING, description="Full file path for the project"),
-        'components_src_dir': openapi.Schema(type=openapi.TYPE_STRING, description="Directory where component source files are stored"),
-        'dependencies': openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            description="Project dependencies",
-            properties={
-                'react-router-dom': openapi.Schema(type=openapi.TYPE_STRING, description="Version of React Router DOM"),
-                'bootstrap': openapi.Schema(type=openapi.TYPE_STRING, description="Version of Bootstrap"),
-                'react-bootstrap': openapi.Schema(type=openapi.TYPE_STRING, description="Version of React Bootstrap"),
-            }
-        ),
-        'project_name': openapi.Schema(type=openapi.TYPE_STRING, description="The project name (duplicate)"),
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description="The name of the project which is used by the system"),
+                'description': openapi.Schema(type=openapi.TYPE_STRING, description="Description of the project", nullable=True),
+                'author': openapi.Schema(type=openapi.TYPE_STRING, description="Author of the project", nullable=True),
+                'framework': openapi.Schema(type=openapi.TYPE_STRING, description="The framework used (e.g., React)"),
+                'language': openapi.Schema(type=openapi.TYPE_STRING, description="Programming language (e.g., JavaScript)"),
+                'styling': openapi.Schema(type=openapi.TYPE_STRING, description="Styling framework or library used (e.g., Bootstrap)"),
+                'buildTool': openapi.Schema(type=openapi.TYPE_STRING, description="The build tool for the project (e.g., Create React App)"),
+                'logo': openapi.Schema(type=openapi.TYPE_STRING, description="URL or path to the logo", nullable=True),
+                'projectPath': openapi.Schema(type=openapi.TYPE_STRING, description="The path where the project will be located"),
+                'defaultComponent': openapi.Schema(type=openapi.TYPE_STRING, description="The default component of the project"),
+                'projectName': openapi.Schema(type=openapi.TYPE_STRING, description="The project name given by the user"),
+                'currentEnvironment': openapi.Schema(type=openapi.TYPE_STRING, description="Current environment for the project", nullable=True),
+                'path': openapi.Schema(type=openapi.TYPE_STRING, description="Full file path for the project"),
+                'componentsSrcDir': openapi.Schema(type=openapi.TYPE_STRING, description="Directory where component source files are stored"),
+                'dependencies': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description="Project dependencies",
+                    properties={
+                        'react-router-dom': openapi.Schema(type=openapi.TYPE_STRING, description="Version of React Router DOM"),
+                        'bootstrap': openapi.Schema(type=openapi.TYPE_STRING, description="Version of Bootstrap"),
+                        'react-bootstrap': openapi.Schema(type=openapi.TYPE_STRING, description="Version of React Bootstrap"),
+                        "react": openapi.Schema(type=openapi.TYPE_STRING, description="Version of React"),
+                        "react-dom": openapi.Schema(type=openapi.TYPE_STRING, description="Version of React Dom")
+                    }
+                ),
     },
             )
     }
