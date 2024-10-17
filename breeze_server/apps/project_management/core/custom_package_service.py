@@ -22,14 +22,14 @@ def get_project_config(project_name):
     app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
     app_config['PATH'] = f"{app_config['path']}"
     react_app_dir = app_config['PATH']
-    return app_config, react_app_dir
+    return app_config, react_app_dir , app_config_dir
 
 def write_config_file(path, data):
     with open(path, "w") as file:
         json.dump(data, file, indent=4)
 
 def check_existing_folder(project_name, file_name):
-    app_config, react_app_dir = get_project_config(project_name)
+    app_config, react_app_dir, app_config_dir = get_project_config(project_name)
        
     destination_path = os.path.join(react_app_dir, CUSTOM_UPLOADS, file_name)
     
@@ -74,7 +74,7 @@ def upload_file(project_name, file, fileName):
 def extract_zip_file(project_name, zip_file_path, fileName):
     try:
         # Directory for the React app
-        app_config, react_app_dir = get_project_config(project_name)
+        app_config, react_app_dir, app_config_dir= get_project_config(project_name)
         
         # Ensure the React app directory exists
         if not os.path.exists(react_app_dir):
@@ -122,7 +122,7 @@ def extract_zip_file(project_name, zip_file_path, fileName):
 
 def get_zip_files(project_name):
     try:
-        app_config, react_app_dir = get_project_config(project_name)
+        app_config, react_app_dir, app_config_dir = get_project_config(project_name)
         custom_uploads_path = os.path.join(react_app_dir,CUSTOM_UPLOADS)
         if not os.path.exists(custom_uploads_path):
             return {'folders': []}
@@ -146,7 +146,7 @@ def get_zip_files(project_name):
                 
 def delete_file(project_name, fileName):
     try:
-        app_config, react_app_dir = get_project_config(project_name)
+        app_config, react_app_dir, app_config_dir= get_project_config(project_name)
         react_app_file_path = os.path.join(react_app_dir, CUSTOM_UPLOADS , fileName)
         customized_proj_config_path = os.path.join(CONFIG_PATH, project_name, CUSTOMIZED_PROJ, fileName)
         
@@ -168,28 +168,38 @@ def delete_file(project_name, fileName):
 
     except Exception as e:
         print(f"Error deleting file or directory: {e}")
-
-def get_components(project_name,selected_zip_file):
-    base_path = os.path.join(CONFIG_PATH, project_name, 'customized_proj_config', selected_zip_file)
     
-    index_file_path =  os.path.join(base_path, 'index.json')
-    
+def set_prop_config(project_name, file_name , component_id ,prop_id , new_prop_name=None, new_type=None, new_default_value=None ):
     try:
-        # Check if the index.json file exists
-        if os.path.exists(index_file_path):
-            # Open and read the index.json file
-            with open(index_file_path, 'r') as file:
-                index_data = json.load(file)
+        #load the existing config for the project
+        app_config, react_app_dir , app_config_dir = get_project_config(project_name)
+        component_config_path= os.path.join(app_config_dir,"customized_proj_config",file_name,f"{component_id}.json")
+        if not os.path.exists(component_config_path):
+            raise FileNotFoundError("Component configuration file not found.")
 
-            # Extract the component names (values) from the JSON object
-            component_names = list(index_data.values())
-            print(component_names,"component names")
-            return component_names
-        else:
-            print(f"index.json file not found at: {index_file_path}")
-            return None
-
+        with open(component_config_path, 'r') as file:
+            component_config= json.load(file)
+            
+         # Check if the prop exists in the configuration
+        props = component_config.get('props', {})
+        if prop_id not in props:
+            raise KeyError("Prop not found in the configuration.")
+        
+         # Update the prop fields if provided
+        if new_prop_name is not None:
+            props[prop_id]['prop_name'] = new_prop_name
+        if new_type is not None:
+            props[prop_id]['type'] = new_type
+        if new_default_value is not None:
+            props[prop_id]['default_value'] = new_default_value
+            
+        # Save the updated configuration back to the file
+        with open(component_config_path, 'w') as file:
+            json.dump(component_config, file, indent=4)
+            
+        return component_config
     except Exception as e:
-        print(f"Error occurred while reading components: {str(e)}")
-        return None
-    
+        print(f"Error editing the props: {e}")
+
+        
+        

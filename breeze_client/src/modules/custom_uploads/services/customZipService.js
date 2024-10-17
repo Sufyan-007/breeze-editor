@@ -1,7 +1,6 @@
 import { callApiClient } from '../../../utils/breezeApiCall';
 
 const uploadZipFile = async (submitData, projectName) => {
-  console.log(submitData, 'submit data');
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package-upload/${projectName}`;
   try {
     const response = await callApiClient(url, 'POST', submitData, true);
@@ -42,4 +41,25 @@ const deleteFile = async (file, projectName) => {
   }
 };
 
-export { uploadZipFile, fetchZipFiles, deleteFile };
+const fetchZipFileComponentsService = async (selectedFilename, projectName, additionalPayload = null) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/query_resource/${projectName}/`;
+  const payload = {
+    category: 'customized_proj_config',
+    libname: selectedFilename,
+  };
+
+  if (additionalPayload) {
+    payload.resource = additionalPayload.resource;
+    payload.select = additionalPayload.select;
+  }
+  try {
+    const response = await callApiClient(url, 'POST', payload);
+
+    return response;
+  } catch (error) {
+    console.error('Error fetching zip file components:', error);
+    throw error;
+  }
+};
+
+export { uploadZipFile, fetchZipFiles, deleteFile, fetchZipFileComponentsService };

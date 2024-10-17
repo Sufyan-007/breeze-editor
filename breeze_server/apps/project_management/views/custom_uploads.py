@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from dotenv import load_dotenv
-from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file
+from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file, set_prop_config
 from apps.common.constants.consts import PORT  
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
@@ -108,6 +108,30 @@ def delete_custom_package(request, projectName):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@csrf_exempt
+@api_view(['PUT'])
+def set_component_config(request, projectName):    
+    try:
+        prop_id= request.data.get('id')
+        new_prop_name = request.data.get('propName')
+        new_type = request.data.get('type')
+        new_default_value = request.data.get('defaultValue')
+        file_name = request.data.get('fileName')
+        component_id =  request.data.get('componentId')
+ 
+        if not projectName:
+            return JsonResponse({'error': 'Project name is required'}, status=400)
+        
+        if not (prop_id and component_id and file_name):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        updated_component_config = set_prop_config(projectName, file_name, component_id, prop_id, new_prop_name, new_type, new_default_value)
+        
+        return JsonResponse(updated_component_config, status=200)
+    
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+        
 # Helper function to handle asynchronous API calls
 def call_external_api_async(api_url, payload):
     try:
@@ -118,7 +142,7 @@ def call_external_api_async(api_url, payload):
             print(f"Failed to call external API: {response.text}")
     except Exception as e:
         print(f"Error during external API call: {str(e)}")
-
+        raise Exception(f"Error during external API call:{str(e)}")
 # Trigger the API in a separate thread
 def trigger_api(api_url, payload):
     threading.Thread(target=call_external_api_async, args=(api_url, payload)).start()

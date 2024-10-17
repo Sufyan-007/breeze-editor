@@ -1,0 +1,13 @@
+.custom-button{
+  background-color: transparent;
+  border-radius: 4px;
+  
+}
+
+.custom-button:hover {
+  background-color: rgba(165, 165, 164, 0.5);
+}
+
+.selected {
+  background-color: rgba(165, 165, 164, 0.5);
+}

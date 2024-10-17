@@ -5,18 +5,25 @@ import { BreezeTable, BreezeModal } from '../../../common/display/index';
 import '../styles/CustomZipPackage.css';
 import CustomTextInput from '../../../common/fields/f.textInput';
 import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
+import CustomPropsList from '../components/CustomPropList';
 import columns from '../constants/TableStructure';
 
-import { fetchZipFilesAction, uploadZipFileAction, deleteZipFileAction } from '../redux/customZipActions';
+import {
+  fetchZipFilesAction,
+  uploadZipFileAction,
+  deleteZipFileAction,
+  fetchZipFileComponentsAction,
+} from '../redux/customZipActions';
 import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions';
 import BreezeOffCanvas from '../../../common/display/offcanvas/BreezeOffcanvas';
+import CustomUploadSidebar from '../components/CustomUploadSidebar';
 
 function CustomZipPackagePage() {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showOffCanvas, setShowOffCanvas] = useState(false);
-  const [selectedFilename, setSelectedFilename] = useState(null);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [selectedFilename, setSelectedFilename] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { projectName } = useParams();
   const [formData, setFormData] = useState({
@@ -25,23 +32,15 @@ function CustomZipPackagePage() {
     file: null,
   });
   const [error, setError] = useState('');
-
   const dispatch = useDispatch(); //Initialize dispatch
 
-  const { zipFiles, status } = useSelector((state) => state.zip);
-
+  const { zipFiles, components, props } = useSelector((state) => state.zip);
+  console.log(components, 'components');
   //fetch the list of zip files on component mount
   useEffect(() => {
     dispatch(fetchZipFilesAction(projectName));
   }, [dispatch, projectName]);
 
-  if (status === 'loading') {
-    return;
-  }
-
-  if (status === 'failed') {
-    return;
-  }
   const actions = (item) => (
     <>
       <i
@@ -56,17 +55,23 @@ function CustomZipPackagePage() {
       <i
         className="bi bi-three-dots-vertical"
         alt="Options icon"
-        onClick={async () => {
-          setSelectedFilename(item);
+        onClick={() => {
           setShowOffCanvas(true);
-
-          await dispatch(fetchZipFileComponentsAction({ selectedFilename: item.fileName, projectName }));
+          getComponents(item.fileName);
+          setSelectedFilename(item.fileName);
         }}
         style={{ cursor: 'pointer', fontSize: '18px' }}
       />
     </>
   );
 
+  const getComponents = async (filename) => {
+    try {
+      await dispatch(fetchZipFileComponentsAction({ filename, projectName }));
+    } catch (error) {
+      console.error('Error fetching components:', error);
+    }
+  };
   const handleDelete = () => {
     if (fileToDelete) {
       // Dispatch delete action
@@ -98,11 +103,11 @@ function CustomZipPackagePage() {
 
       const submitData = new FormData();
       for (const key in formData) {
-        if (Object.property.hasOwnProperty.call(formData, key) && key !== 'file') {
+        if (formData.hasOwnProperty(key) && key !== 'file') {
           submitData.append(key, formData[key]);
         }
       }
-      submitData.append('file', formData.file); // Append the file
+      submitData.append('file', formData.file);
 
       try {
         // Dispatch the action to upload the zip file
@@ -210,6 +215,17 @@ function CustomZipPackagePage() {
     lastModified: folder.lastModified,
   }));
 
+  const handleClick = (fileid, filename) => {
+    // e.preventDefault();
+    const payload = {
+      resource: fileid,
+      select: ['props'],
+    };
+
+    // Dispatch the action after preventing default
+    dispatch(fetchZipFileComponentsAction({ filename, projectName, payload }));
+  };
+
   return (
     <div>
       <div className="container-fluid py-2 px-3">
@@ -309,16 +325,22 @@ function CustomZipPackagePage() {
       <BreezeOffCanvas
         show={showOffCanvas}
         onClose={handleOffCanvasClose}
-        title="Components List"
         placement="end"
         size="50%"
+        title="Component Configuration"
       >
-        <div>
-          {/* <ul>
-            {components.map((component, index) => (
-              <button key={index}>{component}</button>
-            ))}
-          </ul> */}
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ flex: '1', paddingRight: '20px', maxWidth: '20%' }}>
+            <CustomUploadSidebar
+              components={components}
+              selectedFilename={selectedFilename}
+              handleClick={handleClick}
+            />
+          </div>
+
+          <div style={{ flex: '1', paddingLeft: '20px', maxWidth: '80%' }}>
+            {props && <CustomPropsList props={props} />}
+          </div>
         </div>
       </BreezeOffCanvas>
     </div>

@@ -21,7 +21,7 @@ const breezeConfigData = {
   },
   'custom-upload': {
     id: 'custom-upload',
-    name: 'custom-upload-config',
+    name: 'external-components.config',
     extension: '',
     type: 'CONFIG',
     children: [],

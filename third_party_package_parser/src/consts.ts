@@ -6,4 +6,4 @@ let rootParentDir = path.dirname(path.dirname(process.cwd()))
 export const GENERATED_PROJECTS: string = `${rootParentDir}`+"/generated_projects";
 export const CONFIG_PATH: string = "breezeui/configurations";
 export const CUSTOMIZED_PROJ_CONFIG:string = "customized_proj_config"
-export const UPLOADED_ZIP_DIR:string = "extracted_zip_files"
+export const UPLOADED_ZIP_DIR:string = "custom_uploads"
