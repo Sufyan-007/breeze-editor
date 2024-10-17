@@ -31,7 +31,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/project/', include('apps.project_management.urls')),
-    path('api/code-gen/', include('apps.code_generator.urls')),
     path('api/config-editor/<str:project_id>/',include('apps.project_config_management.urls')),
     path('api/directory/<str:project_id>/',include('apps.directory_management.urls')),
     path('api/code-gen/<str:project_id>/', include('apps.code_generator.urls')),
