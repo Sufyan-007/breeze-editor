@@ -27,7 +27,12 @@ function ProjectDisplay() {
   }, [fetchPort]);
 
   useEffect(() => {
-    if (selectedNode?.id && !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) && projectName) {
+    if (
+      selectedNode?.id &&
+      !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) &&
+      projectName &&
+      activeTab === 'code'
+    ) {
       const fetchCode = async () => {
         try {
           const data = await getFileCode(projectName, selectedNode.id);
@@ -45,7 +50,7 @@ function ProjectDisplay() {
 
       fetchCode();
     }
-  }, [selectedNode, projectName]);
+  }, [selectedNode, projectName, activeTab]);
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {

@@ -38,8 +38,12 @@ const routingSlice = createSlice({
       .addCase(addRouteConfig.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(addRouteConfig.fulfilled, (state) => {
+      .addCase(addRouteConfig.fulfilled, (state, action) => {
         state.status = 'succeeded';
+        const updatedConfig = action.payload;
+        if (updatedConfig) {
+          state.routingConfig = updatedConfig;
+        }
       })
       .addCase(addRouteConfig.rejected, (state, action) => {
         state.status = 'failed';
@@ -50,8 +54,12 @@ const routingSlice = createSlice({
       .addCase(updateRouteConfig.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(updateRouteConfig.fulfilled, (state) => {
+      .addCase(updateRouteConfig.fulfilled, (state, action) => {
         state.status = 'succeeded';
+        const updatedConfig = action.payload;
+        if (updatedConfig) {
+          state.routingConfig = updatedConfig;
+        }
       })
       .addCase(updateRouteConfig.rejected, (state, action) => {
         state.status = 'failed';
@@ -62,8 +70,12 @@ const routingSlice = createSlice({
       .addCase(deleteRouteConfig.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(deleteRouteConfig.fulfilled, (state) => {
+      .addCase(deleteRouteConfig.fulfilled, (state, action) => {
         state.status = 'succeeded';
+        const updatedConfig = action.payload;
+        if (updatedConfig) {
+          state.routingConfig = updatedConfig;
+        }
       })
       .addCase(deleteRouteConfig.rejected, (state, action) => {
         state.status = 'failed';

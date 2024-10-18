@@ -46,21 +46,26 @@ def run_project_threaded(project_id,port,project_path, env_name):
     
     if not env_name or env_name == 'dev (default)':
         env_name = 'dev'
-
-    process = subprocess.Popen(" ".join(['npm', 'run', f'{env_name}', '--', '--host', '0.0.0.0', '--port', str(port)]), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
+    # modified as per vite
+    process = subprocess.Popen(" ".join(['npm', 'run', f'{env_name}', '--', '--host', '0.0.0.0', '--port', str(port), '--debug']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=project_path,  )
     status_mapping = {
-    b'webpack compiled successfully': "RUNNING",
-    b'Compiled with warnings': "RUNNING", # WARNING
-    b'Failed to compile': "ERROR",
-    b'The build failed' : "CRASHED"
+    b'VITE v': "Starting",
+    b'ready in': "Running",
+    b'Local:': "Running",
+    b'Network:': "Running",
+    b'[vite] warning': "Warning",
+    b'Internal server error': "Error",
+    b'[vite] hmr update' : 'Running',
 }
-
     while True:
         output = process.stdout.readline()
         if output: 
-           
+            # print('*', output)
+            decoded_output = output.decode().strip()
             for key, status in status_mapping.items():
-                if output.startswith(key):
+                key_str = key.decode().strip()
+                if re.search(re.escape(key_str), decoded_output, re.IGNORECASE):
+                    # print(project_id, '==',status)
                     RUNNING_APPS[project_id]['status'] = status
                     async_to_sync(channel_layer.group_send)(
                         project_id,

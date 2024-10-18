@@ -106,7 +106,7 @@ class DirectoryManager:
             else:
                 return os.path.join(self.app_config['path'], name)
         else:
-            return os.path.join(self.get_path_from_file_id(entry["parentId"]), name)
+            return os.path.join(self.get_path_from_file_id(entry["parentId"],relative_path=relative_path), name)
         
         
     def get_file_content(self,id):
