@@ -47,14 +47,14 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
 
 def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new_title):
     if not os.path.exists(swagger_file_path):
-        return {"error": "Module not found"}
+        return {"error": "Module not found"},404
     with open(swagger_file_path, "r") as file:
         swagger_metadata = json.load(file)
     if module_id not in swagger_metadata:
-        return {"error": "Module not found"}
+        return {"error": "Module not found"},404
     for id, value in swagger_metadata.items():
         if value["title"] == new_title:
-            return {"error": "Module name should be unique"}
+            return {"error": "Module name should be unique"},409
     module_data = swagger_metadata[module_id]
     module_data["title"] = new_title
     swagger_metadata[module_id] = module_data
@@ -64,4 +64,4 @@ def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new
         schema_data = json.load(file)
     schema_data[module_id] = new_title
     append_to_dict_file(schema_index_file, schema_data)
-    return {"message": "Module name edited Successfully"}
+    return {"message": "Module name edited Successfully"},200
