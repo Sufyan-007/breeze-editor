@@ -25,7 +25,7 @@ def add_or_edit_schema(request,project_id):
     module_id = data.get("moduleId")
     schema_details = data.get("details")
     schema_name = schema_details.get("name")
-    schema_file_path = f"{CONFIG_PATH}/{project_id}/swagger_schema/{module_id}.json"
+    schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
     if schema_id:
         result = add_or_edit_schema_helper(schema_details=schema_details, schema_name=schema_name,file_path=schema_file_path, schema_id=schema_id)
     else:
@@ -51,7 +51,7 @@ def delete_schema(request,project_id):
     data = json.loads(request.body.decode("utf-8"))
     module_id = data.get("moduleId")
     schema_id = data.get("schemaId")
-    schema_file_path = f"{CONFIG_PATH}/{project_id}/swagger_schema/{module_id}.json"
+    schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
     result = delete_schema_helper(schema_file_path=schema_file_path, schemaId=schema_id)
     if not result or result.get('error'):
         return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)

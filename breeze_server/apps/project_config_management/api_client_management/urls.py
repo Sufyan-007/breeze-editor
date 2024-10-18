@@ -1,5 +1,5 @@
 from django.urls import path
-from .views.manage_api_client import generate_service_config,modify_function_config,transfer_to_auth,edit_module_title,get_response_token
+from .views.manage_api_client import generate_service_config,modify_function_config,transfer_to_auth,edit_module_title,get_response_token,add_module
 from .views.manage_schema import add_or_edit_schema,delete_schema
 
 urlpatterns = [
@@ -7,7 +7,8 @@ urlpatterns = [
     path('transfer-to-auth/', transfer_to_auth ),
     path('edit-function-config/<str:operation>/', modify_function_config),
     path('edit-module-title/', edit_module_title),
-    path('add-schema/<str:moduleId>/', add_or_edit_schema),
+    path('add-module/', add_module),#could be modified later for whole module editing functionality
+    path('add-schema/<str:moduleId>/', add_or_edit_schema), 
     path('edit-schema/<str:schemaId>/<str:moduleId>/', add_or_edit_schema ),
     path('delete-schema/<str:schemaId>/<moduleId>/', delete_schema ),
     path('retrieve-response-tokens/<moduleId>/<apiId>/', get_response_token ),

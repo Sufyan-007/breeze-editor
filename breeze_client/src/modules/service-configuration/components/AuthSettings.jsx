@@ -2,36 +2,25 @@ import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { CustomSelectField } from '../../../common/fields';
-import { getResponseTokens } from '../services/IntermediateServices';
+import { useDispatch, useSelector } from 'react-redux';
+import { retrieveResponseTokens } from '../redux/ApiClientActions';
 
 function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
   const [auth, setAuth] = useState(authData ? (authData[0] ? authData[0] : {}) : {});
-  const [loginApis, setLoginApis] = useState([]);
   const { projectName } = useParams();
-
-  const setAuthApis = useCallback(async (moduleId) => {
-    const result = await getResponseTokens(projectName, moduleId, null);
-    let login_api = [];
-    for (let api of result.data) {
-      if (api.response_tokens) {
-        for (const [key, config] of Object.entries(api.response_tokens)) {
-          login_api.push({
-            id: api.id,
-            operation_id: api.operation_id,
-            tokenKey: `${api.operation_id}-${key}`,
-            tokenConfig: config,
-          });
-        }
-      }
-    }
-    console.log(login_api, 'loginapidjfkdsjfklsdjf');
-    setLoginApis(login_api);
-  }, []);
+  const { login_apis } = useSelector((state) => state.services);
+  const dispatch = useDispatch();
+  const setAuthApis = useCallback(
+    async (moduleId) => {
+      await dispatch(retrieveResponseTokens({ projectName, moduleId, apiId: null })).unwrap();
+    },
+    [projectName, dispatch]
+  );
   const handleChange = (value, field) => {
     const updatedAuthData = { ...auth };
     if (field === 'login_api') {
       const [operationId, tokenId] = value.split('-');
-      const apiId = loginApis.find((api) => api.operation_id === operationId)?.id;
+      const apiId = login_apis.find((api) => api.operation_id === operationId)?.id;
       updatedAuthData[field] = apiId;
       updatedAuthData['token_id'] = tokenId;
     } else {
@@ -41,8 +30,6 @@ function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
   };
 
   useEffect(() => {
-    console.log(moduleId, 'moduleiddd');
-
     setAuthApis(moduleId);
   }, [setAuthApis, moduleId]);
 
@@ -66,16 +53,8 @@ function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
       </div>
     );
   };
-  const authTypeOptions = [
-    { label: 'Select', value: '' },
-    { label: 'Bearer', value: 'BEARER' },
-    { label: 'Oauth', value: 'OAUTH' },
-    { label: 'Oauth2', value: 'OAUTH2' },
-    { label: 'Basic', value: 'BASIC' },
-    { label: 'ApiKey', value: 'APIKEY' },
-  ];
 
-  const loginApiOptions = loginApis.map((api) => ({
+  const loginApiOptions = login_apis.map((api) => ({
     label: api.tokenKey,
     value: api.tokenKey,
     dataSource: 'authApi',
@@ -83,7 +62,7 @@ function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
   return (
     <>
       <div id="main" className="d-flex mx-2">
-        <CustomSelectField
+        {/* <CustomSelectField
           name="authType"
           value={auth.type}
           onChange={(value) => handleChange(value, 'type')}
@@ -93,7 +72,7 @@ function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
             label: 'Authentication Type',
             groupClass: 'form-group mb-2 mx-2 w-50',
           }}
-        />
+        /> */}
 
         {auth.type === 'BASIC' ? (
           <>{/* Additional fields for BASIC auth can be added here */}</>
@@ -102,8 +81,8 @@ function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
             <CustomSelectField
               name="loginApi"
               value={
-                loginApis.find((api) => api.id === auth.login_api)
-                  ? `${loginApis.find((api) => api.id === auth.login_api).operation_id}-${auth.token_id}`
+                login_apis.find((api) => api.id === auth.login_api)
+                  ? `${login_apis.find((api) => api.id === auth.login_api).operation_id}-${auth.token_id}`
                   : ''
               }
               onChange={(value) => handleChange(value, 'login_api')}
@@ -111,7 +90,7 @@ function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
               className="form-select br-form-select form-select-sm"
               config={{
                 label: 'Authentication Api',
-                groupClass: 'form-group mb-2 mx-2 w-50',
+                groupClass: 'form-group mb-2 mx-2 w-100',
               }}
             />
           </>

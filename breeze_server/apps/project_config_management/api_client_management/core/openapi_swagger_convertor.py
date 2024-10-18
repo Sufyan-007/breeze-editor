@@ -8,7 +8,8 @@ from ..utils.set_response_status import set_response_status
 from ..utils.append_dict_file import append_to_dict_file
 from .api_model_loader import ApiModelLoader
 from ..utils.api_models import MethodsEnum,AuthApiTypeEnum,AuthTypeEnum
-from ....directory_management.core.directory_management_service import DirectoryManager
+from ..utils.schema_conversion import convert_type_to_config, generate_ids,object_converter
+from ....common.utils.replace_variable import replace_variable
 def prepare_api_models(json_data, project_name):
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
@@ -26,47 +27,46 @@ def prepare_api_models(json_data, project_name):
             openapi_data = yaml.safe_load(json_data)
             meta_data = openapi_data.get("info",{})
             meta_data["auth_apis"] = {}
-            if not os.path.exists(swagger_metadata_file_path):
-                with open(swagger_metadata_file_path, "w") as file:
-                    json.dump({"custom": {"title": "custom"}}, file)
             with open(swagger_metadata_file_path, "r") as file:
                 swagger_metadata_file_content = json.load(file)
             swagger_metadata_id = generate_uuid_as_key()
             
-            directory_manager = DirectoryManager(project_name=project_name)
-            newNode = directory_manager.add_node_to_config(
-                parent_id= "SERVICES",
-                tag= "SERVICES",
-                name=meta_data.get("title", ""),
-                node_type="DIRECTORY",
-                file_id= swagger_metadata_id,
-                entity_id=swagger_metadata_id,
-                isProtected=False
-            )
-                
             swagger_metadata_file_content[swagger_metadata_id] = meta_data
             append_to_dict_file(swagger_metadata_file_path, swagger_metadata_file_content)
-            # write_json_file(swagger_metadata_file_path, swagger_metadata_file_content)
             
-            avalilable_schemas = openapi_data.get("components").get("schemas", {})
+            swagger_schema_path = f"{CONFIG_PATH}/{project_name}/models/index.json";
+            with open(swagger_schema_path, 'r') as file:
+                schema_data = json.load(file)
+            schema_data[swagger_metadata_id] = meta_data.get("title")
+            append_to_dict_file(swagger_schema_path, schema_data)
+            
+            ########### schema extraction #############
+            comps =  openapi_data.get("components")
+            if comps:
+                avalilable_schemas = comps.get("schemas", {})
+            else:
+                avalilable_schemas = {}
             structured_schema_data = {}
             for key, val in avalilable_schemas.items():
-                id = generate_uuid_as_key()
-                val["name"]= key
-                structured_schema_data[id] = val
+                if "properties" in val:
+                    structured_schema_data[key] = object_converter(val)
+                    structured_schema_data[key]["schemaType"] = "modals"
+                    
+                else:
+                    structured_schema_data[key] = convert_type_to_config(val)
+                    structured_schema_data[key]["schemaType"] = "combined_schema"
+                    
                 
-            custom_schemas_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/custom_schemas.json"
-            if not os.path.exists(custom_schemas_file_path):
-                with open(custom_schemas_file_path, "w+") as file:
-                    json.dump({}, file)
-            schema_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/{swagger_metadata_id}.json"
+            schema_with_ids =  generate_ids(structured_schema_data)
             
-            if not os.path.exists(schema_file_path):
-                with open(schema_file_path, "w+") as file:
-                    json.dump({}, file)
-            with open(schema_file_path, "w+") as file:
-                json.dump(structured_schema_data,file, cls=EnhancedJSONEncoder)
+            for key, val in schema_with_ids.items():
+                replace_variable(schema_with_ids, f"#/components/schemas/{val['name']}",key)
+            schema_file_path = f"{CONFIG_PATH}/{project_name}/models/{swagger_metadata_id}.json"
+            
+            with open(schema_file_path, "w") as file:
+                json.dump(schema_with_ids,file, cls=EnhancedJSONEncoder)
                 
+            ###### auth related details ########
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
                 
             security_schemes_models = handle_security_schema(security_schemes,openapi_data) 
@@ -89,6 +89,7 @@ def prepare_api_models(json_data, project_name):
                 "id": swagger_metadata_id,
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,
+                "title": meta_data.get("title", '')
             }
 
         except Exception as e:
@@ -197,7 +198,7 @@ def _create_parameters_json( parameter_data):
                 parameters.append({
                     "param_in": param.get("in","").strip(),
                     "name":param.get("name"),
-                    "type":param.get("schema").get("type").strip().upper(),
+                    "type":param.get("schema",param).get("type").strip().upper(),
                     "required":param.get("required"),
                     "description":param.get("description")
                 })
@@ -471,7 +472,10 @@ def classified_tags_and_method(open_api_json_data):
             "default" : []
         }
         for path, path_data in paths.items():
-            for operation, operation_data in path_data.items():
+            for operation in ["get", "post", "put", "patch", "delete", "head", "options", "trace"]:
+                operation_data = path_data.get(operation)
+                if not operation_data: 
+                    continue
                 tags = operation_data.get("tags", None)
                 if isinstance(tags,list):
                     for tag in tags:
@@ -488,59 +492,71 @@ def classified_tags_and_method(open_api_json_data):
                     tags_map["default"].append((path, operation, operation_data))
         return tags_map
     
-    
-    
-def convert_to_json_data_model(tags_map,meta_data,module_id,security_schemes_models=[]):
-        tag_mappings = {}
-        for tag, tag_operations in tags_map.items():
-            for path, operation, operation_data in tag_operations:
-                try:
-                    request_obj = create_request_json(
-                        path=path,
-                        path_data=operation_data,
-                        operation=operation,
-                        meta_data=meta_data,
-                        security_schemes_models = security_schemes_models,
-                        module_id=module_id
-                    )
-                    response_arr = create_response_arr_json(
-                        path_data=operation_data,
-                        meta_data=meta_data
-                    )
-                    for body in request_obj["body"]:
-                        request_obj_new = {
-                            "method":request_obj["method"], 
-                            "auth":request_obj["auth"], 
-                            "headers":request_obj["headers"], 
-                            "parameters":request_obj["parameters"], 
-                            "url":request_obj["url"], 
-                            "body":[body]
-                        }
-                        id = generate_uuid_as_key()
-                        funcName = operation_data.get("operationId","function_name"+str(id[:4]))
-                        
-                        funcName+="_"+body["content_type"] if len(request_obj["body"])>1 else ""
-                        api_model_obj = {
-                            "type": "FUNCTION",
-                            "isAsync": True,
-                            "parameters": [],
-                            "id" : id,
-                            "operation_id":funcName,
-                            "tags" :tag,
-                            "request":request_obj_new,
-                            "response":response_arr,
-                            "summary":operation_data.get("summary"),
-                            "is_authentication_api":False
-                        }
-                        if tag in tag_mappings:
-                            tag_mappings[tag].append(api_model_obj) 
-                        else:
-                            tag_mappings[tag]= [api_model_obj]
 
-                except Exception as e:
-                    print(traceback.format_exc())
-        return tag_mappings
-    
+def create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data):
+    return {
+        "type": "FUNCTION",
+        "isAsync": True,
+        "parameters": [],
+        "id": id,
+        "operation_id": funcName,
+        "tags": tag,
+        "request": request_obj_new,
+        "response": create_response_arr_json(path_data=operation_data, meta_data=meta_data),
+        "summary": operation_data.get("summary"),
+        "is_authentication_api": False
+    }
+
+
+def convert_to_json_data_model(tags_map, meta_data, module_id, security_schemes_models=[]):
+    tag_mappings = {}
+
+    for tag, tag_operations in tags_map.items():
+        for path, operation, operation_data in tag_operations:
+            try:
+                request_obj = create_request_json(
+                    path=path,
+                    path_data=operation_data,
+                    operation=operation,
+                    meta_data=meta_data,
+                    security_schemes_models=security_schemes_models,
+                    module_id=module_id
+                )
+
+                body_items = request_obj["body"]
+                request_obj_new = {
+                    "method": request_obj["method"],
+                    "auth": request_obj["auth"],
+                    "headers": request_obj["headers"],
+                    "parameters": request_obj["parameters"],
+                    "url": request_obj["url"],
+                    "body": []  
+                }
+
+                # If there are body items, handle them separately
+                if len(body_items)>0:
+                    for i, body in enumerate(body_items):
+                        request_obj_new["body"] = [body]  
+                        id = generate_uuid_as_key()
+                        funcName = operation_data.get("operationId", f"function_name{id[:4]}")
+                        funcName += f"_{body['content_type']}"
+                        
+                        api_model_obj = create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data)
+
+                        tag_mappings.setdefault(tag, []).append(api_model_obj)
+
+                else:
+                    # Handle case with no body items
+                    id = generate_uuid_as_key()
+                    funcName = operation_data.get("operationId", f"function_name{id[:4]}")
+                    api_model_obj = create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data)
+
+                    tag_mappings.setdefault(tag, []).append(api_model_obj)
+
+            except Exception:
+                print(traceback.format_exc())
+
+    return tag_mappings
 
 def wrap_conversion(converted_data, project_name, folder_path):
     security_schemes_models = converted_data.get("security_schemes_models")
@@ -574,34 +590,39 @@ def wrap_conversion(converted_data, project_name, folder_path):
         index_content = json.load(file)
 
     for tag, api_models in tag_models.items():
+        is_error_present = False
         function_with_errors = set()
         model_dict = {}
         unique_id = generate_uuid_as_key()
         filename = f"{unique_id}.json"
         full_file_path = os.path.join(api_models_folder_path, filename)
-        directory_manager = DirectoryManager(project_name=project_name)
-        newNode = directory_manager.add_node_to_config(
-            parent_id= swagger_metadata_key,
-            tag= "SERVICES",
-            name= tag,
-            node_type="FILE",
-            file_id= unique_id ,
-            entity_id=unique_id,
-            isProtected=False,
-            ext="SX"
-        )
+        
+        ########## this also needs to be done after generation #########
+        
+        # directory_manager = DirectoryManager(project_name=project_name)
+        # newNode = directory_manager.add_node_to_config(
+        #     parent_id= swagger_metadata_key,
+        #     tag= "SERVICES",
+        #     name= tag,
+        #     node_type="FILE",
+        #     file_id= unique_id ,
+        #     entity_id=unique_id,
+        #     isProtected=False,
+        #     ext="SX"
+        # )
         for model in api_models:
             model_as_dict = model.as_dict()
             model_dict[model.id] = model_as_dict
             if len(model_as_dict["errors"]["root_errors"]) > 0:
                 function_with_errors.add(model.operation_id)
+                is_error_present = True
 
         function_with_errors_list = list(function_with_errors)
-        files_with_apis.append({"filename": tag, "apis": model_dict, "errors": function_with_errors_list})
+        files_with_apis.append({"filename": tag, "apis": model_dict, "errors": function_with_errors_list, "fileId": unique_id})
         append_to_dict_file(full_file_path, model_dict)
         index_content[unique_id] = {"file": tag}
 
     with open(api_models_index_file_path, "w") as file:
         json.dump(index_content, file)
 
-    return files_with_apis
+    return files_with_apis, is_error_present

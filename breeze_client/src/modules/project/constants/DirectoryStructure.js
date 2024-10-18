@@ -19,6 +19,16 @@ const breezeConfigData = {
     tag: 'CUSTOM_UPLOAD',
     parentId: null,
   },
+  'schema-config': {
+    id: 'schema-config',
+    name: 'schema-config',
+    extension: '',
+    type: 'CONFIG',
+    children: [],
+    wasOpen: false,
+    tag: 'SCHEMAS',
+    parentId: null,
+  },
 };
 
 export default breezeConfigData;

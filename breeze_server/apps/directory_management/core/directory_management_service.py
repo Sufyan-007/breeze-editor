@@ -21,8 +21,8 @@ class DirectoryManager:
     def save_file(self, file_id, content,formatted=True):
         path = self.get_path_from_file_id(file_id)
         create_parent_dir_if_not_exists(path)
-        if formatted:
-            content = format_by_prettier(content)
+        # if formatted:
+        #     content = format_by_prettier(content)
         with open(path, 'w') as f:
             f.write(content)
 
@@ -52,6 +52,9 @@ class DirectoryManager:
                     
             ex = ("tsx" if self.isTypeScript else "jsx") if ext=="SX" else ext
             fullName = name + "." + ex
+        
+        if file_id and file_id in self.directory_management_config:
+            raise KeyError("Id already in directory management")
         
         if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir):
             raise FileExistsError("Given file name already exists")
