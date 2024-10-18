@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from "uuid";
 import { Project, SourceFile } from "ts-morph";
 import { execSync } from "child_process";
 import { CUSTOMIZED_PROJ_CONFIG, CONFIG_PATH } from "./consts"
-
 const fileTypes: string[] = [".d.ts", ".js", ".ts"];
 // Utility function to get all TypeScript declaration files
 export function getDeclarationFiles(directory: string): string[] {
@@ -48,7 +47,7 @@ export function extractProps(
       props[key.toString()] = propType;
     });
   }
-
+  
   const baseTypes = type.getBaseTypes() || [];
   baseTypes.forEach((baseType) => {
     const inheritedProps = extractProps(baseType, typeChecker);
@@ -240,9 +239,30 @@ function getFunctionName(node: ts.Node): string {
   }
 }
 
+
+type ComponentProp = {
+  prop_name: string;
+  type: string;
+  default_value: string;
+  id: string;
+};
+
+type ComponentDetails = {
+  _id: string;
+  name: string;
+  props: Record<string, ComponentProp>; // UUIDs as keys with ComponentProp as values
+  importPath: string;
+  children: string[];
+};
+
 // Function to extract component details
-function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[], library: string, directoryPath: string): { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } {
-    const componentDetails: { [componentName: string]: {_id:string, name:string , props: Record<string, string>, importPath: string, children: string[]} } = {};
+
+function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker, allComponentNames: string[], library: string, directoryPath: string): { [componentName: string]: ComponentDetails } {
+    
+  const componentDetails: { [componentName: string]: ComponentDetails } = {};
+  type FormattedProps = Record<string, ComponentProp>;
+  
+  // const componentDetails: { [componentName: string]: {_id:string, name:string , props: Record<string, string>, importPath: string, children: string[]} } = {};
     const functionDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
     const classDetails: { [componentName: string]: { props: Record<string, string>, importPath: string, children: string[] } } = {};
 
@@ -271,6 +291,18 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
         
             if (isJsx) {
                 const props = extractProps(type, typeChecker);
+                const formattedProps: FormattedProps = {};
+
+                for (const [propName, propType] of Object.entries(props)) {
+                  let uuid = uuidv4();
+                  uuid = uuid.replace(/-/g, "_");
+                  formattedProps[uuid] = {
+                    prop_name: propName,
+                    type: propType,
+                    default_value: "",  // Default value can be adjusted as needed
+                    id: uuid            // Replace with appropriate id logic if needed
+                  };
+                }
 
         // Adjust import path to match 'craft.js' structure
 
@@ -280,8 +312,15 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
                 myuuid = myuuid.replace(/-/g, "_");
                 const _id=myuuid;
 
-                componentDetails[componentName] = {_id, name:componentName, props, importPath: importPathFormatted, children};
-            }
+                componentDetails[componentName] = {
+                  _id,
+                  name: componentName,
+                  props: formattedProps,  // formattedProps is the correct structure here
+                  importPath: importPathFormatted,
+                  children
+                };
+                
+           }
         }
         else if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
 
@@ -307,19 +346,54 @@ function extractComponentDetails(sourceFile: ts.SourceFile, typeChecker: ts.Type
                         //     // extract name of the function
                         
                         // }
-                        let formattedParams: Record<string, string> = {};
+                        // let formattedParams: Record<string, string> = {};
+                        const formattedProps: FormattedProps = {};
+
                         
                         parameters.map(param => {
+                          if('elements' in param?.name ){
+                            for(const element of param.name.elements){
+                              const name = element.getText();
+                              const type = 'any';
+
+                              let uuid = uuidv4();
+                              uuid = uuid.replace(/-/g, "_");
+
+                              formattedProps[uuid] = {
+                                prop_name: name,
+                                type: type,
+                                default_value: "",  // Default value can be adjusted as needed
+                                id: uuid            // Replace with appropriate id logic if needed
+                              };
+                              }
+                          }
+                          else{
                             const name = param.name.getText();
                             const type = param.type ? param.type.getText() : 'any';
-                            formattedParams[name] = type;
+                            
+                            let uuid = uuidv4();
+                            uuid = uuid.replace(/-/g, "_");
+                            
+                            formattedProps[uuid] = {
+                                prop_name: name,
+                                type: type,
+                                default_value: "",  // Default value can be adjusted as needed
+                                id: uuid            // Replace with appropriate id logic if needed
+                              };
+                            }
                         });
 
                         let myuuid = uuidv4();
                         myuuid = myuuid.replace(/-/g, "_");
                         const _id=myuuid;
-
-                    componentDetails[functionName] = { _id , name:functionName  ,props: formattedParams, importPath: importPathFormatted, children: [""] };
+                        componentDetails[functionName] = {
+                          _id,
+                          name: functionName,
+                          props: formattedProps,  // formattedProps is the correct structure here
+                          importPath: importPathFormatted,
+                          children: [""]
+                        };
+                        
                 }
                 
             }

@@ -142,14 +142,9 @@ SWAGGER_SETTINGS = {
  }
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_AUTHENTICATION_CLASSES': (
-    #     'apps.authentication.authentication.CustomTokenAuthentication',
-    # ),
-    # uncomment below class when we need to run all APIs only after being 
-    # authenticated so that no one can access APIs if he/she isn't logged in 
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'apps.authentication.core.authentication.CustomTokenAuthentication',
+    ),
 }
 
 CHANNEL_LAYERS = {

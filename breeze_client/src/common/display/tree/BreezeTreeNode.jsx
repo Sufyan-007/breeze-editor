@@ -35,7 +35,7 @@ const TreeNode = ({ node, fetchChildren, data, handleNodeClick }) => {
         </div>
       </div>
 
-      {node.children && (
+      {isExpanded && node.children && (
         <div>
           {node.children.map(
             (childId) =>

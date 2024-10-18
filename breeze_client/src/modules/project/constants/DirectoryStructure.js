@@ -1,14 +1,4 @@
 const breezeConfigData = {
-  'routing-config': {
-    id: 'routing-config',
-    name: 'routing-config',
-    extension: '',
-    type: 'FILE',
-    children: [],
-    wasOpen: false,
-    tag: 'ROUTING',
-    parentId: null,
-  },
   'service-config': {
     id: 'service-config',
     name: 'service-config',

@@ -1,11 +1,11 @@
 import TopBar from './TopBar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ConfigDisplay from './ConfigDisplay';
 import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
 import { useTreeContext } from '../context/TreeContext';
 import { getAvailableTabs, getLanguageFromExtension } from '../constants/TabScreen';
 import { useParams } from 'react-router-dom';
-import { getFileCode } from '../services/projectService';
+import { getFileCode, getProjectPort } from '../services/projectService';
 
 function ProjectDisplay() {
   const { selectedNode } = useTreeContext();
@@ -13,11 +13,26 @@ function ProjectDisplay() {
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   const [editorCode, setEditorCode] = useState('// Loading..');
   const [editorLanguage, setEditorLanguage] = useState('javascript');
+  const [projectPort, setProjectPort] = useState(3000);
 
   const availableTabs = getAvailableTabs(selectedNode?.tag);
 
+  const fetchPort = useCallback(async () => {
+    const port = await getProjectPort(projectName);
+    setProjectPort(port.port);
+  }, [projectName]);
+
   useEffect(() => {
-    if (selectedNode?.id && !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) && projectName) {
+    fetchPort();
+  }, [fetchPort]);
+
+  useEffect(() => {
+    if (
+      selectedNode?.id &&
+      !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) &&
+      projectName &&
+      activeTab === 'code'
+    ) {
       const fetchCode = async () => {
         try {
           const data = await getFileCode(projectName, selectedNode.id);
@@ -35,7 +50,7 @@ function ProjectDisplay() {
 
       fetchCode();
     }
-  }, [selectedNode, projectName]);
+  }, [selectedNode, projectName, activeTab]);
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {
@@ -74,7 +89,7 @@ function ProjectDisplay() {
             >
               <div className="project-display-container iframe-container">
                 <iframe
-                  src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}`}
+                  src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}:${projectPort}`}
                   title="Preview"
                   width="100%"
                   height="100%"

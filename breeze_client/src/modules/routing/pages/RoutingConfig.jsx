@@ -25,11 +25,18 @@ function RoutingConfig() {
   const [showRouterProviderForm, setShowRouterProviderForm] = useState(false);
   const { components } = useSelector((state) => state.component);
   const { routingConfig, status } = useSelector((state) => state.routing);
+  const [flag, setFlag] = useState(false);
 
   useEffect(() => {
     dispatch(fetchComponents({ projectName }));
     dispatch(fetchRoutingConfig({ projectName }));
   }, [dispatch, projectName]);
+
+  useEffect(() => {
+    if (status === 'succeeded') {
+      setFlag(true);
+    }
+  }, [status]);
 
   const transformedComponents = components?.data
     ? [
@@ -65,8 +72,6 @@ function RoutingConfig() {
       } else if (isEditing) {
         await dispatch(updateRouteConfig({ projectName, payload: routeData })).unwrap();
       }
-
-      await dispatch(fetchRoutingConfig({ projectName })).unwrap();
     } catch (error) {
       console.error('Error submitting route data:', error);
     } finally {
@@ -81,7 +86,6 @@ function RoutingConfig() {
       await dispatch(deleteRouteConfig({ projectName, payload: { id } }));
       setSelectedRoute(initialRoutingConfig);
       setIsEditing(false);
-      await dispatch(fetchRoutingConfig({ projectName }));
     }
   };
 
@@ -125,7 +129,7 @@ function RoutingConfig() {
             />
           </div>
           <div className="routing-tree">
-            {status === 'succeeded' && (
+            {flag && (
               <BreezeTree data={routingConfig} fetchChildren={fetchChildren} handleNodeClick={handleNodeClick} />
             )}
           </div>

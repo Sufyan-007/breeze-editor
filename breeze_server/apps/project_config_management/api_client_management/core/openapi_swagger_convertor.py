@@ -14,7 +14,7 @@ def prepare_api_models(json_data, project_name):
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
         app_config = read_json_file(app_config_path)
-        app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
+        app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['componentsSrcDir']}"
 
         swagger_metadata_file_path = f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json" 
         api_model_loader = ApiModelLoader()
