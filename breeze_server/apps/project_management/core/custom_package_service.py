@@ -200,6 +200,39 @@ def set_prop_config(project_name, file_name , component_id ,prop_id , new_prop_n
         return component_config
     except Exception as e:
         print(f"Error editing the props: {e}")
+        #raise exception errror
 
         
+def update_resource_config(project_name, file_name ,status,  tag="ZIP"):
+    resource_config_file_path= os.path.join(CONFIG_PATH, project_name, "uploaded_resources_config.json")
+    
+    if os.path.exists(resource_config_file_path):
+        with open(resource_config_file_path, 'r') as config_file:
+            config_data = json.load(config_file)
+    else:
+        config_data = {}
         
+    # Update or add the new entry for the zip file
+    config_data[file_name] = {
+        "zip_file_name":file_name,
+        "status": status,
+        "tag": tag
+    }
+
+    # Write the updated config back to the file
+    with open(resource_config_file_path, 'w') as config_file:
+        json.dump(config_data, config_file, indent=4)
+        
+def get_current_status(projectName, fileName):
+    resource_config_path = os.path.join(CONFIG_PATH,projectName, "uploaded_resources_config.json")
+
+    with open(resource_config_path, 'r') as f:
+        resource_config = json.load(f)
+    
+    # Find the entry for the given fileName and return its status
+    if fileName in resource_config:
+        status = resource_config[fileName]['status']
+        print(status, "status")
+        return status
+    
+    return 'status not found'

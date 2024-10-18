@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from dotenv import load_dotenv
-from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file, set_prop_config
+from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file, set_prop_config, update_resource_config, get_current_status
 from apps.common.constants.consts import PORT  
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
@@ -37,22 +37,30 @@ def add_custom_package(request, projectName):
         if check_existing_folder(projectName, fileName):
             return JsonResponse({'error': 'A folder with this name already exists.'}, status=400)
 
+        update_resource_config(projectName, fileName, status="extracting", tag="ZIP")
+        
         upload_file(projectName, file, fileName)
 
         # After the file is uploaded, call the external API asynchronously
         load_dotenv()
+        
         SERVER_HOST = os.getenv("SERVER_HOST") 
         api_url = f"http://{SERVER_HOST}:{PORT}/custom"
         payload = {
             "projName": projectName,
             "fileName": fileName
         }
-        print(payload,"payload")
-        trigger_api(api_url, payload)
-
-        return JsonResponse({'message': 'File uploaded successfully'}, status=200)
+        trigger_api(api_url, payload, projectName, fileName)
+        
+        update_resource_config(projectName, fileName, status="uploaded", tag="ZIP")
+    
+        updated_status = get_current_status(projectName, fileName)
+        print(updated_status,"updated status")
+        return JsonResponse({'status': updated_status}, status=200)
 
     except Exception as e:
+        update_resource_config(projectName, fileName, status="file upload failed", tag="ZIP")
+        print("inside exception ")
         return JsonResponse({'error': str(e)}, status=500)
 
 @swagger_auto_schema(
@@ -133,16 +141,22 @@ def set_component_config(request, projectName):
         return JsonResponse({"error": str(e)}, status=400)
         
 # Helper function to handle asynchronous API calls
-def call_external_api_async(api_url, payload):
+def call_external_api_async(api_url, payload, projectName , fileName):
     try:
         response = requests.post(api_url, json=payload)
         if response.status_code == 200:
+            update_resource_config(projectName, fileName, status="uploaded", tag="ZIP")
             print("External API call successful")
+            return True
         else:
+            update_resource_config(projectName, fileName, status="component uploading failed", tag="ZIP")
             print(f"Failed to call external API: {response.text}")
+            return False
     except Exception as e:
         print(f"Error during external API call: {str(e)}")
+        update_resource_config(projectName, fileName, status="component uploading failed", tag="ZIP")
         raise Exception(f"Error during external API call:{str(e)}")
 # Trigger the API in a separate thread
-def trigger_api(api_url, payload):
-    threading.Thread(target=call_external_api_async, args=(api_url, payload)).start()
+def trigger_api(api_url, payload, projectName, fileName):
+    threading.Thread(target=call_external_api_async, args=(api_url, payload , projectName, fileName)).start()
+ 
