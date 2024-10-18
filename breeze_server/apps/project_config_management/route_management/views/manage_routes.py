@@ -5,12 +5,10 @@ from django.http import JsonResponse
 from ..core.route_config_editor import update_route_in_config,check_for_mandatory_route_props,validate_route_path
 from ..utils.utils import process_route_config, include_all_routes_accessory_data, transform_route_config, rewrite_clean_route_config
 from ..core.route_config_editor import delete_route as del_route
-from django.http import JsonResponse
 from apps.common.utils.tree_management import get_node,get_all_path_of_node, add_node
 from apps.common.constants.enums.tree_type import TreeType
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.manage_routes_schema import get_routes_schema,get_all_routes_fullpath_schema,add_route_schema,update_route_schema,delete_route_schema
-
 
 @swagger_auto_schema(
     method='get',

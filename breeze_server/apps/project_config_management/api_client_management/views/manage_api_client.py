@@ -4,9 +4,8 @@ from rest_framework.permissions import AllowAny
 from ....common.constants.consts import CONFIG_PATH,CLIENT_API
 from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
-from ..core.intermediate_modification_helper import process_api_data,transfer_to_auth,add_auth_function
+from ..core.intermediate_modification_helper import process_api_data, transfer_data_to_auth,add_auth_function
 from ..core.module_manager import add_module_helper,edit_module_title_helper
-from ..utils.api_models.custom_exception import CustomeException
 from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -66,9 +65,6 @@ def generate_service_config(request, collectionType, project_id):
             
             else:
                 return JsonResponse({"error": "Invalid collection type or file format."}, status=400)
-        except CustomeException as e:
-            print(e)
-            return JsonResponse({"error": str(e)}, status=500)
         
         except Exception as e:
             print(traceback.format_exc())
@@ -79,7 +75,7 @@ def generate_service_config(request, collectionType, project_id):
     method='post',
     request_body=modify_function_config_schema['rb'],
     responses={
-            201:modify_function_config_schema['response_201']
+            200:modify_function_config_schema['response_200']
         },
     tags=['manage-api-client']
 ) 
@@ -96,9 +92,9 @@ def modify_function_config(request,operation,project_id):
     else:
         result = process_api_data(operation,api_data, filename,project_id,module_id)
     if result:
-        return JsonResponse({"message": "Function Added Successfully" }, status=201)
+        return JsonResponse({"message": "Function Added Successfully" }, status=200)
     else:
-        return JsonResponse({"message": result }, status=201)
+        return JsonResponse({"message": result }, status=200)
 
 @swagger_auto_schema(
     method='post',
@@ -117,8 +113,10 @@ def transfer_to_auth(request,project_id):
     module_id = data.get("module_id")
     file_path = os.path.join(f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{module_id}", f"{filename}.json")
     target_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
-    result = transfer_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
-    return JsonResponse(result)
+    result = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
+    if not result or result.get('error'):
+        return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)
+    return JsonResponse(result, status=200)
 
 @swagger_auto_schema(
     method='post',

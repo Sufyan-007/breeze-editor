@@ -145,6 +145,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'apps.authentication.core.authentication.CustomTokenAuthentication',
     ),
+    'EXCEPTION_HANDLER': 'apps.common.exception.exception_handler.custom_exception_handler'
 }
 
 CHANNEL_LAYERS = {

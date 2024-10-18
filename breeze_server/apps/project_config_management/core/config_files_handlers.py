@@ -8,6 +8,7 @@ from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.utils.uuid_as_key import generate_uuid_as_key 
 from apps.common.utils.tree_management import replace_node
 from apps.project_management.core.resource_upload_service import update_config
+
 def add_dirs_configs(data, proj_data_request):
     if data["name"] == "":
         raise ValueError("Name must be specified")
