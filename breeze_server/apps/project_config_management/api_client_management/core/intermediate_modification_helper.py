@@ -63,7 +63,7 @@ def add_auth_function(auth_model, appName, moduleId,operation):
         append_to_dict_file(folder_path, json_data)
 
 
-def transfer_to_auth(filename, id_value, file_path, target_file_path, module_id):
+def transfer_data_to_auth(filename, id_value, file_path, target_file_path, module_id):
     auth_api_template = {
         "id": "",
         "operation_id": "",
