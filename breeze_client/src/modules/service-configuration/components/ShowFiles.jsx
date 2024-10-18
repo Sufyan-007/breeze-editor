@@ -4,7 +4,7 @@ import ShowFunctions from './ShowFunctions';
 import { useParams } from 'react-router-dom';
 import { fetchFunctions, generateServiceFile } from '../redux/ApiClientActions';
 
-function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setView, moduleName }) {
+function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setView, moduleName, setSelectedFile }) {
   const file = useSelector((state) => state.services.filesList[fileId]);
   const [isOpen, setIsOpen] = useState(false);
   const { projectName } = useParams();
@@ -37,7 +37,13 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
   return (
     <div>
       <div className={`d-flex justify-content-between ${isOpen ? 'br-background-secondary' : 'br-background-primary'}`}>
-        <div onClick={toggleFilesExpansion} className="w-75">
+        <div
+          onClick={() => {
+            toggleFilesExpansion();
+            setSelectedFile(fileId);
+          }}
+          className="w-75"
+        >
           <i className="bi bi-file-earmark-fill" alt="file"></i>
           <span className="mx-2"> {file?.file.length > 30 ? `${file?.file.slice(0, 30)}...` : file?.file}</span>
         </div>

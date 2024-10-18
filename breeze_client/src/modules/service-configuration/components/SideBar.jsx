@@ -184,6 +184,7 @@ function SideBar({
                         moduleId={folderKey}
                         moduleName={value.title}
                         setSelectedApi={setSelectedApi}
+                        setSelectedFile={setSelectedFile}
                         setSelectedModule={setSelectedModule}
                         setView={setView}
                       />
