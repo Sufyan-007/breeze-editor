@@ -41,7 +41,7 @@ def get_proj_metadata(request, project_id):
         )
         return JsonResponse(app_config, status=200)
     except Exception as e:
-        return JsonResponse({"message": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
     
 @swagger_auto_schema(
     method='post',
@@ -59,7 +59,7 @@ def add(request):
         ## 2) Validate proj data
         data = load_proj_data(request)
         if "errors" in data:
-            return JsonResponse(data, status=400)
+            return JsonResponse({'error':'required field missing..', 'res_data': data}, status=400)
         ## 3) Write proj data (app_config.json)
         ## 4) Create default directories objects for given template
         ## 5) Create default config for the main component via proj_config_management
@@ -80,7 +80,7 @@ def add(request):
         response = {"name": data["name"]}
         return JsonResponse(response, status=200)
     except Exception as e:
-        return JsonResponse({"message": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
        
 @swagger_auto_schema(
     method='delete',
@@ -105,6 +105,6 @@ def delete(request, project_id):
         shutil.rmtree(generated_project_path,ignore_errors=False)
     except Exception as e:
         print("error occured: ", e)
-        return JsonResponse({"message": "Failed to delete the project"}, status=500)
+        return JsonResponse({"error": "Failed to delete the project"}, status=500)
     # here parent_id is parent name itself 
     return JsonResponse({"message": f"{project_id} deleted successfully"}, status=200)

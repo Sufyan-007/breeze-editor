@@ -1,6 +1,5 @@
 import json
 import os
-import re
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework.permissions import AllowAny
@@ -8,7 +7,6 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from ...common.constants.enums.ResourceCategory import (
     ResourceCategory,
-    ThirdPartyLibraryKeys,
 )
 from ...common.utils.file_helpers.config_handler import read_config_file
 from ...common.constants.consts import (
@@ -21,10 +19,6 @@ from ...common.constants.consts import (
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.query_resource_schema import manage_resource_schema
 from ...common.utils.file_helpers.json_handler import read_json_file as read_file
-
-# from ...common.constants
-# found_keys=[]
-
 
 @swagger_auto_schema(
     method="post",
@@ -241,7 +235,7 @@ def manage_resource(request, param):
                             key: get_nested_value(selected_data, key) for key in select
                         }
                     except Exception as e:
-                        return JsonResponse({"error2": str(e)}, status=400)
+                        return JsonResponse({"error": str(e)}, status=400)
 
             elif category in [ResourceCategory.API_CLIENT.value]:
                 if module and not (files or resource):
@@ -255,7 +249,7 @@ def manage_resource(request, param):
                             key: get_nested_value(selected_data, key) for key in select
                         }
                     except Exception as e:
-                        return JsonResponse({"error2": str(e)}, status=400)
+                        return JsonResponse({"error": str(e)}, status=400)
 
             elif category in [ResourceCategory.MODEL.value]:
                 if module or resource:

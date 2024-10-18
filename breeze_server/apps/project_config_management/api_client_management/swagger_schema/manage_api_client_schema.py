@@ -57,7 +57,7 @@ modify_function_config_schema={
                 )
         }
     ),
-    'response_201':openapi.Response(
+    'response_200':openapi.Response(
                 description='Created',
                 schema = openapi.Schema(
                     type=openapi.TYPE_OBJECT,

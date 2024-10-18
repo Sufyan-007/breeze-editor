@@ -1,4 +1,4 @@
-from apps.common.utils.tree_management import is_target_in_hierarchy,get_all_path_of_node,move_node
+from apps.common.utils.tree_management import is_target_in_hierarchy, get_all_path_of_node, move_node, get_nodes_upper_lineage
 from apps.common.constants.enums.tree_type import TreeType
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.constants.consts import CONFIG_PATH
@@ -36,8 +36,11 @@ def check_for_mandatory_route_props(route_obj, project_id):
 
 def validate_route_path(route_obj,target_id, project_id="",skip_ids=[]):
     full_route_paths = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id,'path',skip_ids =skip_ids) 
+    route_full_path = route_obj.get("path")
+    if 'parentId' in route_obj and route_obj.get('parentId') not in  [None, ""]:
+        route_full_path = get_nodes_upper_lineage(route_obj['parentId'], project_id, TreeType["ROUTES"])+route_full_path
     for full_route_path in full_route_paths:
-        if route_obj.get("path") == full_route_path.get("path"):
+        if  route_full_path== full_route_path.get("path"):
             raise Exception('route already exists..')
     return True
         

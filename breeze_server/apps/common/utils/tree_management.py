@@ -163,7 +163,17 @@ def get_root_nodes(config_data):
             root_nodes.append(v)
     return root_nodes
 
-
+def get_nodes_upper_lineage(node_id, project_name, category, config_data = {}):
+    if config_data == {}:
+        config_dir = os.path.join(CONFIG_PATH, project_name)
+        config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category.value])
+    node = config_data.get(node_id)
+    path = ""
+    if node is not None:
+        path = node.get('path')
+        if node.get('parentId'):
+            path = get_nodes_upper_lineage(node.get('parentId'), project_name, category, config_data ) + path
+        return path
 
 def clone_with_new_uuid(data):
     """
