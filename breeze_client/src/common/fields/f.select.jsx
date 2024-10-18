@@ -25,7 +25,7 @@ function CustomSelectField({ config, name, value, onChange, options, className, 
       >
         {availableOptions ? (
           <>
-            <option value="">{'Select'}</option>
+            {/* <option value="">{'Select'}</option> */}
             {availableOptions.map((option, index) => (
               <option key={index} value={option.value} data-source={option.dataSource}>
                 {option.label}
@@ -46,6 +46,7 @@ CustomSelectField.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   className: PropTypes.string,
+  sendSelectedOption: PropTypes.bool,
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,
