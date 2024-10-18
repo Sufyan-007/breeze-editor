@@ -293,16 +293,21 @@ def create_service_files( map_services,project_name,fileId,module_id, module_nam
     #     isProtected=False
     # )
     for tag, func_arr in map_services.items():
-        newNode = directory_manager.add_node_to_config(
-            parent_id= module_id,
-            tag= "SERVICES",
-            name= tag,
-            node_type="FILE",
-            file_id= fileId ,
-            entity_id=fileId,
-            isProtected=False,
-            ext="SX"
-        )
+        try:
+            directory_manager.add_node_to_config(
+                parent_id= module_id,
+                tag= "SERVICES",
+                name= tag,
+                node_type="FILE",
+                file_id= fileId ,
+                entity_id=fileId,
+                isProtected=False,
+                ext="SX"
+            )
+        except Exception as e:
+            if type(e) is not KeyError:
+                raise e
+        
         for func in func_arr:
             content += "\n"
             content += func
@@ -424,7 +429,7 @@ def generate_request_body_schema(parent_key,schema_name,schema):
         if schema.get("type") == "object":
             if parent_key is not None:
                 schema_name = parent_key+"."+schema_name
-            for key,value in schema.get("properties",[]).items():
+            for key,value in schema.get("properties",{}).items():
                 if "type" in value and value.get("type") == "object":
                     body[key] = generate_request_body_schema(schema_name,key,value)
                 else:
@@ -530,7 +535,7 @@ def set_request_body(model,app_name):
             params.append("BodyDetails")
             for key,item in form_data.get("properties",{}).items():
                 # params.append(key)
-                variable_declaration = "\n" + variable_declaration+"formBody.push(`${encodeURIComponent('%s')} = ${encodeURIComponent(BodyDetails['%s']`)});"%(key,key)
+                variable_declaration = "\n" + variable_declaration+"formBody.push(`${encodeURIComponent('%s')} = ${encodeURIComponent(BodyDetails['%s'])}`);"%(key,key)
             raw_data = "formBody"
             variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
 

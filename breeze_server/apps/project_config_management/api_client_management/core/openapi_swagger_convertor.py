@@ -41,8 +41,11 @@ def prepare_api_models(json_data, project_name):
             append_to_dict_file(swagger_schema_path, schema_data)
             
             ########### schema extraction #############
-            avalilable_schemas = openapi_data.get("components").get("schemas", {})
-            
+            comps =  openapi_data.get("components")
+            if comps:
+                avalilable_schemas = comps.get("schemas", {})
+            else:
+                avalilable_schemas = {}
             structured_schema_data = {}
             for key, val in avalilable_schemas.items():
                 if "properties" in val:
@@ -195,7 +198,7 @@ def _create_parameters_json( parameter_data):
                 parameters.append({
                     "param_in": param.get("in","").strip(),
                     "name":param.get("name"),
-                    "type":param.get("schema").get("type").strip().upper(),
+                    "type":param.get("schema",param).get("type").strip().upper(),
                     "required":param.get("required"),
                     "description":param.get("description")
                 })
@@ -469,7 +472,10 @@ def classified_tags_and_method(open_api_json_data):
             "default" : []
         }
         for path, path_data in paths.items():
-            for operation, operation_data in path_data.items():
+            for operation in ["get", "post", "put", "patch", "delete", "head", "options", "trace"]:
+                operation_data = path_data.get(operation)
+                if not operation_data: 
+                    continue
                 tags = operation_data.get("tags", None)
                 if isinstance(tags,list):
                     for tag in tags:
