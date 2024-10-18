@@ -136,7 +136,7 @@ def edit_module_title(request, project_id):
         new_title = data.get("title")
         module_id = data.get("moduleId")
         swagger_metadata_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
-        swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/swagger_schema/index.json"
+        swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
         result = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
         return JsonResponse(result)
     
@@ -186,6 +186,6 @@ def add_module(request,project_id):
     if not module_name or not module_description:
         return JsonResponse({"error": "Module name and description are required."}, status=400)
     swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
-    swagger_schema_path = f"{CONFIG_PATH}/{project_id}/swagger_schema"
+    swagger_schema_path = f"{CONFIG_PATH}/{project_id}/models"
     result = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
     return JsonResponse(result)

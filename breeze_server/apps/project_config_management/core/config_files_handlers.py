@@ -23,8 +23,8 @@ def add_dirs_configs(data, proj_data_request):
     )
     
     # for storing schemas retrieved form swagger file
-    create_dir_if_not_exists(f"{app_config_dir}/swagger_schema")
-    write_json_file(f"{app_config_dir}/swagger_schema/index.json", {})
+    create_dir_if_not_exists(f"{app_config_dir}/models")
+    write_json_file(f"{app_config_dir}/models/index.json", {})
     create_dir_if_not_exists(data["path"])
 
     app_current_config = data

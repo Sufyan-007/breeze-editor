@@ -34,7 +34,7 @@ def prepare_api_models(json_data, project_name):
             swagger_metadata_file_content[swagger_metadata_id] = meta_data
             append_to_dict_file(swagger_metadata_file_path, swagger_metadata_file_content)
             
-            swagger_schema_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/index.json";
+            swagger_schema_path = f"{CONFIG_PATH}/{project_name}/models/index.json";
             with open(swagger_schema_path, 'r') as file:
                 schema_data = json.load(file)
             schema_data[swagger_metadata_id] = meta_data.get("title")
@@ -61,7 +61,7 @@ def prepare_api_models(json_data, project_name):
             
             for key, val in schema_with_ids.items():
                 replace_variable(schema_with_ids, f"#/components/schemas/{val['name']}",key)
-            schema_file_path = f"{CONFIG_PATH}/{project_name}/swagger_schema/{swagger_metadata_id}.json"
+            schema_file_path = f"{CONFIG_PATH}/{project_name}/models/{swagger_metadata_id}.json"
             
             with open(schema_file_path, "w") as file:
                 json.dump(schema_with_ids,file, cls=EnhancedJSONEncoder)
