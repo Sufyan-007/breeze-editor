@@ -1,7 +1,7 @@
 const breezeConfigData = {
   'service-config': {
     id: 'service-config',
-    name: 'service-config',
+    name: 'api.config',
     extension: '',
     type: 'CONFIG',
     children: [],
@@ -11,7 +11,7 @@ const breezeConfigData = {
   },
   'custom-upload': {
     id: 'custom-upload',
-    name: 'custom-upload-config',
+    name: 'external-comp.config',
     extension: '',
     type: 'CONFIG',
     children: [],
@@ -21,7 +21,7 @@ const breezeConfigData = {
   },
   'schema-config': {
     id: 'schema-config',
-    name: 'schema-config',
+    name: 'schema.config',
     extension: '',
     type: 'CONFIG',
     children: [],
