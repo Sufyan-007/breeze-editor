@@ -90,7 +90,7 @@ def start_app(app_config, forceRestart=False):
         thread = threading.Thread(target=run_project_threaded,args= [project_id,port,project_path, env_name])
         thread.daemon = True
         thread.start()
-        RUNNING_APPS[project_id] = {'port':port,'thread':thread,'status':"COMPILING.."}
+        RUNNING_APPS[project_id] = {'port':port,'thread':thread,'status':"Compiling"}
         # process.wait()
         # process=subprocess.run(command, cwd=project_path, env=environment)
 
