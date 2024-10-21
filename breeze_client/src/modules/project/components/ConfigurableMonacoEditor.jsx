@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
-import { BreezeOffcanvas, BreezeList } from '../../../common/display';
+import { BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
 import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
 import VariableConfigForm from '../../component-configuration/components/config-forms/VariableConfigForm';
@@ -10,6 +10,7 @@ import ImportConfigForm from '../../component-configuration/components/config-fo
 import FunctionConfigForm from '../../component-configuration/components/config-forms/FunctionConfigForm';
 import LifecycleConfigForm from '../../component-configuration/components/config-forms/LifecycleConfigForm';
 import HookConfigForm from '../../component-configuration/components/config-forms/HookConfigForm';
+import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 
 const items = ['+ Imports', '+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
 
@@ -23,12 +24,11 @@ const ConfigurableMonacoEditor = ({
 }) => {
   const editorRef = useRef(null);
   const [editor, setEditor] = useState(null);
-  const [showOffCanvas, setShowOffCanvas] = useState(false);
-  const [OffCanvasContent, setOffCanvasContent] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [value] = useState(defaultValue);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+  const { showOffcanvas } = useOffcanvas();
 
   useEffect(() => {
     if (editor && editor.getValue() !== defaultValue) {
@@ -110,8 +110,14 @@ const ConfigurableMonacoEditor = ({
         contentComponent = null;
     }
 
-    setOffCanvasContent(contentComponent);
-    setShowOffCanvas(true);
+    showOffcanvas(
+      contentComponent,
+      'Component Configuration',
+      'end', // Optional placement
+      true, // Optional backdrop
+      '40%' // Optional size
+    );
+
     setShowMenu(false);
   };
 
@@ -137,7 +143,7 @@ const ConfigurableMonacoEditor = ({
       )}
 
       {/* Breeze Off-Canvas */}
-      <BreezeOffcanvas
+      {/* <BreezeOffcanvas
         show={showOffCanvas}
         onClose={() => setShowOffCanvas(false)}
         title="Component Configuration"
@@ -145,7 +151,7 @@ const ConfigurableMonacoEditor = ({
         size="40%"
       >
         <>{OffCanvasContent}</>
-      </BreezeOffcanvas>
+      </BreezeOffcanvas> */}
     </div>
   );
 };
