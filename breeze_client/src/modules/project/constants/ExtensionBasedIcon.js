@@ -1,16 +1,16 @@
 export const getIconClass = (extension) => {
   switch (extension) {
     case 'SX':
-      return 'bi-filetype-jsx';
+      return { iconClass: 'bi-filetype-jsx', color: '#A57CE8' };
     case 'js':
-      return 'bi-filetype-js';
+      return { iconClass: 'bi-filetype-js', color: '#A57CE8' };
     case 'json':
-      return 'bi-filetype-json';
+      return { iconClass: 'bi-filetype-json', color: '#568D2A' };
     case 'html':
-      return 'bi-filetype-html';
+      return { iconClass: 'bi-filetype-html', color: '#E34F26' };
     case 'css':
-      return 'bi-filetype-css';
+      return { iconClass: 'bi-filetype-css', color: '#80C2FF' };
     default:
-      return 'bi-file-earmark';
+      return { iconClass: 'bi-file-earmark', color: '#6C757D' };
   }
 };

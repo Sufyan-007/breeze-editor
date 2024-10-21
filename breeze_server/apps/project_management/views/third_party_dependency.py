@@ -1,3 +1,4 @@
+import json
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from apps.common.utils.file_helpers.config_handler import get_breeze_config_file
@@ -7,21 +8,7 @@ from ..core.third_party_dependency_service import (
     update_package_in_dependencies,
     delete_package_from_dependencies
 )
-import json
-
-
-def parse_request_data(request):
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-        package_name = data.get("name")
-        package_version = data.get("version")
-
-        if not package_name or (request.method != "DELETE" and not package_version):
-            raise ValueError("Both package name and version are required.")
-        return package_name, package_version
-    except json.JSONDecodeError:
-        raise ValueError("Invalid JSON data.")
-
+from ..utils.request_data_parser import parse_request_data
 
 @csrf_exempt
 @api_view(["POST"])

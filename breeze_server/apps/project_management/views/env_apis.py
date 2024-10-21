@@ -51,7 +51,7 @@ def get_environment_config(request, project_id):
         env_config = get_env_config(project_id)
         return JsonResponse({'status': 'success', 'config': env_config}, status=200)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"error: {e}")
         return JsonResponse({'error': 'Server error'}, status=500)
 
 @swagger_auto_schema(
@@ -68,7 +68,7 @@ def add_env_config(request, project_id):
         env_config = generate_config_from_payload(project_id, data)
         return JsonResponse({'status': 'success', 'config': env_config, 'message': 'Environment settings saved successfully'}, status=200)
     except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
     

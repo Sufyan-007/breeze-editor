@@ -4,11 +4,15 @@ from rest_framework.permissions import AllowAny
 from ....common.constants.consts import CONFIG_PATH,CLIENT_API
 from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
-from ..core.intermediate_modification_helper import process_api_data,transfer_to_auth,add_auth_function
-from ..utils.api_models.custom_exception import CustomeException
+from ..core.intermediate_modification_helper import process_api_data, transfer_data_to_auth,add_auth_function
+from ..core.module_manager import add_module_helper,edit_module_title_helper
 from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from ....code_generator.core.api_client_generator import generate_react_service
+from ....directory_management.core.directory_management_service import DirectoryManager
+
+
 
 @swagger_auto_schema(
     method='post',
@@ -22,8 +26,7 @@ from drf_yasg import openapi
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def generate_service_config(request, collectionType, project_id):
-        project_name = project_id
-        folder_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}" 
+        folder_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}" 
         filename = ''
         try:
             json_file = request.FILES['file']
@@ -37,8 +40,23 @@ def generate_service_config(request, collectionType, project_id):
             #     return JsonResponse({"data": model_dict, "filename": filename}, status=201)
 
             if collectionType.lower() == 'openapi' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
-                converted_data = prepare_api_models(json_data, project_name)
-                files_with_apis = wrap_conversion(converted_data=converted_data, project_name=project_name, folder_path=folder_path)
+                converted_data = prepare_api_models(json_data, project_id)
+                module_id = converted_data.get("id")
+                module_name = converted_data.get("title")
+                files_with_apis, is_erroroneous = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
+                if not is_erroroneous:
+                    directory_manager = DirectoryManager(project_name=project_id)
+                    newNode = directory_manager.add_node_to_config(
+                        parent_id= "SERVICES",
+                        tag= "SERVICES",
+                        name=module_name,
+                        node_type="DIRECTORY",
+                        file_id= module_id,
+                        entity_id=module_id,
+                        isProtected=False
+                    )
+                    for file in files_with_apis:
+                        generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name)
                 return JsonResponse({"files_with_apis": files_with_apis}, status=201)
             
             # elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
@@ -47,9 +65,6 @@ def generate_service_config(request, collectionType, project_id):
             
             else:
                 return JsonResponse({"error": "Invalid collection type or file format."}, status=400)
-        except CustomeException as e:
-            print(e)
-            return JsonResponse({"error": str(e)}, status=500)
         
         except Exception as e:
             print(traceback.format_exc())
@@ -60,7 +75,7 @@ def generate_service_config(request, collectionType, project_id):
     method='post',
     request_body=modify_function_config_schema['rb'],
     responses={
-            201:modify_function_config_schema['response_201']
+            200:modify_function_config_schema['response_200']
         },
     tags=['manage-api-client']
 ) 
@@ -77,9 +92,9 @@ def modify_function_config(request,operation,project_id):
     else:
         result = process_api_data(operation,api_data, filename,project_id,module_id)
     if result:
-        return JsonResponse({"message": "Function Added Successfully" }, status=201)
+        return JsonResponse({"message": "Function Added Successfully" }, status=200)
     else:
-        return JsonResponse({"message": result }, status=201)
+        return JsonResponse({"message": result }, status=200)
 
 @swagger_auto_schema(
     method='post',
@@ -98,8 +113,10 @@ def transfer_to_auth(request,project_id):
     module_id = data.get("module_id")
     file_path = os.path.join(f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{module_id}", f"{filename}.json")
     target_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
-    result = transfer_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
-    return JsonResponse(result)
+    result = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
+    if not result or result.get('error'):
+        return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)
+    return JsonResponse(result, status=200)
 
 @swagger_auto_schema(
     method='post',
@@ -116,31 +133,20 @@ def edit_module_title(request, project_id):
         data = json.loads(request.body)
         new_title = data.get("title")
         module_id = data.get("moduleId")
-        file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
-        if not os.path.exists(file_path):
-            return JsonResponse({"message": "Module not found"}, status=404)
-        with open(file_path, "r") as file:
-            swagger_metadata = json.load(file)
-        if module_id not in swagger_metadata:
-            return JsonResponse({"message": "Module not found"}, status=404)
-        for id, value in swagger_metadata.items():
-            if value["title"] == new_title:
-                return JsonResponse({"message": "Module name should be unique"}, status=404)
-        module_data = swagger_metadata[module_id]
-        module_data["title"] = new_title
-        swagger_metadata[module_id] = module_data
-        with open(file_path, "w") as file:
-            json.dump(swagger_metadata, file, indent=4)
-        return JsonResponse({"message": "Module name edited Successfully"}, status=200)
+        swagger_metadata_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
+        swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
+        result,status = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
+        return JsonResponse(result,status)
     
-    
-    
+@api_view(['GET'])
+@permission_classes([AllowAny])   
 def get_response_token( request, project_id,apiId, moduleId):
         try:
             file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
             if not os.path.exists(file_path):
                 return JsonResponse({"error": "File not found"}, status=404)
-
+            if moduleId=='null' or moduleId == 'undefined' or apiId == 'null' or apiId == 'undefined':
+                return JsonResponse({"error": "Module ID or API ID not provided"}, status=400)
             result = {}
             with open(file_path, "r") as file:
                 file_content = json.load(file)
@@ -167,3 +173,17 @@ def get_response_token( request, project_id,apiId, moduleId):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def add_module(request,project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    module_name = data.get("name")
+    module_description = data.get("description")
+    if not module_name or not module_description:
+        return JsonResponse({"error": "Module name and description are required."}, status=400)
+    swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
+    swagger_schema_path = f"{CONFIG_PATH}/{project_id}/models"
+    result = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
+    return JsonResponse(result)

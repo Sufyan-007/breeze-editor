@@ -8,6 +8,7 @@ from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.utils.uuid_as_key import generate_uuid_as_key 
 from apps.common.utils.tree_management import replace_node
 from apps.project_management.core.resource_upload_service import update_config
+
 def add_dirs_configs(data, proj_data_request):
     if data["name"] == "":
         raise ValueError("Name must be specified")
@@ -23,7 +24,8 @@ def add_dirs_configs(data, proj_data_request):
     )
     
     # for storing schemas retrieved form swagger file
-    create_dir_if_not_exists(f"{app_config_dir}/swagger_schema")
+    create_dir_if_not_exists(f"{app_config_dir}/models")
+    write_json_file(f"{app_config_dir}/models/index.json", {})
     create_dir_if_not_exists(data["path"])
 
     app_current_config = data
@@ -115,11 +117,7 @@ def write_routing_config(app_config):
 
 def write_swagger_schema_config(app_config_dir):
     write_json_file(f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json", {
-        "custom" : {
-            "title" : "Custom",
-            "auth_apis" : {}
-        }
-    })
+})
 
 def write_resource_config(app_current_config, proj_data_request):
     logo_file = proj_data_request.FILES.get('logo')

@@ -52,6 +52,7 @@
 #sidebar .sidebar-nav {
     padding: 0;
     overflow-y: auto;
+    height: calc(100% - 140px);
 }
 
 #sidebar .bottom-nav {
