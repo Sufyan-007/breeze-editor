@@ -6,17 +6,20 @@ import { useTreeContext } from '../context/TreeContext';
 import { getAvailableTabs, getLanguageFromExtension } from '../constants/TabScreen';
 import { useParams } from 'react-router-dom';
 import { getFileCode, getProjectPort } from '../services/projectService';
+import { useTabContext } from '../context/TabContext';
+import TabBar from './TabBar';
+import '../styles/ProjectDisplay.css';
 
 function ProjectDisplay() {
-  const { selectedNode } = useTreeContext();
+  const { selectedNode, setSelectedNode } = useTreeContext();
   const { projectName } = useParams();
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   const [editorCode, setEditorCode] = useState('// Loading..');
   const [editorLanguage, setEditorLanguage] = useState('javascript');
   const [projectPort, setProjectPort] = useState(3000);
+  const { openTabs, selectedTab, addTab, removeTab, selectTab } = useTabContext();
 
   const availableTabs = getAvailableTabs(selectedNode?.tag);
-
   const fetchPort = useCallback(async () => {
     const port = await getProjectPort(projectName);
     setProjectPort(port.port);
@@ -25,6 +28,12 @@ function ProjectDisplay() {
   useEffect(() => {
     fetchPort();
   }, [fetchPort]);
+
+  useEffect(() => {
+    if (selectedNode) {
+      addTab(selectedNode);
+    }
+  }, [selectedNode, addTab]);
 
   useEffect(() => {
     if (
@@ -62,58 +71,74 @@ function ProjectDisplay() {
     setActiveTab(tab);
   };
 
+  const handleTabSelect = (node) => {
+    setSelectedNode(node);
+    selectTab(node);
+  };
+
+  const handleTabClose = (nodeId) => {
+    removeTab(nodeId);
+  };
+
   return (
-    <>
-      <div className="mb-3">
-        <TopBar onTabChange={handleTabChange} activeTab={activeTab} availableTabs={availableTabs} />
-
-        <div className="tab-content" id="pills-tabContent">
-          {activeTab === 'code' && (
-            <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-              <div className="editor-container">
-                <ConfigurableMonacoEditor
-                  defaultValue={editorCode ? editorCode : '// Loading...'}
-                  height="calc(100vh - 123px)"
-                  language={editorLanguage}
-                />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'preview' && (
-            <div
-              className="tab-pane fade show active"
-              id="pills-preview"
-              role="tabpanel"
-              aria-labelledby="pills-preview-tab"
-            >
-              <div className="project-display-container iframe-container">
-                <iframe
-                  src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}:${projectPort}`}
-                  title="Preview"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                ></iframe>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'config' && (
-            <div
-              className="tab-pane fade show active"
-              id="pills-config"
-              role="tabpanel"
-              aria-labelledby="pills-config-tab"
-            >
-              <div className="project-display-container config-container">
-                <ConfigDisplay configType={selectedNode?.tag || ''} />
-              </div>
-            </div>
-          )}
-        </div>
+    <div className="mb-3">
+      <div className="mb-2">
+        <TabBar
+          openTabs={openTabs}
+          selectedTab={selectedTab}
+          handleTabSelect={handleTabSelect}
+          handleTabClose={handleTabClose}
+        />
       </div>
-    </>
+
+      <TopBar onTabChange={handleTabChange} activeTab={activeTab} availableTabs={availableTabs} />
+
+      <div className="tab-content" id="pills-tabContent">
+        {activeTab === 'code' && (
+          <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+            <div className="editor-container">
+              <ConfigurableMonacoEditor
+                defaultValue={editorCode ? editorCode : '// Loading...'}
+                height="calc(100vh - 161px)"
+                language={editorLanguage}
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'preview' && (
+          <div
+            className="tab-pane fade show active"
+            id="pills-preview"
+            role="tabpanel"
+            aria-labelledby="pills-preview-tab"
+          >
+            <div className="project-display-container iframe-container">
+              <iframe
+                src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}:${projectPort}`}
+                title="Preview"
+                width="100%"
+                height="100%"
+                frameBorder="0"
+              ></iframe>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'config' && (
+          <div
+            className="tab-pane fade show active"
+            id="pills-config"
+            role="tabpanel"
+            aria-labelledby="pills-config-tab"
+          >
+            <div className="project-display-container config-container">
+              <ConfigDisplay configType={selectedNode?.tag || ''} />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

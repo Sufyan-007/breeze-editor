@@ -7,6 +7,7 @@ import { TreeProvider } from '../context/TreeContext';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { resetStore } from '../../../store/actions';
+import { TabProvider } from '../context/TabContext';
 
 function ProjectPage() {
   const projectStatus = useSelector((state) => state.project.status);
@@ -24,7 +25,11 @@ function ProjectPage() {
       <TreeProvider>
         <Layout
           sidebar={<ProjectSidebar />}
-          mainContent={<ProjectDisplay />}
+          mainContent={
+            <TabProvider>
+              <ProjectDisplay />
+            </TabProvider>
+          }
           currentPage="project"
           projectName={projectName}
         />

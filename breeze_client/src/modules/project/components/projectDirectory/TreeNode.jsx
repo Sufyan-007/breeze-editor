@@ -182,10 +182,6 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
               )}
             </>
           )}
-
-          <span className="tree-node-state">
-            {node.type === 'DIRECTORY' && !isEditing && (isExpanded(node.id) ? '   -   ' : '   +   ')}
-          </span>
         </span>
       </div>
       {hasChildren(node) && isExpanded(node.id) && (
