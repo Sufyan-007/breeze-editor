@@ -38,8 +38,8 @@ export const TabProvider = ({ children }) => {
     [selectedTab, setSelectedNode]
   );
   const selectTab = (node) => {
+    setSelectedNode(node);
     setSelectedTab(node);
-    // setSelectedNode(node);
   };
 
   return (

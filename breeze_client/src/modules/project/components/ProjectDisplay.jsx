@@ -7,19 +7,18 @@ import { getAvailableTabs, getLanguageFromExtension } from '../constants/TabScre
 import { useParams } from 'react-router-dom';
 import { getFileCode, getProjectPort } from '../services/projectService';
 import { useTabContext } from '../context/TabContext';
-import TabBar from './TabBar';
 import '../styles/ProjectDisplay.css';
 
 function ProjectDisplay() {
-  const { selectedNode, setSelectedNode } = useTreeContext();
+  const { selectedNode } = useTreeContext();
   const { projectName } = useParams();
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   const [editorCode, setEditorCode] = useState('// Loading..');
   const [editorLanguage, setEditorLanguage] = useState('javascript');
   const [projectPort, setProjectPort] = useState(3000);
-  const { openTabs, selectedTab, addTab, removeTab, selectTab } = useTabContext();
-
+  const { addTab } = useTabContext();
   const availableTabs = getAvailableTabs(selectedNode?.tag);
+
   const fetchPort = useCallback(async () => {
     const port = await getProjectPort(projectName);
     setProjectPort(port.port);
@@ -71,26 +70,8 @@ function ProjectDisplay() {
     setActiveTab(tab);
   };
 
-  const handleTabSelect = (node) => {
-    setSelectedNode(node);
-    selectTab(node);
-  };
-
-  const handleTabClose = (nodeId) => {
-    removeTab(nodeId);
-  };
-
   return (
     <div className="mb-3">
-      <div className="mb-2">
-        <TabBar
-          openTabs={openTabs}
-          selectedTab={selectedTab}
-          handleTabSelect={handleTabSelect}
-          handleTabClose={handleTabClose}
-        />
-      </div>
-
       <TopBar onTabChange={handleTabChange} activeTab={activeTab} availableTabs={availableTabs} />
 
       <div className="tab-content" id="pills-tabContent">

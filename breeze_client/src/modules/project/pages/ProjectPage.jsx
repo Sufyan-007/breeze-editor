@@ -1,6 +1,7 @@
 import Layout from '../../../common/layout/Layout';
 import ProjectDisplay from '../components/ProjectDisplay';
 import ProjectSidebar from '../components/ProjectSidebar';
+import TabBar from '../components/TabBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { BreezeLoader } from '../../../common/display';
 import { TreeProvider } from '../context/TreeContext';
@@ -27,6 +28,7 @@ function ProjectPage() {
           sidebar={<ProjectSidebar />}
           mainContent={
             <TabProvider>
+              <TabBar />
               <ProjectDisplay />
             </TabProvider>
           }

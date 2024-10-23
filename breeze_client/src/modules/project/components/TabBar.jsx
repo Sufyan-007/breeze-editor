@@ -1,10 +1,20 @@
 import PropTypes from 'prop-types';
 import { getIconClass } from '../constants/ExtensionBasedIcon';
+import { useTabContext } from '../context/TabContext';
 
-function TabBar({ openTabs, selectedTab, handleTabSelect, handleTabClose }) {
+function TabBar() {
+  const { openTabs, selectedTab, selectTab, removeTab } = useTabContext();
+
+  const handleTabSelect = (node) => {
+    selectTab(node);
+  };
+
+  const handleTabClose = (nodeId) => {
+    removeTab(nodeId);
+  };
+
   return (
-    <div>
-      {' '}
+    <div className="mb-2">
       <div className="project-tab-bar d-flex small-font">
         {openTabs.map((tab) => (
           <div
