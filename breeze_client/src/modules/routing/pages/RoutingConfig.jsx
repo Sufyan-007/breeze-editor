@@ -28,9 +28,16 @@ function RoutingConfig() {
   const [flag, setFlag] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchComponents({ projectName }));
-    dispatch(fetchRoutingConfig({ projectName }));
-  }, [dispatch, projectName]);
+    if (Object.keys(routingConfig).length === 0) {
+      dispatch(fetchRoutingConfig({ projectName }));
+    }
+  }, [dispatch, projectName, routingConfig]);
+
+  useEffect(() => {
+    if (Object.keys(components).length === 0) {
+      dispatch(fetchComponents({ projectName }));
+    }
+  }, [dispatch, projectName, components]);
 
   useEffect(() => {
     if (status === 'succeeded') {
