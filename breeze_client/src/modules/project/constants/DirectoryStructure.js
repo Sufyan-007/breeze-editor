@@ -9,14 +9,14 @@ const breezeConfigData = {
     tag: 'SERVICE-CONFIG',
     parentId: null,
   },
-  'custom-upload': {
-    id: 'custom-upload',
+  'external-comp-config': {
+    id: 'external-comp-config',
     name: 'external-comp.config',
     extension: '',
     type: 'CONFIG',
     children: [],
     wasOpen: false,
-    tag: 'CUSTOM_UPLOAD',
+    tag: 'EXTERNAL_COMP',
     parentId: null,
   },
   'schema-config': {
