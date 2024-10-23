@@ -16,7 +16,7 @@ export async function editFunctionConfig(projectName, operation, payload) {
 
 export async function fetchIntermediates(projectName, payload) {
   const apiUrl = `${BASE_URL}/api/project/query_resource/${projectName}/`;
-  const response = callApiClient(apiUrl, 'POST', payload, false, {}, true);
+  const response = callApiClient(apiUrl, 'POST', payload, false, {}, true, false);
   return response;
 }
 

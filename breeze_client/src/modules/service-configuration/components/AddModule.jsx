@@ -18,7 +18,7 @@ function AddModule({ setView }) {
   const handleSubmit = async (payload) => {
     await dispatch(addModule({ projectName, payload })).unwrap();
     await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
-    setView('TEST');
+    if (setView) setView('TEST');
   };
   return (
     <div className="row mt-3">

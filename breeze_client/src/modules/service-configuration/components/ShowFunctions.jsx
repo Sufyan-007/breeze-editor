@@ -2,8 +2,6 @@ import { useSelector } from 'react-redux';
 
 function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId }) {
   const func = useSelector((state) => state.services.functionsList[functionId]);
-  console.log(func, 'functionnn');
-
   const authFunc = useSelector((state) => state.services.moduleList[moduleId]?.auth_apis[functionId]);
   const displayName = isAuth ? authFunc?.operation_id : func?.operation_id;
   const shortName = displayName && displayName.length > 30 ? `${displayName.slice(0, 30)}...` : displayName;

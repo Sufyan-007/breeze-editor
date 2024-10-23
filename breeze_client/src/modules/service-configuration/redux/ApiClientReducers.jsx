@@ -49,6 +49,7 @@ const serviceConfigSlice = createSlice({
             value: value.title,
             moduleId: key,
           }));
+          options.push({ label: 'select', value: '' });
           state.transformedOptions = options;
           state.moduleList = action.payload.data;
         })

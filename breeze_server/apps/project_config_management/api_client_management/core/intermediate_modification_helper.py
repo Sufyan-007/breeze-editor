@@ -13,12 +13,19 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
         modified_api["id"] = generate_uuid_as_key()
 
     folder_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}/{moduleId}"
+    with open(api_client_index_path, "r") as file:
+            existing_index_data = json.load(file)
     if not filename:
         filename = generate_uuid_as_key()
-        with open(api_client_index_path, "r") as file:
-            existing_index_data = json.load(file)
+        recieved_tag = modified_api.get("tags")
+        for key, val in existing_index_data.items():
+            if val.get('file') == recieved_tag:
+                filename = key
+                break
         existing_index_data[filename] = {"file": modified_api["tags"]}
         append_to_dict_file(api_client_index_path, existing_index_data)
+        
+    
 
     file_path = os.path.join(folder_path, filename) + ".json"
 
@@ -32,7 +39,11 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
                 existing_data = json.load(file)
             if modified_api["id"] in existing_data:
                 if tag != existing_data[modified_api["id"]].get("tags", "default"):
-                    new_file_path = os.path.join(folder_path, f"{tag}.json")
+                    new_file_id = generate_uuid_as_key()
+                    new_file_path = os.path.join(folder_path, f"{new_file_id}.json")
+                    for key, val in existing_index_data.items():
+                        if val.get('file') == tag:
+                            new_file_path = os.path.join(folder_path, f"{key}.json")
                     append_to_dict_file(new_file_path, resultant_model)
                     if modified_api["id"] in existing_data:
                         del existing_data[modified_api["id"]]

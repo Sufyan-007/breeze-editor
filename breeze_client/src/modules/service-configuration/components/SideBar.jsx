@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchAuthFunctions, fetchFiles, fetchFunctions } from '../redux/ApiClientActions';
 import ShowFiles from './ShowFiles';
 import ShowFunctions from './ShowFunctions';
+import ShowModules from './ShowModules';
 
 const customComparator = (oldKeyList, newKeyList) => {
   // code to compare if all entries are equal
@@ -30,12 +31,10 @@ function SideBar({
   const { moduleList } = useSelector((state) => state.services);
   // console.log(moduleList, 'moduleList');
 
-  const filesList = useSelector(customSelectFunctions, customComparator);
   const [expandedModules, setExpandedModules] = useState([]);
   const [expandedAuthModules, setExpandedAuthModules] = useState([]);
   const [editingModule, setEditingModule] = useState(null);
   const [newModuleTitle, setNewModuleTitle] = useState('');
-  // const [expandedFiles, setExpandedFiles] = useState({});
 
   const toggleModuleExpansion = async (module) => {
     const isExpanded = expandedModules.includes(module);
@@ -88,6 +87,11 @@ function SideBar({
     setSelectedAuthApi(api);
     setView('AUTH_API');
   };
+  const onNormalSelect = (name, folderKey) => {
+    setView('TEST');
+    setSelectedApi({});
+    setSelectedModule({ name: name, id: folderKey });
+  };
   return (
     <>
       <div
@@ -97,16 +101,18 @@ function SideBar({
       >
         <div className="d-flex justify-content-between mb-2 br-background-primary">
           <h5 className="mt-4">Services</h5>
-          <div className="d-flex">
+          <div className="d-flex pe-1">
             <i
               className="bi bi-plus-circle mx-1 mt-4"
+              title="add-module"
               style={{ cursor: 'pointer' }}
               onClick={() => {
                 setView('ADD_MODULE');
               }}
             ></i>
             <i
-              className="bi bi-file-earmark-arrow-down-fill mx-1 mt-4"
+              className="bi bi-cloud-arrow-up-fill mx-1 mt-4"
+              title="upload-file"
               style={{ cursor: 'pointer' }}
               onClick={() => setView('IMPORT_API')}
             ></i>
@@ -127,7 +133,10 @@ function SideBar({
                         value={newModuleTitle}
                         className="form-control form-control-sm br-text-primary br-background-primary"
                         onChange={handleInputChange}
-                        onBlur={() => saveTitle(value.title, folderKey, newModuleTitle)}
+                        onBlur={() => {
+                          saveTitle(value.title, folderKey, newModuleTitle);
+                          // toggleEditing(value.title);
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             saveTitle(value.title, folderKey, newModuleTitle);
@@ -195,6 +204,17 @@ function SideBar({
                 </div>
               )}
             </div>
+            // <ShowModules
+            //   key={folderKey}
+            //   folderKey={folderKey}
+            //   value={value}
+            //   saveTitle={saveTitle}
+            //   setSelectedApi={setSelectedApi}
+            //   setSelectedFile={setSelectedFile}
+            //   setSelectedModule={setSelectedModule}
+            //   setView={setView}
+            //   onAdd={onNormalSelect}
+            // />
           ))
         ) : (
           <span className="m-2 br-text-primary">No services found</span>

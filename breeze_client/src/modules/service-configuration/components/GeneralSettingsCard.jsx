@@ -2,11 +2,12 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router';
 import { CustomButtonField, CustomCheckBoxField, CustomSelectField, CustomTextInput } from '../../../common/fields';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInfo, onSuccessfulTransfer }) {
   const [showModal, setShowModal] = useState(false);
   const dispatch = useDispatch();
+  const { filesList } = useSelector((state) => state.services);
 
   const handleInputChange = (prop, value) => {
     onChange(prop, value);
@@ -27,12 +28,16 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
     await dispatch(convertToAuthApi({ projectName, payload })).unwrap();
     setShowModal(!showModal);
     onSuccessfulTransfer();
-    // const result = await transferToAuth(projectName, payload);
-    // if (result.message) {
-    //   setShowModal(!showModal);
-    //   onSuccessfulTransfer();
-    // }
   };
+
+  const transformedOptions = Object.entries(filesList).map(([fileId, file]) => {
+    return {
+      label: file.file,
+      value: file.file,
+      id: fileId, //not being used currently could be used later
+    };
+  });
+  // transformedOptions.push({ label: 'select', value: '' });
   return (
     <>
       {showModal && (
@@ -81,12 +86,21 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
                 <label className=" br-text-primary mx-3">Service File:</label>
               </div>
               <div className="col-sm-9">
-                <CustomTextInput
-                  className="form-control br-form-control form-control-sm"
-                  placeholder="File Name"
-                  value={settings.tags || ''}
-                  onChange={(value) => handleInputChange('tags', value)}
-                />
+                {transformedOptions.length > 0 ? (
+                  <CustomSelectField
+                    className="form-select br-form-select form-select-sm"
+                    value={settings.tags || ''}
+                    onChange={(value) => onChange('tags', value)}
+                    options={transformedOptions}
+                  />
+                ) : (
+                  <CustomTextInput
+                    className="form-control br-form-control form-control-sm"
+                    placeholder="File Name"
+                    value={settings.tags || ''}
+                    onChange={(value) => handleInputChange('tags', value)}
+                  />
+                )}
               </div>
             </div>
           </div>

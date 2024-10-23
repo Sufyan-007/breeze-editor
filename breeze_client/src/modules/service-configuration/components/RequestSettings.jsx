@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import HeadersSetting from './HeadersSettings';
 import AuthSettings from './AuthSettings';
 import UrlSettings from './UrlSettings';
 import BodySettings from './BodySettings';
-// import { useParams } from 'react-router';
-// import { fetchEnvironmentSettings } from '../services/EnvironmentSettingsService';
 
 function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, requestType, moduleId }) {
   const [request, setRequest] = useState(requestData);
@@ -13,26 +11,13 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
   const [api, setApi] = useState({});
   const [requestProperties, setRequestProperties] = useState(['Url', 'Body', 'Headers', 'Auth']);
   const [envVars, setEnvVars] = useState({});
-  // const { projectName } = useParams();
-
-  // const getEnvironments = useCallback(async () => {
-  //   const result = await fetchEnvironmentSettings('creator');
-  //   if (result && result.config) {
-  //     setEnvVars(result.config.envVars);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   getEnvironments();
-  // }, [getEnvironments]);
+  const [urlHeading, setUrlHeading] = useState('');
 
   useEffect(() => {
-    if (apiData.is_open_api) {
-      setRequestProperties(['Url', 'Body', 'Headers']);
-    } else {
-      setRequestProperties(['Url', 'Body', 'Headers', 'Auth']);
+    if (requestData.method === 'GET') {
+      setRequestProperties(['Url', 'Headers', 'Auth']);
     }
-  }, [apiData.is_open_api]);
+  }, [requestData.method]);
 
   useEffect(() => {
     if (isAuthApi) {
@@ -89,6 +74,18 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
 
   useEffect(() => {
     setRequest(requestData);
+    const baseUrl = requestData?.url?.baseurl;
+    const pathSegments = requestData?.url?.path || [];
+    const allParams = requestData?.parameters || [];
+    const fullPath = pathSegments.filter((segment) => segment).join('/');
+    const queryParams = allParams
+      .filter((param) => param.param_in === 'QUERY' && param.value) // Filter for QUERY params that have values
+      .map((param) => `${encodeURIComponent(param.name)}=${encodeURIComponent(param.value)}`)
+      .join('&');
+    const sanitizedBaseUrl = baseUrl?.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+    const fullUrl = `${sanitizedBaseUrl}/${fullPath}${queryParams ? '?' + queryParams : ''}`;
+    setUrlHeading(sanitizedBaseUrl ? fullUrl : 'Url');
   }, [requestData]);
 
   useEffect(() => {
@@ -127,11 +124,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
             >
               <div className="card-body d-flex justify-content-between" onClick={() => toggleProperty(index)}>
                 <div>
-                  {req === 'Url' && request.url && request.url.baseurl !== ''
-                    ? envVars[request.url.baseurl]
-                      ? envVars[request.url.baseurl]
-                      : request.url.baseurl
-                    : req}
+                  {req === 'Url' ? urlHeading : req}
                   {req === 'Url'
                     ? ((request?.parameters &&
                         request?.parameters.some((param) => param.errors && Object.keys(param.errors).length > 0)) ||
