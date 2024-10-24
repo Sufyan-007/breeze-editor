@@ -6,7 +6,7 @@ get_routes_schema = {
             name='target_id',
             in_=openapi.IN_QUERY,
             type=openapi.TYPE_STRING,
-            description='id of target node'
+            description='id of target route'
         )
     ],
     'response_200':openapi.Response(
@@ -19,12 +19,12 @@ get_routes_schema = {
                                 type=openapi.TYPE_ARRAY,description="array of node's children",
                                 items=openapi.Schema(
                                     type=openapi.TYPE_OBJECT,
-                                    description='details of each child node',
+                                    description='details of each child route',
                                     properties={
-                                        'id':openapi.Schema(type=openapi.TYPE_STRING,description='id of node'),
-                                        'name':openapi.Schema(type=openapi.TYPE_STRING,description='name of node'),
-                                        'parent_id':openapi.Schema(type=openapi.TYPE_STRING,description='parent id'),
-                                        'type':openapi.Schema(type=openapi.TYPE_STRING,description='type of node - either Directory or File')
+                                        'id':openapi.Schema(type=openapi.TYPE_STRING,description='id of route'),
+                                        'path':openapi.Schema(type=openapi.TYPE_STRING,description='path of route'),
+                                        'component_id':openapi.Schema(type=openapi.TYPE_STRING,description='route\'s component id'),
+                                        'component_name':openapi.Schema(type=openapi.TYPE_STRING,description='route\'s component name')
                                     }
                                 )
                             )
@@ -49,7 +49,7 @@ get_all_routes_fullpath_schema = {
             name='target_id',
             in_=openapi.IN_QUERY,
             type=openapi.TYPE_STRING,
-            description='id of target node'
+            description='id of target route'
         )
     ],
     'response_200':openapi.Response(

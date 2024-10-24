@@ -1,4 +1,4 @@
-from apps.common.constants.consts import CONFIG_PATH,CLIENT_API
+from apps.common.constants.consts import CONFIG_PATH,CLIENT_API,EXTERNAL_COMPONENTS_CONFIG
 import json, os
 from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
 from apps.common.utils.file_helpers.json_handler import read_json_file, write_json_file
@@ -46,6 +46,7 @@ def add_dirs_configs(data, proj_data_request):
     write_json_file(f"{app_config_path}.json", app_current_config)
     
     create_resource_directory(data['name'], ResourceCategory.COMPONENTS)
+    create_dir_if_not_exists(f"{app_config_dir}/{EXTERNAL_COMPONENTS_CONFIG}") 
     app_current_config = write_basic_main_comp_config(app_current_config)
     write_routing_config(app_current_config)
     write_swagger_schema_config(app_config_dir)
@@ -105,10 +106,17 @@ def write_basic_main_comp_config(app_config):
 def write_routing_config(app_config):
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
     default_path_id = generate_uuid_as_key()
+    sandbox_path_id = generate_uuid_as_key()
     basic_routing_config = {
         default_path_id : {
             "id": default_path_id,
             "path": "/",
+            "componentId": f"{app_config['defaultCompId']}",
+            "parentId": None
+        },
+        sandbox_path_id : {
+            "id": sandbox_path_id,
+            "path": "/breeze/sandbox",
             "componentId": f"{app_config['defaultCompId']}",
             "parentId": None
         }

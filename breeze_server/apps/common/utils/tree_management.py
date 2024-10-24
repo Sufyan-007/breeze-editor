@@ -58,7 +58,7 @@ def add_node( project_name, category, target_id, data):
         if not data['id'] in config_data[target_id]['children']:
             config_data[target_id]['children'].append(data['id'])
     
-        return config_data,data['id']
+        return config_data, data['id']
 
 def is_target_in_hierarchy(source_id, target_id, data):
     """
@@ -105,11 +105,13 @@ def get_node(project_name,category,target_id,depth=1):
     else:
         node = config_data.get(target_id,None)
         if(node != None):
+            if depth == 0:
+                return node
             #return all its children node
             nodes = get_children_up_to_depth(node.get("id"), config_data, depth, current_depth=0)
             
         else:
-            return {'error':'Id not found'}
+            raise Exception('Id not found')
     return {
         'node':target_id,
         'children':nodes

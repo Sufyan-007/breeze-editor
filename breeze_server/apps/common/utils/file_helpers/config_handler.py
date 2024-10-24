@@ -9,7 +9,7 @@ from apps.common.utils.file_helpers.json_handler import write_json_file, read_pr
 SEPARATOR = "<>"
 
 def read_config_file(project_name,category,filename,version="latest"):
-    file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}"
+    file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}.json"
     version_path = f"{CONFIG_PATH}/{project_name}/{category}/versions/{filename}"
     json_config = {}
     err = False
@@ -17,7 +17,7 @@ def read_config_file(project_name,category,filename,version="latest"):
         
     if version == "latest":
         ## config file as the data of latest version already 
-        with open(f"{file_path}.json","rb") as flatten_config:
+        with open(file_path,"rb") as flatten_config:
             flatten_json = json.load(flatten_config)
             json_config = unflatten_list(flatten_json,SEPARATOR)
             
@@ -105,20 +105,31 @@ def write_config_file(project_name,category,filename,json_data):
             current_version = int(current_version) + 1  
             file_version_json["current_version"] = current_version
             current_version = str(current_version)
-            
+                    
             ## add new entry in the versions and store current time
             versions = file_version_json.get("versions",{})
             versions[current_version] = { "key" : int(current_version), "timestamp" : time.time() }
             
+            # remove extra versions present in versions' stack and changes 
+            for version in list(versions.keys()):
+                if int(version) > int(current_version):
+                    del versions[version]
+                    
+            changes = file_version_json.get("changes",{})
+            for change_obj in list(changes.values()):
+                for version in list(change_obj.keys()):
+                    # change to del only greater version
+                    if int(version) > int(current_version):
+                        del change_obj[version]
+
+
             ## store the changes of each field corresponding to it's version 
             ## for that use flatten obj for given data
-            changes = file_version_json.get("changes",{})
             for key,value in flatten_data_json.items():
                 if value != file_config_json[key]:
                     ## field value is updated so store the changes
                     if key not in changes:
                         changes[key] = {}
-                    changes[key][prev_version]= file_config_json[key]
                     changes[key][current_version] = value
                 else:
                     pass 
@@ -132,6 +143,9 @@ def write_config_file(project_name,category,filename,json_data):
         file_version_json["versions"] = {}
         file_version_json["versions"]["1"] = { "key" : 1, "timestamp" : time.time() }
         file_version_json["changes"]={}
+        for key, value in flatten_data_json.items():
+            file_version_json["changes"][key] = {}
+            file_version_json["changes"][key][1] = value
         
     ## update both files
     with open(f"{version_file_path}_versions.json", "w+") as jsconfig_version_file:
@@ -144,6 +158,83 @@ def write_config_file(project_name,category,filename,json_data):
             index_file_content[filename] = json_data.get('name')
             write_json_file(INDEX_FILE_PATH, index_file_content)
             
+# rollback all files to there previous version
+def rollback_config_file(project_name, category, filename, is_exception):
+    # 1st change file ma jaine changes object ma 1 step revert previous ne copy
+    # 2nd change config ma jaine copy karea changes ne override
+    # handle case where if 1st version is removed then delete the original entity
+    # rewrite generated projects file as per new config
+    file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}.json"
+    version_file_path = f"{CONFIG_PATH}/{project_name}/{category}/versions/{filename}_versions.json"
+    
+    with open(file_path,"rb") as flatten_config:
+        flatten_json = json.load(flatten_config)
+    
+    with open(version_file_path,"rb") as version_handler:
+        version_handler = json.load(version_handler)
+        
+    current_version = version_handler.get('current_version')
+    if current_version > 1:
+        version_handler['current_version'] = current_version - 1
+        
+        for key in version_handler['changes']:
+            version_list = sorted(version_handler['changes'][key].keys())
+            if current_version == int(version_list[-1]):
+                previous_version_in_use = version_list[-2]
+                flatten_json[key] = version_handler['changes'][key][previous_version_in_use]
+            elif str(current_version) in version_list:
+                prev_ver_index = version_list.index(str(current_version)) - 1
+                previous_version_in_use = version_list[prev_ver_index]
+                flatten_json[key] = version_handler['changes'][key][previous_version_in_use]
+                
+    elif current_version == 1:
+        if is_exception:
+            revert_the_file_creation(project_name, category, filename)
+        else:
+            pass
+    
+            
+    json_config = unflatten_list(flatten_json,SEPARATOR)
+    
+    with open(f"{version_file_path}", "w+") as jsconfig_version_file:
+        jsconfig_version_file.write(json.dumps(version_handler))
+    with open(f"{file_path}", "w") as jsconfig_file:
+        jsconfig_file.write(json.dumps(flatten_json))
+    
+def rollforward_config_file(project_name, category, filename):
+    # 1st change file ma jaine changes object ma 1 step revert previous ne copy
+    # 2nd change config ma jaine copy karea changes ne override
+    # handle case where if 1st version is removed then delete the original entity
+    # rewrite generated projects file as per new config
+    file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}.json"
+    version_file_path = f"{CONFIG_PATH}/{project_name}/{category}/versions/{filename}_versions.json"
+    
+    with open(file_path,"rb") as flatten_config:
+        flatten_json = json.load(flatten_config)
+    
+    with open(version_file_path,"rb") as version_handler:
+        version_handler = json.load(version_handler)
+        
+    current_version = version_handler.get('current_version')
+    if str(current_version+1) in list(version_handler['versions'].keys()):
+        version_handler['current_version'] = current_version + 1
+        
+        for key in version_handler['changes']:
+            version_list = sorted(version_handler['changes'][key].keys())
+            if str(current_version+1) in version_list:
+                new_version_to_be_used = str(current_version+1)
+                flatten_json[key] = version_handler['changes'][key][new_version_to_be_used]
+    else:
+        return "already reached the latest changes"
+            
+    json_config = unflatten_list(flatten_json,SEPARATOR)
+    
+    with open(f"{version_file_path}", "w+") as jsconfig_version_file:
+        jsconfig_version_file.write(json.dumps(version_handler))
+    with open(f"{file_path}", "w") as jsconfig_file:
+        jsconfig_file.write(json.dumps(flatten_json))
+   
+       
 def get_breeze_config_file(project_id, config_type='APP_CONFIG'):
     path = f"{CONFIG_PATH}/{project_id}"
     config = read_project_config_file(
@@ -151,3 +242,5 @@ def get_breeze_config_file(project_id, config_type='APP_CONFIG'):
     )
     return config
     
+def revert_the_file_creation(project_name, category, filename):
+    pass

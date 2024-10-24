@@ -46,11 +46,13 @@ def get_routing_config(project_id="", routing_config={}):
         routing_config = read_project_config_file(f"{CONFIG_PATH}/{project_id}", CONFIG_FILES_PATH['ROUTING_CONFIG'])
     return routing_config
     
-def rewrite_clean_route_config(project_name, updated_route_config):
+def rewrite_clean_route_config(project_name, updated_route_config, route_id):
     for route in list(updated_route_config.values()):
-        keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
-        for key in keys_to_remove:
-            del route[key]
+        if route_id == route.get('id'):
+            keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
+            for key in keys_to_remove:
+                del route[key]
+            break
         
     # line as per this scenario: project_id and project are same for the time being
     routing_config_path = f"{CONFIG_PATH}/{project_name}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
@@ -155,11 +157,22 @@ def create_route_property_sub_config(function, id):
             print('function: ', function, 'id: ', id)
         return None
 
-def transform_route_config(original_config):
+def transform_route_config(original_config, route_id):
     for route in list(original_config.values()):
-        print("==========transform_route_config============")
-        print(route)
-        route["action"] = create_route_property_sub_config(route.get("action", None), route['path']+'-action')
-        route["loader"] = create_route_property_sub_config(route.get("loader", None), route['path']+'-loader')
-        route["lazy"] = create_route_property_sub_config(route.get("lazy", None), route['path']+'-lazy')
-        route["shouldRevalidate"] = create_route_property_sub_config(route.get("shouldRevalidate", None), route['path']+'-shouldRevalidate')
+        if route_id == route.get('id'):
+            print("==========transform_route_config============")
+            print(route)
+            route["action"] = create_route_property_sub_config(route.get("action", None), route['path']+'-action')
+            route["loader"] = create_route_property_sub_config(route.get("loader", None), route['path']+'-loader')
+            route["lazy"] = create_route_property_sub_config(route.get("lazy", None), route['path']+'-lazy')
+            route["shouldRevalidate"] = create_route_property_sub_config(route.get("shouldRevalidate", None), route['path']+'-shouldRevalidate')
+            break
+
+def handle_advance_prop_details(route_config, route_obj):
+    props_to_be_handled = ["action", "loader", "lazy", "shouldRevalidate"]
+    for route in list(route_config.values()):
+        if route['id'] == route_obj.get('id'):
+            for prop in props_to_be_handled:
+                if route.get(prop) != None:
+                    route[prop] = route_obj[prop]
+            break

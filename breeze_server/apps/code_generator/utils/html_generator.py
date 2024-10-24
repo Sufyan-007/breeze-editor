@@ -68,7 +68,7 @@ class HTMLGenerator:
               
         elif value.get('type') == "FUNCTION":
             print("------------FUNCTION------------")
-            #  print(FunctionCodeGenerator.generate_function(value.get('value'), {}))
+            #  print(FunctionCodeGenerator.generate_function(value.get('value')))
             ref = value.get("$ref",None)
             if ref:
                 for resource in self.config["resources"]:
@@ -90,7 +90,7 @@ class HTMLGenerator:
                 related_func_config = value.get('value')
                 related_func_config["isAnonymous"]=True
             if related_func_config["isAnonymous"]:
-                val= f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
+                val= f"{{{FunctionCodeGenerator.generate_function(related_func_config)}}}"
             else:
                 val = "{%s}" % related_func_config["name"]
         return f"{attr}={val}"
