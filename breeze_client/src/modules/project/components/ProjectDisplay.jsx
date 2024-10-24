@@ -16,7 +16,7 @@ function ProjectDisplay() {
   const [editorCode, setEditorCode] = useState('// Loading..');
   const [editorLanguage, setEditorLanguage] = useState('javascript');
   const [projectPort, setProjectPort] = useState(3000);
-  const { addTab, openTabs, updateTabContent } = useTabContext();
+  const { addTab, openTabs, updateTabContent, selectTab } = useTabContext();
   const availableTabs = getAvailableTabs(selectedNode?.tag);
 
   const fetchPort = useCallback(async () => {
@@ -34,11 +34,12 @@ function ProjectDisplay() {
       if (existingTab && existingTab.code) {
         setEditorLanguage(existingTab.language);
         setEditorCode(existingTab.code);
+        selectTab(existingTab);
       } else {
         addTab(selectedNode);
       }
     }
-  }, [selectedNode, addTab, openTabs]);
+  }, [selectedNode, addTab, openTabs, selectTab]);
 
   useEffect(() => {
     const existingTab = openTabs.find((tab) => tab.id === selectedNode?.id);

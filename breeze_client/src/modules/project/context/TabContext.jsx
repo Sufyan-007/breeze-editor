@@ -1,13 +1,36 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useTreeContext } from './TreeContext';
 import PropTypes from 'prop-types';
 
 const TabContext = createContext();
 
 export const TabProvider = ({ children }) => {
-  const [openTabs, setOpenTabs] = useState([]);
-  const [selectedTab, setSelectedTab] = useState(null);
+  const [openTabs, setOpenTabs] = useState(() => {
+    const storedTabs = localStorage.getItem('openTabs');
+    return storedTabs ? JSON.parse(storedTabs) : [];
+  });
+
+  const [selectedTab, setSelectedTab] = useState(() => {
+    const storedSelectedTab = localStorage.getItem('selectedTab');
+    return storedSelectedTab ? JSON.parse(storedSelectedTab) : null;
+  });
+
   const { setSelectedNodeId, setSelectedNode } = useTreeContext();
+
+  useEffect(() => {
+    const tabsToStore = openTabs.map(({ id, name, type, extension, tag }) => ({ id, name, type, extension, tag }));
+    localStorage.setItem('openTabs', JSON.stringify(tabsToStore));
+  }, [openTabs]);
+
+  useEffect(() => {
+    if (selectedTab) {
+      const { id, name, type, extension, tag } = selectedTab;
+      const tabToStore = { id, name, type, extension, tag };
+      localStorage.setItem('selectedTab', JSON.stringify(tabToStore));
+    } else {
+      localStorage.removeItem('selectedTab');
+    }
+  }, [selectedTab]);
 
   const addTab = useCallback((node, code = '', language = '') => {
     if (node?.type !== 'DIRECTORY') {
