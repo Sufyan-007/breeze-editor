@@ -29,20 +29,27 @@ def write_config_file(path, data):
         json.dump(data, file, indent=4)
 
 def check_existing_folder(project_name, file_name):
-    app_config, react_app_dir, app_config_dir = get_project_config(project_name)
-       
-    destination_path = os.path.join(react_app_dir, CUSTOM_UPLOADS, file_name)
-    
-    
-    # Check if the extracted_zip_folder directory exists
-    if not os.path.exists(destination_path):
-        return False  # If the directory doesn't exist, the folder can't exist either
+    try:
+        
+        app_config, react_app_dir, app_config_dir = get_project_config(project_name)
+        uploaded_resources_config_path = os.path.join(app_config_dir,'uploaded_resources_config,json')
+        
+        # Check if the config file exists
+        if not os.path.exists(uploaded_resources_config_path):
+            return False 
+        
+        # Load the JSON content from the config file
+        with open(uploaded_resources_config_path, 'r') as config_file:
+            resources_config = json.load(config_file)
+            
+        for resource_info in resources_config.values():
+            if resource_info.get('zip_file_name') == file_name:
+                return True
+            
+        return False
 
-    # List all folders in the extracted_zip_folders directory
-    existing_folders = [f for f in os.listdir(destination_path) if os.path.isdir(os.path.join(destination_path, f))]
-
-    # Return True if a folder with the same name exists
-    return file_name in existing_folders
+    except Exception as e:
+        raise Exception(f"An error occurred while checking for the existing folder: {str(e)}")
 
 
 def upload_file(project_name, file, fileName):
@@ -123,21 +130,27 @@ def extract_zip_file(project_name, zip_file_path, fileName):
 def get_zip_files(project_name):
     try:
         app_config, react_app_dir, app_config_dir = get_project_config(project_name)
-        custom_uploads_path = os.path.join(react_app_dir,CUSTOM_UPLOADS)
-        if not os.path.exists(custom_uploads_path):
+        uploaded_resources_config_path = os.path.join(app_config_dir,'uploaded_resources_config.json')
+
+        # custom_uploads_path = os.path.join(react_app_dir,CUSTOM_UPLOADS)
+        if not os.path.exists(uploaded_resources_config_path):
             return {'folders': []}
 
+        with open(uploaded_resources_config_path,'r') as config_file:
+            resources_config = json.load(config_file)
+            
         extracted_folders = [
             {
-                "name": folder,
+                'zip_file_name': resource_info.get('zip_file_name'),
                 "lastModified": datetime.fromtimestamp(
-                    os.path.getmtime(os.path.join(custom_uploads_path, folder))
+                    os.path.getmtime(os.path.join(uploaded_resources_config_path))
                 ).astimezone(timezone.utc).strftime('%Y-%m-%d ')
+
             }
-            for folder in os.listdir(custom_uploads_path)
-            if os.path.isdir(os.path.join(custom_uploads_path, folder))
+            for resource_info in resources_config.values()
+            if 'zip_file_name' in resource_info
         ]
-        
+       
         return {
             'folders': extracted_folders
         }
@@ -203,7 +216,7 @@ def set_prop_config(project_name, file_name , component_id ,prop_id , new_prop_n
         #raise exception errror
 
         
-def update_resource_config(project_name, file_name ,status,  tag="ZIP"):
+def update_resource_config(project_name, file_name ,file_id, status,  tag="ZIP"):
     resource_config_file_path= os.path.join(CONFIG_PATH, project_name, "uploaded_resources_config.json")
     
     if os.path.exists(resource_config_file_path):
@@ -213,8 +226,9 @@ def update_resource_config(project_name, file_name ,status,  tag="ZIP"):
         config_data = {}
         
     # Update or add the new entry for the zip file
-    config_data[file_name] = {
+    config_data[file_id] = {
         "zip_file_name":file_name,
+        "zip_file_id":file_id,
         "status": status,
         "tag": tag
     }
@@ -223,16 +237,15 @@ def update_resource_config(project_name, file_name ,status,  tag="ZIP"):
     with open(resource_config_file_path, 'w') as config_file:
         json.dump(config_data, config_file, indent=4)
         
-def get_current_status(projectName, fileName):
-    resource_config_path = os.path.join(CONFIG_PATH,projectName, "uploaded_resources_config.json")
+# def get_current_status(projectName, fileName):
+#     resource_config_path = os.path.join(CONFIG_PATH,projectName, "uploaded_resources_config.json")
 
-    with open(resource_config_path, 'r') as f:
-        resource_config = json.load(f)
+#     with open(resource_config_path, 'r') as f:
+#         resource_config = json.load(f)
     
-    # Find the entry for the given fileName and return its status
-    if fileName in resource_config:
-        status = resource_config[fileName]['status']
-        print(status, "status")
-        return status
+#     # Find the entry for the given fileName and return its status
+#     if fileName in resource_config:
+#         status = resource_config[fileName]['status']
+#         return status
     
-    return 'status not found'
+#     return 'status not found'
