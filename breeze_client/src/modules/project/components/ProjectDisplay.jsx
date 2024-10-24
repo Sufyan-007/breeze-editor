@@ -16,7 +16,7 @@ function ProjectDisplay() {
   const [editorCode, setEditorCode] = useState('// Loading..');
   const [editorLanguage, setEditorLanguage] = useState('javascript');
   const [projectPort, setProjectPort] = useState(3000);
-  const { addTab } = useTabContext();
+  const { addTab, openTabs, updateTabContent } = useTabContext();
   const availableTabs = getAvailableTabs(selectedNode?.tag);
 
   const fetchPort = useCallback(async () => {
@@ -30,23 +30,34 @@ function ProjectDisplay() {
 
   useEffect(() => {
     if (selectedNode) {
-      addTab(selectedNode);
+      const existingTab = openTabs.find((tab) => tab.id === selectedNode.id);
+      if (existingTab && existingTab.code) {
+        setEditorLanguage(existingTab.language);
+        setEditorCode(existingTab.code);
+      } else {
+        addTab(selectedNode);
+      }
     }
-  }, [selectedNode, addTab]);
+  }, [selectedNode, addTab, openTabs]);
 
   useEffect(() => {
+    const existingTab = openTabs.find((tab) => tab.id === selectedNode?.id);
     if (
       selectedNode?.id &&
       !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) &&
       projectName &&
-      activeTab === 'code'
+      activeTab === 'code' &&
+      existingTab &&
+      !existingTab.code
     ) {
       const fetchCode = async () => {
         try {
           const data = await getFileCode(projectName, selectedNode.id);
           if (data.code) {
-            setEditorLanguage(getLanguageFromExtension(selectedNode?.extension));
+            const language = getLanguageFromExtension(selectedNode?.extension);
+            setEditorLanguage(language);
             setEditorCode(data.code);
+            updateTabContent(selectedNode.id, data.code, language);
           } else {
             setEditorCode('// Loading...');
           }
@@ -58,7 +69,7 @@ function ProjectDisplay() {
 
       fetchCode();
     }
-  }, [selectedNode, projectName, activeTab]);
+  }, [selectedNode, projectName, activeTab, openTabs, updateTabContent]);
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {

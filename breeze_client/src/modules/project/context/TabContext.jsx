@@ -7,13 +7,20 @@ const TabContext = createContext();
 export const TabProvider = ({ children }) => {
   const [openTabs, setOpenTabs] = useState([]);
   const [selectedTab, setSelectedTab] = useState(null);
-  const { setSelectedNode } = useTreeContext();
+  const { setSelectedNodeId, setSelectedNode } = useTreeContext();
 
-  const addTab = useCallback((node) => {
+  const addTab = useCallback((node, code = '', language = '') => {
     if (node?.type !== 'DIRECTORY') {
       setOpenTabs((prevTabs) => {
-        if (prevTabs.find((tab) => tab.id === node.id)) return prevTabs;
-        return [...prevTabs, node];
+        const existingTab = prevTabs.find((tab) => tab.id === node.id);
+        if (existingTab) return prevTabs;
+        const newTab = {
+          ...node,
+          code: code || '',
+          language: language || '',
+        };
+
+        return [...prevTabs, newTab];
       });
       setSelectedTab(node);
     }
@@ -30,20 +37,27 @@ export const TabProvider = ({ children }) => {
           const remainingTabs = openTabs.filter((tab) => tab.id !== nodeId);
           const node = remainingTabs.length > 0 ? remainingTabs[remainingTabs.length - 1] : null;
           setSelectedNode(node);
+          setSelectedNodeId(node?.id);
           setSelectedTab(node);
         }
         return openTabs;
       });
     },
-    [selectedTab, setSelectedNode]
+    [selectedTab, setSelectedNode, setSelectedNodeId]
   );
+
+  const updateTabContent = useCallback((nodeId, code, language) => {
+    setOpenTabs((prevTabs) => prevTabs.map((tab) => (tab.id === nodeId ? { ...tab, code, language } : tab)));
+  }, []);
+
   const selectTab = (node) => {
     setSelectedNode(node);
+    setSelectedNodeId(node.id);
     setSelectedTab(node);
   };
 
   return (
-    <TabContext.Provider value={{ openTabs, selectedTab, addTab, removeTab, selectTab }}>
+    <TabContext.Provider value={{ openTabs, selectedTab, addTab, removeTab, selectTab, updateTabContent }}>
       {children}
     </TabContext.Provider>
   );
