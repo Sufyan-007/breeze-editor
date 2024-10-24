@@ -1,21 +1,29 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { BreezeOffcanvas } from '../../../common/display';
 import { CustomButtonField } from '../../../common/fields';
 import DependencyForm from '../components/DependencyForm';
-import {
-  addThirdPartyDependency,
-  deleteThirdPartyDependency,
-  getThirdPartyDependencies,
-  updateThirdPartyDependency,
-} from '../services/ThirdPartyDependenciesService';
 import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  addThirdPartyDependencies,
+  deleteThirdPartyDependencies,
+  fetchThirdPartyDependencies,
+  updateThirdPartyDependencies,
+} from '../../../redux/third-party-dependencies/thirdPartyDependenciesActions';
 
 function ThirdPartyDependencyConfig() {
+  const dispatch = useDispatch();
+  const { thirdPartyDependencies } = useSelector((state) => state.thirdPartyDependencies);
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
-  const [dependencies, setDependencies] = useState([]);
   const [selectedDependency, setSelectedDependency] = useState({ name: '', version: '*' });
   const [isEditMode, setIsEditMode] = useState(false);
   const { projectName } = useParams();
+
+  useEffect(() => {
+    if (thirdPartyDependencies.length === 0) {
+      dispatch(fetchThirdPartyDependencies({ projectName }));
+    }
+  }, [dispatch, thirdPartyDependencies, projectName]);
 
   const handleOffcanvasClose = () => {
     setIsOffcanvasOpen(false);
@@ -35,34 +43,20 @@ function ThirdPartyDependencyConfig() {
     setIsOffcanvasOpen(true);
   };
 
-  const handleDeleteDependency = async (dependencyName) => {
-    await deleteThirdPartyDependency(projectName, { name: dependencyName });
-    loadDependencies();
-  };
-
   const handleSubmit = async (formData) => {
     if (isEditMode) {
-      await updateThirdPartyDependency(projectName, formData);
+      await dispatch(updateThirdPartyDependencies({ projectName, payload: formData })).unwrap();
     } else {
-      await addThirdPartyDependency(projectName, formData);
+      await dispatch(addThirdPartyDependencies({ projectName, payload: formData })).unwrap();
     }
-    loadDependencies();
+    dispatch(fetchThirdPartyDependencies({ projectName }));
     handleOffcanvasClose();
   };
 
-  const loadDependencies = useCallback(async () => {
-    const data = await getThirdPartyDependencies(projectName);
-    const transformedData = Object.entries(data).map(([name, version]) => ({
-      name,
-      version,
-    }));
-
-    setDependencies(transformedData);
-  }, [projectName]);
-
-  useEffect(() => {
-    loadDependencies();
-  }, [loadDependencies]);
+  const handleDeleteDependency = async (dependencyName) => {
+    await dispatch(deleteThirdPartyDependencies({ projectName, payload: { name: dependencyName } }));
+    dispatch(fetchThirdPartyDependencies({ projectName }));
+  };
 
   return (
     <>
@@ -79,7 +73,7 @@ function ThirdPartyDependencyConfig() {
         </div>
 
         <div className="dependency-list mt-3 px-3">
-          {dependencies.map((dep) => (
+          {thirdPartyDependencies.map((dep) => (
             <div
               key={dep.name}
               className="dependency-card d-flex justify-content-between align-items-center p-2 border"

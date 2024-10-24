@@ -42,5 +42,28 @@
 }
 
 .project-display-container {
-    height: calc(100vh - 123px);
+    height: calc(100vh - 161px);
+}
+
+.project-tab-bar {
+    background-color: var(--color-primary);
+    padding: 4px;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+}
+
+.project-tab-item {
+    color: var(--color-text) !important;
+    padding: 2px 4px;
+    cursor: pointer;
+    border-right: 1px solid var(--color-subtext);
+    display: flex;
+    white-space: nowrap;
+}
+
+.project-tab-item.active {
+    color: var(--color-text) !important;
+    background-color: var(--color-secondary);
+    border-radius: 0.175rem;
+    border: 0;
 }

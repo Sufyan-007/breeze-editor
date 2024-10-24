@@ -5,12 +5,15 @@ import componentReducer from '../redux/components/componentReducer';
 import customZipReducers from '../modules/custom_uploads/redux/customZipReducers';
 import environmentReducer from '../redux/settings/settingsReducers';
 import directory_reducers from '../redux/directory_management/directory_reducers';
-import serviceConfigReducer from '../modules/service-configuration/redux/ApiClientReducers';import { RESET_STORE } from './actions';
+import serviceConfigReducer from '../modules/service-configuration/redux/ApiClientReducers';
+import thirdPartyDependenciesReducer from '../redux/third-party-dependencies/thirdPartyDependenciesReducer';
+import { RESET_STORE } from './actions';
 
 const appReducer = combineReducers({
   project: projectReducer,
   routing: routingReducer,
   component: componentReducer,
+  thirdPartyDependencies: thirdPartyDependenciesReducer,
   zip: customZipReducers,
   directory: directory_reducers,
   environment: environmentReducer,
