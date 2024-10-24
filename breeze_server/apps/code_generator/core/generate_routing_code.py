@@ -104,13 +104,13 @@ def generate_route_props(_route_config, _comp_config_index):
         
     if _route_config.get("action", None):
         code = "action = {"
-        code += FunctionCodeGenerator.generate_function(_route_config['action']['implementation'], None)
+        code += FunctionCodeGenerator.generate_function(_route_config['action']['implementation'])
         code += "\n }"
         props_code.append(code)
 
     if _route_config.get("loader",  None):
         code = "loader = {"
-        code += FunctionCodeGenerator.generate_function(_route_config['loader']['implementation'], None)
+        code += FunctionCodeGenerator.generate_function(_route_config['loader']['implementation'])
         code += "\n }"
         props_code.append(code)
         
@@ -124,13 +124,13 @@ def generate_route_props(_route_config, _comp_config_index):
 
     if _route_config.get("shouldRevalidate", None):
         code = " shouldRevalidate = {"
-        code += FunctionCodeGenerator.generate_function(_route_config['shouldRevalidate']['implementation'], None)
+        code += FunctionCodeGenerator.generate_function(_route_config['shouldRevalidate']['implementation'])
         code += "\n } "
         props_code.append(code)
 
     if _route_config.get("lazy", None):
         code = " lazy = {"
-        code += FunctionCodeGenerator.generate_function(_route_config['lazy']['implementation'], None)
+        code += FunctionCodeGenerator.generate_function(_route_config['lazy']['implementation'])
         # code = f" lazy = {{ () => import({get_path_without_ext(_route_config['component'])})}} "
         code += "\n } "
         props_code.append(code)

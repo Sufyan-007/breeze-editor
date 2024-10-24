@@ -6,8 +6,8 @@
       "SRC",
       "PACKAGE_CONFIG",
       "ALL_STYLES_FILE",
-      "INDEX_HTML",
-      "CUSTOM_UPLOAD"
+      "EXTERNAL_COMPONENTS",
+      "INDEX_HTML"
     ]
   },
   "SRC": {
@@ -140,12 +140,12 @@
     "tag": "ALL_STYLES_FILE",
     "type": "FILE"
   },
-  "CUSTOM_UPLOAD": {
-    "name": "custom_upload",
+  "EXTERNAL_COMPONENTS": {
+    "name": "external_components",
     "parentId": "ROOT",
-    "id":"CUSTOM_UPLOAD",
+    "id":"EXTERNAL_COMPONENTS",
     "children":[],
-    "tag":"CUSTOM_UPLOAD",
+    "tag":"EXTERNAL_COMPONENTS",
     "type":"DIRECTORY"
   }
 }

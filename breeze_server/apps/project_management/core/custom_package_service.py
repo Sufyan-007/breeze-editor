@@ -5,7 +5,7 @@ import shutil
 import zipfile
 import json
 from datetime import datetime, timezone
-from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH
+from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH , EXTERNAL_COMPONENTS,EXTERNAL_COMPONENTS_CONFIG
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists,create_dir_if_not_exists
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
 from apps.directory_management.core.directory_management_service import DirectoryManager
@@ -29,7 +29,7 @@ def write_config_file(path, data):
         json.dump(data, file, indent=4)
 
 def check_existing_folder(project_name, file_name):
-    extracted_dir = os.path.join(CONFIG_PATH, project_name, "extracted_zip_files")
+    extracted_dir = os.path.join(CONFIG_PATH, project_name, EXTERNAL_COMPONENTS_CONFIG)
     
     # Check if the extracted_zip_folder directory exists
     if not os.path.exists(extracted_dir):
@@ -66,7 +66,7 @@ def upload_file(project_name, file, fileName):
 
 def extract_zip_file(project_name, zip_file_path, fileName):
     try:
-        extract_dir = os.path.join(CONFIG_PATH, project_name, "extracted_zip_files")
+        extract_dir = os.path.join(CONFIG_PATH, project_name, EXTERNAL_COMPONENTS)
         zip_dir_path = os.path.join(extract_dir,fileName)
         # Ensure the extraction directory exists
         if not os.path.exists(extract_dir):
@@ -99,7 +99,7 @@ def extract_zip_file(project_name, zip_file_path, fileName):
         print("start")
         #generate JSON structure of the uploaded zip files
         directory_manager = DirectoryManager(project_name)
-        result = create_json_structure(directory_manager,zip_dir_path,parent_id="CUSTOM_UPLOAD",tag="ZIP")
+        result = create_json_structure(directory_manager,zip_dir_path,parent_id="EXTERNAL_COMPONENTS",tag="ZIP")
         print(result,"result")
         
         app_config, react_app_dir = get_project_config(project_name)
@@ -113,7 +113,7 @@ def extract_zip_file(project_name, zip_file_path, fileName):
             destination_path = os.path.join(react_app_dir, folder_name)
             shutil.copytree(folder_for_files, destination_path)
         else:
-            destination_path = os.path.join(react_app_dir, "extracted_zip_files")
+            destination_path = os.path.join(react_app_dir, EXTERNAL_COMPONENTS)
             shutil.copytree(extract_dir, destination_path, dirs_exist_ok=True)
         
         print(f"Extracted files to {extract_dir}")
@@ -125,7 +125,7 @@ def extract_zip_file(project_name, zip_file_path, fileName):
 
 def get_zip_files(project_name):
     try:
-        extracted_dir = os.path.join(CONFIG_PATH, project_name, "extracted_zip_files")
+        extracted_dir = os.path.join(CONFIG_PATH, project_name, EXTERNAL_COMPONENTS)
     
         if not os.path.exists(extracted_dir):
             return {'folders': []}
@@ -151,9 +151,9 @@ def delete_file(project_name, fileName):
     try:
         app_config, react_app_dir = get_project_config(project_name)
         
-        extracted_dir = os.path.join(CONFIG_PATH, project_name, "extracted_zip_files")
+        extracted_dir = os.path.join(CONFIG_PATH, project_name, EXTERNAL_COMPONENTS)
         uploaded_file_path = os.path.join(extracted_dir, fileName)
-        react_app_file_path = os.path.join(react_app_dir, "extracted_zip_files", fileName)
+        react_app_file_path = os.path.join(react_app_dir, EXTERNAL_COMPONENTS, fileName)
         customized_proj_config_path = os.path.join(CONFIG_PATH, project_name, "customized_proj_config", fileName)
         
         def delete_path(file_path, location_name):
@@ -169,9 +169,9 @@ def delete_file(project_name, fileName):
             else:
                 raise FileNotFoundError(f"{fileName} does not exist at {file_path} in {location_name}.")
 
-        delete_path(uploaded_file_path, "extracted_zip_files")
+        delete_path(uploaded_file_path, EXTERNAL_COMPONENTS)
         delete_path(react_app_file_path, "React app")
-        delete_path(customized_proj_config_path, "customized_proj_config")
+        delete_path(customized_proj_config_path, EXTERNAL_COMPONENTS_CONFIG)
 
     except Exception as e:
         print(f"Error deleting file or directory: {e}")
