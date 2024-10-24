@@ -4,11 +4,30 @@ login_schema ={
     'rb':openapi.Schema(
         type = openapi.TYPE_OBJECT,
         properties = {
-            'username':openapi.Schema(type = openapi.TYPE_STRING),
-            'password':openapi.Schema(type = openapi.FORMAT_PASSWORD)
+            'username':openapi.Schema(type = openapi.TYPE_STRING,default='breeze_user'),
+            'password':openapi.Schema(type = openapi.FORMAT_PASSWORD,default='breeze_user')
         },
         required = ['username','password']
     ),
+    # 'form_data' : [
+    # openapi.Parameter(
+    #     'username',
+    #     in_=openapi.IN_FORM,
+    #     type=openapi.TYPE_STRING,
+    #     description='username',
+    #     required=True,
+    #     default='breeze_user'
+        
+    # ),
+    # openapi.Parameter(
+    #     'password',
+    #     in_=openapi.IN_FORM,
+    #     type=openapi.TYPE_STRING,
+    #     description='password',
+    #     required=True,
+    #     default='breeze_user'
+    # ),
+    # ],
     'response_200':openapi.Response(
                    description='Success',
                     schema=openapi.Schema(

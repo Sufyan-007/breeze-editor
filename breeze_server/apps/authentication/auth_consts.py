@@ -1,5 +1,5 @@
 EXEMPT_URLS = [
     '/api/auth/login/',
     '/api/auth/register/',
-    '/api/swagger'
+    '/api/swagger/'
 ]

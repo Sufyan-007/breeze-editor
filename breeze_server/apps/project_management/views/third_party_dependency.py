@@ -9,7 +9,20 @@ from ..core.third_party_dependency_service import (
     delete_package_from_dependencies
 )
 from ..utils.request_data_parser import parse_request_data
+from drf_yasg.utils import swagger_auto_schema
+from ..swagger_schema.third_party_dependency_schema import add_third_party_dependency_schema,get_third_party_dependency_schema,update_third_party_dependency_schema,delete_third_party_dependency_schema
 
+@swagger_auto_schema(
+    method="post",
+    manual_parameters=add_third_party_dependency_schema["parameters"],
+    request_body=add_third_party_dependency_schema["rb"],
+    responses={
+        200: add_third_party_dependency_schema["response_200"],
+        500: add_third_party_dependency_schema["response_500"],
+        400: add_third_party_dependency_schema["response_400"]
+    },
+    tags=["third_party(package.json)"],
+)
 @csrf_exempt
 @api_view(["POST"])
 def add_third_party_dependency(request, projectName):
@@ -22,7 +35,16 @@ def add_third_party_dependency(request, projectName):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-
+@swagger_auto_schema(
+    method="get",
+    manual_parameters=get_third_party_dependency_schema["parameters"],
+    request_body=None,
+    responses={
+        200: get_third_party_dependency_schema["response_200"],
+        500: get_third_party_dependency_schema["response_500"],
+    },
+    tags=["third_party(package.json)"],
+)
 @csrf_exempt
 @api_view(["GET"])
 def get_third_party_dependency(request, projectName):
@@ -33,7 +55,17 @@ def get_third_party_dependency(request, projectName):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-
+@swagger_auto_schema(
+    method="put",
+    manual_parameters=update_third_party_dependency_schema["parameters"],
+    request_body=update_third_party_dependency_schema['rb'],
+    responses={
+        200: update_third_party_dependency_schema["response_200"],
+        500: update_third_party_dependency_schema["response_500"],
+        400:update_third_party_dependency_schema['response_400']
+    },
+    tags=["third_party(package.json)"],
+)
 @csrf_exempt
 @api_view(["PUT"])
 def update_third_party_dependency(request, projectName):
@@ -46,7 +78,17 @@ def update_third_party_dependency(request, projectName):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-
+@swagger_auto_schema(
+    method="delete",
+    manual_parameters=delete_third_party_dependency_schema["parameters"],
+    request_body=None,
+    responses={
+        200: delete_third_party_dependency_schema["response_200"],
+        500: delete_third_party_dependency_schema["response_500"],
+        400:delete_third_party_dependency_schema['response_400']
+    },
+    tags=["third_party(package.json)"],
+)
 @csrf_exempt
 @api_view(["DELETE"])
 def delete_third_party_dependency(request, projectName):

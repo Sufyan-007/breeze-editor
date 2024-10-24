@@ -81,7 +81,7 @@ add_route_schema ={
         'componentId': openapi.Schema(type=openapi.TYPE_STRING, description="The ID of the component to render for the route"),
         'children': openapi.Schema(type=openapi.TYPE_ARRAY, description="List of child routes", items=openapi.Schema(type=openapi.TYPE_OBJECT)),
         'parentId': openapi.Schema(type=openapi.TYPE_STRING, description="The parent route ID, if applicable", nullable=True),
-        'props': openapi.Schema(type=openapi.TYPE_STRING, description="Properties to pass to the component", nullable=True),
+        'props': openapi.Schema(type=openapi.TYPE_ARRAY, items = openapi.Schema(type=openapi.TYPE_STRING) , description="Properties to pass to the component", nullable=True),
         'redirectTo': openapi.Schema(type=openapi.TYPE_STRING, description="The path to redirect to, if applicable", nullable=True),
         'hydrateFallbackElementId': openapi.Schema(type=openapi.TYPE_STRING, description="Fallback element for hydration", nullable=True),
         'errorElementId': openapi.Schema(type=openapi.TYPE_STRING, description="Element ID to display on error", nullable=True),

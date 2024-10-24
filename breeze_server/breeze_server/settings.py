@@ -190,10 +190,18 @@ SWAGGER_SETTINGS = {
         'drf_yasg.inspectors.StringDefaultFieldInspector',
     ],
     'SECURITY_DEFINITIONS': {
-        'Basic': {
-            'type': 'basic'
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Enter "Bearer <your-token>"',
         }
-    }
+    },
+    'DEFAULT_SECURITY': [
+        {
+            'Bearer': []
+        }
+    ]
  }
 
 CHANNEL_LAYERS = {
