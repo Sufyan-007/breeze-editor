@@ -16,6 +16,8 @@ from ...common.constants.consts import (
     CUSTOMIZED_PROJ,
     MODEL,
     INDEX,
+    ROUTING,
+    COMPONENT,
 )
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.query_resource_schema import manage_resource_schema
@@ -58,7 +60,12 @@ def manage_resource(request, param):
         selected_data = {}
 
         category = category.lower()
-
+        
+        dir_path = os.path.join(CONFIG_PATH,projectname)
+        
+        if not os.path.isdir(dir_path):
+            return JsonResponse({"error":"project not found"},status = 400)
+        
         if not category:
             return JsonResponse({"error": "category is required"}, status=400)
 
@@ -79,7 +86,7 @@ def manage_resource(request, param):
             if selected_data:
                 selected_data = selected_data["data"]
             else:
-                return JsonResponse({"error": "File not present"}, status=400)
+                return JsonResponse({"error":"check category name or project name"}, status=400)
             # return JsonResponse({"message": f"{selected_data}"}, status=200)
 
         if category in [ResourceCategory.THIRD_PARTY.value]:
@@ -223,6 +230,34 @@ def manage_resource(request, param):
                         return JsonResponse(
                             {"error": "resource is not available"}, status=400
                         )
+                        
+        if category in [ResourceCategory.ROUTING.value]:
+            try:
+                config_path = os.path.join(
+                    CONFIG_PATH, projectname, ROUTING
+                )
+                selected_data = read_file(config_path)
+                
+                comp_path = os.path.join(CONFIG_PATH,projectname,COMPONENT,INDEX)
+                comp_data = read_file(comp_path)
+                # print(selected_data)
+                for key,value in selected_data.items():
+                    # print(value["componentId"])
+                    try:
+                        value["componentName"]=comp_data[value["componentId"]]
+                    except Exception as e:
+                        return JsonResponse(
+                            {"error": "component are not present in module"}, status=400
+                        )
+                
+                if resource:
+                    selected_data=selected_data[resource]
+                    
+            except Exception as e:
+                return JsonResponse(
+                    {"error": "files are not present in module"}, status=400
+                )
+        
 
         if select:
             if category in [
@@ -242,7 +277,7 @@ def manage_resource(request, param):
                     except Exception as e:
                         return JsonResponse({"error": str(e)}, status=400)
 
-            elif category in [ResourceCategory.API_CLIENT.value]:
+            elif category in [ResourceCategory.API_CLIENT.value,ResourceCategory.ROUTING.value]:
                 if module and not (files or resource):
                     return JsonResponse(
                         {"error": "module has no functionality of select"}, status=400

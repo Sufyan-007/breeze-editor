@@ -31,5 +31,7 @@ CLIENT_API = "api_client_intermediate_json"
 CUSTOMIZED_PROJ = "customized_proj_config"
 MODEL = "models"
 INDEX = "index"
+ROUTING = "routing_config"
+COMPONENT = "components"
 
 APP_CONFIG_PATH = "configurations"

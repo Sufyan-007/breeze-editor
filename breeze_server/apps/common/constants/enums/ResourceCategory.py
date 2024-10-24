@@ -8,7 +8,7 @@ class ResourceCategory(Enum):
     API_CLIENT = "api_client"
     CUSTOMIZED_PROJ = "customized_proj_config"
     MODEL = "models"
-
+    ROUTING = "routing"
 
 class ThirdPartyLibraryKeys:
     LIB_NAME = "libname"
