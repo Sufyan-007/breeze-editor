@@ -11,7 +11,7 @@ from drf_yasg.utils import swagger_auto_schema
     methods=['post','put'],
     request_body=add_or_edit_swagger_schema['rb'],
     responses={
-        201:add_or_edit_swagger_schema['response_201'],
+        200:add_or_edit_swagger_schema['response_200'],
         400:add_or_edit_swagger_schema['response_400'],
         500:add_or_edit_swagger_schema['response_500']
     },
@@ -25,19 +25,21 @@ def add_or_edit_schema(request,project_id):
     module_id = data.get("moduleId")
     schema_details = data.get("details")
     schema_name = schema_details.get("name")
-    schema_file_path = f"{CONFIG_PATH}/{project_id}/swagger_schema/{module_id}.json"
+    schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
     if schema_id:
         result = add_or_edit_schema_helper(schema_details=schema_details, schema_name=schema_name,file_path=schema_file_path, schema_id=schema_id)
     else:
         result = add_or_edit_schema_helper(schema_details=schema_details,schema_name=schema_name,file_path=schema_file_path )
-    return JsonResponse(result)
+    if not result or result.get('error'):
+        return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)
+    return JsonResponse(result, status=200)
 
 
 @swagger_auto_schema(
     method='delete',
     request_body=delete_schema_swagger['rb'],
     responses={
-        204:delete_schema_swagger['response_204'],
+        200:delete_schema_swagger['response_200'],
         400:delete_schema_swagger['response_400'],
         500:delete_schema_swagger['response_500']
     },
@@ -49,6 +51,8 @@ def delete_schema(request,project_id):
     data = json.loads(request.body.decode("utf-8"))
     module_id = data.get("moduleId")
     schema_id = data.get("schemaId")
-    schema_file_path = f"{CONFIG_PATH}/{project_id}/swagger_schema/{module_id}.json"
+    schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
     result = delete_schema_helper(schema_file_path=schema_file_path, schemaId=schema_id)
-    return JsonResponse(result)
+    if not result or result.get('error'):
+        return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)
+    return JsonResponse(result, status=200)

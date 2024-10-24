@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import edit from '../../../../../assets/icons/edit-icon.svg';
-import Delete from '../../../../../assets/icons/delete-trash.svg';
+// import edit from '../../../../../assets/icons/edit-icon.svg';
+// import Delete from '../../../../../assets/icons/delete-trash.svg';
 import PropTypes from 'prop-types';
 function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList }) {
   const [val, setVal] = useState(value);
@@ -148,7 +148,9 @@ function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList
           )}
 
           <div>
-            <img
+            <i className="bi bi-pencil-square" onClick={() => setIsExpanded((state) => !state)}></i>
+            <i className="bi bi-trash3" alt="delete" onClick={() => deleteProperty()}></i>
+            {/* <img
               alt="edit"
               className="mx-1"
               height={25}
@@ -165,7 +167,7 @@ function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList
               src={Delete}
               style={{ cursor: 'pointer' }}
               onClick={() => deleteProperty()}
-            />
+            /> */}
           </div>
         </div>
 

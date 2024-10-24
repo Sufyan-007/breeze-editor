@@ -1,18 +1,56 @@
 import TopBar from './TopBar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ConfigDisplay from './ConfigDisplay';
 import ConfigurableMonacoEditor from './ConfigurableMonacoEditor';
 import { useTreeContext } from '../context/TreeContext';
-import { getAvailableTabs, initCode } from '../constants/TabScreen';
+import { getAvailableTabs, getLanguageFromExtension } from '../constants/TabScreen';
+import { useParams } from 'react-router-dom';
+import { getFileCode, getProjectPort } from '../services/projectService';
 
 function ProjectDisplay() {
   const { selectedNode } = useTreeContext();
-
+  const { projectName } = useParams();
   const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
-  // const [codeEditorTheme, setCodeEditorTheme] = useState(projectTheme);
-  // const item = selectedNode.id === 7 ? { type: 'third-party' } : { type: 'component' }; // TO DO : Dynamic after api integration
+  const [editorCode, setEditorCode] = useState('// Loading..');
+  const [editorLanguage, setEditorLanguage] = useState('javascript');
+  const [projectPort, setProjectPort] = useState(3000);
 
   const availableTabs = getAvailableTabs(selectedNode?.tag);
+
+  const fetchPort = useCallback(async () => {
+    const port = await getProjectPort(projectName);
+    setProjectPort(port.port);
+  }, [projectName]);
+
+  useEffect(() => {
+    fetchPort();
+  }, [fetchPort]);
+
+  useEffect(() => {
+    if (
+      selectedNode?.id &&
+      !['DIRECTORY', 'CONFIG'].includes(selectedNode?.type) &&
+      projectName &&
+      activeTab === 'code'
+    ) {
+      const fetchCode = async () => {
+        try {
+          const data = await getFileCode(projectName, selectedNode.id);
+          if (data.code) {
+            setEditorLanguage(getLanguageFromExtension(selectedNode?.extension));
+            setEditorCode(data.code);
+          } else {
+            setEditorCode('// Loading...');
+          }
+        } catch (error) {
+          setEditorCode('// Loading...');
+          console.error('Error fetching code:', error);
+        }
+      };
+
+      fetchCode();
+    }
+  }, [selectedNode, projectName, activeTab]);
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {
@@ -33,7 +71,11 @@ function ProjectDisplay() {
           {activeTab === 'code' && (
             <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
               <div className="editor-container">
-                <ConfigurableMonacoEditor defaultValue={initCode} height="calc(100vh - 123px)" language="javascript" />
+                <ConfigurableMonacoEditor
+                  defaultValue={editorCode ? editorCode : '// Loading...'}
+                  height="calc(100vh - 123px)"
+                  language={editorLanguage}
+                />
               </div>
             </div>
           )}
@@ -47,7 +89,7 @@ function ProjectDisplay() {
             >
               <div className="project-display-container iframe-container">
                 <iframe
-                  src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}`}
+                  src={`${import.meta.env.VITE_GENERATED_PROJECT_DOMAIN}:${projectPort}`}
                   title="Preview"
                   width="100%"
                   height="100%"

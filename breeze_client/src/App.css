@@ -25,10 +25,12 @@
 .color-blue:hover {
   color: var(--color-blue-hover);
 }
+
 .color-red {
   color: var(--color-red)
 }
-.color-red:hover{
+
+.color-red:hover {
   color: var(--color-red-hover)
 }
 
@@ -87,14 +89,16 @@
   background-color: var(--color-red) !important;
   color: var(--color-white) !important;
   border-radius: 3px;
-  border:0 ;
-} 
-.btn-delete:hover{
+  border: 0;
+}
+
+.btn-delete:hover {
   background-color: var(--color-red-hover) !important;
   border: solid 2px var(--color-red) !important;
   color: var(--color-tertiary) !important;
 }
-.btn-filled:active {
+
+.btn-delete:active {
   background-color: var(--color-red-hover) !important;
   border: solid 2px var(--color-red) !important;
   color: var(--color-tertiary) !important;
@@ -157,4 +161,19 @@
 .form-select option {
   background-color: var(--color-primary);
   color: var(--color-text);
+}
+
+.br-cursor-pointer {
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+  background-color: #D8D7DD;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A5A5A4;
+  border-radius: 3px;
 }

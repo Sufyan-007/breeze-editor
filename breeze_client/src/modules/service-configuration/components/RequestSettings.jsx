@@ -96,7 +96,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
   }, [apiData]);
 
   const onReqChange = (prop, value) => {
-    let r = request;
+    let r = { ...request };
     r[prop] = value;
     setRequest({
       ...r,
@@ -132,7 +132,19 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
                       ? envVars[request.url.baseurl]
                       : request.url.baseurl
                     : req}
+                  {req === 'Url'
+                    ? ((request?.parameters &&
+                        request?.parameters.some((param) => param.errors && Object.keys(param.errors).length > 0)) ||
+                        (request?.url && request.url.errors && Object.keys(request?.url?.errors).length > 0)) && (
+                        <i className="bi bi-exclamation-circle mx-2" style={{ color: 'red' }}></i>
+                      )
+                    : request[req.toLowerCase()] &&
+                      request[req.toLowerCase()]['errors'] &&
+                      Object.keys(request[req.toLowerCase()]['errors']).length > 0 && (
+                        <i className="bi bi-exclamation-circle mx-2" style={{ color: 'red' }}></i>
+                      )}
                 </div>
+
                 <div>
                   {req === 'Headers' && (
                     <i

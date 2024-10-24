@@ -50,7 +50,6 @@ def register(request):
             file.seek(0)
             json.dump(auth_data, file)
     except FileNotFoundError:
-        print('some error 2')
         with open(auth_file_path, 'w') as file:
             json.dump({token: token_data}, file)
 

@@ -173,13 +173,13 @@ function ProjectSidebar() {
   return (
     <aside id="sidebar" className="br-background-primary">
       <div
-        className="project-sidebar pb-2"
+        className="project-sidebar pb-2 h-100"
         onDragOver={(e) => e.preventDefault()}
         onDrop={() => {
           handleDrop(null);
         }}
       >
-        <div>
+        <div className="h-100">
           <div className="sidebar-header d-flex justify-content-between align-items-center">
             <h2 className="mb-0 med-font br-text-primary collapsible">PROJECT</h2>
             <div className="sidebar-action-buttons">

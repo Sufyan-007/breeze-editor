@@ -44,26 +44,28 @@ def run_project_threaded(project_id,port,project_path, env_name):
     env['BROWSER'] =  "NONE"
     channel_layer = get_channel_layer()
     
-    if env_name == '' or env_name == 'default (.env)':
-        process = subprocess.Popen(" ".join(['npm', 'start','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
-    else:
-        process = subprocess.Popen(" ".join(['npm', f'run start:{env_name}','0.0.0.0']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=project_path,  )
-    
+    if not env_name or env_name == 'dev (default)':
+        env_name = 'dev'
+    # modified as per vite
+    process = subprocess.Popen(" ".join(['npm', 'run', f'{env_name}', '--', '--host', '0.0.0.0', '--port', str(port), '--debug']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=project_path,  )
     status_mapping = {
-    b'webpack compiled successfully': "RUNNING",
-    b'Compiled with warnings': "RUNNING", # WARNING
-    b'Failed to compile': "ERROR",
-    b'The build failed' : "CRASHED"
+    b'VITE v': "Starting",
+    b'ready in': "Running",
+    b'Local:': "Running",
+    b'Network:': "Running",
+    b'[vite] warning': "Warning",
+    b'Internal server error': "Error",
+    b'[vite] hmr update' : 'Running',
 }
-
     while True:
         output = process.stdout.readline()
-        if output:
-            # print(project_id)
-            # print("====================", output, "===================")
-            
+        if output: 
+            # print('*', output)
+            decoded_output = output.decode().strip()
             for key, status in status_mapping.items():
-                if output.startswith(key):
+                key_str = key.decode().strip()
+                if re.search(re.escape(key_str), decoded_output, re.IGNORECASE):
+                    # print(project_id, '==',status)
                     RUNNING_APPS[project_id]['status'] = status
                     async_to_sync(channel_layer.group_send)(
                         project_id,
@@ -72,12 +74,12 @@ def run_project_threaded(project_id,port,project_path, env_name):
                             "message": {"project_id": project_id, "status": status},
                         }
                     )
-                pass
 
 
 def start_app(app_config, forceRestart=False):
+    
     project_id = app_config["name"]
-    env_name = app_config.get("current_environment","")
+    env_name = app_config.get("currentEnvironment", "")
     project_path = app_config["path"]
     if project_id in RUNNING_APPS and not forceRestart:
         pass
@@ -88,7 +90,7 @@ def start_app(app_config, forceRestart=False):
         thread = threading.Thread(target=run_project_threaded,args= [project_id,port,project_path, env_name])
         thread.daemon = True
         thread.start()
-        RUNNING_APPS[project_id] = {'port':port,'thread':thread,'status':"COMPILING.."}
+        RUNNING_APPS[project_id] = {'port':port,'thread':thread,'status':"Compiling"}
         # process.wait()
         # process=subprocess.run(command, cwd=project_path, env=environment)
 

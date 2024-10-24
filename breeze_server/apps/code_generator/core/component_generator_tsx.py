@@ -11,11 +11,11 @@ class ComponentGenerator_TSX(ComponentGenerator):
             self.all_comp_config = all_comp_config
             self.all_store_config = all_store_config
             self.all_context_comp_config = all_context_comp_config
-            self.src_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
+            self.src_dir = f"{app_config['path']}/{app_config['name']}/{app_config['componentsSrcDir']}"
             self.app_config['APP_SOURCE_DIR'] = self.src_dir 
             self.all_reducer_config = all_reducer_config
             # self.mapping_config = mapping_config
-            self.components_dir = f"{app_config['path']}/{app_config['name']}/{app_config['components_src_dir']}"
+            self.components_dir = f"{app_config['path']}/{app_config['name']}/{app_config['componentsSrcDir']}"
     
     def write_all_components(self):
         configs =  list(self.all_comp_config.values())

@@ -3,10 +3,25 @@ import { useEffect, useState } from 'react';
 // import { getApiSchemaDetails } from '../services/ApiService';
 // import { useParams } from 'react-router';
 import { CustomSelectField, CustomTextInput } from '../../../common/fields';
+import {
+  BINARY_OPTIONS,
+  FILE_OPTIONS,
+  FORMDATA_OPTIONS,
+  RAW_OPTIONS,
+  TEXT_OPTIONS,
+  URLENCODED_OPTIONS,
+} from '../constants/Content-Types';
 
 function BodySettings({ bodyData, onChange, moduleId }) {
-  console.log(moduleId, 'moduleid in bodyyyyyyyyyy');
   const [body, setBody] = useState(bodyData);
+  const optionsMap = {
+    RAW: RAW_OPTIONS,
+    URLENCODED: URLENCODED_OPTIONS,
+    BINARY: BINARY_OPTIONS,
+    FORMDATA: FORMDATA_OPTIONS,
+    TEXT: TEXT_OPTIONS,
+    FILE: FILE_OPTIONS,
+  };
   // const [schemaList, setSchemaList] = useState([]);
   // const { projectName } = useParams();
   // const fetchSchemasList = useCallback(
@@ -80,63 +95,46 @@ function BodySettings({ bodyData, onChange, moduleId }) {
     <>
       <div className="rounded-0 br-text-primary br-background-secondary d-flex align-items-center justify-content-between">
         <CustomSelectField
+          name="modeSelect"
+          value={body.mode}
+          onChange={(e) => handleChanges('mode', e)}
+          options={[
+            { label: 'RAW', value: 'RAW' },
+            { label: 'BINARY', value: 'BINARY' },
+            { label: 'FORMDATA', value: 'FORMDATA' },
+            { label: 'TEXT', value: 'TEXT' },
+            { label: 'FILE', value: 'FILE' },
+            { label: 'URLENCODED', value: 'URLENCODED' },
+          ]}
+          className="form-select br-form-select form-select-sm mt-3"
+          config={{
+            label: 'Mode',
+            groupClass: 'form-group mb-2 mx-2 w-50',
+          }}
+        />
+
+        <CustomSelectField
           name="valueSelect"
           value={body.content_type}
           onChange={(e) => handleChanges('content_type', e)}
-          options={[
-            { label: 'Select', value: '' },
-            { label: 'JSON', value: 'JSON' },
-            { label: 'TEXT', value: 'TEXT' },
-            { label: 'HTML', value: 'HTML' },
-          ]}
+          options={body?.mode ? optionsMap[body?.mode] : []}
           className="form-select br-form-select form-select-sm mt-3"
           config={{
             label: 'Content-Type',
             groupClass: 'form-group mb-2 mx-2 w-50',
           }}
         />
-        {body.content_type === 'TEXT' ? (
-          <CustomTextInput
-            className=" form-control br-form-control form-control-sm"
-            placeholder="Value"
-            config={{
-              label: 'Value',
-              groupClass: 'form-group mb-2 mx-2 w-50',
-            }}
-            value={body.raw_content}
-            onChange={(e) => handleChanges('raw_content', e)}
-          />
-        ) : (
-          <>
-            <CustomSelectField
-              name="modeSelect"
-              value={body.mode}
-              onChange={(e) => handleChanges('mode', e)}
-              options={[
-                { label: 'Select', value: '' },
-                { label: 'RAW', value: 'RAW' },
-                { label: 'BINARY', value: 'BINARY' },
-                { label: 'URLENCODED', value: 'URLENCODED' },
-              ]}
-              className="form-select br-form-select form-select-sm mt-3"
-              config={{
-                label: 'Mode',
-                groupClass: 'form-group mb-2 mx-2 w-50',
-              }}
-            />
-            <CustomSelectField
-              name="schemaSelect"
-              value={body.schema_name}
-              // onChange={(e) => handleSchemaChange(e)}
-              // options={schemaOptions}
-              className="form-select br-form-select form-select-sm mt-3"
-              config={{
-                label: 'Schema',
-                groupClass: 'form-group mb-2 mx-2 w-50',
-              }}
-            />
-          </>
-        )}
+        <CustomSelectField
+          name="schemaSelect"
+          value={body.schema_name}
+          // onChange={(e) => handleSchemaChange(e)}
+          // options={schemaOptions}
+          className="form-select br-form-select form-select-sm mt-3"
+          config={{
+            label: 'Schema',
+            groupClass: 'form-group mb-2 mx-2 w-50',
+          }}
+        />
       </div>
       {renderError(body.errors)}
     </>

@@ -6,22 +6,28 @@ class ImportHelper:
         pass
 
     @staticmethod
-    def generate_imports_code(component_config, all_config,all_store_config, all_reducer_config, app_config={}):
+    def generate_imports_code(component_config, comp_config_index, all_store_config, all_reducer_config, app_config={}):
         # print(component_config)
         imported_components = component_config['imports'].get('components',[])
         imported_store = component_config['imports'].get('store',[]) 
     
         import_statements = []
+        import_statement_tree = []
         
         directory_management_service = DirectoryManager(app_config["name"])
 
         # Handle import for components
         for ic in imported_components:
-            related_comp = all_config[ic]
+            related_comp = comp_config_index[ic]
             path = directory_management_service.get_path_from_file_id(related_comp["file_id"],relative_path=True)
             comp_path = get_path_without_ext(path)
 
             import_statement = f'import {related_comp["name"]} from \'/{comp_path}\';'
+            import_statement_tree.append({
+                "type": "IMPORT",
+                "statementType" : "SINGLE",
+                "code" : import_statement
+            })
             import_statements.append(import_statement)
 
         # Handle import for redux store
@@ -30,6 +36,11 @@ class ImportHelper:
             store_path = get_path_without_ext(related_store['containingFile'])
 
             import_statement = f'import {related_store["name"]} from \'{store_path}\';'
+            import_statement_tree.append({
+                "type": "IMPORT",
+                "statementType" : "SINGLE",
+                "code" : import_statement
+            })
             import_statements.append(import_statement)
 
         # Handle other imports
@@ -44,7 +55,11 @@ class ImportHelper:
                 # elif imp['import_type'] == 'SINGLE':
                 else:
                     import_statement = f'import  {{ {imp["import_entity"]} }} from \'{imp["from"]}\' ;'
-                
+                import_statement_tree.append({
+                    "type": "IMPORT",
+                    "statementType" : "SINGLE",
+                    "code" : import_statement
+                })
                 import_statements.append(import_statement)
             
             elif imp['TYPE'] == "REDUCER_FUNCTION":
@@ -55,13 +70,21 @@ class ImportHelper:
                     import_statement = "import  {select%s} from '%s';"%(related_reducer["stateVarName"],path)
                 else:
                     import_statement = f'import  {{{imp["import_entity"]}}} from \'{path}\' ;'
-                
+                import_statement_tree.append({
+                    "type": "IMPORT",
+                    "statementType" : "SINGLE",
+                    "code" : import_statement
+                })
                 import_statements.append(import_statement)
             elif imp['TYPE'] == "SERVICE":
                 print("---SERVICE TYPE****")
                 import_path = imp["from"]
                 import_statement = f'import {{ {imp["import_entity"]} }} from \'{import_path}\' ;'
-
+                import_statement_tree.append({
+                    "type": "IMPORT",
+                    "statementType" : "SINGLE",
+                    "code" : import_statement
+                })
                 import_statements.append(import_statement)
 
         
@@ -73,13 +96,17 @@ class ImportHelper:
             if imp['TYPE'] == 'CUSTOM':
                 imp_path = app_config['CSS_CONFIG'][imp['from']]['containingFile']
                 import_statement = f'import \'{imp_path}\' ; '
-
+                import_statement_tree.append({
+                    "type": "IMPORT",
+                    "statementType" : "SINGLE",
+                    "code" : import_statement
+                })
                 import_statements.append(import_statement)
         import_statements = list(set(import_statements))
-        return '\n'.join(import_statements)
+        return '\n'.join(import_statements),import_statement_tree
 
     @staticmethod
-    def handle_import(component_config, all_config, all_store_config):
+    def handle_import(component_config, comp_config_index, all_store_config):
         pass
 
     @staticmethod

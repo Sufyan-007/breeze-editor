@@ -1,21 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ImportApi from '../components/ImportApi';
 import GeneralSettingsCard from '../components/GeneralSettingsCard';
 import RequestSettings from '../components/RequestSettings';
 import ResponseSettings from '../components/ResponseSettings';
-import { generateService } from '../services/GeneratedService';
 import SideBar from '../components/SideBar';
+import { useDispatch, useSelector } from 'react-redux';
 import { CustomButtonField, CustomSelectField } from '../../../common/fields';
-import {
-  convertSwagger,
-  editFunctionConfig,
-  fetchIntermediates,
-  editModuleName,
-} from '../services/IntermediateServices';
-
+import { fetchModules, convertFile, editFunction, editModule, generateServices } from '../redux/ApiClientActions';
+// import { resetState } from '../redux/ApiClientReducers';
+import AddModule from '../components/AddModule';
 function ServiceConfiguration() {
-  const [apiList, setApiList] = useState([]);
+  const { transformedOptions, message } = useSelector((state) => state.services);
+  const dispatch = useDispatch();
   const [selectedApi, setSelectedApi] = useState({});
   const [selectedAuthApi, setSelectedAuthApi] = useState({});
   const { projectName } = useParams();
@@ -23,32 +20,12 @@ function ServiceConfiguration() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [show, setShow] = useState(true);
   const [showToast, setShowToast] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [selectedModule, setSelectedModule] = useState(null);
-  const [transformedOptions, setTransformedOptions] = useState([]);
-  const fetchServiceList = useCallback(async () => {
-    try {
-      const result = await fetchIntermediates(projectName, { category: 'api_client' });
-      const apiList = Object.entries(result.data).map(([key, value]) => ({
-        id: key,
-        title: value.title,
-      }));
-      const options = Object.entries(result.data).map(([key, value]) => ({
-        label: value.title,
-        value: value.title,
-        moduleId: key,
-      }));
-      setTransformedOptions(options);
-      setApiList(apiList);
-    } catch (error) {
-      console.error('Error generating react service:', error);
-    }
-  }, [projectName]);
 
-  const generateServiceFile = async (fileType, filename, moduleId) => {
+  const generateServiceFile = async (type, filename, moduleId) => {
     try {
-      const result = await generateService(fileType, projectName, { filename, moduleId });
-      console.log(result, 'result');
+      const payload = { filename, moduleId };
+      await dispatch(generateServices({ type, projectName, payload })).unwrap();
     } catch (error) {
       console.error('Error generate react service:', error);
     }
@@ -66,7 +43,7 @@ function ServiceConfiguration() {
     setSelectedAuthApi({ ...model });
   };
 
-  const handleUpload = async (event, fileType) => {
+  const handleUpload = async (event, collectionType) => {
     const file = event.target.files[0];
     if (!file) {
       return;
@@ -74,17 +51,13 @@ function ServiceConfiguration() {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await convertSwagger(projectName, fileType, formData);
-      if (response.files_with_apis) {
-        fetchServiceList();
-        setShow(false);
-        setView('TEST');
-        event.target.value = '';
-      } else {
-        setErrorMessage(response.error);
-      }
+      const payload = { category: 'api_client' };
+      await dispatch(convertFile({ projectName, collectionType, formData })).unwrap();
+      setShow(false);
+      setView('TEST');
+      await dispatch(fetchModules({ projectName, payload })).unwrap();
     } catch (error) {
-      setErrorMessage(error.message);
+      // setErrorMessage(error.message);
     }
   };
 
@@ -93,37 +66,40 @@ function ServiceConfiguration() {
     console.log(selectedApiModel, 'selectedApiModel');
     if (!isValidApiStructure(selectedApiModel)) {
       setShowToast(true);
-      setErrorMessage('Please Fill All the Values before Submitting');
+      // setErrorMessage('Please Fill All the Values before Submitting');
       return;
     }
     if (!selectedModule) {
       setShowToast(true);
-      setErrorMessage('Please Select a Module first');
+      // setErrorMessage('Please Select a Module first');
       return;
     }
     e.preventDefault();
     let operation = selectedApiModel.id ? 'UPDATE' : 'ADD';
     if (isAuthApi) {
       selectedApiModel.tags = 'auth';
-      await editFunctionConfig(projectName, operation, {
+      const payload = {
         moduleId: selectedModule.id,
         api_type: 'AUTH',
         api_data: selectedApiModel,
-      });
+      };
+      await dispatch(editFunction({ projectName, operation, payload })).unwrap();
     } else {
-      await editFunctionConfig(projectName, operation, {
+      const payload = {
         moduleId: selectedModule.id,
         api_type: 'ORDINARY',
         api_data: selectedApiModel,
         filename: selectedFile,
-      });
+      };
+      await dispatch(editFunction({ projectName, operation, payload })).unwrap();
     }
+    // dispatch(resetState());
+    await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
     if (isAuthApi) {
       setSelectedAuthApi({});
     } else {
       setSelectedApi({});
     }
-    fetchServiceList();
   };
 
   const isValidApiStructure = (api) => {
@@ -165,19 +141,18 @@ function ServiceConfiguration() {
   };
 
   useEffect(() => {
-    fetchServiceList();
-  }, [fetchServiceList]);
+    const payload = { category: 'api_client' };
+    dispatch(fetchModules({ projectName, payload })).unwrap();
+  }, [dispatch, projectName]);
 
   const saveTitle = async (oldTitle, moduleId, newTitle) => {
     if (oldTitle !== newTitle) {
-      const result = await editModuleName(projectName, { title: newTitle, moduleId: moduleId });
-      if (result.message) {
-        setShowToast(true);
-        setErrorMessage(result.message);
-      }
-      fetchServiceList();
+      const payload = { title: newTitle, moduleId: moduleId };
+      await dispatch(editModule({ projectName, payload })).unwrap();
+      dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
     }
   };
+
   const handleModuleSelect = (selectedOption) => {
     if (selectedOption) {
       const { label: moduleName, moduleId } = selectedOption;
@@ -193,20 +168,19 @@ function ServiceConfiguration() {
               <strong className="me-auto">Message</strong>
               <button type="button" className="btn-close" onClick={() => setShowToast(false)}></button>
             </div>
-            <div className="toast-body">{errorMessage}</div>
+            <div className="toast-body">{message}</div>
           </div>
         </div>
       )}
 
       <div className="row h-100 br-background-primary">
         <div
-          className="col-sm-2 "
+          className="col-sm-3 "
           style={{
             borderRight: '1px solid rgba(128, 128, 128, 0.5)',
           }}
         >
           <SideBar
-            apiList={apiList}
             setView={setView}
             setSelectedApi={setSelectedApi}
             setSelectedAuthApi={setSelectedAuthApi}
@@ -214,9 +188,10 @@ function ServiceConfiguration() {
             generateService={generateServiceFile}
             setSelectedModule={setSelectedModule}
             setSelectedFile={setSelectedFile}
+            selectedModule={selectedModule}
           />
         </div>
-        <div className="col-sm-10">
+        <div className="col-sm-9">
           {view === 'TEST' ? (
             <>
               <div className="d-flex justify-content-between">
@@ -243,8 +218,8 @@ function ServiceConfiguration() {
                 onChange={onApiModelChange}
                 isAuthApi={false}
                 onSuccessfulTransfer={() => {
-                  fetchServiceList();
-                  setErrorMessage('Function Transferred Successfully');
+                  // fetchServiceList();
+                  // setErrorMessage('Function Transferred Successfully');
                   setShowToast(true);
                 }}
               />
@@ -317,6 +292,8 @@ function ServiceConfiguration() {
                 setShow(!show);
               }}
             />
+          ) : view === 'ADD_MODULE' ? (
+            <AddModule setView={setView} />
           ) : null}
         </div>
       </div>

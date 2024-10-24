@@ -14,7 +14,7 @@ def set_environment(env_name, project_id):
         app_config = read_project_config_file(
             app_config_dir, CONFIG_FILES_PATH['APP_CONFIG']
         )
-        app_config["current_environment"] = env_name
+        app_config["currentEnvironment"] = env_name
         write_json_file(f"{app_config_path}.json", app_config)
         start_app(app_config, forceRestart=True)
     except FileNotFoundError as e:
@@ -55,8 +55,8 @@ def edit_package_json_file(project_id, config):
         environments = config.get("environments", {})
 
         for env_name in environments.keys():
-            script_name = f"start:{env_name}"
-            if env_name == 'default (.env)':
+            script_name = env_name
+            if env_name == 'dev (default)':
                 continue
             if app_config.get('buildTool', "") == "create-react-app":
                 command = f"env-cmd -f {env_name}.env react-scripts start"
@@ -67,7 +67,7 @@ def edit_package_json_file(project_id, config):
 
         package_json_data["scripts"] = scripts
 
-        create_parent_dir_if_not_exists(package_json_path)
+        create_parent_dir_if_not_exists(os.path.dirname(package_json_path))
 
         with open(package_json_path, 'w') as package_json_file:
             json.dump(package_json_data, package_json_file, indent=4)
@@ -88,7 +88,7 @@ def save_file(project_id, env_name, env_values, env_vars):
         env_file_path = os.path.join(env_directory, f".env.{env_name}")
         if env_name == 'dev (default)':
             env_file_path = os.path.join(env_directory, ".env")
-        create_parent_dir_if_not_exists(env_file_path)
+        create_parent_dir_if_not_exists(os.path.dirname(env_file_path))
         with open(env_file_path, 'w') as file:
             for var_id, value in env_values.items():
                 var_name = env_vars.get(var_id, var_id)
@@ -147,7 +147,7 @@ def generate_config_from_payload(project_id, payload):
         write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ENVIRONMENT_SETTINGS']}.json", config)
 
         # Call edit_package_json_file with the new environments
-        edit_package_json_file(project_id, {"new_env_name": new_env_name})
+        edit_package_json_file(project_id, config)
 
         # Save environment files
         for env_name, env_values in config["environments"].items():
@@ -187,7 +187,6 @@ def update_env_vars(project_id, variable_id, updated_name, updated_values):
 def update_environment_name(project_id, old_env_name, new_env_name):
     try:
         config = get_env_config(project_id)
-        temp_config = {}
 
         # Check if the old environment name exists in the config
         if old_env_name not in config["environments"]:
@@ -214,8 +213,6 @@ def update_environment_name(project_id, old_env_name, new_env_name):
         # Update the configuration with the new environments
         config["environments"] = new_environments
 
-        # Pass old and new environment names to edit_package_json_file
-        temp_config.update({"old_env_name": old_env_name, "new_env_name": new_env_name})
 
         app_config_dir = f"{CONFIG_PATH}/{project_id}"
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
@@ -223,12 +220,13 @@ def update_environment_name(project_id, old_env_name, new_env_name):
         write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ENVIRONMENT_SETTINGS']}.json", config)
 
         # Remove the old environment file if it exists
-        env_file_path = os.path.join(app_config['path'], f"{old_env_name}.env")
+        env_file_path = os.path.join(app_config['path'], f".env.{old_env_name}")
         if os.path.exists(env_file_path):
             os.remove(env_file_path)
 
         # Update the package.json file
-        edit_package_json_file(project_id, temp_config)
+        remove_script_from_package_json(app_config['path'], old_env_name)
+        edit_package_json_file(project_id, config)
 
         # Save environment files
         for env_name, env_values in config["environments"].items():
@@ -250,7 +248,7 @@ def delete_proj_env(project_id, env_name):
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         env_directory = app_config['path']
         
-        if env_name == app_config.get('current_environment'):
+        if env_name == app_config.get('currentEnvironment'):
             raise Exception(f"Cannot delete the current environment '{env_name}'")
 
         config = get_env_config(project_id)
@@ -285,7 +283,7 @@ def remove_script_from_package_json(app_config_path, env_name):
 
         package_json_data["scripts"] = scripts
 
-        create_parent_dir_if_not_exists(package_json_path)
+        create_parent_dir_if_not_exists(os.path.dirname(package_json_path))
 
         with open(package_json_path, 'w') as package_json_file:
             json.dump(package_json_data, package_json_file, indent=4)

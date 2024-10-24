@@ -22,7 +22,8 @@
       "SERVICES",
       "PROJECT_ROOT_FILE",
       "MAIN_COMPONENT",
-      "ASSETS"
+      "ASSETS",
+      "ROUTE_COMPONENT"
     ]
   },
   "COMPONENTS": {
@@ -66,11 +67,44 @@
     "tag": "ROOT_COMPONENT",
     "type": "FILE"
   },
+  "ROUTE_COMPONENT": {
+    "name": "Routing",
+    "parentId": "SRC",
+    "extension": "SX",
+    "id": "ROUTE_COMPONENT",
+    "tag": "ROUTING",
+    "type": "FILE",
+    "wasOpen":false
+  },
   "ASSETS": {
     "name": "assets",
     "parentId": "SRC",
     "id": "ASSETS",
     "tag": "ASSETS",
+    "type": "DIRECTORY",
+    "children": ["IMAGES", "SVGS", "FONTS"]
+  },
+  "IMAGES": {
+    "name": "images",
+    "parentId": "ASSETS",
+    "id": "IMAGES",
+    "tag": "IMAGES",
+    "type": "DIRECTORY",
+    "children": []
+  },
+  "SVGS": {
+    "name": "svgs",
+    "parentId": "ASSETS",
+    "id": "SVGS",
+    "tag": "SVGS",
+    "type": "DIRECTORY",
+    "children": []
+  },
+  "FONTS": {
+    "name": "fonts",
+    "parentId": "ASSETS",
+    "id": "FONTS",
+    "tag": "FONTS",
     "type": "DIRECTORY",
     "children": []
   },

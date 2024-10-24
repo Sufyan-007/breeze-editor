@@ -7,8 +7,9 @@ from apps.common.utils.file_helpers.config_handler import write_config_file
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.utils.uuid_as_key import generate_uuid_as_key 
 from apps.common.utils.tree_management import replace_node
+from apps.project_management.core.resource_upload_service import update_config
 
-def add_dirs_configs(data):
+def add_dirs_configs(data, proj_data_request):
     if data["name"] == "":
         raise ValueError("Name must be specified")
     app_config_dir = f"{CONFIG_PATH}/{data['name']}"
@@ -23,15 +24,18 @@ def add_dirs_configs(data):
     )
     
     # for storing schemas retrieved form swagger file
-    create_dir_if_not_exists(f"{app_config_dir}/swagger_schema")
+    create_dir_if_not_exists(f"{app_config_dir}/models")
+    write_json_file(f"{app_config_dir}/models/index.json", {})
     create_dir_if_not_exists(data["path"])
 
     app_current_config = data
-    app_current_config['components_src_dir'] = 'src'
+    app_current_config['componentsSrcDir'] = 'src'
     app_current_config["dependencies"] = {
         "react-router-dom": "*",
         "bootstrap": "^5.3.2",
-        "react-bootstrap": "*"
+        "react-bootstrap": "*",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
     }
     
 
@@ -49,6 +53,7 @@ def add_dirs_configs(data):
     # entries in directory management
     create_directory_management_file(app_current_config)
     update_directory_management_file(app_current_config)
+    write_resource_config(app_current_config, proj_data_request)
     return app_current_config
 
 def write_basic_main_comp_config(app_config):
@@ -88,7 +93,7 @@ def write_basic_main_comp_config(app_config):
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
 
     app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
-    app_config['default_comp_id'] = _id
+    app_config['defaultCompId'] = _id
     del app_config['defaultComponent']
     write_json_file(f"{app_config_path}.json", app_config)
     write_config_file( f"{app_config['name']}", ResourceCategory.COMPONENTS.value, f"{_id}", main_comp_config)
@@ -104,7 +109,7 @@ def write_routing_config(app_config):
         default_path_id : {
             "id": default_path_id,
             "path": "/",
-            "componentId": f"{app_config['default_comp_id']}",
+            "componentId": f"{app_config['defaultCompId']}",
             "parentId": None
         }
     }
@@ -112,11 +117,17 @@ def write_routing_config(app_config):
 
 def write_swagger_schema_config(app_config_dir):
     write_json_file(f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json", {
-        "custom" : {
-            "title" : "Custom",
-            "auth_apis" : {}
-        }
-    })
+})
+
+def write_resource_config(app_current_config, proj_data_request):
+    logo_file = proj_data_request.FILES.get('logo')
+    write_json_file(f"{CONFIG_PATH}/{app_current_config['name']}/{CONFIG_FILES_PATH['RESOURCE_CONFIG']}.json", {})
+    if logo_file:
+        project_id = app_current_config['name']
+        file_name = logo_file.name
+        file_id = app_current_config['logoId']
+        description = "Project Logo"
+        return update_config(project_id, file_name, description, file_id)
 
 def create_directory_management_file(app_config):
     template_path = ""
@@ -144,8 +155,8 @@ def update_directory_management_file(app_config):
     
     directory_management_config = read_json_file(directory_management_path)
     comp_index_file = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
-    default_comp_name = comp_index_file[app_config['default_comp_id']] + (".tsx" if app_config.get("language") == "typescript" else ".jsx")
-    main_comp_id = app_config['default_comp_id']
+    default_comp_name = comp_index_file[app_config['defaultCompId']]
+    main_comp_id = app_config['defaultCompId']
     template_content = replace_node("DEFAULT_COMP",main_comp_id,directory_management_config)
     
     template_content[main_comp_id]["name"] = default_comp_name
