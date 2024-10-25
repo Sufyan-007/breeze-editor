@@ -12,7 +12,7 @@ add_or_edit_swagger_schema = {
         },
         required=['name']
     ),
-    'response_201':openapi.Response(
+    'response_200':openapi.Response(
             description='created or edited',
             schema=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
@@ -52,7 +52,7 @@ delete_schema_swagger = {
             'schemaId':openapi.Schema(type=openapi.TYPE_STRING,description='id of schema')
         }
     ),
-    'response_204':openapi.Response(
+    'response_200':openapi.Response(
             description='Delete on a resource is successful',
             schema=openapi.Schema(
                 type=openapi.TYPE_OBJECT,

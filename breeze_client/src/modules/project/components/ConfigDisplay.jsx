@@ -4,12 +4,13 @@ import ServiceConfiguration from '../../service-configuration/pages/ServiceConfi
 import CustomZipPackagePage from '../../custom_uploads/pages/CustomZipPackage';
 import Settings from '../../settings/pages/Settings';
 import ThirdPartyDependencyConfig from '../../third-party-dependencies/pages/ThirdPartyDependencyConfig';
+import SchemaSettings from '../../schema-configuration/pages/SchemaSettings';
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {
     switch (configType) {
       case 'ROUTING':
         return <RoutingConfig />;
-      case 'CUSTOM_UPLOAD':
+      case 'EXTERNAL_COMP':
         return <CustomZipPackagePage />;
       case 'SERVICE-CONFIG':
         return <ServiceConfiguration />;
@@ -17,6 +18,8 @@ function ConfigDisplay({ configType }) {
         return <Settings />;
       case 'PACKAGE_CONFIG':
         return <ThirdPartyDependencyConfig />;
+      case 'SCHEMAS':
+        return <SchemaSettings />;
       default:
         return <div>Select a configuration type</div>;
     }

@@ -1,10 +1,22 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CustomTextInput } from '../../../common/fields';
-import { fetchIntermediates } from '../services/IntermediateServices';
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAuthFunctions, fetchFiles, fetchFunctions } from '../redux/ApiClientActions';
+import ShowFiles from './ShowFiles';
+import ShowFunctions from './ShowFunctions';
+
+const customComparator = (oldKeyList, newKeyList) => {
+  // code to compare if all entries are equal
+  return true;
+};
+
+const customSelectFunctions = (state) => {
+  return Object.entries(state.services.filesList);
+};
+
 function SideBar({
-  apiList,
   setView,
   setSelectedApi,
   setSelectedModule,
@@ -14,66 +26,44 @@ function SideBar({
   generateService,
 }) {
   const { projectName } = useParams();
+  const dispatch = useDispatch();
+  const { moduleList } = useSelector((state) => state.services);
+  // console.log(moduleList, 'moduleList');
+
+  const filesList = useSelector(customSelectFunctions, customComparator);
   const [expandedModules, setExpandedModules] = useState([]);
+  const [expandedAuthModules, setExpandedAuthModules] = useState([]);
   const [editingModule, setEditingModule] = useState(null);
   const [newModuleTitle, setNewModuleTitle] = useState('');
-  const [expandedFilenames, setExpandedFilenames] = useState([]);
-  const [availableFiles, setAvailableFiles] = useState([]);
-  const [availableFunctions, setAvailableFunctions] = useState([]);
-  const [availableAuthFunctions, setAvailableAuthFunctions] = useState([]);
+  // const [expandedFiles, setExpandedFiles] = useState({});
 
-  const toggleExpansion = (moduleTitle, filename, moduleId = null, fileId = null, api_type = null) => {
-    if (moduleTitle) {
-      if (moduleId) {
-        fetchFilesAndFunctions({ category: 'api_client', module: moduleId });
-      }
-      if (expandedModules.includes(moduleTitle)) {
-        setExpandedModules(expandedModules.filter((title) => title !== moduleTitle));
-      } else {
-        setExpandedModules([...expandedModules, moduleTitle]);
-      }
-    } else {
-      if (fileId) {
-        fetchFilesAndFunctions({ category: 'api_client', module: moduleId, files: fileId });
-        setSelectedFile(fileId);
-      } else if (api_type) {
-        fetchFilesAndFunctions({ category: 'api_client' }, true, moduleId);
-      }
-      if (expandedFilenames.includes(filename)) {
-        setExpandedFilenames(expandedFilenames.filter((fn) => fn !== filename));
-      } else {
-        setExpandedFilenames([...expandedFilenames, filename]);
-      }
-    }
+  const toggleModuleExpansion = async (module) => {
+    const isExpanded = expandedModules.includes(module);
+    await fetchFilesAndFunctions({ category: 'api_client', module: module });
+    setExpandedModules((prev) => (isExpanded ? prev.filter((title) => title !== module) : [...prev, module]));
   };
-
-  const fetchFilesAndFunctions = useCallback(async (payload, isAuth = null, selectedModule = null) => {
-    try {
-      const result = await fetchIntermediates(projectName, payload);
-      if (isAuth) {
-        const authApis = Object.entries(result.data)
-          .filter(([key, value]) => key === selectedModule)
-          .flatMap(([key, value]) => (value.auth_apis ? Object.values(value.auth_apis) : []));
-        // console.log(authApis, 'authApiList');
-        setAvailableAuthFunctions(authApis);
-      } else {
-        if (payload.files) {
-          const functionList = Object.entries(result.data).map(([key, value]) => ({
-            ...value,
-          }));
-          setAvailableFunctions(functionList);
-        } else if (payload.module) {
-          const filesList = Object.entries(result.data).map(([key, value]) => ({
-            id: key,
-            title: value.file,
-          }));
-          setAvailableFiles(filesList);
+  const toggleAuthModuleExpansion = (module) => {
+    const isExpanded = expandedAuthModules.includes(module);
+    setExpandedAuthModules((prev) => (isExpanded ? prev.filter((title) => title !== module) : [...prev, module]));
+  };
+  const fetchFilesAndFunctions = useCallback(
+    async (payload, isAuth = null, selectedModule = null) => {
+      try {
+        if (isAuth) {
+          await dispatch(fetchAuthFunctions({ projectName, payload, moduleId: selectedModule })).unwrap();
+        } else {
+          if (payload.files) {
+            await dispatch(fetchFunctions({ projectName, payload })).unwrap();
+          } else if (payload.module) {
+            await dispatch(fetchFiles({ projectName, payload })).unwrap();
+          }
         }
+      } catch (error) {
+        console.error('Error generating react service:', error);
       }
-    } catch (error) {
-      console.error('Error generating react service:', error);
-    }
-  }, []);
+    },
+    [projectName, dispatch]
+  );
 
   const handleInputChange = (value) => {
     setNewModuleTitle(value);
@@ -88,7 +78,16 @@ function SideBar({
       setNewModuleTitle(title);
     }
   };
-
+  const onAuthSelect = (api, moduleName, moduleId) => {
+    setSelectedModule({
+      name: moduleName,
+      id: moduleId,
+      filename: '',
+      serviceId: api.id,
+    });
+    setSelectedAuthApi(api);
+    setView('AUTH_API');
+  };
   return (
     <>
       <div
@@ -97,54 +96,43 @@ function SideBar({
         style={{ borderBottom: '1px solid gray' }}
       >
         <div className="d-flex justify-content-between mb-2 br-background-primary">
-          {/* <span className="mt-4 overflow-auto br-text-primary">
-            <strong> Services</strong>
-          </span> */}
           <h5 className="mt-4">Services</h5>
           <div className="d-flex">
             <i
               className="bi bi-plus-circle mx-1 mt-4"
-              width={25}
-              height={25}
               style={{ cursor: 'pointer' }}
               onClick={() => {
-                setView('TEST');
-                setSelectedApi({});
-                setSelectedModule({});
+                setView('ADD_MODULE');
               }}
             ></i>
             <i
               className="bi bi-file-earmark-arrow-down-fill mx-1 mt-4"
-              width="25"
-              height="25"
-              onClick={() => setView('IMPORT_API')}
               style={{ cursor: 'pointer' }}
+              onClick={() => setView('IMPORT_API')}
             ></i>
           </div>
         </div>
-        {apiList && apiList.length > 0 ? (
-          apiList.map((folder, folderIndex) => (
-            <div key={folderIndex} className="my-2">
+        {Object.keys(moduleList).length > 0 ? (
+          Object.entries(moduleList).map(([folderKey, value]) => (
+            <div key={folderKey} className="my-2">
               <div
-                className={`mb-2 p-1 br-text-primary ${expandedModules.includes(folder.title) ? 'br-background-secondary' : 'br-background-primary'}`}
-                onClick={() => toggleExpansion(folder.title, null, folder.id, null, null)}
-                style={{
-                  cursor: 'pointer',
-                }}
+                className={`mb-2 p-1 br-text-primary ${expandedModules.includes(folderKey) ? 'br-background-secondary' : 'br-background-primary'}`}
+                onClick={() => toggleModuleExpansion(folderKey)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    {editingModule === folder.title ? (
+                    {editingModule === value.title ? (
                       <CustomTextInput
                         value={newModuleTitle}
                         className="form-control form-control-sm br-text-primary br-background-primary"
                         onChange={handleInputChange}
-                        onBlur={() => saveTitle(folder.title, folder.id, newModuleTitle)}
+                        onBlur={() => saveTitle(value.title, folderKey, newModuleTitle)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
-                            saveTitle(folder.title, folder.id, newModuleTitle);
+                            saveTitle(value.title, folderKey, newModuleTitle);
                           } else if (e.key === 'Escape') {
-                            toggleEditing(folder.title);
+                            toggleEditing(value.title);
                           }
                         }}
                         autoFocus
@@ -157,89 +145,49 @@ function SideBar({
                           src="https://img.icons8.com/ios-filled/50/AAAAAA/module.png"
                           alt="module"
                         />
-                        <span className="mx-2 br-text-primary">{folder.title}</span>
+                        <span className="mx-2 br-text-primary">
+                          {value.title.length > 30 ? `${value.title.slice(0, 30)}...` : value.title}
+                        </span>
                       </div>
                     )}
                   </div>
-                  <i
-                    className="bi bi-pencil-square"
-                    alt="edit"
-                    height={30}
-                    width={15}
-                    onClick={() => toggleEditing(folder.title)}
-                  ></i>
+                  <div>
+                    <i
+                      className="bi bi-plus-circle mx-1"
+                      style={{ cursor: 'pointer' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setView('TEST');
+                        setSelectedApi({});
+                        setSelectedModule({ name: value.title, id: folderKey });
+                      }}
+                      title="add-to-module"
+                    ></i>
+                    <i
+                      className="bi bi-pencil-square mx-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEditing(value.title);
+                      }}
+                      title="edit-module-name"
+                    ></i>
+                  </div>
                 </div>
               </div>
-              {expandedModules.includes(folder.title) && editingModule === null && (
-                <div
-                  className="br-background-primary br-text-primary"
-                  style={{
-                    cursor: 'pointer',
-                  }}
-                >
-                  {availableFiles && availableFiles.length > 0 ? (
-                    availableFiles.map((service) => (
-                      <div key={service.id} className="my-2">
-                        <div
-                          className={`mb-2 p-1 ${expandedFilenames.includes(service.title) ? 'br-background-secondary' : 'br-background-primary'}`}
-                          onClick={() => toggleExpansion(null, service.title, folder.id, service.id, null)}
-                          style={{
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <div className="d-flex justify-content-between">
-                            <div>
-                              <i className="bi bi-file-earmark-fill" height={15} width={15} alt="file"></i>
-                              <span className="mx-2">{service.title}</span>
-                              {service.errors && service.errors.length > 0 && (
-                                <i className="bi bi-exclamation-circle" style={{ color: 'red' }}></i>
-                              )}
-                            </div>
-                            <i
-                              className="bi bi-gear-wide-connected"
-                              onClick={() => generateService('ORDINARY', service.id, folder.id)}
-                              width={15}
-                              height={15}
-                            ></i>
-                          </div>
-                        </div>
-                        {expandedFilenames.includes(service.title) && (
-                          <div
-                            className="br-text-primary br-background-primary"
-                            style={{
-                              cursor: 'pointer',
-                            }}
-                          >
-                            {availableFunctions.length > 0 ? (
-                              availableFunctions.map((func) => (
-                                <div key={func.id} className="m-1 d-flex justify-content-between">
-                                  <span
-                                    className={`overflow-auto ${func.errors && func.errors.root_errors.length > 0 ? 'text-danger' : ''}`}
-                                    onClick={() => {
-                                      setSelectedModule({
-                                        name: folder.title,
-                                        id: folder.id,
-                                        filename: service.title,
-                                        serviceId: func.id,
-                                      });
-                                      setSelectedApi(func);
-                                      setView('TEST');
-                                    }}
-                                    style={{ width: '90%' }}
-                                  >
-                                    {func.operation_id}
-                                  </span>
-                                  <div id="actions-div" className="d-flex">
-                                    <i className="bi bi-trash3" alt="delete" height={20} width={20}></i>
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <span className=" m-2 br-text-primary">No services found</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
+              {expandedModules.includes(folderKey) && editingModule === null && (
+                <div className="br-background-primary br-text-primary" style={{ cursor: 'pointer' }}>
+                  {value['files']?.length > 0 ? (
+                    value['files'].map((fileId) => (
+                      <ShowFiles
+                        key={fileId}
+                        fileId={fileId}
+                        moduleId={folderKey}
+                        moduleName={value.title}
+                        setSelectedApi={setSelectedApi}
+                        setSelectedFile={setSelectedFile}
+                        setSelectedModule={setSelectedModule}
+                        setView={setView}
+                      />
                     ))
                   ) : (
                     <span className="m-2 br-text-primary">No services found</span>
@@ -257,8 +205,6 @@ function SideBar({
           <h5>Authentication Config</h5>
           <i
             className="bi bi-plus-circle mx-1 mt-1"
-            width="25"
-            height="25"
             onClick={() => {
               setView('AUTH_API');
               setSelectedAuthApi({});
@@ -266,84 +212,76 @@ function SideBar({
             }}
           ></i>
         </div>
-        {apiList && apiList.length > 0 ? (
-          apiList.map((module, index) => (
-            <div key={index} className="my-2">
-              <div
-                className={`mb-2 p-1 br-text-primary ${expandedFilenames.includes(module.title) ? 'br-background-secondary' : 'br-background-primary'}`}
-                onClick={() => toggleExpansion(null, module.title, module.id, null, 'auth')}
-                style={{
-                  cursor: 'pointer',
-                }}
-              >
-                <div className="d-flex justify-content-between">
-                  <div>
-                    <img
-                      width="20"
-                      height="20"
-                      src="https://img.icons8.com/ios-filled/50/AAAAAA/module.png"
-                      alt="module"
-                    />
-                    <span className=" br-text-primary mx-2">{module.title}</span>
-                  </div>
-                  <i
-                    className="bi bi-gear-wide-connected"
-                    onClick={() => generateService('AUTH', module.title, module.model_id)}
-                    width={15}
-                    height={15}
-                  ></i>
-                </div>
-              </div>
-              {expandedFilenames.includes(module.title) && (
+
+        {Object.keys(moduleList).length > 0
+          ? Object.entries(moduleList).map(([folderKey, value]) => (
+              <div key={folderKey} className="my-2">
                 <div
-                  className=" br-text-primary br-background-primary"
-                  style={{
-                    cursor: 'pointer',
-                  }}
+                  className={`mb-2 p-1 br-text-primary ${expandedModules.includes(folderKey) ? 'br-background-secondary' : 'br-background-primary'}`}
+                  onClick={() => toggleAuthModuleExpansion(folderKey)}
+                  style={{ cursor: 'pointer' }}
                 >
-                  {availableAuthFunctions && availableAuthFunctions.length > 0 ? (
-                    <>
-                      {availableAuthFunctions.map((api) => (
-                        <div key={api.id} className="m-1 d-flex justify-content-between">
-                          <span
-                            className={`overflow-auto ${api.errors && api.errors.root_errors.length > 0 ? 'text-danger' : 'br-text-primary'}`}
-                            onClick={() => {
-                              setSelectedModule({
-                                name: module.title,
-                                id: module.id,
-                                filename: '',
-                                serviceId: api.id,
-                              });
-                              setSelectedAuthApi(api);
-                              setView('AUTH_API');
-                            }}
-                            style={{ width: '90%' }}
-                          >
-                            {api.operation_id}
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      {editingModule === value.title ? (
+                        <CustomTextInput
+                          value={newModuleTitle}
+                          className="form-control form-control-sm br-text-primary br-background-primary"
+                          onChange={handleInputChange}
+                          onBlur={() => saveTitle(value.title, folderKey, newModuleTitle)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              saveTitle(value.title, folderKey, newModuleTitle);
+                            } else if (e.key === 'Escape') {
+                              toggleEditing(value.title);
+                            }
+                          }}
+                          autoFocus
+                        />
+                      ) : (
+                        <div className="">
+                          <img
+                            width="20"
+                            height="20"
+                            src="https://img.icons8.com/ios-filled/50/AAAAAA/module.png"
+                            alt="module"
+                          />
+                          <span className="mx-2 br-text-primary">
+                            {value.title.length > 30 ? `${value.title.slice(0, 30)}...` : value.title}
                           </span>
-                          <div id="actions-div" className="d-flex">
-                            <i className="bi bi-trash3" alt="delete" height={20} width={20}></i>
-                          </div>
                         </div>
-                      ))}
-                    </>
-                  ) : (
-                    <span className="m-2 br-text-primary">No services found</span>
-                  )}
+                      )}
+                    </div>
+                    <i className="bi bi-pencil-square" onClick={() => toggleEditing(value.title)}></i>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <span className="m-2 br-text-primary">No services found</span>
-        )}
+                {expandedAuthModules.includes(folderKey) && editingModule === null && (
+                  <div className="br-background-primary br-text-primary" style={{ cursor: 'pointer' }}>
+                    {Object.keys(value['auth_apis'])?.length > 0 ? (
+                      Object.entries(value['auth_apis']).map(([funcId, funcVal]) => (
+                        <ShowFunctions
+                          key={funcId}
+                          functionId={funcId}
+                          onFunctionClick={() => onAuthSelect(funcVal, value.title, folderKey)}
+                          isAuth={true}
+                          moduleId={folderKey}
+                        />
+                      ))
+                    ) : (
+                      <span className="m-2 br-text-primary">No services found</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          : null}
       </div>
     </>
   );
 }
 
 SideBar.propTypes = {
-  apiList: PropTypes.arrayOf(
+  moduleList: PropTypes.arrayOf(
     PropTypes.shape({
       title: PropTypes.string.isRequired,
       id: PropTypes.string.isRequired,

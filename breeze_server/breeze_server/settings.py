@@ -145,6 +145,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'apps.authentication.core.authentication.CustomTokenAuthentication',
     ),
+    'EXCEPTION_HANDLER': 'apps.common.exception.exception_handler.custom_exception_handler'
 }
 
 CHANNEL_LAYERS = {
@@ -189,10 +190,18 @@ SWAGGER_SETTINGS = {
         'drf_yasg.inspectors.StringDefaultFieldInspector',
     ],
     'SECURITY_DEFINITIONS': {
-        'Basic': {
-            'type': 'basic'
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Enter "Bearer <your-token>"',
         }
-    }
+    },
+    'DEFAULT_SECURITY': [
+        {
+            'Bearer': []
+        }
+    ]
  }
 
 CHANNEL_LAYERS = {

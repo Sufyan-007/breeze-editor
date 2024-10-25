@@ -55,8 +55,8 @@ function ParameterSettings({ paramData, onChange, renderError }) {
                   handleInputChange(index, 'param_type', e);
                 }}
                 options={[
-                  { label: 'Select', value: '' },
-                  { label: 'STATIC', value: 'STATIC' },
+                  // { label: 'Select', value: '' },
+                  // { label: 'STATIC', value: 'STATIC' },
                   { label: 'USER INPUT', value: 'USER_INPUT' },
                   { label: 'LOCALSTORAGE', value: 'LOCAL_STORAGE' },
                   { label: 'SESSION STORAGE', value: 'SESSION_STORAGE' },
@@ -67,20 +67,27 @@ function ParameterSettings({ paramData, onChange, renderError }) {
                   groupClass: 'form-group mb-2 mx-2 w-50',
                 }}
               />
-              {param.param_type === 'STATIC' ? (
-                <CustomTextInput
-                  className=" form-control br-form-control form-control-sm"
-                  placeholder="Value"
-                  config={{
-                    label: 'Value',
-                    groupClass: 'form-group mb-2 mx-2 w-50',
-                  }}
-                  value={param.value}
-                  onChange={(e) => {
-                    handleInputChange(index, 'value', e);
-                  }}
-                />
-              ) : param.param_type === 'LOCAL_STORAGE' || param.param_type === 'SESSION_STORAGE' ? (
+
+              <CustomSelectField
+                name="dataTypeSelect"
+                value={param.data_type || ''}
+                onChange={(e) => {
+                  handleInputChange(index, 'data_type', e);
+                }}
+                options={[
+                  { label: 'String', value: 'string' },
+                  { label: 'Numeric', value: 'numeric' },
+                  { label: 'Object', value: 'object' },
+                  { label: 'Boolean', value: 'boolean' },
+                ]}
+                className="form-select br-form-select form-select-sm mt-3"
+                config={{
+                  label: 'Data Type',
+                  groupClass: 'form-group mb-2 mx-2 w-50',
+                }}
+              />
+
+              {param.param_type === 'LOCAL_STORAGE' || param.param_type === 'SESSION_STORAGE' ? (
                 <CustomTextInput
                   className=" form-control br-form-control form-control-sm"
                   placeholder="Key"

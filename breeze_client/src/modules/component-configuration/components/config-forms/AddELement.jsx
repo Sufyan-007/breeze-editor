@@ -17,11 +17,12 @@ const AddELement = () => {
   const [allHtmlTags, setAllHtmlTags] = useState([]);
   const [allCustomTags, setAllCustomTags] = useState([]);
   const [allThirdPartyTags, setAllThirdPartyTags] = useState([]);
-  const [allCustomThirdPartyTags, setAllCustomThirdPartyTags] = useState([]);
+  // const [allCustomThirdPartyTags, setAllCustomThirdPartyTags] = useState([]);
   const [displayTags, setDisplayTags] = useState([]);
   const [searchedValue, setSearchedValue] = useState('');
   const [selectedElements, setSelectedElements] = useState('');
-  console.log(allCustomTags);
+  // console.log(allCustomTags);
+
   useEffect(() => {
     let allHtmlTags = elements.HTML.map((obj) => {
       obj.type = 'HTML';
@@ -69,7 +70,7 @@ const AddELement = () => {
     }
 
     if (selectedCategory !== 'THIRD_PARTY') setSelectedSubCategory('All');
-  }, [selectedCategory, selectedSubCategory]);
+  }, [selectedCategory, selectedSubCategory, allCustomTags, allHtmlTags, allThirdPartyTags]);
 
   useEffect(() => {
     const tempFilteredELements = filteredElements.filter((item) => item.name.toLowerCase().includes(searchedValue));
@@ -174,7 +175,7 @@ const AddELement = () => {
               <li
                 className="list-group-item p-1 text-lowercase br-background-secondary br-text-primary listViewHover border-0 ps-4"
                 key={item.id}
-                onClick={(event) => {
+                onClick={() => {
                   setSelectedElements(item.name.toLowerCase());
                   setSearchedValue(item.name.toLowerCase());
                 }}

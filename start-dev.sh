@@ -1,5 +1,34 @@
 #!/bin/bash
 
+# Check if pip3 is installed, if not install it
+if ! command -v pip3 &> /dev/null; then
+    echo "pip3 could not be found, installing pip3..."
+    sudo apt-get update
+    sudo apt-get install -y python3-pip
+fi
+
+# Function to check if a package is installed in the virtual environment
+check_virtualenv_installed() {
+    source "../venv/bin/activate"
+    if ! pip3 show virtualenv &> /dev/null; then
+        echo "virtualenv is not installed, installing it..."
+        pip3 install virtualenv
+    fi
+}
+
+# Check if venv folder exists
+if [ ! -d "../venv" ]; then
+    echo "Virtual environment not found, creating one..."
+    python3 -m pip3 install --user virtualenv
+    python3 -m virtualenv "../venv"
+    check_virtualenv_installed
+else
+    check_virtualenv_installed
+fi
+
+# Activate the virtual environment
+source "../venv/bin/activate"
+
 # Function to check if a port is in use and kill the process
 kill_port() {
     local port=$1
@@ -22,13 +51,27 @@ kill_port $THIRD_PARTY_PACKAGE_PARSER_PORT
 kill_port $BREEZE_CLIENT_PORT
 kill_port $BREEZE_SERVER_PORT
 
-# Start Python server
-echo "Starting Python server in development mode..."
+# Get the current working directory
+BASE_DIR=$(pwd)
+
+# Install Python dependencies
+pip3 install -r "$BASE_DIR/requirements.txt"
+
+# Install JS dependencies for third_party_package_parser and breeze_client
+echo "Installing JavaScript dependencies..."
+npm install --prefix "$BASE_DIR/third_party_package_parser/"
+npm install --prefix "$BASE_DIR/breeze_client/"
+
+# make configuration directory if not present
+mkdir -p "$BASE_SIR/configurations" 
+
+# Start breeze_server
+echo "Starting breeze_server in development mode..."
 export RUN_ENV=dev
 python3 breeze_server/manage.py runserver &
 
-# Start Node.js server
-echo "Starting Node.js server in development mode..."
+# Start third_party_package_parser server
+echo "Starting third_party_package_parser server in development mode..."
 npm run dev --prefix ./third_party_package_parser/ &
 
 # start breeze_client server

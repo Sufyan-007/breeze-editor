@@ -7,6 +7,7 @@ import { router } from '../../../routes/routing';
 import { createProject, deleteProject, getAllProjects } from '../services/projectService';
 import CreateProjectForm from '../components/CreateProjectForm';
 import { BreezeModal } from '../../../common/display';
+import { progressMessages } from '../constants/progressMessages';
 
 const AllProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -16,7 +17,9 @@ const AllProjects = () => {
   const [message, setMessage] = useState('Uploading...');
   const [isLoaderModalOpen, setLoaderModalOpen] = useState(false);
   const ws = useRef(null);
+  const wsStatus = useRef(null);
   const intervalId = useRef(null);
+  const [projectStatuses, setProjectStatuses] = useState({});
 
   const incrementProgress = () => {
     intervalId.current = setInterval(() => {
@@ -104,15 +107,6 @@ const AllProjects = () => {
         setProgress(progressData);
       }
 
-      const progressMessages = {
-        5: 'Initializing your project',
-        20: 'Installing Packages',
-        50: 'Configuring Services',
-        60: 'Setting up your project',
-        80: 'This might take a while',
-        90: 'Almost there...',
-      };
-
       const relatedMessage = progressMessages[progressData];
       if (relatedMessage) {
         setMessage(relatedMessage);
@@ -137,6 +131,56 @@ const AllProjects = () => {
     setLoaderModalOpen(false);
   };
 
+  useEffect(() => {
+    wsStatus.current = new WebSocket(`${import.meta.env.VITE_SOCKET_URL}/ws/app-status/`);
+
+    wsStatus.current.onopen = () => {
+      console.log('Connected to the WebSocket of app status');
+      if (wsStatus.current && wsStatus.current.readyState === WebSocket.OPEN) {
+        sendProjectStatuses(projects);
+      }
+    };
+
+    wsStatus.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      const { project_id, status } = message?.status || {};
+      if (project_id && status) {
+        setProjectStatuses((prevStatuses) => ({
+          ...prevStatuses,
+          [project_id]: status,
+        }));
+      }
+    };
+
+    wsStatus.current.onclose = () => {
+      console.log('Disconnected from the WebSocket');
+    };
+
+    return () => {
+      if (wsStatus.current) {
+        wsStatus.current.close();
+        console.log('WebSocket connection closed');
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (wsStatus.current && wsStatus.current.readyState === WebSocket.OPEN) {
+      sendProjectStatuses(projects);
+    }
+  }, [projects]);
+
+  const sendProjectStatuses = (projects) => {
+    projects.forEach((project) => {
+      wsStatus.current.send(
+        JSON.stringify({
+          command: 'status',
+          project_id: project.name,
+        })
+      );
+    });
+  };
+
   return (
     <div className="container-fluid vh-100 p-0 br-background-secondary">
       <Navbar />
@@ -150,6 +194,7 @@ const AllProjects = () => {
               iconSrc={images.VectorIcon}
               onClick={() => handleOpenProject(project.name)}
               onDelete={() => handleDeleteProject(project.name)}
+              projectStatus={projectStatuses[project.name]}
             />
           ))}
           <ProjectCard isCreateNew={true} onClick={openModal} />

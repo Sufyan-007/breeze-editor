@@ -9,6 +9,8 @@ import {
 const initialState = {
   zipFiles: [],
   status: 'idle',
+  zipFiles: [],
+  status: 'idle',
   error: null,
   uploadMessage: null,
   components: { data: {} },
@@ -48,7 +50,9 @@ const zipSlice = createSlice({
       .addCase(deleteZipFileAction.pending, (state) => {
         state.error = null;
       })
-      .addCase(deleteZipFileAction.fulfilled, () => {})
+      .addCase(deleteZipFileAction.fulfilled, (state) => {
+        state.status = 'succeeded';
+      })
       .addCase(deleteZipFileAction.rejected, (state, action) => {
         state.error = action.payload;
       });

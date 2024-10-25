@@ -68,7 +68,7 @@ class HTMLGenerator:
               
         elif value.get('type') == "FUNCTION":
             print("------------FUNCTION------------")
-            #  print(FunctionCodeGenerator.generate_function(value.get('value'), {}))
+            #  print(FunctionCodeGenerator.generate_function(value.get('value')))
             ref = value.get("$ref",None)
             if ref:
                 for resource in self.config["resources"]:
@@ -90,7 +90,7 @@ class HTMLGenerator:
                 related_func_config = value.get('value')
                 related_func_config["isAnonymous"]=True
             if related_func_config["isAnonymous"]:
-                val= f"{{{FunctionCodeGenerator.generate_function(related_func_config, {})}}}"
+                val= f"{{{FunctionCodeGenerator.generate_function(related_func_config)}}}"
             else:
                 val = "{%s}" % related_func_config["name"]
         return f"{attr}={val}"
@@ -135,14 +135,39 @@ class HTMLGenerator:
             close_tag = f'</{tag_name}>'
 
             if not children:
-                return f'{open_tag}{close_tag}'
+                tree = {
+                    "type" : "HTML",
+                    # "statementType" : "NA",
+                    "code" : f'{open_tag}{close_tag}',
+                    "id" : config_id["_id"]
+                }
+                return f'{open_tag}{close_tag}', tree
 
-            inner_html = ''.join([self.generateHTML(child) for child in children])
-
-            return f'{open_tag}{inner_html}{close_tag}'
+            inner_code_tree = []
+            inner_html= []
+            for child in children:
+                code,tree = self.generateHTML(child)
+                inner_html.append(code)
+                inner_code_tree.append(tree)
+                
+            inner_html = ''.join(inner_html)
+            tree = {
+                "type" : "HTML",
+                # "statementType" : "NA",
+                "code":f'{open_tag}{inner_html}{close_tag}',
+                "children" : inner_code_tree,
+                "id" : config_id["_id"]
+            }
+            return f'{open_tag}{inner_html}{close_tag}' , tree
 
         elif config.get('type') == 'text':
-            return config['text']
+            tree = {
+                "type" : "HTML",
+                # "statementType" : "NA",
+                "code" : config['text'],
+                "id" : config_id["_id"]
+            }
+            return config['text'],tree
         
         # elif config.get("type") == "Expression":
 

@@ -2,10 +2,12 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router';
 import { CustomButtonField, CustomCheckBoxField, CustomSelectField, CustomTextInput } from '../../../common/fields';
-import { transferToAuth } from '../services/IntermediateServices';
+import { useDispatch } from 'react-redux';
 
 function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInfo, onSuccessfulTransfer }) {
   const [showModal, setShowModal] = useState(false);
+  const dispatch = useDispatch();
+
   const handleInputChange = (prop, value) => {
     onChange(prop, value);
   };
@@ -22,15 +24,17 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
       id: selectedServiceInfo.serviceId,
       module_id: selectedServiceInfo.id,
     };
-    const result = await transferToAuth(projectName, payload);
-    if (result.message) {
-      setShowModal(!showModal);
-      onSuccessfulTransfer();
-    }
+    await dispatch(convertToAuthApi({ projectName, payload })).unwrap();
+    setShowModal(!showModal);
+    onSuccessfulTransfer();
+    // const result = await transferToAuth(projectName, payload);
+    // if (result.message) {
+    //   setShowModal(!showModal);
+    //   onSuccessfulTransfer();
+    // }
   };
   return (
     <>
-      {/* Modal for Conversion Confirmation */}
       {showModal && (
         <div className="modal show" style={{ display: 'block' }}>
           <div className="modal-dialog modal-dialog-centered">
@@ -38,7 +42,6 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
               <div className="modal-header">
                 <h5 className="modal-title">Convert to Auth</h5>
                 <CustomButtonField label="" className="btn-close" onClick={() => setShowModal(false)} />
-                {/* <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button> */}
               </div>
               <div className="modal-body">
                 <p>The contents of this File will be Lost!</p>
@@ -46,12 +49,6 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
               <div className="modal-footer">
                 <CustomButtonField label="Cancel" className="btn btn-primary" onClick={() => setShowModal(false)} />
                 <CustomButtonField label="Continue" className="btn btn-secondary" onClick={handleConversion} />
-                {/* <button className="btn btn-primary" onClick={() => setShowModal(false)}>
-                  Cancel
-                </button> */}
-                {/* <button className="btn btn-secondary" onClick={handleConversion}>
-                  Continue
-                </button> */}
               </div>
             </div>
           </div>

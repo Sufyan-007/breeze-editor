@@ -7,6 +7,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
   const [url, setUrl] = useState(urlData);
   const [pathParams, setPathParams] = useState([]);
   const [queryParams, setQueryParams] = useState([]);
+  const [pathInputValue, setPathInputValue] = useState('');
   const options = [
     { label: 'abc', value: '', dataSource: 'envVars' },
     { label: 'abc', value: 'dfsdf', dataSource: 'envVars' },
@@ -14,6 +15,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
 
   useEffect(() => {
     setUrl(urlData);
+    setPathInputValue(urlData?.path ? urlData.path.join('/') : '');
   }, [urlData]);
 
   useEffect(() => {
@@ -37,25 +39,11 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
       options.push({ value: key, label: value, dataSource: 'envVars' });
     });
   }
-  // const handleChanges = (prop, event) => {
-  //   const selectedValue = event.target.value;
-  //   const newUrlData = { ...url };
-  //   if (prop === 'path') {
-  //     newUrlData[prop] = selectedValue.split('/');
-  //   } else {
-  //     const selectedOption = event.target.options[event.target.selectedIndex];
-  //     const source = selectedOption.getAttribute('data-source');
-  //     if (source === 'envVars') {
-  //       newUrlData['url_env'] = selectedValue;
-  //     } else newUrlData['url_env'] = '';
-  //     newUrlData[prop] = selectedValue;
-  //   }
-  //   onChange('url', newUrlData);
-  // };
   const handleChanges = (prop, newValue) => {
     const newUrlData = { ...url };
 
     if (prop === 'path') {
+      setPathInputValue(newValue);
       newUrlData[prop] = newValue.split('/');
     } else {
       newUrlData[prop] = newValue;
@@ -158,7 +146,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
           value={method}
           onChange={(e) => handleMethodChange(e)}
           options={[
-            { label: 'Select', value: '' },
+            // { label: 'Select', value: '' },
             { label: 'GET', value: 'GET' },
             { label: 'PUT', value: 'PUT' },
             { label: 'POST', value: 'POST' },
@@ -189,7 +177,8 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
             label: 'Path',
             groupClass: 'form-group mb-2 mx-2 w-50',
           }}
-          value={path ? path.join('/') : ''}
+          // value={path ? path.join('/') : ''}
+          value={pathInputValue}
           onChange={(e) => handleChanges('path', e)}
           onBlur={handlePathParsing}
         />
@@ -221,7 +210,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
                   }}
                   options={[
                     { label: 'Select', value: '' },
-                    { label: 'STATIC', value: 'STATIC' },
+                    // { label: 'STATIC', value: 'STATIC' }, remove static
                     { label: 'USER INPUT', value: 'USER_INPUT' },
                     { label: 'LOCALSTORAGE', value: 'LOCAL_STORAGE' },
                     { label: 'SESSION STORAGE', value: 'SESSION_STORAGE' },
@@ -233,20 +222,26 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
                   }}
                 />
 
-                {para.param_type === 'STATIC' ? (
-                  <CustomTextInput
-                    className=" form-control br-form-control form-control-sm"
-                    placeholder="Value"
-                    config={{
-                      label: 'Value',
-                      groupClass: 'form-group mb-2 mx-2 w-50',
-                    }}
-                    value={para.value}
-                    onChange={(e) => {
-                      handleInputChange('path', index, 'value', e);
-                    }}
-                  />
-                ) : para.param_type === 'LOCAL_STORAGE' || para.param_type === 'SESSION_STORAGE' ? (
+                <CustomSelectField
+                  name="dataTypeSelect"
+                  value={para.data_type || ''}
+                  onChange={(e) => {
+                    handleInputChange('path', index, 'data_type', e);
+                  }}
+                  options={[
+                    { label: 'String', value: 'string' },
+                    { label: 'Numeric', value: 'numeric' },
+                    { label: 'Object', value: 'object' },
+                    { label: 'Boolean', value: 'boolean' },
+                  ]}
+                  className="form-select br-form-select form-select-sm mt-3"
+                  config={{
+                    label: 'Data Type',
+                    groupClass: 'form-group mb-2 mx-2 w-50',
+                  }}
+                />
+
+                {para.param_type === 'LOCAL_STORAGE' || para.param_type === 'SESSION_STORAGE' ? (
                   <CustomTextInput
                     className=" form-control br-form-control form-control-sm"
                     placeholder="Key"

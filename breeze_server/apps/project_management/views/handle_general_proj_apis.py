@@ -1,7 +1,7 @@
 import shutil
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,parser_classes
 from ..utils.validate_add_proj_data import load_proj_data
 from ..utils.get_all_projects import get_all_projects
 from ..utils.start import start_project
@@ -11,7 +11,7 @@ from apps.project_config_management.core.config_files_handlers import add_dirs_c
 from apps.code_generator.core.generate_project import generate_project
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.handle_general_proj_apis_schema import get_all_schema,add_schema,delete_schema
-
+from rest_framework.parsers import MultiPartParser, FormParser
 @swagger_auto_schema(
     method = 'get',
     request_body=None,
@@ -41,11 +41,12 @@ def get_proj_metadata(request, project_id):
         )
         return JsonResponse(app_config, status=200)
     except Exception as e:
-        return JsonResponse({"message": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
     
 @swagger_auto_schema(
     method='post',
-    request_body=add_schema['rb'],
+    request_body=None,
+    manual_parameters=add_schema['form_data'],
     responses={
         200:add_schema['response_200'],
         500:add_schema['response_500']
@@ -53,13 +54,14 @@ def get_proj_metadata(request, project_id):
 )
 @csrf_exempt
 @api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])  # Set the parsers to handle form data
 def add(request):
     try:
         ## 1) Load proj data from UI
         ## 2) Validate proj data
         data = load_proj_data(request)
         if "errors" in data:
-            return JsonResponse(data, status=400)
+            return JsonResponse({'error':'required field missing..', 'res_data': data}, status=400)
         ## 3) Write proj data (app_config.json)
         ## 4) Create default directories objects for given template
         ## 5) Create default config for the main component via proj_config_management
@@ -80,7 +82,7 @@ def add(request):
         response = {"name": data["name"]}
         return JsonResponse(response, status=200)
     except Exception as e:
-        return JsonResponse({"message": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
        
 @swagger_auto_schema(
     method='delete',
@@ -105,6 +107,6 @@ def delete(request, project_id):
         shutil.rmtree(generated_project_path,ignore_errors=False)
     except Exception as e:
         print("error occured: ", e)
-        return JsonResponse({"message": "Failed to delete the project"}, status=500)
+        return JsonResponse({"error": "Failed to delete the project"}, status=500)
     # here parent_id is parent name itself 
     return JsonResponse({"message": f"{project_id} deleted successfully"}, status=200)

@@ -1,6 +1,5 @@
 import json
 import os
-import re
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework.permissions import AllowAny
@@ -8,23 +7,21 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from ...common.constants.enums.ResourceCategory import (
     ResourceCategory,
-    ThirdPartyLibraryKeys,
 )
 from ...common.utils.file_helpers.config_handler import read_config_file
-from ...common.constants.consts import (
+from apps.common.constants.consts import (
     CONFIG_PATH,
     THIRD_PARTY_CONFIG_PATH,
     CLIENT_API,
-    CUSTOMIZED_PROJ,
+    EXTERNAL_COMPONENTS_CONFIG,
     MODEL,
+    INDEX,
+    ROUTING,
+    COMPONENT,
 )
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.query_resource_schema import manage_resource_schema
 from ...common.utils.file_helpers.json_handler import read_json_file as read_file
-
-# from ...common.constants
-# found_keys=[]
-
 
 @swagger_auto_schema(
     method="post",
@@ -41,6 +38,10 @@ from ...common.utils.file_helpers.json_handler import read_json_file as read_fil
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def manage_resource(request, param):
+    
+    
+    
+    
     try:
         projectname = param
         data = json.loads(request.body)
@@ -59,7 +60,12 @@ def manage_resource(request, param):
         selected_data = {}
 
         category = category.lower()
-
+        
+        dir_path = os.path.join(CONFIG_PATH,projectname)
+        
+        if not os.path.isdir(dir_path):
+            return JsonResponse({"error":"project not found"},status = 400)
+        
         if not category:
             return JsonResponse({"error": "category is required"}, status=400)
 
@@ -73,20 +79,20 @@ def manage_resource(request, param):
             ResourceCategory.SERVICES.value,
         ]:
             if not resource:
-                selected_data = get_json_config_data("index", category, projectname)
+                selected_data = get_json_config_data(INDEX, category, projectname)
             else:
                 selected_data = get_json_config_data(resource, category, projectname)
 
             if selected_data:
                 selected_data = selected_data["data"]
             else:
-                return JsonResponse({"error": "File not present"}, status=400)
+                return JsonResponse({"error":"check category name or project name"}, status=400)
             # return JsonResponse({"message": f"{selected_data}"}, status=200)
 
         if category in [ResourceCategory.THIRD_PARTY.value]:
             if not libname or not libversion:
                 if not resource:
-                    config_path = os.path.join(THIRD_PARTY_CONFIG_PATH, "index")
+                    config_path = os.path.join(THIRD_PARTY_CONFIG_PATH,INDEX)
                     selected_data = read_file(config_path)
                 else:
                     return JsonResponse(
@@ -100,12 +106,12 @@ def manage_resource(request, param):
                         THIRD_PARTY_CONFIG_PATH, library, "component"
                     )
                     if not resource:
-                        config_path = os.path.join(config_path, "index")
+                        config_path = os.path.join(config_path, INDEX)
                         selected_data = read_file(config_path)
                         # print(selected_data)
                     else:
                         file_name = ""
-                        with open(f"{config_path}/index.json", "rb") as index_config:
+                        with open(f"{config_path}/{INDEX}.json", "rb") as index_config:
                             index_data = json.load(index_config)
                             for key, value in index_data.items():
                                 if value == resource:
@@ -155,7 +161,7 @@ def manage_resource(request, param):
                 try:
                     if not resource:
                         config_path = os.path.join(
-                            CONFIG_PATH, projectname, CLIENT_API, module, "index"
+                            CONFIG_PATH, projectname, CLIENT_API, module, INDEX
                         )
                         selected_data = read_file(config_path)
                     else:
@@ -190,13 +196,13 @@ def manage_resource(request, param):
             folder_name = libname
             if not resource:
                 config_path = os.path.join(
-                    CONFIG_PATH, projectname, CUSTOMIZED_PROJ, folder_name, "index"
+                    CONFIG_PATH, projectname, EXTERNAL_COMPONENTS_CONFIG, folder_name, INDEX
                 )
                 selected_data = read_file(config_path)
             elif resource:
                 try:
                     config_path = os.path.join(
-                        CONFIG_PATH, projectname, CUSTOMIZED_PROJ, folder_name, resource
+                        CONFIG_PATH, projectname, EXTERNAL_COMPONENTS_CONFIG, folder_name, resource
                     )
                     selected_data = read_file(config_path)
 
@@ -210,7 +216,7 @@ def manage_resource(request, param):
                     return JsonResponse(
                         {"error": "please provide module first"}, status=400
                     )
-                config_path = os.path.join(CONFIG_PATH, projectname, MODEL, "index")
+                config_path = os.path.join(CONFIG_PATH, projectname, MODEL, INDEX)
                 selected_data = read_file(config_path)
                 # return JsonResponse({"error":"resource are misseing"},status = 400)
 
@@ -224,6 +230,45 @@ def manage_resource(request, param):
                         return JsonResponse(
                             {"error": "resource is not available"}, status=400
                         )
+                        
+        if category in [ResourceCategory.ROUTING.value]:
+            try:
+                config_path = os.path.join(
+                    CONFIG_PATH, projectname, ROUTING
+                )
+                selected_data = read_file(config_path)
+                
+                comp_path = os.path.join(CONFIG_PATH,projectname,COMPONENT,INDEX)
+                comp_data = read_file(comp_path)
+                # print(selected_data)
+                for key,value in selected_data.items():
+                    # print(value["componentId"])
+                    try:
+                        value["componentName"]=comp_data[value["componentId"]]
+                    except Exception as e:
+                        return JsonResponse(
+                            {"error": "component are not present in module"}, status=400
+                        )
+                
+                if resource:
+                    selected_data=selected_data[resource]
+                
+                if not resource:
+                    for key in list(selected_data.keys()):  # Iterate over keys to modify each item
+                        selected_data[key] = {
+                            "id":selected_data[key].get("id"),
+                            "parentId":selected_data[key].get("parentId"),
+                            "path":selected_data[key].get("path"),
+                            "componentId": selected_data[key].get("componentId"),
+                            "children": selected_data[key].get("children", []),
+                            "componentName":selected_data[key].get("componentName")
+                        }
+                    
+            except Exception as e:
+                return JsonResponse(
+                    {"error": "files are not present in module"}, status=400
+                )
+        
 
         if select:
             if category in [
@@ -241,9 +286,9 @@ def manage_resource(request, param):
                             key: get_nested_value(selected_data, key) for key in select
                         }
                     except Exception as e:
-                        return JsonResponse({"error2": str(e)}, status=400)
+                        return JsonResponse({"error": str(e)}, status=400)
 
-            elif category in [ResourceCategory.API_CLIENT.value]:
+            elif category in [ResourceCategory.API_CLIENT.value,ResourceCategory.ROUTING.value]:
                 if module and not (files or resource):
                     return JsonResponse(
                         {"error": "module has no functionality of select"}, status=400
@@ -255,7 +300,7 @@ def manage_resource(request, param):
                             key: get_nested_value(selected_data, key) for key in select
                         }
                     except Exception as e:
-                        return JsonResponse({"error2": str(e)}, status=400)
+                        return JsonResponse({"error": str(e)}, status=400)
 
             elif category in [ResourceCategory.MODEL.value]:
                 if module or resource:

@@ -22,6 +22,8 @@ NEW_LINE_CHAR = "\n"
 THIRD_PARTY_CONFIG_PATH = "third_party_configs"
 
 CONFIG_PATH = "configurations"
+EXTERNAL_COMPONENTS = "external_components"
+EXTERNAL_COMPONENTS_CONFIG = "external_components_config"
 
 PORT = 4000
 # should be used after confirming the genration path status
@@ -29,7 +31,9 @@ PROJECT_GENERATION_PATH = "generated_projects"
 
 CUSTOM_UPLOADS = "custom_uploads"
 CLIENT_API = "api_client_intermediate_json"
-CUSTOMIZED_PROJ = "customized_proj_config"
 MODEL = "models"
+INDEX = "index"
+ROUTING = "routing_config"
+COMPONENT = "components"
 
 APP_CONFIG_PATH = "configurations"

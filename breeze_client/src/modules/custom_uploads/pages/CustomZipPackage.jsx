@@ -38,8 +38,10 @@ function CustomZipPackagePage() {
   console.log(components, 'components');
   //fetch the list of zip files on component mount
   useEffect(() => {
-    dispatch(fetchZipFilesAction(projectName));
-  }, [dispatch, projectName]);
+    if (zipFiles.length === 0) {
+      dispatch(fetchZipFilesAction(projectName));
+    }
+  }, [dispatch, projectName, zipFiles]);
 
   const actions = (item) => (
     <>

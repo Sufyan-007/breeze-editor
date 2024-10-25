@@ -16,6 +16,7 @@ from ..utils.dependencies_manager import DependencyManager
 from ..utils import static_code
 from apps.project_management.core.resource_upload_service import save_file
 
+
 def generate_project(project_config):
     
     project_name = project_config['name']
@@ -168,6 +169,9 @@ def write_main_app_and_routing_component(app_config, routing_config):
     
     # write Main.jsx component (in src/components folder of generated project)
     write_component(app_config, main_comp_config_data, comp_config_index)
+    
+    
+    
     
     directory_manager= DirectoryManager(app_config['name'])
     

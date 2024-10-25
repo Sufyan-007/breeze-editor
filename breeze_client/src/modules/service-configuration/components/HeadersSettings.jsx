@@ -54,8 +54,8 @@ function HeadersSetting({ headerData, onChange }) {
                 value={header.type}
                 onChange={(e) => handleInputChange(index, 'type', e)}
                 options={[
-                  { label: 'Select', value: '' },
-                  { label: 'STATIC', value: 'STATIC' },
+                  // { label: 'Select', value: '' },
+                  // { label: 'STATIC', value: 'STATIC' },
                   { label: 'USER INPUT', value: 'USER_INPUT' },
                   { label: 'LOCALSTORAGE', value: 'LOCAL_STORAGE' },
                   { label: 'SESSION STORAGE', value: 'SESSION_STORAGE' },
@@ -66,7 +66,24 @@ function HeadersSetting({ headerData, onChange }) {
                   groupClass: 'form-group mb-2 mx-2 w-50',
                 }}
               />
-
+              <CustomSelectField
+                name="dataTypeSelect"
+                value={header.data_type || ''}
+                onChange={(e) => {
+                  handleInputChange(index, 'data_type', e);
+                }}
+                options={[
+                  { label: 'String', value: 'string' },
+                  { label: 'Numeric', value: 'numeric' },
+                  { label: 'Object', value: 'object' },
+                  { label: 'Boolean', value: 'boolean' },
+                ]}
+                className="form-select br-form-select form-select-sm mt-3"
+                config={{
+                  label: 'Data Type',
+                  groupClass: 'form-group mb-2 mx-2 w-50',
+                }}
+              />
               {header.type === 'STATIC' ? (
                 <CustomTextInput
                   className=" form-control br-form-control form-control-sm"

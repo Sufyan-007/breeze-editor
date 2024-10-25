@@ -23,12 +23,18 @@ function CustomSelectField({ config, name, value, onChange, options, className, 
         }
         {...rest}
       >
-        {availableOptions &&
-          availableOptions.map((option, index) => (
-            <option key={index} value={option.value} data-source={option.dataSource}>
-              {option.label}
-            </option>
-          ))}
+        {availableOptions ? (
+          <>
+            {/* <option value="">{'Select'}</option> */}
+            {availableOptions.map((option, index) => (
+              <option key={index} value={option.value} data-source={option.dataSource}>
+                {option.label}
+              </option>
+            ))}
+          </>
+        ) : (
+          <option value={''}>{'No Option Available'}</option>
+        )}
       </select>
     </div>
   );
@@ -40,6 +46,7 @@ CustomSelectField.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   className: PropTypes.string,
+  sendSelectedOption: PropTypes.bool,
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,

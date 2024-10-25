@@ -166,3 +166,15 @@
 .br-cursor-pointer {
   cursor: pointer;
 }
+
+::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+  background-color: #D8D7DD;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A5A5A4;
+  border-radius: 3px;
+}
