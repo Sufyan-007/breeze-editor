@@ -9,7 +9,7 @@ from ...common.constants.enums.ResourceCategory import (
     ResourceCategory,
 )
 from ...common.utils.file_helpers.config_handler import read_config_file
-from ...common.constants.consts import (
+from apps.common.constants.consts import (
     CONFIG_PATH,
     THIRD_PARTY_CONFIG_PATH,
     CLIENT_API,

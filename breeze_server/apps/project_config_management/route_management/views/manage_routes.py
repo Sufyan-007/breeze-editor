@@ -26,7 +26,7 @@ def get_all_child_routes(request,project_id):
     depth = request.GET.get('depth', "1")
     target_id = None if target_id in ['null', '""', "''", "", ''] else target_id
     nodes = get_node(project_id,TreeType["ROUTES"],target_id, depth = int(depth))
-    include_all_routes_accessory_data(project_id, nodes.get('children'))
+    include_all_routes_accessory_data(project_id, nodes.get('children'), transform_all=True)
     return JsonResponse(nodes, status=200)
 
 
@@ -43,6 +43,7 @@ def get_all_child_routes(request,project_id):
 def get_all_routes_fullpath(request,project_id):
     target_id = request.GET.get('target_id', None)
     nodes = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id,'path')
+    nodes = [{**node, 'path': '/'+node['path'].strip('/')} for node in nodes]
     data = {
         "nodes" : nodes
     }
@@ -126,14 +127,9 @@ def delete_route(request, project_id):
         data = json.loads(request.body.decode("utf-8"))
         res = del_route(data.get('id'), project_id)
         config_data = res['config']
-        # create clean and properly formatted config for code generation
-        transform_route_config(config_data)
-        # now it isn't useful since we won't have a full path as a key
-        # add_params_to_route_object()
-        rewrite_clean_route_config(project_id, config_data)
-        process_route_config(project_id, config_data)        
-        include_all_routes_accessory_data(project_id, list(config_data.values()))
-        return JsonResponse(config_data, status=200)
+        rewrite_clean_route_config(project_id, config_data, data['id'])
+        process_route_config(project_id, config_data)
+        return JsonResponse({'message': 'deletion operation successfully completed!', 'route_id': data['id']}, status=200)
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)

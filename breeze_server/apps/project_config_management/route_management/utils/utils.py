@@ -11,12 +11,13 @@ def generate_layout_route_key():
     # Generate a unique key for layout routes
     return f"/layout__{''.join(random.choices(string.ascii_lowercase + string.digits, k=9))}__"
 
-def include_all_routes_accessory_data(project_name, nodes):
+def include_all_routes_accessory_data(project_name, nodes, transform_all=False):
     app_config_dir = f"{CONFIG_PATH}/{project_name}"
     comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
     
     for route_obj in nodes:
         route_obj['componentName'] = comp_config_index[route_obj['componentId']]
+    reverse_func_implementation_of_route(nodes) if transform_all else ''
     return nodes
 
 def process_route_config(project_name, routing_config={}):
@@ -47,12 +48,11 @@ def get_routing_config(project_id="", routing_config={}):
     return routing_config
     
 def rewrite_clean_route_config(project_name, updated_route_config, route_id):
-    for route in list(updated_route_config.values()):
-        if route_id == route.get('id'):
-            keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
-            for key in keys_to_remove:
-                del route[key]
-            break
+    if route_id in updated_route_config:
+        route = updated_route_config[route_id]
+        keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
+        for key in keys_to_remove:
+            del route[key]
         
     # line as per this scenario: project_id and project are same for the time being
     routing_config_path = f"{CONFIG_PATH}/{project_name}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
@@ -158,21 +158,34 @@ def create_route_property_sub_config(function, id):
         return None
 
 def transform_route_config(original_config, route_id):
-    for route in list(original_config.values()):
-        if route_id == route.get('id'):
-            print("==========transform_route_config============")
-            print(route)
-            route["action"] = create_route_property_sub_config(route.get("action", None), route['path']+'-action')
-            route["loader"] = create_route_property_sub_config(route.get("loader", None), route['path']+'-loader')
-            route["lazy"] = create_route_property_sub_config(route.get("lazy", None), route['path']+'-lazy')
-            route["shouldRevalidate"] = create_route_property_sub_config(route.get("shouldRevalidate", None), route['path']+'-shouldRevalidate')
-            break
+    if route_id in original_config:
+        print("==========transform_route_config============")
+        route = original_config[route_id]
+        print(route)
+        route["action"] = create_route_property_sub_config(route.get("action", None), route['path']+'-action')
+        route["loader"] = create_route_property_sub_config(route.get("loader", None), route['path']+'-loader')
+        route["lazy"] = create_route_property_sub_config(route.get("lazy", None), route['path']+'-lazy')
+        route["shouldRevalidate"] = create_route_property_sub_config(route.get("shouldRevalidate", None), route['path']+'-shouldRevalidate')
+
+def reverse_func_implementation_of_route(route_objects):
+    props_to_be_handled = ["action", "loader", "lazy", "shouldRevalidate"]
+    for route_obj in route_objects:
+        for prop in props_to_be_handled:
+            if route_obj.get(prop) not in [None, ""]:
+                # Extract parameter names from the JSON data
+                params = ', '.join(param['name'] for param in route_obj[prop]['implementation']['parameters']['list'])
+                # Extract the function body
+                function_body = route_obj[prop]['implementation']['functionBody'].replace('\"', '')
+                is_param_destructured = route_obj[prop]['implementation']['parameters']['destructured']
+                params = f"{{{params}}}" if is_param_destructured else params
+                result = f"({params}) => {{{function_body}}}"
+                route_obj[prop] = result
+    return route_objects
 
 def handle_advance_prop_details(route_config, route_obj):
     props_to_be_handled = ["action", "loader", "lazy", "shouldRevalidate"]
-    for route in list(route_config.values()):
-        if route['id'] == route_obj.get('id'):
-            for prop in props_to_be_handled:
-                if route.get(prop) != None:
-                    route[prop] = route_obj[prop]
-            break
+    route_obj_id = route_obj.get('id')
+    if route_obj.get('id') in route_config:
+        for prop in props_to_be_handled:
+            if route_config[route_obj_id].get(prop) not in [None, ""]:
+                route_config[route_obj_id][prop] = route_obj[prop]
