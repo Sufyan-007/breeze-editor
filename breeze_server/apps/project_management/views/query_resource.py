@@ -13,7 +13,7 @@ from ...common.constants.consts import (
     CONFIG_PATH,
     THIRD_PARTY_CONFIG_PATH,
     CLIENT_API,
-    CUSTOMIZED_PROJ,
+    EXTERNAL_COMPONENTS_CONFIG,
     MODEL,
     INDEX,
     ROUTING,
@@ -196,13 +196,13 @@ def manage_resource(request, param):
             folder_name = libname
             if not resource:
                 config_path = os.path.join(
-                    CONFIG_PATH, projectname, CUSTOMIZED_PROJ, folder_name, INDEX
+                    CONFIG_PATH, projectname, EXTERNAL_COMPONENTS_CONFIG, folder_name, INDEX
                 )
                 selected_data = read_file(config_path)
             elif resource:
                 try:
                     config_path = os.path.join(
-                        CONFIG_PATH, projectname, CUSTOMIZED_PROJ, folder_name, resource
+                        CONFIG_PATH, projectname, EXTERNAL_COMPONENTS_CONFIG, folder_name, resource
                     )
                     selected_data = read_file(config_path)
 

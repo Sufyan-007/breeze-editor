@@ -6,7 +6,7 @@ class ResourceCategory(Enum):
     SERVICES = "services"
     THIRD_PARTY = "third_party"
     API_CLIENT = "api_client"
-    CUSTOMIZED_PROJ = "customized_proj_config"
+    CUSTOMIZED_PROJ = "external_components_config"
     MODEL = "models"
     ROUTING = "routing"
 

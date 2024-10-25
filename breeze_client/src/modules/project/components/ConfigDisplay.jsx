@@ -10,7 +10,7 @@ function ConfigDisplay({ configType }) {
     switch (configType) {
       case 'ROUTING':
         return <RoutingConfig />;
-      case 'CUSTOM_UPLOAD':
+      case 'EXTERNAL_COMP':
         return <CustomZipPackagePage />;
       case 'SERVICE-CONFIG':
         return <ServiceConfiguration />;

@@ -226,12 +226,13 @@ function ProjectSidebar() {
           </ul>
         </div>
         <div className="bottom-nav py-2">
-          <a href="#">
+          <a>
             <img
               src={logos.settingsIcon}
               alt="settings"
               onClick={() =>
                 setSelectedNode({
+                  name: 'Settings',
                   tag: 'SETTINGS',
                 })
               }
