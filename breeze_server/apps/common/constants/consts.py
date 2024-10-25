@@ -31,5 +31,8 @@ PROJECT_GENERATION_PATH = "generated_projects"
 
 CLIENT_API = "api_client_intermediate_json"
 MODEL = "models"
+INDEX = "index"
+ROUTING = "routing_config"
+COMPONENT = "components"
 
 APP_CONFIG_PATH = "configurations"
