@@ -27,7 +27,7 @@ from ....directory_management.core.directory_management_service import Directory
 @permission_classes([AllowAny])
 def generate_service_config(request, collectionType, project_id):
         folder_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}" 
-        filename = ''
+
         try:
             json_file = request.FILES['file']
             json_data = json_file.read().decode("utf-8")
@@ -40,13 +40,14 @@ def generate_service_config(request, collectionType, project_id):
             #     return JsonResponse({"data": model_dict, "filename": filename}, status=201)
 
             if collectionType.lower() == 'openapi' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
-                converted_data = prepare_api_models(json_data, project_id)
+                isJson = json_file.name.endswith('.json')
+                converted_data = prepare_api_models(json_data, project_id,isJson)
                 module_id = converted_data.get("id")
                 module_name = converted_data.get("title")
                 files_with_apis, is_erroroneous = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
                 if not is_erroroneous:
                     directory_manager = DirectoryManager(project_name=project_id)
-                    newNode = directory_manager.add_node_to_config(
+                    directory_manager.add_node_to_config(
                         parent_id= "SERVICES",
                         tag= "SERVICES",
                         name=module_name,
