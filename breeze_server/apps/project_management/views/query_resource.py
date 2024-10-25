@@ -252,6 +252,17 @@ def manage_resource(request, param):
                 
                 if resource:
                     selected_data=selected_data[resource]
+                
+                if not resource:
+                    for key in list(selected_data.keys()):  # Iterate over keys to modify each item
+                        selected_data[key] = {
+                            "id":selected_data[key].get("id"),
+                            "parentId":selected_data[key].get("parentId"),
+                            "path":selected_data[key].get("path"),
+                            "componentId": selected_data[key].get("componentId"),
+                            "children": selected_data[key].get("children", []),
+                            "componentName":selected_data[key].get("componentName")
+                        }
                     
             except Exception as e:
                 return JsonResponse(
