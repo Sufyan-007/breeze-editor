@@ -1,12 +1,14 @@
 import Layout from '../../../common/layout/Layout';
 import ProjectDisplay from '../components/ProjectDisplay';
 import ProjectSidebar from '../components/ProjectSidebar';
+import TabBar from '../components/TabBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { BreezeLoader } from '../../../common/display';
 import { TreeProvider } from '../context/TreeContext';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { resetStore } from '../../../store/actions';
+import { TabProvider } from '../context/TabContext';
 
 function ProjectPage() {
   const projectStatus = useSelector((state) => state.project.status);
@@ -24,7 +26,12 @@ function ProjectPage() {
       <TreeProvider>
         <Layout
           sidebar={<ProjectSidebar />}
-          mainContent={<ProjectDisplay />}
+          mainContent={
+            <TabProvider>
+              <TabBar />
+              <ProjectDisplay />
+            </TabProvider>
+          }
           currentPage="project"
           projectName={projectName}
         />

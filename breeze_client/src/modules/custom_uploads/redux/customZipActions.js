@@ -6,7 +6,6 @@ export const uploadZipFileAction = createAsyncThunk(
   'zip/uploadZipFile',
   async ({ formData, projectName }, { rejectWithValue }) => {
     try {
-     
       const result = await uploadZipFile(formData, projectName);
       return result;
     } catch (error) {
@@ -19,7 +18,6 @@ export const uploadZipFileAction = createAsyncThunk(
 export const fetchZipFilesAction = createAsyncThunk('zip/fetchZipFiles', async (projectName, { rejectWithValue }) => {
   try {
     const files = await fetchZipFiles(projectName);
-  
     return files;
   } catch (error) {
     return rejectWithValue(error.message);
@@ -31,7 +29,6 @@ export const deleteZipFileAction = createAsyncThunk(
   'zip/deleteZipFile',
   async ({ fileName, projectName }, { rejectWithValue }) => {
     try {
-     
       const result = await deleteFile(fileName, projectName);
       return result;
     } catch (error) {

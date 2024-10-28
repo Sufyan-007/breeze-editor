@@ -5,6 +5,7 @@ import BreezeStudio from '../../assets/images/Breeze Studio.png';
 import Avatar from '../../assets/images/Ellipse 1.png';
 import VectorIcon from '../../assets/images/Vector.png';
 import darkLightModeSwitch from '../../assets/svgs/dark-light-mode-switch.svg';
+import { Link } from 'react-router-dom';
 function Navbar({ currentPage = 'index', projectName = '' }) {
   const { toggleTheme } = useContext(ThemeContext);
 
@@ -17,9 +18,9 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
       <div className="container-fluid">
         <ol className="breadcrumb mb-0" style={{ '--bs-breadcrumb-divider-color': 'var(--color-text)' }}>
           <li className="breadcrumb-item mb-1">
-            <a href="/">
+            <Link to={'/'}>
               <img src={BreezeStudio} alt="logo" />
-            </a>
+            </Link>
           </li>
 
           {currentPage === 'project' && (

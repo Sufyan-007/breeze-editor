@@ -57,7 +57,8 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
             append_to_dict_file(file_path, resultant_model)
     except Exception as e:
         print(traceback.format_exc())
-        return {"error": str(e)}
+        print("error: ",  str(e))
+        raise Exception(str(e))
 
 
 def add_auth_function(auth_model, appName, moduleId,operation):

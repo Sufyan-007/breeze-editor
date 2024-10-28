@@ -10,6 +10,8 @@ export const getIconClass = (extension) => {
       return { iconClass: 'bi-filetype-html', color: '#E34F26' };
     case 'css':
       return { iconClass: 'bi-filetype-css', color: '#80C2FF' };
+    case 'scss':
+      return { iconClass: 'bi-filetype-scss', color: '#80C2FF' };
     default:
       return { iconClass: 'bi-file-earmark', color: '#6C757D' };
   }

@@ -34,12 +34,10 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
   useEffect(() => {
     const fetchRoutes = async () => {
       const res = await getAllRoutesFullPath(projectName);
-      const formattedRoutes = res?.nodes
-        .map((node) => ({
-          label: node.path,
-          value: node.id,
-        }))
-        .filter((route) => route.label !== '/');
+      const formattedRoutes = res?.nodes.map((node) => ({
+        label: node.path,
+        value: node.id,
+      }));
       setAvailableRoutes([{ label: 'Select Route', value: '' }, ...formattedRoutes]);
     };
     fetchRoutes();

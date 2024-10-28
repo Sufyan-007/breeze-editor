@@ -35,7 +35,7 @@ urlpatterns = [
     path('api/directory/<str:project_id>/',include('apps.directory_management.urls')),
     path('api/code-gen/<str:project_id>/', include('apps.code_generator.urls')),
     path('api/auth/',include('apps.authentication.urls')),
-    path('api/swagger', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
+    path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
     path('cached/swagger/', schema_view.with_ui('swagger', cache_timeout=None), name='cschema-swagger-ui'),
 

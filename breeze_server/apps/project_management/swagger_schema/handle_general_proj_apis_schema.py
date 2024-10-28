@@ -41,20 +41,66 @@ get_all_schema = {
 }
 
 add_schema ={
-    'rb':openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'name':openapi.Schema(type=openapi.TYPE_STRING,description='name of project'),
-            'description':openapi.Schema(type=openapi.TYPE_STRING,description='null'),
-            'author':openapi.Schema(type=openapi.TYPE_STRING,description='author name'),
-            'framework':openapi.Schema(type=openapi.TYPE_STRING,description='name of framework used in the project'),
-            'language':openapi.Schema(type=openapi.TYPE_STRING,description='name of programming language used in the project'),
-            'styling':openapi.Schema(type=openapi.TYPE_STRING,description='name of styling used in the project'),
-            'buildTool':openapi.Schema(type=openapi.TYPE_STRING,description='command to create app'),
-            'logo':openapi.Schema(type=openapi.TYPE_FILE,description='logo file'),
-            'projectPath':openapi.Schema(type=openapi.TYPE_STRING,description='path of project')
-        }
+    # 'rb':openapi.Schema(
+    #     type=openapi.TYPE_OBJECT,
+    #     properties={
+    #         'name':openapi.Schema(type=openapi.TYPE_STRING,description='name of project'),
+    #         'description':openapi.Schema(type=openapi.TYPE_STRING,description='null'),
+    #         'author':openapi.Schema(type=openapi.TYPE_STRING,description='author name'),
+    #         'framework':openapi.Schema(type=openapi.TYPE_STRING,description='name of framework used in the project'),
+    #         'language':openapi.Schema(type=openapi.TYPE_STRING,description='name of programming language used in the project'),
+    #         'styling':openapi.Schema(type=openapi.TYPE_STRING,description='name of styling used in the project'),
+    #         'buildTool':openapi.Schema(type=openapi.TYPE_STRING,description='command to create app'),
+    #         'logo':openapi.Schema(type=openapi.TYPE_FILE,description='logo file'),
+    #         'technology':openapi.Schema(type=openapi.TYPE_STRING,description='name of technology')
+    #     }
+    # ),
+    'form_data' : [
+    openapi.Parameter(
+        'name',
+        in_=openapi.IN_FORM,
+        type=openapi.TYPE_STRING,
+        description='name of project',
+        required=True
+        
     ),
+    openapi.Parameter(
+        'author',
+        in_=openapi.IN_FORM,
+        type=openapi.TYPE_STRING,
+        description='author name',
+        required=True
+    ),
+    openapi.Parameter(
+        'language',
+        in_=openapi.IN_FORM,
+        type=openapi.TYPE_STRING,
+        description='name of programming language used in the project',
+        required=True,
+    ),
+    openapi.Parameter(
+        'styling',
+        in_=openapi.IN_FORM,
+        type=openapi.TYPE_STRING,
+        description='name of styling used in the project',
+        required=True
+    ),
+    openapi.Parameter(
+        'buildTool',
+        in_=openapi.IN_FORM,
+        type=openapi.TYPE_STRING,
+        description='command to create app',
+        required = True
+    ),
+    openapi.Parameter(
+        'technology',
+        in_=openapi.IN_FORM,
+        type=openapi.TYPE_STRING,
+        description='name of technology',
+        required=True
+    )
+],
+
     'response_200':openapi.Response(
             description='ok',
             schema=openapi.Schema(
@@ -78,8 +124,8 @@ add_schema ={
 delete_schema ={
     'parameters':[
         openapi.Parameter(
-            name='param',
-            description='name of project',
+            name='project_id',
+            description='id of project',
             in_=openapi.IN_PATH,
             type=openapi.TYPE_STRING
         )

@@ -29,11 +29,13 @@ function CustomZipPackagePage() {
 
   //fetch the list of zip files on component mount
   useEffect(() => {
-    dispatch(fetchZipFilesAction(projectName));
-  }, [dispatch, projectName]);
+    if (zipFiles.length === 0) {
+      dispatch(fetchZipFilesAction(projectName));
+    }
+  }, [dispatch, projectName, zipFiles]);
 
   if (status === 'loading') {
-    return ;
+    return;
   }
 
   if (status === 'failed') {
@@ -41,7 +43,7 @@ function CustomZipPackagePage() {
   }
   const actions = (item) => (
     <i
-      class="bi bi-trash"
+      className="bi bi-trash"
       alt="Delete icon"
       onClick={() => {
         setFileToDelete(item);
@@ -185,8 +187,6 @@ function CustomZipPackagePage() {
     fileName: folder.name,
     lastModified: folder.lastModified,
   }));
-
-
 
   return (
     <div>
