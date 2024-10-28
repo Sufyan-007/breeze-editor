@@ -18,6 +18,7 @@ from apps.common.constants.consts import (
     INDEX,
     ROUTING,
     COMPONENT,
+    RESOURCE
 )
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.query_resource_schema import manage_resource_schema
@@ -269,7 +270,22 @@ def manage_resource(request, param):
                     {"error": "files are not present in module"}, status=400
                 )
         
-
+        if category in [ResourceCategory.RESOURCE.value]:
+             try:
+                config_path = os.path.join(
+                    CONFIG_PATH, projectname, RESOURCE
+                )
+                selected_data = read_file(config_path)
+                
+                if resource:
+                    selected_data=selected_data[resource]
+                    
+             except Exception as e:
+                return JsonResponse(
+                    {"error": "files are not present in module"}, status=400
+                )        
+                    
+                    
         if select:
             if category in [
                 ResourceCategory.COMPONENTS.value,
@@ -288,7 +304,7 @@ def manage_resource(request, param):
                     except Exception as e:
                         return JsonResponse({"error": str(e)}, status=400)
 
-            elif category in [ResourceCategory.API_CLIENT.value,ResourceCategory.ROUTING.value]:
+            elif category in [ResourceCategory.API_CLIENT.value,ResourceCategory.ROUTING.value,ResourceCategory.RESOURCE.value]:
                 if module and not (files or resource):
                     return JsonResponse(
                         {"error": "module has no functionality of select"}, status=400
