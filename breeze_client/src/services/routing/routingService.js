@@ -10,13 +10,11 @@ export async function getAllRoutesFullPath(projectName) {
   }
 }
 
-export async function getRoutingConfig(projectName, parentId = null) {
-  let url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/routes/get-childs/`;
-  if (parentId) {
-    url += `?target_id=${parentId}`;
-  }
+export async function getRoutingConfig(projectName) {
+  const payload = { category: 'routing' };
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/query_resource/${projectName}/`;
   try {
-    const response = await callApiClient(url, 'GET');
+    const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
     return response;
   } catch (error) {
     console.log(error);
@@ -47,6 +45,17 @@ export async function deleteRoute(projectName, payload) {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/routes/delete/`;
   try {
     const response = await callApiClient(url, 'DELETE', payload);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getRouteDetails(projectName, resource) {
+  const payload = { category: 'routing', resource: resource };
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/query_resource/${projectName}/`;
+  try {
+    const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
     return response;
   } catch (error) {
     console.log(error);
