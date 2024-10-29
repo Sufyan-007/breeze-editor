@@ -1,17 +1,64 @@
 import PropTypes from 'prop-types';
-function CustomTextInput({ name, value, onChange, config, className, placeholder = '', required, ...rest }) {
+import { useState, useEffect } from 'react';
+import { validator } from '../../utils/Validator';
+
+function CustomTextInput({
+  name,
+  value,
+  onChange,
+  config,
+  className,
+  placeholder = '',
+  isSubmitted = false,
+  customValidations = [],
+  ...rest
+}) {
+  const [hasTouched, setHasTouched] = useState(false);
+  const hasRequiredValidation = customValidations.includes(validator.REQUIRED);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (hasTouched || isSubmitted) {
+      const validationError = validateField(value);
+      setError(validationError);
+    }
+  }, [value, hasTouched, isSubmitted]);
+
+  const validateField = (inputValue) => {
+    for (let validate of customValidations) {
+      const error = validate(inputValue);
+      if (error) {
+        return error;
+      }
+    }
+    return '';
+  };
+
+  const handleBlur = () => {
+    setHasTouched(true);
+    const validationError = validateField(value);
+    setError(validationError);
+  };
+
+  const handleChange = (e) => {
+    onChange(e.target.value);
+    const validationError = validateField(e.target.value);
+    setError(validationError);
+  };
+
   return (
     <div className={config ? config.groupClass : 'form-group'}>
       {config && config.label && (
         <label className={config.labelClass || 'form-label br-text-primary med-font fw-semibold'}>
-          {config.label} {required && <span className="text-danger"> *</span>}
+          {config.label} {hasRequiredValidation && <span className="text-danger"> *</span>}
         </label>
       )}
       <input
         type="text"
         name={name}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
+        onBlur={handleBlur}
         className={
           config ? (config.className ? config.className : 'form-control br-form-control form-control-sm') : className
         }
@@ -19,6 +66,7 @@ function CustomTextInput({ name, value, onChange, config, className, placeholder
         disabled={config?.disabled || false}
         {...rest}
       />
+      {error && <p className="small-font text-danger mb-0">{error}</p>}
     </div>
   );
 }
@@ -27,10 +75,11 @@ CustomTextInput.propTypes = {
   config: PropTypes.any,
   name: PropTypes.string.isRequired,
   value: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
   className: PropTypes.string,
   placeholder: PropTypes.string,
-  required: PropTypes.bool,
+  isSubmitted: PropTypes.bool,
+  customValidations: PropTypes.arrayOf(PropTypes.func),
 };
 
 export default CustomTextInput;

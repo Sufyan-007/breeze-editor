@@ -1,9 +1,8 @@
-
 import PropTypes from 'prop-types';
 import './BreezeModal.css';
 import { useEffect, useRef } from 'react';
 
-const CustomModal = ({ isOpen, onClose, header, footer, size = 'lg', children }) => {
+const CustomModal = ({ isOpen, onClose, header, footer, size = 'lg', children, afterClosed = () => {} }) => {
   const ref = useRef();
 
   const handleClose = (e) => {
@@ -23,6 +22,7 @@ const CustomModal = ({ isOpen, onClose, header, footer, size = 'lg', children })
       div.classList.remove('show');
       setTimeout(() => {
         div.style.display = 'none';
+        afterClosed();
       }, 100);
     }
   }, [isOpen, ref]);
@@ -30,7 +30,7 @@ const CustomModal = ({ isOpen, onClose, header, footer, size = 'lg', children })
   return (
     <div
       className={`modal modal-${size} fade `}
-      style={{ display: 'none' }}
+      style={{ display: 'none', zIndex: 9999 }}
       ref={ref}
       aria-hidden={true}
       tabIndex="-1"
@@ -97,6 +97,7 @@ CustomModal.propTypes = {
   }),
   size: PropTypes.string,
   children: PropTypes.node.isRequired,
+  afterClosed: PropTypes.func,
 };
 
 export default CustomModal;

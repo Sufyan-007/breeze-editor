@@ -135,7 +135,7 @@ def write_resource_config(app_current_config, proj_data_request):
         file_name = logo_file.name
         file_id = app_current_config['logoId']
         description = "Project Logo"
-        return update_config(project_id, file_name, description, file_id)
+        update_config(project_id, file_name, description, file_id)
 
 def create_directory_management_file(app_config):
     template_path = ""

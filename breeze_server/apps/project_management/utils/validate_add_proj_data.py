@@ -35,7 +35,7 @@ def load_proj_data(proj_data_request):
     #     raise Exception("Application name should be unique.")
     
     if logo_file:
-        logo_file_id = upload_file(logo_file, data["name"])
+        logo_file_id = upload_file(data["name"], logo_file)
         data["logoId"] = logo_file_id
     else:
         data["logoId"] = None
