@@ -1,10 +1,9 @@
 import TypeDetails from './TypeDetails';
 
-function Types({ propertyData, onUpdate }) {
+function Types({ propertyData, onUpdate, moduleId, selectedSchema, propertyName, onResolve }) {
   const handleChange = (val, index) => {
     const updateProperty = { ...propertyData };
     updateProperty['types'] = updateProperty['types'].map((type, i) => (i === index ? val : type));
-    // console.log(updateProperty, 'jfdsklf');
     onUpdate(updateProperty);
   };
 
@@ -16,13 +15,24 @@ function Types({ propertyData, onUpdate }) {
     // console.log(updateProperty);
     onUpdate(updateProperty);
   };
-
+  const handleResolve = (payload) => {
+    onResolve(payload);
+  };
   return (
     <>
       <div className="row">
         <div className="col-11">
           {propertyData.types.map((prop, index) => (
-            <TypeDetails key={index} typeData={prop} onUpdate={(val) => handleChange(val, index)} index={index} />
+            <TypeDetails
+              key={index}
+              typeData={prop}
+              onUpdate={(val) => handleChange(val, index)}
+              index={index}
+              moduleId={moduleId}
+              selectedSchema={selectedSchema}
+              propertyName={propertyName}
+              onResolve={handleResolve}
+            />
           ))}
         </div>
         <div className="col-1">

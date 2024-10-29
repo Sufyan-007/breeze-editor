@@ -2,32 +2,30 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchModules } from '../../service-configuration/redux/ApiClientActions';
-import { editSchema, fetchSchemas } from '../../schema-configuration/redux/schemaConfigActions';
+import {
+  editSchema,
+  fetchSchemas,
+  resolveSchemaProperties,
+} from '../../schema-configuration/redux/schemaConfigActions';
 import ObjectDetails from '../components/ObjectDetails';
 import { CustomButtonField, CustomTextInput } from '../../../common/fields';
 import AddModule from '../../service-configuration/components/AddModule';
-import { schemaTemplate } from '../constants/templates';
+import ShowModules from '../components/ShowModules';
 
 function SchemaSettings() {
-  const { moduleList } = useSelector((state) => state.services);
-  const { schemaList } = useSelector((state) => state.schemas);
-  const [expandedModule, setExpandedModule] = useState([]);
   const [selectedSchema, setSelectedSchema] = useState('');
   const [selectedModule, setSelectedModule] = useState('');
   const [view, setView] = useState('ADD_MODULE');
   const [currentSchema, setCurrentSchema] = useState({});
   const { projectName } = useParams();
+  const { moduleList } = useSelector((state) => state.services);
+
   const dispatch = useDispatch();
   // console.log('chanhe>>', currentSchema);
 
   useEffect(() => {
     dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
   }, [dispatch, projectName]);
-
-  const toggleModuleExpand = (moduleId) => {
-    dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
-    setExpandedModule((prev) => (prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]));
-  };
 
   const updateSchema = async (schema) => {
     // console.log(schema);
@@ -49,7 +47,21 @@ function SchemaSettings() {
     ).unwrap();
     await dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: selectedModule } })).unwrap();
   };
+  const handleResolve = async (payload) => {
+    const updatedPayload = { ...payload };
+    updatedPayload['schemaId'] = selectedSchema;
+    await dispatch(resolveSchemaProperties({ projectName, payload: updatedPayload })).unwrap();
+    const result = await dispatch(
+      fetchSchemas({ projectName, payload: { category: 'models', module: selectedModule } })
+    ).unwrap();
 
+    const newSchema = { ...result[selectedModule][selectedSchema] };
+    setCurrentSchema(newSchema);
+  };
+
+  useEffect(() => {
+    console.log('currentschema >>', currentSchema);
+  }, [currentSchema]);
   return (
     <div className="container-fluid h-100 overflow-auto">
       <div className="row h-100 br-background-primary">
@@ -69,46 +81,15 @@ function SchemaSettings() {
             <div className="text-center mt-4">No modules present</div>
           ) : (
             Object.entries(moduleList).map(([key, module]) => (
-              <>
-                <div
-                  className="br-background-secondary mt-2 "
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    toggleModuleExpand(key);
-                    setSelectedModule(key);
-                  }}
-                >
-                  <div className="d-flex justify-content-between">
-                    <span className="p-1 mx-1 br-text-primary">{module.title}</span>
-                    <i
-                      className="bi bi-plus-circle mx-1 mt-1"
-                      style={{ cursor: 'pointer' }}
-                      title="add-schema"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentSchema(schemaTemplate);
-                        setSelectedModule(key);
-                        setView('SCHEMA_CONFIG');
-                      }}
-                    ></i>
-                  </div>
-                </div>
-                {expandedModule.includes(key) &&
-                  Object.entries(schemaList).map(([key, schema]) => (
-                    <div
-                      className="ps-2 my-1"
-                      style={{ cursor: 'pointer' }}
-                      key={key}
-                      onClick={() => {
-                        setSelectedSchema(key);
-                        setCurrentSchema(schema);
-                        setView('SCHEMA_CONFIG');
-                      }}
-                    >
-                      <i className="bi bi-dot"></i> {schema.name}
-                    </div>
-                  ))}
-              </>
+              <ShowModules
+                key={key} // Add a key prop to help React identify which items have changed
+                setView={setView}
+                moduleId={key} // Use the correct module ID here
+                setCurrentSchema={setCurrentSchema}
+                setSelectedModule={setSelectedModule}
+                setSelectedSchema={setSelectedSchema}
+                title={module.title}
+              />
             ))
           )}
         </div>
@@ -132,7 +113,13 @@ function SchemaSettings() {
                 </div>
               </div>
               <div className="row">
-                <ObjectDetails objectData={currentSchema} onUpdate={updateSchema} moduleId={selectedModule} />
+                <ObjectDetails
+                  objectData={currentSchema}
+                  onUpdate={updateSchema}
+                  moduleId={selectedModule}
+                  selectedSchema={selectedSchema}
+                  onResolve={handleResolve}
+                />
               </div>
             </div>
             <div className="d-flex justify-content-end mb-3">

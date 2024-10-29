@@ -1,12 +1,10 @@
 import { typeTemplate } from '../constants/templates';
 import PropertyDetailsCard from './PropertyDetailsCard';
 
-function ObjectDetails({ objectData, onUpdate, moduleId }) {
+function ObjectDetails({ objectData, onUpdate, moduleId, selectedSchema, onResolve }) {
   const { properties } = objectData;
 
   const handleChange = (prop, value) => {
-    // console.log(prop, value, 'in obj details');
-
     const updatedSchema = { ...objectData };
     if (value) {
       updatedSchema.properties = { ...updatedSchema.properties, [prop]: value };
@@ -14,8 +12,6 @@ function ObjectDetails({ objectData, onUpdate, moduleId }) {
       updatedSchema.properties = { ...updatedSchema.properties };
       delete updatedSchema.properties[prop];
     }
-    // console.log(updatedSchema, 'udpated schema');
-
     onUpdate(updatedSchema, moduleId);
   };
 
@@ -32,6 +28,12 @@ function ObjectDetails({ objectData, onUpdate, moduleId }) {
     updatedSchema.properties = { ...updatedSchema.properties, [newkey]: data };
     delete updatedSchema.properties[oldkey];
     onUpdate(updatedSchema, moduleId);
+  };
+
+  const handleResolve = (payload) => {
+    const updatedPayload = { ...payload };
+    updatedPayload['moduleId'] = moduleId;
+    onResolve(updatedPayload);
   };
 
   return (
@@ -54,6 +56,9 @@ function ObjectDetails({ objectData, onUpdate, moduleId }) {
               property={property}
               handleChange={handleChange}
               changePropertyName={changePropertyName}
+              moduleId={moduleId}
+              selectedSchema={selectedSchema}
+              onResolve={handleResolve}
             />
           </div>
         ))}

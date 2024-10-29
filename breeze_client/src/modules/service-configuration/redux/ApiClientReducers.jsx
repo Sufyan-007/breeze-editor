@@ -129,7 +129,8 @@ const serviceConfigSlice = createSlice({
         })
         .addCase(fetchFiles.fulfilled, (state, action) => {
           state.status = 'succeeded';
-          state.filesList = action.payload.data;
+          const newFiles = action.payload.data;
+          state.filesList = { ...state.filesList, ...newFiles };
         })
         .addCase(fetchFiles.rejected, (state, action) => {
           state.status = 'failed';

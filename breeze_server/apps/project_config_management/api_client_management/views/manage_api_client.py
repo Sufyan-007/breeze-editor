@@ -114,10 +114,8 @@ def transfer_to_auth(request,project_id):
     module_id = data.get("module_id")
     file_path = os.path.join(f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{module_id}", f"{filename}.json")
     target_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
-    result = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
-    if not result or result.get('error'):
-        return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)
-    return JsonResponse(result, status=200)
+    result,status = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
+    return JsonResponse(result, status=status)
 
 @swagger_auto_schema(
     method='post',
@@ -137,7 +135,7 @@ def edit_module_title(request, project_id):
         swagger_metadata_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
         swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
         result,status = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
-        return JsonResponse(result,status)
+        return JsonResponse(result,status=status)
     
 @api_view(['GET'])
 @permission_classes([AllowAny])   
@@ -186,5 +184,8 @@ def add_module(request,project_id):
         return JsonResponse({"error": "Module name and description are required."}, status=400)
     swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
     swagger_schema_path = f"{CONFIG_PATH}/{project_id}/models"
-    result = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
-    return JsonResponse(result)
+    result,status = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
+    return JsonResponse(result, status=status)
+
+
+

@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchSchemas, editSchema } from './schemaConfigActions';
+import { fetchSchemas, editSchema, resolveSchemaProperties } from './schemaConfigActions';
 
 const initialState = {
   schemaList: {},
@@ -16,7 +16,8 @@ const schemaConfigSlice = createSlice({
           state.error = null;
         })
         .addCase(fetchSchemas.fulfilled, (state, action) => {
-          state.schemaList = action.payload.data;
+          const result = action.payload;
+          state.schemaList = { ...state.schemaList, ...result };
         })
         .addCase(fetchSchemas.rejected, (state, action) => {
           state.error = action.payload;
@@ -34,6 +35,19 @@ const schemaConfigSlice = createSlice({
           state.error = action.payload;
         });
     };
+    const handleResolveSchema = (builder) => {
+      builder
+        .addCase(resolveSchemaProperties.pending, (state) => {
+          state.error = null;
+        })
+        .addCase(resolveSchemaProperties.fulfilled, (state) => {
+          state.error = null;
+        })
+        .addCase(resolveSchemaProperties.rejected, (state, action) => {
+          state.error = action.payload;
+        });
+    };
+    handleResolveSchema(builder);
     handleEditSchema(builder);
     handleFetchSchemas(builder);
   },

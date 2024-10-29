@@ -2,9 +2,23 @@ import { useState } from 'react';
 import { CustomTextInput } from '../../../common/fields';
 import Types from './Types';
 
-function PropertyDetailsCard({ changePropertyName, propKey, property, handleChange }) {
+function PropertyDetailsCard({
+  changePropertyName,
+  propKey,
+  property,
+  handleChange,
+  moduleId,
+  selectedSchema,
+  onResolve,
+}) {
   const [newName, setNewName] = useState(propKey);
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleResolve = (payload) => {
+    const updatedPayload = { ...payload };
+    updatedPayload['propertyDetails']['name'] = propKey;
+    onResolve(updatedPayload);
+  };
   const toggleOpen = () => {
     setIsOpen((prev) => !prev);
   };
@@ -24,7 +38,14 @@ function PropertyDetailsCard({ changePropertyName, propKey, property, handleChan
                 />
               </div>
               <div className="col-10">
-                <Types propertyData={property} onUpdate={(val) => handleChange(propKey, val)} />
+                <Types
+                  propertyData={property}
+                  onUpdate={(val) => handleChange(propKey, val)}
+                  moduleId={moduleId}
+                  selectedSchema={selectedSchema}
+                  propertyName={propKey}
+                  onResolve={handleResolve}
+                />
               </div>
             </div>
           </div>

@@ -98,7 +98,7 @@ def transfer_data_to_auth(filename, id_value, file_path, target_file_path, modul
     }
 
     if not filename or not id_value:
-        return {"error": "Invalid data provided."}
+        return {"error": "Invalid data provided."}, 400
 
     with open(target_file_path, "r") as file:
         swagger_content = json.load(file)
@@ -106,14 +106,14 @@ def transfer_data_to_auth(filename, id_value, file_path, target_file_path, modul
     current_auth_apis = swagger_content.get(module_id).get("auth_apis", {})
 
     if not os.path.exists(file_path):
-        return {"error": "File not found."}
+        return {"error": "File not found."}, 404
 
     with open(file_path, "r+") as file:
         file_data = json.load(file)
         api_info = file_data.get(id_value)
 
         if not api_info:
-            return {"error": "API ID not found."}
+            return {"error": "API ID not found."}, 404
 
         auth_api_template["id"] = api_info["id"]
         auth_api_template["operation_id"] = api_info["operation_id"]
@@ -130,4 +130,4 @@ def transfer_data_to_auth(filename, id_value, file_path, target_file_path, modul
         del file_data[id_value]
         append_to_dict_file(file_path, file_data, False)
 
-        return {"message": "Data transferred successfully."}
+        return {"message": "Data transferred successfully."}, 200
