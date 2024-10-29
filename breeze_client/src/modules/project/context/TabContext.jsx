@@ -18,21 +18,28 @@ export const TabProvider = ({ children }) => {
   const { setSelectedNodeId, setSelectedNode } = useTreeContext();
 
   useEffect(() => {
-    const tabsToStore = openTabs.map(({ id, name, type, extension, tag }) => ({ id, name, type, extension, tag }));
+    const tabsToStore = openTabs.map(({ id, name, type, extension, tag, activeTab }) => ({
+      id,
+      name,
+      type,
+      extension,
+      tag,
+      activeTab,
+    }));
     localStorage.setItem('openTabs', JSON.stringify(tabsToStore));
   }, [openTabs]);
 
   useEffect(() => {
     if (selectedTab) {
-      const { id, name, type, extension, tag } = selectedTab;
-      const tabToStore = { id, name, type, extension, tag };
+      const { id, name, type, extension, tag, activeTab } = selectedTab;
+      const tabToStore = { id, name, type, extension, tag, activeTab };
       localStorage.setItem('selectedTab', JSON.stringify(tabToStore));
     } else {
       localStorage.removeItem('selectedTab');
     }
   }, [selectedTab]);
 
-  const addTab = useCallback((node, code = '', language = '') => {
+  const addTab = useCallback((node, code = '', language = '', activeTab = 'code') => {
     if (node?.type !== 'DIRECTORY') {
       setOpenTabs((prevTabs) => {
         const existingTab = prevTabs.find((tab) => tab.id === node.id);
@@ -41,6 +48,7 @@ export const TabProvider = ({ children }) => {
           ...node,
           code: code || '',
           language: language || '',
+          activeTab,
         };
 
         return [...prevTabs, newTab];
@@ -73,6 +81,10 @@ export const TabProvider = ({ children }) => {
     setOpenTabs((prevTabs) => prevTabs.map((tab) => (tab.id === nodeId ? { ...tab, code, language } : tab)));
   }, []);
 
+  const setActiveConfigTab = useCallback((nodeId, activeTab) => {
+    setOpenTabs((prevTabs) => prevTabs.map((tab) => (tab.id === nodeId ? { ...tab, activeTab } : tab)));
+  }, []);
+
   const selectTab = (node) => {
     setSelectedNode(node);
     setSelectedNodeId(node.id);
@@ -80,7 +92,9 @@ export const TabProvider = ({ children }) => {
   };
 
   return (
-    <TabContext.Provider value={{ openTabs, selectedTab, addTab, removeTab, selectTab, updateTabContent }}>
+    <TabContext.Provider
+      value={{ openTabs, selectedTab, addTab, removeTab, selectTab, updateTabContent, setActiveConfigTab }}
+    >
       {children}
     </TabContext.Provider>
   );

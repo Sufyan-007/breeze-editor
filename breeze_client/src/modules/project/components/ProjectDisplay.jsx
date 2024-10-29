@@ -12,12 +12,13 @@ import '../styles/ProjectDisplay.css';
 function ProjectDisplay() {
   const { selectedNode } = useTreeContext();
   const { projectName } = useParams();
-  const [activeTab, setActiveTab] = useState('code'); // 'code' or 'preview' or 'config'
   const [editorCode, setEditorCode] = useState('// Loading..');
   const [editorLanguage, setEditorLanguage] = useState('javascript');
   const [projectPort, setProjectPort] = useState(3000);
-  const { addTab, openTabs, updateTabContent, selectTab } = useTabContext();
+  const { addTab, openTabs, updateTabContent, selectTab, setActiveConfigTab } = useTabContext();
   const availableTabs = getAvailableTabs(selectedNode?.tag);
+  const currentTab = openTabs.find((tab) => tab.id === selectedNode?.id);
+  const activeTab = currentTab?.activeTab || 'code'; // 'code' or 'preview' or 'config'
 
   const fetchPort = useCallback(async () => {
     const port = await getProjectPort(projectName);
@@ -74,12 +75,12 @@ function ProjectDisplay() {
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {
-      setActiveTab(availableTabs[0]);
+      setActiveConfigTab(selectedNode.id, availableTabs[0]);
     }
-  }, [selectedNode, availableTabs, activeTab]);
+  }, [selectedNode, availableTabs, activeTab, setActiveConfigTab]);
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab);
+    setActiveConfigTab(selectedNode.id, tab);
   };
 
   return (
