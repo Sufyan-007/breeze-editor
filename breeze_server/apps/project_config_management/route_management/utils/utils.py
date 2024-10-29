@@ -11,13 +11,12 @@ def generate_layout_route_key():
     # Generate a unique key for layout routes
     return f"/layout__{''.join(random.choices(string.ascii_lowercase + string.digits, k=9))}__"
 
-def include_all_routes_accessory_data(project_name, nodes, transform_all=False):
+def include_all_routes_accessory_data(project_name, nodes):
     app_config_dir = f"{CONFIG_PATH}/{project_name}"
     comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
     
     for route_obj in nodes:
         route_obj['componentName'] = comp_config_index[route_obj['componentId']]
-    reverse_func_implementation_of_route(nodes) if transform_all else ''
     return nodes
 
 def process_route_config(project_name, routing_config={}):
