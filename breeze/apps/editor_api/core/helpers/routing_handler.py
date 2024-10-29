@@ -284,7 +284,6 @@ class RouteHandler:
 
     def get_app_routing_code(self, routing_code):
         react_code = f'''
-        import './styles.js';
         import React, {{useEffect}} from 'react';
         import SandBox from "/src/SandBox";
         import {{ Routes, Route, Navigate, BrowserRouter, createBrowserRouter, createRoutesFromElements, RouterProvider }} from "react-router-dom";
