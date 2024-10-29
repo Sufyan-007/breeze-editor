@@ -14,6 +14,7 @@ import {
   updateRouteConfig,
   deleteRouteConfig,
 } from '../../../redux/routing/routingActions';
+import { getRouteDetails } from '../../../services/routing/routingService';
 
 function RoutingConfig() {
   const dispatch = useDispatch();
@@ -55,14 +56,11 @@ function RoutingConfig() {
       ]
     : [{ label: 'Select component', value: '' }];
 
-  const handleNodeClick = (route) => {
+  const handleNodeClick = async (route) => {
     setShowRouterProviderForm(false);
-    setSelectedRoute(route);
+    const res = await getRouteDetails(projectName, route.id);
+    setSelectedRoute(res.data);
     setIsEditing(true);
-  };
-
-  const fetchChildren = async (parentId) => {
-    dispatch(fetchRoutingConfig({ projectName, parentId }));
   };
 
   const handleAddRoute = () => {
@@ -84,15 +82,17 @@ function RoutingConfig() {
     } finally {
       setIsEditing(false);
       setIsNewRoute(false);
+      dispatch(fetchRoutingConfig({ projectName }));
     }
   };
 
   const handleDeleteRoute = async () => {
     if (selectedRoute) {
       const id = selectedRoute.id;
-      await dispatch(deleteRouteConfig({ projectName, payload: { id } }));
+      await dispatch(deleteRouteConfig({ projectName, payload: { id } })).unwrap();
       setSelectedRoute(initialRoutingConfig);
       setIsEditing(false);
+      dispatch(fetchRoutingConfig({ projectName }));
     }
   };
 
@@ -136,9 +136,7 @@ function RoutingConfig() {
             />
           </div>
           <div className="routing-tree">
-            {flag && (
-              <BreezeTree data={routingConfig} fetchChildren={fetchChildren} handleNodeClick={handleNodeClick} />
-            )}
+            {flag && <BreezeTree data={routingConfig} fetchChildren={() => {}} handleNodeClick={handleNodeClick} />}
           </div>
         </div>
 
