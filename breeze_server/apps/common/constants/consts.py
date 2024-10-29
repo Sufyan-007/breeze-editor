@@ -34,5 +34,6 @@ MODEL = "models"
 INDEX = "index"
 ROUTING = "routing_config"
 COMPONENT = "components"
+RESOURCE = "uploaded_resources_config"
 
 APP_CONFIG_PATH = "configurations"

@@ -1,6 +1,6 @@
 export const initialRoutingConfig = {
   parentPath: '',
-  routePath: '/',
+  path: '/',
   element: '',
   props: [],
   index: false,
