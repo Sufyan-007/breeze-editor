@@ -6,6 +6,7 @@ export const getAvailableTabs = (tag) => {
       return ['code', 'config'];
     case 'SERVICE-CONFIG':
     case 'EXTERNAL_COMP':
+    case 'RESOURCE':
     case 'SCHEMAS':
     case 'SETTINGS':
       return ['config'];
