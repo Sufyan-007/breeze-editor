@@ -24,10 +24,12 @@ function ObjectDetails({ objectData, onUpdate, moduleId, selectedSchema, onResol
     onUpdate(updatedSchema, moduleId);
   };
   const changePropertyName = (oldkey, newkey, data) => {
-    const updatedSchema = { ...objectData };
-    updatedSchema.properties = { ...updatedSchema.properties, [newkey]: data };
-    delete updatedSchema.properties[oldkey];
-    onUpdate(updatedSchema, moduleId);
+    if (oldkey !== newkey) {
+      const updatedSchema = { ...objectData };
+      updatedSchema.properties = { ...updatedSchema.properties, [newkey]: data };
+      delete updatedSchema.properties[oldkey];
+      onUpdate(updatedSchema, moduleId);
+    }
   };
 
   const handleResolve = (payload) => {

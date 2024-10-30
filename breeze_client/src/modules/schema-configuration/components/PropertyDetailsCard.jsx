@@ -34,7 +34,11 @@ function PropertyDetailsCard({
                   value={newName}
                   className={'form-control br-form-control form-control-sm'}
                   onChange={(val) => setNewName(val)}
-                  onBlur={() => changePropertyName(propKey, newName, property)}
+                  onBlur={() => {
+                    const trimmedNewName = newName.trim();
+                    changePropertyName(propKey, trimmedNewName, property);
+                    setNewName(trimmedNewName);
+                  }}
                 />
               </div>
               <div className="col-10">

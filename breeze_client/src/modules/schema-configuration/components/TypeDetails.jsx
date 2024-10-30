@@ -8,6 +8,7 @@ function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId }) {
   const [openResolve, setOpenResolve] = useState(false);
   const [resolvedName, setResolvedName] = useState('');
   const [schemaChoice, setSchemaChoice] = useState('new');
+  const [showOverlay, setShowOverlay] = useState(false);
   const { type, $ref } = typeData;
   console.log($ref);
 
@@ -80,14 +81,30 @@ function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId }) {
             sendSelectedOption={true}
           />
           {type === 'object' && !openResolve && (
-            <i
-              className="badge breeze-badge mt-1 bi bi-exclamation-circle br-text-primary"
-              style={{ cursor: 'pointer', border: '1px solid #ffcc00' }}
-              title="resolve-object-type"
-              onClick={() => setOpenResolve(true)}
-            >
-              <span className="mx-1">Resolve</span>
-            </i>
+            <>
+              <i
+                className="badge breeze-badge mt-1 bi bi-exclamation-circle br-text-primary"
+                style={{ cursor: 'pointer', border: '1px solid #ffcc00' }}
+                title="resolve-object-type"
+                onClick={() => setOpenResolve(true)}
+              >
+                <span className="mx-1">Resolve</span>
+              </i>
+              <i
+                className="bi bi-info-circle br-text-primary mt-1"
+                onMouseEnter={() => setShowOverlay(true)}
+                onMouseLeave={() => setShowOverlay(false)}
+              ></i>
+              {showOverlay && (
+                <div className="overlay">
+                  <div className="overlay-content br-text-primary">
+                    {/* <pre> */}
+                    <code>{JSON.stringify(typeData, null, 2)}</code>
+                    {/* </pre> */}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
         {openResolve && (
@@ -109,6 +126,20 @@ function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId }) {
                   Select from existing
                 </button>
               </div>
+              <i
+                className="bi bi-info-circle br-text-primary  mx-3 mt-1"
+                onMouseEnter={() => setShowOverlay(true)}
+                onMouseLeave={() => setShowOverlay(false)}
+              ></i>
+              {showOverlay && (
+                <div className="overlay">
+                  <div className="overlay-content br-text-primary">
+                    {/* <pre> */}
+                    <code>{JSON.stringify(typeData, null, 2)}</code>
+                    {/* </pre> */}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="col-11">
               {schemaChoice === 'new' ? (
