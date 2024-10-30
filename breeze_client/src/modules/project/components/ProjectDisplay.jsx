@@ -95,6 +95,7 @@ function ProjectDisplay() {
                 defaultValue={editorCode ? editorCode : '// Loading...'}
                 height="calc(100vh - 161px)"
                 language={editorLanguage}
+                node={selectedNode}
               />
             </div>
           </div>
