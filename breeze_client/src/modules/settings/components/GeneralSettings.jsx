@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router';
 import { initialGeneralSettingsConfig } from '../constants/SettingsFormConstants';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjectConfig } from '../../../redux/project/projectActions';
+import { getProjectLogo } from '../../project/services/projectService';
 
 const GeneralSettings = () => {
   const navigate = useNavigate();
@@ -18,7 +19,6 @@ const GeneralSettings = () => {
   const [logoFile, setLogoFile] = useState(null);
   const [logoDeleted, setLogoDeleted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [showSaveToast, setShowSaveToast] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
   const [initialValues, setInitialValues] = useState({});
 
@@ -43,13 +43,18 @@ const GeneralSettings = () => {
           author: res.author,
           description: res.description,
         });
-
-        // if (res.logo && res.logo !== 'null' && res.logo !== '') {
-        //   const logoUrl = `http://localhost:8000/editor/file-upload/${res.name}/${res.logo}`;
-        //   setLogoPreview(logoUrl);
-        // } else {
-        //   setLogoPreview('');
-        // }
+        console.log(res)
+        if (res.logoId && res.logoId !== 'null' && res.logoId !== '') {
+          getProjectLogo(res.name, res.logoId)
+            .then((response) => response.blob())
+            .then((blob) => {
+              const logoBlobUrl = URL.createObjectURL(blob);
+              setLogoPreview(logoBlobUrl);
+            })
+            .catch((error) => console.error('Error fetching logo:', error));
+        } else {
+          setLogoPreview('');
+        }
       });
   }, [projectName]);
 
@@ -66,8 +71,6 @@ const GeneralSettings = () => {
       logoDeleted;
     setIsChanged(hasChanged);
   }, [formData, initialValues, logoFile, logoDeleted]);
-
-  const toggleShowSaveToast = () => setShowSaveToast(!showSaveToast);
 
   const handleUploadIconClick = () => {
     if (fileInputRef.current) {
@@ -211,14 +214,6 @@ const GeneralSettings = () => {
           </form>
         </div>
       </div>
-      {/* <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1 }}>
-        <Toast bg={'primary'} show={showSaveToast} onClose={toggleShowSaveToast} delay={2000} autohide>
-          <Toast.Header closeButton={false}>
-            <strong>Success..!</strong>
-          </Toast.Header>
-          <Toast.Body>Project Details are Updated</Toast.Body>
-        </Toast>
-      </ToastContainer> */}
     </div>
   );
 };

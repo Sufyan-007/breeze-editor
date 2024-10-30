@@ -16,8 +16,7 @@ class ApplyValidation:
         if (self.name not in obj.__dict__['errorObj']):
             obj.__dict__['errorObj'][self.name] = []
         for validator in self.validators:
-            error = validator(value)
-            print(error)
+            error = validator(self.name,value)
             if not error:
                 obj.__dict__['responseObj'][self.name] = value
                 obj.__dict__['errorObj'][self.name].append('valid')

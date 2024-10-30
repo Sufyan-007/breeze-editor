@@ -11,6 +11,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from ....code_generator.core.api_client_generator import generate_react_service
 from ....directory_management.core.directory_management_service import DirectoryManager
+from ..models.manage_api_client import ModifyFunctionConfigBody,TransferToAuthBody,EditModuleTitleBody,AddModuleBody,EditModuleTitleResponse,GetResponseTokenResponse
 
 
 
@@ -83,10 +84,14 @@ def generate_service_config(request, collectionType, project_id):
 @permission_classes([AllowAny])
 def modify_function_config(request,operation,project_id):
     data = json.loads(request.body.decode("utf-8"))
-    filename = data.get("filename")
-    module_id = data.get("moduleId")
-    api_type = data.get("api_type")
-    api_data = data.get("api_data")
+    res = ModifyFunctionConfigBody(data.get("filename"),data.get("moduleId"),data.get("api_type"),data.get("api_data"))
+    if(res.__dict__['isError']):
+        raise Exception(res.__dict__['errorObj'])
+    else:
+        filename = res.__dict__['responseObj'].get("filename")
+        module_id = res.__dict__['responseObj'].get("moduleId")
+        api_type = res.__dict__['responseObj'].get("api_type")
+        api_data = res.__dict__['responseObj'].get("api_data")
     if api_type.lower() == "auth":
         result = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id,operation=operation)
     else:
@@ -108,9 +113,13 @@ def modify_function_config(request,operation,project_id):
 @permission_classes([AllowAny])
 def transfer_to_auth(request,project_id):
     data = json.loads(request.body.decode("utf-8"))
-    filename = data.get("filename")
-    id_value = data.get("id")
-    module_id = data.get("module_id")
+    res = TransferToAuthBody(data.get("filename"),data.get("id"),data.get("module_id"))
+    if(res.__dict__['isError']):
+        raise Exception(res.__dict__['errorObj'])
+    else:
+        filename = res.__dict__['responseObj'].get("filename")
+        id_value = res.__dict__['responseObj'].get("id")
+        module_id = res.__dict__['responseObj'].get("module_id")
     file_path = os.path.join(f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{module_id}", f"{filename}.json")
     target_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
     result = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
@@ -131,13 +140,25 @@ def transfer_to_auth(request,project_id):
 @permission_classes([AllowAny])
 def edit_module_title(request, project_id):
         data = json.loads(request.body)
-        new_title = data.get("title")
-        module_id = data.get("moduleId")
+        res = EditModuleTitleBody(data.get("title"),data.get("moduleId"))
+        if(res.__dict__['isError']):
+            raise Exception(res.__dict__['errorObj'])
+        else:
+            new_title = res.__dict__['responseObj'].get("title")
+            module_id = res.__dict__['responseObj'].get("moduleId")
         swagger_metadata_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
         swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
         result,status = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
+        #this will validate the response before sending to the client side
+        rd = EditModuleTitleResponse(result)
+        if(rd.__dict__['isError']):
+            return JsonResponse({'error':rd.__dict__['errorObj']},status=400)
         return JsonResponse(result,status)
-    
+
+@swagger_auto_schema(
+    method='get',
+    tags=['manage-api-client']
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])   
 def get_response_token( request, project_id,apiId, moduleId):
@@ -167,22 +188,33 @@ def get_response_token( request, project_id,apiId, moduleId):
                         })
                 else:
                     result = auth_apis.get(apiId)
-                    
+            res = GetResponseTokenResponse(result)
+            #this will validate the response before sending to the client side
+            if(res.__dict__['isError']):
+                return JsonResponse({"error":res.__dict__['errorObj']},status = 400)
             return JsonResponse({"data": result}, status=200)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
 
-
+@swagger_auto_schema(
+    method='post',
+    tags = ['manage-api-client']
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def add_module(request,project_id):
     data = json.loads(request.body.decode("utf-8"))
-    module_name = data.get("name")
-    module_description = data.get("description")
-    if not module_name or not module_description:
-        return JsonResponse({"error": "Module name and description are required."}, status=400)
+    res = AddModuleBody(data.get("name"),data.get("description"))
+    if(res.__dict__['isError']):
+        return JsonResponse({"error": res.__dict__['errorObj']}, status=400)
+    else:
+        module_name = res.__dict__['responseObj'].get("name")
+        module_description = res.__dict__['responseObj'].get("description")
+    # if not module_name or not module_description:
+    #     return JsonResponse({"error": "Module name and description are required."}, status=400)
+    
     swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
     swagger_schema_path = f"{CONFIG_PATH}/{project_id}/models"
     result = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)

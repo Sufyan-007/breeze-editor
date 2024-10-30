@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.login_schema import login_schema
+from ..models.Auth import LoginBody,LoginResponse
 
 @csrf_exempt
 @require_POST
@@ -24,11 +25,12 @@ from ..swagger_schema.login_schema import login_schema
 def login(request):
     try:
         data = json.loads(request.body)
-        print("login_data")
-        print(data)
-        username = data.get('username')
-        password = data.get('password')
-
+        res = LoginBody(data.get('username'),data.get('password'))
+        if(res.__dict__['isError']):
+            raise Exception(res.__dict__['errorObj'])
+        else:
+            username = res.__dict__['responseObj'].get('username')
+            password = res.__dict__['responseObj'].get('password')
         auth_file_path = get_auth_file_path()
         try:
             with open(auth_file_path, 'r') as file:
@@ -66,7 +68,11 @@ def login(request):
             
         # request.session['auth_token'] = token
         # request.session.set_expiry(None)
-        return JsonResponse({'accessToken': token, 'username': token_data['username']}, status=200)
+        login_response = LoginResponse(token,token_data['username'])
+        if login_response.__dict__['isError']:
+            raise Exception(login_response.__dict__['errorObj'])
+        else:
+            return JsonResponse({'accessToken': token, 'username': token_data['username']}, status=200)
 
     except Exception as e:
         print('Error: ', e)

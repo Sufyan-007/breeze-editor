@@ -41,3 +41,23 @@ get_env_config_schema = {
             )
     ),
 }
+
+# add_env_config_schema = {
+#     'rb':openapi.Schema(
+#         type=openapi.TYPE_OBJECT,
+#         properties={
+#             'envVars':openapi.Schema(type=openapi.TYPE_STRING),
+#             'environments':openapi.Schema(type=openapi.TYPE_STRING)
+#         }
+#     )
+# }
+
+# update_env_config_schema = {
+#     'rb':openapi.Schema(
+#         type=openapi.TYPE_OBJECT,
+#         properties={
+#             'envVariableId':openapi.Schema(type=openapi.TYPE_STRING),
+#             'envVars':openapi.Schema(type=openapi.TYPE_STRING)
+#         }
+#     )
+# }
