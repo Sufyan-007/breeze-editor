@@ -2,13 +2,24 @@ import Types from './Types';
 import { basicTypeTemplate, objectTemplate, typeWithTemplateInput } from '../constants/templates';
 import { CustomSelectField, CustomTextInput } from '../../../common/fields';
 import { selectionTypes } from '../constants/templates';
-import { useEffect, useState } from 'react';
-function TypeDetails({ typeData, onUpdate, moduleId, index, selectedSchema, propertyName, onResolve }) {
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId }) {
   const [openResolve, setOpenResolve] = useState(false);
   const [resolvedName, setResolvedName] = useState('');
-  const [receivedType, setReceivedType] = useState(typeData);
-  const { type } = receivedType;
+  const [schemaChoice, setSchemaChoice] = useState('new');
+  const { type, $ref } = typeData;
+  console.log($ref);
+
   const selectedType = selectionTypes[type];
+  const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
+  console.log('hiii');
+
+  const transformedSchemaList = Object.keys(schemaList).map((key) => ({
+    value: key,
+    label: schemaList[key].name,
+  }));
+  const combinedOptions = [...basicTypeTemplate, ...transformedSchemaList];
   const changeType = (val) => {
     if (val.templates) {
       const updatedType = typeWithTemplateInput;
@@ -32,28 +43,27 @@ function TypeDetails({ typeData, onUpdate, moduleId, index, selectedSchema, prop
     }
   };
 
-  useEffect(() => {
-    console.log('typeData::>>', typeData);
-    setReceivedType(typeData);
-  }, [typeData]);
-
   const updateTemplateInput = (val, i) => {
-    const updatedType = { ...receivedType };
+    const updatedType = { ...typeData };
     updatedType.templateInputs = updatedType.templateInputs.map((input, index) => (index === i ? val : input));
     onUpdate(updatedType);
   };
 
   const handleResolve = async () => {
-    const payload = {
-      // moduleId: moduleId,
-      // schemaId: selectedSchema,
-      newName: resolvedName,
-      schemaDetails: receivedType,
-      propertyDetails: { index: index },
-    };
-    onResolve(payload);
-    // await dispatch(resolveSchemaProperties({ projectName, payload })).unwrap();
-    // await dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
+    if (schemaChoice === 'new') {
+      const payload = {
+        newName: resolvedName,
+        schemaDetails: typeData,
+        propertyDetails: { index: index },
+      };
+      onResolve(payload);
+    } else {
+      const payload = {
+        propertyDetails: { index },
+        existingSchemaId: resolvedName,
+      };
+      onResolve(payload);
+    }
     setOpenResolve(false);
   };
 
@@ -63,40 +73,65 @@ function TypeDetails({ typeData, onUpdate, moduleId, index, selectedSchema, prop
         <div className="col-12">
           <CustomSelectField
             name="moduleSelect"
-            value={type}
+            value={type ? type : $ref}
             onChange={(val) => changeType(val)}
-            options={basicTypeTemplate}
-            className="form-select br-form-select form-select-sm  "
+            options={combinedOptions}
+            className="form-select br-form-select form-select-sm"
             sendSelectedOption={true}
           />
           {type === 'object' && !openResolve && (
-            <>
-              {/* <i className="bi bi-exclamation-circle mt-1 mx-1" style={{ color: 'red' }}></i> */}
-              <i
-                className=" badge breeze-badge mt-1 bi bi-exclamation-circle br-text-primary"
-                style={{ cursor: 'pointer', border: '1px solid #ffcc00' }}
-                title="resolve-object-type"
-                onClick={() => setOpenResolve(true)}
-              >
-                <span className="mx-1">Resolve </span>
-              </i>
-            </>
+            <i
+              className="badge breeze-badge mt-1 bi bi-exclamation-circle br-text-primary"
+              style={{ cursor: 'pointer', border: '1px solid #ffcc00' }}
+              title="resolve-object-type"
+              onClick={() => setOpenResolve(true)}
+            >
+              <span className="mx-1">Resolve</span>
+            </i>
           )}
         </div>
         {openResolve && (
           <div className="row">
+            <div className="col-12">
+              <div className="my-2 btn-group">
+                <button
+                  type="button"
+                  className={`btn  btn-sm ${schemaChoice === 'new' ? 'btn-secondary' : 'btn-outline-secondary'} br-text-primary`}
+                  onClick={() => setSchemaChoice('new')}
+                >
+                  Create a new schema
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${schemaChoice === 'existing' ? 'btn-secondary' : 'btn-outline-secondary'} br-text-primary`}
+                  onClick={() => setSchemaChoice('existing')}
+                >
+                  Select from existing
+                </button>
+              </div>
+            </div>
             <div className="col-11">
-              <CustomTextInput
-                name="propertyName"
-                value={resolvedName}
-                className={'form-control br-form-control form-control-sm my-1'}
-                onChange={(val) => setResolvedName(val)}
-                placeholder="Enter schema name"
-              />
+              {schemaChoice === 'new' ? (
+                <CustomTextInput
+                  name="propertyName"
+                  value={resolvedName}
+                  className={'form-control br-form-control form-control-sm my-1'}
+                  onChange={(val) => setResolvedName(val)}
+                  placeholder="Enter schema name"
+                />
+              ) : (
+                <CustomSelectField
+                  name="existingSchemas"
+                  value={resolvedName}
+                  onChange={(val) => setResolvedName(val)}
+                  options={transformedSchemaList}
+                  className="form-select br-form-select form-select-sm"
+                />
+              )}
             </div>
             <div className="col-1 my-1">
               <i
-                className=" badge breeze-badge-active br-text-primary"
+                className="badge breeze-badge-active br-text-primary"
                 style={{ cursor: 'pointer' }}
                 title="add-other-type"
                 onClick={handleResolve}
@@ -106,19 +141,17 @@ function TypeDetails({ typeData, onUpdate, moduleId, index, selectedSchema, prop
             </div>
           </div>
         )}
-        {/* <div>{type === 'object' && <ObjectDetails objectData={typeData} onUpdate={onUpdate} />}</div> */}
         <div className="col-12 ms-3 my-1" style={{ borderLeft: '1px solid rgba(128, 128, 128, 0.5)' }}>
           {selectedType?.templates &&
             selectedType.templates.map((val, i) => {
               return (
-                <>
+                <div key={val['name']}>
                   <span className="br-text-primary my-1">{val['name']}</span>
                   <Types
-                    key={val['name']}
-                    propertyData={receivedType.templateInputs[i]}
+                    propertyData={typeData.templateInputs[i]}
                     onUpdate={(value) => updateTemplateInput(value, i)}
                   />
-                </>
+                </div>
               );
             })}
         </div>

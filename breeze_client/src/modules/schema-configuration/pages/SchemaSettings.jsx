@@ -21,14 +21,12 @@ function SchemaSettings() {
   const { moduleList } = useSelector((state) => state.services);
 
   const dispatch = useDispatch();
-  // console.log('chanhe>>', currentSchema);
 
   useEffect(() => {
     dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
   }, [dispatch, projectName]);
 
   const updateSchema = async (schema) => {
-    // console.log(schema);
     setCurrentSchema({ ...schema });
   };
 
@@ -59,9 +57,6 @@ function SchemaSettings() {
     setCurrentSchema(newSchema);
   };
 
-  useEffect(() => {
-    console.log('currentschema >>', currentSchema);
-  }, [currentSchema]);
   return (
     <div className="container-fluid h-100 overflow-auto">
       <div className="row h-100 br-background-primary">
@@ -82,9 +77,9 @@ function SchemaSettings() {
           ) : (
             Object.entries(moduleList).map(([key, module]) => (
               <ShowModules
-                key={key} // Add a key prop to help React identify which items have changed
+                key={key}
                 setView={setView}
-                moduleId={key} // Use the correct module ID here
+                moduleId={key}
                 setCurrentSchema={setCurrentSchema}
                 setSelectedModule={setSelectedModule}
                 setSelectedSchema={setSelectedSchema}

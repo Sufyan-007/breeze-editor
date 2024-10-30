@@ -66,6 +66,7 @@ def resolve_schemas(request,project_id):
     new_schema_name = data.get("newName")
     schema_details = data.get("schemaDetails")
     property_details = data.get("propertyDetails")
+    existing_schema_id = data.get("existingSchemaId")
     schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
-    result,status = resolve_schemas_helper(schema_file_path=schema_file_path, schemaId=schema_id, new_schema_name=new_schema_name, details=schema_details, property_details=property_details)
+    result,status = resolve_schemas_helper(schema_file_path=schema_file_path, schemaId=schema_id, new_schema_name=new_schema_name, details=schema_details, property_details=property_details, existing_schema_id = existing_schema_id)
     return JsonResponse(result, status=status)

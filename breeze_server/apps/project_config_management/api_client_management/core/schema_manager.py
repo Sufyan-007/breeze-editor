@@ -48,20 +48,30 @@ def add_or_edit_schema_helper( schema_details, schema_name, file_path, edited_na
         return {"error": str(e)},500
     
     
-def resolve_schemas_helper(schema_file_path, schemaId, new_schema_name, details, property_details):
+def resolve_schemas_helper(schema_file_path, schemaId, new_schema_name, details, property_details, existing_schema_id):
     try:
         prop_name = property_details.get("name")
         types_index = int(property_details.get("index"))
-        new_schema_id = generate_uuid_as_key()
-        details["name"] = new_schema_name
+
         with open(schema_file_path, "r+") as file:
             schema_data = json.load(file)
+            
+        if new_schema_name:
+            if any(schema.get("name") == new_schema_name for schema in schema_data.values()):
+                return {"error": f"Schema name '{new_schema_name}' already exists."}, 409
+
         if schemaId in schema_data:
-            schema_data[schemaId]["properties"][prop_name]["types"][types_index] = {"$ref" : new_schema_id}
-            schema_data[new_schema_id] = details
+            schema_id_to_use = existing_schema_id if existing_schema_id else generate_uuid_as_key()
+            
+            schema_data[schemaId]["properties"][prop_name]["types"][types_index] = {"$ref": schema_id_to_use}
+            
+            if not existing_schema_id:
+                details["name"] = new_schema_name
+                schema_data[schema_id_to_use] = details
+            
             append_to_dict_file(schema_file_path, schema_data)
-            return {"message": f"Schema resolved successfully."},200
+            return {"message": "Schema resolved successfully."}, 200
         else:
-            return {"error": f"Schema '{schemaId}' not found."},404
+            return {"error": f"Schema '{schemaId}' not found."}, 404
     except Exception as e:
-        return {"error": str(e)},500
+        return {"error": str(e)}, 500
