@@ -23,8 +23,8 @@ from rest_framework import status
 @api_view(['GET'])
 def get_directories(request,project_id):
     target_id = request.GET.get('target_id', None)
-    depth = request.GET.get('depth', 1)
-    nodes = get_node(project_id,TreeType["DIRECTORY"],target_id,depth=depth)
+    depth = request.GET.get('depth', "1")
+    nodes = get_node(project_id,TreeType["DIRECTORY"],target_id,depth=int(depth))
     return JsonResponse(nodes, status=200)
 
 

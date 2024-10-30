@@ -103,16 +103,22 @@ def generate_route_props(_route_config, _comp_config_index):
         props_code.append('index')
         
     if _route_config.get("action", None):
-        code = "action = {"
-        code += FunctionCodeGenerator.generate_function(_route_config['action']['implementation'])
-        code += "\n }"
-        props_code.append(code)
+        if type(_route_config['action']) != str and _route_config['action'].get('implementation'):
+            code = "action = {"
+            code += FunctionCodeGenerator.generate_function(_route_config['action']['implementation'])
+            code += "\n }"
+            props_code.append(code)
+        else:
+            props_code.append(f"action={{{_route_config['action']}}}")
 
     if _route_config.get("loader",  None):
-        code = "loader = {"
-        code += FunctionCodeGenerator.generate_function(_route_config['loader']['implementation'])
-        code += "\n }"
-        props_code.append(code)
+        if type(_route_config['loader']) != str and _route_config['loader'].get('implementation'):
+            code = "loader = {"
+            code += FunctionCodeGenerator.generate_function(_route_config['loader']['implementation'])
+            code += "\n }"
+            props_code.append(code)
+        else:
+            props_code.append(f"loader={{{_route_config['loader']}}}")
         
     if _route_config.get("errorElementId", None):
         code = f" errorElement={{<{get_comp_name_by_id(_route_config['errorElementId'], _comp_config_index)} />}} "
@@ -123,17 +129,22 @@ def generate_route_props(_route_config, _comp_config_index):
         props_code.append(code)
 
     if _route_config.get("shouldRevalidate", None):
-        code = " shouldRevalidate = {"
-        code += FunctionCodeGenerator.generate_function(_route_config['shouldRevalidate']['implementation'])
-        code += "\n } "
-        props_code.append(code)
+        if type(_route_config['shouldRevalidate']) != str and _route_config['shouldRevalidate'].get('implementation'):
+            code = "shouldRevalidate = {"
+            code += FunctionCodeGenerator.generate_function(_route_config['shouldRevalidate']['implementation'])
+            code += "\n }"
+            props_code.append(code)
+        else:
+            props_code.append(f"shouldRevalidate={{{_route_config['shouldRevalidate']}}}")
 
     if _route_config.get("lazy", None):
-        code = " lazy = {"
-        code += FunctionCodeGenerator.generate_function(_route_config['lazy']['implementation'])
-        # code = f" lazy = {{ () => import({get_path_without_ext(_route_config['component'])})}} "
-        code += "\n } "
-        props_code.append(code)
+        if type(_route_config['lazy']) != str and _route_config['lazy'].get('implementation'):
+            code = "lazy = {"
+            code += FunctionCodeGenerator.generate_function(_route_config['lazy']['implementation'])
+            code += "\n }"
+            props_code.append(code)
+        else:
+            props_code.append(f"lazy={{{_route_config['lazy']}}}")
 
     print(props_code)
     return "  ".join(props_code)

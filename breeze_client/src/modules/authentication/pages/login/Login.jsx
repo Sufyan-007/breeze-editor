@@ -1,39 +1,44 @@
-import { useContext, useRef, useState } from 'react';
+import { useContext, useState } from 'react';
 import logos from '../../../../assets/svgs/index';
 import images from '../../../../assets/images/index';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import '../../styles/authentication_module.css';
 import { router } from '../../../../routes/routing';
 import { login } from '../../services/authService';
+import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
+import { validator } from '../../../../utils/Validator';
 
 function Login() {
   const { toggleTheme } = useContext(ThemeContext);
-  const [errorMessage, setErrorMessage] = useState('');
-  const usernameRef = useRef(null);
-  const passwordRef = useRef(null);
+  const [userDetails, setUserDetails] = useState({
+    username: '',
+    password: '',
+  });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const handleInputChange = (name, value) => {
+    setUserDetails({ ...userDetails, [name]: value });
+  };
   const handleLogin = async (username, password) => {
     try {
       const { accessToken } = await login(username, password);
       console.log('Logged in successfully. Token:', accessToken);
-      // Save token to local storage or state management
       localStorage.setItem('accessToken', accessToken);
-      // Navigate to home after successful login
       router.navigate('/all-projects');
     } catch (error) {
-      setErrorMessage('Invalid username or password');
       console.error('Login error:', error.message);
     }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setErrorMessage('');
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitted(true);
 
-    const username = usernameRef.current.value;
-    const password = passwordRef.current.value;
+    const formIsValid = [userDetails.username, userDetails.password].every(Boolean);
 
-    handleLogin(username, password);
+    if (formIsValid) {
+      handleLogin(userDetails.username, userDetails.password);
+    }
   };
 
   return (
@@ -51,14 +56,13 @@ function Login() {
               <img src={images.BreezeStudio} alt="Breeze Studio Logo" />
             </div>
             <div className="theme-switch">
-              <button
+              <CustomButtonField
                 type="button"
-                className="btn btn-theme m-0 p-0"
                 onClick={toggleTheme}
+                className="btn btn-theme m-0 p-0"
+                icon={<img src={logos.darkLightModeSwitch} alt="Toggle dark/light mode" />}
                 title="Toggle dark/light mode"
-              >
-                <img src={logos.darkLightModeSwitch} alt="Toggle dark/light mode" />
-              </button>
+              />
             </div>
           </div>
 
@@ -67,40 +71,38 @@ function Login() {
               <h2 className="login-text br-text-tertiary mb-3">Welcome to Breeze Studio</h2>
               <form className="login-custom-form" onSubmit={handleSubmit}>
                 <div className="mb-3 login-form-box">
-                  <label htmlFor="username" className="login-text login-med-font mb-1 br-text-primary">
-                    Username
-                  </label>
-                  <input
-                    placeholder="Enter Username"
-                    type="text"
-                    className="form-control br-text-primary"
-                    id="username"
+                  <CustomTextInput
                     name="username"
-                    ref={usernameRef}
-                    required
+                    value={userDetails.username}
+                    onChange={(value) => handleInputChange('username', value)}
+                    config={{
+                      label: 'Username',
+                      className: 'form-control br-text-primary',
+                    }}
+                    placeholder="Enter Username"
+                    customValidations={[validator.REQUIRED, validator.USERNAME_VALIDATION]}
+                    isSubmitted={isSubmitted}
                   />
                 </div>
                 <div className="mb-3 login-form-box">
-                  <label htmlFor="password" className="login-text login-med-font mb-1 br-text-primary">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control br-text-primary"
-                    placeholder="Enter Password"
-                    id="password"
+                  <CustomTextInput
                     name="password"
-                    ref={passwordRef}
-                    required
+                    value={userDetails.password}
+                    onChange={(value) => handleInputChange('password', value)}
+                    config={{
+                      label: 'Password',
+                      className: 'form-control br-text-primary',
+                    }}
+                    placeholder="Enter Password"
+                    type="password"
+                    customValidations={[validator.REQUIRED]}
+                    isSubmitted={isSubmitted}
                   />
                 </div>
-                {errorMessage && <p className="text-danger">{errorMessage}</p>}
                 <div className="">
                   <a className="text-decoration-none float-end login-small-font mb-3">Forgot Password?</a>
                 </div>
-                <button type="submit" className="login-button btn-filled w-100 mb-3">
-                  Sign In
-                </button>
+                <CustomButtonField type="submit" className="login-button btn-filled w-100 mb-3" label="Sign In" />
               </form>
             </div>
           </div>

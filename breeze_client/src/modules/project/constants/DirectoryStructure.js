@@ -29,6 +29,16 @@ const breezeConfigData = {
     tag: 'SCHEMAS',
     parentId: null,
   },
+  'resource-config': {
+    id: 'resource-config',
+    name: 'resource.config',
+    extension: '',
+    type: 'CONFIG',
+    children: [],
+    wasOpen: false,
+    tag: 'RESOURCE',
+    parentId: null,
+  },
 };
 
 export default breezeConfigData;

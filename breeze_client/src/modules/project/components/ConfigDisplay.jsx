@@ -5,6 +5,7 @@ import CustomZipPackagePage from '../../custom_uploads/pages/CustomZipPackage';
 import Settings from '../../settings/pages/Settings';
 import ThirdPartyDependencyConfig from '../../third-party-dependencies/pages/ThirdPartyDependencyConfig';
 import SchemaSettings from '../../schema-configuration/pages/SchemaSettings';
+import Resources from '../../resource-configuration/pages/Resources';
 function ConfigDisplay({ configType }) {
   const renderConfigScreen = () => {
     switch (configType) {
@@ -18,6 +19,8 @@ function ConfigDisplay({ configType }) {
         return <Settings />;
       case 'PACKAGE_CONFIG':
         return <ThirdPartyDependencyConfig />;
+      case 'RESOURCE':
+        return <Resources />;
       case 'SCHEMAS':
         return <SchemaSettings />;
       default:

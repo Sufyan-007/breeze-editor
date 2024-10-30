@@ -101,7 +101,11 @@ def get_node(project_name,category,target_id,depth=1):
     nodes = []
     ## if target is none then this will give all the root nodes
     if(target_id in [None, ""]):
-        nodes = get_root_nodes(config_data)
+        root_nodes = get_root_nodes(config_data)
+        nodes = [] + root_nodes
+        if depth > 1:
+            for node in root_nodes:
+                nodes += get_children_up_to_depth(node.get("id"), config_data, depth, current_depth=0)
     else:
         node = config_data.get(target_id,None)
         if(node != None):

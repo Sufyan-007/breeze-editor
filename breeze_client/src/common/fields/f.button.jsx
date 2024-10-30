@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
 function CustomButtonField({
-  label = 'Button',
+  label,
   onClick = () => {},
   type = 'button',
   disabled = false,

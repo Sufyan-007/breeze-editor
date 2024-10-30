@@ -73,3 +73,31 @@ export const deleteProject = async (projectName) => {
     throw error;
   }
 };
+
+export const getProjectLogo = async (projectName, logoId) => {
+  const getAccessToken = () => {
+    return localStorage.getItem('accessToken');
+  };
+
+  const accessToken = getAccessToken();
+
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/download-file/${projectName}/${logoId}/`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch the logo');
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error fetching project logo:', error);
+    throw error;
+  }
+};
