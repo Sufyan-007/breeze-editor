@@ -1,26 +1,27 @@
 from dataclasses import dataclass
-from breeze_server.validator import validate_user,validate_email,validate_password,validate_string
-from breeze_server.descriptor import ApplyValidation
+from validator import validate_user,validate_email,validate_password,validate_string,required_validator
+from descriptor import ApplyValidation
 import pprint
 # from ....descriptor import ApplyValidation
-# from ....validator import validate_user,validate_email,validate_password
+# from ....validator import validate_user,validate_email,validate_password,required_validator,validate_string
 
 @dataclass   
 class LoginBody:
-    user:str = ApplyValidation([validate_user])
-    password:str = ApplyValidation([validate_password])
+    username:str = ApplyValidation([required_validator])
+    password:str = ApplyValidation([required_validator])
 
 @dataclass
 class RegisterBody:
     
-    user:str = ApplyValidation([validate_string,validate_user])
-    email:str = ApplyValidation([validate_email])   #descriptor instance
-    password:str = ApplyValidation([validate_password])
-    
-def main():
-    r = RegisterBody('user','abc@gmail.com','Jh$0dfgdff')
-    # l = LoginBody('usr','jgdj$Dve5')
-    pprint.pprint(r.__dict__)
-    # print(l.__dict__)
-    # print(r.user,r.email,r.password)
-main()
+    username:str = ApplyValidation([required_validator])
+    email:str = ApplyValidation([required_validator])   #descriptor instance
+    password:str = ApplyValidation([required_validator])
+
+@dataclass
+class LoginResponse:
+    accessToken:str = ApplyValidation([])
+    username:str = ApplyValidation([])
+
+@dataclass
+class RegisterResponse:
+    accessToken:str = ApplyValidation([])

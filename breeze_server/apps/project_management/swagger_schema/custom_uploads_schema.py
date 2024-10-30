@@ -4,7 +4,7 @@ add_custom_package_schema = {
  'rb':openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
-            'file':openapi.Schema(type=openapi.TYPE_FILE),
+            # 'file':openapi.Schema(type=openapi.TYPE_FILE),
             'fileName':openapi.Schema(type=openapi.TYPE_STRING,description='name of file')
                                   
         }

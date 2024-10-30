@@ -4,16 +4,23 @@ import threading
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,parser_classes
 from dotenv import load_dotenv
 from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file
 from apps.common.constants.consts import PORT  
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
+from ..models.custom_upload import AddCustomPackageBody,DeleteCustomPackageBody,GetCustomPackagesResponse
+from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser
 
 @swagger_auto_schema(
     method='post',
-    request_body=add_custom_package_schema['rb'],
+    manual_parameters=[
+        openapi.Parameter(name='file',in_=openapi.IN_FORM,type=openapi.TYPE_FILE),
+        openapi.Parameter(name='fileName',in_=openapi.IN_FORM,type=openapi.TYPE_STRING,description='name of file')
+    ],
+    # request_body=add_custom_package_schema['rb'],
     responses={
         200:add_custom_package_schema['response_200'],
         500:add_custom_package_schema['response_500']
@@ -22,13 +29,18 @@ from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get
 )
 @csrf_exempt
 @api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
 def add_custom_package(request, projectName):
     try:
         file = request.FILES.get('file')
         fileName = request.POST.get("filename")
+        #this will validate request body 
+        rb = AddCustomPackageBody(file,fileName)
+        if(rb.__dict__['isError']):
+            return JsonResponse({'error':rb.__dict__['errorObj']},status=400)
 
-        if not file:
-            return JsonResponse({'error': 'No file provided.'}, status=400)
+        # if not file:
+        #     return JsonResponse({'error': 'No file provided.'}, status=400)
 
         if fileName.endswith('.zip'):
             fileName = fileName.replace('.zip', '')
@@ -73,7 +85,9 @@ def get_custom_packages(request, projectName):
             return JsonResponse({'error': 'Project name is required.'}, status=400)
 
         zip_files_info = get_zip_files(projectName)
-      
+        res = GetCustomPackagesResponse(zip_files_info)
+        if(res.__dict__['isError']):
+            raise Exception(res.__dict__['errorObj'])
         return JsonResponse(zip_files_info, status=200)
 
     except Exception as e:
@@ -94,13 +108,17 @@ def get_custom_packages(request, projectName):
 def delete_custom_package(request, projectName):
     try:
         data = json.loads(request.body)
+        #this will validate request body 
+        rb = DeleteCustomPackageBody(data.get("fileName"))
+        if(rb.__dict__['isError']):
+            return JsonResponse({'error':rb.__dict__['errorObj']},status = 400)
         fileName = data.get("fileName")
 
         if not projectName:
             return JsonResponse({'error': 'Project name is required'}, status=400)
 
-        if not fileName:
-            return JsonResponse({'error': 'File name is required'}, status=400)
+        # if not fileName:
+        #     return JsonResponse({'error': 'File name is required'}, status=400)
 
         delete_file(projectName, fileName)
         return JsonResponse({'message': "File deleted successfully"}, status=200)

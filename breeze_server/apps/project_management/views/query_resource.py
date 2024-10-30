@@ -23,7 +23,7 @@ from apps.common.constants.consts import (
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.query_resource_schema import manage_resource_schema
 from ...common.utils.file_helpers.json_handler import read_json_file as read_file
-
+from ..models.query_resource import ManageResourceBody,ManageResourceResponse
 @swagger_auto_schema(
     method="post",
     manual_parameters=manage_resource_schema["parameters"],
@@ -46,18 +46,36 @@ def manage_resource(request, param):
     try:
         projectname = param
         data = json.loads(request.body)
-        category = data.get("category", "")
-        resource = data.get("resource") or None
-        select = data.get("select") or None
-        filter = data.get("filter") or None
-        order = data.get("order") or None
-        limit = data.get("limit") or None
-        offset = data.get("offset") or None
-        count = data.get("count") or None
-        libname = data.get("libname") or None
-        libversion = data.get("libversion") or None
-        module = data.get("module") or None
-        files = data.get("files") or None
+        #this will validate the request body
+        res = ManageResourceBody(
+            data.get("category"),
+            data.get("resource"),
+            data.get("select"),
+            data.get("filter"),
+            data.get("order"),
+            data.get("limit"),
+            data.get("offset"),
+            data.get("count"),
+            data.get("libname"),
+            data.get("libversion"),
+            data.get("module"),
+            data.get("files")
+        )
+        if(res.__dict__['isError']):
+            raise Exception(res.__dict__['errorObj'])
+        
+        category = res.__dict__['responseObj'].get("category")
+        resource = res.__dict__['responseObj'].get("resource")
+        select = res.__dict__['responseObj'].get("select")
+        filter = res.__dict__['responseObj'].get("filter")
+        order = res.__dict__['responseObj'].get("order")
+        limit = res.__dict__['responseObj'].get("limit")
+        offset = res.__dict__['responseObj'].get("offset")
+        count = res.__dict__['responseObj'].get("count")
+        libname = res.__dict__['responseObj'].get("libname")
+        libversion = res.__dict__['responseObj'].get("libversion")
+        module = res.__dict__['responseObj'].get("module")
+        files = res.__dict__['responseObj'].get("files")
         selected_data = {}
 
         category = category.lower()
@@ -73,7 +91,6 @@ def manage_resource(request, param):
         # elif category not in [ResourceCategory.COMPONENTS.value , ResourceCategory.SERVICES.value , ResourceCategory.THIRD_PARTY.value,ResourceCategory.API_CLIENT.value]:
         elif category not in ResourceCategory._value2member_map_:
             return JsonResponse({"error": "category is not defined"}, status=400)
-
         # category=category.lower()
         if category in [
             ResourceCategory.COMPONENTS.value,
@@ -330,7 +347,9 @@ def manage_resource(request, param):
                     return JsonResponse(
                         {"error": "please provide module or resource"}, status=400
                     )
-
+        res = ManageResourceResponse(selected_data)
+        if(res.__dict__['isError']):
+            raise Exception(res.__dict__['errorObj'])
         return JsonResponse({"data": selected_data}, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
