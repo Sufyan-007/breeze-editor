@@ -6,7 +6,7 @@ from ..core.environment_management import delete_env_variable, update_env_vars, 
 from django.http import JsonResponse
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.env_apis_schema import set_env_schema
-
+from ..models.env_apis import SetEnvBody,AddEnvConfig,UpdateEnvConfig,DeleteEnvConfig
 @swagger_auto_schema(
     method='post',
     request_body=set_env_schema['rb'],
@@ -21,7 +21,13 @@ from ..swagger_schema.env_apis_schema import set_env_schema
 def set_env(request, project_id):
     try:
         data = json.loads(request.body.decode("utf-8"))
-        env_name = data.get('environmentName')
+        print(data)
+        #this will validate request body 
+        res = SetEnvBody(data.get('environmentName'))
+        if(res.__dict__['isError']):
+            return JsonResponse({'error':res.__dict__['errorObj']}, status=400)
+        else:
+            env_name = res.__dict__['responseObj'].get('environmentName')
         set_environment(env_name, project_id)
         if env_name == "dev (default)":
             return JsonResponse({
@@ -65,6 +71,10 @@ def get_environment_config(request, project_id):
 def add_env_config(request, project_id):
     try:
         data = json.loads(request.body.decode("utf-8"))
+        #this will validate request body 
+        rb = AddEnvConfig(data.get('envVars'),data.get('environments'))
+        if(rb.__dict__['isError']):
+            raise Exception(rb.__dict__['errorObj'])
         env_config = generate_config_from_payload(project_id, data)
         return JsonResponse({'status': 'success', 'config': env_config, 'message': 'Environment settings saved successfully'}, status=200)
     except json.JSONDecodeError:
@@ -83,10 +93,15 @@ def add_env_config(request, project_id):
 def update_env_config(request, project_id):
     try:
         data = json.loads(request.body)
-        variable_id = data.get('envVariableId')
-        env_vars = data.get('envVars')
-        env_name = env_vars.get('name')
-        env_values = env_vars.get('values')
+        #this will validate request body 
+        rb = UpdateEnvConfig(data.get('envVariableId'),data.get('envVars'))
+        if(rb.__dict__['isError']):
+            return JsonResponse({'error':rb.__dict__['errorObj']},status = 400)
+        else:
+            variable_id = data.get('envVariableId')
+            env_vars = data.get('envVars')
+            env_name = env_vars.get('name')
+            env_values = env_vars.get('values')
 
 
         if variable_id:
@@ -114,8 +129,13 @@ def update_env_config(request, project_id):
 def delete_env_config(request, project_id):
     try:
         data = json.loads(request.body)
-        env_name = data.get('envName')
-        env_variable_id = data.get('envVariableId')
+        #this will validate request body 
+        rb = DeleteEnvConfig(data.get('envName'),data.get('envVariableId'))
+        if(rb.__dict__['isError']):
+            return JsonResponse({'error':rb.__dict__['errorObj']},status = 400)
+        else:
+            env_name = data.get('envName')
+            env_variable_id = data.get('envVariableId')
 
         if env_name:
             # Handle environment deletion
