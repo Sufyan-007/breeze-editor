@@ -12,7 +12,6 @@ from apps.code_generator.core.generate_project import generate_project
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.handle_general_proj_apis_schema import get_all_schema,add_schema,delete_schema
 from rest_framework.parsers import MultiPartParser, FormParser
-from ..models.handle_general_proj_apis import GetProjMetaDataResponse,AddResponse
 @swagger_auto_schema(
     method = 'get',
     request_body=None,
@@ -40,9 +39,6 @@ def get_proj_metadata(request, project_id):
         app_config = read_project_config_file(
             app_config_dir, CONFIG_FILES_PATH['APP_CONFIG']
         )
-        res = GetProjMetaDataResponse(app_config)
-        if(res.__dict__['isError']):
-            return JsonResponse({'error':res.__dict__['errorObj']},status=400)
         return JsonResponse(app_config, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -63,15 +59,13 @@ def add(request):
     try:
         ## 1) Load proj data from UI
         ## 2) Validate proj data
-        res = load_proj_data(request)
-        # print(data.__dict__)
-        if res.__dict__['isError']:
-            return JsonResponse({'error':'required field missing..', 'res_data': res.__dict__['errorObj']}, status=400)
+        data = load_proj_data(request)
+        if "errors" in data:
+            return JsonResponse({'error':'required field missing..', 'res_data': data}, status=400)
         ## 3) Write proj data (app_config.json)
         ## 4) Create default directories objects for given template
         ## 5) Create default config for the main component via proj_config_management
         ## 6) Create default config for the route for main comp via proj_config_management
-        data = res.__dict__['responseObj']
         app_current_config = add_dirs_configs(data, request)
             
         ## 7) Replace the content for the related code in the template file
@@ -86,10 +80,6 @@ def add(request):
         
         start_project(data["name"])
         response = {"name": data["name"]}
-        #this will validate response before sending to client
-        res = AddResponse(data['name'])
-        if(res.__dict__['isError']):
-            raise Exception(res.__dict__['errorObj'])
         return JsonResponse(response, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
