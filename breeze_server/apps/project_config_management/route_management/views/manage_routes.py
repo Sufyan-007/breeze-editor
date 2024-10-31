@@ -9,7 +9,7 @@ from ..utils.utils import process_route_config, include_all_routes_accessory_dat
 from ..core.route_config_editor import delete_route as del_route
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.manage_routes_schema import get_routes_schema,get_all_routes_fullpath_schema,add_route_schema,update_route_schema,delete_route_schema
-from ..models.manage_routes import AddRouteBody,UpdateRouteBody,DeleteRouteBody,GetAllChildRoutesResponse,GetAllRoutesFullPathResponse,AddRouteResponse,UpdateRouteResponse,DeleteRouteResponse
+
 @swagger_auto_schema(
     method='get',
     manual_parameters=get_routes_schema['parameters'],
@@ -27,10 +27,6 @@ def get_all_child_routes(request,project_id):
     target_id = None if target_id in ['null', '""', "''", "", ''] else target_id
     nodes = get_node(project_id,TreeType["ROUTES"],target_id, depth = int(depth))
     include_all_routes_accessory_data(project_id, nodes.get('children'))
-    #this will validate response before sending to client side
-    res = GetAllChildRoutesResponse(nodes)
-    if(res.__dict__['isError']):
-        return JsonResponse({'error': res.__dict__['errorObj']}, status=400)
     return JsonResponse(nodes, status=200)
 
 
@@ -48,10 +44,6 @@ def get_all_routes_fullpath(request,project_id):
     target_id = request.GET.get('target_id', None)
     nodes = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id,'path')
     nodes = [{**node, 'path': '/'+node['path'].strip('/')} for node in nodes]
-    #this will validate response before sending to client side
-    res = GetAllRoutesFullPathResponse(nodes)
-    if(res.__dict__['isError']):
-        return JsonResponse({'error':res.__dict__['errorObj']},status=200)
     data = {
         "nodes" : nodes
     }
@@ -70,40 +62,15 @@ def get_all_routes_fullpath(request,project_id):
 @api_view(['POST'])
 def add_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
-     #this will validate request body 
-
-    res = AddRouteBody(
-            data.get('path'),
-            data.get('componentId'),
-            data.get('children'),
-            data.get('parentId'),
-            data.get('props'),
-            data.get('redirectTo'),
-            data.get('hydrateFallbackElementId'),
-            data.get('errorElementId'),
-            data.get('loader'),
-            data.get('lazy'),
-            data.get('action'),
-            data.get('shouldRevalidate'),
-            data.get('caseSensitive'),
-            data.get('index')
-        )
     try:
-        if(res.__dict__['isError']):
-            raise Exception(res.__dict__['errorObj'])
-        else:
-            check_for_mandatory_route_props(data, project_id)
-            if validate_route_path(data, data.get("parentId"), project_id) is True:    
-                config_data, node_id = add_node(project_id, TreeType["ROUTES"].value, data.get("parentId"), data)
-                # add_params_to_route_object()
-                rewrite_clean_route_config(project_id, config_data, node_id)
-                process_route_config(project_id, config_data)
-                include_all_routes_accessory_data(project_id, [config_data[node_id]])
-                 #this will validate response before sending to client side
-                res = AddRouteResponse(config_data)
-                if(res.__dict__['isError']):
-                    return JsonResponse({'error':res.__dict__['errorObj']},status=400)
-                return JsonResponse(config_data[node_id], status=200)
+        check_for_mandatory_route_props(data, project_id)
+        if validate_route_path(data, data.get("parentId"), project_id) is True:    
+            config_data, node_id = add_node(project_id, TreeType["ROUTES"].value, data.get("parentId"), data)
+            # add_params_to_route_object()
+            rewrite_clean_route_config(project_id, config_data, node_id)
+            process_route_config(project_id, config_data)
+            include_all_routes_accessory_data(project_id, [config_data[node_id]])
+            return JsonResponse(config_data[node_id], status=200)
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
@@ -121,24 +88,15 @@ def add_route(request, project_id):
 @api_view(['PUT'])
 def update_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
-    #this will validate request body 
-    rb = UpdateRouteBody(data.get('path'),data.get('componentId'),data.get('id'))
     try:
-        if(rb.__dict__['isError']):
-            raise Exception(rb.__dict__['errorObj'])
-        else:
-            check_for_mandatory_route_props(data, project_id)
-            res = update_route_in_config(data, project_id)
-            config_data = res['config']
-            # add_params_to_route_object()
-            rewrite_clean_route_config(project_id, config_data, data['id'])
-            process_route_config(project_id, config_data)
-            include_all_routes_accessory_data(project_id, [config_data[data['id']]])
-            #this will validate response before sending to client side
-            res = UpdateRouteResponse(config_data)
-            if(res.__dict__['isError']):
-                return JsonResponse({'error':res.__dict__['errorObj']},status=400)
-            return JsonResponse(config_data[data['id']], status=200)
+        check_for_mandatory_route_props(data, project_id)
+        res = update_route_in_config(data, project_id)
+        config_data = res['config']
+        # add_params_to_route_object()
+        rewrite_clean_route_config(project_id, config_data, data['id'])
+        process_route_config(project_id, config_data)
+        include_all_routes_accessory_data(project_id, [config_data[data['id']]])
+        return JsonResponse(config_data[data['id']], status=200)
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
@@ -157,20 +115,11 @@ def update_route(request, project_id):
 def delete_route(request, project_id):
     try:
         data = json.loads(request.body.decode("utf-8"))
-        #this will validate request body 
-        rb = DeleteRouteBody(data.get('id'))
-        if(rb.__dict__['isError']):
-            raise Exception(rb.__dict__['errorObj'])
-        else:
-            res = del_route(data.get('id'), project_id)
-            config_data = res['config']
-            rewrite_clean_route_config(project_id, config_data, data['id'])
-            process_route_config(project_id, config_data)
-            #this will validate response before sending to client side
-            res = DeleteRouteResponse(config_data)
-            if(res.__dict__['isError']):
-                return JsonResponse({'error':res.__dict__['errorObj']},status = 400)
-            return JsonResponse({'message': 'deletion operation successfully completed!', 'route_id': data['id']}, status=200)
+        res = del_route(data.get('id'), project_id)
+        config_data = res['config']
+        rewrite_clean_route_config(project_id, config_data, data['id'])
+        process_route_config(project_id, config_data)
+        return JsonResponse({'message': 'deletion operation successfully completed!', 'route_id': data['id']}, status=200)
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)

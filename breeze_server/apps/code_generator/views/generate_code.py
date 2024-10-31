@@ -6,7 +6,7 @@ from ..core.api_client_generator import generate_react_service
 from django.http import JsonResponse
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.generate_code_schema import generate_service_file_schema
-from ..models.generate_code import GenerateServiceFileBody
+
 
 @csrf_exempt
 def generate_code(request):
@@ -23,12 +23,8 @@ def generate_code(request):
 @permission_classes([AllowAny])     
 def generate_service_files(request,project_id,type):
     data = json.loads(request.body.decode("utf-8"))
-    res = GenerateServiceFileBody(data.get("filename"),data.get("moduleId"))
-    if(res.__dict__['isError']):
-        raise Exception(res.__dict__['errorObj'])
-    else:
-        filename = res.__dict__['responseObj'].get("filename")
-        module_id = res.__dict__['responseObj'].get("moduleId")
+    filename = data.get("filename")
+    module_id = data.get("moduleId")
     service_type = "ORDINARY"
     if(type == "AUTH"):
         service_type = "AUTH"
