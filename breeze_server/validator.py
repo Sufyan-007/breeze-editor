@@ -1,5 +1,4 @@
 import re
-from apps.project_management.utils.get_all_projects import get_all_projects
 
 def validate_file_name(value):
     pass
@@ -20,17 +19,9 @@ def validate_schema_id(value):
 
 def validate_title(value):
     pass 
-def validate_logo_file_size(field,logo_file):
-    if logo_file:
-        if logo_file.size > 5 * 1024 * 1024:
-            return "Logo must be smaller than 5MB."
-        if not logo_file.content_type.startswith("image/"):
-            return "Logo must be an image."
-def validate_project_unique_name(field,value):
-    if value.lower().replace(" ", "_") in get_all_projects().keys():
-        return "Project name must be unique."
+    
 
-def validate_user(field,value):
+def validate_user(value):
     try:
         if len(value) <= 2:
             return "Username length must be greater than 2"
@@ -38,7 +29,7 @@ def validate_user(field,value):
         return e
         
 
-def validate_password(field,value):
+def validate_password(value):
     if len(value) < 6 or len(value) > 12:
         return "Password length should be between 6 and 12 characters"
     elif not re.search("[a-z]", value):
@@ -52,7 +43,7 @@ def validate_password(field,value):
     elif re.search(r"\s", value):
         return "Password should not contain any whitespace character"
 
-def validate_email(field,value):
+def validate_email(value):
     if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', value):
         return "Invalid email address"
     
@@ -109,16 +100,16 @@ def validate_file_name(value):
 def validate_environment_name(value):
     pass
 
-def validate_string(field,value):
+def validate_string(value):
     if not isinstance(value, str):
         return f'Expected {value!r} to be a str'
 
 def validate_select(value):
     pass
 
-def required_validator(field,value):
+def required_validator(name, value):
     if value is None:
-        return f'{field} is required'
+        return "Value is required"
     
 def validate_filter(value):
     pass

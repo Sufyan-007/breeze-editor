@@ -7,7 +7,8 @@ add_or_edit_swagger_schema = {
         properties={
             'schemaId':openapi.Schema(type=openapi.TYPE_STRING,description='id of schema'),
             'moduleId':openapi.Schema(type=openapi.TYPE_STRING,description='id of module'),
-            'details':openapi.Schema(type=openapi.TYPE_OBJECT,description='details of schema',properties={'name':openapi.Schema(type=openapi.TYPE_STRING,description='name of schema')}),
+            'details':openapi.Schema(type=openapi.TYPE_STRING,description='details of schema'),
+            'name':openapi.Schema(type=openapi.TYPE_STRING,description='name of schema')
         },
         required=['name']
     ),
