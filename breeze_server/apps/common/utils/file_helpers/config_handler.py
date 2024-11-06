@@ -3,12 +3,14 @@ import time
 from pathlib import Path
 from flatten_json import flatten
 from flatten_json import unflatten_list
-from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH
+from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH, MULTI_NODE_MULTI_FILE
+
 from apps.common.utils.file_helpers.json_handler import write_json_file, read_project_config_file
 
 SEPARATOR = "<>"
+global_file_change_state = {'changed_files': {}}
 
-def read_config_file(project_name,category,filename,version="latest"):
+def read_config_file(project_name, category, filename, version="latest"):
     file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}.json"
     version_path = f"{CONFIG_PATH}/{project_name}/{category}/versions/{filename}"
     json_config = {}
@@ -78,7 +80,7 @@ def read_config_file(project_name,category,filename,version="latest"):
             "data" : json_config
         }
     
-def write_config_file(project_name,category,filename,json_data):
+def write_config_file(project_name, category, filename, json_data):
     INDEX_FILE_PATH = f"{CONFIG_PATH}/{project_name}/{category}/index.json"
     file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}"
     version_file_path = f"{CONFIG_PATH}/{project_name}/{category}/versions/{filename}"
@@ -91,7 +93,6 @@ def write_config_file(project_name,category,filename,json_data):
     file_version_json = {}
     file_config_json = {}
     
-    
     ## fist check if file is present then store and update it's version
     if versions_file.is_file() and config_file.is_file():
         # files exists
@@ -101,39 +102,51 @@ def write_config_file(project_name,category,filename,json_data):
             
             ## increment the version number
             current_version = file_version_json.get("current_version")
-            prev_version = str(current_version)
-            current_version = int(current_version) + 1  
-            file_version_json["current_version"] = current_version
+            file_version_json["current_version"] = current_version + 1
             current_version = str(current_version)
                     
             ## add new entry in the versions and store current time
             versions = file_version_json.get("versions",{})
-            versions[current_version] = { "key" : int(current_version), "timestamp" : time.time() }
+            versions[str(int(current_version) + 1)] = { "key" : int(current_version) + 1, "timestamp" : time.time() }
+            
+            # flag to check something have changed or not
+            has_something_changed = False
             
             # remove extra versions present in versions' stack and changes 
             for version in list(versions.keys()):
-                if int(version) > int(current_version):
+                if int(version) > int(current_version) + 1:
                     del versions[version]
                     
             changes = file_version_json.get("changes",{})
             for change_obj in list(changes.values()):
                 for version in list(change_obj.keys()):
                     # change to del only greater version
-                    if int(version) > int(current_version):
+                    if int(version) > int(current_version) + 1:
                         del change_obj[version]
 
-
+            if not file_version_json.get("deleted_keys"):
+                file_version_json["deleted_keys"] = {}
+            for key in file_version_json["deleted_keys"]:
+                if int(key) >= int(current_version) + 1:
+                    del file_version_json["deleted_keys"][key]
             ## store the changes of each field corresponding to it's version 
             ## for that use flatten obj for given data
             for key,value in flatten_data_json.items():
-                if value != file_config_json[key]:
+                if value != file_config_json.get(key):
                     ## field value is updated so store the changes
                     if key not in changes:
                         changes[key] = {}
-                    changes[key][current_version] = value
+                    changes[key][int(current_version) + 1] = value
+                    has_something_changed = True
                 else:
                     pass 
-                
+            
+            for key in file_config_json:
+                if key not in flatten_data_json:
+                    if not file_version_json.get("deleted_keys", {}).get(str(int(current_version) + 1)):
+                        file_version_json["deleted_keys"][file_version_json["current_version"]] = []
+                    file_version_json["deleted_keys"][file_version_json["current_version"]].append(key)
+                    has_something_changed = True
             file_version_json["versions"] = versions    
             file_version_json["changes"] = changes
     
@@ -143,104 +156,43 @@ def write_config_file(project_name,category,filename,json_data):
         file_version_json["versions"] = {}
         file_version_json["versions"]["1"] = { "key" : 1, "timestamp" : time.time() }
         file_version_json["changes"]={}
+        file_version_json["deleted_keys"] = {}
         for key, value in flatten_data_json.items():
             file_version_json["changes"][key] = {}
             file_version_json["changes"][key][1] = value
+        has_something_changed = True
         
     ## update both files
-    with open(f"{version_file_path}_versions.json", "w+") as jsconfig_version_file:
-        jsconfig_version_file.write(json.dumps(file_version_json))
-        with open(f"{file_path}.json", "w") as jsconfig_file:
-            jsconfig_file.write(json.dumps(flatten_data_json))
-            # UPDATE INDEX.JSON WITH NEW KEY VALUE PAIR
-            index_file = open(f"{INDEX_FILE_PATH}")
-            index_file_content = json.load(index_file)
-            index_file_content[filename] = json_data.get('name')
-            write_json_file(INDEX_FILE_PATH, index_file_content)
-            
-# rollback all files to there previous version
-def rollback_config_file(project_name, category, filename, is_exception):
-    # 1st change file ma jaine changes object ma 1 step revert previous ne copy
-    # 2nd change config ma jaine copy karea changes ne override
-    # handle case where if 1st version is removed then delete the original entity
-    # rewrite generated projects file as per new config
-    file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}.json"
-    version_file_path = f"{CONFIG_PATH}/{project_name}/{category}/versions/{filename}_versions.json"
-    
-    with open(file_path,"rb") as flatten_config:
-        flatten_json = json.load(flatten_config)
-    
-    with open(version_file_path,"rb") as version_handler:
-        version_handler = json.load(version_handler)
-        
-    current_version = version_handler.get('current_version')
-    if current_version > 1:
-        version_handler['current_version'] = current_version - 1
-        
-        for key in version_handler['changes']:
-            version_list = sorted(version_handler['changes'][key].keys())
-            if current_version == int(version_list[-1]):
-                previous_version_in_use = version_list[-2]
-                flatten_json[key] = version_handler['changes'][key][previous_version_in_use]
-            elif str(current_version) in version_list:
-                prev_ver_index = version_list.index(str(current_version)) - 1
-                previous_version_in_use = version_list[prev_ver_index]
-                flatten_json[key] = version_handler['changes'][key][previous_version_in_use]
-                
-    elif current_version == 1:
-        if is_exception:
-            revert_the_file_creation(project_name, category, filename)
-        else:
-            pass
-    
-            
-    json_config = unflatten_list(flatten_json,SEPARATOR)
-    
-    with open(f"{version_file_path}", "w+") as jsconfig_version_file:
-        jsconfig_version_file.write(json.dumps(version_handler))
-    with open(f"{file_path}", "w") as jsconfig_file:
-        jsconfig_file.write(json.dumps(flatten_json))
-    
-def rollforward_config_file(project_name, category, filename):
-    # 1st change file ma jaine changes object ma 1 step revert previous ne copy
-    # 2nd change config ma jaine copy karea changes ne override
-    # handle case where if 1st version is removed then delete the original entity
-    # rewrite generated projects file as per new config
-    file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}.json"
-    version_file_path = f"{CONFIG_PATH}/{project_name}/{category}/versions/{filename}_versions.json"
-    
-    with open(file_path,"rb") as flatten_config:
-        flatten_json = json.load(flatten_config)
-    
-    with open(version_file_path,"rb") as version_handler:
-        version_handler = json.load(version_handler)
-        
-    current_version = version_handler.get('current_version')
-    if str(current_version+1) in list(version_handler['versions'].keys()):
-        version_handler['current_version'] = current_version + 1
-        
-        for key in version_handler['changes']:
-            version_list = sorted(version_handler['changes'][key].keys())
-            if str(current_version+1) in version_list:
-                new_version_to_be_used = str(current_version+1)
-                flatten_json[key] = version_handler['changes'][key][new_version_to_be_used]
+    if has_something_changed:
+        with open(f"{version_file_path}_versions.json", "w+") as jsconfig_version_file:
+            jsconfig_version_file.write(json.dumps(file_version_json))
+            with open(f"{file_path}.json", "w") as jsconfig_file:
+                global_file_change_state["changed_files"][filename] = {
+                    "filename": filename,
+                    "project_name": project_name,
+                    "category": category,
+                    "current_version": file_version_json["current_version"]
+                }
+                jsconfig_file.write(json.dumps(flatten_data_json))
+                if category in MULTI_NODE_MULTI_FILE:
+                    # UPDATE INDEX.JSON WITH NEW KEY VALUE PAIR
+                    index_file = open(f"{INDEX_FILE_PATH}")
+                    index_file_content = json.load(index_file)
+                    index_file_content[filename] = json_data.get('name')
+                    write_json_file(INDEX_FILE_PATH, index_file_content)
     else:
-        return "already reached the latest changes"
-            
-    json_config = unflatten_list(flatten_json,SEPARATOR)
-    
-    with open(f"{version_file_path}", "w+") as jsconfig_version_file:
-        jsconfig_version_file.write(json.dumps(version_handler))
-    with open(f"{file_path}", "w") as jsconfig_file:
-        jsconfig_file.write(json.dumps(flatten_json))
-   
-       
+        print(f"Nothing changed in {filename}")
+                 
 def get_breeze_config_file(project_id, config_type='APP_CONFIG'):
     path = f"{CONFIG_PATH}/{project_id}"
-    config = read_project_config_file(
-        path, CONFIG_FILES_PATH[config_type]
-    )
+    if config_type == "ROUTING_CONFIG":
+        config_data_obj = read_config_file(project_id, "routing_config", "routing_config")
+        if config_data_obj.get('err'):
+            raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+        config = config_data_obj.get('data')
+    else:
+        config = read_project_config_file(
+            path, CONFIG_FILES_PATH[config_type]
+        )
     return config
-    
-def revert_the_file_creation(project_name, category, filename):
-    pass
+        

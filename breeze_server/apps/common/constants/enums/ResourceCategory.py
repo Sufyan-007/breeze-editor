@@ -10,6 +10,7 @@ class ResourceCategory(Enum):
     MODEL = "models"
     ROUTING = "routing"
     RESOURCE = "resource_config"
+    DIRECTORY_MANAGEMENT = "directory_management"
 
 class ThirdPartyLibraryKeys:
     LIB_NAME = "libname"

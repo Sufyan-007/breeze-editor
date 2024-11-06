@@ -1,4 +1,4 @@
-from apps.common.constants.consts import CONFIG_PATH,CLIENT_API,EXTERNAL_COMPONENTS_CONFIG
+from apps.common.constants.consts import CONFIG_PATH,CLIENT_API,EXTERNAL_COMPONENTS_CONFIG, MULTI_NODE_MULTI_FILE, ROUTING
 import json, os
 from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
 from apps.common.utils.file_helpers.json_handler import read_json_file, write_json_file
@@ -38,14 +38,11 @@ def add_dirs_configs(data, proj_data_request):
         "react-dom": "^18.3.1"
     }
     
-
-    # TODO: write all configuration part ASA other dependent module gets ready
-
     # creating app_basic_config, component_config & routing config
-    
     write_json_file(f"{app_config_path}.json", app_current_config)
     
-    create_resource_directory(data['name'], ResourceCategory.COMPONENTS)
+    create_resource_directory(data['name'], ResourceCategory.COMPONENTS.value)
+    create_resource_directory(data['name'], ROUTING)
     create_dir_if_not_exists(f"{app_config_dir}/{EXTERNAL_COMPONENTS_CONFIG}") 
     app_current_config = write_basic_main_comp_config(app_current_config)
     write_routing_config(app_current_config)
@@ -121,7 +118,8 @@ def write_routing_config(app_config):
             "parentId": None
         }
     }
-    write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", basic_routing_config)
+    # write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", basic_routing_config)
+    write_config_file( f"{app_config['name']}", ROUTING, ROUTING, basic_routing_config)
 
 def write_swagger_schema_config(app_config_dir):
     write_json_file(f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json", {
@@ -174,9 +172,10 @@ def update_directory_management_file(app_config):
 # expecting enum object and project name i.e. is currently an ID itself
 def create_resource_directory(project_id, resource_category):
     app_config_dir = f"{CONFIG_PATH}/{project_id}"
-    create_dir_if_not_exists(f"{app_config_dir}/{resource_category.value}")
-    write_json_file(f"{app_config_dir}/{resource_category.value}/index.json", {})
-    create_dir_if_not_exists(f"{app_config_dir}/{resource_category.value}/versions")
+    create_dir_if_not_exists(f"{app_config_dir}/{resource_category}")
+    if resource_category in MULTI_NODE_MULTI_FILE:
+        write_json_file(f"{app_config_dir}/{resource_category}/index.json", {})
+    create_dir_if_not_exists(f"{app_config_dir}/{resource_category}/versions")
     
 def entry_in_config_index(project_id, resource_category, key, value):
     app_config_dir = f"{CONFIG_PATH}/{project_id}"

@@ -12,7 +12,6 @@ def get_base_route_list(route_config):
         if route_obj.get('parentId') in [None, ""]:
             base_route_ids_list.append(route_obj.get('id'))
     return base_route_ids_list
-        
     
 def get_routing_code(_route_config, _comp_config_index, _app_config):
     # handle imports for the code generation
