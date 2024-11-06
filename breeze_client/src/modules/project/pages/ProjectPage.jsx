@@ -23,11 +23,11 @@ function ProjectPage() {
 
   return (
     <div>
-      <TreeProvider>
+      <TreeProvider projectName={projectName}>
         <Layout
           sidebar={<ProjectSidebar />}
           mainContent={
-            <TabProvider>
+            <TabProvider projectName={projectName}>
               <TabBar />
               <ProjectDisplay />
             </TabProvider>

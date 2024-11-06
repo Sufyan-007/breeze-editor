@@ -4,18 +4,18 @@ import PropTypes from 'prop-types';
 
 const TabContext = createContext();
 
-export const TabProvider = ({ children }) => {
+export const TabProvider = ({ children, projectName }) => {
   const [openTabs, setOpenTabs] = useState(() => {
-    const storedTabs = localStorage.getItem('openTabs');
-    return storedTabs ? JSON.parse(storedTabs) : [];
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    return storedInfo[projectName]?.openTabs || [];
   });
 
   const [selectedTab, setSelectedTab] = useState(() => {
-    const storedSelectedTab = localStorage.getItem('selectedTab');
-    return storedSelectedTab ? JSON.parse(storedSelectedTab) : null;
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    return storedInfo[projectName]?.selectedTab || null;
   });
 
-  const { setSelectedNodeId, setSelectedNode } = useTreeContext();
+  const { setSelectedNodeId, setSelectedNode, selectedNode } = useTreeContext();
 
   useEffect(() => {
     const tabsToStore = openTabs.map(({ id, name, type, extension, tag, activeTab }) => ({
@@ -26,18 +26,40 @@ export const TabProvider = ({ children }) => {
       tag,
       activeTab,
     }));
-    localStorage.setItem('openTabs', JSON.stringify(tabsToStore));
-  }, [openTabs]);
+
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    storedInfo[projectName] = {
+      ...storedInfo[projectName],
+      openTabs: tabsToStore,
+    };
+
+    localStorage.setItem('openTabsInfo', JSON.stringify(storedInfo));
+  }, [openTabs, projectName]);
 
   useEffect(() => {
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
     if (selectedTab) {
       const { id, name, type, extension, tag, activeTab } = selectedTab;
-      const tabToStore = { id, name, type, extension, tag, activeTab };
-      localStorage.setItem('selectedTab', JSON.stringify(tabToStore));
+      storedInfo[projectName] = {
+        ...storedInfo[projectName],
+        selectedTab: { id, name, type, extension, tag, activeTab },
+      };
     } else {
-      localStorage.removeItem('selectedTab');
+      delete storedInfo[projectName].selectedTab;
     }
-  }, [selectedTab]);
+
+    localStorage.setItem('openTabsInfo', JSON.stringify(storedInfo));
+  }, [selectedTab, projectName]);
+
+  useEffect(() => {
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    storedInfo[projectName] = {
+      ...storedInfo[projectName],
+      selectedNode,
+    };
+
+    localStorage.setItem('openTabsInfo', JSON.stringify(storedInfo));
+  }, [selectedNode, projectName]);
 
   const addTab = useCallback((node, code = '', language = '', activeTab = 'code') => {
     if (node?.type !== 'DIRECTORY') {
@@ -106,4 +128,5 @@ export const useTabContext = () => {
 
 TabProvider.propTypes = {
   children: PropTypes.node.isRequired,
+  projectName: PropTypes.string.isRequired,
 };
