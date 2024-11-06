@@ -306,7 +306,7 @@ def modify_index_html_with_logo(app_config):
 
     if logo_id:
         # Download the file
-        downloaded_file_path = file_handler.download_file(logo_id, project_name)
+        downloaded_file_path = file_handler.get_file_path(logo_id, project_name)
 
         if downloaded_file_path:
             # Copy the downloaded file to the public folder with the appropriate extension
