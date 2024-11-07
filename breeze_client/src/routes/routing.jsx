@@ -3,7 +3,7 @@ import Login from '../modules/authentication/pages/login/Login';
 import ProjectPage from '../modules/project/pages/ProjectPage';
 import AllProjects from '../modules/project/pages/AllProjects';
 import PropTypes from 'prop-types';
-
+import { OffcanvasProvider } from '../contexts/OffcanvasContext';
 const isAuthenticated = () => {
   return !!localStorage.getItem('accessToken');
 };
@@ -51,7 +51,9 @@ export const router = createBrowserRouter([
     path: '/project/:projectName',
     element: (
       // <ProtectedRoute>
-      <ProjectPage />
+      <OffcanvasProvider>
+        <ProjectPage />
+      </OffcanvasProvider>
       // </ProtectedRoute>
     ),
   },
