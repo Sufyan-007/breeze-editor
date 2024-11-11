@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   CustomTextInput,
@@ -9,8 +9,14 @@ import {
 import { initialImportConfig } from '../../constants/ResourcesFormData';
 import { ImportCategories, ImportTypes } from '../../constants/FormConstants';
 
-function ImportConfigForm({ onSubmit }) {
-  const [formData, setFormData] = useState(initialImportConfig);
+function ImportConfigForm({ onSubmit, formData: initialData, editMode = false }) {
+  const [formData, setFormData] = useState(initialData || initialImportConfig);
+
+  useEffect(() => {
+    if (editMode && initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData, editMode]);
 
   const handleChange = (field, value) => {
     setFormData({
@@ -20,8 +26,8 @@ function ImportConfigForm({ onSubmit }) {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
     console.log('formData::>>', formData);
+    e.preventDefault();
     onSubmit(formData);
     setFormData(initialImportConfig);
   };
@@ -32,7 +38,7 @@ function ImportConfigForm({ onSubmit }) {
         <div>
           <CustomTextInput
             name="importEntity"
-            value={formData.importEntity}
+            value={formData.importEntity || ''}
             onChange={(value) => handleChange('importEntity', value)}
             config={{
               label: 'Import Entity',
@@ -41,7 +47,7 @@ function ImportConfigForm({ onSubmit }) {
           />
           <CustomTextInput
             name="importFrom"
-            value={formData.importFrom}
+            value={formData.importFrom || ''}
             onChange={(value) => handleChange('importFrom', value)}
             config={{
               label: 'Import From',
@@ -50,7 +56,7 @@ function ImportConfigForm({ onSubmit }) {
           />
           <CustomRadioButtonField
             name="importType"
-            value={formData.importType}
+            value={formData.importType || 'full'}
             onChange={(value) => handleChange('importType', value)}
             options={ImportTypes}
             config={{
@@ -62,7 +68,7 @@ function ImportConfigForm({ onSubmit }) {
           />
           <CustomSelectField
             name="category"
-            value={formData.category}
+            value={formData.category || 'component'}
             onChange={(value) => handleChange('category', value)}
             options={ImportCategories}
             config={{
@@ -72,7 +78,12 @@ function ImportConfigForm({ onSubmit }) {
           />
         </div>
         <div className="d-flex justify-content-end">
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -80,7 +91,14 @@ function ImportConfigForm({ onSubmit }) {
 }
 
 ImportConfigForm.propTypes = {
-  onSubmit: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
+  formData: PropTypes.shape({
+    importEntity: PropTypes.string,
+    importFrom: PropTypes.string,
+    importType: PropTypes.string,
+    category: PropTypes.string,
+  }),
+  editMode: PropTypes.bool,
 };
 
 export default ImportConfigForm;

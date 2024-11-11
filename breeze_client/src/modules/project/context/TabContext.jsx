@@ -4,35 +4,64 @@ import PropTypes from 'prop-types';
 
 const TabContext = createContext();
 
-export const TabProvider = ({ children }) => {
+export const TabProvider = ({ children, projectName }) => {
   const [openTabs, setOpenTabs] = useState(() => {
-    const storedTabs = localStorage.getItem('openTabs');
-    return storedTabs ? JSON.parse(storedTabs) : [];
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    return storedInfo[projectName]?.openTabs || [];
   });
 
   const [selectedTab, setSelectedTab] = useState(() => {
-    const storedSelectedTab = localStorage.getItem('selectedTab');
-    return storedSelectedTab ? JSON.parse(storedSelectedTab) : null;
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    return storedInfo[projectName]?.selectedTab || null;
   });
 
-  const { setSelectedNodeId, setSelectedNode } = useTreeContext();
+  const { setSelectedNodeId, setSelectedNode, selectedNode } = useTreeContext();
 
   useEffect(() => {
-    const tabsToStore = openTabs.map(({ id, name, type, extension, tag }) => ({ id, name, type, extension, tag }));
-    localStorage.setItem('openTabs', JSON.stringify(tabsToStore));
-  }, [openTabs]);
+    const tabsToStore = openTabs.map(({ id, name, type, extension, tag, activeTab }) => ({
+      id,
+      name,
+      type,
+      extension,
+      tag,
+      activeTab,
+    }));
+
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    storedInfo[projectName] = {
+      ...storedInfo[projectName],
+      openTabs: tabsToStore,
+    };
+
+    localStorage.setItem('openTabsInfo', JSON.stringify(storedInfo));
+  }, [openTabs, projectName]);
 
   useEffect(() => {
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
     if (selectedTab) {
-      const { id, name, type, extension, tag } = selectedTab;
-      const tabToStore = { id, name, type, extension, tag };
-      localStorage.setItem('selectedTab', JSON.stringify(tabToStore));
+      const { id, name, type, extension, tag, activeTab } = selectedTab;
+      storedInfo[projectName] = {
+        ...storedInfo[projectName],
+        selectedTab: { id, name, type, extension, tag, activeTab },
+      };
     } else {
-      localStorage.removeItem('selectedTab');
+      delete storedInfo[projectName].selectedTab;
     }
-  }, [selectedTab]);
 
-  const addTab = useCallback((node, code = '', language = '') => {
+    localStorage.setItem('openTabsInfo', JSON.stringify(storedInfo));
+  }, [selectedTab, projectName]);
+
+  useEffect(() => {
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    storedInfo[projectName] = {
+      ...storedInfo[projectName],
+      selectedNode,
+    };
+
+    localStorage.setItem('openTabsInfo', JSON.stringify(storedInfo));
+  }, [selectedNode, projectName]);
+
+  const addTab = useCallback((node, code = '', language = '', activeTab = 'code') => {
     if (node?.type !== 'DIRECTORY') {
       setOpenTabs((prevTabs) => {
         const existingTab = prevTabs.find((tab) => tab.id === node.id);
@@ -41,6 +70,7 @@ export const TabProvider = ({ children }) => {
           ...node,
           code: code || '',
           language: language || '',
+          activeTab,
         };
 
         return [...prevTabs, newTab];
@@ -73,6 +103,10 @@ export const TabProvider = ({ children }) => {
     setOpenTabs((prevTabs) => prevTabs.map((tab) => (tab.id === nodeId ? { ...tab, code, language } : tab)));
   }, []);
 
+  const setActiveConfigTab = useCallback((nodeId, activeTab) => {
+    setOpenTabs((prevTabs) => prevTabs.map((tab) => (tab.id === nodeId ? { ...tab, activeTab } : tab)));
+  }, []);
+
   const selectTab = (node) => {
     setSelectedNode(node);
     setSelectedNodeId(node.id);
@@ -80,7 +114,9 @@ export const TabProvider = ({ children }) => {
   };
 
   return (
-    <TabContext.Provider value={{ openTabs, selectedTab, addTab, removeTab, selectTab, updateTabContent }}>
+    <TabContext.Provider
+      value={{ openTabs, selectedTab, addTab, removeTab, selectTab, updateTabContent, setActiveConfigTab }}
+    >
       {children}
     </TabContext.Provider>
   );
@@ -92,4 +128,5 @@ export const useTabContext = () => {
 
 TabProvider.propTypes = {
   children: PropTypes.node.isRequired,
+  projectName: PropTypes.string.isRequired,
 };
