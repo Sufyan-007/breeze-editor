@@ -4,8 +4,6 @@ from apps.common.constants.consts import CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import write_json_file
 from apps.code_generator.core.generate_code import generate_code_with_latest_config
 
-
-
 # rollback all files to there previous version
 def rollback_config_file(project_name, category, filename, version=None, is_exception=False):
     # 1st change file ma jaine changes object ma 1 step revert previous ne copy
