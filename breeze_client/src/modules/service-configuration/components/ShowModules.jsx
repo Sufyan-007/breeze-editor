@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CustomTextInput } from '../../../common/fields';
 import ShowFiles from './ShowFiles';
 import { fetchFiles } from '../redux/ApiClientActions';
 import { useParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import isEqual from 'lodash/isEqual';
+import PropTypes from 'prop-types';
 
 function ShowModules({
   folderKey,
@@ -20,12 +22,27 @@ function ShowModules({
   const [newModuleTitle, setNewModuleTitle] = useState('');
   const { projectName } = useParams();
   const dispatch = useDispatch();
-  const toggleModuleExpansion = async () => {
+
+  const files = useSelector(
+    (state) => state.services.filesList,
+    (prevFiles, nextFiles) => {
+      return isEqual(prevFiles, nextFiles);
+    }
+  );
+
+  const toggleModuleExpansion = async (name, id) => {
     if (!isOpen) {
-      await dispatch(fetchFiles({ projectName, payload: { category: 'api_client', module: folderKey } })).unwrap();
+      setSelectedModule({ name: name, id: id });
     }
     setIsOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (Object.keys(files).length === 0) {
+      dispatch(fetchFiles({ projectName, payload: { category: 'api_client', module: folderKey } })).unwrap();
+    }
+  }, [dispatch, folderKey, projectName, files]);
+
   const handleInputChange = (value) => {
     setNewModuleTitle(value);
   };
@@ -43,7 +60,7 @@ function ShowModules({
     <div key={folderKey} className="my-2">
       <div
         className={`mb-2 p-1 br-text-primary ${isOpen ? 'br-background-secondary' : 'br-background-primary'}`}
-        onClick={() => toggleModuleExpansion()}
+        onClick={() => toggleModuleExpansion(value.title, folderKey)}
         style={{ cursor: 'pointer' }}
       >
         <div className="d-flex justify-content-between align-items-center">
@@ -79,7 +96,7 @@ function ShowModules({
             <i
               className="bi bi-plus-circle mx-1"
               style={{ cursor: 'pointer' }}
-              onClick={(e) => {
+              onClick={() => {
                 onAdd();
               }}
               title="add-to-module"
@@ -118,5 +135,17 @@ function ShowModules({
     </div>
   );
 }
-
+ShowModules.propTypes = {
+  folderKey: PropTypes.string.isRequired,
+  saveTitle: PropTypes.func.isRequired,
+  value: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    files: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
+  onAdd: PropTypes.func.isRequired,
+  setSelectedApi: PropTypes.func.isRequired,
+  setSelectedFile: PropTypes.func.isRequired,
+  setSelectedModule: PropTypes.func.isRequired,
+  setView: PropTypes.func.isRequired,
+};
 export default ShowModules;

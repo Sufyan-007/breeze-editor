@@ -58,7 +58,7 @@ def generate_service_config(request, collectionType, project_id):
                     )
                     for file in files_with_apis:
                         generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name)
-                return JsonResponse({"files_with_apis": files_with_apis}, status=201)
+                return JsonResponse({"module_id": module_id}, status=201)
             
             # elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
             #     model_dict,filename,error_obj = WebsocketConverter.prepare_api_models(json_data)
@@ -144,8 +144,8 @@ def get_response_token( request, project_id,apiId, moduleId):
             file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
             if not os.path.exists(file_path):
                 return JsonResponse({"error": "File not found"}, status=404)
-            if moduleId=='null' or moduleId == 'undefined' or apiId == 'null' or apiId == 'undefined':
-                return JsonResponse({"error": "Module ID or API ID not provided"}, status=400)
+            if moduleId=='null' or moduleId == 'undefined':
+                return JsonResponse({"error": "Module ID not provided"}, status=400)
             result = {}
             with open(file_path, "r") as file:
                 file_content = json.load(file)

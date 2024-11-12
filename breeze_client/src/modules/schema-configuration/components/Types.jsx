@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import TypeDetails from './TypeDetails';
 
 function Types({ propertyData, onUpdate, moduleId, selectedSchema, propertyName, onResolve }) {
@@ -12,7 +13,6 @@ function Types({ propertyData, onUpdate, moduleId, selectedSchema, propertyName,
     const updateProperty = { ...propertyData };
     updateProperty['types'] = [...updateProperty['types']];
     updateProperty['types'].push(newType);
-    // console.log(updateProperty);
     onUpdate(updateProperty);
   };
   const handleResolve = (payload) => {
@@ -50,4 +50,18 @@ function Types({ propertyData, onUpdate, moduleId, selectedSchema, propertyName,
   );
 }
 
+Types.propTypes = {
+  propertyData: PropTypes.shape({
+    types: PropTypes.arrayOf(
+      PropTypes.shape({
+        type: PropTypes.string,
+      })
+    ).isRequired,
+  }).isRequired,
+  onUpdate: PropTypes.func.isRequired,
+  moduleId: PropTypes.string.isRequired,
+  selectedSchema: PropTypes.object.isRequired,
+  propertyName: PropTypes.string.isRequired,
+  onResolve: PropTypes.func.isRequired,
+};
 export default Types;

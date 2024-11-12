@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { typeTemplate } from '../constants/templates';
 import PropertyDetailsCard from './PropertyDetailsCard';
 
@@ -68,5 +69,13 @@ function ObjectDetails({ objectData, onUpdate, moduleId, selectedSchema, onResol
     </>
   );
 }
-
+ObjectDetails.propTypes = {
+  objectData: PropTypes.shape({
+    properties: PropTypes.object.isRequired,
+  }).isRequired,
+  onUpdate: PropTypes.func.isRequired,
+  moduleId: PropTypes.string.isRequired,
+  selectedSchema: PropTypes.object.isRequired,
+  onResolve: PropTypes.func.isRequired,
+};
 export default ObjectDetails;

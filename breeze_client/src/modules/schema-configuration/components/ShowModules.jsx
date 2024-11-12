@@ -3,6 +3,7 @@ import { schemaTemplate } from '../constants/templates';
 import { useEffect, useState } from 'react';
 import { fetchSchemas } from '../redux/schemaConfigActions';
 import { useParams } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSchema, setSelectedSchema }) {
   const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
@@ -60,10 +61,18 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
             }}
           >
             <i className="bi bi-dot"></i> {schema.name}
+            {schema.isUnresolved && <i className="bi bi-exclamation-circle text-danger mx-2"></i>}
           </div>
         ))}
     </>
   );
 }
-
+ShowModules.propTypes = {
+  setView: PropTypes.func.isRequired,
+  moduleId: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  setSelectedModule: PropTypes.func.isRequired,
+  setCurrentSchema: PropTypes.func.isRequired,
+  setSelectedSchema: PropTypes.func.isRequired,
+};
 export default ShowModules;

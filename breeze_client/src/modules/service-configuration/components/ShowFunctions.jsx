@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-
+import PropTypes from 'prop-types';
 function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId }) {
   const func = useSelector((state) => state.services.functionsList[functionId]);
   const authFunc = useSelector((state) => state.services.moduleList[moduleId]?.auth_apis[functionId]);
@@ -21,5 +21,10 @@ function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId }) {
     </div>
   );
 }
-
+ShowFunctions.propTypes = {
+  functionId: PropTypes.string.isRequired,
+  onFunctionClick: PropTypes.func.isRequired,
+  isAuth: PropTypes.bool.isRequired,
+  moduleId: PropTypes.string.isRequired,
+};
 export default ShowFunctions;

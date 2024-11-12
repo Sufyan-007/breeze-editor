@@ -1,6 +1,7 @@
 import json
 from ..utils.append_dict_file import append_to_dict_file
 from ....common.utils.uuid_as_key import generate_uuid_as_key
+from ..utils.set_unresolved_key import set_unresolved_keys
 def delete_schema_helper(schema_file_path,schemaId):
     try:
         with open(schema_file_path, "r+") as file:
@@ -64,10 +65,13 @@ def resolve_schemas_helper(schema_file_path, schemaId, new_schema_name, details,
             schema_id_to_use = existing_schema_id if existing_schema_id else generate_uuid_as_key()
             
             schema_data[schemaId]["properties"][prop_name]["types"][types_index] = {"$ref": schema_id_to_use}
+            del schema_data[schemaId]["isUnresolved"]
             
             if not existing_schema_id:
                 details["name"] = new_schema_name
                 schema_data[schema_id_to_use] = details
+                set_unresolved_keys(schema_data)
+            
             
             append_to_dict_file(schema_file_path, schema_data)
             return {"message": "Schema resolved successfully."}, 200

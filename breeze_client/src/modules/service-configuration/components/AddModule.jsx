@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { CustomButtonField, CustomTextArea, CustomTextInput } from '../../../common/fields';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -64,5 +65,7 @@ function AddModule({ setView }) {
     </div>
   );
 }
-
+AddModule.propTypes = {
+  setView: PropTypes.func,
+};
 export default AddModule;

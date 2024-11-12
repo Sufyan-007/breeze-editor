@@ -4,14 +4,23 @@ import HeadersSetting from './HeadersSettings';
 import AuthSettings from './AuthSettings';
 import UrlSettings from './UrlSettings';
 import BodySettings from './BodySettings';
+import { fetchEnvironmentConfig } from '../../../redux/settings/settingsActions';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, requestType, moduleId }) {
   const [request, setRequest] = useState(requestData);
   const [expandedProperty, setExpandedProperty] = useState(null);
   const [api, setApi] = useState({});
   const [requestProperties, setRequestProperties] = useState(['Url', 'Body', 'Headers', 'Auth']);
-  const [envVars, setEnvVars] = useState({});
+  // const [envVars, setEnvVars] = useState({});
+  const { environmentSettingsConfig } = useSelector((state) => state.environment);
+
+  const envVars = environmentSettingsConfig?.envVars;
+
+  const { projectName } = useParams();
   const [urlHeading, setUrlHeading] = useState('');
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (requestData.method === 'GET') {
@@ -35,6 +44,9 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
     }
   }, [isAuthApi, apiData.authentication_type]);
 
+  useEffect(() => {
+    dispatch(fetchEnvironmentConfig({ projectName }));
+  }, [dispatch, projectName]);
   const addProperty = (e, prop) => {
     let newData = null;
     if (prop === 'query parameters') {

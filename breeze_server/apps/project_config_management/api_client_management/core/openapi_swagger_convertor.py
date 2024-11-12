@@ -10,6 +10,7 @@ from .api_model_loader import ApiModelLoader
 from ..utils.api_models import MethodsEnum,AuthApiTypeEnum,AuthTypeEnum
 from ..utils.schema_conversion import convert_type_to_config, generate_ids,object_converter
 from ....common.utils.replace_variable import replace_variable
+from ..utils.set_unresolved_key import set_unresolved_keys
 def prepare_api_models(json_data, project_name,isJson):
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         # app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
@@ -72,9 +73,11 @@ def prepare_api_models(json_data, project_name,isJson):
                 replace_variable(schema_with_ids, f"#/components/schemas/{val['name']}",key)
             schema_file_path = f"{CONFIG_PATH}/{project_name}/models/{swagger_metadata_id}.json"
             
+            set_unresolved_keys(schema_with_ids)
+            
             with open(schema_file_path, "w") as file:
                 json.dump(schema_with_ids,file, cls=EnhancedJSONEncoder)
-                
+            
             ###### auth related details ########
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
                 
@@ -635,3 +638,7 @@ def wrap_conversion(converted_data, project_name, folder_path):
         json.dump(index_content, file)
 
     return files_with_apis, is_error_present
+
+                    
+
+    

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CustomTextInput } from '../../../common/fields';
 import Types from './Types';
+import PropTypes from 'prop-types';
 
 function PropertyDetailsCard({
   changePropertyName,
@@ -75,5 +76,13 @@ function PropertyDetailsCard({
     </>
   );
 }
-
+PropertyDetailsCard.propTypes = {
+  changePropertyName: PropTypes.func.isRequired,
+  propKey: PropTypes.string.isRequired,
+  property: PropTypes.object.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  moduleId: PropTypes.string.isRequired,
+  selectedSchema: PropTypes.object.isRequired,
+  onResolve: PropTypes.func.isRequired,
+};
 export default PropertyDetailsCard;
