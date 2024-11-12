@@ -11,8 +11,9 @@ import FunctionConfigForm from '../../component-configuration/components/config-
 import LifecycleConfigForm from '../../component-configuration/components/config-forms/LifecycleConfigForm';
 import HookConfigForm from '../../component-configuration/components/config-forms/HookConfigForm';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
-
-const items = ['+ Imports', '+ Variable', '+ Props', '+ Function', '+ Lifecycle', '+ Hook', '+ Html elements'];
+import { configTypeMapping, items } from '../constants/EditorList';
+import { getCodeDetails } from '../../../services/components/componentService';
+import { useParams } from 'react-router-dom';
 
 const ConfigurableMonacoEditor = ({
   defaultValue = '',
@@ -21,14 +22,18 @@ const ConfigurableMonacoEditor = ({
   language = 'javascript',
   onChange,
   readOnlyMode = false,
+  node = {},
 }) => {
   const editorRef = useRef(null);
   const [editor, setEditor] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [filteredItems, setFilteredItems] = useState(items);
   const [value] = useState(defaultValue);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const { showOffcanvas } = useOffcanvas();
+  const { projectName } = useParams();
 
   useEffect(() => {
     if (editor && editor.getValue() !== defaultValue) {
@@ -50,74 +55,89 @@ const ConfigurableMonacoEditor = ({
       language: language,
       theme: projectTheme,
       readOnly: readOnlyMode,
+      contextmenu: node?.tag === 'COMPONENTS' ? 'false' : 'true',
     });
-
     setEditor(editorInstance);
 
-    // Show custom menu on alt+enter
-    const handleKeyDown = (event) => {
-      if (event.altKey && event.key === 'Enter') {
-        event.preventDefault();
-        setShowMenu(true);
+    const handleClick = async (e) => {
+      if (e && e.event.buttons !== 1) {
+        return;
       }
+
+      const model = editorInstance.getModel();
+      const position = editorInstance.getPosition();
+      const index = model.getOffsetAt(position);
+      // const character = model.getValue()[index];
+      const text = model.getValue();
+      const count = text.slice(0, index).length;
+
+      const payload = {
+        type: node?.tag,
+        compId: node.id,
+        index: count,
+      };
+      const result = await getCodeDetails(projectName, payload);
+      const configType = result?.related_config?.type;
+      setFilteredItems(configType ? configTypeMapping[configType] || items : items);
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-
-    const handleClickOutside = (event) => {
-      setShowMenu((state) => {
-        if (state && !event.target.closest('#customMenu')) {
-          return false;
-        }
-        return state;
+    if (node?.tag === 'COMPONENTS') {
+      editorInstance.onContextMenu(async (e) => {
+        e.event.preventDefault();
+        e.event.stopPropagation();
+        await new Promise((r) => setTimeout(r, 5));
+        await handleClick();
+        const { clientX, clientY } = e.event.browserEvent;
+        setMenuPosition({ x: clientX, y: clientY });
+        setShowMenu(true);
       });
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
+      editorInstance.onMouseDown(() => {
+        setShowMenu(false);
+      });
+    }
+
+    if (node?.tag === 'COMPONENTS') {
+      editorInstance.onMouseDown(handleClick);
+    }
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
       editorInstance.dispose();
     };
-  }, [language, readOnlyMode, value, projectTheme]);
+  }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
   const handleMenuItemClick = (item) => {
     let contentComponent;
     switch (item) {
-      case '+ Imports':
+      case 'Add Import':
         contentComponent = <ImportConfigForm onSubmit={() => {}} />;
         break;
-      case '+ Props':
+      case 'Edit Import':
+        contentComponent = <ImportConfigForm onSubmit={() => {}} formData={{}} editMode={true} />;
+        break;
+      case 'Props':
         contentComponent = <PropConfigForm onSubmit={() => {}} />;
         break;
-      case '+ Variable':
+      case 'Variable':
         contentComponent = <VariableConfigForm onSubmit={() => {}} />;
         break;
-      case '+ Html elements':
+      case 'Html elements':
         contentComponent = <AddELement />;
         break;
-      case '+ Function':
+      case 'Function':
         contentComponent = <FunctionConfigForm onSubmit={() => {}} />;
         break;
-      case '+ Lifecycle':
+      case 'Lifecycle':
         contentComponent = <LifecycleConfigForm onSubmit={() => {}} />;
         break;
-      case '+ Hook':
+      case 'Hook':
         contentComponent = <HookConfigForm onSubmit={() => {}} />;
         break;
       default:
         contentComponent = null;
     }
 
-    showOffcanvas(
-      contentComponent,
-      'Component Configuration',
-      'end', // Optional placement
-      true, // Optional backdrop
-      '40%' // Optional size
-    );
-
+    showOffcanvas(contentComponent, 'Component Configuration', 'end', true, '40%');
     setShowMenu(false);
   };
 
@@ -130,28 +150,16 @@ const ConfigurableMonacoEditor = ({
         <div
           id="customMenu"
           style={{
-            display: 'block',
             position: 'absolute',
-            top: '50%',
-            right: '40%',
+            top: menuPosition.y,
+            left: menuPosition.x,
             borderRadius: '5px',
             zIndex: 1000,
           }}
         >
-          <BreezeList items={items} onItemClick={handleMenuItemClick} isSearchable={true} />
+          <BreezeList items={filteredItems} onItemClick={handleMenuItemClick} isSearchable={true} />
         </div>
       )}
-
-      {/* Breeze Off-Canvas */}
-      {/* <BreezeOffcanvas
-        show={showOffCanvas}
-        onClose={() => setShowOffCanvas(false)}
-        title="Component Configuration"
-        placement="end"
-        size="40%"
-      >
-        <>{OffCanvasContent}</>
-      </BreezeOffcanvas> */}
     </div>
   );
 };
@@ -164,6 +172,7 @@ ConfigurableMonacoEditor.propTypes = {
   onChange: PropTypes.func,
   id: PropTypes.string,
   readOnlyMode: PropTypes.bool,
+  node: PropTypes.object,
 };
 
 export default ConfigurableMonacoEditor;

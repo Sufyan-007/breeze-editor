@@ -5,7 +5,6 @@
     "children": [
       "SRC",
       "PACKAGE_CONFIG",
-      "ALL_STYLES_FILE",
       "EXTERNAL_COMPONENTS",
       "INDEX_HTML"
     ]
@@ -131,14 +130,6 @@
     "tag": "STYLES",
     "type": "DIRECTORY",
     "children": []
-  },
-  "ALL_STYLES_FILE": {
-    "name": "styles",
-    "extension": "js",
-    "parentId": "ROOT",
-    "id": "ALL_STYLES_FILE",
-    "tag": "ALL_STYLES_FILE",
-    "type": "FILE"
   },
   "EXTERNAL_COMPONENTS": {
     "name": "external_components",
