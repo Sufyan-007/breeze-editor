@@ -4,8 +4,6 @@ from apps.common.constants.consts import CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import write_json_file
 from apps.code_generator.core.generate_code import generate_code_with_latest_config
 
-
-
 # rollback all files to there previous version
 def rollback_config_file(project_name, category, filename, version=None, is_exception=False):
     # 1st change file ma jaine changes object ma 1 step revert previous ne copy
@@ -59,6 +57,9 @@ def rollback_config_file(project_name, category, filename, version=None, is_exce
                     prev_ver_index = version_list.index(str(current_version)) - 1
                     previous_version_in_use = version_list[prev_ver_index]
                     flatten_json[key] = version_handler['changes'][key][previous_version_in_use]
+            elif int(version_list[0]) > (current_version - 1):
+                flatten_json.pop(key, None)
+                 
     elif current_version == 1:
         if is_exception:
             # remove_the_newly_added_content_from_the_index_file
@@ -122,6 +123,13 @@ def rollforward_config_file(project_name, category, filename, version=None):
             if str(current_version+1) in version_list:
                 new_version_to_be_used = str(current_version+1)
                 flatten_json[key] = version_handler['changes'][key][new_version_to_be_used]
+            elif version:
+                for ver in version_list[::-1]:
+                    if int(ver) <= int(version):
+                        deleted_keys = version_handler.get('deleted_keys', {})
+                        if not (str(ver) in deleted_keys and key in deleted_keys[str(ver)]):
+                            flatten_json[key] = version_handler['changes'][key][ver]
+                        break
         if version_handler.get('deleted_keys'):
             for key in version_handler['deleted_keys'].get(str(current_version + 1), {}):
                 flatten_json.pop(key, None)
