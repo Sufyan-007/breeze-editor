@@ -12,3 +12,9 @@ export async function getComponents(projectName) {
     console.log(error);
   }
 }
+
+export async function getCodeDetails(projectName, payload) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/code-gen/${projectName}/code-indexing/`;
+  const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
+  return response;
+}
