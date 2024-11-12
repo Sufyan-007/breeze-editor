@@ -22,11 +22,11 @@ const fetchZipFiles = async (projectName) => {
   }
 };
 
-const deleteFile = async (file, projectName) => {
-  const fileName = file;
+const deleteFile = async (fileName, fileId, projectName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package-delete/${projectName}`;
   const payload = {
     fileName,
+    fileId
   };
   try {
     const response = await callApiClient(url, 'DELETE', payload);
@@ -44,7 +44,7 @@ const deleteFile = async (file, projectName) => {
 const fetchZipFileComponentsService = async (selectedFilename, projectName, additionalPayload = null) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/query_resource/${projectName}/`;
   const payload = {
-    category: 'customized_proj_config',
+    category: 'external_components_config',
     libname: selectedFilename,
   };
 

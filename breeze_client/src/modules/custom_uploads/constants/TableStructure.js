@@ -10,5 +10,12 @@ const columns = [
     render: (value) => new Date(value).toLocaleDateString(),
     width: '40%',
   },
+  {
+    header: 'Actions',
+    accessfor: 'actions',
+    width: '20%',
+    align: 'right',
+    headerRenderer: () => <div style={{ display: 'flex', justifyContent: 'space-between' }}>Actions</div>,
+  },
 ];
 export default columns;

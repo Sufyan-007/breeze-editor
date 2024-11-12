@@ -19,6 +19,7 @@ class EchoConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_add)(self.group_name, self.channel_name)
         message_type = text_data_json.get("command")
 
+        file_id = text_data_json.get("file_id")
         if message_type == "start":
             async_to_sync(self.channel_layer.group_send)(
                 self.group_name,
@@ -41,8 +42,25 @@ class EchoConsumer(WebsocketConsumer):
                 },
             )
 
+        elif message_type == "custom_upload_status":
+            async_to_sync(self.channel_layer.group_send)(
+                self.group_name,
+                {
+                    "type":"file_upload_status", 
+                    "file_id":file_id,
+                    "message":{
+                        "status":"Loading"
+                    }
+                }
+            )
     def project_progress(self, event):
         self.send(text_data=json.dumps({"progress": event["message"]}))
 
     def app_status(self, event):
         self.send(text_data=json.dumps({"status": event["message"]}))
+        
+    def file_upload_status(self, event):
+        self.send(text_data=json.dumps({
+                "file_id": event["file_id"],  
+                "status": event["message"]
+            }))

@@ -8,11 +8,10 @@ import {
 
 const initialState = {
   zipFiles: [],
-  status: 'idle',
+  fileId: null,
   zipFiles: [],
   status: 'idle',
   error: null,
-  uploadMessage: null,
   components: { data: {} },
   props: null,
 };
@@ -35,11 +34,11 @@ const zipSlice = createSlice({
     // Upload zip file
     builder
       .addCase(uploadZipFileAction.pending, (state) => {
-        state.uploadMessage = null;
         state.error = null;
       })
       .addCase(uploadZipFileAction.fulfilled, (state, action) => {
-        state.uploadMessage = action.message;
+        state.fileId = action.payload["file_id"];
+
       })
       .addCase(uploadZipFileAction.rejected, (state, action) => {
         state.error = action.payload;

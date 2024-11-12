@@ -3,10 +3,10 @@ import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { BreezeTable, BreezeModal } from '../../../common/display/index';
 import '../styles/CustomZipPackage.css';
-import CustomTextInput from '../../../common/fields/f.textInput';
+import { CustomButtonField, CustomTextInput } from '../../../common/fields';
 import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
 import CustomPropsList from '../components/CustomPropList';
-import columns from '../constants/TableStructure';
+// import columns from '../constants/TableStructure';
 
 import {
   fetchZipFilesAction,
@@ -32,40 +32,81 @@ function CustomZipPackagePage() {
     file: null,
   });
   const [error, setError] = useState('');
-  const dispatch = useDispatch(); //Initialize dispatch
 
-  const { zipFiles, components, props } = useSelector((state) => state.zip);
-  console.log(components, 'components');
+  const [uploadStatus, setUploadStatus] = useState({});
+  const [socket, setSocket] = useState(null); // WebSocket state
+  const [fileIdws, setFileIdws] = useState(''); //file id received from the websocket
+  const [fileIds, setFileIds] = useState([]); //array to store the file ids
+  const dispatch = useDispatch(); 
+  const { zipFiles, fileId, components, props } = useSelector((state) => state.zip);
+
   //fetch the list of zip files on component mount
+  useEffect(() => {
+    // Append the fileId to the fileIds array when fileId is available
+    if (fileId) {
+      setFileIds((prevFileIds) => [...prevFileIds, fileId]);
+    }
+
+     const folders = zipFiles?.folders || [];
+
+     const initialUploadStatus = { ...uploadStatus };
+
+     folders.forEach((folder) => {
+       initialUploadStatus[folder.zip_file_id] = folder.status; // Update or add the status for each file
+     });
+
+     setUploadStatus(initialUploadStatus);
+  }, [fileId, zipFiles]);
+
   useEffect(() => {
     if (zipFiles.length === 0) {
       dispatch(fetchZipFilesAction(projectName));
     }
   }, [dispatch, projectName, zipFiles]);
 
-  const actions = (item) => (
-    <>
-      <i
-        className="bi bi-trash"
-        alt="Delete icon"
-        onClick={() => {
-          setFileToDelete(item);
-          setShowDeleteModal(true);
-        }}
-        style={{ cursor: 'pointer', color: 'red', fontSize: '18px', marginRight: '20px' }}
-      />
-      <i
-        className="bi bi-three-dots-vertical"
-        alt="Options icon"
-        onClick={() => {
-          setShowOffCanvas(true);
-          getComponents(item.fileName);
-          setSelectedFilename(item.fileName);
-        }}
-        style={{ cursor: 'pointer', fontSize: '18px' }}
-      />
-    </>
-  );
+  // Establish WebSocket connection when the component mounts
+  useEffect(() => {
+
+    const ws = new WebSocket('ws://localhost:8000/ws/custom-upload-progress/');
+
+    // Set up WebSocket listeners
+    ws.onopen = () => {
+      console.log('WebSocket connection established');
+    };
+
+    //messages from the server are received here . the message is a string
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data); // Converts the string to a JS object
+      console.log('Received WebSocket message:', data);
+      // Update upload progress and status based on WebSocket data
+      if (data.file_id && data.status) {
+        setFileIdws(data.file_id);
+        // Update the status for the specific file_id
+        setUploadStatus((prevStatuses) => ({
+          ...prevStatuses,
+          [data.file_id]: data.status,
+        }));
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    setSocket(ws);
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  console.log(fileIds, 'file ids ');
+  console.log(fileIdws, 'file id ws');
+  console.log(zipFiles,"fetch zip files");
 
   const getComponents = async (filename) => {
     try {
@@ -74,10 +115,17 @@ function CustomZipPackagePage() {
       console.error('Error fetching components:', error);
     }
   };
+
   const handleDelete = () => {
     if (fileToDelete) {
       // Dispatch delete action
-      dispatch(deleteZipFileAction({ fileName: fileToDelete.fileName, projectName: projectName })).then(() => {
+      dispatch(
+        deleteZipFileAction({
+          fileName: fileToDelete.zip_file_name,
+          fileId: fileToDelete.zip_file_id,
+          projectName: projectName,
+        })
+      ).then(() => {
         dispatch(fetchZipFilesAction(projectName));
       });
     }
@@ -94,6 +142,7 @@ function CustomZipPackagePage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    setShowModal(false);
     const fileInput = document.querySelector('input[type="file"]');
 
     if (fileInput.files.length > 0) {
@@ -110,6 +159,16 @@ function CustomZipPackagePage() {
         }
       }
       submitData.append('file', formData.file);
+
+      // Initialize WebSocket and notify the server about the start of the upload
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            command: 'custom_upload_status',
+            project_id: projectName.toLowerCase().replace(/ /g, '_'),
+          })
+        );
+      }
 
       try {
         // Dispatch the action to upload the zip file
@@ -212,10 +271,72 @@ function CustomZipPackagePage() {
 
   // Map the folders array to the desired format
   const folders = zipFiles?.folders || [];
+
   const filesData = folders.map((folder) => ({
-    fileName: folder.name,
+    fileName: folder.zip_file_name,
+    zipFileId: folder.zip_file_id,
     lastModified: folder.lastModified,
+    actions: (
+      <div className="d-flex align-items-center">
+        {uploadStatus[folder.zip_file_id] === 'extracting...' ||
+        uploadStatus[folder.zip_file_id] === 'file uploading...' ? (
+          <div className="ws-progress-status d-flex align-items-center">
+            <div
+              className="spinner-border spinner-border-sm"
+              role="status"
+              style={{ width: '1rem', height: '1rem' }}
+            ></div>
+            <p style={{ marginLeft: '8px', marginBottom: '0', lineHeight: '1rem' }}>
+              {uploadStatus[folder.zip_file_id]}
+            </p>
+          </div>
+        ) : uploadStatus[folder.zip_file_id] === 'success' ? (
+          <>
+            <CustomButtonField
+              label={<i className="bi bi-trash" />}
+              onClick={() => {
+                setFileToDelete(folder);
+                setShowDeleteModal(true);
+              }}
+              className="btn toggle-btn btn-outline-danger settings-no-outline-button"
+            />
+            <CustomButtonField
+              label={<i className="bi bi-three-dots-vertical" />}
+              onClick={() => {
+                setShowOffCanvas(true);
+                getComponents(folder.fileName);
+                setSelectedFilename(folder.fileName);
+              }}
+              className="btn toggle-btn br-text-primary"
+            />
+          </>
+        ) : uploadStatus[folder.zip_file_id] === 'file upload failed' ? (
+          <>
+            <CustomButtonField
+              label={<i className="bi bi-arrow-clockwise" />}
+              onClick={() => {
+                // Add your reload function here to retry the upload
+                // retryFileUpload(folder.zip_file_id);
+              }}
+              className="btn toggle-btn btn-outline-secondary settings-no-outline-button"
+            />
+          </>
+        ) : uploadStatus[folder.zip_file_id] === 'components upload failed' ? (
+          <>
+            <CustomButtonField
+              label={<i className="bi bi-trash" />}
+              onClick={() => {
+                setFileToDelete(folder);
+                setShowDeleteModal(true);
+              }}
+              className="btn toggle-btn btn-outline-danger settings-no-outline-button"
+            />
+          </>
+        ) : null}
+      </div>
+    ),
   }));
+
 
   const handleClick = (fileid, filename) => {
     // e.preventDefault();
@@ -228,6 +349,29 @@ function CustomZipPackagePage() {
     dispatch(fetchZipFileComponentsAction({ filename, projectName, payload }));
   };
 
+  const columns = [
+    {
+      header: 'File Name',
+      accessor: 'fileName',
+      width: '40%',
+    },
+    {
+      header: 'Last Modified',
+      accessor: 'lastModified',
+      render: (value) => new Date(value).toLocaleDateString(),
+      width: '40%',
+    },
+    {
+      header: 'Actions',
+      accessor: 'actions',
+      width: '20%',
+      align: 'right',
+      headerRenderer: () => <div style={{ display: 'flex', justifyContent: 'space-between' }}>Actions</div>,
+    },
+  ];
+
+  console.log(uploadStatus, 'upload status');
+  console.log(showDeleteModal,"show delete model");
   return (
     <div>
       <div className="container-fluid py-2 px-3">
@@ -244,12 +388,12 @@ function CustomZipPackagePage() {
           <BreezeTable
             columns={columns}
             data={filesData}
-            actions={actions}
+            // actions={actions}
             currentPage={currentPage}
             onPageChange={handlePageChange}
             sortBy="filename"
             sortDirection="asc"
-            actionPlacement={'end'}
+            // actionPlacement={'end'}
           />
         </div>
       </div>
