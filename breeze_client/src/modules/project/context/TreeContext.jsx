@@ -1,40 +1,48 @@
 import PropTypes from 'prop-types';
 import { createContext, useContext, useEffect, useState } from 'react';
 
-// Create the Tree Context
 const TreeContext = createContext();
 
-// Hook to use the context
 export const useTreeContext = () => useContext(TreeContext);
 
 // Provider component to wrap the tree components
-export const TreeProvider = ({ children }) => {
+export const TreeProvider = ({ children, projectName }) => {
   const [selectedNodeId, setSelectedNodeId] = useState(() => {
-    const storedNodeId = localStorage.getItem('selectedNodeId');
-    return storedNodeId ? storedNodeId : 'INDEX_HTML';
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    return storedInfo[projectName]?.selectedNode?.id || 'INDEX_HTML';
   });
 
   const [selectedNode, setSelectedNode] = useState(() => {
-    const storedNode = localStorage.getItem('selectedNode');
-    return storedNode
-      ? JSON.parse(storedNode)
-      : {
-          name: 'index',
-          parentId: 'ROOT',
-          extension: 'html',
-          id: 'INDEX_HTML',
-          tag: 'INDEX_HTML',
-          type: 'FILE',
-        };
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    return (
+      storedInfo[projectName]?.selectedNode || {
+        name: 'index',
+        parentId: 'ROOT',
+        extension: 'html',
+        id: 'INDEX_HTML',
+        tag: 'INDEX_HTML',
+        type: 'FILE',
+      }
+    );
   });
 
   useEffect(() => {
-    localStorage.setItem('selectedNodeId', selectedNodeId);
-  }, [selectedNodeId]);
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    storedInfo[projectName] = {
+      ...storedInfo[projectName],
+      selectedNode: { ...selectedNode, id: selectedNodeId },
+    };
+    localStorage.setItem('openTabsInfo', JSON.stringify(storedInfo));
+  }, [selectedNodeId, selectedNode, projectName]);
 
   useEffect(() => {
-    localStorage.setItem('selectedNode', JSON.stringify(selectedNode));
-  }, [selectedNode]);
+    const storedInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    storedInfo[projectName] = {
+      ...storedInfo[projectName],
+      selectedNode,
+    };
+    localStorage.setItem('openTabsInfo', JSON.stringify(storedInfo));
+  }, [selectedNode, projectName]);
 
   const contextValue = {
     selectedNodeId,
@@ -48,4 +56,5 @@ export const TreeProvider = ({ children }) => {
 
 TreeProvider.propTypes = {
   children: PropTypes.node.isRequired,
+  projectName: PropTypes.string.isRequired,
 };

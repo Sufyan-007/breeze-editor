@@ -1,5 +1,4 @@
 Root_App_Code = f'''
-    import './styles.js';
     import React, {{useEffect}} from 'react';
     import router from "./Routing.jsx";
     import {{ RouterProvider }} from "react-router-dom";
