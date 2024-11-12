@@ -1,5 +1,6 @@
-from apps.common.constants.consts import CONFIG_PATH,CLIENT_API,EXTERNAL_COMPONENTS_CONFIG, MULTI_NODE_MULTI_FILE, ROUTING
 import json, os
+from apps.common.middlewares.TransactionMiddleware import get_transaction_id
+from apps.common.constants.consts import CONFIG_PATH,CLIENT_API,EXTERNAL_COMPONENTS_CONFIG, MULTI_NODE_MULTI_FILE, ROUTING
 from apps.common.constants.consts import CONFIG_FILES_PATH, JSX_DIRECTORY_CONFIG, TSX_DIRECTORY_CONFIG
 from apps.common.utils.file_helpers.json_handler import read_json_file, write_json_file
 from apps.common.utils.file_helpers.dir_handler import  create_dir_if_not_exists
@@ -94,7 +95,8 @@ def write_basic_main_comp_config(app_config):
     app_config['defaultCompId'] = _id
     del app_config['defaultComponent']
     write_json_file(f"{app_config_path}.json", app_config)
-    write_config_file( f"{app_config['name']}", ResourceCategory.COMPONENTS.value, f"{_id}", main_comp_config)
+    transaction_id = get_transaction_id()
+    write_config_file( f"{app_config['name']}", ResourceCategory.COMPONENTS.value, f"{_id}", main_comp_config, None, transaction_id)
     
     entry_in_config_index(app_config['name'], ResourceCategory.COMPONENTS, _id, name)
     return app_config
@@ -119,7 +121,8 @@ def write_routing_config(app_config):
         }
     }
     # write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", basic_routing_config)
-    write_config_file( f"{app_config['name']}", ROUTING, ROUTING, basic_routing_config)
+    transaction_id = get_transaction_id()
+    write_config_file( f"{app_config['name']}", ROUTING, ROUTING, basic_routing_config, None, transaction_id)
 
 def write_swagger_schema_config(app_config_dir):
     write_json_file(f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json", {

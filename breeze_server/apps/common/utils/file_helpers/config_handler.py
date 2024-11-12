@@ -8,7 +8,7 @@ from apps.common.utils.file_helpers.json_handler import write_json_file, read_pr
 from .concurreny_file_lock_handler import wait_for_write, add_to_queue, write_started, write_completed, remove_from_queue
 
 SEPARATOR = "<>"
-global_file_change_state = {'changed_files': {}}
+global_file_change_state = {}
 
 def read_config_file(project_name, category, filename, version="latest"):
     file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}.json"
@@ -80,7 +80,7 @@ def read_config_file(project_name, category, filename, version="latest"):
             "data" : json_config
         }
     
-def write_config_file(project_name, category, filename, json_data):
+def write_config_file(project_name, category, filename, json_data, current_config_version=0, transaction_id=None):
     INDEX_FILE_PATH = f"{CONFIG_PATH}/{project_name}/{category}/index.json"
     file_path = f"{CONFIG_PATH}/{project_name}/{category}/{filename}"
     version_file_path = f"{CONFIG_PATH}/{project_name}/{category}/versions/{filename}"
@@ -102,7 +102,7 @@ def write_config_file(project_name, category, filename, json_data):
         ## fist check if file is present then store and update it's version
         if versions_file.is_file() and config_file.is_file():
             # files exists
-            has_something_changed, file_version_json = update_file_config(version_file_path, file_path, flatten_data_json)
+            has_something_changed, file_version_json = update_file_config(version_file_path, file_path, flatten_data_json, current_config_version)
         ## new file config to be written
         else:
             file_version_json = {}
@@ -118,16 +118,16 @@ def write_config_file(project_name, category, filename, json_data):
             
         ## update both files
         if has_something_changed:
-            save_config_file(filename, project_name, category, json_data, version_file_path, file_version_json, flatten_data_json, file_path, INDEX_FILE_PATH)
+            save_config_file(filename, project_name, category, json_data, version_file_path, file_version_json, flatten_data_json, file_path, INDEX_FILE_PATH, transaction_id)
         else:
             print(f"Nothing changed in {filename}")
             
-        # Signal that writing is completed
-        write_completed.send(sender=None, file_id=filename)
-
     finally:
         # Remove the file ID from the write queue
         remove_from_queue(filename)
+        
+        # Signal that writing is completed
+        write_completed.send(sender=None, file_id=filename)
                  
 def get_breeze_config_file(project_id, config_type='APP_CONFIG'):
     path = f"{CONFIG_PATH}/{project_id}"
@@ -142,7 +142,7 @@ def get_breeze_config_file(project_id, config_type='APP_CONFIG'):
         )
     return config
         
-def update_file_config(version_file_path, file_path, flatten_data_json):
+def update_file_config(version_file_path, file_path, flatten_data_json, current_config_version=0):
     with open(f"{version_file_path}_versions.json","r") as file_version_config,  open(f"{file_path}.json","r") as file_config:
         file_version_json = json.load(file_version_config)
         file_config_json = json.load(file_config)
@@ -151,7 +151,13 @@ def update_file_config(version_file_path, file_path, flatten_data_json):
         current_version = file_version_json.get("current_version")
         file_version_json["current_version"] = current_version + 1
         current_version = str(current_version)
-                
+        
+        # TODO: upon completion of the flow discussion uncomment and/or update below code
+        # if due to a concurrent modification the file have been modified
+        # then we need to fetch the modification before continuing with our changes.
+        # if int(current_version) != int(current_config_version):
+        #     raise Exception("please fetch the latest changes...")
+        
         ## add new entry in the versions and store current time
         versions = file_version_json.get("versions",{})
         versions[str(int(current_version) + 1)] = { "key" : int(current_version) + 1, "timestamp" : time.time() }
@@ -173,14 +179,13 @@ def update_file_config(version_file_path, file_path, flatten_data_json):
 
         if not file_version_json.get("deleted_keys"):
             file_version_json["deleted_keys"] = {}
-        for key in file_version_json["deleted_keys"]:
+        for key in list(file_version_json["deleted_keys"].keys()):
             if int(key) >= int(current_version) + 1:
                 del file_version_json["deleted_keys"][key]
         ## store the changes of each field corresponding to it's version 
         ## for that use flatten obj for given data
         for key,value in flatten_data_json.items():
-            # currently no null values are being addressed in the json config file
-            if value != file_config_json.get(key):
+            if key not in file_config_json or value != file_config_json[key]:
                 ## field value is updated so store the changes
                 if key not in changes:
                     changes[key] = {}
@@ -200,16 +205,17 @@ def update_file_config(version_file_path, file_path, flatten_data_json):
     
         return has_something_changed, file_version_json
     
-def save_config_file(filename, project_name, category, json_data, version_file_path, file_version_json, flatten_data_json, file_path, INDEX_FILE_PATH):
+def save_config_file(filename, project_name, category, json_data, version_file_path, file_version_json, flatten_data_json, file_path, INDEX_FILE_PATH, transaction_id):
     with open(f"{version_file_path}_versions.json", "w+") as jsconfig_version_file:
         jsconfig_version_file.write(json.dumps(file_version_json))
         with open(f"{file_path}.json", "w") as jsconfig_file:
-            global_file_change_state["changed_files"][filename] = {
-                "filename": filename,
-                "project_name": project_name,
-                "category": category,
-                "current_version": file_version_json["current_version"]
-            }
+            if transaction_id:
+                global_file_change_state[transaction_id]["changed_files"][filename] = {
+                    "filename": filename,
+                    "project_name": project_name,
+                    "category": category,
+                    "current_version": file_version_json["current_version"]
+                }
             jsconfig_file.write(json.dumps(flatten_data_json))
             if category in MULTI_NODE_MULTI_FILE:
                 # UPDATE INDEX.JSON WITH NEW KEY VALUE PAIR

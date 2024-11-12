@@ -1,6 +1,6 @@
 import random
 import string, re
-
+from apps.common.middlewares.TransactionMiddleware import get_transaction_id
 from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH, ROUTING
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file, write_json_file
@@ -56,7 +56,7 @@ def get_routing_config(project_id="", routing_config={}):
         # routing_config = read_project_config_file(f"{CONFIG_PATH}/{project_id}", CONFIG_FILES_PATH['ROUTING_CONFIG'])
     return routing_config
     
-def rewrite_clean_route_config(project_name, updated_route_config, route_id):
+def rewrite_clean_route_config(project_name, updated_route_config, route_id, current_version):
     if route_id in updated_route_config:
         route = updated_route_config[route_id]
         keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
@@ -65,7 +65,8 @@ def rewrite_clean_route_config(project_name, updated_route_config, route_id):
         
     # routing_config_path = f"{CONFIG_PATH}/{project_name}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
     # write_json_file(f"{routing_config_path}.json", updated_route_config)
-    write_config_file( project_name, ROUTING, ROUTING, updated_route_config)
+    transaction_id = get_transaction_id()
+    write_config_file( project_name, ROUTING, ROUTING, updated_route_config, current_version, transaction_id)
     
 def extract_function_details(js_function, id):
     function_pattern = r'(async\s+)?(?:function\s+(\w+)\s*)?\(([^)]*)\)\s*{([^}]*)}'
