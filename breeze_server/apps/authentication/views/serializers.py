@@ -11,7 +11,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['username', 'email','password','roles','phone_number']
+        fields = ['username', 'email','password','roles','phone_number','projects']
         extra_kwargs = {'password': {'write_only': True}}
         
     def validate(self, data):
@@ -51,7 +51,7 @@ class LoginSerializer(serializers.Serializer):
         # Generate tokens if validation passes
         refresh = RefreshToken.for_user(user)
         refresh['username']=data['username']
-        
+        # print(user,"fasddf")
         # with this i can get all role of that user
         # roles = [role.name for role in user.roles.all()]
         

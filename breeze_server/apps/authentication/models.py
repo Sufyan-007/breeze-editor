@@ -21,6 +21,8 @@ class UserProfile(models.Model):
     # Many-to-many relationship to the Role model
     roles = models.ManyToManyField(Role, related_name="users")
     
+    projects = models.JSONField(default=list)
+    
     # set_password = models
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     # created_at = models.DateTimeField(auto_now_add=True)
