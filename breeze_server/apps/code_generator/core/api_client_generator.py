@@ -1,6 +1,6 @@
 import copy,json
 from ...common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH,CLIENT_API
-from apps.common.utils.file_helpers.json_handler import read_json_file,read_project_config_file
+from ...common.utils.file_helpers.json_handler import read_json_file,read_project_config_file
 from ...project_config_management.api_client_management.core.api_model_loader import ApiModelLoader
 from ...project_config_management.api_client_management.utils.api_models import TokenStoreTypeEnum,AuthApiTypeEnum,ContentEnum,ModeEnum,AuthTypeEnum,ParamsInEnum
 from ...project_config_management.api_client_management.utils.append_dict_file import append_to_dict_file
@@ -8,6 +8,7 @@ from ...common.utils.file_helpers.dir_handler import create_dir_if_not_exists
 from ...common.utils.file_helpers.json_handler import write_json_file
 from ...directory_management.core.directory_management_service import DirectoryManager
 from ...project_config_management.api_client_management.consts import WEBSOCKET_HOOK,RESPONSE_INTERCEPTOR,RESPONSE_STATUS_CONDITION,REQUEST_INTERCEPTOR,REFRESH_TOKEN_API
+from ...common.utils.variable_name_convertor import convert_to_valid_variable_name
 def __init__( app_name):
     app_config_dir = f"{CONFIG_PATH}/{app_name}"
     app_config = read_project_config_file(
@@ -256,7 +257,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             react_code = react_code.replace('{RESPONSE_CODE}',"")
 
         # react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
-        react_code = react_code.replace('{FUNC_NAME}',func_name)
+        react_code = react_code.replace('{FUNC_NAME}',convert_to_valid_variable_name(func_name))
         react_service_functions.append(react_code)
     return react_service_functions
         

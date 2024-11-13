@@ -1,11 +1,13 @@
 import random
 import string, re
-from ..core.post_edit_operations import get_routing_code
-
-from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
-from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file, write_json_file
-from apps.directory_management.core.directory_management_service import DirectoryManager
+from apps.common.middlewares.TransactionMiddleware import get_transaction_id
+from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH, ROUTING
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
+from apps.common.utils.file_helpers.json_handler import read_project_config_file, read_json_file, write_json_file
+from apps.common.utils.file_helpers.config_handler import write_config_file, read_config_file
+
+from apps.directory_management.core.directory_management_service import DirectoryManager
+from ..core.post_edit_operations import get_routing_code
 
 def generate_layout_route_key():
     # Generate a unique key for layout routes
@@ -25,7 +27,11 @@ def process_route_config(project_name, routing_config={}):
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
         comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
         if routing_config == {}:
-            routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
+            config_data_obj = read_config_file(project_name, "routing_config", "routing_config")
+            if config_data_obj.get('err'):
+                raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+            routing_config = config_data_obj.get('data')
+            # routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
         react_code = get_routing_code(app_config, routing_config, comp_config_index, )
         directory_manager= DirectoryManager(project_name)
         directory_manager.save_file("ROUTE_COMPONENT",react_code)
@@ -43,19 +49,24 @@ def get_routing_config(project_id="", routing_config={}):
     if routing_config == {}:
         if project_id == "":
             raise ValueError("project id is missing")
-        routing_config = read_project_config_file(f"{CONFIG_PATH}/{project_id}", CONFIG_FILES_PATH['ROUTING_CONFIG'])
+        config_data_obj = read_config_file(project_id, "routing_config", "routing_config")
+        if config_data_obj.get('err'):
+            raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+        routing_config = config_data_obj.get('data')
+        # routing_config = read_project_config_file(f"{CONFIG_PATH}/{project_id}", CONFIG_FILES_PATH['ROUTING_CONFIG'])
     return routing_config
     
-def rewrite_clean_route_config(project_name, updated_route_config, route_id):
+def rewrite_clean_route_config(project_name, updated_route_config, route_id, current_version):
     if route_id in updated_route_config:
         route = updated_route_config[route_id]
         keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
         for key in keys_to_remove:
             del route[key]
         
-    # line as per this scenario: project_id and project are same for the time being
-    routing_config_path = f"{CONFIG_PATH}/{project_name}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
-    write_json_file(f"{routing_config_path}.json", updated_route_config)
+    # routing_config_path = f"{CONFIG_PATH}/{project_name}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
+    # write_json_file(f"{routing_config_path}.json", updated_route_config)
+    transaction_id = get_transaction_id()
+    write_config_file( project_name, ROUTING, ROUTING, updated_route_config, current_version, transaction_id)
     
 def extract_function_details(js_function, id):
     function_pattern = r'(async\s+)?(?:function\s+(\w+)\s*)?\(([^)]*)\)\s*{([^}]*)}'

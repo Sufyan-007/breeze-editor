@@ -2,11 +2,13 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router';
 import { CustomButtonField, CustomCheckBoxField, CustomSelectField, CustomTextInput } from '../../../common/fields';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInfo, onSuccessfulTransfer }) {
+function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInfo, onSuccessfulTransfer, moduleId }) {
   const [showModal, setShowModal] = useState(false);
   const dispatch = useDispatch();
+  const filesIdList = useSelector((state) => state.services.moduleList[moduleId]?.files);
+  const { filesList } = useSelector((state) => state.services);
 
   const handleInputChange = (prop, value) => {
     onChange(prop, value);
@@ -27,12 +29,15 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
     await dispatch(convertToAuthApi({ projectName, payload })).unwrap();
     setShowModal(!showModal);
     onSuccessfulTransfer();
-    // const result = await transferToAuth(projectName, payload);
-    // if (result.message) {
-    //   setShowModal(!showModal);
-    //   onSuccessfulTransfer();
-    // }
   };
+
+  const filteredFiles = filesIdList ? filesIdList.map((fileId) => filesList[fileId]).filter((file) => file) : [];
+
+  const transformedOptions = filteredFiles.map((file) => ({
+    label: file.file,
+    value: file.file,
+    id: file.id,
+  }));
   return (
     <>
       {showModal && (
@@ -78,23 +83,6 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
           <div className="col-sm-6">
             <div className="row">
               <div className="col-sm-3">
-                <label className=" br-text-primary mx-3">Service File:</label>
-              </div>
-              <div className="col-sm-9">
-                <CustomTextInput
-                  className="form-control br-form-control form-control-sm"
-                  placeholder="File Name"
-                  value={settings.tags || ''}
-                  onChange={(value) => handleInputChange('tags', value)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="row mt-2">
-          <div className="col-sm-6">
-            <div className="row">
-              <div className="col-sm-3">
                 <label className=" br-text-primary mx-3">Summary:</label>
               </div>
               <div className="col-sm-9">
@@ -107,27 +95,57 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
               </div>
             </div>
           </div>
+        </div>
+        <div className="row mt-2">
           <div className="col-sm-6">
-            {isAuthApi ? (
+            {!isAuthApi && (
               <div className="row">
                 <div className="col-sm-3">
-                  <label className=" br-text-primary  mx-3">Authentication Type:</label>
+                  <label className=" br-text-primary mx-3">Service File:</label>
                 </div>
                 <div className="col-sm-9">
-                  <CustomSelectField
-                    className="form-select br-form-select form-select-sm"
-                    value={settings.authentication_type}
-                    onChange={(value) => onChange('authentication_type', value)}
-                    options={[
-                      { label: 'Select', value: '' },
-                      { label: 'Bearer', value: 'BEARER' },
-                      { label: 'Basic', value: 'BASIC' },
-                      { label: 'Oauth2', value: 'OAUTH2' },
-                      { label: 'ApiKey', value: 'APIKEY' },
-                    ]}
-                  />
+                  {transformedOptions.length > 0 ? (
+                    <CustomSelectField
+                      className="form-select br-form-select form-select-sm"
+                      value={settings.tags || ''}
+                      onChange={(value) => onChange('tags', value)}
+                      options={transformedOptions}
+                    />
+                  ) : (
+                    <CustomTextInput
+                      className="form-control br-form-control form-control-sm"
+                      placeholder="File Name"
+                      value={settings.tags || ''}
+                      onChange={(value) => handleInputChange('tags', value)}
+                    />
+                  )}
                 </div>
               </div>
+            )}
+          </div>
+          <div className="col-sm-6">
+            {isAuthApi ? (
+              <>
+                <div className="row">
+                  <div className="col-sm-3">
+                    <label className=" br-text-primary  mx-3">Authentication Type:</label>
+                  </div>
+                  <div className="col-sm-9">
+                    <CustomSelectField
+                      className="form-select br-form-select form-select-sm"
+                      value={settings.authentication_type}
+                      onChange={(value) => onChange('authentication_type', value)}
+                      options={[
+                        { label: 'Select', value: '' },
+                        { label: 'Bearer', value: 'BEARER' },
+                        { label: 'Basic', value: 'BASIC' },
+                        { label: 'Oauth2', value: 'OAUTH2' },
+                        { label: 'ApiKey', value: 'APIKEY' },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </>
             ) : (
               <>
                 {selectedServiceInfo && Object.keys(selectedServiceInfo).length > 0 && settings.id && (
@@ -212,5 +230,6 @@ GeneralSettingsCard.propTypes = {
     id: PropTypes.string,
   }).isRequired,
   onSuccessfulTransfer: PropTypes.func.isRequired,
+  moduleId: PropTypes.string.isRequired,
 };
 export default GeneralSettingsCard;

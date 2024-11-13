@@ -58,18 +58,6 @@ export const fetchAuthFunctions = createAsyncThunk(
   }
 );
 
-// export const fetchFunctionConfig = createAsyncThunk(
-//   'service_configuration/fetchFiles',
-//   async ({ projectName, payload }, { rejectWithValue }) => {
-//     try {
-//       const response = await fetchIntermediates(projectName, payload);
-//       return response;
-//     } catch (error) {
-//       return rejectWithValue(error.response.data);
-//     }
-//   }
-// );
-
 export const convertFile = createAsyncThunk(
   'service_configuration/convertFile',
   async ({ projectName, collectionType, formData }, { rejectWithValue }) => {

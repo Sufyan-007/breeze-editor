@@ -49,6 +49,7 @@ const serviceConfigSlice = createSlice({
             value: value.title,
             moduleId: key,
           }));
+          options.push({ label: 'select', value: '' });
           state.transformedOptions = options;
           state.moduleList = action.payload.data;
         })
@@ -128,7 +129,8 @@ const serviceConfigSlice = createSlice({
         })
         .addCase(fetchFiles.fulfilled, (state, action) => {
           state.status = 'succeeded';
-          state.filesList = action.payload.data;
+          const newFiles = action.payload.data;
+          state.filesList = { ...state.filesList, ...newFiles };
         })
         .addCase(fetchFiles.rejected, (state, action) => {
           state.status = 'failed';
