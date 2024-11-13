@@ -20,7 +20,9 @@ editor_ui/package-lock.json
 third_party_configs/*
 breeze_server/.env
 sample_configs/
-*.sqlite3
+**/db.sqlite3
 third_party_package_parser.log
 breeze_server.log
 breeze_client.log
+breeze_server/apps/authentication/migrations
+# breeze_server/db.sqlite3

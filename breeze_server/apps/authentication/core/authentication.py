@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from django.utils import timezone
 import json
+import jwt
 import uuid
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
@@ -15,21 +16,22 @@ class CustomTokenAuthentication(BaseAuthentication):
         token = request.headers.get('Authorization', None)
         if token is None:
             raise AuthenticationFailed('Invalid token.')
-
-        token = token.replace('Bearer ', '')
-        auth_file_path = get_auth_file_path()
-
-        try:
-            with open(auth_file_path, 'r+') as file:
-                auth_data = json.load(file)
-        except FileNotFoundError:
             return None
 
-        token_data = auth_data.get(token)
+        token = token.replace('Bearer ', '')
+        # auth_file_path = get_auth_file_path()
+
+        # try:
+        #     with open(auth_file_path, 'r+') as file:
+        #         auth_data = json.load(file)
+        # except FileNotFoundError:
+        #     return None
+
+        token_data = jwt.decode(token, options={"verify_signature": False})
         if not token_data:
             raise AuthenticationFailed('Invalid token.')
 
-        expiry = datetime.fromisoformat(token_data['expiry'])
+        # expiry = datetime.fromisoformat(token_data['expiry'])
         # if timezone.now() > expiry:
         #     # Generate a new token and transfer the existing data
         #     new_token = str(uuid.uuid4())
@@ -47,7 +49,7 @@ class CustomTokenAuthentication(BaseAuthentication):
         #     # Raise an authentication error with the new token, so the client knows they need to update
         #     raise AuthenticationFailed({'message': 'Token has expired. Use new token.', 'new_token': new_token})
 
-        return (token_data['username'], None)
+        return (token_data, None)
 
     def authenticate_header(self, request):
         return 'Token'
