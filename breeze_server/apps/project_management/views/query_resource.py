@@ -39,10 +39,6 @@ from ...common.utils.file_helpers.json_handler import read_json_file as read_fil
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def manage_resource(request, param):
-    
-    
-    
-    
     try:
         projectname = param
         data = json.loads(request.body)
@@ -241,8 +237,14 @@ def manage_resource(request, param):
                 config_path = os.path.join(
                     CONFIG_PATH, projectname, ROUTING
                 )
-                selected_data = read_file(config_path)
+                # reading routing config
+                config_data_obj = read_config_file(projectname, "routing_config", "routing_config")
+                if config_data_obj.get('err'):
+                    raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+                routing_config = config_data_obj.get('data')
+                selected_data = routing_config
                 
+                # selected_data = read_file(config_path)
                 comp_path = os.path.join(CONFIG_PATH,projectname,COMPONENT,INDEX)
                 comp_data = read_file(comp_path)
                 # print(selected_data)

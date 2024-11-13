@@ -46,7 +46,7 @@ def convert_type_to_config(input_type,with_wrap="anyOf"):
     elif input_type["type"] == "array":
         typeObj= {
             "type": "array",
-            "templateInput": [convert_type_to_config(input_type["items"])]
+            "templateInputs": [convert_type_to_config(input_type["items"])]
         }
         
     elif input_type["type"] == "object":

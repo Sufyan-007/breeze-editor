@@ -2,6 +2,24 @@ from rest_framework.views import exception_handler
 from rest_framework import exceptions
 from django.http import JsonResponse
 
+class customException(Exception):
+    """Exception raised for custom error in the application."""
+
+    def __init__(self, message, error_body={}, error_code=400):
+        super().__init__(message)
+        self.message = message
+        self.error_code = error_code
+        self.error_body = error_body
+
+    def get_error_message(self):
+        return f"{self.message}"
+    
+    def get_error_code(self):
+        return self.error_code
+    
+    def get_error_body(self):
+        return self.error_body
+
 def custom_exception_handler(exc, context):
     
     # Calling REST framework's default exception handler first
@@ -24,6 +42,8 @@ def custom_exception_handler(exc, context):
         return JsonResponse({'error': 'TypeError: ' + str(exc)}, status=400)
     elif isinstance(exc, AttributeError):
         return JsonResponse({'error': 'AttributeError: An attribute was referenced that does not exist.'}, status=400)
+    elif isinstance(exc, customException):
+        return JsonResponse({'error': 'CustomException: ' + exc.get_error_message(), 'errorBody': exc.get_error_body()}, status=exc.get_error_code())
     
     if response is not None:
         return response

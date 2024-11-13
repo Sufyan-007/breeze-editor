@@ -235,6 +235,3 @@ def generate_react_component_code(app_config, config, comp_config_index):
         """
 
     return react_component, code_tree
-
-def write_app_component():
-    pass
