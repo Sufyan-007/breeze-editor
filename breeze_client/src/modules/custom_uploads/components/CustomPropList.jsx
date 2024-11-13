@@ -17,6 +17,7 @@ function CustomPropsList({ props }) {
     }
   };
 
+  console.log(props, 'props ');
   const handleFormSubmit = (formData) => {
     console.log('Form submitted with data:', formData);
   };
@@ -30,7 +31,7 @@ function CustomPropsList({ props }) {
             <div key={key}>
               <CustomButtonField
                 type="button"
-                label={key.name}
+                label={props[key].prop_name}
                 onClick={() => handlePropClick(key)}
                 className={`run-btn med-font br-text-primary custom-button ${selectedProp === key ? 'selected' : ''}`}
                 style={{

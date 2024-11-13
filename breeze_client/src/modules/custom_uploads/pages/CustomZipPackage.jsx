@@ -34,17 +34,17 @@ function CustomZipPackagePage() {
 
   const [uploadStatus, setUploadStatus] = useState({});
   const [socket, setSocket] = useState(null); // WebSocket state
-  const [fileIdws, setFileIdws] = useState(''); //file id received from the websocket
-  const [fileIds, setFileIds] = useState([]); //array to store the file ids
+  // const [fileIdws, setFileIdws] = useState('');
+  // const [fileIds, setFileIds] = useState([]);
   const dispatch = useDispatch();
   const { zipFiles, fileId, components, props } = useSelector((state) => state.zip);
 
   //fetch the list of zip files on component mount
   useEffect(() => {
     // Append the fileId to the fileIds array when fileId is available
-    if (fileId) {
-      setFileIds((prevFileIds) => [...prevFileIds, fileId]);
-    }
+    // if (fileId) {
+    //   setFileIds((prevFileIds) => [...prevFileIds, fileId]);
+    // }
 
     const folders = zipFiles?.folders || [];
 
@@ -78,7 +78,7 @@ function CustomZipPackagePage() {
       console.log('Received WebSocket message:', data);
       // Update upload progress and status based on WebSocket data
       if (data.file_id && data.status) {
-        setFileIdws(data.file_id);
+        // setFileIdws(data.file_id);
         // Update the status for the specific file_id
         setUploadStatus((prevStatuses) => ({
           ...prevStatuses,
@@ -258,7 +258,6 @@ function CustomZipPackagePage() {
       },
     ],
   };
-
   // Map the folders array to the desired format
   const folders = zipFiles?.folders || [];
 
@@ -309,9 +308,9 @@ function CustomZipPackagePage() {
                 setFileToDelete(folder);
                 setShowDeleteModal(true);
               }}
-              className="btn toggle-btn btn-outline-danger btn-sm settings-no-outline-button"
+              className="btn toggle-btn btn-outline-danger settings-no-outline-button"
             />
-            <p>{uploadStatus[folder.zip_file_id]}</p>
+            <p>({uploadStatus[folder.zip_file_id]})</p>
           </>
         ) : null}
       </div>
