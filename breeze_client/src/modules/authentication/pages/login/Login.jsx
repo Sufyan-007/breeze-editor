@@ -45,13 +45,13 @@ function Login() {
     <div className="h-100 container-fluid br-background-primary">
       <div className="row h-100 overflow-auto">
         <div className="col-8 left-side d-block br-background-secondary">
-          <div className="login-img-fluid">
+          <div className="authentication-img-fluid">
             <img src={images.DeveloperActivityAmico} alt="Developer Activity Amico" />
           </div>
         </div>
 
         <div className="col-4 right-side d-flex flex-column justify-content-between">
-          <div className="login-header">
+          <div className="authentication-header">
             <div className="logo">
               <img src={images.BreezeStudio} alt="Breeze Studio Logo" />
             </div>
@@ -66,11 +66,11 @@ function Login() {
             </div>
           </div>
 
-          <div className="login-form-container px-xxl-5 p-md-4 px-1 mt-4 mt-lg-0">
-            <div className="login-form">
-              <h2 className="login-text br-text-tertiary mb-3">Welcome to Breeze Studio</h2>
-              <form className="login-custom-form" onSubmit={handleSubmit}>
-                <div className="mb-3 login-form-box">
+          <div className="authentication-form-container px-xxl-5 p-md-4 px-1 mt-4 mt-lg-0">
+            <div className="authentication-form">
+              <h2 className="authentication-text br-text-tertiary mb-3">Welcome to Breeze Studio</h2>
+              <form className="authentication-custom-form" onSubmit={handleSubmit}>
+                <div className="mb-3 authentication-form-box">
                   <CustomTextInput
                     name="username"
                     value={userDetails.username}
@@ -84,7 +84,7 @@ function Login() {
                     isSubmitted={isSubmitted}
                   />
                 </div>
-                <div className="mb-3 login-form-box">
+                <div className="mb-3 authentication-form-box">
                   <CustomTextInput
                     name="password"
                     value={userDetails.password}
@@ -100,15 +100,19 @@ function Login() {
                   />
                 </div>
                 <div className="">
-                  <a className="text-decoration-none float-end login-small-font mb-3">Forgot Password?</a>
+                  <a className="text-decoration-none float-end authentication-small-font mb-3">Forgot Password?</a>
                 </div>
-                <CustomButtonField type="submit" className="login-button btn-filled w-100 mb-3" label="Sign In" />
+                <CustomButtonField
+                  type="submit"
+                  className="authentication-button btn-filled w-100 mb-3"
+                  label="Sign In"
+                />
               </form>
             </div>
           </div>
 
-          <div className="login-footer">
-            <h2 className="text-center login-med-font br-text-primary">
+          <div className="authentication-footer">
+            <h2 className="text-center authentication-med-font br-text-primary">
               © 2024 Argusoft All rights reserved <br />
               Privacy Policy | Terms and Conditions
             </h2>

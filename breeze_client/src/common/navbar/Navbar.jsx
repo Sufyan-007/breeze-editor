@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ThemeContext from '../../contexts/ThemeContext';
 import PropTypes from 'prop-types';
 import BreezeStudio from '../../assets/images/Breeze Studio.png';
@@ -6,8 +6,35 @@ import Avatar from '../../assets/images/Ellipse 1.png';
 import VectorIcon from '../../assets/images/Vector.png';
 import darkLightModeSwitch from '../../assets/svgs/dark-light-mode-switch.svg';
 import { Link } from 'react-router-dom';
+import './Navbar.css';
+
 function Navbar({ currentPage = 'index', projectName = '' }) {
   const { toggleTheme } = useContext(ThemeContext);
+  const menuRef = useRef(null);
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleMenuToggle = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav
@@ -42,6 +69,30 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
             >
               <img src={darkLightModeSwitch} alt="Toggle dark/light mode" />
             </button>
+          </div>
+          {/* Grid menu button  */}
+          <div className="menu-button ms-2 position-relative" ref={menuRef}>
+            <button
+              type="button"
+              className="btn br-text-primary m-0 p-0"
+              onClick={handleMenuToggle}
+              title="Open app menu"
+            >
+              <i className="bi bi-menu-button"></i>
+            </button>
+            {isMenuOpen && (
+              <div className="menu-dropdown position-absolute br-background-secondary shadow p-3 rounded ">
+                <Link to="/user-management" className="d-block mb-2 br-text-tertiary" onClick={handleLinkClick}>
+                  User Management
+                </Link>
+                <Link to="/role-management" className="d-block mb-2 br-text-tertiary" onClick={handleLinkClick}>
+                  Role Management
+                </Link>
+                <Link to="/all-projects" className="d-block br-text-tertiary" onClick={handleLinkClick}>
+                  All Projects
+                </Link>
+              </div>
+            )}
           </div>
           <div className="profile d-flex align-items-center ms-3">
             <img className="avatar" src={Avatar} alt="avatar" />
