@@ -72,12 +72,7 @@ def add(request):
         ## 8) Create all the files in the targeted new app
         ## 9) Install all the dependencies in that project
         generate_project(app_current_config)
-        
-        # TODO: need to add this part later
-        # if logo_file:
-        #     resource_config_generator = ResourceConfigGenerator(data["name"])
-        #     resource_config_generator.update_config(logo_file.name, '/src/assets', "", logo_file_id)
-        
+
         start_project(data["name"])
         response = {"name": data["name"]}
         return JsonResponse(response, status=200)
