@@ -1,7 +1,7 @@
 import json
 from django.http import JsonResponse
 from ....common.constants.consts import CONFIG_PATH
-from ..core.schema_manager import add_or_edit_schema_helper, delete_schema_helper
+from ..core.schema_manager import add_or_edit_schema_helper, delete_schema_helper, resolve_schemas_helper
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from ..swagger_schema.manage_schema_schema import add_or_edit_swagger_schema,delete_schema_swagger
@@ -24,15 +24,16 @@ def add_or_edit_schema(request,project_id):
     schema_id = data.get("schemaId")
     module_id = data.get("moduleId")
     schema_details = data.get("details")
+    edited_name = data.get("editedName")
     schema_name = schema_details.get("name")
+    if not module_id:
+        return JsonResponse({'error': 'Module ID is required'}, status=400)
     schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
     if schema_id:
-        result = add_or_edit_schema_helper(schema_details=schema_details, schema_name=schema_name,file_path=schema_file_path, schema_id=schema_id)
+        result,status = add_or_edit_schema_helper(schema_details=schema_details, schema_name=schema_name,file_path=schema_file_path, schema_id=schema_id, edited_name=edited_name)
     else:
-        result = add_or_edit_schema_helper(schema_details=schema_details,schema_name=schema_name,file_path=schema_file_path )
-    if not result or result.get('error'):
-        return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)
-    return JsonResponse(result, status=200)
+        result,status = add_or_edit_schema_helper(schema_details=schema_details,schema_name=schema_name,file_path=schema_file_path )
+    return JsonResponse(result, status=status)
 
 
 @swagger_auto_schema(
@@ -52,7 +53,20 @@ def delete_schema(request,project_id):
     module_id = data.get("moduleId")
     schema_id = data.get("schemaId")
     schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
-    result = delete_schema_helper(schema_file_path=schema_file_path, schemaId=schema_id)
-    if not result or result.get('error'):
-        return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)
-    return JsonResponse(result, status=200)
+    result,status = delete_schema_helper(schema_file_path=schema_file_path, schemaId=schema_id)
+    return JsonResponse(result, status=status)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def resolve_schemas(request,project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    module_id = data.get("moduleId")
+    schema_id = data.get("schemaId")
+    new_schema_name = data.get("newName")
+    schema_details = data.get("schemaDetails")
+    property_details = data.get("propertyDetails")
+    existing_schema_id = data.get("existingSchemaId")
+    schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
+    result,status = resolve_schemas_helper(schema_file_path=schema_file_path, schemaId=schema_id, new_schema_name=new_schema_name, details=schema_details, property_details=property_details, existing_schema_id = existing_schema_id)
+    return JsonResponse(result, status=status)

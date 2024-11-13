@@ -100,7 +100,7 @@ function ImportApi({ show, onClose, onImport }) {
                   <input
                     type="file"
                     className="w-50"
-                    accept=".yaml, .yml"
+                    accept=".yaml, .yml, .json"
                     ref={swaggerInputRef}
                     style={{ display: 'none' }}
                     onChange={(e) => handleInputChange(e, 'openapi')}
@@ -121,7 +121,7 @@ function ImportApi({ show, onClose, onImport }) {
                   <input
                     type="file"
                     className="w-50"
-                    accept=".json,.yaml"
+                    accept=".json,.yaml, .yml"
                     ref={swaggerWebsocketInputRef}
                     style={{ display: 'none' }}
                     onChange={(e) => handleInputChange(e, 'websocket')}
