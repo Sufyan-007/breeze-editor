@@ -9,7 +9,6 @@ import {
 const initialState = {
   zipFiles: [],
   fileId: null,
-  zipFiles: [],
   status: 'idle',
   error: null,
   components: { data: {} },
@@ -37,8 +36,7 @@ const zipSlice = createSlice({
         state.error = null;
       })
       .addCase(uploadZipFileAction.fulfilled, (state, action) => {
-        state.fileId = action.payload["file_id"];
-
+        state.fileId = action.payload['file_id'];
       })
       .addCase(uploadZipFileAction.rejected, (state, action) => {
         state.error = action.payload;

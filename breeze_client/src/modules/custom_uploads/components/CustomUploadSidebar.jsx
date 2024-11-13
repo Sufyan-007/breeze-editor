@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../styles/CustomUploadSidebar.css';
+import PropTypes from 'prop-types';
 import { CustomButtonField } from '../../../common/fields';
 export default function CustomUploadSidebar({ components, selectedFilename, handleClick }) {
   const [selectedKey, setSelectedKey] = useState(null);
@@ -45,3 +46,12 @@ export default function CustomUploadSidebar({ components, selectedFilename, hand
     </div>
   );
 }
+
+// Prop type validations
+CustomUploadSidebar.propTypes = {
+  components: PropTypes.shape({
+    data: PropTypes.objectOf(PropTypes.string),
+  }),
+  selectedFilename: PropTypes.string,
+  handleClick: PropTypes.func,
+};

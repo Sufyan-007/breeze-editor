@@ -7,7 +7,6 @@ import { CustomButtonField, CustomTextInput } from '../../../common/fields';
 import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
 import CustomPropsList from '../components/CustomPropList';
 
-
 import {
   fetchZipFilesAction,
   uploadZipFileAction,
@@ -102,10 +101,6 @@ function CustomZipPackagePage() {
       ws.close();
     };
   }, []);
-
-  console.log(fileIds, 'file ids ');
-  console.log(fileIdws, 'file id ws');
-  console.log(zipFiles, 'fetch zip files');
 
   const getComponents = async (filename) => {
     try {
@@ -372,7 +367,6 @@ function CustomZipPackagePage() {
             onPageChange={handlePageChange}
             sortBy="filename"
             sortDirection="asc"
-            // cellDataClass={}
           />
         </div>
       </div>
