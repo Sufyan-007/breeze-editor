@@ -67,7 +67,7 @@ def add_route(request, project_id):
         if validate_route_path(data, data.get("parentId"), project_id) is True:    
             config_data, node_id = add_node(project_id, TreeType["ROUTES"].value, data.get("parentId"), data)
             # add_params_to_route_object()
-            rewrite_clean_route_config(project_id, config_data, node_id)
+            rewrite_clean_route_config(project_id, config_data, node_id, data.get("currentVersion"))
             process_route_config(project_id, config_data)
             include_all_routes_accessory_data(project_id, [config_data[node_id]])
             return JsonResponse(config_data[node_id], status=200)
@@ -93,7 +93,7 @@ def update_route(request, project_id):
         res = update_route_in_config(data, project_id)
         config_data = res['config']
         # add_params_to_route_object()
-        rewrite_clean_route_config(project_id, config_data, data['id'])
+        rewrite_clean_route_config(project_id, config_data, data['id'], data.get("currentVersion"))
         process_route_config(project_id, config_data)
         include_all_routes_accessory_data(project_id, [config_data[data['id']]])
         return JsonResponse(config_data[data['id']], status=200)
@@ -117,7 +117,7 @@ def delete_route(request, project_id):
         data = json.loads(request.body.decode("utf-8"))
         res = del_route(data.get('id'), project_id)
         config_data = res['config']
-        rewrite_clean_route_config(project_id, config_data, data['id'])
+        rewrite_clean_route_config(project_id, config_data, data['id'], data.get("currentVersion"))
         process_route_config(project_id, config_data)
         return JsonResponse({'message': 'deletion operation successfully completed!', 'route_id': data['id']}, status=200)
     except Exception as e:
