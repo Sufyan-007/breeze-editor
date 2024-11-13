@@ -20,14 +20,7 @@ const routingSlice = createSlice({
       .addCase(fetchRoutingConfig.fulfilled, (state, action) => {
         state.status = 'succeeded';
         const newData = action.payload;
-        const configs = {};
-        for (const node of newData.children) {
-          configs[node.id] = node;
-        }
-        state.routingConfig = {
-          ...state.routingConfig,
-          ...configs,
-        };
+        state.routingConfig = newData.data;
       })
       .addCase(fetchRoutingConfig.rejected, (state, action) => {
         state.status = 'failed';
@@ -38,12 +31,8 @@ const routingSlice = createSlice({
       .addCase(addRouteConfig.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(addRouteConfig.fulfilled, (state, action) => {
+      .addCase(addRouteConfig.fulfilled, (state) => {
         state.status = 'succeeded';
-        const updatedConfig = action.payload;
-        if (updatedConfig) {
-          state.routingConfig = updatedConfig;
-        }
       })
       .addCase(addRouteConfig.rejected, (state, action) => {
         state.status = 'failed';
@@ -54,12 +43,8 @@ const routingSlice = createSlice({
       .addCase(updateRouteConfig.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(updateRouteConfig.fulfilled, (state, action) => {
+      .addCase(updateRouteConfig.fulfilled, (state) => {
         state.status = 'succeeded';
-        const updatedConfig = action.payload;
-        if (updatedConfig) {
-          state.routingConfig = updatedConfig;
-        }
       })
       .addCase(updateRouteConfig.rejected, (state, action) => {
         state.status = 'failed';
@@ -70,12 +55,8 @@ const routingSlice = createSlice({
       .addCase(deleteRouteConfig.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(deleteRouteConfig.fulfilled, (state, action) => {
+      .addCase(deleteRouteConfig.fulfilled, (state) => {
         state.status = 'succeeded';
-        const updatedConfig = action.payload;
-        if (updatedConfig) {
-          state.routingConfig = updatedConfig;
-        }
       })
       .addCase(deleteRouteConfig.rejected, (state, action) => {
         state.status = 'failed';

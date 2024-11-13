@@ -1,8 +1,6 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-// import { getApiSchemaDetails } from '../services/ApiService';
-// import { useParams } from 'react-router';
-import { CustomSelectField, CustomTextInput } from '../../../common/fields';
+import { CustomSelectField } from '../../../common/fields';
 import {
   BINARY_OPTIONS,
   FILE_OPTIONS,
@@ -11,9 +9,16 @@ import {
   TEXT_OPTIONS,
   URLENCODED_OPTIONS,
 } from '../constants/Content-Types';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchSchemas } from '../../schema-configuration/redux/schemaConfigActions';
+import { useParams } from 'react-router-dom';
 
 function BodySettings({ bodyData, onChange, moduleId }) {
   const [body, setBody] = useState(bodyData);
+  const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
+  const dispatch = useDispatch();
+  const { projectName } = useParams();
+
   const optionsMap = {
     RAW: RAW_OPTIONS,
     URLENCODED: URLENCODED_OPTIONS,
@@ -22,53 +27,27 @@ function BodySettings({ bodyData, onChange, moduleId }) {
     TEXT: TEXT_OPTIONS,
     FILE: FILE_OPTIONS,
   };
-  // const [schemaList, setSchemaList] = useState([]);
-  // const { projectName } = useParams();
-  // const fetchSchemasList = useCallback(
-  //   async (schemaName, moduleId) => {
-  //     try {
-  //       const result = await getApiSchemaDetails(projectName, schemaName, moduleId);
-  //       if (schemaName) {
-  //         return result;
-  //       } else {
-  //         setSchemaList(result[0].schemas);
-  //       }
-  //       console.log(result, 'result');
-  //     } catch (e) {
-  //       console.error(e);
-  //     }
-  //   },
-  //   [projectName]
-  // );
-
-  // useEffect(() => {
-  //   if (moduleId) {
-  //     fetchSchemasList(null, moduleId);
-  //   }
-  // }, [fetchSchemasList, moduleId]);
-
-  // const handleSchemaChange = async (value) => {
-  //   const updatedSchema = await fetchSchemasList(value, moduleId);
-  //   console.log(updatedSchema, 'updatedSchema');
-  //   setBody((state) => {
-  //     state.schema = updatedSchema;
-  //     state.schema_name = value;
-  //     onChange('body', [state]);
-  //     return { ...state };
-  //   });
-  // };
 
   const handleChanges = (prop, value) => {
-    console.log(prop, value);
     const newBody = { ...body };
     newBody[prop] = value;
     setBody(newBody);
     onChange('body', [newBody]);
   };
-
+  const handleSchemaChange = (option) => {
+    const newBody = { ...body };
+    newBody['schema'] = option.schema;
+    newBody['schema_name'] = option.value;
+    setBody(newBody);
+    onChange('body', [newBody]);
+  };
   useEffect(() => {
     setBody(bodyData);
   }, [bodyData]);
+
+  useEffect(() => {
+    dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
+  }, [dispatch, projectName, moduleId]);
 
   const renderError = (errors) => {
     if (!errors) return null;
@@ -87,10 +66,15 @@ function BodySettings({ bodyData, onChange, moduleId }) {
     );
   };
 
-  // const schemaOptions = schemaList.map((schema) => ({
-  //   label: schema.name,
-  //   value: schema.id,
-  // }));
+  const schemaOptions = schemaList
+    ? Object.keys(schemaList)
+        .filter((key) => !Object.hasOwn(schemaList[key], 'isUnresolved')) // Check if 'isUnresolved' exists on the object
+        .map((key) => ({
+          value: key,
+          label: schemaList[key].name,
+          schema: schemaList[key],
+        }))
+    : [];
   return body ? (
     <>
       <div className="rounded-0 br-text-primary br-background-secondary d-flex align-items-center justify-content-between">
@@ -127,8 +111,9 @@ function BodySettings({ bodyData, onChange, moduleId }) {
         <CustomSelectField
           name="schemaSelect"
           value={body.schema_name}
-          // onChange={(e) => handleSchemaChange(e)}
-          // options={schemaOptions}
+          onChange={(e) => handleSchemaChange(e)}
+          sendSelectedOption={true}
+          options={schemaOptions}
           className="form-select br-form-select form-select-sm mt-3"
           config={{
             label: 'Schema',

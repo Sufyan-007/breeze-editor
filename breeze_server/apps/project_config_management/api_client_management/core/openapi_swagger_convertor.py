@@ -10,12 +10,19 @@ from .api_model_loader import ApiModelLoader
 from ..utils.api_models import MethodsEnum,AuthApiTypeEnum,AuthTypeEnum
 from ..utils.schema_conversion import convert_type_to_config, generate_ids,object_converter
 from ....common.utils.replace_variable import replace_variable
-def prepare_api_models(json_data, project_name):
+from ..utils.set_unresolved_key import set_unresolved_keys
+def prepare_api_models(json_data, project_name,isJson):
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
-        app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
-        app_config = read_json_file(app_config_path)
-        app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['componentsSrcDir']}"
-
+        # app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
+        # app_config = read_json_file(app_config_path)
+        # app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['componentsSrcDir']}"
+        try:
+            if isJson:
+                openapi_data = json.loads(json_data)
+            else:
+                openapi_data = yaml.safe_load(json_data)
+        except:
+            raise SyntaxError("File not valid json or yml")
         swagger_metadata_file_path = f"{app_config_dir}/{CLIENT_API}/swagger_metadata.json" 
         api_model_loader = ApiModelLoader()
         tag_models = {}
@@ -24,12 +31,15 @@ def prepare_api_models(json_data, project_name):
             if not json_data:
                 return 
 
-            openapi_data = yaml.safe_load(json_data)
             meta_data = openapi_data.get("info",{})
             meta_data["auth_apis"] = {}
             with open(swagger_metadata_file_path, "r") as file:
                 swagger_metadata_file_content = json.load(file)
             swagger_metadata_id = generate_uuid_as_key()
+            
+            for x in swagger_metadata_file_content.values():
+                if (not meta_data.get('title')) or x.get("title") == meta_data.get("title"):
+                    meta_data["title"] = meta_data.get("title")+"_1"
             
             swagger_metadata_file_content[swagger_metadata_id] = meta_data
             append_to_dict_file(swagger_metadata_file_path, swagger_metadata_file_content)
@@ -63,9 +73,11 @@ def prepare_api_models(json_data, project_name):
                 replace_variable(schema_with_ids, f"#/components/schemas/{val['name']}",key)
             schema_file_path = f"{CONFIG_PATH}/{project_name}/models/{swagger_metadata_id}.json"
             
+            set_unresolved_keys(schema_with_ids)
+            
             with open(schema_file_path, "w") as file:
                 json.dump(schema_with_ids,file, cls=EnhancedJSONEncoder)
-                
+            
             ###### auth related details ########
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
                 
@@ -626,3 +638,7 @@ def wrap_conversion(converted_data, project_name, folder_path):
         json.dump(index_content, file)
 
     return files_with_apis, is_error_present
+
+                    
+
+    

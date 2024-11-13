@@ -21,8 +21,8 @@ class DirectoryManager:
     def save_file(self, file_id, content,formatted=True):
         path = self.get_path_from_file_id(file_id)
         create_parent_dir_if_not_exists(path)
-        # if formatted:
-        #     content = format_by_prettier(content)
+        if formatted:
+            content = format_by_prettier(content)
         with open(path, 'w') as f:
             f.write(content)
 

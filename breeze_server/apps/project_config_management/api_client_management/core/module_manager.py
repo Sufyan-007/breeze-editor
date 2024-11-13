@@ -15,7 +15,7 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
 
         for _, value in swagger_metadata.items():
             if value["title"] == module_name:
-                return {"message": "Module name should be unique."}
+                return {"message": "Module name should be unique."}, 409
         swagger_metadata[module_id] = {
             "title": module_name,
             "description": module_description,
@@ -28,7 +28,7 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
             json.dump({}, schema_file)
         for title in schema_data.values():
             if title == module_name:
-                return {"message": "Module name should be unique."}
+                return {"message": "Module name should be unique."}, 409
         schema_data[module_id] = module_name
         append_to_dict_file(swagger_schema_index_path, schema_data)
 
@@ -39,10 +39,10 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
         with open(index_file_path, 'w') as index_file:
             index_file.write('{}') 
 
-        return {"message": "Module added successfully."}
+        return {"message": "Module added successfully."}, 200
     
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": str(e)}, 500
 
 
 def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new_title):

@@ -9,6 +9,8 @@ class ResourceCategory(Enum):
     CUSTOMIZED_PROJ = "external_components_config"
     MODEL = "models"
     ROUTING = "routing"
+    RESOURCE = "resource_config"
+    DIRECTORY_MANAGEMENT = "directory_management"
 
 class ThirdPartyLibraryKeys:
     LIB_NAME = "libname"

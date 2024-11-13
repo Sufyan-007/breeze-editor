@@ -2,6 +2,7 @@ GLOBAL_RESOURCES_PATH = "user_uploads"
 
 DEFAULT_THIRD_PARTY_CONFIG_FOLDER_NAME = "third_party_configs"
 
+# TODO: need to finalize declaration of all config const here or in RespourceCategory.py
 CONFIG_FILES_PATH = {
     'APP_CONFIG' : 'app_basic_config',
     'ROUTING_CONFIG' : 'routing_config',
@@ -11,6 +12,9 @@ CONFIG_FILES_PATH = {
     'RESOURCE_CONFIG' : 'uploaded_resources_config',
     'ENVIRONMENT_SETTINGS' : 'environment_settings',
 }
+
+MULTI_NODE_MULTI_FILE = ['components', 'services', 'api_client']
+MULTI_NODE_SINGLE_FILE = ['routing', 'resource_config', 'directory_management']
 
 JSX_TEMPLATE_PATH = "project_templates/jsx_template"
 TSX_TEMPLATE_PATH = "project_templates/tsx_template"
@@ -35,5 +39,6 @@ MODEL = "models"
 INDEX = "index"
 ROUTING = "routing_config"
 COMPONENT = "components"
+RESOURCE = "uploaded_resources_config"
 
 APP_CONFIG_PATH = "configurations"

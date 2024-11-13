@@ -10,6 +10,7 @@ from .views.custom_uploads import delete_custom_package
 from .views.custom_uploads import set_component_config
 from .views.third_party_dependency import (add_third_party_dependency, delete_third_party_dependency, update_third_party_dependency, get_third_party_dependency)
 from .views.project_status import get_port
+from .views import file_handle as file_handle
 
 urlpatterns = [
     path('get-all/', proj_apis.get_all, name='get_all_project'),
@@ -35,6 +36,11 @@ urlpatterns = [
     path('update-third-party-dependency/<str:projectName>/', update_third_party_dependency),
     path('get-third-party-dependency/<str:projectName>/', get_third_party_dependency),
     path('delete-third-party-dependency/<str:projectName>/', delete_third_party_dependency),
+    
+    # file upload
+    path('upload-file/<str:project_id>/', file_handle.upload_file),
+    path('download-file/<str:project_id>/<str:fileId>/', file_handle.download_file),
+    path('delete-file/<str:project_id>/', file_handle.delete_file),
 ]
 
 

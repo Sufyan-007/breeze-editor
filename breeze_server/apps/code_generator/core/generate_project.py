@@ -10,7 +10,7 @@ from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.project_config_management.route_management.core.post_edit_operations import get_routing_code
 from apps.directory_management.core.directory_management_service import DirectoryManager
 
-from .new_component_generator import write_component, write_app_component
+from .new_component_generator import write_component
 from .project_generation_progress import ProjectGenerationProgress
 from ..utils.dependencies_manager import DependencyManager
 from ..utils import static_code
@@ -22,7 +22,13 @@ def generate_project(project_config):
     project_name = project_config['name']
     app_config_dir = f"{CONFIG_PATH}/{project_name}"
     app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
-    routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
+    
+    # reading routing config
+    config_data_obj = read_config_file(project_name, "routing_config", "routing_config")
+    if config_data_obj.get('err'):
+        raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+    routing_config = config_data_obj.get('data')
+    # routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
     
     ProjectGenerationProgress.store_func_progress(app_config['name'], 10)
     # Create React App using create-react-app 
@@ -163,7 +169,12 @@ def write_main_app_and_routing_component(app_config, routing_config):
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
     
     comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
-    routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
+    # reading routing config
+    config_data_obj = read_config_file(app_config['name'], "routing_config", "routing_config")
+    if config_data_obj.get('err'):
+        raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+    routing_config = config_data_obj.get('data')
+    # routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
     main_comp_config_obj = read_config_file(app_config['name'], ResourceCategory.COMPONENTS.value, app_config['defaultCompId'])
     main_comp_config_data = main_comp_config_obj.get('data')[comp_config_index[app_config['defaultCompId']]]
     
@@ -295,7 +306,7 @@ def modify_index_html_with_logo(app_config):
 
     if logo_id:
         # Download the file
-        downloaded_file_path = file_handler.download_file(logo_id, project_name)
+        downloaded_file_path = file_handler.get_file_path(logo_id, project_name)
 
         if downloaded_file_path:
             # Copy the downloaded file to the public folder with the appropriate extension
