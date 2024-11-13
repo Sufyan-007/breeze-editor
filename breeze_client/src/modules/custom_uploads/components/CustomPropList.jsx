@@ -30,7 +30,7 @@ function CustomPropsList({ props }) {
             <div key={key}>
               <CustomButtonField
                 type="button"
-                label={key}
+                label={key.name}
                 onClick={() => handlePropClick(key)}
                 className={`run-btn med-font br-text-primary custom-button ${selectedProp === key ? 'selected' : ''}`}
                 style={{

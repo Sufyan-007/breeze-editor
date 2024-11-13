@@ -6,7 +6,7 @@ import '../styles/CustomZipPackage.css';
 import { CustomButtonField, CustomTextInput } from '../../../common/fields';
 import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
 import CustomPropsList from '../components/CustomPropList';
-// import columns from '../constants/TableStructure';
+
 
 import {
   fetchZipFilesAction,
@@ -37,7 +37,7 @@ function CustomZipPackagePage() {
   const [socket, setSocket] = useState(null); // WebSocket state
   const [fileIdws, setFileIdws] = useState(''); //file id received from the websocket
   const [fileIds, setFileIds] = useState([]); //array to store the file ids
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const { zipFiles, fileId, components, props } = useSelector((state) => state.zip);
 
   //fetch the list of zip files on component mount
@@ -47,15 +47,15 @@ function CustomZipPackagePage() {
       setFileIds((prevFileIds) => [...prevFileIds, fileId]);
     }
 
-     const folders = zipFiles?.folders || [];
+    const folders = zipFiles?.folders || [];
 
-     const initialUploadStatus = { ...uploadStatus };
+    const initialUploadStatus = { ...uploadStatus };
 
-     folders.forEach((folder) => {
-       initialUploadStatus[folder.zip_file_id] = folder.status; // Update or add the status for each file
-     });
+    folders.forEach((folder) => {
+      initialUploadStatus[folder.zip_file_id] = folder.status;
+    });
 
-     setUploadStatus(initialUploadStatus);
+    setUploadStatus(initialUploadStatus);
   }, [fileId, zipFiles]);
 
   useEffect(() => {
@@ -66,7 +66,6 @@ function CustomZipPackagePage() {
 
   // Establish WebSocket connection when the component mounts
   useEffect(() => {
-
     const ws = new WebSocket('ws://localhost:8000/ws/custom-upload-progress/');
 
     // Set up WebSocket listeners
@@ -106,7 +105,7 @@ function CustomZipPackagePage() {
 
   console.log(fileIds, 'file ids ');
   console.log(fileIdws, 'file id ws');
-  console.log(zipFiles,"fetch zip files");
+  console.log(zipFiles, 'fetch zip files');
 
   const getComponents = async (filename) => {
     try {
@@ -140,7 +139,9 @@ function CustomZipPackagePage() {
   const handleOffCanvasClose = () => setShowOffCanvas(false);
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    if (event) {
+      event.preventDefault();
+    }
 
     setShowModal(false);
     const fileInput = document.querySelector('input[type="file"]');
@@ -171,18 +172,12 @@ function CustomZipPackagePage() {
       }
 
       try {
-        // Dispatch the action to upload the zip file
         await dispatch(uploadZipFileAction({ formData: submitData, projectName }));
-        setShowModal(false);
-        // Fetch the updated list of zip files after the upload completes
         await dispatch(fetchZipFilesAction(projectName));
-
-        // Fetch the updated folder configuration
         await dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
 
         // Reset the form and close the modal
         resetForm();
-        // setShowModal(false);
       } catch (error) {
         console.error('Error during file upload or fetching folder config:', error);
       }
@@ -304,24 +299,14 @@ function CustomZipPackagePage() {
               label={<i className="bi bi-three-dots-vertical" />}
               onClick={() => {
                 setShowOffCanvas(true);
-                getComponents(folder.fileName);
-                setSelectedFilename(folder.fileName);
+                getComponents(folder.zip_file_name);
+                setSelectedFilename(folder.zip_file_name);
               }}
               className="btn toggle-btn br-text-primary"
             />
           </>
-        ) : uploadStatus[folder.zip_file_id] === 'file upload failed' ? (
-          <>
-            <CustomButtonField
-              label={<i className="bi bi-arrow-clockwise" />}
-              onClick={() => {
-                // Add your reload function here to retry the upload
-                // retryFileUpload(folder.zip_file_id);
-              }}
-              className="btn toggle-btn btn-outline-secondary settings-no-outline-button"
-            />
-          </>
-        ) : uploadStatus[folder.zip_file_id] === 'components upload failed' ? (
+        ) : uploadStatus[folder.zip_file_id] === 'components upload failed' ||
+          uploadStatus[folder.zip_file_id] === 'file upload failed' ? (
           <>
             <CustomButtonField
               label={<i className="bi bi-trash" />}
@@ -329,23 +314,20 @@ function CustomZipPackagePage() {
                 setFileToDelete(folder);
                 setShowDeleteModal(true);
               }}
-              className="btn toggle-btn btn-outline-danger settings-no-outline-button"
+              className="btn toggle-btn btn-outline-danger btn-sm settings-no-outline-button"
             />
+            <p>{uploadStatus[folder.zip_file_id]}</p>
           </>
         ) : null}
       </div>
     ),
   }));
 
-
   const handleClick = (fileid, filename) => {
-    // e.preventDefault();
     const payload = {
       resource: fileid,
       select: ['props'],
     };
-
-    // Dispatch the action after preventing default
     dispatch(fetchZipFileComponentsAction({ filename, projectName, payload }));
   };
 
@@ -370,8 +352,6 @@ function CustomZipPackagePage() {
     },
   ];
 
-  console.log(uploadStatus, 'upload status');
-  console.log(showDeleteModal,"show delete model");
   return (
     <div>
       <div className="container-fluid py-2 px-3">
@@ -388,12 +368,11 @@ function CustomZipPackagePage() {
           <BreezeTable
             columns={columns}
             data={filesData}
-            // actions={actions}
             currentPage={currentPage}
             onPageChange={handlePageChange}
             sortBy="filename"
             sortDirection="asc"
-            // actionPlacement={'end'}
+            // cellDataClass={}
           />
         </div>
       </div>
