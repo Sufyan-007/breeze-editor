@@ -124,12 +124,12 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
   const renderError = (errors) => {
     if (!errors) return null;
     return (
-      <div className="text-danger">
+      <div className="text-danger mx-2 mb-1">
         {Object.entries(errors).map(([key, messages]) => (
           <div key={key}>
             {messages.map((message, idx) => (
               <div key={idx}>
-                {key}:{message}
+                {key} : {message}
               </div>
             ))}
           </div>
@@ -146,7 +146,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
           value={method}
           onChange={(e) => handleMethodChange(e)}
           options={[
-            // { label: 'Select', value: '' },
+            { label: 'Select', value: '' },
             { label: 'GET', value: 'GET' },
             { label: 'PUT', value: 'PUT' },
             { label: 'POST', value: 'POST' },
@@ -177,7 +177,6 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
             label: 'Path',
             groupClass: 'form-group mb-2 mx-2 w-50',
           }}
-          // value={path ? path.join('/') : ''}
           value={pathInputValue}
           onChange={(e) => handleChanges('path', e)}
           onBlur={handlePathParsing}

@@ -4,24 +4,32 @@ import { useEffect, useState } from 'react';
 import { fetchSchemas } from '../redux/schemaConfigActions';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 
 function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSchema, setSelectedSchema }) {
   const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
+  const allSchemas = useSelector(
+    (state) => state.schemas.schemaList,
+    (prevFiles, nextFiles) => {
+      return isEqual(prevFiles, nextFiles);
+    }
+  );
   const [isOpen, setIsOpen] = useState(false);
   const { projectName } = useParams();
   const dispatch = useDispatch();
 
   const toggleModuleExpand = () => {
-    if (!isOpen) {
-      dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
-    }
+    // if (!isOpen) {
+    //   dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
+    // }
     setIsOpen(!isOpen);
   };
 
   useEffect(() => {
-    console.log(moduleId, 'moduleis');
-    dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
-  }, [dispatch, moduleId, projectName]);
+    if (Object.keys(allSchemas).length === 0) {
+      dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
+    }
+  }, [dispatch, moduleId, projectName, allSchemas]);
   return (
     <>
       <div

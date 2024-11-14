@@ -141,7 +141,7 @@ class ApiModelLoader:
                     name=param.get("name"),
                     type=param.get("type"),
                     required=param.get("required"),
-                    param_type=param.get("param_type", "STATIC"),
+                    param_type=param.get("param_type", "USER_INPUT"),
                     value=param.get("value"),
                     storage_key=param.get("storage_key"),
                     description=param.get("description"),
@@ -202,8 +202,8 @@ class ApiModelLoader:
     def load_headers(header_data):
         headers = []
         for item in header_data:
-            new_headers = KeyValue(key=item.get(
-                "key"), value=item.get("value"),type=item.get("type"),errors={},storage_key=item.get("storage_key"))
+            new_headers = KeyValue(key=item.get("key"), 
+                value=item.get("value"),type=item.get("type"),errors={},storage_key=item.get("storage_key"),data_type=item.get("data_type"))
             headers.append(new_headers)
         return headers
 

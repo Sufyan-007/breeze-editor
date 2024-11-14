@@ -111,7 +111,12 @@ function ServiceConfiguration() {
     if (operation === 'ADD') {
       dispatch(fetchFiles({ projectName, payload: { category: 'api_client', module: selectedModule.id } })).unwrap();
     }
-    await dispatch(fetchFunctions({ projectName, payload: { category: 'api_client', fileId: selectedFile } }));
+    await dispatch(
+      fetchFunctions({
+        projectName,
+        payload: { category: 'api_client', files: selectedFile, module: selectedModule.id },
+      })
+    ).unwrap();
     if (isAuthApi) {
       setSelectedAuthApi({});
     } else {

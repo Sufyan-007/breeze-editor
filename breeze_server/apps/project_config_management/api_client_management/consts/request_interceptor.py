@@ -10,7 +10,5 @@ REQUEST_INTERCEPTOR = """
     },
     (error) => Promise.reject(error)
     );    
-    
-    
 """
 

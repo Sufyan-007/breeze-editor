@@ -44,6 +44,7 @@ def generate_service_config(request, collectionType, project_id):
                 converted_data = prepare_api_models(json_data, project_id,isJson)
                 module_id = converted_data.get("id")
                 module_name = converted_data.get("title")
+                security_schemes = converted_data.get("security_schemes")
                 files_with_apis, is_erroroneous = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
                 if not is_erroroneous:
                     directory_manager = DirectoryManager(project_name=project_id)
@@ -57,7 +58,7 @@ def generate_service_config(request, collectionType, project_id):
                         isProtected=False
                     )
                     for file in files_with_apis:
-                        generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name)
+                        generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name, security_schemes= security_schemes)
                 return JsonResponse({"module_id": module_id}, status=201)
             
             # elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):

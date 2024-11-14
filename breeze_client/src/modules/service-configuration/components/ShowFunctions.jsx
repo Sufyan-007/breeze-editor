@@ -5,9 +5,10 @@ function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId }) {
   const authFunc = useSelector((state) => state.services.moduleList[moduleId]?.auth_apis[functionId]);
   const displayName = isAuth ? authFunc?.operation_id : func?.operation_id;
   const shortName = displayName && displayName.length > 30 ? `${displayName.slice(0, 30)}...` : displayName;
+  // console.log(func, functionId);
 
   return (
-    <div key={functionId} className="m-1 d-flex justify-content-between">
+    <div key={functionId} className="mx-3 my-1 d-flex justify-content-between">
       <span
         className={` ${func?.errors && func?.errors.root_errors.length > 0 ? 'text-danger' : ''}`}
         onClick={isAuth ? () => onFunctionClick() : () => onFunctionClick(func)}
