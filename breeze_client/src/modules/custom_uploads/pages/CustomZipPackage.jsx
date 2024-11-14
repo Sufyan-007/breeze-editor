@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { BreezeTable, BreezeModal } from '../../../common/display/index';
+import { BreezeTable, BreezeModal, BreezeToaster } from '../../../common/display/index';
 import '../styles/CustomZipPackage.css';
 import { CustomButtonField, CustomTextInput } from '../../../common/fields';
 import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
@@ -31,7 +31,6 @@ function CustomZipPackagePage() {
     file: null,
   });
   const [error, setError] = useState('');
-
   const [uploadStatus, setUploadStatus] = useState({});
   const [socket, setSocket] = useState(null); // WebSocket state
   // const [fileIdws, setFileIdws] = useState('');
@@ -138,11 +137,16 @@ function CustomZipPackagePage() {
       event.preventDefault();
     }
 
-    setShowModal(false);
     const fileInput = document.querySelector('input[type="file"]');
 
     if (fileInput.files.length > 0) {
       const selectedFile = fileInput.files[0];
+
+      const MAX_FILE_SIZE = 5 * 1024 * 1024;
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        setError('File size exceeds');
+        return;
+      }
 
       // Update formData with the projectId and the selected file
       formData.projectId = projectName;
@@ -167,7 +171,9 @@ function CustomZipPackagePage() {
       }
 
       try {
+        setShowModal(false);
         await dispatch(uploadZipFileAction({ formData: submitData, projectName }));
+
         await dispatch(fetchZipFilesAction(projectName));
         await dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
 
@@ -371,7 +377,7 @@ function CustomZipPackagePage() {
       </div>
       <BreezeModal isOpen={showModal} onClose={() => setShowModal(false)} header={header} footer={footer}>
         <form onSubmit={handleSubmit}>
-          {error && <p className="text-danger">{error}</p>}
+          {error && <BreezeToaster message={error} type="error" duration={5000} />}
           <div className="row">
             <div className="col mb-3">
               <CustomFileUploadField
@@ -457,7 +463,7 @@ function CustomZipPackagePage() {
           </div>
 
           <div style={{ flex: '1', paddingLeft: '20px', maxWidth: '80%' }}>
-            {props && <CustomPropsList props={props} />}
+            {props && <CustomPropsList components={components} props={props} />}
           </div>
         </div>
       </BreezeOffCanvas>

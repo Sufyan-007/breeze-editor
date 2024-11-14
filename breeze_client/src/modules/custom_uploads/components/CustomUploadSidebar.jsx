@@ -19,9 +19,9 @@ export default function CustomUploadSidebar({ components, selectedFilename, hand
         top: 0,
       }}
     >
-      <h5 className="large-font">Components</h5>
-      {components?.data && !components?.data?.props && (
+      {components?.data && Object.keys(components.data).length > 0 && !components?.data?.props ? (
         <div>
+          <h5 className="large-font">Components</h5>
           {Object.keys(components.data).map((key) => (
             <div key={key}>
               <CustomButtonField
@@ -40,9 +40,9 @@ export default function CustomUploadSidebar({ components, selectedFilename, hand
             </div>
           ))}
         </div>
+      ) : (
+        <p>No components found</p>
       )}
-
-      {!components?.data && <p>No components available</p>}
     </div>
   );
 }

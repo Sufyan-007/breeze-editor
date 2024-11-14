@@ -31,6 +31,10 @@ def add_custom_package(request, projectName):
         if not file:
             return JsonResponse({'error': 'No file provided.'}, status=400)
 
+        # Check if file size exceeds 5 MB (5 * 1024 * 1024 bytes)
+        if file.size > 5 * 1024 * 1024:
+            return JsonResponse({'error': 'File size exceeds the 5MB limit.'}, status=400)
+        
         if fileName.endswith('.zip'):
             fileName = fileName.replace('.zip', '')
 

@@ -27,7 +27,7 @@ const zipSlice = createSlice({
         state.zipFiles = action.payload;
       })
       .addCase(fetchZipFilesAction.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.error;
       });
 
     // Upload zip file
@@ -39,7 +39,7 @@ const zipSlice = createSlice({
         state.fileId = action.payload['file_id'];
       })
       .addCase(uploadZipFileAction.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.error;
       });
 
     // Delete zip file

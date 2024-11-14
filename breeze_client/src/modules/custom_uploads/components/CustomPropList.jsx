@@ -1,11 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm'; // Adjust the import path if needed
 import { CustomButtonField } from '../../../common/fields';
 import '../styles/CustomUploadSidebar.css';
 
-function CustomPropsList({ props }) {
-  const [selectedProp, setSelectedProp] = useState(null);
+function CustomPropsList({ components, props }) {
+  const [selectedProp, setSelectedProp] = useState();
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [currentProps, setCurrentProps] = useState(props);
+  useEffect(() => {
+    if (components?.data && Object.keys(components.data).length === 0) {
+      setCurrentProps({});
+      setSelectedProp(null);
+      setIsFormVisible(false);
+    } else {
+      setCurrentProps(props); // Update with new props if components are available
+    }
+  }, [components.data, props]);
 
   const handlePropClick = (key) => {
     if (selectedProp === key && isFormVisible) {
@@ -17,7 +27,6 @@ function CustomPropsList({ props }) {
     }
   };
 
-  console.log(props, 'props ');
   const handleFormSubmit = (formData) => {
     console.log('Form submitted with data:', formData);
   };
@@ -26,12 +35,12 @@ function CustomPropsList({ props }) {
     <div className="br-background-primary d-flex">
       <div style={{ width: '20%', marginRight: '50px' }}>
         <h5 className="large-font">Props</h5>
-        {Object.keys(props).length > 0 ? (
-          Object.keys(props).map((key) => (
+        {Object.keys(currentProps).length > 0 ? (
+          Object.keys(currentProps).map((key) => (
             <div key={key}>
               <CustomButtonField
                 type="button"
-                label={props[key].prop_name}
+                label={currentProps[key].prop_name}
                 onClick={() => handlePropClick(key)}
                 className={`run-btn med-font br-text-primary custom-button ${selectedProp === key ? 'selected' : ''}`}
                 style={{
@@ -50,7 +59,7 @@ function CustomPropsList({ props }) {
       </div>
 
       <div style={{ width: '70%' }}>
-        {isFormVisible && selectedProp && Object.keys(props).length > 0 && (
+        {isFormVisible && selectedProp && Object.keys(currentProps).length > 0 && (
           <div className="collapsible-form">
             <PropConfigForm onSubmit={handleFormSubmit} />
           </div>
