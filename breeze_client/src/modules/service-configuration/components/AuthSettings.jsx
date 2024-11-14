@@ -5,7 +5,7 @@ import { CustomSelectField } from '../../../common/fields';
 import { useDispatch, useSelector } from 'react-redux';
 import { retrieveResponseTokens } from '../redux/ApiClientActions';
 
-function AuthSettings({ authData, onChange, apiData, onApiChange, moduleId }) {
+function AuthSettings({ authData, onChange, moduleId }) {
   const [auth, setAuth] = useState(authData ? (authData[0] ? authData[0] : {}) : {});
   const { projectName } = useParams();
   const { login_apis } = useSelector((state) => state.services);

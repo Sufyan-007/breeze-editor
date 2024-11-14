@@ -11,6 +11,8 @@ function CustomSelectField({ config, name, value, onChange, options, className, 
         name={name}
         value={value}
         onChange={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           if (sendSelectedOption) {
             const selectedOption = availableOptions.find((option) => option.value === e.target.value);
             onChange(selectedOption);

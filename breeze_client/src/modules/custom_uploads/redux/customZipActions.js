@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { uploadZipFile, fetchZipFiles, deleteFile } from '../services/customZipService';
+import { uploadZipFile, fetchZipFiles, deleteFile, fetchZipFileComponentsService } from '../services/customZipService';
 
 // Action to upload a zip file
 export const uploadZipFileAction = createAsyncThunk(
@@ -27,12 +27,24 @@ export const fetchZipFilesAction = createAsyncThunk('zip/fetchZipFiles', async (
 // Action to delete a zip file
 export const deleteZipFileAction = createAsyncThunk(
   'zip/deleteZipFile',
-  async ({ fileName, projectName }, { rejectWithValue }) => {
+  async ({ fileName, fileId, projectName }, { rejectWithValue }) => {
     try {
-      const result = await deleteFile(fileName, projectName);
+      const result = await deleteFile(fileName, fileId, projectName);
       return result;
     } catch (error) {
       return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchZipFileComponentsAction = createAsyncThunk(
+  'zip/fetchZipFileComponents',
+  async ({ filename, projectName, payload = null }, { rejectWithValue }) => {
+    try {
+      const data = await fetchZipFileComponentsService(filename, projectName, payload);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data || 'An error occurred while fetching components');
     }
   }
 );

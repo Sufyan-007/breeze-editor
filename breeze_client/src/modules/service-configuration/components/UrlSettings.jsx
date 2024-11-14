@@ -35,8 +35,8 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
     });
   }
   if (envVars) {
-    Object.entries(envVars).forEach(([key, value]) => {
-      options.push({ value: key, label: value, dataSource: 'envVars' });
+    envVars.forEach(({ id, name }) => {
+      options.push({ value: id, label: name, dataSource: 'envVars' });
     });
   }
   const handleChanges = (prop, newValue) => {

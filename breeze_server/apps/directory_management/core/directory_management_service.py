@@ -21,14 +21,13 @@ class DirectoryManager:
     def save_file(self, file_id, content,formatted=True):
         path = self.get_path_from_file_id(file_id)
         create_parent_dir_if_not_exists(path)
-        # if formatted:
-        #     content = format_by_prettier(content)
+        if formatted:
+            content = format_by_prettier(content)
         with open(path, 'w') as f:
             f.write(content)
 
 
     def add_node_to_config(self, parent_id, tag,name, node_type="FILE",ext="", file_id=None, entity_id = "",isProtected=False):
-        
         parent_node = self.directory_management_config.get(parent_id,None)
         
         if not parent_node:
@@ -41,7 +40,6 @@ class DirectoryManager:
             raise PermissionError()
         
         parent_dir = self.get_path_from_file_id(parent_node["id"])
-        
         fullName = name
         
         if node_type == "FILE":
@@ -56,8 +54,8 @@ class DirectoryManager:
         if file_id and file_id in self.directory_management_config:
             raise KeyError("Id already in directory management")
         
-        if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir):
-            raise FileExistsError("Given file name already exists")
+        # if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir):
+        #     raise FileExistsError("Given file name already exists")
         
         
         if file_id:

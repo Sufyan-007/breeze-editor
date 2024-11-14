@@ -7,8 +7,15 @@ import ResponseSettings from '../components/ResponseSettings';
 import SideBar from '../components/SideBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { CustomButtonField, CustomSelectField } from '../../../common/fields';
-import { fetchModules, convertFile, editFunction, editModule, generateServices } from '../redux/ApiClientActions';
-// import { resetState } from '../redux/ApiClientReducers';
+import {
+  fetchModules,
+  convertFile,
+  editFunction,
+  editModule,
+  generateServices,
+  fetchFunctions,
+  fetchFiles,
+} from '../redux/ApiClientActions';
 import AddModule from '../components/AddModule';
 function ServiceConfiguration() {
   const { transformedOptions, message } = useSelector((state) => state.services);
@@ -52,12 +59,21 @@ function ServiceConfiguration() {
     formData.append('file', file);
     try {
       const payload = { category: 'api_client' };
-      await dispatch(convertFile({ projectName, collectionType, formData })).unwrap();
+      const newModuleId = await dispatch(convertFile({ projectName, collectionType, formData })).unwrap();
       setShow(false);
       setView('TEST');
       await dispatch(fetchModules({ projectName, payload })).unwrap();
+      const res = await dispatch(
+        fetchFiles({ projectName, payload: { category: 'api_client', module: newModuleId.module_id } })
+      ).unwrap();
+      const fileIds = Object.keys(res.data);
+      const fetchFunctionsPromises = fileIds.map((fileId) =>
+        dispatch(fetchFunctions({ projectName, payload: { category: 'api_client', fileId } }))
+      );
+
+      await Promise.all(fetchFunctionsPromises);
     } catch (error) {
-      // setErrorMessage(error.message);
+      console.error('Error uploading file:', error);
     }
   };
 
@@ -66,12 +82,10 @@ function ServiceConfiguration() {
     console.log(selectedApiModel, 'selectedApiModel');
     if (!isValidApiStructure(selectedApiModel)) {
       setShowToast(true);
-      // setErrorMessage('Please Fill All the Values before Submitting');
       return;
     }
     if (!selectedModule) {
       setShowToast(true);
-      // setErrorMessage('Please Select a Module first');
       return;
     }
     e.preventDefault();
@@ -93,8 +107,11 @@ function ServiceConfiguration() {
       };
       await dispatch(editFunction({ projectName, operation, payload })).unwrap();
     }
-    // dispatch(resetState());
     await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+    if (operation === 'ADD') {
+      dispatch(fetchFiles({ projectName, payload: { category: 'api_client', module: selectedModule.id } })).unwrap();
+    }
+    await dispatch(fetchFunctions({ projectName, payload: { category: 'api_client', fileId: selectedFile } }));
     if (isAuthApi) {
       setSelectedAuthApi({});
     } else {
@@ -103,12 +120,9 @@ function ServiceConfiguration() {
   };
 
   const isValidApiStructure = (api) => {
-    console.log(api, 'api submitted');
     if (!api) return false;
-    const hasRequiredTopLevelProps = api.operation_id && api.tags;
-    if (!hasRequiredTopLevelProps) return false;
-    console.log('top level');
-
+    if (!api.operation_id) return false;
+    // if (!api.tags) return false;
     if (api.request) {
       const hasValidRequestProps =
         api.request.method &&
@@ -126,6 +140,8 @@ function ServiceConfiguration() {
         const hasRequiredParamProps = param.param_in && param.name && param.type && param.param_type;
         if (!hasRequiredParamProps) return false;
       }
+      console.log('params');
+
       for (const body of api.request.body) {
         const hasRequiredBodyProps = body.content_type && body.mode;
         if (!hasRequiredBodyProps) return false;
@@ -218,10 +234,9 @@ function ServiceConfiguration() {
                 onChange={onApiModelChange}
                 isAuthApi={false}
                 onSuccessfulTransfer={() => {
-                  // fetchServiceList();
-                  // setErrorMessage('Function Transferred Successfully');
                   setShowToast(true);
                 }}
+                moduleId={selectedModule && selectedModule.id}
               />
               <RequestSettings
                 moduleId={selectedModule && selectedModule.id}
@@ -262,7 +277,12 @@ function ServiceConfiguration() {
                 </div>
               </div>
 
-              <GeneralSettingsCard settings={selectedAuthApi} onChange={onAuthApiModelChange} isAuthApi={true} />
+              <GeneralSettingsCard
+                settings={selectedAuthApi}
+                onChange={onAuthApiModelChange}
+                isAuthApi={true}
+                moduleId={selectedModule && selectedModule.id}
+              />
               <div>
                 <RequestSettings
                   requestData={selectedAuthApi.request ? selectedAuthApi.request : {}}
