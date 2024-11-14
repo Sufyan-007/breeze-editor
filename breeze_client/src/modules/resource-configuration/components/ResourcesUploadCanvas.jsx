@@ -99,8 +99,18 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
             <CustomFileUploadField
               key={fileInputKey}
               onFileSelect={handleFileChange}
+              style={{
+                borderColor: '#666666',
+                color: 'br-text-primary',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+              }}
               config={{
-                label: 'Choose File',
+                innerlabel: 'Choose File',
+                outerlabel: 'Choose File',
                 groupClass: 'form-group',
                 className: 'btn br-text-primary med-font',
               }}

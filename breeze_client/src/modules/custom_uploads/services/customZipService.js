@@ -12,7 +12,7 @@ const uploadZipFile = async (submitData, projectName) => {
 };
 
 const fetchZipFiles = async (projectName) => {
-  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package/${projectName}`;
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/get-uploaded-resource/${projectName}?tag=ZIP`;
   try {
     const response = await callApiClient(url, 'GET');
     return response;

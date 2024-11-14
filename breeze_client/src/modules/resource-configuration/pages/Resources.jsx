@@ -18,10 +18,9 @@ const Resources = () => {
   const fetchFiles = async () => {
     try {
       const fileData = await getAllUploadedFiles(projectName);
-      const fileArray = Object.keys(fileData.data).map((fileId) => ({
-        id: fileId,
-        name: fileData.data[fileId].name,
-        type: fileData.data[fileId].type,
+      const fileArray = fileData.folders.map((file) => ({
+        name: file.name,
+        type: file.type,
       }));
       setFiles(fileArray);
     } catch (error) {
@@ -34,7 +33,6 @@ const Resources = () => {
     Object.keys(formData).forEach((key) => {
       payload.append(key, formData[key]);
     });
-
     try {
       await uploadFile(payload, projectName);
       fetchFiles();
