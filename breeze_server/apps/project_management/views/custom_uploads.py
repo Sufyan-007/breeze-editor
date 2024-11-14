@@ -11,6 +11,7 @@ from apps.common.constants.consts import PORT
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
 from ..utils.custom_uploads_tracker import store_custom_upload
+
 @swagger_auto_schema(
     method='post',
     request_body=add_custom_package_schema['rb'],
@@ -68,7 +69,8 @@ def upload_and_update_file(projectName, file, fileName , file_id):
         # Call the external API asynchronously after upload is done
         load_dotenv()
         SERVER_HOST = os.getenv("SERVER_HOST") 
-        api_url = f"http://{SERVER_HOST}:{PORT}/custom"
+        THIRD_PARTY_PARSER_PORT = os.getenv("THIRD_PARTY_PARSER_PORT")
+        api_url = f"http://{SERVER_HOST}:{THIRD_PARTY_PARSER_PORT}/custom"
         payload = {
             "projName": projectName,
             "fileName": fileName

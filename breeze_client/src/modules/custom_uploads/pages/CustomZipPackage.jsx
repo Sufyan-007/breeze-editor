@@ -64,7 +64,7 @@ function CustomZipPackagePage() {
 
   // Establish WebSocket connection when the component mounts
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws/custom-upload-progress/');
+    const ws = new WebSocket(`${import.meta.env.VITE_SOCKET_URL}/ws/custom-upload-progress/`);
 
     // Set up WebSocket listeners
     ws.onopen = () => {
