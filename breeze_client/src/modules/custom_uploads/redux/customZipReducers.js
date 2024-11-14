@@ -1,11 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { uploadZipFileAction, fetchZipFilesAction, deleteZipFileAction } from './customZipActions';
+import {
+  uploadZipFileAction,
+  fetchZipFilesAction,
+  deleteZipFileAction,
+  fetchZipFileComponentsAction,
+} from './customZipActions';
 
 const initialState = {
   zipFiles: [],
+  fileId: null,
   status: 'idle',
   error: null,
-  uploadMessage: null,
+  components: { data: {} },
+  props: null,
 };
 
 const zipSlice = createSlice({
@@ -15,46 +22,53 @@ const zipSlice = createSlice({
   extraReducers: (builder) => {
     // Fetch zip files
     builder
-      .addCase(fetchZipFilesAction.pending, (state) => {
-        state.status = 'loading';
-      })
+      .addCase(fetchZipFilesAction.pending, () => {})
       .addCase(fetchZipFilesAction.fulfilled, (state, action) => {
-        console.log('fetched zip files payload', action.payload);
-        state.status = 'succeeded';
         state.zipFiles = action.payload;
       })
       .addCase(fetchZipFilesAction.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
+        state.error = action.error;
       });
 
     // Upload zip file
     builder
       .addCase(uploadZipFileAction.pending, (state) => {
-        state.status = 'loading';
-        state.uploadMessage = null;
         state.error = null;
       })
       .addCase(uploadZipFileAction.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.uploadMessage = action.message;
+        state.fileId = action.payload['file_id'];
       })
       .addCase(uploadZipFileAction.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
+        state.error = action.error;
       });
 
     // Delete zip file
     builder
       .addCase(deleteZipFileAction.pending, (state) => {
-        state.status = 'loading';
         state.error = null;
       })
       .addCase(deleteZipFileAction.fulfilled, (state) => {
         state.status = 'succeeded';
       })
       .addCase(deleteZipFileAction.rejected, (state, action) => {
-        state.status = 'failed';
+        state.error = action.payload;
+      });
+
+    builder
+      .addCase(fetchZipFileComponentsAction.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(fetchZipFileComponentsAction.fulfilled, (state, action) => {
+        const { data } = action.payload;
+
+        // Check if `props` exists in the response data
+        if (data && data.props) {
+          state.props = data.props; // Store the `props` in the state
+        } else {
+          state.components = { data }; // Store `data` as components if `props` doesn't exist
+        }
+      })
+      .addCase(fetchZipFileComponentsAction.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

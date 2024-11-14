@@ -14,6 +14,11 @@ from pathlib import Path
 import os,json
 from dotenv import load_dotenv
 
+# import os
+from datetime import timedelta
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 def str_to_bool(s):
     if s.lower() == "true":
@@ -244,8 +249,24 @@ CORS_ALLOWED_ORIGINS = str_to_array(os.getenv("CORS_ALLOWED_ORIGINS"))
 CORS_ALLOW_CREDENTIALS = str_to_bool(os.getenv("CORS_ALLOW_CREDENTIALS")) 
 
 
+# DATABASES = {
+#    'default' : json.loads(os.getenv("DATABASES",'{}')) 
+# }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': os.getenv("JWT_SECRET_KEY", "123456789"),  # Custom JWT secret key
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 DATABASES = {
-   'default' : json.loads(os.getenv("DATABASES",'{}')) 
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME':BASE_DIR / 'db.sqlite3',
+    }
 }
 LANGUAGE_CODE = os.getenv("LANGUAGE_CODE") 
 TIME_ZONE = os.getenv("TIME_ZONE") 

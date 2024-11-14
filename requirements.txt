@@ -10,3 +10,5 @@ django-allow-cidr
 flatten-json
 PyExecJS
 python-dotenv
+pyjwt==1.7.1
+djangorestframework-simplejwt
