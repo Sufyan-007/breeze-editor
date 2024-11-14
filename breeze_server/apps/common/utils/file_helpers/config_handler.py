@@ -126,7 +126,7 @@ def write_config_file(project_name,category,filename,json_data):
             ## store the changes of each field corresponding to it's version 
             ## for that use flatten obj for given data
             for key,value in flatten_data_json.items():
-                if value != file_config_json[key]:
+                if value != file_config_json.get(key):
                     ## field value is updated so store the changes
                     if key not in changes:
                         changes[key] = {}

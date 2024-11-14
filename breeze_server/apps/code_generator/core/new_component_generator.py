@@ -3,7 +3,6 @@ from apps.common.utils.formatter import format_raw_val
 from apps.common.constants.consts import CONFIG_PATH
 from ..utils.html_generator import HTMLGenerator
 from ..utils.function_ast_parser import FunctionParser
-from ..utils.import_helper import ImportHelper
 from ..utils.code_indexing import get_code_index
 from ...common.utils.file_helpers.file_handler import create_parent_dir_if_not_exists
 import pickle
@@ -13,7 +12,7 @@ import pickle
 def write_component(app_config, comp_config, comp_config_index):
 
     #generate react component code
-    react_component_code, code_tree = generate_react_component_code(app_config, comp_config, comp_config_index)
+    react_component_code, code_tree = generate_react_component_code( comp_config)
     
     file_id = comp_config.get("file_id")
     
@@ -34,7 +33,7 @@ def write_component(app_config, comp_config, comp_config_index):
         pickle.dump(code_tree, file)
     
 
-def generate_react_component_code(app_config, config, comp_config_index):
+def generate_react_component_code( config):
     # component_uuid = config['component_uuid']
     # all_store_config = all_store_config
     # all_reducer_config = all_reducer_config
@@ -106,7 +105,7 @@ def generate_react_component_code(app_config, config, comp_config_index):
     props_vars_declaration = ', '.join([f'{var["name"]}={var["body"]["defaultValue"]}' if var["body"].get("defaultValue") else var["name"] for var in props_vars])
     if props_vars_declaration != "":
         props_vars_declaration = "{" + props_vars_declaration +"}"
-    import_stats,import_statement_tree = ImportHelper.generate_imports_code(config, comp_config_index, all_store_config,all_reducer_config, app_config)
+    # import_stats,import_statement_tree = ImportHelper.generate_imports_code(config, comp_config_index, all_store_config,all_reducer_config, app_config)
     
     def generate_function_code(func):
         all_resources = []
@@ -182,12 +181,12 @@ def generate_react_component_code(app_config, config, comp_config_index):
     
     code_tree=[]
     
-    code_tree.append({
-        "type" : "ALL_IMPORTS",
-        # "statementType" : "NA",
-        "children" :import_statement_tree,
-        "code": "import React, { useState, Fragment } from 'react';" + "".join([x["code"] for x in import_statement_tree])
-    })
+    # code_tree.append({
+    #     "type" : "ALL_IMPORTS",
+    #     # "statementType" : "NA",
+    #     "children" :import_statement_tree,
+    #     "code": "import React, { useState, Fragment } from 'react';" + "".join([x["code"] for x in import_statement_tree])
+    # })
     
     all_resources = {
         "type" : "ALL_RESOURCES",
@@ -214,15 +213,27 @@ def generate_react_component_code(app_config, config, comp_config_index):
             ],
 
     })
-    code_tree.append({
-        "type" : "EXPORT",
-        # "statementType" : "NA",
-        "code" : f"export default {name};"
-        
+    
+    config["imports"]["other"].append({
+        'TYPE':'THIRD_PARTY',
+        'import_type':'FULL',
+        'import_entity':'React',
+        'from':'react'
     })
+    config["imports"]["other"].append({
+        'TYPE':'THIRD_PARTY',
+        'import_type':'SINGLE',
+        'import_entity':'Fragment',
+        'from':'react'
+    })
+    config["imports"]["other"].append({
+        'TYPE':'THIRD_PARTY',
+        'import_type':'SINGLE',
+        'import_entity':'useState',
+        'from':'react'
+    })
+    
     react_component = f"""
-        import React, {{ useState, Fragment }} from 'react';
-        {import_stats}
 
         const {name} = ( {props_vars_declaration} ) => {{
             {resources_code}
@@ -230,11 +241,10 @@ def generate_react_component_code(app_config, config, comp_config_index):
                 {html_code}
             );
         }}
-
-        export default {name};
         """
 
-    return react_component, code_tree
+    return react_component, code_tree, config["imports"]
 
 def write_app_component():
     pass
+

@@ -95,12 +95,13 @@ class HTMLGenerator:
                 val = "{%s}" % related_func_config["name"]
         return f"{attr}={val}"
 
-    def generateHTML(self,config_id):
+    def generateHTML(self,config):
         # print("---", config)
-        try:
-            config=self.config["html_elements"][config_id["_id"]]
-        except:
-            return ""
+        # try:
+        #     html_elems = self.config["html_elements"]
+        #     config=html_elems[config_id["_id"]]
+        # except:
+        #     return ""
         if config.get('type') == 'Element':
             print("ImportExample",self.config ,config)
             if config.get('elementType',"") == 'CUSTOM':
@@ -130,7 +131,7 @@ class HTMLGenerator:
             children = config.get('children', [])
 
             attribute_str = ' '.join([f'{self.generateAttributeCode(attr, value)}' for attr, value in attributes.items()])
-            attribute_str = attribute_str+f" data-brz-id='{config_id['_id']}'"
+            attribute_str = attribute_str+f" data-brz-id='{config['id']}'"
             open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
             close_tag = f'</{tag_name}>'
 
@@ -139,7 +140,7 @@ class HTMLGenerator:
                     "type" : "HTML",
                     # "statementType" : "NA",
                     "code" : f'{open_tag}{close_tag}',
-                    "id" : config_id["_id"]
+                    "id" : config["id"]
                 }
                 return f'{open_tag}{close_tag}', tree
 
@@ -156,7 +157,7 @@ class HTMLGenerator:
                 # "statementType" : "NA",
                 "code":f'{open_tag}{inner_html}{close_tag}',
                 "children" : inner_code_tree,
-                "id" : config_id["_id"]
+                "id" : config["id"]
             }
             return f'{open_tag}{inner_html}{close_tag}' , tree
 
@@ -165,7 +166,7 @@ class HTMLGenerator:
                 "type" : "HTML",
                 # "statementType" : "NA",
                 "code" : config['text'],
-                "id" : config_id["_id"]
+                "id" : config["id"]
             }
             return config['text'],tree
         

@@ -34,7 +34,7 @@ class DirectoryManager:
         if not parent_node:
             raise IndexError("Given parent id does not exist")
         
-        if parent_node["type"] != "DIRECTORY":
+        if not parent_id=="ROOT" and parent_node["type"] != "DIRECTORY":
             raise NotADirectoryError("Parent is not a directory")
         
         if parent_node.get("isProtected",False) :
@@ -93,6 +93,8 @@ class DirectoryManager:
 
     #get path from file_id
     def get_path_from_file_id(self,file_id,relative_path=False):
+        if file_id=="ROOT":
+            return self.app_config['path']
         if file_id not in self.directory_management_config:
             raise Exception(f"File ID {file_id} not found in directory_management.json")
         entry = self.directory_management_config[file_id]

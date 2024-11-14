@@ -46,6 +46,7 @@ def add_dirs_configs(data, proj_data_request):
     write_json_file(f"{app_config_path}.json", app_current_config)
     
     create_resource_directory(data['name'], ResourceCategory.COMPONENTS)
+    create_resource_directory(data['name'], ResourceCategory.CODE_FILE)
     create_dir_if_not_exists(f"{app_config_dir}/{EXTERNAL_COMPONENTS_CONFIG}") 
     app_current_config = write_basic_main_comp_config(app_current_config)
     write_routing_config(app_current_config)

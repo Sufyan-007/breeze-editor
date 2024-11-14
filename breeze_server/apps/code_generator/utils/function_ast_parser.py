@@ -1,4 +1,10 @@
 # from breeze.apps.editor_api.core.component_config_service import ComponentConfigService
+import copy
+from .reference_helper import resolve_ref
+import apps.code_generator.core.new_component_generator as CompGenerator
+
+from .html_generator import HTMLGenerator
+
 RESOURCES={
     "STATE/UUID1":{
         "name":"xyz"
@@ -15,17 +21,36 @@ RESOURCES={
 }
 
 class FunctionParser:
-    def __init__(self, resources=None):
-        self.resources = resources 
+    def __init__(self,projectId=None, resources=[]):
+        self.projectId = projectId
+        self.resources = copy.deepcopy(resources)
+        self.generated_imports = {
+            'other':[],
+            'components':[],
+        }
+        self.scope = []
+        
+    def get_generated_imports(self):
+        return self.generated_imports
     
-    def generate_statement_code(self,config):
-        
+    def generate_statement_code(self,config,key_chaining=[]):
+        if config.get('$ref'):
+            entityType =config["entityType"]
+            config = resolve_ref(projectId=self.projectId,entityType=entityType,entityId= config["$ref"],extras=config)
+            config["type"]= entityType
         if not config.get('type'):
-            return ""
+            raise KeyError('type must be defined')
         
+        elif config["type"] =="COMPONENT":
+            code,tree, imports = CompGenerator.generate_react_component_code(config)
+            self.generated_imports["other"].extend(imports.get('other',[]))
+            self.generated_imports["components"].extend(imports.get('components',[]))
+            return code
         
         elif config["type"] == "BLOCK":
             statements = "\n".join([ self.generate_statement_code(code) for code in config['statements']])
+            if config.get("noWrap"):
+                return statements
             return f"""{{ 
                 {statements}
             }}"""
@@ -42,7 +67,15 @@ class FunctionParser:
         
         elif config["type"] == "DECLARATION":
             declaration_type = config.get("declarationType","const") 
-            varName = config["varName"]
+            destructured = config.get("destructured",False)
+            if destructured:
+                variables = [x["name"] for x in config.get("variables") ]
+                if config.get("destructureType","OBJECT") == "OBJECT":
+                    varName = f"{{ {','.join(variables)} }}"
+                else:
+                    varName = f"[ {','.join(variables)} ]"                   
+            else:
+                varName = config["varName"]
             if declaration_type == "const" or config.get("value",False):
                 value = self.get_value_code(config["value"])
                 return f"""{declaration_type} {varName} = {value}"""
@@ -99,6 +132,7 @@ class FunctionParser:
             
             finallyBody = ""
             if config.get('finallyBody'):
+                
                 finallyBody = f"""finally {self.generate_statement_code(config["finallyBody"])}"""
             
             return " ".join([tryBody,catchBody,finallyBody])
@@ -118,6 +152,17 @@ class FunctionParser:
         
         elif config["type"] == "OPERATION":
             return f" {self.get_operation_code(config)} "
+        
+        elif config["type"] == "IMPORT":
+            if config.get("importType") == "DEFAULT":
+                return f" import {config['importEntity']} from '{config['path']}'"
+            elif config.get("importType") == "NAMESPACE":
+                return f" import * as {config['importEntity']} from '{config['path']}'"
+            else:
+                return f"import {{{config['importEntity']}}} from '{config['path']}'"
+        
+        elif config["type"] == "COMMENT":
+            return f" /* {config['text']} */"
         
         return ""
         
@@ -185,7 +230,17 @@ class FunctionParser:
             
             elif type == "CHAINED_FUNCTIONS":
                 return self.generate_statement_code(value)
-
+            
+            elif type == "Element":
+                html_generator = HTMLGenerator({
+                    "name":"Main",
+                    "imports": {
+                        "components": [],
+                        "other": []
+                    }
+                })
+                code,tree = html_generator.generateHTML(value)
+                return code
         return ""
         
     def get_function_call_code(self,config,disableAwait = False):
