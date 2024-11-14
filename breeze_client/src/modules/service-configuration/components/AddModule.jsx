@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { CustomButtonField, CustomTextArea, CustomTextInput } from '../../../common/fields';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -18,7 +19,7 @@ function AddModule({ setView }) {
   const handleSubmit = async (payload) => {
     await dispatch(addModule({ projectName, payload })).unwrap();
     await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
-    setView('TEST');
+    if (setView) setView('TEST');
   };
   return (
     <div className="row mt-3">
@@ -64,5 +65,7 @@ function AddModule({ setView }) {
     </div>
   );
 }
-
+AddModule.propTypes = {
+  setView: PropTypes.func,
+};
 export default AddModule;

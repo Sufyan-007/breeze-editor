@@ -49,14 +49,14 @@ def run_project_threaded(project_id,port,project_path, env_name):
     # modified as per vite
     process = subprocess.Popen(" ".join(['npm', 'run', f'{env_name}', '--', '--host', '0.0.0.0', '--port', str(port), '--debug']), shell=True,env=env,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=project_path,  )
     status_mapping = {
-    b'VITE v': "Starting",
-    b'ready in': "Running",
-    b'Local:': "Running",
-    b'Network:': "Running",
-    b'[vite] warning': "Warning",
-    b'Internal server error': "Error",
-    b'[vite] hmr update' : 'Running',
-}
+        b'VITE v': "Starting",
+        b'ready in': "Running",
+        b'Local:': "Running",
+        b'Network:': "Running",
+        b'[vite] warning': "Warning",
+        b'Internal server error': "Error",
+        b'[vite] hmr update' : 'Running',
+    }
     while True:
         output = process.stdout.readline()
         if output: 

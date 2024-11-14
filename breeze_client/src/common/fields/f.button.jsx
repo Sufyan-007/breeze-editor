@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
 function CustomButtonField({
-  label = 'Button',
+  label,
   onClick = () => {},
   type = 'button',
   disabled = false,
@@ -29,7 +29,7 @@ function CustomButtonField({
       onClick={onClick}
       disabled={disabled}
       style={style}
-      className={className ? className : config.className}
+      className={className || config?.className || 'btn btn-sm btn-primary'}
       autoFocus={autoFocus}
       formTarget={formTarget}
       contentEditable={contentEditable}

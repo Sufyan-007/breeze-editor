@@ -54,8 +54,7 @@ function HeadersSetting({ headerData, onChange }) {
                 value={header.type}
                 onChange={(e) => handleInputChange(index, 'type', e)}
                 options={[
-                  // { label: 'Select', value: '' },
-                  // { label: 'STATIC', value: 'STATIC' },
+                  { label: 'Select', value: '' },
                   { label: 'USER INPUT', value: 'USER_INPUT' },
                   { label: 'LOCALSTORAGE', value: 'LOCAL_STORAGE' },
                   { label: 'SESSION STORAGE', value: 'SESSION_STORAGE' },

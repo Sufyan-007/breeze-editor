@@ -2,17 +2,10 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { getRoutingConfig, addRoute, updateRoute, deleteRoute } from '../../services/routing/routingService';
 
 // Fetch routing config
-export const fetchRoutingConfig = createAsyncThunk(
-  'routing/fetchRoutingConfig',
-  async ({ projectName, parentId = null }, { rejectWithValue }) => {
-    try {
-      const response = await getRoutingConfig(projectName, parentId);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
+export const fetchRoutingConfig = createAsyncThunk('routing/fetchRoutingConfig', async ({ projectName }) => {
+  const response = await getRoutingConfig(projectName);
+  return response;
+});
 
 // Add new route
 export const addRouteConfig = createAsyncThunk(

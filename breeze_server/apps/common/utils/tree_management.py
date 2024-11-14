@@ -3,6 +3,7 @@ import os,copy
 from .uuid_as_key import generate_uuid_as_key
 from ..constants.consts import CONFIG_PATH,CONFIG_FILES_PATH
 from ..utils.file_helpers.json_handler import read_project_config_file
+from ..utils.file_helpers.config_handler import read_config_file
 
 def get_children_up_to_depth(node_id, data, depth, current_depth=0):
     """
@@ -40,7 +41,13 @@ def get_children_up_to_depth(node_id, data, depth, current_depth=0):
 #this function will create a new node or add node to target_id node
 def add_node( project_name, category, target_id, data):
     config_dir = os.path.join(CONFIG_PATH, project_name)
-    config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category])
+    if category == "ROUTING_CONFIG":
+        config_data_obj = read_config_file(project_name, "routing_config", "routing_config")
+        if config_data_obj.get('err'):
+            raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+        config_data = config_data_obj.get('data')
+    else:
+        config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category])
     if "id" not in data:
         data['id'] = generate_uuid_as_key()
     
@@ -97,11 +104,21 @@ def is_target_in_hierarchy(source_id, target_id, data):
 def get_node(project_name,category,target_id,depth=1):
     ## open given category config
     config_dir = os.path.join(CONFIG_PATH, project_name)
-    config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category.value])
+    if category.value == "ROUTING_CONFIG":
+        config_data_obj = read_config_file(project_name, "routing_config", "routing_config")
+        if config_data_obj.get('err'):
+            raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+        config_data = config_data_obj.get('data')
+    else:
+        config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category.value])
     nodes = []
     ## if target is none then this will give all the root nodes
     if(target_id in [None, ""]):
-        nodes = get_root_nodes(config_data)
+        root_nodes = get_root_nodes(config_data)
+        nodes = [] + root_nodes
+        if depth > 1:
+            for node in root_nodes:
+                nodes += get_children_up_to_depth(node.get("id"), config_data, depth, current_depth=0)
     else:
         node = config_data.get(target_id,None)
         if(node != None):
@@ -140,7 +157,13 @@ def get_path(node_id,data,route,prop_name,skip_ids=[]):
 # this method return node_id and its all children path 
 def get_all_path_of_node(project_id,category,node_id,prop_name,skip_ids=[]):
     app_config_dir = f"{CONFIG_PATH}/{project_id}"
-    config_data = read_project_config_file(app_config_dir, CONFIG_FILES_PATH[category.value])
+    if category.value == "ROUTING_CONFIG":
+        config_data_obj = read_config_file(project_id, "routing_config", "routing_config")
+        if config_data_obj.get('err'):
+            raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+        config_data = config_data_obj.get('data')
+    else:
+        config_data = read_project_config_file(app_config_dir, CONFIG_FILES_PATH[category.value])
     all_paths = []
     ## we need all paths from each and every root node
     if node_id in [None, ""]:
@@ -168,7 +191,13 @@ def get_root_nodes(config_data):
 def get_nodes_upper_lineage(node_id, project_name, category, config_data = {}):
     if config_data == {}:
         config_dir = os.path.join(CONFIG_PATH, project_name)
-        config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category.value])
+        if category.value == "ROUTING_CONFIG":
+            config_data_obj = read_config_file(project_name, "routing_config", "routing_config")
+            if config_data_obj.get('err'):
+                raise Exception(config_data_obj['message'], ": not able to read routing_config..")
+            config_data = config_data_obj.get('data')
+        else:
+            config_data = read_project_config_file(config_dir, CONFIG_FILES_PATH[category.value])
     node = config_data.get(node_id)
     path = ""
     if node is not None:

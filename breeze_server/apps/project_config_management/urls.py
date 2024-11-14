@@ -14,7 +14,7 @@ urlpatterns = [
     # reducers
     # context
     # 
-    path('write-resource-config/', manage_configs.manage_configs),
+    path('update-project-config/', manage_configs.update_configs),
     
     # to manage whole route scenario individually
     path('routes/', include('apps.project_config_management.route_management.urls')),

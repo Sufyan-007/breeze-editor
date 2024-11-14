@@ -1,6 +1,4 @@
 import { useState } from 'react';
-// import edit from '../../../../../assets/icons/edit-icon.svg';
-// import Delete from '../../../../../assets/icons/delete-trash.svg';
 import PropTypes from 'prop-types';
 function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList }) {
   const [val, setVal] = useState(value);
@@ -150,24 +148,6 @@ function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList
           <div>
             <i className="bi bi-pencil-square" onClick={() => setIsExpanded((state) => !state)}></i>
             <i className="bi bi-trash3" alt="delete" onClick={() => deleteProperty()}></i>
-            {/* <img
-              alt="edit"
-              className="mx-1"
-              height={25}
-              width={25}
-              src={edit}
-              onClick={() => setIsExpanded((state) => !state)}
-              style={{ cursor: 'pointer' }}
-            />
-            <img
-              alt="delete"
-              className="mx-1"
-              height={25}
-              width={25}
-              src={Delete}
-              style={{ cursor: 'pointer' }}
-              onClick={() => deleteProperty()}
-            /> */}
           </div>
         </div>
 
@@ -179,17 +159,25 @@ function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList
                 <i className="bi bi-plus-circle" width="25" height="25" onClick={addProperty}></i>
               </div>
             )}
-            {val.properties &&
-              Object.entries(val.properties).map(([key, value]) => (
-                <RenderObject
-                  key={key}
-                  propertyName={key}
-                  value={value}
-                  updateParent={(value, newKey = null) => editChild(key, value, newKey)}
-                  depth={depth + 1}
-                  schemaList={schemaList}
-                />
-              ))}
+            {val.types &&
+              val.types.map((type) => {
+                {
+                  {
+                    console.log(type, 'inside');
+                  }
+                  type.properties &&
+                    Object.entries(type.properties).map(([k, prop]) => {
+                      <RenderObject
+                        key={k}
+                        propertyName={k}
+                        value={prop.types[0]}
+                        updateParent={(value, newKey = null) => editChild(type, value, newKey)}
+                        depth={depth + 1}
+                        schemaList={schemaList}
+                      />;
+                    });
+                }
+              })}
           </div>
         )}
       </div>

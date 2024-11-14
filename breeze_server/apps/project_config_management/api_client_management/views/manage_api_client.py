@@ -27,7 +27,7 @@ from ....directory_management.core.directory_management_service import Directory
 @permission_classes([AllowAny])
 def generate_service_config(request, collectionType, project_id):
         folder_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}" 
-        filename = ''
+
         try:
             json_file = request.FILES['file']
             json_data = json_file.read().decode("utf-8")
@@ -40,13 +40,14 @@ def generate_service_config(request, collectionType, project_id):
             #     return JsonResponse({"data": model_dict, "filename": filename}, status=201)
 
             if collectionType.lower() == 'openapi' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
-                converted_data = prepare_api_models(json_data, project_id)
+                isJson = json_file.name.endswith('.json')
+                converted_data = prepare_api_models(json_data, project_id,isJson)
                 module_id = converted_data.get("id")
                 module_name = converted_data.get("title")
                 files_with_apis, is_erroroneous = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
                 if not is_erroroneous:
                     directory_manager = DirectoryManager(project_name=project_id)
-                    newNode = directory_manager.add_node_to_config(
+                    directory_manager.add_node_to_config(
                         parent_id= "SERVICES",
                         tag= "SERVICES",
                         name=module_name,
@@ -57,7 +58,7 @@ def generate_service_config(request, collectionType, project_id):
                     )
                     for file in files_with_apis:
                         generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name)
-                return JsonResponse({"files_with_apis": files_with_apis}, status=201)
+                return JsonResponse({"module_id": module_id}, status=201)
             
             # elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
             #     model_dict,filename,error_obj = WebsocketConverter.prepare_api_models(json_data)
@@ -113,10 +114,8 @@ def transfer_to_auth(request,project_id):
     module_id = data.get("module_id")
     file_path = os.path.join(f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{module_id}", f"{filename}.json")
     target_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
-    result = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
-    if not result or result.get('error'):
-        return JsonResponse({"error": result.get('error') or "something went wrong.."}, status=500)
-    return JsonResponse(result, status=200)
+    result,status = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
+    return JsonResponse(result, status=status)
 
 @swagger_auto_schema(
     method='post',
@@ -136,7 +135,7 @@ def edit_module_title(request, project_id):
         swagger_metadata_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
         swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
         result,status = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
-        return JsonResponse(result,status)
+        return JsonResponse(result,status=status)
     
 @api_view(['GET'])
 @permission_classes([AllowAny])   
@@ -145,8 +144,8 @@ def get_response_token( request, project_id,apiId, moduleId):
             file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
             if not os.path.exists(file_path):
                 return JsonResponse({"error": "File not found"}, status=404)
-            if moduleId=='null' or moduleId == 'undefined' or apiId == 'null' or apiId == 'undefined':
-                return JsonResponse({"error": "Module ID or API ID not provided"}, status=400)
+            if moduleId=='null' or moduleId == 'undefined':
+                return JsonResponse({"error": "Module ID not provided"}, status=400)
             result = {}
             with open(file_path, "r") as file:
                 file_content = json.load(file)
@@ -185,5 +184,8 @@ def add_module(request,project_id):
         return JsonResponse({"error": "Module name and description are required."}, status=400)
     swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
     swagger_schema_path = f"{CONFIG_PATH}/{project_id}/models"
-    result = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
-    return JsonResponse(result)
+    result,status = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
+    return JsonResponse(result, status=status)
+
+
+
