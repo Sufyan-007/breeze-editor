@@ -30,29 +30,30 @@ function CustomPropsList({ components, props }) {
   const handleFormSubmit = (formData) => {
     console.log('Form submitted with data:', formData);
   };
-
   return (
     <div className="br-background-primary d-flex">
       <div style={{ width: '20%', marginRight: '50px' }}>
         <h5 className="large-font">Props</h5>
         {Object.keys(currentProps).length > 0 ? (
-          Object.keys(currentProps).map((key) => (
-            <div key={key}>
-              <CustomButtonField
-                type="button"
-                label={currentProps[key].prop_name}
-                onClick={() => handlePropClick(key)}
-                className={`run-btn med-font br-text-primary custom-button ${selectedProp === key ? 'selected' : ''}`}
-                style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '5px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              />
-            </div>
-          ))
+          Object.keys(currentProps).map((outerKey) =>
+            Object.keys(currentProps[outerKey]).map((key) => (
+              <div key={key}>
+                <CustomButtonField
+                  type="button"
+                  label={currentProps[outerKey][key].prop_name}
+                  onClick={() => handlePropClick(key)}
+                  className={`run-btn med-font br-text-primary custom-button ${selectedProp === key ? 'selected' : ''}`}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '5px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                />
+              </div>
+            ))
+          )
         ) : (
           <p className="med-font br-text-primary">No props available</p>
         )}
