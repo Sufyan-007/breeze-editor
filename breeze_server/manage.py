@@ -23,8 +23,8 @@ def main():
     settings_env = 'breeze_server.settings'
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_env)
 
-    # if server not in sys.argv:
-    #     sys.argv += [server]
+    if server not in sys.argv:
+        sys.argv += [server]
     try:
         from django.core.management import execute_from_command_line
         execute_from_command_line(sys.argv)

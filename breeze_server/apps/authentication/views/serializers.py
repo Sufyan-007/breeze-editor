@@ -49,15 +49,44 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Incorrect password.")
         
         # Generate tokens if validation passes
-        refresh = RefreshToken.for_user(user)
-        refresh['username']=data['username']
         # print(user,"fasddf")
         # with this i can get all role of that user
         # roles = [role.name for role in user.roles.all()]
-        
-        # print(roles)
+        # user_details = get_user_data(user.id)
+        # request.user_datails = user_details
+        # print(user.id)
         # Do not return the username or password, only the tokens
+        refresh = RefreshToken.for_user(user)
+        # refresh['username']=data['username']
+        
         return {
             'refresh': str(refresh),
-            'access': str(refresh.access_token)
+            'access': str(refresh.access_token),
+            # 'user_details':user_details
         }
+        
+def get_user_data(id):
+    try:
+        user = UserProfile.objects.get(id=id)
+        serializer = UserProfileSerializer(user)
+        # print(serializer.data)
+        
+        return serializer.data
+        # return jsonResponse(serializer.data)
+    except UserProfile.DoesNotExist:
+        # return jsonResponse({"error": "User not found"}, status=400)
+        return {"error":"user not found"}       
+        
+def get_all_user_data():
+    try:
+        user = UserProfile.objects.all()
+        # serializer = UserProfileSerializer(user)
+        user_list = list(user.values())
+        print(user_list)
+        
+        return user_list
+        # return jsonResponse(serializer.data)
+    except Exception as e:
+        # return jsonResponse({"error": "User not found"}, status=400)
+        return {"error":"users not found"}   
+    
