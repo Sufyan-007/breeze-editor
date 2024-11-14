@@ -38,6 +38,7 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
     value: file.file,
     id: file.id,
   }));
+  transformedOptions.push({ label: 'select', value: '' });
   return (
     <>
       {showModal && (

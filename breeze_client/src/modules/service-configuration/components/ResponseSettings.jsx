@@ -30,9 +30,6 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   const [properties, setProperties] = useState([]);
 
   useEffect(() => {
-    setResponse(responseData);
-  }, [responseData]);
-  useEffect(() => {
     dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
   }, [dispatch, projectName, moduleId]);
 
@@ -42,11 +39,12 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
         .map((key) => ({
           value: key,
           label: schemaList[key].name,
+          schema: schemaList[key],
         }))
     : [];
 
   const extractProperties = useCallback(
-    (schema) => {
+    (schema, checkNewRes = false) => {
       if (schema && schema.properties) {
         const props = Object.entries(schema.properties).map(([key, value]) => ({
           name: key,
@@ -55,7 +53,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
         const filteredProps = props.filter((prop) => prop.type === 'string' || prop.type === 'integer');
         setProperties(filteredProps);
 
-        if (newResponse.status === 'S_200') {
+        if (newResponse.status === 'S_200' && checkNewRes) {
           const initialTokenStore = {};
           filteredProps.forEach((prop) => {
             initialTokenStore[`${prop.name}`] = {
@@ -74,19 +72,38 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   );
 
   useEffect(() => {
+    setResponse(responseData);
+    responseData.forEach((res) => {
+      if (res.schema_name && schemaList[res.schema_name]) {
+        const schema = schemaList[res.schema_name];
+        extractProperties(schema);
+      }
+    });
+  }, [responseData, schemaList, extractProperties]);
+
+  useEffect(() => {
     if (newResponse.schema_name && schemaList[newResponse.schema_name]) {
       const schema = schemaList[newResponse.schema_name];
       setNewResponse((prevState) => ({
         ...prevState,
         schema,
       }));
-      extractProperties(schema);
-      console.log('hiiii');
+      extractProperties(schema, true);
     }
   }, [newResponse.schema_name, schemaList, extractProperties]);
 
   const handleInputChange = (index, field, value, subField = null) => {
     const updatedResponse = [...response];
+    if (field === 'schema_name') {
+      updatedResponse[index] = {
+        ...updatedResponse[index],
+        ['schema']: value['schema'],
+        [field]: value['value'],
+      };
+      setResponse(updatedResponse);
+      onChange(responseType, updatedResponse);
+      return;
+    }
     if (subField) {
       updatedResponse[index] = {
         ...updatedResponse[index],
@@ -97,6 +114,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
       };
     }
     updatedResponse[index] = { ...updatedResponse[index], [field]: value };
+    setResponse(updatedResponse);
     onChange(responseType, updatedResponse);
   };
 
@@ -157,37 +175,43 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                   <ResponseForm
                     label="Content Type"
                     value={res.content_type}
-                    onChange={(e) => handleInputChange(index, 'content_type', e.target.value)}
+                    onChange={(e) => handleInputChange(index, 'content_type', e)}
                     options={RESPONSE_OPTIONS}
                   />
                   <ResponseForm
                     label="Status"
                     value={res.status}
-                    onChange={(e) => handleInputChange(index, 'status', e.target.value)}
-                    options={['S_200', 'S_400', 'S_404', 'S_500']}
+                    onChange={(e) => handleInputChange(index, 'status', e)}
+                    options={[
+                      { label: 'S_200', value: 'S_200' },
+                      { label: 'S_400', value: 'S_400' },
+                      { label: 'S_404', value: 'S_404' },
+                      { label: 'S_500', value: 'S_500' },
+                    ]}
                   />
                   <ResponseForm
                     label="Schema"
                     value={res.schema_name}
-                    onChange={(e) => handleInputChange(index, 'schema_name', e.target.value)}
+                    onChange={(e) => handleInputChange(index, 'schema_name', e)}
                     options={schemaOptions}
+                    sendSelected={true}
                   />
                 </div>
                 {res.status === 'S_200' && isAuthApi && (
                   <div className="mt-3 w-100">
-                    <table className="table table-bordered br-background-secondary">
+                    <table className="table table-bordered br-background-secondary" style={{ borderColor: 'gray' }}>
                       <thead>
-                        <tr>
-                          <th>Property</th>
-                          <th>Storage Key</th>
-                          <th>Save As</th>
+                        <tr className="br-background-secondary">
+                          <th className="br-background-secondary br-text-primary">Property</th>
+                          <th className="br-background-secondary br-text-primary">Storage Key</th>
+                          <th className="br-background-secondary br-text-primary">Save As</th>
                         </tr>
                       </thead>
                       <tbody>
                         {properties.map((prop, idx) => (
                           <tr key={idx}>
-                            <td>{prop.name}</td>
-                            <td>
+                            <td className="br-background-secondary br-text-primary">{prop.name}</td>
+                            <td className="br-background-secondary br-text-primary">
                               <CustomTextInput
                                 className=" form-control br-form-control form-control-sm"
                                 placeholder="Storage Key"
@@ -195,7 +219,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                                 onChange={(e) => handlePropertyChange(prop.name, 'storage_key', e)}
                               />
                             </td>
-                            <td>
+                            <td className="br-background-secondary br-text-primary">
                               <CustomSelectField
                                 name="valueSelect"
                                 value={res.token_store[`${prop.name}`]?.store_in || ''}
@@ -207,7 +231,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                                   { label: 'LOCAL STORAGE', value: 'LOCAL_STORAGE' },
                                   { label: 'SESSION', value: 'SESSION' },
                                 ]}
-                                className="form-select br-form-select form-select-sm mt-3"
+                                className="form-select br-form-select form-select-sm"
                               />
                             </td>
                           </tr>
@@ -271,6 +295,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
             value={newResponse.status}
             onChange={(e) => setNewResponse({ ...newResponse, status: e })}
             options={[
+              { value: '', label: 'Select' },
               { label: 'S_200', value: 'S_200' },
               { label: 'S_400', value: 'S_400' },
               { label: 'S_404', value: 'S_404' },
@@ -285,22 +310,21 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
           />
           {isAuthApi && newResponse.status === 'S_200' && (
             <>
-              {console.log(properties, 'properties')}
               {properties.length > 0 && (
                 <div className="mt-3 w-100">
-                  <table className="table table-bordered br-background-secondary">
+                  <table className="table table-bordered br-background-secondary" style={{ borderColor: 'gray' }}>
                     <thead>
-                      <tr>
-                        <th>Property</th>
-                        <th>Storage Key</th>
-                        <th>Save As</th>
+                      <tr className="br-background-secondary br-text-primary">
+                        <th className="br-background-secondary br-text-primary">Property</th>
+                        <th className="br-background-secondary br-text-primary">Storage Key</th>
+                        <th className="br-background-secondary br-text-primary">Save As</th>
                       </tr>
                     </thead>
                     <tbody>
                       {properties.map((prop, idx) => (
-                        <tr key={idx}>
-                          <td>{prop.name}</td>
-                          <td>
+                        <tr key={idx} className="br-background-secondary br-text-primary">
+                          <td className="br-background-secondary br-text-primary">{prop.name}</td>
+                          <td className="br-background-secondary br-text-primary">
                             <CustomTextInput
                               className=" form-control br-form-control form-control-sm"
                               placeholder="Storage Key"
@@ -308,19 +332,19 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                               onChange={(e) => handlePropertyChange(prop.name, 'storage_key', e)}
                             />
                           </td>
-                          <td>
+                          <td className="br-background-secondary br-text-primary">
                             <CustomSelectField
                               name="valueSelect"
                               value={newResponse.token_store[`${prop.name}`]?.store_in || ''}
                               onChange={(e) => handlePropertyChange(prop.name, 'store_in', e)}
                               options={[
-                                // { label: 'Select', value: '' },
+                                { label: 'Select', value: '' },
                                 { label: 'DontSave', value: 'DontSave' },
                                 { label: 'COOKIE', value: 'COOKIE' },
                                 { label: 'LOCAL STORAGE', value: 'LOCAL_STORAGE' },
                                 { label: 'SESSION', value: 'SESSION' },
                               ]}
-                              className="form-select br-form-select form-select-sm mt-3"
+                              className="form-select br-form-select form-select-sm"
                             />
                           </td>
                         </tr>
@@ -341,7 +365,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   );
 }
 
-function ResponseForm({ label, value, onChange, options }) {
+function ResponseForm({ label, value, onChange, options, sendSelected }) {
   return (
     <>
       <div className="mx-1" style={{ width: '30%' }}>
@@ -350,6 +374,7 @@ function ResponseForm({ label, value, onChange, options }) {
           value={value}
           onChange={onChange}
           options={options}
+          sendSelectedOption={sendSelected}
         />
       </div>
     </>
@@ -375,5 +400,6 @@ ResponseForm.propTypes = {
       filter: PropTypes.string,
     }).isRequired
   ).isRequired,
+  sendSelected: PropTypes.bool,
 };
 export default ResponseSettings;

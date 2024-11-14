@@ -59,21 +59,10 @@ function AuthSettings({ authData, onChange, moduleId }) {
     value: api.tokenKey,
     dataSource: 'authApi',
   }));
+  loginApiOptions.push({ label: 'select', value: '' });
   return (
     <>
       <div id="main" className="d-flex mx-2">
-        {/* <CustomSelectField
-          name="authType"
-          value={auth.type}
-          onChange={(value) => handleChange(value, 'type')}
-          options={authTypeOptions}
-          className="form-select br-form-select form-select-sm"
-          config={{
-            label: 'Authentication Type',
-            groupClass: 'form-group mb-2 mx-2 w-50',
-          }}
-        /> */}
-
         {auth.type === 'BASIC' ? (
           <>{/* Additional fields for BASIC auth can be added here */}</>
         ) : (

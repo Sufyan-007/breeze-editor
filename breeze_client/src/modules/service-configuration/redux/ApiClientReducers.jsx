@@ -144,7 +144,7 @@ const serviceConfigSlice = createSlice({
         })
         .addCase(fetchFunctions.fulfilled, (state, action) => {
           state.status = 'succeeded';
-          state.functionsList = action.payload;
+          state.functionsList = { ...state.functionsList, ...action.payload };
         })
         .addCase(fetchFunctions.rejected, (state, action) => {
           state.status = 'failed';

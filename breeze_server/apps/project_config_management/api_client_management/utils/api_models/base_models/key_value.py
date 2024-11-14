@@ -8,6 +8,7 @@ class KeyValue:
     # errors = {}
     type: str = CustomizedAttr((str),[])
     storage_key: str = CustomizedAttr((str))
+    data_type:str = CustomizedAttr((str))
     errors : dict = CustomizedAttr((dict), [])
     
 
@@ -24,5 +25,6 @@ class KeyValue:
             'value': self.value,
             'type': self.type if self.type else None, 
             'storage_key': self.storage_key,
+            'data_type': self.data_type,
             'errors': self.errors if self.errors else None
         }

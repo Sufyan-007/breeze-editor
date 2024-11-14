@@ -1,4 +1,5 @@
 export const RAW_OPTIONS = [
+  { value: '', label: 'Select' },
   { value: 'JSON', label: 'application/json' },
   { value: 'XML', label: 'application/xml' },
   { value: 'TEXT', label: 'text/plain' },
@@ -7,11 +8,18 @@ export const RAW_OPTIONS = [
   { value: 'HTML', label: 'text/html' },
 ];
 
-export const URLENCODED_OPTIONS = [{ value: 'URLENCODED', label: 'application/x-www-form-urlencoded' }];
+export const URLENCODED_OPTIONS = [
+  { value: '', label: 'Select' },
+  { value: 'URLENCODED', label: 'application/x-www-form-urlencoded' },
+];
 
-export const FORMDATA_OPTIONS = [{ value: 'FORMDATA', label: 'multipart/form-data' }];
+export const FORMDATA_OPTIONS = [
+  { value: '', label: 'Select' },
+  { value: 'FORMDATA', label: 'multipart/form-data' },
+];
 
 export const BINARY_OPTIONS = [
+  { value: '', label: 'Select' },
   { value: 'OCTET_STREAM', label: 'application/octet-stream' },
   { value: 'PDF', label: 'application/pdf' },
   { value: 'ZIP', label: 'application/zip' },
@@ -22,6 +30,7 @@ export const BINARY_OPTIONS = [
 ];
 
 export const TEXT_OPTIONS = [
+  { value: '', label: 'Select' },
   { value: 'TEXT', label: 'text/plain' },
   { value: 'HTML', label: 'text/html' },
   { value: 'CSV', label: 'text/csv' },
@@ -30,6 +39,7 @@ export const TEXT_OPTIONS = [
 ];
 
 export const FILE_OPTIONS = [
+  { value: '', label: 'Select' },
   { value: 'FORMDATA', label: 'multipart/form-data' },
   { value: 'OCTET_STREAM', label: 'application/octet-stream' },
   { value: 'PDF', label: 'application/pdf' },
@@ -38,6 +48,7 @@ export const FILE_OPTIONS = [
 ];
 
 export const RESPONSE_OPTIONS = [
+  { value: '', label: 'Select' },
   { value: 'JSON', label: 'JSON (application/json)' },
   { value: 'XML', label: 'XML (application/xml)' },
   { value: 'HTML', label: 'HTML (text/html)' },
