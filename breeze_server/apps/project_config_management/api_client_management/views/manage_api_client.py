@@ -185,7 +185,7 @@ def add_module(request,project_id):
         return JsonResponse({"error": "Module name and description are required."}, status=400)
     swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
     swagger_schema_path = f"{CONFIG_PATH}/{project_id}/models"
-    result,status = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
+    result,status = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description, project_id=project_id)
     return JsonResponse(result, status=status)
 
 

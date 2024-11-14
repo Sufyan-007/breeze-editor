@@ -1,9 +1,10 @@
 import json,os
 from ..utils.append_dict_file import append_to_dict_file
 from ....common.utils.uuid_as_key import generate_uuid_as_key
+from ....directory_management.core.directory_management_service import DirectoryManager
 
 
-def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, module_description):
+def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, module_description,project_id):
     try:
         swagger_metadata_json_path = f"{swagger_metadata_path}/swagger_metadata.json"
         module_id = generate_uuid_as_key()
@@ -39,8 +40,17 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
         with open(index_file_path, 'w') as index_file:
             index_file.write('{}') 
 
+        directory_manager = DirectoryManager(project_name=project_id)
+        directory_manager.add_node_to_config(
+            parent_id= "SERVICES",
+            tag= "SERVICES",
+            name=module_name,
+            node_type="DIRECTORY",
+            file_id= module_id,
+            entity_id=module_id,
+            isProtected=False
+        )
         return {"message": "Module added successfully."}, 200
-    
     except Exception as e:
         return {"error": str(e)}, 500
 

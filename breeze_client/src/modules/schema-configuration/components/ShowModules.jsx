@@ -19,9 +19,6 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
   const dispatch = useDispatch();
 
   const toggleModuleExpand = () => {
-    // if (!isOpen) {
-    //   dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
-    // }
     setIsOpen(!isOpen);
   };
 
@@ -56,21 +53,24 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
         </div>
       </div>
       {isOpen &&
-        schemaList &&
-        Object.entries(schemaList).map(([key, schema]) => (
-          <div
-            className="ps-2 my-1"
-            style={{ cursor: 'pointer' }}
-            key={key}
-            onClick={() => {
-              setSelectedSchema(key);
-              setCurrentSchema(schema);
-              setView('SCHEMA_CONFIG');
-            }}
-          >
-            <i className="bi bi-dot"></i> {schema.name}
-            {schema.isUnresolved && <i className="bi bi-exclamation-circle text-danger mx-2"></i>}
-          </div>
+        (schemaList && Object.keys(schemaList).length > 0 ? (
+          Object.entries(schemaList).map(([key, schema]) => (
+            <div
+              className="ps-2 my-1"
+              style={{ cursor: 'pointer' }}
+              key={key}
+              onClick={() => {
+                setSelectedSchema(key);
+                setCurrentSchema(schema);
+                setView('SCHEMA_CONFIG');
+              }}
+            >
+              <i className="bi bi-dot"></i> {schema.name}
+              {schema.isUnresolved && <i className="bi bi-exclamation-circle text-danger mx-2"></i>}
+            </div>
+          ))
+        ) : (
+          <div className="br-text-primary mx-3 my-1">No Schema available</div>
         ))}
     </>
   );
