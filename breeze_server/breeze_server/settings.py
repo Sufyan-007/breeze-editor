@@ -14,6 +14,9 @@ from pathlib import Path
 import os,json
 from dotenv import load_dotenv
 
+# import os
+from datetime import timedelta
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -250,6 +253,15 @@ CORS_ALLOW_CREDENTIALS = str_to_bool(os.getenv("CORS_ALLOW_CREDENTIALS"))
 #    'default' : json.loads(os.getenv("DATABASES",'{}')) 
 # }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': os.getenv("JWT_SECRET_KEY", "123456789"),  # Custom JWT secret key
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
