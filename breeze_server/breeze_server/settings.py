@@ -14,6 +14,8 @@ from pathlib import Path
 import os,json
 from dotenv import load_dotenv
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 def str_to_bool(s):
     if s.lower() == "true":
@@ -244,8 +246,15 @@ CORS_ALLOWED_ORIGINS = str_to_array(os.getenv("CORS_ALLOWED_ORIGINS"))
 CORS_ALLOW_CREDENTIALS = str_to_bool(os.getenv("CORS_ALLOW_CREDENTIALS")) 
 
 
+# DATABASES = {
+#    'default' : json.loads(os.getenv("DATABASES",'{}')) 
+# }
+
 DATABASES = {
-   'default' : json.loads(os.getenv("DATABASES",'{}')) 
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME':BASE_DIR / 'db.sqlite3',
+    }
 }
 LANGUAGE_CODE = os.getenv("LANGUAGE_CODE") 
 TIME_ZONE = os.getenv("TIME_ZONE") 

@@ -79,11 +79,15 @@ def manage_resource(request, param):
                 selected_data = get_json_config_data(INDEX, category, projectname)
             else:
                 selected_data = get_json_config_data(resource, category, projectname)
-
-            if selected_data:
+                
+            if selected_data and resource:
+                selected_data = {
+                    resource : selected_data["data"]
+                }
+            elif selected_data:
                 selected_data = selected_data["data"]
             else:
-                return JsonResponse({"error":"check category name or project name"}, status=400)
+              return JsonResponse({"error":"check category name or project name"}, status=400)
             # return JsonResponse({"message": f"{selected_data}"}, status=200)
 
         if category in [ResourceCategory.THIRD_PARTY.value]:
@@ -254,7 +258,9 @@ def manage_resource(request, param):
                         )
                 
                 if resource:
-                    selected_data=selected_data[resource]
+                    selected_data={
+                        resource : selected_data[resource]
+                    }
                 
                 if not resource:
                     for key in list(selected_data.keys()):  # Iterate over keys to modify each item
@@ -280,8 +286,10 @@ def manage_resource(request, param):
                 selected_data = read_file(config_path)
                 
                 if resource:
-                    selected_data=selected_data[resource]
-                    
+                    selected_data={
+                        resource:selected_data[resource]
+                    }
+                    # selected_data=selected_data[resource]
              except Exception as e:
                 return JsonResponse(
                     {"error": "files are not present in module"}, status=400
@@ -300,9 +308,10 @@ def manage_resource(request, param):
                 else:
                     try:
                         # selected_data=selected_data["data"]
-                        selected_data = {
-                            key: get_nested_value(selected_data, key) for key in select
-                        }
+                        # selected_data = {
+                        #     key: get_nested_value(selected_data, key) for key in select
+                        # }
+                        selected_data = ffilter_selected_data(selected_data,select)
                     except Exception as e:
                         return JsonResponse({"error": str(e)}, status=400)
 
@@ -314,18 +323,20 @@ def manage_resource(request, param):
 
                 else:
                     try:
-                        selected_data = {
-                            key: get_nested_value(selected_data, key) for key in select
-                        }
+                        # selected_data = {
+                        #     key: get_nested_value(selected_data, key) for key in select
+                        # }
+                        selected_data = ffilter_selected_data(selected_data,select)
                     except Exception as e:
-                        return JsonResponse({"error": str(e)}, status=400)
+                        return JsonResponse({"error2": str(e)}, status=400)
 
             elif category in [ResourceCategory.MODEL.value]:
                 if module or resource:
                     try:
-                        selected_data = {
-                            key: get_nested_value(selected_data, key) for key in select
-                        }
+                        # selected_data = {
+                        #     key: get_nested_value(selected_data, key) for key in select
+                        # }
+                        selected_data=filter_selected_data(selected_data,select)
                     except Exception as e:
                         return JsonResponse({"error": str(e)}, status=400)
                 else:
@@ -381,6 +392,145 @@ def get_nested_value(data, path):
             return None  # If it's neither a list nor a dict, return None
 
     return value
+
+
+# def get_nested_value(data, path):
+#     keys = path.split(".")  # Split path by dot notation
+#     value = data
+
+#     for key in keys:
+#         if isinstance(value, list):
+#             value = [item.get(key, None) for item in value if isinstance(item, dict)]
+#         elif isinstance(value, dict):
+#             if key in value:
+#                 value = value[key]
+#             else:
+#                 # Check if key exists within nested dictionaries and collect matching items
+#                 result = {}
+#                 for item_key, item_value in value.items():
+#                     if isinstance(item_value, dict) and key in item_value:
+#                         result[item_key] = {key: item_value[key]}
+#                     else:
+#                         result[item_key] = {key: None}  # Add missing keys as None
+#                 return result
+#         else:
+#             return None
+
+#     return value
+
+
+def filter_selected_data(selected_data, select_keys):
+    def find_nested_value(d, key):
+        # If key is found directly in the dictionary
+        if key in d:
+            return d[key]
+        # If key is nested within other dictionaries
+        for k, v in d.items():
+            if isinstance(v, dict):
+                result = find_nested_value(v, key)
+                if result is not None:
+                    return result
+        return None
+
+    result = {}
+    for item_key, item_data in selected_data.items():
+        filtered_data = {}
+        for key in select_keys:
+            # Use find_nested_value to get the nested key if available
+            filtered_data[key] = find_nested_value(item_data, key)
+        result[item_key] = filtered_data
+    return result
+
+def ffilter_selected_data(selected_data, select_keys):
+    def get_nested_value(d, path_parts):
+        """Retrieve the value from the dictionary `d` using the list of path parts."""
+        current = d
+        for part in path_parts:
+            if isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                return None
+        return current
+
+    def find_key_recursively(d, target_key):
+        """Recursively search for `target_key` within nested dictionaries."""
+        if target_key in d:
+            return d[target_key]
+        for v in d.values():
+            if isinstance(v, dict):
+                found = find_key_recursively(v, target_key)
+                if found is not None:
+                    return found
+        return None
+
+    result = {}
+    for key_path in select_keys:
+        path_parts = key_path.split(".")
+
+        # Case 1: Path refers to a specific top-level key like "ROOT.smit.sam"
+        if path_parts[0] in selected_data:
+            item_key = path_parts[0]  # Top-level key
+            nested_value = get_nested_value(selected_data[item_key], path_parts[1:])
+            
+            # Build nested structure in result based on path_parts
+            current = result.setdefault(item_key, {})
+            for part in path_parts[1:-1]:
+                current = current.setdefault(part, {})
+            current[path_parts[-1]] = nested_value
+
+        # Case 2: Path refers to general keys like "id" and "children"
+        else:
+            for item_key, item_data in selected_data.items():
+                # If key is direct (like "id" or "children")
+                if len(path_parts) == 1:
+                    nested_value = find_key_recursively(item_data, path_parts[0])
+                else:
+                    # Try to find the nested value for each top-level item
+                    nested_value = get_nested_value(item_data, path_parts)
+
+                if nested_value is not None:
+                    current = result.setdefault(item_key, {})
+                    # For general keys, directly assign value to path end
+                    current[path_parts[-1]] = nested_value
+
+    return result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # def get_nested_value(data, path):
