@@ -13,7 +13,9 @@ function CustomPropsList({ components, props }) {
       setSelectedProp(null);
       setIsFormVisible(false);
     } else {
-      setCurrentProps(props); // Update with new props if components are available
+      setCurrentProps(props);
+      setSelectedProp(null);
+      setIsFormVisible(false);
     }
   }, [components.data, props]);
 
@@ -30,6 +32,7 @@ function CustomPropsList({ components, props }) {
   const handleFormSubmit = (formData) => {
     console.log('Form submitted with data:', formData);
   };
+  console.log(currentProps, 'current props', selectedProp, 'selected props');
   return (
     <div className="br-background-primary d-flex">
       <div style={{ width: '20%', marginRight: '50px' }}>
