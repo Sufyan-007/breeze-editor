@@ -73,12 +73,14 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
 
   useEffect(() => {
     setResponse(responseData);
-    responseData.forEach((res) => {
-      if (res.schema_name && schemaList[res.schema_name]) {
-        const schema = schemaList[res.schema_name];
-        extractProperties(schema);
-      }
-    });
+    if (schemaList) {
+      responseData.forEach((res) => {
+        if (res.schema_name && schemaList[res.schema_name]) {
+          const schema = schemaList[res.schema_name];
+          extractProperties(schema);
+        }
+      });
+    }
   }, [responseData, schemaList, extractProperties]);
 
   useEffect(() => {

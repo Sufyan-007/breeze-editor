@@ -106,11 +106,7 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
         {Object.keys(moduleList).length > 0
           ? Object.entries(moduleList).map(([folderKey, value]) => (
               <div key={folderKey} className="my-2">
-                <div
-                  // className={`mb-2 p-1 br-text-primary ${expandedModules.includes(folderKey) ? 'br-background-secondary' : 'br-background-primary'}`}
-                  onClick={() => toggleAuthModuleExpansion(folderKey)}
-                  style={{ cursor: 'pointer' }}
-                >
+                <div onClick={() => toggleAuthModuleExpansion(folderKey)} style={{ cursor: 'pointer' }}>
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
                       {editingModule === value.title ? (

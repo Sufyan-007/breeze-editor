@@ -90,14 +90,11 @@ def modify_function_config(request,operation,project_id):
     api_type = data.get("api_type")
     api_data = data.get("api_data")
     if api_type.lower() == "auth":
-        result = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id,operation=operation)
+        result,status = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id,operation=operation)
     else:
-        result = process_api_data(operation,api_data, filename,project_id,module_id)
-    if result:
-        return JsonResponse({"message": "Function Added Successfully" }, status=200)
-    else:
-        return JsonResponse({"message": result }, status=200)
-
+        result,status = process_api_data(operation,api_data, filename,project_id,module_id)
+    return JsonResponse(result, status=status)
+    
 @swagger_auto_schema(
     method='post',
     request_body=transfer_to_auth_schema['rb'],

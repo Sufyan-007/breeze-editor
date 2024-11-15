@@ -642,7 +642,7 @@ def set_request_url(model,app_name):
     else:
         url = url_env+path
         config = get_env_config(project_id=app_name)
-        url = "${process.env.%s}" % config.get("envVars").get(url_env)  + path
+        url = "${process.env.%s}" % config.get("envVars").get(url_env) + '/' + path
     new_query_params =[]
     new_path_params = []
     for params in model.request.parameters:
