@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework import status
+import json
 from ..core.directory_management_service import DirectoryManager
 
 @swagger_auto_schema(
@@ -31,3 +32,11 @@ def get_file_content(request,project_id,file_id):
 
 
 
+@csrf_exempt
+@api_view(["DELETE"])
+def delete_file(request,project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    
+    directoryManager = DirectoryManager(project_id)
+    directoryManager.delete_node(data["file_id"],data.get("recursive", False))
+    return JsonResponse({},status=200)
