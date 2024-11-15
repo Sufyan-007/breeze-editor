@@ -6,8 +6,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { retrieveResponseTokens } from '../redux/ApiClientActions';
 
 function AuthSettings({ authData, onChange, moduleId }) {
-  console.log(authData, 'authdata');
-
   const [auth, setAuth] = useState(authData ? (authData[0] ? authData[0] : {}) : {});
   const { projectName } = useParams();
   const { login_apis } = useSelector((state) => state.services);

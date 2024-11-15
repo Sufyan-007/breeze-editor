@@ -85,7 +85,7 @@ function ServiceConfiguration() {
       return;
     }
     if (!selectedModule) {
-      console.log(transformedOptions);
+      // console.log(transformedOptions);
 
       if (transformedOptions.length === 1) {
         const module = transformedOptions[0];
@@ -182,7 +182,7 @@ function ServiceConfiguration() {
   };
 
   const handleModuleSelect = (selectedOption) => {
-    console.log(selectedOption);
+    // console.log(selectedOption);
 
     if (selectedOption) {
       const { label: moduleName, moduleId } = selectedOption;

@@ -8,12 +8,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
   const [pathParams, setPathParams] = useState([]);
   const [queryParams, setQueryParams] = useState([]);
   const [pathInputValue, setPathInputValue] = useState('');
-  const options = [
-    { label: 'select', value: '' },
-    // { label: 'abc', value: '', dataSource: 'envVars' },
-    // { label: 'abc', value: 'dfsdf', dataSource: 'envVars' },
-  ];
-
+  const options = [{ label: 'select', value: '' }];
   useEffect(() => {
     setUrl(urlData);
     setPathInputValue(urlData?.path ? urlData.path.join('/') : '');
@@ -49,7 +44,6 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
     } else {
       newUrlData[prop] = newValue;
       const selectedOption = options.find((option) => option.value === newValue);
-      console.log(selectedOption, 'selected option');
       if (selectedOption.dataSource === 'envVars') {
         newUrlData['env_label'] = selectedOption.label;
       } else {
@@ -96,15 +90,15 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
 
       const allParams = [...updatedParamData, ...queryParams];
 
-      const remainingParamNames = updatedParamData.map((param) => param.name);
-      const deletedParams = pathParams.filter((param) => !remainingParamNames.includes(param.name));
+      // const remainingParamNames = updatedParamData.map((param) => param.name);
+      // const deletedParams = pathParams.filter((param) => !remainingParamNames.includes(param.name));
 
-      if (deletedParams.length > 0) {
-        console.log(
-          'Deleted parameters:',
-          deletedParams.map((param) => param.name)
-        );
-      }
+      // if (deletedParams.length > 0) {
+      //   console.log(
+      //     'Deleted parameters:',
+      //     deletedParams.map((param) => param.name)
+      //   );
+      // }
 
       onChange('parameters', allParams);
       setPathParams(updatedParamData);

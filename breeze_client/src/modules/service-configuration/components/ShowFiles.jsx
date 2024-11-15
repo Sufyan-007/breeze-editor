@@ -44,7 +44,6 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
     if (availableFunctions && availableFunctions.length > 0) {
       const missingFunctions = availableFunctions.filter((functionId) => !functions[functionId]);
       if (missingFunctions.length > 0 && loading.current === 0) {
-        console.log(missingFunctions);
         loading.current = 1;
         await dispatch(
           fetchFunctions({ projectName, payload: { category: 'api_client', module: moduleId, files: fileId } })

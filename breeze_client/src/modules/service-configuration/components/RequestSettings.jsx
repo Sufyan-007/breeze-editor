@@ -98,23 +98,25 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
     setRequest(requestData);
     let baseUrl = requestData?.url?.baseurl;
     const env_label = requestData?.url?.env_label;
-    console.log(env_label, 'envlabel');
-
     if (env_label) {
       baseUrl = env_label;
+    }
+    if (baseUrl && envVars.some((env) => env.id === baseUrl)) {
+      const selectedEnv = envVars.find((env) => env.id === baseUrl);
+      baseUrl = selectedEnv.name;
     }
     const pathSegments = requestData?.url?.path || [];
     const allParams = requestData?.parameters || [];
     const fullPath = pathSegments.filter((segment) => segment).join('/');
     const queryParams = allParams
-      .filter((param) => param.param_in === 'QUERY' && param.value) // Filter for QUERY params that have values
+      .filter((param) => param.param_in === 'QUERY' && param.value)
       .map((param) => `${encodeURIComponent(param.name)}=${encodeURIComponent(param.value)}`)
       .join('&');
     const sanitizedBaseUrl = baseUrl?.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
     const fullUrl = `${sanitizedBaseUrl}/${fullPath}${queryParams ? '?' + queryParams : ''}`;
     setUrlHeading(sanitizedBaseUrl ? fullUrl : 'Url');
-  }, [requestData]);
+  }, [requestData, envVars]);
 
   useEffect(() => {
     setApi(apiData);
