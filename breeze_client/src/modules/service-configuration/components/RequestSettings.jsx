@@ -202,6 +202,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
                       envVars={envVars}
                       method={request.method}
                       onAdd={addProperty}
+                      moduleId={moduleId}
                     />
                   </div>
                 ) : req.toLowerCase() === 'auth' ? (

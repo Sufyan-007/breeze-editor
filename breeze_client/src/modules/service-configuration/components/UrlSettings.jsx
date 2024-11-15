@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import ParameterSettings from './ParameterSettings';
 import { CustomSelectField, CustomTextInput } from '../../../common/fields';
 import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
 
-function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
+function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars, moduleId }) {
   const [url, setUrl] = useState(urlData);
   const [pathParams, setPathParams] = useState([]);
   const [queryParams, setQueryParams] = useState([]);
   const [pathInputValue, setPathInputValue] = useState('');
+  const currentModule = useSelector((state) => state.services.moduleList[moduleId]);
+  // console.log(currentModule, 'currentmodule');
+
   const options = [{ label: 'select', value: '' }];
   useEffect(() => {
     setUrl(urlData);
@@ -30,7 +34,20 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
       options.push({ value: server.url, label: server.url, dataSource: 'swagger' });
     });
   }
-  if (envVars) {
+  // if (envVars) {
+  //   envVars.forEach(({ id, name }) => {
+  //     options.push({ value: id, label: name, dataSource: 'envVars' });
+  //   });
+  // }
+  if (!envVars || envVars.length === 0) {
+    if (currentModule?.servers_info && currentModule?.servers_info.length > 0) {
+      currentModule?.servers_info.forEach(({ url }) => {
+        options.push({ value: url, label: url, dataSource: 'swagger' });
+      });
+    }
+    // console.log(options, 'optionss');
+  } else {
+    // If envVars exists, use them to populate options
     envVars.forEach(({ id, name }) => {
       options.push({ value: id, label: name, dataSource: 'envVars' });
     });
