@@ -13,7 +13,6 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
   const [expandedProperty, setExpandedProperty] = useState(null);
   const [api, setApi] = useState({});
   const [requestProperties, setRequestProperties] = useState(['Url', 'Body', 'Headers', 'Auth']);
-  // const [envVars, setEnvVars] = useState({});
   const { environmentSettingsConfig } = useSelector((state) => state.environment);
 
   const envVars = environmentSettingsConfig?.envVars;
@@ -25,6 +24,8 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
   useEffect(() => {
     if (requestData.method === 'GET') {
       setRequestProperties(['Url', 'Headers', 'Auth']);
+    } else {
+      setRequestProperties(['Url', 'Headers', 'Auth', 'Body']);
     }
   }, [requestData.method]);
 
@@ -39,10 +40,15 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
       } else if (apiData.authentication_type === 'BASIC') {
         setRequestProperties(['Body', 'Headers']);
       }
+    } else if (apiData.is_open_api) {
+      setRequestProperties(['Url', 'Body', 'Headers']);
+      const updatedRequest = { ...requestData };
+      updatedRequest.auth = [];
+      setRequest(updatedRequest);
     } else {
       setRequestProperties(['Url', 'Body', 'Headers', 'Auth']);
     }
-  }, [isAuthApi, apiData.authentication_type]);
+  }, [isAuthApi, apiData.authentication_type, apiData.is_open_api]);
 
   useEffect(() => {
     dispatch(fetchEnvironmentConfig({ projectName }));

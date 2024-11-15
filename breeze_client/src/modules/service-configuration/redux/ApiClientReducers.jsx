@@ -49,7 +49,7 @@ const serviceConfigSlice = createSlice({
             value: value.title,
             moduleId: key,
           }));
-          options.push({ label: 'select', value: '' });
+          options.push({ label: 'select', value: '', moduleId: '', hidden: true, selected: true });
           state.transformedOptions = options;
           state.moduleList = action.payload.data;
         })

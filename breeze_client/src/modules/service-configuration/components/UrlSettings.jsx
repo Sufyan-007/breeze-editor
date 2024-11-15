@@ -9,8 +9,9 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
   const [queryParams, setQueryParams] = useState([]);
   const [pathInputValue, setPathInputValue] = useState('');
   const options = [
-    { label: 'abc', value: '', dataSource: 'envVars' },
-    { label: 'abc', value: 'dfsdf', dataSource: 'envVars' },
+    { label: 'select', value: '' },
+    // { label: 'abc', value: '', dataSource: 'envVars' },
+    // { label: 'abc', value: 'dfsdf', dataSource: 'envVars' },
   ];
 
   useEffect(() => {
