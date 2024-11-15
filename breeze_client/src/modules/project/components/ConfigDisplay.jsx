@@ -19,7 +19,7 @@ function ConfigDisplay({ configType }) {
         return <Settings />;
       case 'PACKAGE_CONFIG':
         return <ThirdPartyDependencyConfig />;
-      case 'RESOURCE':
+      case 'RESOURCE_CONFIG':
         return <Resources />;
       case 'SCHEMAS':
         return <SchemaSettings />;

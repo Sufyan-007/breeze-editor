@@ -32,6 +32,7 @@ def get_uploaded_resources(project_name, tag):
             })
             elif not tag and value.get('tag') != "ZIP":
                 files.append({
+                    "id" : key,
                     "name": value.get("name"),
                     "type": value.get("type"),
                 })
