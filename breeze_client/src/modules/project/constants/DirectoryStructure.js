@@ -36,7 +36,7 @@ const breezeConfigData = {
     type: 'CONFIG',
     children: [],
     wasOpen: false,
-    tag: 'RESOURCE',
+    tag: 'RESOURCE_CONFIG',
     parentId: null,
   },
 };
