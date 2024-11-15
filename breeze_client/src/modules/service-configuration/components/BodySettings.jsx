@@ -16,6 +16,7 @@ import { useParams } from 'react-router-dom';
 function BodySettings({ bodyData, onChange, moduleId }) {
   const [body, setBody] = useState(bodyData);
   const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
+  const { status } = useSelector((state) => state.schemas);
   const dispatch = useDispatch();
   const { projectName } = useParams();
 
@@ -46,8 +47,9 @@ function BodySettings({ bodyData, onChange, moduleId }) {
   }, [bodyData]);
 
   useEffect(() => {
-    dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
-  }, [dispatch, projectName, moduleId]);
+    if (status === 'ready')
+      dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
+  }, [dispatch, projectName, moduleId, status]);
 
   const renderError = (errors) => {
     if (!errors) return null;
@@ -136,8 +138,8 @@ BodySettings.propTypes = {
     schema: PropTypes.object,
     schema_name: PropTypes.string,
     errors: PropTypes.object,
-  }).isRequired,
+  }),
   onChange: PropTypes.func.isRequired,
-  moduleId: PropTypes.string.isRequired,
+  moduleId: PropTypes.string,
 };
 export default BodySettings;
