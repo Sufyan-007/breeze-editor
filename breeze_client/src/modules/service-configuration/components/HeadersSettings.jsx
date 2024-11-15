@@ -139,7 +139,7 @@ HeadersSetting.propTypes = {
       value: PropTypes.string,
       storage_key: PropTypes.string,
     })
-  ).isRequired,
+  ),
   onChange: PropTypes.func.isRequired,
 };
 export default HeadersSetting;

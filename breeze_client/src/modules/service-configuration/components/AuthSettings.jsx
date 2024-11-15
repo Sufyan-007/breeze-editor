@@ -14,7 +14,9 @@ function AuthSettings({ authData, onChange, moduleId }) {
   const dispatch = useDispatch();
   const setAuthApis = useCallback(
     async (moduleId) => {
-      await dispatch(retrieveResponseTokens({ projectName, moduleId, apiId: null })).unwrap();
+      if (moduleId) {
+        await dispatch(retrieveResponseTokens({ projectName, moduleId, apiId: null })).unwrap();
+      }
     },
     [projectName, dispatch]
   );
@@ -22,10 +24,16 @@ function AuthSettings({ authData, onChange, moduleId }) {
     const updatedAuthData = { ...auth };
     if (field === 'login_api') {
       const [operationId, tokenId] = value.split('-');
-      const apiId = login_apis.find((api) => api.operation_id === operationId)?.id;
-      updatedAuthData[field] = apiId;
-      updatedAuthData['token_id'] = tokenId;
-      // updatedAuthData['type'] = 'APIKEY';
+      const loginApi = login_apis.find((api) => api.operation_id === operationId);
+
+      if (loginApi) {
+        const apiId = loginApi.id;
+        const apiType = loginApi.type;
+
+        updatedAuthData[field] = apiId;
+        updatedAuthData['token_id'] = tokenId;
+        updatedAuthData['type'] = apiType;
+      }
     } else {
       updatedAuthData[field] = value;
     }
@@ -104,7 +112,7 @@ AuthSettings.propTypes = {
   onChange: PropTypes.func.isRequired,
   apiData: PropTypes.object,
   onApiChange: PropTypes.func,
-  moduleId: PropTypes.string.isRequired,
+  moduleId: PropTypes.string,
 };
 
 AuthSettings.defaultProps = {

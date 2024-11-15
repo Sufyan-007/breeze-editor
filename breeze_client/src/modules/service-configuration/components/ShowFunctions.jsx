@@ -8,11 +8,11 @@ function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId }) {
   // console.log(func, functionId);
 
   return (
-    <div key={functionId} className="mx-3 my-1 d-flex justify-content-between">
+    <div key={functionId} className="mx-4 my-1 d-flex justify-content-between">
       <span
         className={` ${func?.errors && func?.errors.root_errors.length > 0 ? 'text-danger' : ''}`}
         onClick={isAuth ? () => onFunctionClick() : () => onFunctionClick(func)}
-        style={{ width: '90%' }}
+        style={{ width: '90%', fontSize: '14px' }}
       >
         {shortName}
       </span>

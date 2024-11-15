@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setView, moduleName, setSelectedFile }) {
   const loading = useRef(0);
   const file = useSelector((state) => state.services.filesList[fileId]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [hasErrors, setHasErrors] = useState(false);
   const { projectName } = useParams();
@@ -75,6 +76,7 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
       id: moduleId,
       filename: file.file,
       serviceId: api.id,
+      fileId: fileId,
     });
     setSelectedApi(api);
     setView('TEST');
@@ -98,7 +100,7 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
           className="w-75 mx-2"
         >
           <i className="bi bi-file-earmark-fill" alt="file"></i>
-          <span className={`${hasErrors ? 'text-danger' : ''} mx-2`}>
+          <span className={`${hasErrors ? 'text-danger' : ''} mx-2`} style={{ fontSize: '16px' }}>
             {file?.file.length > 30 ? `${file?.file.slice(0, 30)}...` : file?.file}
           </span>{' '}
         </div>

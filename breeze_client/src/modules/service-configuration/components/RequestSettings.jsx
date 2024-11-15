@@ -13,7 +13,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
   const [expandedProperty, setExpandedProperty] = useState(null);
   const [api, setApi] = useState({});
   const [requestProperties, setRequestProperties] = useState(['Url', 'Body', 'Headers', 'Auth']);
-  const { environmentSettingsConfig } = useSelector((state) => state.environment);
+  const { environmentSettingsConfig, status } = useSelector((state) => state.environment);
 
   const envVars = environmentSettingsConfig?.envVars;
 
@@ -45,14 +45,18 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
       const updatedRequest = { ...requestData };
       updatedRequest.auth = [];
       setRequest(updatedRequest);
+    } else if (apiData?.request?.method === 'GET') {
+      setRequestProperties(['Url', 'Auth', 'Headers']);
     } else {
       setRequestProperties(['Url', 'Body', 'Headers', 'Auth']);
     }
-  }, [isAuthApi, apiData.authentication_type, apiData.is_open_api]);
+  }, [isAuthApi, apiData.authentication_type, apiData.is_open_api, requestData, apiData.request?.method]);
 
   useEffect(() => {
-    dispatch(fetchEnvironmentConfig({ projectName }));
-  }, [dispatch, projectName]);
+    if (status === 'ready') {
+      dispatch(fetchEnvironmentConfig({ projectName }));
+    }
+  }, [dispatch, projectName, status]);
   const addProperty = (e, prop) => {
     let newData = null;
     if (prop === 'query parameters') {
@@ -92,7 +96,13 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
 
   useEffect(() => {
     setRequest(requestData);
-    const baseUrl = requestData?.url?.baseurl;
+    let baseUrl = requestData?.url?.baseurl;
+    const env_label = requestData?.url?.env_label;
+    console.log(env_label, 'envlabel');
+
+    if (env_label) {
+      baseUrl = env_label;
+    }
     const pathSegments = requestData?.url?.path || [];
     const allParams = requestData?.parameters || [];
     const fullPath = pathSegments.filter((segment) => segment).join('/');
@@ -130,7 +140,9 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
   return (
     <div className="row mt-3 ">
       <div className=" br-text-primary br-background-secondary p-1">
-        <span className="mx-2">{title}</span>
+        <span className="mx-2" style={{ fontSize: '16px' }}>
+          {title}
+        </span>
       </div>
       <div className="p-1">
         {requestProperties &&
@@ -141,7 +153,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
               style={{ border: '1px solid rgba(128, 128, 128, 0.5)' }}
             >
               <div className="card-body d-flex justify-content-between" onClick={() => toggleProperty(index)}>
-                <div>
+                <div style={{ fontSize: '14px' }}>
                   {req === 'Url' ? urlHeading : req}
                   {req === 'Url'
                     ? ((request?.parameters &&

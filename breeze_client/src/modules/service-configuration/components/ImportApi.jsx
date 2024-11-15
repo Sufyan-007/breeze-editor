@@ -54,6 +54,7 @@ function ImportApi({ show, onClose, onImport }) {
                     ref={postmanInputRef}
                     style={{ display: 'none' }}
                     onChange={(e) => handleInputChange(e, 'postman')}
+                    disabled={true}
                   />
                   <img
                     width="25"
@@ -75,6 +76,7 @@ function ImportApi({ show, onClose, onImport }) {
                     ref={postmanEnvInputRef}
                     style={{ display: 'none' }}
                     onChange={(e) => handleInputChange(e, 'postmanenv')}
+                    disabled={true}
                   />
                   <img
                     width="25"
@@ -125,6 +127,7 @@ function ImportApi({ show, onClose, onImport }) {
                     ref={swaggerWebsocketInputRef}
                     style={{ display: 'none' }}
                     onChange={(e) => handleInputChange(e, 'websocket')}
+                    disabled={true}
                   />
                   <img
                     width="25"

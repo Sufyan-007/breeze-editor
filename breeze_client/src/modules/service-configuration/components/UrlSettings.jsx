@@ -49,6 +49,13 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
     } else {
       newUrlData[prop] = newValue;
       const selectedOption = options.find((option) => option.value === newValue);
+      console.log(selectedOption, 'selected option');
+      if (selectedOption.dataSource === 'envVars') {
+        newUrlData['env_label'] = selectedOption.label;
+      } else {
+        newUrlData['env_label'] = '';
+      }
+
       newUrlData['url_env'] = selectedOption?.dataSource === 'envVars' ? newValue : '';
     }
     onChange('url', newUrlData);
@@ -184,7 +191,9 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
         />
       </div>
       <div className="br-text-primary mt-3" style={{ border: '1px solid rgba(128, 128, 128, 0.5)' }}>
-        <div className="m-2">Path Parameter Details:</div>
+        <div className="m-2" style={{ fontSize: '14px' }}>
+          Path Parameter Details:
+        </div>
         {pathParams && pathParams.length > 0 ? (
           pathParams.map((para, index) => (
             <div
@@ -265,7 +274,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
       </div>
 
       <div className="br-text-primary mt-3" style={{ border: '1px solid rgba(128, 128, 128, 0.5)' }}>
-        <div className="m-2">
+        <div className="m-2" style={{ fontSize: '14px' }}>
           Query Parameter Details:
           <i
             className="bi bi-plus-circle mx-3 mb-1"
@@ -285,7 +294,7 @@ UrlSettings.propTypes = {
   onChange: PropTypes.func.isRequired,
   paramData: PropTypes.any,
   onAdd: PropTypes.func.isRequired,
-  method: PropTypes.string.isRequired,
-  envVars: PropTypes.object,
+  method: PropTypes.string,
+  envVars: PropTypes.any,
 };
 export default UrlSettings;
