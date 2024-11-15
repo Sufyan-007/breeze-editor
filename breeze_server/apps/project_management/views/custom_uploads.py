@@ -32,7 +32,10 @@ def add_custom_package(request, projectName):
 
         if not file:
             return JsonResponse({'error': 'No file provided.'}, status=400)
-
+        
+        if not fileName:
+            return JsonResponse({'error': 'No fileName provided.'}, status=400)
+        
         # Check if file size exceeds 5 MB (5 * 1024 * 1024 bytes)
         if file.size > 5 * 1024 * 1024:
             return JsonResponse({'error': 'File size exceeds the 5MB limit.'}, status=400)
@@ -128,7 +131,7 @@ def delete_custom_package(request, projectName):
             return JsonResponse({'error': 'Project name is required'}, status=400)
 
         if not fileName or not fileId :
-            return JsonResponse({'error': 'File name or Id  is required'}, status=400)
+            return JsonResponse({'error': 'File name or Id is required'}, status=400)
 
         delete_file(projectName, fileName, fileId)
         return JsonResponse({'message': "File deleted successfully"}, status=200)

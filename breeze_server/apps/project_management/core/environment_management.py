@@ -277,7 +277,7 @@ def remove_script_from_package_json(app_config_path, env_name):
 
         scripts = package_json_data.get("scripts", {})
 
-        script_name = f"start:{env_name}"
+        script_name = env_name
         if script_name in scripts:
             del scripts[script_name]
 

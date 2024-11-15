@@ -87,8 +87,34 @@ class DirectoryManager:
     
     def move_node(self, node_id, new_parent_id):
         raise NotImplementedError()
+    
+    
+    def delete_node(self,file_id,recursive=False):
+        node = self.directory_management_config[file_id]
+        children = node.get("children",[])
+        if children:
+            if recursive:
+                for child in children:
+                    self.delete_node(child,recursive=True)
+            else:
+                raise Exception("Directory contains entries")
+        path=self.get_path_from_file_id(file_id)
+        try:
+            if node["type"] == "FILE":
+                os.remove(path)
+                
+            else:
+                shutil.rmtree(path)
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            raise e
+        parent_node = self.directory_management_config[node["parentId"]]
+        parent_node["children"].remove(file_id)
+        del self.directory_management_config[file_id]
+        with open(self.directory_config_path, 'w') as file:
+            json.dump(self.directory_management_config, file, indent=2)
         
-
     #get path from file_id
     def get_path_from_file_id(self,file_id,relative_path=False):
         if file_id not in self.directory_management_config:
