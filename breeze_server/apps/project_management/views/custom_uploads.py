@@ -11,6 +11,7 @@ from apps.common.constants.consts import PORT
 from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
 from ..utils.custom_uploads_tracker import store_custom_upload
+from ..utils.get_uploaded_resources import get_uploaded_resources as get_resources
 
 @swagger_auto_schema(
     method='post',
@@ -96,13 +97,13 @@ def upload_and_update_file(projectName, file, fileName , file_id):
 )
 @csrf_exempt
 @api_view(['GET'])
-def get_custom_packages(request, projectName):
+def get_uploaded_resources(request, projectName):
     try:
         if not projectName:
             return JsonResponse({'error': 'Project name is required.'}, status=400)
 
-        zip_files_info = get_zip_files(projectName)
-      
+        tag = request.GET.get('tag')
+        zip_files_info = get_resources(projectName, tag)
         return JsonResponse(zip_files_info, status=200)
 
     except Exception as e:

@@ -68,7 +68,7 @@ function BodySettings({ bodyData, onChange, moduleId }) {
 
   const schemaOptions = schemaList
     ? Object.keys(schemaList)
-        .filter((key) => !Object.hasOwn(schemaList[key], 'isUnresolved')) // Check if 'isUnresolved' exists on the object
+        .filter((key) => !Object.hasOwn(schemaList[key], 'isUnresolved'))
         .map((key) => ({
           value: key,
           label: schemaList[key].name,
@@ -83,6 +83,7 @@ function BodySettings({ bodyData, onChange, moduleId }) {
           value={body.mode}
           onChange={(e) => handleChanges('mode', e)}
           options={[
+            { label: 'Select', value: '' },
             { label: 'RAW', value: 'RAW' },
             { label: 'BINARY', value: 'BINARY' },
             { label: 'FORMDATA', value: 'FORMDATA' },

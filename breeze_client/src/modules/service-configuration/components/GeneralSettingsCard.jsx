@@ -33,11 +33,21 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
 
   const filteredFiles = filesIdList ? filesIdList.map((fileId) => filesList[fileId]).filter((file) => file) : [];
 
-  const transformedOptions = filteredFiles.map((file) => ({
-    label: file.file,
-    value: file.file,
-    id: file.id,
-  }));
+  const transformedOptions =
+    filteredFiles.length > 0
+      ? [
+          { label: 'Select', value: '', id: '', selected: true, hidden: true },
+          ...filteredFiles.map((file) => ({
+            label: file.file,
+            value: file.file,
+            id: file.id,
+          })),
+        ]
+      : filteredFiles.map((file) => ({
+          label: file.file,
+          value: file.file,
+          id: file.id,
+        }));
   return (
     <>
       {showModal && (

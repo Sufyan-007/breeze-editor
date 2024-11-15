@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { retrieveResponseTokens } from '../redux/ApiClientActions';
 
 function AuthSettings({ authData, onChange, moduleId }) {
+  console.log(authData, 'authdata');
+
   const [auth, setAuth] = useState(authData ? (authData[0] ? authData[0] : {}) : {});
   const { projectName } = useParams();
   const { login_apis } = useSelector((state) => state.services);
@@ -23,6 +25,7 @@ function AuthSettings({ authData, onChange, moduleId }) {
       const apiId = login_apis.find((api) => api.operation_id === operationId)?.id;
       updatedAuthData[field] = apiId;
       updatedAuthData['token_id'] = tokenId;
+      // updatedAuthData['type'] = 'APIKEY';
     } else {
       updatedAuthData[field] = value;
     }
@@ -59,21 +62,10 @@ function AuthSettings({ authData, onChange, moduleId }) {
     value: api.tokenKey,
     dataSource: 'authApi',
   }));
+  loginApiOptions.push({ label: 'select', value: '' });
   return (
     <>
       <div id="main" className="d-flex mx-2">
-        {/* <CustomSelectField
-          name="authType"
-          value={auth.type}
-          onChange={(value) => handleChange(value, 'type')}
-          options={authTypeOptions}
-          className="form-select br-form-select form-select-sm"
-          config={{
-            label: 'Authentication Type',
-            groupClass: 'form-group mb-2 mx-2 w-50',
-          }}
-        /> */}
-
         {auth.type === 'BASIC' ? (
           <>{/* Additional fields for BASIC auth can be added here */}</>
         ) : (

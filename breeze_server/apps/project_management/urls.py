@@ -5,7 +5,7 @@ from .views import swagger_template as swag_temp
 from .views import env_apis as env_manage
 from .communication import consumers
 from .views.custom_uploads import add_custom_package
-from .views.custom_uploads import get_custom_packages
+from .views.custom_uploads import get_uploaded_resources
 from .views.custom_uploads import delete_custom_package
 from .views.custom_uploads import set_component_config
 from .views.third_party_dependency import (add_third_party_dependency, delete_third_party_dependency, update_third_party_dependency, get_third_party_dependency)
@@ -26,7 +26,6 @@ urlpatterns = [
     path('set-proj-env/<str:project_id>/', env_manage.set_env),
     path('get-metadata/<str:project_id>/', proj_apis.get_proj_metadata),
     path('custom-package-upload/<str:projectName>', add_custom_package),
-    path('custom-package/<str:projectName>', get_custom_packages),
     path('custom-package-delete/<str:projectName>', delete_custom_package),
     path('set-component-configuration/<str:projectName>',set_component_config),
     
@@ -41,6 +40,9 @@ urlpatterns = [
     path('upload-file/<str:project_id>/', file_handle.upload_file),
     path('download-file/<str:project_id>/<str:fileId>/', file_handle.download_file),
     path('delete-file/<str:project_id>/', file_handle.delete_file),
+    
+    # Get resources
+    path('get-uploaded-resource/<str:projectName>', get_uploaded_resources),
 ]
 
 

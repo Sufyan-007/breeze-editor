@@ -29,7 +29,14 @@ function CustomSelectField({ config, name, value, onChange, options, className, 
           <>
             {/* <option value="">{'Select'}</option> */}
             {availableOptions.map((option, index) => (
-              <option key={index} value={option.value} data-source={option.dataSource}>
+              <option
+                selected={option.selected}
+                disabled={option.disabled}
+                hidden={option.hidden}
+                key={index}
+                value={option.value}
+                data-source={option.dataSource}
+              >
                 {option.label}
               </option>
             ))}

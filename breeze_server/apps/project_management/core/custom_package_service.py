@@ -43,7 +43,7 @@ def check_existing_folder(project_name, file_name):
             resources_config = json.load(config_file)
             
         for resource_info in resources_config.values():
-            if resource_info.get('zip_file_name') == file_name:
+            if resource_info.get('name') == file_name:
                 return True
             
         return False
@@ -135,7 +135,7 @@ def get_zip_files(project_name):
             
         extracted_folders = [
             {
-                'zip_file_name': resource_info.get('zip_file_name'),
+                'name': resource_info.get('name'),
                 "zip_file_id":resource_info.get('zip_file_id'),
                 "lastModified": datetime.fromtimestamp(
                     os.path.getmtime(os.path.join(uploaded_resources_config_path))
@@ -144,7 +144,7 @@ def get_zip_files(project_name):
 
             }
             for resource_info in resources_config.values()
-            if 'zip_file_name' in resource_info
+            if 'name' in resource_info
         ]
        
         return {
@@ -242,7 +242,7 @@ def update_resource_config(project_name, file_name ,file_id, status,  tag="ZIP")
         
     # Update or add the new entry for the zip file
     config_data[file_id] = {
-        "zip_file_name":file_name,
+        "name":file_name,
         "zip_file_id":file_id,
         "status": status,
         "tag": tag

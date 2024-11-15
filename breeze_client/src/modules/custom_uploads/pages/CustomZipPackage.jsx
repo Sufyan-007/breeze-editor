@@ -114,7 +114,7 @@ function CustomZipPackagePage() {
       // Dispatch delete action
       dispatch(
         deleteZipFileAction({
-          fileName: fileToDelete.zip_file_name,
+          fileName: fileToDelete.name,
           fileId: fileToDelete.zip_file_id,
           projectName: projectName,
         })
@@ -268,7 +268,7 @@ function CustomZipPackagePage() {
   const folders = zipFiles?.folders || [];
 
   const filesData = folders.map((folder) => ({
-    fileName: folder.zip_file_name,
+    fileName: folder.name,
     zipFileId: folder.zip_file_id,
     lastModified: folder.lastModified,
     actions: (
@@ -299,8 +299,8 @@ function CustomZipPackagePage() {
               label={<i className="bi bi-three-dots-vertical" />}
               onClick={() => {
                 setShowOffCanvas(true);
-                getComponents(folder.zip_file_name);
-                setSelectedFilename(folder.zip_file_name);
+                getComponents(folder.name);
+                setSelectedFilename(folder.name);
               }}
               className="btn toggle-btn br-text-primary"
             />

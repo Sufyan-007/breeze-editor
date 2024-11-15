@@ -49,7 +49,7 @@ const serviceConfigSlice = createSlice({
             value: value.title,
             moduleId: key,
           }));
-          options.push({ label: 'select', value: '' });
+          options.push({ label: 'select', value: '', moduleId: '', hidden: true, selected: true });
           state.transformedOptions = options;
           state.moduleList = action.payload.data;
         })
@@ -144,7 +144,7 @@ const serviceConfigSlice = createSlice({
         })
         .addCase(fetchFunctions.fulfilled, (state, action) => {
           state.status = 'succeeded';
-          state.functionsList = action.payload;
+          state.functionsList = { ...state.functionsList, ...action.payload };
         })
         .addCase(fetchFunctions.rejected, (state, action) => {
           state.status = 'failed';
