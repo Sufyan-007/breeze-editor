@@ -38,12 +38,11 @@ function CustomPropsList({ components, props }) {
       <div style={{ width: '20%', marginRight: '50px' }}>
         <h5 className="large-font">Props</h5>
         {Object.keys(currentProps).length > 0 ? (
-          Object.keys(currentProps).map((outerKey) =>
-            Object.keys(currentProps[outerKey]).map((key) => (
+          Object.keys(currentProps).map((key) =>
               <div key={key}>
                 <CustomButtonField
                   type="button"
-                  label={currentProps[outerKey][key].prop_name}
+                  label={currentProps[key].prop_name}
                   onClick={() => handlePropClick(key)}
                   className={`run-btn med-font br-text-primary custom-button ${selectedProp === key ? 'selected' : ''}`}
                   style={{
@@ -55,7 +54,7 @@ function CustomPropsList({ components, props }) {
                   }}
                 />
               </div>
-            ))
+            
           )
         ) : (
           <p className="med-font br-text-primary">No props available</p>
