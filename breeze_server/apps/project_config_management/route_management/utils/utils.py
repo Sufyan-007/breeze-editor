@@ -66,7 +66,7 @@ def rewrite_clean_route_config(project_name, updated_route_config, route_id, cur
     # routing_config_path = f"{CONFIG_PATH}/{project_name}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
     # write_json_file(f"{routing_config_path}.json", updated_route_config)
     transaction_id = get_transaction_id()
-    write_config_file( project_name, ROUTING, ROUTING, updated_route_config, current_version, transaction_id)
+    write_config_file( project_name, ROUTING, ROUTING, updated_route_config, current_version, transaction_id, True)
     
 def extract_function_details(js_function, id):
     function_pattern = r'(async\s+)?(?:function\s+(\w+)\s*)?\(([^)]*)\)\s*{([^}]*)}'

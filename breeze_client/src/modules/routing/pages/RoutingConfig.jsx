@@ -14,7 +14,9 @@ import {
   updateRouteConfig,
   deleteRouteConfig,
 } from '../../../redux/routing/routingActions';
+import { fetchConfigVersion } from '../../../redux/project/projectActions';
 import { getRouteDetails } from '../../../services/routing/routingService';
+import { configDetailsKeyMapper } from '../../project/constants/configDetailsKeyMapper';
 
 function RoutingConfig() {
   const dispatch = useDispatch();
@@ -76,6 +78,19 @@ function RoutingConfig() {
         await dispatch(addRouteConfig({ projectName, payload: routeData })).unwrap();
       } else if (isEditing) {
         await dispatch(updateRouteConfig({ projectName, payload: routeData })).unwrap();
+      }
+      try {
+        const payload = {
+          category: configDetailsKeyMapper['category']['ROUTING'],
+          filename: configDetailsKeyMapper['filename']['ROUTE_COMPONENT'],
+        };
+        dispatch(fetchConfigVersion({ projectName, payload }))
+          .unwrap()
+          .then((res) => {
+            console.log(res);
+          });
+      } catch (err) {
+        console.log(err.message);
       }
     } catch (error) {
       console.error('Error submitting route data:', error);
