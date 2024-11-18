@@ -161,6 +161,7 @@ def get_response_token( request, project_id,apiId, moduleId):
                             "id" : key,
                             "operation_id" : api.get("operation_id"),
                             "response_tokens": response_tokens,
+                            "type": api.get("authentication_type")
                         })
                 else:
                     result = auth_apis.get(apiId)

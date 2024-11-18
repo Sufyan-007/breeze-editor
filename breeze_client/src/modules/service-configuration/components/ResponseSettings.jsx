@@ -25,13 +25,15 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   const [newResponse, setNewResponse] = useState(responseObject);
   const [expandedProperty, setExpandedProperty] = useState(null);
   const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
+  const { status } = useSelector((state) => state.schemas);
   const dispatch = useDispatch();
   const { projectName } = useParams();
   const [properties, setProperties] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
-  }, [dispatch, projectName, moduleId]);
+    if (status === 'ready')
+      dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
+  }, [dispatch, projectName, moduleId, status]);
 
   const schemaOptions = schemaList
     ? Object.keys(schemaList)
@@ -281,7 +283,9 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     <>
       <div className="row mt-3">
         <div className=" br-text-primary br-background-secondary p-1">
-          <span className="mx-2">{title}</span>
+          <span className="mx-2" style={{ fontSize: '16px' }}>
+            {title}
+          </span>
         </div>
       </div>
       <div className="rounded-0 br-text-primary br-background-primary mt-2 d-flex align-items-center justify-content-between">
@@ -314,7 +318,10 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
             <>
               {properties.length > 0 && (
                 <div className="mt-3 w-100">
-                  <table className="table table-bordered br-background-secondary" style={{ borderColor: 'gray' }}>
+                  <table
+                    className="table table-bordered br-background-secondary"
+                    style={{ borderColor: 'gray', fontSize: '14px' }}
+                  >
                     <thead>
                       <tr className="br-background-secondary br-text-primary">
                         <th className="br-background-secondary br-text-primary">Property</th>
@@ -383,7 +390,7 @@ function ResponseForm({ label, value, onChange, options, sendSelected }) {
   );
 }
 ResponseSettings.propTypes = {
-  moduleId: PropTypes.string.isRequired,
+  moduleId: PropTypes.string,
   responseData: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   isAuthApi: PropTypes.bool.isRequired,
@@ -392,13 +399,13 @@ ResponseSettings.propTypes = {
 };
 
 ResponseForm.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(
     PropTypes.shape({
-      value: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
+      value: PropTypes.string,
+      label: PropTypes.string,
       filter: PropTypes.string,
     }).isRequired
   ).isRequired,

@@ -1,6 +1,7 @@
 export const getIconClass = (extension) => {
   switch (extension) {
     case 'SX':
+    case 'jsx':
       return { iconClass: 'bi-filetype-jsx', color: '#A57CE8' };
     case 'js':
       return { iconClass: 'bi-filetype-js', color: '#A57CE8' };

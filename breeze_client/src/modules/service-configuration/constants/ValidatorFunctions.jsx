@@ -4,7 +4,7 @@ const hasRequiredProps = (obj, props) => {
 };
 export const isValidApiStructure = (api, isAuthApi) => {
   if (!api) return false;
-  console.log(api);
+  // console.log(api);
 
   // Check basic API structure
   if (!hasRequiredProps(api, ['operation_id', 'request', 'response'])) return false;

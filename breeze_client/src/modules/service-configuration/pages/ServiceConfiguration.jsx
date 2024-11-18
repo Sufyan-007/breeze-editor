@@ -19,7 +19,7 @@ import {
 import AddModule from '../components/AddModule';
 import { isValidApiStructure } from '../constants/ValidatorFunctions';
 function ServiceConfiguration() {
-  const { transformedOptions, message } = useSelector((state) => state.services);
+  const { transformedOptions, message, status } = useSelector((state) => state.services);
   const dispatch = useDispatch();
   const [selectedApi, setSelectedApi] = useState({});
   const [selectedAuthApi, setSelectedAuthApi] = useState({});
@@ -85,7 +85,7 @@ function ServiceConfiguration() {
       return;
     }
     if (!selectedModule) {
-      console.log(transformedOptions);
+      // console.log(transformedOptions);
 
       if (transformedOptions.length === 1) {
         const module = transformedOptions[0];
@@ -167,9 +167,11 @@ function ServiceConfiguration() {
   // };
 
   useEffect(() => {
-    const payload = { category: 'api_client' };
-    dispatch(fetchModules({ projectName, payload })).unwrap();
-  }, [dispatch, projectName]);
+    if (status === 'ready') {
+      const payload = { category: 'api_client' };
+      dispatch(fetchModules({ projectName, payload })).unwrap();
+    }
+  }, [dispatch, projectName, status]);
 
   const saveTitle = async (oldTitle, moduleId, newTitle) => {
     if (oldTitle !== newTitle) {
@@ -180,7 +182,7 @@ function ServiceConfiguration() {
   };
 
   const handleModuleSelect = (selectedOption) => {
-    console.log(selectedOption);
+    // console.log(selectedOption);
 
     if (selectedOption) {
       const { label: moduleName, moduleId } = selectedOption;
@@ -223,7 +225,9 @@ function ServiceConfiguration() {
           {view === 'TEST' ? (
             <>
               <div className="d-flex justify-content-between">
-                <h5 className=" br-text-primary mt-4">Service Function Configuration</h5>
+                <h5 className=" br-text-primary mt-4" style={{ fontSize: '18px' }}>
+                  Service Function Configuration
+                </h5>
                 <div className="d-flex align-items-center">
                   <CustomSelectField
                     name="moduleSelect"
@@ -245,9 +249,9 @@ function ServiceConfiguration() {
                 settings={selectedApi}
                 onChange={onApiModelChange}
                 isAuthApi={false}
-                onSuccessfulTransfer={() => {
-                  setShowToast(true);
-                }}
+                // onSuccessfulTransfer={() => {
+                //   setShowToast(true);
+                // }}
                 moduleId={selectedModule && selectedModule.id}
               />
               <RequestSettings

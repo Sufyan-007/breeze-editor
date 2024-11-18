@@ -66,11 +66,7 @@ def delete_config(project_id, file_id):
         write_json_file(f"{resource_config_path}.json", existing_config)
 
         directory_manager = DirectoryManager(project_name=project_id)
-        file_path = directory_manager.get_path_from_file_id(file_id)
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
-    # TODO: Update directory_management.json after deleting the file
+        directory_manager.delete_node(file_id)
     
 def file_duplicacy(project_id, file_name):
     app_config_dir = f"{CONFIG_PATH}/{project_id}"

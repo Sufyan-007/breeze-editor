@@ -30,7 +30,7 @@ const deleteFile = async (fileName, fileId, projectName) => {
   };
   try {
     const response = await callApiClient(url, 'DELETE', payload);
-    if (response.ok) {
+    if (response) {
       return { message: 'File deleted successfully' };
     } else {
       throw new Error(response.Error || 'Failed to delete the file');

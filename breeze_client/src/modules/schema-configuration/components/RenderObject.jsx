@@ -10,7 +10,6 @@ function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList
     { backgroundColor: '#6c757d', borderColor: 'rgba(128, 128, 128, 0.5)' }, // Depth 2
   ];
   const handleChanges = (prop, value) => {
-    console.log(prop, value);
     if (prop === 'name') {
       setName(() => {
         updateParent(val, value);
@@ -28,7 +27,6 @@ function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList
   const addProperty = () => {
     const properties = val.properties || {};
     const newPropertyKey = `property${Object.keys(properties).length + 1}`;
-    console.log('ADded property');
     const newProperty = {
       type: '',
       required: false,
@@ -162,9 +160,6 @@ function RenderObject({ propertyName, value, updateParent, depth = 0, schemaList
             {val.types &&
               val.types.map((type) => {
                 {
-                  {
-                    console.log(type, 'inside');
-                  }
                   type.properties &&
                     Object.entries(type.properties).map(([k, prop]) => {
                       <RenderObject

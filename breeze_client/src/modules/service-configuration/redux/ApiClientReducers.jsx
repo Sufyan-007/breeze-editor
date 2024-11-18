@@ -179,7 +179,7 @@ const serviceConfigSlice = createSlice({
         })
         .addCase(transferToAuthFile.fulfilled, (state, action) => {
           state.status = 'succeeded';
-          state.message = action.payload;
+          state.message = action.payload.data;
         })
         .addCase(transferToAuthFile.rejected, (state, action) => {
           state.status = 'failed';
@@ -202,6 +202,7 @@ const serviceConfigSlice = createSlice({
                   operation_id: api.operation_id,
                   tokenKey: `${api.operation_id}-${key}`,
                   tokenConfig: config,
+                  type: api.type,
                 });
               }
             }
