@@ -7,12 +7,12 @@ from apps.common.constants.enums.tree_type import TreeType
 from ..core.route_config_editor import update_route_in_config,check_for_mandatory_route_props,validate_route_path
 from ..utils.utils import process_route_config, include_all_routes_accessory_data, rewrite_clean_route_config
 from ..core.route_config_editor import delete_route as del_route
-from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.manage_routes_schema import get_routes_schema,get_all_routes_fullpath_schema,add_route_schema,update_route_schema,delete_route_schema
+from drf_spectacular.utils import extend_schema
 
-@swagger_auto_schema(
-    method='get',
-    manual_parameters=get_routes_schema['parameters'],
+@extend_schema(
+    methods=['GET'],
+    parameters=get_routes_schema['parameters'],
     responses={
         200:get_routes_schema['response_200'],
         400:get_routes_schema['response_400']
@@ -30,9 +30,9 @@ def get_all_child_routes(request,project_id):
     return JsonResponse(nodes, status=200)
 
 
-@swagger_auto_schema(
-    method='get',
-    manual_parameters=get_all_routes_fullpath_schema['parameters'],
+@extend_schema(
+    methods=['GET'],
+    parameters=get_all_routes_fullpath_schema['parameters'],
     responses={
         200:get_all_routes_fullpath_schema['response_200']
     },
@@ -49,11 +49,11 @@ def get_all_routes_fullpath(request,project_id):
     }
     return JsonResponse(data, status=200)
 
-@swagger_auto_schema(
-    method='post',
-    request_body=add_route_schema['rb'],
+@extend_schema(
+    methods=['POST'],
+    request=add_route_schema['rb'],
     responses={
-        200:'ok',
+        200:None,
         500:add_route_schema['response_500']
     },
     tags=['routes']
@@ -62,6 +62,8 @@ def get_all_routes_fullpath(request,project_id):
 @api_view(['POST'])
 def add_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
+    ## res= model(data)
+    
     try:
         check_for_mandatory_route_props(data, project_id)
         if validate_route_path(data, data.get("parentId"), project_id) is True:    
@@ -75,11 +77,11 @@ def add_route(request, project_id):
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
 
-@swagger_auto_schema(
-    method='put',
-    request_body=update_route_schema['rb'],
+@extend_schema(
+    methods=['PUT'],
+    request=update_route_schema['rb'],
     responses={
-        200:'ok',
+        200:None,
         500:update_route_schema['response_500']
     },
     tags=['routes']
@@ -101,9 +103,9 @@ def update_route(request, project_id):
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
 
-@swagger_auto_schema(
-    method='delete',
-    request_body=delete_route_schema['rb'],
+@extend_schema(
+    methods=['DELETE'],
+    request=delete_route_schema['rb'],
     responses={
         200:delete_route_schema['response_200'],
         500:delete_route_schema['response_500']

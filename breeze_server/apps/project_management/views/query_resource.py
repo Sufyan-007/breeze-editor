@@ -20,14 +20,14 @@ from apps.common.constants.consts import (
     COMPONENT,
     RESOURCE
 )
-from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.query_resource_schema import manage_resource_schema
 from ...common.utils.file_helpers.json_handler import read_json_file as read_file
+from drf_spectacular.utils import extend_schema
 
-@swagger_auto_schema(
-    method="post",
-    manual_parameters=manage_resource_schema["parameters"],
-    request_body=manage_resource_schema["rb"],
+@extend_schema(
+    methods=['POST'],
+    parameters=manage_resource_schema["parameters"],
+    request=manage_resource_schema["rb"],
     responses={
         200: manage_resource_schema["response_200"],
         500: manage_resource_schema["response_500"],
