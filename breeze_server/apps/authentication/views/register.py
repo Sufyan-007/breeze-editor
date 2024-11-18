@@ -7,9 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
-from drf_yasg.utils import swagger_auto_schema
-from ..swagger_schema.register_schema import register_schema
-# # from ..models.Auth import models
+from ..swagger_schema.register_schema import register_schema,RegisterSerializer
+from drf_spectacular.utils import extend_schema# # from ..models.Auth import models
 # from rest_framework import serializers
 # from ..models import UserProfile
 # from django.contrib.auth.hashers import make_password
@@ -18,13 +17,13 @@ from .serializers import UserProfileSerializer
 
 @csrf_exempt
 @require_POST
-@swagger_auto_schema(
-    method='post',
-    request_body=register_schema['rb'],
+@extend_schema(
+    request=RegisterSerializer,
     responses={
-                201:register_schema['response_201'],
-            },
+        201:register_schema['response_201']
+    },
     tags=['Auth']
+    
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])

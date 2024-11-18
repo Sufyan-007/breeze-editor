@@ -23,4 +23,4 @@ def main():
     pprint.pprint(r.__dict__)
     # print(l.__dict__)
     # print(r.user,r.email,r.password)
-main()
+# main()
