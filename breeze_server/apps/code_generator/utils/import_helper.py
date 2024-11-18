@@ -6,13 +6,75 @@ class ImportHelper:
         pass
 
     @staticmethod
-    def generate_imports_code(imports):
+    def generate_imports_code(imports,projectId):
+        directory_management_service = DirectoryManager(projectId)
+        import_statements = []
+        import_statement_tree = []
+        
+        for imp in imports['other']:
+            if imp['TYPE'] == "THIRD_PARTY":
+                if imp['import_type'] == 'FULL':
+                # added a case to check if import is already present
+                    # if imp["import_entity"] in imported_components:
+                    #     continue
+                    # else:
+                    import_statement = f'import {imp["import_entity"]} from \'{imp["from"]}\' ;'
+                # elif imp['import_type'] == 'SINGLE':
+                else:
+                    import_statement = f'import  {{ {imp["import_entity"]} }} from \'{imp["from"]}\' ;'
+                import_statement_tree.append({
+                    "type": "IMPORT",
+                    "statementType" : "SINGLE",
+                    "code" : import_statement
+                })
+                import_statements.append(import_statement)
+        
+        for imp in imports["components"]:
+            path = "/"+directory_management_service.get_path_from_file_id(imp["fileId"],relative_path=True)
+            if imp["import_type"] == "FULL":
+                import_statement = f'import {imp["import_entity"]} from \'{path}\' ;'
+            else:
+                import_statement = f'import  {{ {imp["import_entity"]} }} from \'{path}\' ;'
+                
+            import_statement_tree.append({
+                "type": "IMPORT",
+                "statementType" : "SINGLE",
+                "code" : import_statement
+            })
+            import_statements.append(import_statement)
+            # elif imp['TYPE'] == "REDUCER_FUNCTION":
+            #     related_reducer = all_reducer_config.get(imp["from"])
+            #     path = get_path_without_ext(related_reducer['containingFile'])
+
+            #     if imp['import_entity'] == 'SELECTOR':
+            #         import_statement = "import  {select%s} from '%s';"%(related_reducer["stateVarName"],path)
+            #     else:
+            #         import_statement = f'import  {{{imp["import_entity"]}}} from \'{path}\' ;'
+            #     import_statement_tree.append({
+            #         "type": "IMPORT",
+            #         "statementType" : "SINGLE",
+            #         "code" : import_statement
+            #     })
+            #     import_statements.append(import_statement)
+            # elif imp['TYPE'] == "SERVICE":
+            #     print("---SERVICE TYPE****")
+            #     import_path = imp["from"]
+            #     import_statement = f'import {{ {imp["import_entity"]} }} from \'{import_path}\' ;'
+            #     import_statement_tree.append({
+            #         "type": "IMPORT",
+            #         "statementType" : "SINGLE",
+            #         "code" : import_statement
+            #     })
+            #     import_statements.append(import_statement)
+            
+            
+            
+            
+        
         # print(component_config)
         # imported_components = component_config['imports'].get('components',[])
         # imported_store = component_config['imports'].get('store',[]) 
     
-        import_statements = []
-        import_statement_tree = []
         
         # directory_management_service = DirectoryManager(app_config["name"])
 
@@ -44,48 +106,6 @@ class ImportHelper:
         #     import_statements.append(import_statement)
 
         # Handle other imports
-        for imp in imports['other']:
-            if imp['TYPE'] == "THIRD_PARTY":
-                if imp['import_type'] == 'FULL':
-                # added a case to check if import is already present
-                    # if imp["import_entity"] in imported_components:
-                    #     continue
-                    # else:
-                    import_statement = f'import {imp["import_entity"]} from \'{imp["from"]}\' ;'
-                # elif imp['import_type'] == 'SINGLE':
-                else:
-                    import_statement = f'import  {{ {imp["import_entity"]} }} from \'{imp["from"]}\' ;'
-                import_statement_tree.append({
-                    "type": "IMPORT",
-                    "statementType" : "SINGLE",
-                    "code" : import_statement
-                })
-                import_statements.append(import_statement)
-            
-            # elif imp['TYPE'] == "REDUCER_FUNCTION":
-            #     related_reducer = all_reducer_config.get(imp["from"])
-            #     path = get_path_without_ext(related_reducer['containingFile'])
-
-            #     if imp['import_entity'] == 'SELECTOR':
-            #         import_statement = "import  {select%s} from '%s';"%(related_reducer["stateVarName"],path)
-            #     else:
-            #         import_statement = f'import  {{{imp["import_entity"]}}} from \'{path}\' ;'
-            #     import_statement_tree.append({
-            #         "type": "IMPORT",
-            #         "statementType" : "SINGLE",
-            #         "code" : import_statement
-            #     })
-            #     import_statements.append(import_statement)
-            # elif imp['TYPE'] == "SERVICE":
-            #     print("---SERVICE TYPE****")
-            #     import_path = imp["from"]
-            #     import_statement = f'import {{ {imp["import_entity"]} }} from \'{import_path}\' ;'
-            #     import_statement_tree.append({
-            #         "type": "IMPORT",
-            #         "statementType" : "SINGLE",
-            #         "code" : import_statement
-            #     })
-            #     import_statements.append(import_statement)
 
         
         # Handle CSS imports

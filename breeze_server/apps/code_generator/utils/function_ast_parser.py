@@ -5,20 +5,6 @@ import apps.code_generator.core.new_component_generator as CompGenerator
 
 from .html_generator import HTMLGenerator
 
-RESOURCES={
-    "STATE/UUID1":{
-        "name":"xyz"
-    },
-    "SERVICE/UUID1":{
-        "functionName":"createUser"
-    },
-     "var1":{
-        "name":"val"
-    },
-     "var2":{
-        "name":"va1"
-    }
-}
 
 class FunctionParser:
     def __init__(self,projectId=None, resources=[]):
@@ -34,10 +20,10 @@ class FunctionParser:
         return self.generated_imports
     
     def generate_statement_code(self,config,key_chaining=[]):
-        if config.get('$ref'):
-            entityType =config["entityType"]
-            config = resolve_ref(projectId=self.projectId,entityType=entityType,entityId= config["$ref"],extras=config)
-            config["type"]= entityType
+        # if config.get('$ref'):
+        #     entityType =config["entityType"]
+        #     config = resolve_ref(projectId=self.projectId,entityType=entityType,entityId= config["$ref"],extras=config)
+        #     config["type"]= entityType
         if not config.get('type'):
             raise KeyError('type must be defined')
         
@@ -189,8 +175,7 @@ class FunctionParser:
         ref = value.get("$ref")
         type = value.get("type","UNDEFINED")
         if ref:
-            resource = self.get_resource_by_id(ref)
-            return resource["name"]
+            pass
         else:
             if type == "STRING":
                 return f" '{value['value']}' "
@@ -232,21 +217,87 @@ class FunctionParser:
                 return self.generate_statement_code(value)
             
             elif type == "Element":
-                html_generator = HTMLGenerator({
-                    "name":"Main",
-                    "imports": {
-                        "components": [],
-                        "other": []
-                    }
-                })
-                code,tree = html_generator.generateHTML(value)
+                code = self.generate_html(value)
                 return code
         return ""
+        
+        
+    def generate_html(self,config):
+        if config.get('elementType',"") == 'CUSTOM':
+            tag =config.get("tagName") 
+            if tag!=self.config.get('name'):
+                if tag not in self.config['imports']['components']:
+                    self.config['imports']['components'].append(tag)
+                print("ImportExample",self.config['imports']['components'])
+        elif config.get('elementType',"") == 'THIRD_PARTY':
+            tag = config.get("tagName")
+            typeId = config.get("typeId")
+            for imports in self.config['imports']['other']:
+                if imports.get('typeId',"") == typeId:
+                    break
+            else:
+                imports = {
+                    "TYPE": "THIRD_PARTY",
+                    "from": config["library"],
+                    "import_entity": tag,
+                    "import_type": "SINGLE"
+                }
+                self.config['imports']['other'].append(imports)
+
+                                
+        tag_name = config['tagName']
+        attributes = config.get('attributes', {})
+        children = config.get('children', [])
+
+        attribute_str = ' '.join([f'{self.generate_attribute_code(attr, value)}' for attr, value in attributes.items()])
+        attribute_str = attribute_str+f" data-brz-id='{config['id']}'"
+        open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
+        close_tag = f'</{tag_name}>'
+
+        if not children:
+            tree = {
+                "type" : "HTML",
+                # "statementType" : "NA",
+                "code" : f'{open_tag}{close_tag}',
+                "id" : config["id"]
+            }
+            return f'{open_tag}{close_tag}'
+
+        # inner_code_tree = []
+        inner_html= []
+        for child in children:
+            code = self.get_value_code(child)
+            inner_html.append(code)
+            # inner_code_tree.append(tree)
+            
+        inner_html = ''.join(inner_html)
+        # tree = {
+        #     "type" : "HTML",
+        #     # "statementType" : "NA",
+        #     "code":f'{open_tag}{inner_html}{close_tag}',
+        #     "children" : inner_code_tree,
+        #     "id" : config["id"]
+        # }
+        return f'{open_tag}{inner_html}{close_tag}' 
+    
+    def generate_attribute_code(self,attr,value):
+        return f"{attr}={self.get_value_code(value)}"
         
     def get_function_call_code(self,config,disableAwait = False):
         ref = config.get("$ref",None)
         if ref:
-            functionName = RESOURCES[config["$ref"]]["functionName"]
+            functionConfig = resolve_ref(
+                projectId=self.projectId,
+                entityType=config.get("functionType","SERVICE"),
+                entityId=ref,
+                extras=config
+            )
+            functionName = functionConfig.get("name")
+            self.generated_imports["components"].append({
+                "import_type":"SINGLE",
+                "import_entity":functionName,
+                "fileId":config.get("fileId"),
+            })
         else:
             functionName = config['functionName']
         isAwait = ""
