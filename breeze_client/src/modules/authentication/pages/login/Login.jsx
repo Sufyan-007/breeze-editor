@@ -29,6 +29,7 @@ function Login() {
       const response = await login(username, password);
       if (response.accessToken) {
         localStorage.setItem('accessToken', response.accessToken);
+        localStorage.setItem('username', response.username);
         router.navigate('/all-projects');
       } else {
         const errorMessage = response.non_field_errors?.[0];
