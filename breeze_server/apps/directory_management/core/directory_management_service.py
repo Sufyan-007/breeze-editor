@@ -28,7 +28,6 @@ class DirectoryManager:
 
 
     def add_node_to_config(self, parent_id, tag,name, node_type="FILE",ext="", file_id=None, entity_id = "",isProtected=False):
-        
         parent_node = self.directory_management_config.get(parent_id,None)
         
         if not parent_node:
@@ -41,7 +40,6 @@ class DirectoryManager:
             raise PermissionError()
         
         parent_dir = self.get_path_from_file_id(parent_node["id"])
-        
         fullName = name
         
         if node_type == "FILE":
@@ -56,8 +54,8 @@ class DirectoryManager:
         if file_id and file_id in self.directory_management_config:
             raise KeyError("Id already in directory management")
         
-        if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir):
-            raise FileExistsError("Given file name already exists")
+        # if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir):
+        #     raise FileExistsError("Given file name already exists")
         
         
         if file_id:
@@ -89,8 +87,34 @@ class DirectoryManager:
     
     def move_node(self, node_id, new_parent_id):
         raise NotImplementedError()
+    
+    
+    def delete_node(self,file_id,recursive=False):
+        node = self.directory_management_config[file_id]
+        children = node.get("children",[])
+        if children:
+            if recursive:
+                for child in children:
+                    self.delete_node(child,recursive=True)
+            else:
+                raise Exception("Directory contains entries")
+        path=self.get_path_from_file_id(file_id)
+        try:
+            if node["type"] == "FILE":
+                os.remove(path)
+                
+            else:
+                shutil.rmtree(path)
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            raise e
+        parent_node = self.directory_management_config[node["parentId"]]
+        parent_node["children"].remove(file_id)
+        del self.directory_management_config[file_id]
+        with open(self.directory_config_path, 'w') as file:
+            json.dump(self.directory_management_config, file, indent=2)
         
-
     #get path from file_id
     def get_path_from_file_id(self,file_id,relative_path=False):
         if file_id=="ROOT":

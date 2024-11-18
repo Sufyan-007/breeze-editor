@@ -9,6 +9,7 @@ from ...common.utils.file_helpers.json_handler import write_json_file
 from ...directory_management.core.directory_management_service import DirectoryManager
 from ...project_config_management.api_client_management.consts import WEBSOCKET_HOOK,RESPONSE_INTERCEPTOR,RESPONSE_STATUS_CONDITION,REQUEST_INTERCEPTOR,REFRESH_TOKEN_API
 from ...common.utils.variable_name_convertor import convert_to_valid_variable_name
+from ...project_management.core.environment_management import get_env_config
 def __init__( app_name):
     app_config_dir = f"{CONFIG_PATH}/{app_name}"
     app_config = read_project_config_file(
@@ -17,7 +18,7 @@ def __init__( app_name):
     app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['componentsSrcDir']}"
     return app_config_dir,app_config
 
-def generate_react_service( app_name, filename, service_type, module_id, module_name=''):
+def generate_react_service( app_name, filename, service_type, module_id,security_schemes, module_name=''):
     _, app_config = __init__(app_name)
     map_services = {}
     if service_type == "WS":
@@ -43,7 +44,7 @@ def generate_react_service( app_name, filename, service_type, module_id, module_
         service_config = read_json_file(service_path)
         for key,config in service_config.items():
             model = ApiModelLoader.load_api_model(config)
-            react_functions = generate_service_function(model, False, app_name,service_type, service_path= service_path,module_id=module_id)
+            react_functions = generate_service_function(model, False, app_name,service_type, service_path= service_path,module_id=module_id,security_scheme=security_schemes)
             
             map_services = _manage_service_tags(model.tags, react_functions, map_services)
         
@@ -60,7 +61,7 @@ def create_websocket_hook_file( filename, app_config):
     print("services generated.............")
     
     
-def generate_service_function( model, anonymous, app_name,service_type, service_path,module_id):
+def generate_service_function( model, anonymous, app_name,service_type, service_path,module_id,security_scheme):
     func_name = model.operation_id
     interceptor_code = ""
     response_interceptor_code = RESPONSE_INTERCEPTOR
@@ -68,7 +69,13 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         ## currently only support for single auth
         ## need to handle all array of auth
         auth = model.request.auth[0]
-        interceptor_code = generate_api_interceptor(auth, app_name,module_id)
+        key_name = ''
+        auth_dict = auth.as_dict()
+        if auth_dict.get("type") == 'APIKEY':
+            for k,v in security_scheme.items():
+                if v.get("type") == 'apiKey':
+                    key_name = v.get("name")
+        interceptor_code = generate_api_interceptor(auth, app_name,module_id, key_name=key_name)
 
         # if auth and auth.token_api != "" and auth.token_api is not None:
         #     r_interceptor_code = self.set_response_interceptor(auth, app_name)
@@ -166,36 +173,111 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         "react_code" : react_code,
         "function_args" : function_args
     }
-    
-    for mode,body in body_items.items():
-        variable_declaration = body.get("variable_declaration","")
-        react_code = copy.deepcopy(common_data.get("react_code"))
-        if len(variable_declaration) > 0:
-            ## declare any formdata or file variable befor passing it to axios
-            axis_object_declation = copy.deepcopy(common_data.get("axis_object_declation"))
-            axis_object_declation = variable_declaration + axis_object_declation
+    if len(new_model["request"]["body"]) > 0:
+        for mode,body in body_items.items():
+            variable_declaration = body.get("variable_declaration","")
+            react_code = copy.deepcopy(common_data.get("react_code"))
+            if len(variable_declaration) > 0:
+                ## declare any formdata or file variable befor passing it to axios
+                axis_object_declation = copy.deepcopy(common_data.get("axis_object_declation"))
+                axis_object_declation = variable_declaration + axis_object_declation
 
-        request_body = body.get("raw_data",None)
-        extra_headers = body.get("headers",[])
-        extra_params = body.get("params",[])
+            request_body = body.get("raw_data",None)
+            extra_headers = body.get("headers",[])
+            extra_params = body.get("params",[])
+            
+            ## merge headers
+            headers = copy.deepcopy(common_data.get("headers"))
+            for head in extra_headers:
+                headers[head.get("key")] = head.get("value")
+            
+            function_args = copy.deepcopy(common_data.get("function_args"))
+            # print("function_args",function_args)
+            if extra_params:
+                ## merge params
+                function_args = function_args + extra_params
+            print("function_args", function_args)
+            if request_body is not None:
+                axis_object_declation = axis_object_declation.replace('{BODY}',"data : %s"%(request_body))
+            else:
+                axis_object_declation = axis_object_declation.replace('{BODY}','')
+
+
+            if bool(headers) is True:
+                variable_headers = []
+                for key,value in headers.items():
+                    if type(value) is str:
+                        variable_headers.append(f"'{key}': '{str(value)}'")
+                    elif value["type"] in ["LOCAL_STORAGE", "SESSION_STORAGE", "USER_INPUT"]:
+                        variable_headers.append(f"{key}: {value['value']}")
+                    else:
+                        variable_headers.append(f"'{key}': '{value['value']}'") 
+                headers_items = ', '.join(variable_headers)
+                headers =  ' headers : {%s}'%(headers_items)
+                
+                axis_object_declation = axis_object_declation.replace('{HEADERS}',headers)
+            else:
+                axis_object_declation = axis_object_declation.replace('{HEADERS},',"")
+
+            ## set function args comma seperated
+            function_args = ",".join(function_args)
+            
+            ## set response conditions if provided
+            r_status_conditions = []
+            for res in model.response:
+                if res.status != "200" and res.status != "201":
+                    r_status = RESPONSE_STATUS_CONDITION%(res.status.value,res.description)
+                    r_status_conditions.append(r_status)
+            if len(r_status_conditions)> 0:
+                response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
+            else:
+                response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","")
+
+            react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
+            react_code = react_code.replace('{FUNC_ARGS}',function_args)
+            react_code = react_code.replace('{AXIOS_OBJECT_DECLARATION}', axis_object_declation)
+            react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
+            react_code = react_code.replace(
+                '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
+            
+            ## handle api response code
+            if service_type == "AUTH":
+                auth_api_type = model.auth_api_type
+                code = ""
+                if auth_api_type == AuthApiTypeEnum.LOGIN or auth_api_type == AuthApiTypeEnum.REFRESH:
+                    model_obj = model.as_dict()
+                    for res in model_obj.get("response", []):
+                        if res.get("status") == "S_200":
+                            token_store_info = res.get("token_store")
+                            if token_store_info:
+                                for key,value in token_store_info.items():
+                                    store_in = value.get("store_in")
+                                    storage_key = value.get("storage_key")
+                                    if store_in == TokenStoreTypeEnum.LOCAL_STORAGE:
+                                        code += "localStorage.setItem('%s',`${resp.data.%s}`);"%(storage_key, key)
+                                    elif store_in == TokenStoreTypeEnum.SESSION:
+                                        code += "sessionStorage.setItem('%s',`${resp.data.%s}`);"%(storage_key, key)
+
+                                
+                react_code = react_code.replace('{RESPONSE_CODE}',code)
+            else:
+                react_code = react_code.replace('{RESPONSE_CODE}',"")
+
+            # react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
+            react_code = react_code.replace('{FUNC_NAME}',convert_to_valid_variable_name(func_name))
+            react_service_functions.append(react_code)
+    
+    else:
+        react_code = copy.deepcopy(common_data.get("react_code"))
         
         ## merge headers
         headers = copy.deepcopy(common_data.get("headers"))
-        for head in extra_headers:
-            headers[head.get("key")] = head.get("value")
         
         function_args = copy.deepcopy(common_data.get("function_args"))
         # print("function_args",function_args)
-        if extra_params:
-            ## merge params
-            function_args = function_args + extra_params
+        
         print("function_args", function_args)
-        if request_body is not None:
-            axis_object_declation = axis_object_declation.replace('{BODY}',"data : %s"%(request_body))
-        else:
-            axis_object_declation = axis_object_declation.replace('{BODY}','')
-
-
+        axis_object_declation = axis_object_declation.replace('{BODY}','')
         if bool(headers) is True:
             variable_headers = []
             for key,value in headers.items():
@@ -278,21 +360,8 @@ def _manage_service_tags( tags, react_functions, map_services):
     return map_services
 
 def create_service_files( map_services,project_name,fileId,module_id, module_name):
-    # preprare new service file for each tag
-    # parent_folder_name = "service"
-    # folder_name= "module1"
     content = "import axios from 'axios'\n"
-    # create_dir_if_not_exists(f"{app_config['APP_SOURCE_DIR']}/{parent_folder_name}/{folder_name}")
     directory_manager = DirectoryManager(project_name=project_name)
-    # newNode = directory_manager.add_node_to_config(
-    #     parent_id= "SERVICES",
-    #     tag= "SERVICES",
-    #     name=module_name,
-    #     node_type="DIRECTORY",
-    #     file_id= module_id,
-    #     entity_id=module_id,
-    #     isProtected=False
-    # )
     for tag, func_arr in map_services.items():
         try:
             directory_manager.add_node_to_config(
@@ -353,10 +422,11 @@ def retrive_token_code(auth_api_id,auth_token_id,app_name, module_id ):
         return ""
         
 
-def generate_api_interceptor( auth, app_name,module_id):
+def generate_api_interceptor( auth, app_name,module_id, key_name = ''):
     type = auth.type
     auth_code = ""
     interceptor_code = REQUEST_INTERCEPTOR
+    key_name = key_name
     token = retrive_token_code(auth.login_api, auth.token_id, app_name,module_id)
     if token == '':
         token = "''"
@@ -378,10 +448,14 @@ def generate_api_interceptor( auth, app_name,module_id):
                 auth_code = "config.headers.Authorization = `%s ${token}`;" % (
                     header_prefix)
             else:
-                auth_code = "config.headers.Authorization = `${token}`;"
+                auth_code = "config.headers.Authorization = token;"
 
     elif type == AuthTypeEnum.BEARER:
         auth_code = "config.headers.Authorization = `Bearer ${token}`;"
+    elif type == AuthTypeEnum.APIKEY:
+        auth_code = f"config.headers.{key_name} = token;"
+    else:
+        raise NotImplementedError("Unknown type ",type)
 
     interceptor_code = interceptor_code.replace('{AUTH_CODE}', auth_code)
     return interceptor_code
@@ -567,10 +641,8 @@ def set_request_url(model,app_name):
         url = baseurl+path
     else:
         url = url_env+path
-        ######### needs to be uncommented after env settings migration ##############
-        # environment_settings_service = EnvironmentSettingsConfigService(app_name)
-        # config = environment_settings_service.get_config()
-        # url = "${process.env.%s}" % config.get("envVars").get(url_env)  + path
+        config = get_env_config(project_id=app_name)
+        url = "${process.env.%s}" % config.get("envVars").get(url_env) + '/' + path
     new_query_params =[]
     new_path_params = []
     for params in model.request.parameters:
@@ -578,6 +650,8 @@ def set_request_url(model,app_name):
             if params.param_type == "USER_INPUT":
                 new_query_params.append({"name":params.name, "type":params.type})
                 query_params.append("%s=${QueryParameters.%s}" % (params.name, params.name))
+                if 'QueryParameters' not in function_args:
+                    function_args.append('QueryParameters')
             elif params.param_type == "STATIC":
                 query_params.append("%s=%s"%(params.name,params.value))
             elif params.param_type == "LOCAL_STORAGE":
@@ -586,13 +660,14 @@ def set_request_url(model,app_name):
             elif params.param_type == "SESSION_STORAGE":
                 query_params.append("%s=${sessionStorage.getItem('%s')}" % (params.name, params.storage_key))
                 
-            function_args.append('QueryParameters')
 
             
         elif params.param_in == ParamsInEnum.PATH:
             if params.param_type == "USER_INPUT":
                 new_path_params.append({"name":params.name, "type":params.type})
                 url=url.replace(f"{{{params.name}}}", f"${{PathParameters.{params.name}}}")
+                if 'PathParameters' not in function_args:
+                    function_args.append('PathParameters')
             elif params.param_type == "STATIC":
                 if not params.value:
                     params.value = ""
@@ -602,7 +677,7 @@ def set_request_url(model,app_name):
             elif params.param_type == "SESSION_STORAGE":
                 url=url.replace(f"{{{params.name}}}", "${sessionStorage.getItem('%s')}"%(params.storage_key))
                
-            function_args.append('PathParameters')
+            
 
     if len(query_params) > 0:
         query = '&'.join(query_params)

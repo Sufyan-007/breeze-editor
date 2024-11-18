@@ -1,18 +1,22 @@
+import { useEffect, useState } from 'react';
 import { CustomSelectField, CustomTextInput } from '../../../common/fields';
 import PropTypes from 'prop-types';
 function HeadersSetting({ headerData, onChange }) {
+  const [headers, setHeaders] = useState(headerData);
   const handleInputChange = (index, field, value) => {
-    const updatedHeaders = [...headerData];
+    const updatedHeaders = [...headers];
     updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
     onChange('headers', updatedHeaders);
   };
 
   const handleDelete = (index) => {
-    const updatedHeaders = [...headerData];
+    const updatedHeaders = [...headers];
     updatedHeaders.splice(index, 1);
     onChange('headers', updatedHeaders);
   };
-
+  useEffect(() => {
+    setHeaders(headerData);
+  }, [headerData]);
   // const renderError = (errors) => {
   //   if (!errors) return null;
   //   return (
@@ -32,8 +36,8 @@ function HeadersSetting({ headerData, onChange }) {
 
   return (
     <>
-      {headerData && headerData.length > 0 ? (
-        headerData.map((header, index) => (
+      {headers && headers.length > 0 ? (
+        headers.map((header, index) => (
           <div
             key={index}
             className="my-2 rounded-0 br-text-primary br-background-secondary d-flex align-items-center justify-content-between"
@@ -72,6 +76,7 @@ function HeadersSetting({ headerData, onChange }) {
                   handleInputChange(index, 'data_type', e);
                 }}
                 options={[
+                  { value: '', label: 'Select' },
                   { label: 'String', value: 'string' },
                   { label: 'Numeric', value: 'numeric' },
                   { label: 'Object', value: 'object' },
@@ -134,7 +139,7 @@ HeadersSetting.propTypes = {
       value: PropTypes.string,
       storage_key: PropTypes.string,
     })
-  ).isRequired,
+  ),
   onChange: PropTypes.func.isRequired,
 };
 export default HeadersSetting;

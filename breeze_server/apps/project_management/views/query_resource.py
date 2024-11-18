@@ -80,11 +80,12 @@ def manage_resource(request, param):
             else:
                 selected_data = get_json_config_data(resource, category, projectname)
                 
-            if selected_data and resource:
-                selected_data = {
-                    resource : selected_data["data"]
-                }
-            elif selected_data:
+            # if selected_data and resource:
+            #     selected_data = {
+            #         resource : selected_data["data"]
+            #     }
+            # elif selected_data:
+            if selected_data:
                 selected_data = selected_data["data"]
             else:
               return JsonResponse({"error":"check category name or project name"}, status=400)
@@ -258,9 +259,10 @@ def manage_resource(request, param):
                         )
                 
                 if resource:
-                    selected_data={
-                        resource : selected_data[resource]
-                    }
+                    selected_data=selected_data[resource]
+                    # selected_data={
+                    #     resource : selected_data[resource]
+                    # }
                 
                 if not resource:
                     for key in list(selected_data.keys()):  # Iterate over keys to modify each item
@@ -286,10 +288,10 @@ def manage_resource(request, param):
                 selected_data = read_file(config_path)
                 
                 if resource:
-                    selected_data={
-                        resource:selected_data[resource]
-                    }
-                    # selected_data=selected_data[resource]
+                    # selected_data={
+                    #     resource:selected_data[resource]
+                    # }
+                    selected_data=selected_data[resource]
              except Exception as e:
                 return JsonResponse(
                     {"error": "files are not present in module"}, status=400
@@ -308,10 +310,10 @@ def manage_resource(request, param):
                 else:
                     try:
                         # selected_data=selected_data["data"]
-                        # selected_data = {
-                        #     key: get_nested_value(selected_data, key) for key in select
-                        # }
-                        selected_data = ffilter_selected_data(selected_data,select)
+                        selected_data = {
+                            key: get_nested_value(selected_data, key) for key in select
+                        }
+                        # selected_data = ffilter_selected_data(selected_data,select)
                     except Exception as e:
                         return JsonResponse({"error": str(e)}, status=400)
 
@@ -323,20 +325,20 @@ def manage_resource(request, param):
 
                 else:
                     try:
-                        # selected_data = {
-                        #     key: get_nested_value(selected_data, key) for key in select
-                        # }
-                        selected_data = ffilter_selected_data(selected_data,select)
+                        selected_data = {
+                            key: get_nested_value(selected_data, key) for key in select
+                        }
+                        # selected_data = ffilter_selected_data(selected_data,select)
                     except Exception as e:
                         return JsonResponse({"error2": str(e)}, status=400)
 
             elif category in [ResourceCategory.MODEL.value]:
                 if module or resource:
                     try:
-                        # selected_data = {
-                        #     key: get_nested_value(selected_data, key) for key in select
-                        # }
-                        selected_data=filter_selected_data(selected_data,select)
+                        selected_data = {
+                            key: get_nested_value(selected_data, key) for key in select
+                        }
+                        # selected_data=filter_selected_data(selected_data,select)
                     except Exception as e:
                         return JsonResponse({"error": str(e)}, status=400)
                 else:

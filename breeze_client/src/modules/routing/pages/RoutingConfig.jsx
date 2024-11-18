@@ -60,6 +60,7 @@ function RoutingConfig() {
     setShowRouterProviderForm(false);
     const res = await getRouteDetails(projectName, route.id);
     setSelectedRoute(res.data);
+    setIsNewRoute(false);
     setIsEditing(true);
   };
 

@@ -21,21 +21,12 @@ export async function getFiles(projectName, payload) {
 }
 
 export async function getFunctions(projectName, payload) {
-  const res = await fetchIntermediates(projectName, payload);
   const functionsResponse = {};
-
-  const modulePromises = Object.keys(res.data).map(async (moduleId) => {
-    const { data } = await fetchIntermediates(projectName, { ...payload, module: moduleId });
-    const filePromises = Object.keys(data).map(async (fileId) => {
-      const { data } = await fetchIntermediates(projectName, { ...payload, module: moduleId, files: fileId });
-      Object.entries(data).forEach(([key, value]) => {
-        functionsResponse[key] = value;
-      });
-    });
-
-    await Promise.all(filePromises);
+  const { data } = await fetchIntermediates(projectName, payload);
+  Object.entries(data).forEach(([key, value]) => {
+    functionsResponse[key] = value;
   });
-  await Promise.all(modulePromises);
+
   return functionsResponse;
 }
 

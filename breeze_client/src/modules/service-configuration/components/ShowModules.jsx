@@ -44,7 +44,8 @@ function ShowModules({
   }, [dispatch, folderKey, projectName, files]);
 
   const handleInputChange = (value) => {
-    setNewModuleTitle(value);
+    const trimmedNewName = value.trim();
+    setNewModuleTitle(trimmedNewName);
   };
 
   const toggleEditing = (title) => {
@@ -71,7 +72,8 @@ function ShowModules({
                 className="form-control form-control-sm br-text-primary br-background-primary"
                 onChange={handleInputChange}
                 onBlur={() => {
-                  saveTitle(value.title, folderKey, newModuleTitle);
+                  const trimmedNewName = newModuleTitle.trim();
+                  if (value.title !== trimmedNewName) saveTitle(value.title, folderKey, trimmedNewName);
                   toggleEditing(value.title);
                 }}
                 onKeyDown={(e) => {
@@ -86,7 +88,7 @@ function ShowModules({
             ) : (
               <div className="">
                 <img width="20" height="20" src="https://img.icons8.com/ios-filled/50/AAAAAA/module.png" alt="module" />
-                <span className="mx-2 br-text-primary">
+                <span className="mx-2 br-text-primary" style={{ fontSize: '16px' }}>
                   {value.title.length > 30 ? `${value.title.slice(0, 30)}...` : value.title}
                 </span>
               </div>
@@ -97,9 +99,9 @@ function ShowModules({
               className="bi bi-plus-circle mx-1"
               style={{ cursor: 'pointer' }}
               onClick={() => {
-                onAdd();
+                onAdd(value.title, folderKey);
               }}
-              title="add-to-module"
+              title="add-function"
             ></i>
             <i
               className="bi bi-pencil-square mx-1"

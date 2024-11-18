@@ -21,7 +21,6 @@ function ObjectDetails({ objectData, onUpdate, moduleId, selectedSchema, onResol
     const newProperty = { ...typeTemplate };
     const updatedSchema = { ...objectData };
     updatedSchema.properties = { ...updatedSchema.properties, [newPropertyKey]: newProperty };
-    console.log(updatedSchema);
     onUpdate(updatedSchema, moduleId);
   };
   const changePropertyName = (oldkey, newkey, data) => {
