@@ -15,16 +15,30 @@ function Login() {
     password: '',
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const handleInputChange = (name, value) => {
     setUserDetails({ ...userDetails, [name]: value });
+    setUsernameError('');
+    setPasswordError('');
   };
+
   const handleLogin = async (username, password) => {
     try {
-      const { accessToken } = await login(username, password);
-      console.log('Logged in successfully. Token:', accessToken);
-      localStorage.setItem('accessToken', accessToken);
-      router.navigate('/all-projects');
+      const response = await login(username, password);
+      if (response.accessToken) {
+        localStorage.setItem('accessToken', response.accessToken);
+        localStorage.setItem('username', response.username);
+        router.navigate('/all-projects');
+      } else {
+        const errorMessage = response.non_field_errors?.[0];
+
+        if (errorMessage) {
+          setUsernameError(errorMessage.includes('User does not exist.') ? errorMessage : '');
+          setPasswordError(errorMessage.includes('Incorrect password.') ? errorMessage : '');
+        }
+      }
     } catch (error) {
       console.error('Login error:', error.message);
     }
@@ -83,6 +97,7 @@ function Login() {
                     customValidations={[validator.REQUIRED, validator.USERNAME_VALIDATION]}
                     isSubmitted={isSubmitted}
                   />
+                  {usernameError && <div className="text-danger small-font mt-1">{usernameError}</div>}{' '}
                 </div>
                 <div className="mb-3 authentication-form-box">
                   <CustomTextInput
@@ -98,7 +113,9 @@ function Login() {
                     customValidations={[validator.REQUIRED]}
                     isSubmitted={isSubmitted}
                   />
+                  {passwordError && <div className="text-danger small-font mt-1">{passwordError}</div>}{' '}
                 </div>
+
                 <div className="">
                   <a className="text-decoration-none float-end authentication-small-font mb-3">Forgot Password?</a>
                 </div>

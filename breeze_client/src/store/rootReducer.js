@@ -7,6 +7,7 @@ import environmentReducer from '../redux/settings/settingsReducers';
 import directory_reducers from '../redux/directory_management/directory_reducers';
 import serviceConfigReducer from '../modules/service-configuration/redux/ApiClientReducers';
 import schemaConfigReducers from '../modules/schema-configuration/redux/schemaConfigReducers';
+import resourceReducer from '../modules/resource-configuration/redux/resourcesReducers';
 
 import thirdPartyDependenciesReducer from '../redux/third-party-dependencies/thirdPartyDependenciesReducer';
 import { RESET_STORE } from './actions';
@@ -20,7 +21,7 @@ const appReducer = combineReducers({
   environment: environmentReducer,
   services: serviceConfigReducer,
   schemas: schemaConfigReducers,
-  // Add other module reducers here`
+  resources: resourceReducer,
 });
 
 const rootReducer = (state, action) => {

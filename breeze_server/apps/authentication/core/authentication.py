@@ -7,6 +7,8 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from ..utils import get_auth_file_path
 from ..auth_consts import EXEMPT_URLS
+from django.conf import settings
+from ..views.serializers import get_user_data
 
 class CustomTokenAuthentication(BaseAuthentication):
     def authenticate(self, request):
@@ -14,10 +16,10 @@ class CustomTokenAuthentication(BaseAuthentication):
         if request.path in EXEMPT_URLS:
             return None
         token = request.headers.get('Authorization', None)
+        # print(token)
         if token is None:
             raise AuthenticationFailed('Invalid token.')
-            return None
-
+        
         token = token.replace('Bearer ', '')
         # auth_file_path = get_auth_file_path()
 
@@ -27,7 +29,11 @@ class CustomTokenAuthentication(BaseAuthentication):
         # except FileNotFoundError:
         #     return None
 
-        token_data = jwt.decode(token, options={"verify_signature": False})
+        # token_data = jwt.decode(token, options={"verify_signature": False})
+        # token_data = jwt.decode(token, key=settings.SIMPLE_JWT["SIGNING_KEY"] , algorithms=["HS256"])
+        token_data = jwt.decode(token,key = "123456789" , algorithms=["HS256"])
+        print(token_data['user_id'])
+        # token_data=AccessToken(token)
         if not token_data:
             raise AuthenticationFailed('Invalid token.')
 
@@ -48,8 +54,13 @@ class CustomTokenAuthentication(BaseAuthentication):
             
         #     # Raise an authentication error with the new token, so the client knows they need to update
         #     raise AuthenticationFailed({'message': 'Token has expired. Use new token.', 'new_token': new_token})
-
+        user_details = get_user_data(token_data["user_id"])
+        request.user_details = user_details
+        # print("jiji")
         return (token_data, None)
+
 
     def authenticate_header(self, request):
         return 'Token'
+
+

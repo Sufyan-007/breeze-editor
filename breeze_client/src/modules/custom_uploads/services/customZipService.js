@@ -12,7 +12,7 @@ const uploadZipFile = async (submitData, projectName) => {
 };
 
 const fetchZipFiles = async (projectName) => {
-  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package/${projectName}`;
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/get-uploaded-resource/${projectName}?tag=ZIP`;
   try {
     const response = await callApiClient(url, 'GET');
     return response;
@@ -22,15 +22,15 @@ const fetchZipFiles = async (projectName) => {
   }
 };
 
-const deleteFile = async (file, projectName) => {
-  const fileName = file;
+const deleteFile = async (fileName, fileId, projectName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package-delete/${projectName}`;
   const payload = {
     fileName,
+    fileId,
   };
   try {
     const response = await callApiClient(url, 'DELETE', payload);
-    if (response.ok) {
+    if (response) {
       return { message: 'File deleted successfully' };
     } else {
       throw new Error(response.Error || 'Failed to delete the file');
@@ -41,4 +41,25 @@ const deleteFile = async (file, projectName) => {
   }
 };
 
-export { uploadZipFile, fetchZipFiles, deleteFile };
+const fetchZipFileComponentsService = async (selectedFilename, projectName, additionalPayload = null) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/query_resource/${projectName}/`;
+  const payload = {
+    category: 'external_components_config',
+    libname: selectedFilename,
+  };
+
+  if (additionalPayload) {
+    payload.resource = additionalPayload.resource;
+    payload.select = additionalPayload.select;
+  }
+  try {
+    const response = await callApiClient(url, 'POST', payload);
+
+    return response;
+  } catch (error) {
+    console.error('Error fetching zip file components:', error);
+    throw error;
+  }
+};
+
+export { uploadZipFile, fetchZipFiles, deleteFile, fetchZipFileComponentsService };

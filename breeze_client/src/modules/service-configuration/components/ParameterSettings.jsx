@@ -33,105 +33,106 @@ function ParameterSettings({ paramData, onChange, renderError }) {
     <>
       {queryParameters && queryParameters.length > 0 ? (
         queryParameters.map((param, index) => (
-          <div
-            key={index}
-            className="rounded-0 br-text-primary br-background-secondary d-flex align-items-center justify-content-between mb-2 mx-1"
-          >
-            <div className="d-flex align-items-center w-100">
-              <CustomTextInput
-                className=" form-control br-form-control form-control-sm"
-                placeholder="Name"
-                config={{
-                  label: 'Parameter Name',
-                  groupClass: 'form-group mb-2 mx-2 w-50',
-                }}
-                value={param.name}
-                onChange={(e) => handleInputChange(index, 'name', e)}
-              />
-              <CustomSelectField
-                name="valueSelect"
-                value={param.param_type}
-                onChange={(e) => {
-                  handleInputChange(index, 'param_type', e);
-                }}
-                options={[
-                  // { label: 'Select', value: '' },
-                  // { label: 'STATIC', value: 'STATIC' },
-                  { label: 'USER INPUT', value: 'USER_INPUT' },
-                  { label: 'LOCALSTORAGE', value: 'LOCAL_STORAGE' },
-                  { label: 'SESSION STORAGE', value: 'SESSION_STORAGE' },
-                ]}
-                className="form-select br-form-select form-select-sm mt-3"
-                config={{
-                  label: 'Value Type',
-                  groupClass: 'form-group mb-2 mx-2 w-50',
-                }}
-              />
-
-              <CustomSelectField
-                name="dataTypeSelect"
-                value={param.data_type || ''}
-                onChange={(e) => {
-                  handleInputChange(index, 'data_type', e);
-                }}
-                options={[
-                  { label: 'String', value: 'string' },
-                  { label: 'Numeric', value: 'numeric' },
-                  { label: 'Object', value: 'object' },
-                  { label: 'Boolean', value: 'boolean' },
-                ]}
-                className="form-select br-form-select form-select-sm mt-3"
-                config={{
-                  label: 'Data Type',
-                  groupClass: 'form-group mb-2 mx-2 w-50',
-                }}
-              />
-
-              {param.param_type === 'LOCAL_STORAGE' || param.param_type === 'SESSION_STORAGE' ? (
+          <>
+            {' '}
+            <div
+              key={index}
+              className="rounded-0 br-text-primary br-background-secondary d-flex align-items-center justify-content-between mb-2 mx-1"
+            >
+              <div className="d-flex align-items-center w-100">
                 <CustomTextInput
                   className=" form-control br-form-control form-control-sm"
-                  placeholder="Key"
+                  placeholder="Name"
                   config={{
-                    label: 'Storage Key',
+                    label: 'Parameter Name',
                     groupClass: 'form-group mb-2 mx-2 w-50',
                   }}
-                  value={param.storage_key}
+                  value={param.name}
+                  onChange={(e) => handleInputChange(index, 'name', e)}
+                />
+                <CustomSelectField
+                  name="valueSelect"
+                  value={param.param_type}
                   onChange={(e) => {
-                    handleInputChange(index, 'storage_key', e);
+                    handleInputChange(index, 'param_type', e);
+                  }}
+                  options={[
+                    // { label: 'Select', value: '' },
+                    // { label: 'STATIC', value: 'STATIC' },
+                    { label: 'USER INPUT', value: 'USER_INPUT' },
+                    { label: 'LOCALSTORAGE', value: 'LOCAL_STORAGE' },
+                    { label: 'SESSION STORAGE', value: 'SESSION_STORAGE' },
+                  ]}
+                  className="form-select br-form-select form-select-sm mt-3"
+                  config={{
+                    label: 'Value Type',
+                    groupClass: 'form-group mb-2 mx-2 w-50',
                   }}
                 />
-              ) : null}
-              <CustomCheckBoxField
-                value={param.required}
-                onChange={(e) => handleInputChange(index, 'required', e)}
-                className="form-check-input br-form-check-input"
-                config={{
-                  label: 'Required',
-                  groupClass: 'form-group mb-2 mx-2',
-                }}
-              />
+
+                <CustomSelectField
+                  name="dataTypeSelect"
+                  value={param.data_type || ''}
+                  onChange={(e) => {
+                    handleInputChange(index, 'data_type', e);
+                  }}
+                  options={[
+                    { label: 'String', value: 'string' },
+                    { label: 'Numeric', value: 'numeric' },
+                    { label: 'Object', value: 'object' },
+                    { label: 'Boolean', value: 'boolean' },
+                  ]}
+                  className="form-select br-form-select form-select-sm mt-3"
+                  config={{
+                    label: 'Data Type',
+                    groupClass: 'form-group mb-2 mx-2 w-50',
+                  }}
+                />
+
+                {param.param_type === 'LOCAL_STORAGE' || param.param_type === 'SESSION_STORAGE' ? (
+                  <CustomTextInput
+                    className=" form-control br-form-control form-control-sm"
+                    placeholder="Key"
+                    config={{
+                      label: 'Storage Key',
+                      groupClass: 'form-group mb-2 mx-2 w-50',
+                    }}
+                    value={param.storage_key}
+                    onChange={(e) => {
+                      handleInputChange(index, 'storage_key', e);
+                    }}
+                  />
+                ) : null}
+                <CustomCheckBoxField
+                  value={param.required}
+                  onChange={(e) => handleInputChange(index, 'required', e)}
+                  className="form-check-input br-form-check-input"
+                  config={{
+                    label: 'Required',
+                    groupClass: 'form-group mb-2 mx-2',
+                  }}
+                />
+              </div>
+              <div className="d-flex align-items-center">
+                <i
+                  className="bi bi-trash3 mt-4"
+                  alt="delete"
+                  height={25}
+                  width={25}
+                  onClick={() => handleDelete(index)}
+                ></i>
+              </div>
             </div>
-            <div className="d-flex align-items-center">
-              <i
-                className="bi bi-trash3 mt-4"
-                alt="delete"
-                height={25}
-                width={25}
-                onClick={() => handleDelete(index)}
-              ></i>
+            <div key={index} className="mx-1  br-text-primary">
+              {renderError(param.errors)}
             </div>
-          </div>
+          </>
         ))
       ) : (
         <div className="d-flex justify-content-center">
           <span className=" br-text-primary mb-1">-----No Query Parameters Present-----</span>
         </div>
       )}
-      {queryParameters.map((param, index) => (
-        <div key={index} className="mx-1 mt-1 br-text-primary">
-          {renderError(param.errors)}
-        </div>
-      ))}
     </>
   );
 }

@@ -8,7 +8,10 @@ import darkLightModeSwitch from '../../assets/svgs/dark-light-mode-switch.svg';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
 
+import { router } from '../../routes/routing';
+
 function Navbar({ currentPage = 'index', projectName = '' }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const { toggleTheme } = useContext(ThemeContext);
   const menuRef = useRef(null);
 
@@ -35,6 +38,32 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
+  const username = localStorage.getItem('username');
+  const profileMenu = useRef(null);
+
+  const toggleMenu = (e) => {
+    e.stopPropagation();
+    setMenuOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (profileMenu.current && !profileMenu.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('username');
+    router.navigate('/login');
+  };
 
   return (
     <nav
@@ -45,7 +74,7 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
       <div className="container-fluid">
         <ol className="breadcrumb mb-0" style={{ '--bs-breadcrumb-divider-color': 'var(--color-text)' }}>
           <li className="breadcrumb-item mb-1">
-            <Link to={'/'}>
+            <Link to={'/all-projects'}>
               <img src={BreezeStudio} alt="logo" />
             </Link>
           </li>
@@ -94,9 +123,25 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
               </div>
             )}
           </div>
-          <div className="profile d-flex align-items-center ms-3">
-            <img className="avatar" src={Avatar} alt="avatar" />
-            <span className="ms-1 small-font br-text-primary">John Doe</span>
+          <div ref={profileMenu}>
+            <div className="profile d-flex align-items-center ms-3 br-cursor-pointer" onClick={toggleMenu}>
+              <img className="avatar" src={Avatar} alt="avatar" />
+              <span className="ms-1 small-font br-text-primary">{username || 'John Doe'}</span>
+            </div>
+            {menuOpen && (
+              <div
+                className="dropdown-menu show position-absolute px-2 br-background-primary rounded"
+                style={{ top: 45, right: 10, zIndex: 100, borderRadius: 0 }}
+              >
+                <button
+                  type="button"
+                  className="project-card-dropdown-item dropdown-item p-0 br-text-primary"
+                  onClick={handleLogout}
+                >
+                  <i className="bi bi-box-arrow-right text-danger me-1"></i> Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

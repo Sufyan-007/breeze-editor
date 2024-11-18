@@ -44,6 +44,7 @@ def generate_service_config(request, collectionType, project_id):
                 converted_data = prepare_api_models(json_data, project_id,isJson)
                 module_id = converted_data.get("id")
                 module_name = converted_data.get("title")
+                security_schemes = converted_data.get("security_schemes")
                 files_with_apis, is_erroroneous = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
                 if not is_erroroneous:
                     directory_manager = DirectoryManager(project_name=project_id)
@@ -57,7 +58,7 @@ def generate_service_config(request, collectionType, project_id):
                         isProtected=False
                     )
                     for file in files_with_apis:
-                        generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name)
+                        generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name, security_schemes= security_schemes)
                 return JsonResponse({"module_id": module_id}, status=201)
             
             # elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
@@ -89,14 +90,11 @@ def modify_function_config(request,operation,project_id):
     api_type = data.get("api_type")
     api_data = data.get("api_data")
     if api_type.lower() == "auth":
-        result = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id,operation=operation)
+        result,status = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id,operation=operation)
     else:
-        result = process_api_data(operation,api_data, filename,project_id,module_id)
-    if result:
-        return JsonResponse({"message": "Function Added Successfully" }, status=200)
-    else:
-        return JsonResponse({"message": result }, status=200)
-
+        result,status = process_api_data(operation,api_data, filename,project_id,module_id)
+    return JsonResponse(result, status=status)
+    
 @swagger_auto_schema(
     method='post',
     request_body=transfer_to_auth_schema['rb'],
@@ -163,6 +161,7 @@ def get_response_token( request, project_id,apiId, moduleId):
                             "id" : key,
                             "operation_id" : api.get("operation_id"),
                             "response_tokens": response_tokens,
+                            "type": api.get("authentication_type")
                         })
                 else:
                     result = auth_apis.get(apiId)
@@ -184,7 +183,7 @@ def add_module(request,project_id):
         return JsonResponse({"error": "Module name and description are required."}, status=400)
     swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
     swagger_schema_path = f"{CONFIG_PATH}/{project_id}/models"
-    result,status = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
+    result,status = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description, project_id=project_id)
     return JsonResponse(result, status=status)
 
 

@@ -27,6 +27,7 @@ ProtectedRoute.propTypes = {
 const LoginPageWrapper = () => {
   if (isAuthenticated()) {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('username');
   }
   return <Login />;
 };

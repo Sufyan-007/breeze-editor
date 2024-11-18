@@ -37,6 +37,10 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
         if os.path.exists(file_path):
             with open(file_path, "r") as file:
                 existing_data = json.load(file)
+            is_duplicate = check_for_duplicate_names(modified_api.get("operation_id"),modified_api.get("id"), existing_data=existing_data)
+            if is_duplicate:
+                return {'error': 'Duplicate Function name'}, 409
+            
             if modified_api["id"] in existing_data:
                 if tag != existing_data[modified_api["id"]].get("tags", "default"):
                     new_file_id = generate_uuid_as_key()
@@ -51,15 +55,24 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
                         append_to_dict_file(file_path, existing_data, False)
                 else:
                     append_to_dict_file(file_path, resultant_model)
+                    return {'message': 'added successfully'}, 200
             else:
                 append_to_dict_file(file_path, resultant_model)
+                return {'message': 'added successfully'}, 200
         else:
             append_to_dict_file(file_path, resultant_model)
+            return {'message': 'added successfully'}, 200
     except Exception as e:
         print(traceback.format_exc())
         print("error: ",  str(e))
         raise Exception(str(e))
 
+
+def check_for_duplicate_names(new_name,func_id, existing_data):
+    for key, value in existing_data.items():
+        if value.get("operation_id")== new_name and value.get("id") != func_id:
+            return True
+    return False
 
 def add_auth_function(auth_model, appName, moduleId,operation):
     project_name = appName
@@ -73,6 +86,7 @@ def add_auth_function(auth_model, appName, moduleId,operation):
         auth_api_data[auth_model.get("id")] = auth_model
         json_data[moduleId]["auth_apis"] = auth_api_data
         append_to_dict_file(folder_path, json_data)
+        return {'message': 'added successfully'},200
 
 
 def transfer_data_to_auth(filename, id_value, file_path, target_file_path, module_id):

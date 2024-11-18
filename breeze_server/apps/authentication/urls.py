@@ -6,4 +6,6 @@ urlpatterns = [
     path('login/', log_in_out.login, name='login'),
     path('logout/', log_in_out.logout, name='logout'),
     path('get-user/<str:param>/', user.get_user, name='get_user'),
+    
+    path('get-user/', user.get_user, name='get_all_users'),
 ]

@@ -31,8 +31,13 @@ def prepare_api_models(json_data, project_name,isJson):
             if not json_data:
                 return 
 
+            ##security schemes to store in the swagger metadata
+            security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
+            servers_info = openapi_data.get("servers")
             meta_data = openapi_data.get("info",{})
             meta_data["auth_apis"] = {}
+            meta_data["security_schemes"] = security_schemes
+            meta_data["servers_info"] = servers_info
             with open(swagger_metadata_file_path, "r") as file:
                 swagger_metadata_file_content = json.load(file)
             swagger_metadata_id = generate_uuid_as_key()
@@ -40,7 +45,6 @@ def prepare_api_models(json_data, project_name,isJson):
             for x in swagger_metadata_file_content.values():
                 if (not meta_data.get('title')) or x.get("title") == meta_data.get("title"):
                     meta_data["title"] = meta_data.get("title")+"_1"
-            
             swagger_metadata_file_content[swagger_metadata_id] = meta_data
             append_to_dict_file(swagger_metadata_file_path, swagger_metadata_file_content)
             
@@ -79,7 +83,6 @@ def prepare_api_models(json_data, project_name,isJson):
                 json.dump(schema_with_ids,file, cls=EnhancedJSONEncoder)
             
             ###### auth related details ########
-            security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
                 
             security_schemes_models = handle_security_schema(security_schemes,openapi_data) 
             
@@ -101,7 +104,8 @@ def prepare_api_models(json_data, project_name,isJson):
                 "id": swagger_metadata_id,
                 "tag_models" : tag_models,
                 "security_schemes_models" : security_schemes_models,
-                "title": meta_data.get("title", '')
+                "title": meta_data.get("title", ''),
+                "security_schemes": security_schemes
             }
 
         except Exception as e:

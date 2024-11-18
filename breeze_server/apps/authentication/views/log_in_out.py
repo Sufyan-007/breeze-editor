@@ -29,6 +29,8 @@ def login(request):
             # print(serializer.validated_data["access"])
             request.session['auth_token'] =serializer.validated_data["access"] 
             request.session.set_expiry(None)
+            # request.user_datails = serializer.validated_data["user_details"]
+            
             # return JsonResponse(serializer.validated_data, status=200)
             return JsonResponse({'accessToken': serializer.validated_data["access"], 'username':'username'}, status=200)
         

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ShowFunctions from './ShowFunctions';
 import { useParams } from 'react-router-dom';
@@ -7,11 +7,14 @@ import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 
 function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setView, moduleName, setSelectedFile }) {
+  const loading = useRef(0);
   const file = useSelector((state) => state.services.filesList[fileId]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [hasErrors, setHasErrors] = useState(false);
   const { projectName } = useParams();
   const dispatch = useDispatch();
+  const availableFunctions = file?.functions;
 
   const functions = useSelector(
     (state) => state.services.functionsList,
@@ -37,10 +40,27 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
     setIsOpen((prev) => !prev);
   };
 
+  const fetchFunctionsIfNeeded = useCallback(async () => {
+    if (availableFunctions && availableFunctions.length > 0) {
+      const missingFunctions = availableFunctions.filter((functionId) => !functions[functionId]);
+      if (missingFunctions.length > 0 && loading.current === 0) {
+        loading.current = 1;
+        await dispatch(
+          fetchFunctions({ projectName, payload: { category: 'api_client', module: moduleId, files: fileId } })
+        ).unwrap();
+        loading.current = 0;
+      }
+    }
+  }, [dispatch, availableFunctions, functions, projectName, moduleId, fileId]);
+
   useEffect(() => {
-    if (Object.keys(functions).length === 0)
-      dispatch(fetchFunctions({ projectName, payload: { category: 'api_client', fileId } }));
-  }, [dispatch, fileId, projectName, functions]);
+    fetchFunctionsIfNeeded();
+  }, [fetchFunctionsIfNeeded]);
+
+  // useEffect(() => {
+  //   if (Object.keys(functions).length === 0)
+  //     dispatch(fetchFunctions({ projectName, payload: { category: 'api_client', module: moduleId, files: fileId } }));
+  // }, [dispatch, fileId, projectName, moduleId, functions]);
 
   useEffect(() => {
     if (file?.functions) {
@@ -55,6 +75,7 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
       id: moduleId,
       filename: file.file,
       serviceId: api.id,
+      fileId: fileId,
     });
     setSelectedApi(api);
     setView('TEST');
@@ -67,16 +88,18 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
   };
   return (
     <div>
-      <div className={`d-flex justify-content-between ${isOpen ? 'br-background-secondary' : 'br-background-primary'}`}>
+      <div
+        className={`d-flex justify-content-between ${isOpen ? 'br-background-secondary' : 'br-background-primary'} p-1`}
+      >
         <div
           onClick={() => {
             toggleFilesExpansion();
             setSelectedFile(fileId);
           }}
-          className="w-75"
+          className="w-75 mx-2"
         >
           <i className="bi bi-file-earmark-fill" alt="file"></i>
-          <span className={`${hasErrors ? 'text-danger' : ''} mx-2`}>
+          <span className={`${hasErrors ? 'text-danger' : ''} mx-2`} style={{ fontSize: '16px' }}>
             {file?.file.length > 30 ? `${file?.file.slice(0, 30)}...` : file?.file}
           </span>{' '}
         </div>

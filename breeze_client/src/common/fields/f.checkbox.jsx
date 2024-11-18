@@ -20,9 +20,9 @@ function CustomCheckBoxField({ name, onChange, value, config, className, ...rest
 
 CustomCheckBoxField.propTypes = {
   config: PropTypes.any,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.bool.isRequired,
+  value: PropTypes.bool,
   className: PropTypes.string,
 };
 

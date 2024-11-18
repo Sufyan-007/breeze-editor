@@ -4,24 +4,29 @@ import { useEffect, useState } from 'react';
 import { fetchSchemas } from '../redux/schemaConfigActions';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 
 function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSchema, setSelectedSchema }) {
   const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
+  const allSchemas = useSelector(
+    (state) => state.schemas.schemaList,
+    (prevFiles, nextFiles) => {
+      return isEqual(prevFiles, nextFiles);
+    }
+  );
   const [isOpen, setIsOpen] = useState(false);
   const { projectName } = useParams();
   const dispatch = useDispatch();
 
   const toggleModuleExpand = () => {
-    if (!isOpen) {
-      dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
-    }
     setIsOpen(!isOpen);
   };
 
   useEffect(() => {
-    console.log(moduleId, 'moduleis');
-    dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
-  }, [dispatch, moduleId, projectName]);
+    if (Object.keys(allSchemas).length === 0) {
+      dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
+    }
+  }, [dispatch, moduleId, projectName, allSchemas]);
   return (
     <>
       <div
@@ -48,21 +53,24 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
         </div>
       </div>
       {isOpen &&
-        schemaList &&
-        Object.entries(schemaList).map(([key, schema]) => (
-          <div
-            className="ps-2 my-1"
-            style={{ cursor: 'pointer' }}
-            key={key}
-            onClick={() => {
-              setSelectedSchema(key);
-              setCurrentSchema(schema);
-              setView('SCHEMA_CONFIG');
-            }}
-          >
-            <i className="bi bi-dot"></i> {schema.name}
-            {schema.isUnresolved && <i className="bi bi-exclamation-circle text-danger mx-2"></i>}
-          </div>
+        (schemaList && Object.keys(schemaList).length > 0 ? (
+          Object.entries(schemaList).map(([key, schema]) => (
+            <div
+              className="ps-2 my-1"
+              style={{ cursor: 'pointer' }}
+              key={key}
+              onClick={() => {
+                setSelectedSchema(key);
+                setCurrentSchema(schema);
+                setView('SCHEMA_CONFIG');
+              }}
+            >
+              <i className="bi bi-dot"></i> {schema.name}
+              {schema.isUnresolved && <i className="bi bi-exclamation-circle text-danger mx-2"></i>}
+            </div>
+          ))
+        ) : (
+          <div className="br-text-primary mx-3 my-1">No Schema available</div>
         ))}
     </>
   );

@@ -13,12 +13,13 @@ function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId }) {
 
   const selectedType = selectionTypes[type];
   const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
-  console.log('hiii');
 
-  const transformedSchemaList = Object.keys(schemaList).map((key) => ({
-    value: key,
-    label: schemaList[key].name,
-  }));
+  const transformedSchemaList = schemaList
+    ? Object.keys(schemaList).map((key) => ({
+        value: key,
+        label: schemaList[key].name,
+      }))
+    : [];
   const combinedOptions = [...basicTypeTemplate, ...transformedSchemaList];
   const changeType = (val) => {
     if (val.templates) {
