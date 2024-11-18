@@ -112,12 +112,6 @@ def write_routing_config(app_config):
             "path": "/",
             "componentId": f"{app_config['defaultCompId']}",
             "parentId": None
-        },
-        sandbox_path_id : {
-            "id": sandbox_path_id,
-            "path": "/breeze/sandbox",
-            "componentId": f"{app_config['defaultCompId']}",
-            "parentId": None
         }
     }
     # write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", basic_routing_config)

@@ -22,7 +22,10 @@ class RollbackMiddleware(MiddlewareMixin):
         if changed_files:
             print("Rolling back changes...")
             for file_obj in list(changed_files.values()):
-                rollback_config_file(file_obj.project_name, file_obj.category, file_obj.filename, None, True)
+                try:
+                    rollback_config_file(file_obj.project_name, file_obj.category, file_obj.filename, None, True)
+                except Exception as e:
+                    print(f"Error rolling back file {file_obj.filename}: {e}")
         else:
             print('nothing to rollback')
         

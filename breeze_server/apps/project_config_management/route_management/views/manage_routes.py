@@ -62,14 +62,13 @@ def get_all_routes_fullpath(request,project_id):
 @api_view(['POST'])
 def add_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
-    ## res= model(data)
-    
+    ROUTING_CONFIG_CURRENT_VERSION = data.pop('ROUTING_CONFIG_CURRENT_VERSION', 0)
     try:
         check_for_mandatory_route_props(data, project_id)
         if validate_route_path(data, data.get("parentId"), project_id) is True:    
             config_data, node_id = add_node(project_id, TreeType["ROUTES"].value, data.get("parentId"), data)
             # add_params_to_route_object()
-            rewrite_clean_route_config(project_id, config_data, node_id, data.get("currentVersion"))
+            rewrite_clean_route_config(project_id, config_data, node_id, ROUTING_CONFIG_CURRENT_VERSION)
             process_route_config(project_id, config_data)
             include_all_routes_accessory_data(project_id, [config_data[node_id]])
             return JsonResponse(config_data[node_id], status=200)
@@ -90,12 +89,13 @@ def add_route(request, project_id):
 @api_view(['PUT'])
 def update_route(request, project_id):
     data = json.loads(request.body.decode("utf-8"))
+    ROUTING_CONFIG_CURRENT_VERSION = data.pop('ROUTING_CONFIG_CURRENT_VERSION', 0)
     try:
         check_for_mandatory_route_props(data, project_id)
         res = update_route_in_config(data, project_id)
         config_data = res['config']
         # add_params_to_route_object()
-        rewrite_clean_route_config(project_id, config_data, data['id'], data.get("currentVersion"))
+        rewrite_clean_route_config(project_id, config_data, data['id'], ROUTING_CONFIG_CURRENT_VERSION)
         process_route_config(project_id, config_data)
         include_all_routes_accessory_data(project_id, [config_data[data['id']]])
         return JsonResponse(config_data[data['id']], status=200)
@@ -117,11 +117,12 @@ def update_route(request, project_id):
 def delete_route(request, project_id):
     try:
         data = json.loads(request.body.decode("utf-8"))
+        ROUTING_CONFIG_CURRENT_VERSION = data.pop('ROUTING_CONFIG_CURRENT_VERSION', 0)
         res = del_route(data.get('id'), project_id)
         config_data = res['config']
-        rewrite_clean_route_config(project_id, config_data, data['id'], data.get("currentVersion"))
+        rewrite_clean_route_config(project_id, config_data, data.get('id'), ROUTING_CONFIG_CURRENT_VERSION)
         process_route_config(project_id, config_data)
-        return JsonResponse({'message': 'deletion operation successfully completed!', 'route_id': data['id']}, status=200)
+        return JsonResponse({'message': 'deletion operation successfully completed!', 'route_id': data.get('id')}, status=200)
     except Exception as e:
         print("Error ", e)
         return JsonResponse({'error': str(e)}, status=500)
