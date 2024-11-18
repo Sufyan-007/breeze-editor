@@ -4,7 +4,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from apps.common.utils.file_helpers.config_handler import write_config_file, read_config_file
 from apps.common.utils.file_helpers.config_tracker import rollback_config_file, rollforward_config_file, get_latest_config_version
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(
+    methods=['POST'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['POST'])
 def update_configs(request, project_id):

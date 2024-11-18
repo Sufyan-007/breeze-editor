@@ -56,7 +56,7 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ ...formData, ROUTING_CONFIG_CURRENT_VERSION: selectedNodePayload.currentConfigVersion });
+    onSubmit({ ...formData, ROUTING_CONFIG_CURRENT_VERSION: selectedNodePayload?.latestConfigVersion });
     setFormData(initialRoutingConfig);
   };
 
