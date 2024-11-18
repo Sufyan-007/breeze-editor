@@ -21,8 +21,8 @@ function ProjectDisplay() {
   const [editorLanguage, setEditorLanguage] = useState('javascript');
   const [projectPort, setProjectPort] = useState(3000);
   const { addTab, openTabs, updateTabContent, selectTab, setActiveConfigTab, selectedTab } = useTabContext();
-  const availableTabs = getAvailableTabs(selectedNode?.tag);
-  const currentTab = openTabs.find((tab) => tab.id === selectedNode?.id);
+  const availableTabs = getAvailableTabs(selectedTab?.tag);
+  const currentTab = openTabs.find((tab) => tab.id === selectedTab?.id);
   const activeTab = currentTab?.activeTab || 'code'; // 'code' or 'preview' or 'config'
   const [latestConfigVersion, setLatestConfigVersion] = useState(null);
   const [versionError, setVersionError] = useState(null);
@@ -273,7 +273,7 @@ function ProjectDisplay() {
             aria-labelledby="pills-config-tab"
           >
             <div className="project-display-container config-container">
-              <ConfigDisplay configType={selectedNode?.tag || ''} />
+              <ConfigDisplay configType={selectedTab?.tag || ''} />
             </div>
           </div>
         )}
