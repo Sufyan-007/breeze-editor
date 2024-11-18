@@ -61,6 +61,7 @@ function ObjectDetails({ objectData, onUpdate, moduleId, selectedSchema, onResol
               moduleId={moduleId}
               selectedSchema={selectedSchema}
               onResolve={handleResolve}
+              isUnresolved={property.isUnresolved}
             />
           </div>
         ))}

@@ -46,8 +46,8 @@ def generate_service_config(request, collectionType, project_id):
                 module_name = converted_data.get("title")
                 security_schemes = converted_data.get("security_schemes")
                 files_with_apis, is_erroroneous = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
+                directory_manager = DirectoryManager(project_name=project_id)
                 if not is_erroroneous:
-                    directory_manager = DirectoryManager(project_name=project_id)
                     directory_manager.add_node_to_config(
                         parent_id= "SERVICES",
                         tag= "SERVICES",
@@ -57,6 +57,17 @@ def generate_service_config(request, collectionType, project_id):
                         entity_id=module_id,
                         isProtected=False
                     )
+                    # directory_manager.add_node_to_config(
+                    #     parent_id= module_id,
+                    #     tag= "SERVICES",
+                    #     name= 'interceptors',
+                    #     node_type="FILE",
+                    #     file_id= interceptor_file_id ,
+                    #     entity_id=interceptor_file_id,
+                    #     isProtected=False,
+                    #     ext="SX"
+                    # )
+                    
                     for file in files_with_apis:
                         generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name, security_schemes= security_schemes)
                 return JsonResponse({"module_id": module_id}, status=201)

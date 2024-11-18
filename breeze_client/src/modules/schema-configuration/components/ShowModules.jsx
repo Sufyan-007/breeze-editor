@@ -23,7 +23,7 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
   };
 
   useEffect(() => {
-    if (Object.keys(allSchemas).length === 0) {
+    if (Object.keys(allSchemas).length === 0 && moduleId) {
       dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
     }
   }, [dispatch, moduleId, projectName, allSchemas]);

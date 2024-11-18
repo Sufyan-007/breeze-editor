@@ -41,6 +41,8 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
             index_file.write('{}') 
 
         directory_manager = DirectoryManager(project_name=project_id)
+        
+        directory_manager = DirectoryManager(project_name=project_id)
         directory_manager.add_node_to_config(
             parent_id= "SERVICES",
             tag= "SERVICES",
@@ -50,6 +52,7 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
             entity_id=module_id,
             isProtected=False
         )
+      
         return {"message": "Module added successfully."}, 200
     except Exception as e:
         return {"error": str(e)}, 500

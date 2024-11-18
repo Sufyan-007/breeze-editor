@@ -53,6 +53,8 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
                         del existing_data[modified_api["id"]]
                         print(existing_data, "existing data")
                         append_to_dict_file(file_path, existing_data, False)
+                        return {'message': 'added successfully'}, 200
+
                 else:
                     append_to_dict_file(file_path, resultant_model)
                     return {'message': 'added successfully'}, 200

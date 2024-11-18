@@ -18,6 +18,8 @@ import {
 } from '../redux/ApiClientActions';
 import AddModule from '../components/AddModule';
 import { isValidApiStructure } from '../constants/ValidatorFunctions';
+import { fetchSchemas } from '../../schema-configuration/redux/schemaConfigActions';
+import ModuleSettings from '../components/ModuleSettings';
 function ServiceConfiguration() {
   const { transformedOptions, message, status } = useSelector((state) => state.services);
   const dispatch = useDispatch();
@@ -67,12 +69,9 @@ function ServiceConfiguration() {
       await dispatch(
         fetchFiles({ projectName, payload: { category: 'api_client', module: newModuleId.module_id } })
       ).unwrap();
-      // const fileIds = Object.keys(res.data);
-      // const fetchFunctionsPromises = fileIds.map((fileId) =>
-      //   dispatch(fetchFunctions({ projectName, payload: { category: 'api_client', fileId } }))
-      // );
-
-      // await Promise.all(fetchFunctionsPromises);
+      await dispatch(
+        fetchSchemas({ projectName, payload: { category: 'models', module: newModuleId.module_id } })
+      ).unwrap();
     } catch (error) {
       console.error('Error uploading file:', error);
     }
@@ -85,8 +84,6 @@ function ServiceConfiguration() {
       return;
     }
     if (!selectedModule) {
-      // console.log(transformedOptions);
-
       if (transformedOptions.length === 1) {
         const module = transformedOptions[0];
         setSelectedModule({ name: module.label, id: module.moduleId });
@@ -115,9 +112,9 @@ function ServiceConfiguration() {
       await dispatch(editFunction({ projectName, operation, payload })).unwrap();
     }
     await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
-    if (operation === 'ADD') {
-      dispatch(fetchFiles({ projectName, payload: { category: 'api_client', module: selectedModule.id } })).unwrap();
-    }
+    // if (operation === 'ADD') {
+    dispatch(fetchFiles({ projectName, payload: { category: 'api_client', module: selectedModule.id } })).unwrap();
+    // }
     await dispatch(
       fetchFunctions({
         projectName,
@@ -130,41 +127,6 @@ function ServiceConfiguration() {
       setSelectedApi({});
     }
   };
-
-  // const isValidApiStructure = (api) => {
-  //   if (!api) return false;
-  //   if (!api.operation_id) return false;
-  //   if (!api.request) return false;
-  //   if (!api.response) return false;
-  //   if (!api.is_authentication_api) {
-  //     if (!api.tags) return false;
-  //   }
-  //   const hasValidRequestProps = api.request.method && api.request.url && Array.isArray(api.request.parameters);
-  //   if (!hasValidRequestProps) return false;
-  //   console.log('request props');
-  //   const url = api.request.url;
-  //   const hasRequiredUrlProps = url.path && url.baseurl;
-  //   if (!hasRequiredUrlProps) return false;
-  //   console.log('url');
-
-  //   if (!Array.isArray(url.path)) return false;
-  //   for (const param of api.request.parameters) {
-  //     const hasRequiredParamProps = param.param_in && param.name && param.type && param.param_type;
-  //     if (!hasRequiredParamProps) return false;
-  //   }
-  //   console.log('params');
-  //   if (api.request.method !== 'GET') {
-  //     for (const body of api.request.body) {
-  //       const hasRequiredBodyProps = body.content_type && body.mode;
-  //       if (!hasRequiredBodyProps) return false;
-  //     }
-  //   }
-  //   for (const resp of api.response) {
-  //     const hasRequiredResponseProps = resp.content_type && resp.status;
-  //     if (!hasRequiredResponseProps) return false;
-  //   }
-  //   return true;
-  // };
 
   useEffect(() => {
     if (status === 'ready') {
@@ -182,8 +144,6 @@ function ServiceConfiguration() {
   };
 
   const handleModuleSelect = (selectedOption) => {
-    // console.log(selectedOption);
-
     if (selectedOption) {
       const { label: moduleName, moduleId } = selectedOption;
       setSelectedModule({ name: moduleName, id: moduleId });
@@ -330,6 +290,8 @@ function ServiceConfiguration() {
             />
           ) : view === 'ADD_MODULE' ? (
             <AddModule setView={setView} />
+          ) : view === 'MODULE_SETTINGS' ? (
+            <ModuleSettings moduleId={selectedModule?.id} />
           ) : null}
         </div>
       </div>

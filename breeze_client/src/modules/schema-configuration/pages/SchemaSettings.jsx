@@ -18,13 +18,15 @@ function SchemaSettings() {
   const [view, setView] = useState('ADD_MODULE');
   const [currentSchema, setCurrentSchema] = useState({});
   const { projectName } = useParams();
-  const { moduleList } = useSelector((state) => state.services);
+  const { moduleList, status } = useSelector((state) => state.services);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
-  }, [dispatch, projectName]);
+    if (status === 'ready') {
+      dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+    }
+  }, [dispatch, projectName, status]);
 
   const updateSchema = async (schema) => {
     setCurrentSchema({ ...schema });

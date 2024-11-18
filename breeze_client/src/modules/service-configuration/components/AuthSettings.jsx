@@ -63,11 +63,13 @@ function AuthSettings({ authData, onChange, moduleId }) {
     );
   };
 
-  const loginApiOptions = login_apis.map((api) => ({
-    label: api.tokenKey,
-    value: api.tokenKey,
-    dataSource: 'authApi',
-  }));
+  const loginApiOptions = login_apis
+    .filter((api) => api.tokenConfig?.store_in !== 'DontSave')
+    .map((api) => ({
+      label: api.tokenKey,
+      value: api.tokenKey,
+      dataSource: 'authApi',
+    }));
   loginApiOptions.push({ label: 'select', value: '' });
   return (
     <>

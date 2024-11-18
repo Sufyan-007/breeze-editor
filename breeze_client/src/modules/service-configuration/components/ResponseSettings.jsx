@@ -31,7 +31,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   const [properties, setProperties] = useState([]);
 
   useEffect(() => {
-    if (status === 'ready')
+    if (status === 'ready' && moduleId)
       dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
   }, [dispatch, projectName, moduleId, status]);
 
@@ -96,8 +96,9 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     }
   }, [newResponse.schema_name, schemaList, extractProperties]);
 
-  const handleInputChange = (index, field, value, subField = null) => {
+  const handleInputChange = (index, field, value, subField = null, subProperty = null) => {
     const updatedResponse = [...response];
+
     if (field === 'schema_name') {
       updatedResponse[index] = {
         ...updatedResponse[index],
@@ -108,7 +109,18 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
       onChange(responseType, updatedResponse);
       return;
     }
-    if (subField) {
+    if (subField && subProperty) {
+      updatedResponse[index] = {
+        ...updatedResponse[index],
+        [field]: {
+          ...updatedResponse[index][field],
+          [subField]: {
+            ...updatedResponse[index][field][subField],
+            [subProperty]: value,
+          },
+        },
+      };
+    } else if (subField) {
       updatedResponse[index] = {
         ...updatedResponse[index],
         [field]: {
@@ -116,8 +128,9 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
           [subField]: value,
         },
       };
+    } else {
+      updatedResponse[index] = { ...updatedResponse[index], [field]: value };
     }
-    updatedResponse[index] = { ...updatedResponse[index], [field]: value };
     setResponse(updatedResponse);
     onChange(responseType, updatedResponse);
   };
@@ -220,14 +233,14 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                                 className=" form-control br-form-control form-control-sm"
                                 placeholder="Storage Key"
                                 value={res.token_store[`${prop.name}`]?.storage_key || ''}
-                                onChange={(e) => handlePropertyChange(prop.name, 'storage_key', e)}
+                                onChange={(e) => handleInputChange(index, 'token_store', e, prop.name, 'storage_key')}
                               />
                             </td>
                             <td className="br-background-secondary br-text-primary">
                               <CustomSelectField
                                 name="valueSelect"
                                 value={res.token_store[`${prop.name}`]?.store_in || ''}
-                                onChange={(e) => handlePropertyChange(prop.name, 'store_in', e)}
+                                onChange={(e) => handleInputChange(index, 'token_store', e, prop.name, 'store_in')}
                                 options={[
                                   { label: 'Select', value: '' },
                                   { label: 'DontSave', value: 'DontSave' },

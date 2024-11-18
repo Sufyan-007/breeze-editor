@@ -96,9 +96,19 @@ function ShowModules({
           </div>
           <div>
             <i
+              className="bi bi-gear mx-1"
+              title="module-properties"
+              onClick={(e) => {
+                setSelectedModule({ name: value.title, id: folderKey });
+                e.stopPropagation();
+                setView('MODULE_SETTINGS');
+              }}
+            ></i>
+            <i
               className="bi bi-plus-circle mx-1"
               style={{ cursor: 'pointer' }}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onAdd(value.title, folderKey);
               }}
               title="add-function"
@@ -107,6 +117,7 @@ function ShowModules({
               className="bi bi-pencil-square mx-1"
               onClick={(e) => {
                 e.stopPropagation();
+                setSelectedModule({ name: value.title, id: folderKey });
                 toggleEditing(value.title);
               }}
               title="edit-module-name"
