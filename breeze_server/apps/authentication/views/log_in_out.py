@@ -32,7 +32,7 @@ def login(request):
             # request.user_datails = serializer.validated_data["user_details"]
             
             # return JsonResponse(serializer.validated_data, status=200)
-            return JsonResponse({'accessToken': serializer.validated_data["access"], 'username':'username'}, status=200)
+            return JsonResponse({'accessToken': serializer.validated_data["access"], 'user_id':serializer.validated_data["user_id"]}, status=200)
         
         return JsonResponse(serializer.errors, status=400)
     except Exception as e:

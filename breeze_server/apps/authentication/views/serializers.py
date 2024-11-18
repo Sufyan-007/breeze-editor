@@ -60,9 +60,8 @@ class LoginSerializer(serializers.Serializer):
         # refresh['username']=data['username']
         
         return {
-            'refresh': str(refresh),
             'access': str(refresh.access_token),
-            # 'user_details':user_details
+            'user_id':str(user.id)
         }
         
 def get_user_data(id):
