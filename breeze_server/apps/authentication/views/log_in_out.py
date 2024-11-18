@@ -5,23 +5,25 @@ from ..utils import get_expiry_timestamp
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from rest_framework.decorators import api_view
-from drf_yasg.utils import swagger_auto_schema
-from ..swagger_schema.login_schema import login_schema
+from rest_framework.decorators import api_view,permission_classes
+from drf_spectacular.utils import extend_schema,OpenApiResponse
+from ..swagger_schema.login_schema import login_schema,logout_schema
 from .serializers import LoginSerializer
+from rest_framework.permissions import AllowAny
 
 @csrf_exempt
 @require_POST
-@swagger_auto_schema(
-    method='post',
-    request_body = login_schema['rb'],
-    responses = {
-                200:login_schema['response_200'],
-                400:login_schema['response_400']
+@extend_schema(
+    methods=['POST'],
+    request=login_schema['rb'],
+    responses={
+        200:login_schema['response_200'],
+        400:login_schema['response_400']
     },
     tags=['Auth']
 )
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
     try:
         serializer = LoginSerializer(data=request.data)
@@ -84,7 +86,14 @@ def login(request):
         # # request.session.set_expiry(None)
         # return JsonResponse({'accessToken': token, 'username': token_data['username']}, status=200)
 
-    
+@extend_schema(
+    tags=['Auth'],
+    request=None,
+    responses={
+        200:logout_schema['response_200'],
+        400:logout_schema['response_400']
+    },
+)
 @csrf_exempt
 @require_POST
 @api_view(['POST'])

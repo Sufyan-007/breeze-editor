@@ -10,7 +10,7 @@ urlpatterns = [
     path('add-module/', add_module),#could be modified later for whole module editing functionality
     path('add-schema/', add_or_edit_schema), 
     path('edit-schema/', add_or_edit_schema ),
-    path('delete-schema/<str:schemaId>/<moduleId>/', delete_schema ),
-    path('retrieve-response-tokens/<moduleId>/<apiId>/', get_response_token ),
+    path('delete-schema/<str:schemaId>/<str:moduleId>/', delete_schema ),
+    path('retrieve-response-tokens/<str:moduleId>/<str:apiId>/', get_response_token ),
     path('resolve-schema/', resolve_schemas ),
 ]
