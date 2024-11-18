@@ -9,12 +9,12 @@ from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
 from apps.project_config_management.core.config_files_handlers import add_dirs_configs
 from apps.code_generator.core.generate_project import generate_project
-from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.handle_general_proj_apis_schema import get_all_schema,add_schema,delete_schema
 from rest_framework.parsers import MultiPartParser, FormParser
-@swagger_auto_schema(
-    method = 'get',
-    request_body=None,
+from drf_spectacular.utils import extend_schema
+@extend_schema(
+    methods=['GET'],
+    request=None,
     responses={
         200:get_all_schema['response_200']
     }
@@ -28,9 +28,11 @@ def get_all(request):
 @csrf_exempt
 def get_a_project(request, project_id):
     return ""
-
-
-
+@extend_schema(
+    methods=['GET'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['GET'])
 def get_proj_metadata(request, project_id):
@@ -43,14 +45,20 @@ def get_proj_metadata(request, project_id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
     
-@swagger_auto_schema(
-    method='post',
-    request_body=None,
-    manual_parameters=add_schema['form_data'],
+@extend_schema(
+    methods=['POST'],
+    request={
+        "application/x-www-form-urlencoded":add_schema['form_data']
+    },
     responses={
         200:add_schema['response_200'],
         500:add_schema['response_500']
     },
+)
+@extend_schema(
+    methods=['POST'],
+    request=None,
+    responses=None
 )
 @csrf_exempt
 @api_view(['POST'])
@@ -79,10 +87,10 @@ def add(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
        
-@swagger_auto_schema(
-    method='delete',
-    request_body=None,
-    manual_parameters=delete_schema['parameters'],
+@extend_schema(
+    methods=['DELETE'],
+    request=None,
+    parameters=delete_schema['parameters'],
     responses={
         200:delete_schema['response_200'],
         500:delete_schema['response_500']

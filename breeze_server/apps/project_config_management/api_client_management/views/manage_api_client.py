@@ -6,20 +6,18 @@ from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
 from ..core.intermediate_modification_helper import process_api_data, transfer_data_to_auth,add_auth_function
 from ..core.module_manager import add_module_helper,edit_module_title_helper
-from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema,get_response_token_schema,add_module_schema
 from ....code_generator.core.api_client_generator import generate_react_service
 from ....directory_management.core.directory_management_service import DirectoryManager
+from drf_spectacular.utils import extend_schema
 
 
-
-@swagger_auto_schema(
-    method='post',
-    request_body=generate_service_config_schema['rb'],
+@extend_schema(
+    methods=['POST'],
+    request = generate_service_config_schema['rb'],
     responses={
-        201:generate_service_config_schema['response_201'],
-        500:generate_service_config_schema['response_501']
+        500:generate_service_config_schema['response_500'],
+        201:generate_service_config_schema['response_201']
     },
     tags=['manage-api-client']
 )
@@ -84,14 +82,12 @@ def generate_service_config(request, collectionType, project_id):
             return JsonResponse({"error": str(e)}, status=500)
         
 
-@swagger_auto_schema(
-    method='post',
-    request_body=modify_function_config_schema['rb'],
-    responses={
-            200:modify_function_config_schema['response_200']
-        },
+@extend_schema(
+    methods=['POST'],
+    request=modify_function_config_schema['rb'],
+    responses=modify_function_config_schema['response_200'],
     tags=['manage-api-client']
-) 
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def modify_function_config(request,operation,project_id):
@@ -105,15 +101,15 @@ def modify_function_config(request,operation,project_id):
     else:
         result,status = process_api_data(operation,api_data, filename,project_id,module_id)
     return JsonResponse(result, status=status)
-    
-@swagger_auto_schema(
-    method='post',
-    request_body=transfer_to_auth_schema['rb'],
+     
+@extend_schema(
+    methods=['POST'],
+    request=transfer_to_auth_schema['rb'],
     responses={
-        200:transfer_to_auth_schema['response_201']
+        200:transfer_to_auth_schema['response_200']
     },
     tags=['manage-api-client']
-)   
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def transfer_to_auth(request,project_id):
@@ -126,9 +122,9 @@ def transfer_to_auth(request,project_id):
     result,status = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
     return JsonResponse(result, status=status)
 
-@swagger_auto_schema(
-    method='post',
-    request_body=edit_module_title_schema['rb'],
+@extend_schema(
+    methods=['POST'],
+    request=edit_module_title_schema['rb'],
     responses={
         200:edit_module_title_schema['response_200'],
         400:edit_module_title_schema['response_400']
@@ -145,7 +141,18 @@ def edit_module_title(request, project_id):
         swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
         result,status = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
         return JsonResponse(result,status=status)
+
+
+@extend_schema(
+    methods=['GET'],
+    request=None,
+    responses={
+        400:get_response_token_schema['response_400'],
+        404:get_response_token_schema['response_404']
+    },
+    tags=['manage-api-client']
     
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])   
 def get_response_token( request, project_id,apiId, moduleId):
@@ -183,7 +190,12 @@ def get_response_token( request, project_id,apiId, moduleId):
             return JsonResponse({"error": str(e)}, status=400)
 
 
-
+@extend_schema(
+    methods=['POST'],
+    tags=['manage-api-client'],
+    request=add_module_schema['rb'],
+    responses=None
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def add_module(request,project_id):

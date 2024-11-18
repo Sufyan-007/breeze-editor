@@ -1,48 +1,54 @@
-from drf_yasg import openapi
+# from drf_yasg import openapi
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiResponse,OpenApiExample
+from rest_framework import serializers
+class LoginResponseSerializer(serializers.Serializer):
+    accessToken = serializers.CharField()
+    username = serializers.CharField()
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.CharField()
+
+class LogoutResponseSerializer(serializers.Serializer):
+    details = serializers.CharField()
 
 login_schema ={
-    'rb':openapi.Schema(
-        type = openapi.TYPE_OBJECT,
-        properties = {
-            'username':openapi.Schema(type = openapi.TYPE_STRING,default='breeze_user'),
-            'password':openapi.Schema(type = openapi.FORMAT_PASSWORD,default='breeze_user')
-        },
-        required = ['username','password']
+    'rb':{
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'username': {'type': 'string', 'description': 'username'},
+                'password': {'type': 'string', 'description': 'password'},
+            },
+            'required': ['username','password']
+        }
+    },
+    'response_200': OpenApiResponse(
+        description='success',
+        response=LoginResponseSerializer,
     ),
-    # 'form_data' : [
-    # openapi.Parameter(
-    #     'username',
-    #     in_=openapi.IN_FORM,
-    #     type=openapi.TYPE_STRING,
-    #     description='username',
-    #     required=True,
-    #     default='breeze_user'
-        
-    # ),
-    # openapi.Parameter(
-    #     'password',
-    #     in_=openapi.IN_FORM,
-    #     type=openapi.TYPE_STRING,
-    #     description='password',
-    #     required=True,
-    #     default='breeze_user'
-    # ),
-    # ],
-    'response_200':openapi.Response(
-                   description='Success',
-                    schema=openapi.Schema(
-                       type=openapi.TYPE_OBJECT,
-                       properties={'accessToken':openapi.Schema(type=openapi.TYPE_STRING)}
-                    ),
+    'response_400':OpenApiResponse(
+        description='Bad Request',
+        response=ErrorResponseSerializer,
+        examples=[OpenApiExample(
+            name="Invalid Credentials",
+            value={"error": "Invalid credentials"},
+            summary="When credentials are invalid"
+        )]
+    )
+   
+}
+
+logout_schema ={
+    'response_200': OpenApiResponse(
+        description='success',
+        response=LogoutResponseSerializer,
+        examples=[OpenApiExample(
+            name="Success",
+            value={"detail": "logged out successfully"},
+        )]
     ),
-    'response_400':openapi.Response(
-                    description="Bad Request",
-                    schema=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={'error':openapi.Schema(type=openapi.TYPE_STRING)}
-                    ),
-                    examples={'application/json':{'error':'Invalid credentials'}}
-                    
-                    
+    'response_400':OpenApiResponse(
+        description='Bad Request',
+        response=ErrorResponseSerializer,
     )
 }
