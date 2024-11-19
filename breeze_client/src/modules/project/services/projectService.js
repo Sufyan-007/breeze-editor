@@ -101,3 +101,32 @@ export const getProjectLogo = async (projectName, logoId) => {
     throw error;
   }
 };
+
+export const renameNodeApi = async (projectName, nodeId, newName) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/rename-file/`;
+  const payload = {
+    file_id: nodeId,
+    new_name: newName,
+  };
+  try {
+    const response = await callApiClient(url, 'POST', payload);
+    return response;
+  } catch (error) {
+    console.error('Error renaming node:', error.message);
+    throw error;
+  }
+};
+
+export const deleteNodeApi = async (projectName, nodeId) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/delete/`;
+  const payload = {
+    file_id: nodeId,
+  };
+  try {
+    const response = await callApiClient(url, 'DELETE', payload);
+    return response;
+  } catch (error) {
+    console.error('Error deleting node:', error.message);
+    throw error;
+  }
+};

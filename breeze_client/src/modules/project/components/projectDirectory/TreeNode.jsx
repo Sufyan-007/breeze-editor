@@ -40,9 +40,9 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   };
 
   const handleInputSubmit = () => {
-    if (node.tempName.trim()) {
+    if (node?.tempName.trim()) {
       parentMethods.handleInputSubmit(node.id);
-      parentMethods.handleNodeClick(null);
+      // parentMethods.handleNodeClick(null);
     }
   };
 
@@ -130,10 +130,23 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
                 ref={inputRef}
                 placeholder="Enter name"
               />
-              <button onClick={handleInputSubmit} className="node-input br-text-primary">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInputSubmit();
+                }}
+                type="button"
+                className="node-input br-text-primary"
+              >
                 <i className="bi bi-check" />
               </button>
-              <button onClick={handleInputCancel} className="node-input br-text-primary">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInputCancel();
+                }}
+                className="node-input br-text-primary"
+              >
                 <i className="bi bi-x" />
               </button>
             </div>
@@ -158,18 +171,16 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
               />
             </>
           )}
-          {!node.isProtected && (
-            <i
-              className="bi bi-pencil node-icon"
-              title="Rename"
-              onClick={(e) => {
-                e.stopPropagation();
-                parentMethods.handleRename(node.id);
-              }}
-            />
-          )}
-          {!isEditing && node.type === 'FILE' && (
+          {!isEditing && !node.isProtected && (
             <>
+              <i
+                className="bi bi-pencil node-icon"
+                title="Rename"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  parentMethods.handleRename(node.id);
+                }}
+              />
               {!node.isProtected && (
                 <i
                   className="bi bi-trash node-icon"

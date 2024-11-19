@@ -58,6 +58,8 @@ def delete_file(request, project_id):
 
         df(project_id, file_id)
         delete_config(project_id, file_id)
+        # TODO: User should be given warning on logo deletion and for that
+        # we need to implement resources usage check feature
         return JsonResponse({
             'message': 'File deleted successfully'
         }, status=200)
