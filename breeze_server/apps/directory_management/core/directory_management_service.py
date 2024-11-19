@@ -27,7 +27,7 @@ class DirectoryManager:
             f.write(content)
 
 
-    def add_node_to_config(self, parent_id, tag,name, node_type="FILE",ext="", file_id=None, entity_id = "",isProtected=False):
+    def add_node_to_config(self, parent_id, tag,name, node_type="FILE",ext="", file_id=None, entity_id = "",isProtected=False, overwrite=False):
         parent_node = self.directory_management_config.get(parent_id,None)
         
         if not parent_node:
@@ -54,8 +54,8 @@ class DirectoryManager:
         if file_id and file_id in self.directory_management_config:
             raise KeyError("Id already in directory management")
         
-        # if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir):
-        #     raise FileExistsError("Given file name already exists")
+        if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir) or overwrite==True:
+            raise FileExistsError("Given file name already exists")
         
         
         if file_id:
@@ -83,10 +83,55 @@ class DirectoryManager:
         return new_node
 
     def rename_node(self, node_id, new_name):
-        raise NotImplementedError()
+        node = self.directory_management_config.get(node_id)
+        if not node:
+            raise KeyError("Could not find node")
+        
+        old_path = self.get_path_from_file_id(node_id)
+        node["name"] = new_name
+        
+        new_path = self.get_path_from_file_id(node_id)
+        
+        if os.path.exists(new_path):
+            raise FileExistsError()
+        
+        os.rename(old_path,new_path)
+        with open(self.directory_config_path, 'w') as file:
+            json.dump(self.directory_management_config, file, indent=2)
+        
     
     def move_node(self, node_id, new_parent_id):
-        raise NotImplementedError()
+        node = self.directory_management_config.get(node_id)
+        if not node:
+            raise KeyError("Could not find node")
+        
+        old_path = self.get_path_from_file_id(node_id)
+        
+        old_parent = self.directory_management_config[node["parentId"]]
+        
+        old_parent["children"].remove(node_id)
+        
+        new_parent = self.directory_management_config.get(new_parent_id)
+        
+        if not new_parent:
+            raise KeyError("New parent not found")
+        
+        if new_parent["type"]!="DIRECTORY":
+            raise NotADirectoryError()
+        
+        new_parent["children"].append(node_id)
+        node["parentId"] = new_parent_id
+        
+        new_path = self.get_path_from_file_id(node_id)
+        
+        if os.path.exists(new_path):
+            raise FileExistsError()
+        
+        shutil.move(old_path,new_path)
+        
+        with open(self.directory_config_path, 'w') as file:
+            json.dump(self.directory_management_config, file, indent=2)
+        
     
     
     def delete_node(self,file_id,recursive=False):

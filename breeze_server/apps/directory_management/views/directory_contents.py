@@ -40,3 +40,20 @@ def delete_file(request,project_id):
     directoryManager = DirectoryManager(project_id)
     directoryManager.delete_node(data["file_id"],data.get("recursive", False))
     return JsonResponse({},status=200)
+
+@api_view(["PUT","POST"])
+def rename_file(request,project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    
+    directoryManager = DirectoryManager(project_id)
+    directoryManager.rename_node(data["file_id"],new_name=data["new_name"])
+    return JsonResponse({},status=200)
+
+@api_view(["PUT","POST"])
+def move(request,project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    
+    directoryManager = DirectoryManager(project_id)
+    directoryManager.move_node(node_id=data["file_id"],new_parent_id=data["new_parent_id"])
+    return JsonResponse({},status=200)
+
