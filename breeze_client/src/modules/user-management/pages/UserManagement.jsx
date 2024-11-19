@@ -1,20 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../../../common/navbar/Navbar';
 import CustomTable from '../../../common/display/datatable/BreezeCustomTable';
 import BreezeOffCanvas from '../../../common/display/offcanvas/BreezeOffcanvas';
 import { CustomButtonField } from '../../../common/fields';
 import AddNewUser from '../components/AddNewUser';
-import { addUser } from '../services/UserManagementService';
+import { addUser, getAllUsers } from '../services/UserManagementService';
 
 const UserManagement = () => {
-  const [data, setData] = useState([
-    { id: 1, username: 'John Doe', projects: ['Project A, Project B'], roles: ['Admin'] },
-    { id: 2, username: 'Jane Smith', projects: ['Project B'], roles: ['User'] },
-    { id: 3, username: 'Bob Johnson', projects: ['Project C'], roles: ['Manager'] },
-    { id: 4, username: 'Alice Davis', projects: ['Project D'], roles: ['User'] },
-    { id: 5, username: 'Mike Brown', projects: ['Project E'], roles: ['Admin'] },
-  ]);
-
+  const [data, setData] = useState([]);
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [userData, setUserData] = useState({
     username: '',
@@ -25,6 +18,26 @@ const UserManagement = () => {
     password: '',
     confirmPassword: '',
   });
+
+  const fetchUsers = async () => {
+    try {
+      const response = await getAllUsers();
+      console.log(response.user_details);
+      const transformedData = response.user_details.map((user) => ({
+        id: user.id,
+        username: user.username,
+        projects: user.projects.map((proj) => `Project ${proj}`),
+        roles: ['User'],
+      }));
+      setData(transformedData);
+    } catch (error) {
+      console.error('Error fetching user data:', error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const columns = [
     { header: 'User Name', accessor: 'username' },
@@ -55,23 +68,19 @@ const UserManagement = () => {
   };
 
   const handleUserSubmit = async (newUser) => {
-    if (!newUser.projects || !Array.isArray(newUser.projects)) {
-      newUser.projects = [];
-    }
-
     try {
       const registeredUser = await addUser(newUser);
       console.log(registeredUser);
 
-      // setData((prevData) => [
-      //   ...prevData,
-      //   {
-      //     id: registeredUser.id,
-      //     username: registeredUser.username,
-      //     projects: registeredUser.projects,
-      //     roles: registeredUser.roles,
-      //   },
-      // ]);
+      setData((prevData) => [
+        ...prevData,
+        {
+          id: registeredUser.id,
+          username: registeredUser.username,
+          projects: registeredUser.projects.map((proj) => `Project ${proj}`),
+          roles: registeredUser.roles || ['User'],
+        },
+      ]);
 
       clearForm();
       setIsOffcanvasOpen(false);
