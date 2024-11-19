@@ -9,13 +9,12 @@ from ..core.third_party_dependency_service import (
     delete_package_from_dependencies
 )
 from ..utils.request_data_parser import parse_request_data
-from drf_yasg.utils import swagger_auto_schema
 from ..swagger_schema.third_party_dependency_schema import add_third_party_dependency_schema,get_third_party_dependency_schema,update_third_party_dependency_schema,delete_third_party_dependency_schema
-
-@swagger_auto_schema(
-    method="post",
-    manual_parameters=add_third_party_dependency_schema["parameters"],
-    request_body=add_third_party_dependency_schema["rb"],
+from drf_spectacular.utils import extend_schema
+@extend_schema(
+    methods=['POST'],
+    parameters=add_third_party_dependency_schema["parameters"],
+    request=add_third_party_dependency_schema["rb"],
     responses={
         200: add_third_party_dependency_schema["response_200"],
         500: add_third_party_dependency_schema["response_500"],
@@ -35,10 +34,10 @@ def add_third_party_dependency(request, projectName):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@swagger_auto_schema(
-    method="get",
-    manual_parameters=get_third_party_dependency_schema["parameters"],
-    request_body=None,
+@extend_schema(
+    methods=['GET'],
+    parameters=get_third_party_dependency_schema["parameters"],
+    request=None,
     responses={
         200: get_third_party_dependency_schema["response_200"],
         500: get_third_party_dependency_schema["response_500"],
@@ -55,10 +54,10 @@ def get_third_party_dependency(request, projectName):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@swagger_auto_schema(
-    method="put",
-    manual_parameters=update_third_party_dependency_schema["parameters"],
-    request_body=update_third_party_dependency_schema['rb'],
+@extend_schema(
+    methods=['PUT'],
+    parameters=update_third_party_dependency_schema["parameters"],
+    request=update_third_party_dependency_schema['rb'],
     responses={
         200: update_third_party_dependency_schema["response_200"],
         500: update_third_party_dependency_schema["response_500"],
@@ -78,10 +77,10 @@ def update_third_party_dependency(request, projectName):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-@swagger_auto_schema(
-    method="delete",
-    manual_parameters=delete_third_party_dependency_schema["parameters"],
-    request_body=None,
+@extend_schema(
+    methods=['DELETE'],
+    parameters=delete_third_party_dependency_schema["parameters"],
+    request=None,
     responses={
         200: delete_third_party_dependency_schema["response_200"],
         500: delete_third_party_dependency_schema["response_500"],

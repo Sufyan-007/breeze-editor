@@ -5,6 +5,13 @@ from django.http import JsonResponse, FileResponse
 from ..core.resource_upload_service import file_duplicacy
 from apps.common.utils.file_helpers.file_handler import upload_file as uf, delete_file as df, get_file_path
 from apps.project_management.core.resource_upload_service import update_config, save_file, delete_config
+from drf_spectacular.utils import extend_schema
+
+@extend_schema(
+    methods=['POST'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['POST'])
 def upload_file(request, project_id):
@@ -31,6 +38,11 @@ def upload_file(request, project_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@extend_schema(
+    methods=['DELETE'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['DELETE'])
 def delete_file(request, project_id):
@@ -54,6 +66,11 @@ def delete_file(request, project_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@extend_schema(
+    methods=['GET'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['GET'])
 def download_file(request, project_id, fileId):

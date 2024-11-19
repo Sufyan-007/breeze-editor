@@ -1,176 +1,120 @@
 from drf_yasg import openapi
-
+from drf_spectacular.utils import OpenApiParameter,OpenApiResponse,OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+from ..data_models.serializers import GetThirdPartyResponse200Serializer,AddOrUpdateThirdPartyRequestBodySerializer
+from ...common.serializers.ResponseSerializers import ResponseStatus200Serializer,ResponseStatus400Serializer
 add_third_party_dependency_schema = {
     'parameters':[
-            openapi.Parameter(
+            OpenApiParameter(
                 name='projectName',
-                in_=openapi.IN_PATH,
+                location=OpenApiParameter.PATH,
                 description='name of project',
-                type=openapi.TYPE_STRING,
+                type=OpenApiTypes.STR
             )
     ],
-    'rb': openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'name':openapi.Schema(
-                type=openapi.TYPE_STRING,
-                description='name of package'
-            ),
-            'version':openapi.Schema(
-                type=openapi.TYPE_STRING,
-                description='version of package'
+    'rb':AddOrUpdateThirdPartyRequestBodySerializer,
+    'response_200':OpenApiResponse(
+        description='ok',
+        response=ResponseStatus200Serializer,
+         examples=[
+            OpenApiExample(
+                name='success',
+                value={'message':'Package added successfully'}
             )
-        }
+        ]
     ),
-    'response_200':openapi.Response(
-            description='ok',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'message':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            ),
-            examples={'application/json':{'message':'Package added successfully'}}
-        ),
-    'response_500':openapi.Response(
-            description='Request is failed due to an error.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
+    'response_500':OpenApiResponse(
+        description='Request is failed due to an error.',
+        response=ResponseStatus400Serializer
     ),
-     'response_400':openapi.Response(
+     'response_400':OpenApiResponse(
             description='Request has failed due to incorrect parameters in the request.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
+            response=ResponseStatus400Serializer
     ),
 }
 
 get_third_party_dependency_schema = {
     'parameters':[
-            openapi.Parameter(
+            OpenApiParameter(
                 name='projectName',
-                in_=openapi.IN_PATH,
+                location=OpenApiParameter.PATH,
                 description='name of project',
-                type=openapi.TYPE_STRING,
+                type=OpenApiTypes.STR
             )
         ],
-    'response_200':openapi.Response(
+    'response_200':OpenApiResponse(
             description='ok',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'package_name':openapi.Schema(type=openapi.TYPE_STRING,description='package name and its version')
-                }
-            ),
-            examples={'application/json':{'package_name':'version'}}
-        ),
-    'response_500':openapi.Response(
-            description='Request is failed due to an error.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
+            response=GetThirdPartyResponse200Serializer,
+            examples=[
+            OpenApiExample(
+                name='success',
+                value={'package_name':'version'}
             )
+            ],
+        ),
+    'response_500':OpenApiResponse(
+            description='Request is failed due to an error.',
+            response=ResponseStatus400Serializer
     ),
 }
 
 update_third_party_dependency_schema = {
     'parameters':[
-            openapi.Parameter(
+            OpenApiParameter(
                 name='projectName',
-                in_=openapi.IN_PATH,
+                location=OpenApiParameter.PATH,
                 description='name of project',
-                type=openapi.TYPE_STRING,
+                type=OpenApiTypes.STR
             )
     ],
-    'rb': openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'name':openapi.Schema(
-                type=openapi.TYPE_STRING,
-                description='name of package'
-            ),
-            'version':openapi.Schema(
-                type=openapi.TYPE_STRING,
-                description='version of package'
-            )
-        }
-    ),
-    'response_200':openapi.Response(
+    'rb':AddOrUpdateThirdPartyRequestBodySerializer,
+    'response_200':OpenApiResponse(
             description='ok',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'message':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            ),
-            examples={'application/json':{'message':'Package updated successfully'}}
+            response=ResponseStatus200Serializer,
+            examples=[
+            OpenApiExample(
+                name='success',
+                value={'message':'Package updated successfully'}
+            )
+            ],
         ),
-    'response_500':openapi.Response(
+    'response_500':OpenApiResponse(
             description='Request is failed due to an error.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
+            response=ResponseStatus400Serializer
     ),
-     'response_400':openapi.Response(
+     'response_400':OpenApiResponse(
             description='Request has failed due to incorrect parameters in the request.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
+            response=ResponseStatus400Serializer
     ),
     
 }
 
 delete_third_party_dependency_schema = {
     'parameters':[
-            openapi.Parameter(
+            OpenApiParameter(
                 name='projectName',
-                in_=openapi.IN_PATH,
+                location=OpenApiParameter.PATH,
                 description='name of project',
-                type=openapi.TYPE_STRING,
+                type=OpenApiTypes.STR
             )
     ],
-    'response_200':openapi.Response(
+    'response_200':OpenApiResponse(
             description='ok',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'message':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            ),
-            examples={'application/json':{'message':'Package deleted successfully'}}
+            response=ResponseStatus200Serializer,
+            examples=[
+            OpenApiExample(
+                name='success',
+                value={'message':'Package deleted successfully'}
+            )
+            ]
         ),
-    'response_500':openapi.Response(
+    'response_500':OpenApiResponse(
             description='Request is failed due to an error.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
+            response=ResponseStatus400Serializer
     ),
-     'response_400':openapi.Response(
+     'response_400':OpenApiResponse(
             description='Request has failed due to incorrect parameters in the request or package name is required.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
+            response=ResponseStatus400Serializer
     ),
 }
 

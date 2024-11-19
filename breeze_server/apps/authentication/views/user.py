@@ -2,8 +2,14 @@ from django.views.decorators.csrf import csrf_exempt
 from .serializers import get_user_data,get_all_user_data
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema
 
-
+@extend_schema(
+    tags=['Auth'],
+    request=None,
+    responses=None,
+    operation_id='Get_user'
+)
 @csrf_exempt
 @api_view(['GET'])
 def get_user(request,param=None):
