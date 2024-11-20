@@ -108,7 +108,7 @@ const CustomTable = ({
                 {actionPlacement === 'start' || actionPlacement === 'both' ? <td>{actions && actions(item)}</td> : null}
                 {columns.map((column, colIndex) => (
                   <td className={cellDataClass} key={colIndex} style={{ textAlign: column.align || 'left' }}>
-                    {column.render ? column.render(item[column.accessor]) : item[column.accessor]}
+                    {column.render ? column.render(item) : item[column.accessor]}
                   </td>
                 ))}
                 {actionPlacement === 'end' || actionPlacement === 'both' ? (
@@ -138,7 +138,7 @@ const CustomTable = ({
           <i className="bi bi-chevron-left" style={{ fontSize: '12px' }}></i>
           Previous
         </button>
-        <span>
+        <span className="br-text-primary">
           Page {currentPage} of {Math.max(1, Math.ceil((data?.length || 0) / pageSize))}
         </span>
         <button

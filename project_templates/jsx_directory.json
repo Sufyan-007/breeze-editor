@@ -2,12 +2,7 @@
   "ROOT": {
     "parentId": null,
     "id": "ROOT",
-    "children": [
-      "SRC",
-      "PACKAGE_CONFIG",
-      "EXTERNAL_COMPONENTS",
-      "INDEX_HTML"
-    ]
+    "children": ["SRC", "PACKAGE_CONFIG", "EXTERNAL_COMPONENTS", "INDEX_HTML"]
   },
   "SRC": {
     "name": "src",
@@ -73,7 +68,8 @@
     "id": "ROUTE_COMPONENT",
     "tag": "ROUTING",
     "type": "FILE",
-    "wasOpen":false
+    "wasOpen": false,
+    "isProtected": true
   },
   "ASSETS": {
     "name": "assets",
@@ -113,7 +109,8 @@
     "parentId": "ROOT",
     "id": "PACKAGE_CONFIG",
     "tag": "PACKAGE_CONFIG",
-    "type": "FILE"
+    "type": "FILE",
+    "isProtected": true
   },
   "INDEX_HTML": {
     "name": "index",
@@ -134,10 +131,9 @@
   "EXTERNAL_COMPONENTS": {
     "name": "external_components",
     "parentId": "ROOT",
-    "id":"EXTERNAL_COMPONENTS",
-    "children":[],
-    "tag":"EXTERNAL_COMPONENTS",
-    "type":"DIRECTORY"
+    "id": "EXTERNAL_COMPONENTS",
+    "children": [],
+    "tag": "EXTERNAL_COMPONENTS",
+    "type": "DIRECTORY"
   }
 }
-  

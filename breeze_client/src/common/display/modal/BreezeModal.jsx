@@ -66,6 +66,7 @@ const CustomModal = ({ isOpen, onClose, header, footer, size = 'lg', children, a
                     type={button.type || 'button'}
                     className={button.className || 'btn btn-filled modal-med-font'}
                     onClick={button.onClick}
+                    disabled={button.disabled || false}
                   >
                     {button.label}
                   </button>
@@ -92,6 +93,7 @@ CustomModal.propTypes = {
         onClick: PropTypes.func.isRequired,
         type: PropTypes.string,
         className: PropTypes.string,
+        disabled: PropTypes.bool,
       })
     ),
   }),

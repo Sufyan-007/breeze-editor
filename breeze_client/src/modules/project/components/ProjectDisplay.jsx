@@ -30,6 +30,8 @@ function ProjectDisplay() {
   const [isVersionLimitCrossed, setIsVersionLimitCrossed] = useState(null);
   const dispatch = useDispatch();
 
+  // console.log('versionError::>>', versionError);
+
   useEffect(() => {
     const fetchConfigFileVersions = async () => {
       try {
@@ -47,21 +49,19 @@ function ProjectDisplay() {
           });
       } catch (err) {
         setVersionError(err.message);
-        console.log(versionError);
       }
     };
 
-    if (currentTab?.id == 'ROUTE_COMPONENT') {
+    if (selectedNode?.id == 'ROUTE_COMPONENT') {
       fetchConfigFileVersions();
     }
-    console.log(selectedTab);
 
     return () => {
-      if (currentTab?.id == 'ROUTE_COMPONENT') {
+      if (selectedNode?.id == 'ROUTE_COMPONENT') {
         dispatch(clearSelectedNodePayload());
       }
     };
-  }, [projectName, currentTab?.id, selectedNode.id, activeTab, selectedNode.tag, dispatch]);
+  }, [projectName, selectedNode, activeTab, dispatch]);
 
   const fetchPort = useCallback(async () => {
     const port = await getProjectPort(projectName);
@@ -93,7 +93,8 @@ function ProjectDisplay() {
       projectName &&
       activeTab === 'code' &&
       existingTab &&
-      !existingTab.code
+      !existingTab.code &&
+      !selectedNode.isNew
     ) {
       const fetchCode = async () => {
         try {
@@ -118,12 +119,12 @@ function ProjectDisplay() {
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {
-      setActiveConfigTab(selectedNode.id, availableTabs[0]);
+      setActiveConfigTab(selectedTab.id, availableTabs[0]);
     }
-  }, [selectedNode, availableTabs, activeTab, setActiveConfigTab]);
+  }, [selectedTab, availableTabs, activeTab, setActiveConfigTab]);
 
   const handleTabChange = (tab) => {
-    setActiveConfigTab(selectedNode.id, tab);
+    setActiveConfigTab(selectedTab.id, tab);
   };
 
   const fetchCode = async () => {
@@ -190,7 +191,7 @@ function ProjectDisplay() {
                 />
               </div>
             </div>
-            {currentTab?.id == 'ROUTE_COMPONENT' && (
+            {selectedNode?.id == 'ROUTE_COMPONENT' && (
               <div className="d-flex justify-content-between mt-2">
                 <div className="d-flex">
                   <div
