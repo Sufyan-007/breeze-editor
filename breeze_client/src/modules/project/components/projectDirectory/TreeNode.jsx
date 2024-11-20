@@ -17,7 +17,7 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
 
   const inputRef = useRef(null);
   const handleContextMenuSelection = (nodeId) => {
-    parentMethods.addNodeToTree({ type: 'FILE', parentId: nodeId });
+    parentMethods.addNodeToTree({ type: 'FILE', parentId: nodeId, extension: 'jsx' });
     if (!isExpanded(nodeId)) {
       toggleNode(nodeId);
       return;
@@ -75,10 +75,19 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   };
 
   const handleContextMenu = (e) => {
+    if (node.isProtected) {
+      return;
+    }
     contextMenuRef.current?.handleEvent(e);
     setMenuItems(
       node.type === 'DIRECTORY'
-        ? folderOptions(node.id, handleContextMenuSelection, parentMethods.handleRename)
+        ? folderOptions(
+            node.id,
+            handleContextMenuSelection,
+            parentMethods.handleRename,
+            parentMethods.handleAddFolder,
+            parentMethods.handleRemoveNode
+          )
         : fileOptions(node.id, parentMethods.handleRename, parentMethods.handleRemoveNode)
     );
   };
