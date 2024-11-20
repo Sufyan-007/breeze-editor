@@ -6,6 +6,7 @@ import { useTreeContext } from '../context/TreeContext';
 import CustomContextMenu from '../../../common/display/context-menu/BreezeContextMenu';
 import { addFileOptions } from '../constants/contextMenuOptions';
 import {
+  addNodeAsync,
   deleteNodeAsync,
   fetchFolderConfig,
   renameNodeAsync,
@@ -16,6 +17,8 @@ import {
   cancelRename,
   updateNodeEditing,
   updateNodeTempName,
+  addNode,
+  cancelAdd,
 } from '../../../redux/directory_management/directory_reducers';
 import CustomModal from '../../../common/display/modal/BreezeModal';
 
@@ -26,16 +29,15 @@ function ProjectSidebar() {
   const [show, setShow] = useState(true);
   const [isModalOpen, setModalOpen] = useState(false);
   const [nodeToDelete, setNodeToDelete] = useState(null);
-
   const contextMenuRef = useRef(null);
-
   const { selectedNodeId, setSelectedNode, setSelectedNodeId } = useTreeContext();
   const { projectName } = useParams();
   const dispatch = useDispatch();
+
   useEffect(() => {
     const id = 'ROOT';
     dispatch(fetchFolderConfig({ id, projectName })).unwrap();
-  }, [dispatch]);
+  }, [dispatch, projectName]);
 
   const toggleNode = async (nodeId) => {
     const isNodeExpanded = expandedNodes[nodeId];
@@ -62,27 +64,11 @@ function ProjectSidebar() {
   };
 
   const handleContextMenuSelection = () => {
-    addNodeToTree({ type: 'FILE', parentId: selectedNodeId });
+    addNodeToTree({ type: 'FILE', parentId: 'ROOT', extension: 'jsx' });
   };
 
-  const addNodeToTree = ({ type, parentId }) => {
-    // setTreeData((prevTreeData) => [
-    //   ...prevTreeData,
-    //   {
-    //     id: Date.now().toString(),
-    //     name: '',
-    //     tempName: '',
-    //     isEditing: true,
-    //     isNew: true,
-    //     type,
-    //     parentId,
-    //     children: [],
-    //   },
-    // ]);
-    // setExpandedNodes((prev) => ({
-    //   ...prev,
-    //   [parentId]: true,
-    // }));
+  const addNodeToTree = ({ type, parentId, extension }) => {
+    dispatch(addNode({ type, parentId, extension }));
   };
 
   const handleDragStart = (node) => setDraggedNode(node);
@@ -110,13 +96,23 @@ function ProjectSidebar() {
 
   const handleInputSubmit = (nodeId) => {
     const node = directoryConfig[nodeId];
-    if (node?.tempName.trim()) {
-      dispatch(renameNodeAsync({ projectId: projectName, nodeId, newName: node.tempName })).unwrap();
+    if (!node.isNew) {
+      if (node?.tempName.trim()) {
+        dispatch(renameNodeAsync({ projectId: projectName, nodeId, newName: node.tempName })).unwrap();
+      }
+    } else {
+      // TODO : add folder api as per condition
+      dispatch(addNodeAsync({ projectId: projectName, node })).unwrap();
     }
   };
 
   const handleInputCancel = (nodeId) => {
-    dispatch(cancelRename({ nodeId }));
+    const node = directoryConfig[nodeId];
+    if (!node.isNew) {
+      dispatch(cancelRename({ nodeId }));
+    } else {
+      dispatch(cancelAdd({ nodeId }));
+    }
   };
 
   const handleRemoveNode = (nodeId) => {
@@ -137,8 +133,8 @@ function ProjectSidebar() {
 
   const toggleSidebar = () => setShow((prev) => !prev);
 
-  const handleAddFile = (parentId) => addNodeToTree({ type: 'FILE', parentId });
-  const handleAddFolder = (parentId) => addNodeToTree({ type: 'DIRECTORY', parentId });
+  const handleAddFile = (parentId) => addNodeToTree({ type: 'FILE', parentId, extension: 'jsx' });
+  const handleAddFolder = (parentId) => addNodeToTree({ type: 'DIRECTORY', parentId, extension: '' });
 
   const methods = {
     handleNodeClick,
@@ -257,6 +253,7 @@ function ProjectSidebar() {
               label: 'Delete',
               onClick: confirmDelete,
               className: 'btn btn-danger',
+              disabled: true,
             },
             {
               label: 'Cancel',

@@ -1,5 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { deleteNodeApi, getFolderConfig, renameNodeApi } from '../../modules/project/services/projectService';
+import {
+  addNodeApi,
+  deleteNodeApi,
+  getFolderConfig,
+  renameNodeApi,
+} from '../../modules/project/services/projectService';
 
 export const fetchFolderConfig = createAsyncThunk(
   'directory_management/fetchFolderConfig',
@@ -12,6 +17,15 @@ export const fetchFolderConfig = createAsyncThunk(
     }
   }
 );
+
+export const addNodeAsync = createAsyncThunk('directory/addNode', async ({ projectId, node }, { rejectWithValue }) => {
+  try {
+    const response = await addNodeApi(projectId, node);
+    return response;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || 'Failed to rename node');
+  }
+});
 
 export const renameNodeAsync = createAsyncThunk(
   'directory/renameNode',

@@ -30,7 +30,7 @@ function ProjectDisplay() {
   const [isVersionLimitCrossed, setIsVersionLimitCrossed] = useState(null);
   const dispatch = useDispatch();
 
-  console.log('versionError::>>', versionError);
+  // console.log('versionError::>>', versionError);
 
   useEffect(() => {
     const fetchConfigFileVersions = async () => {
@@ -93,7 +93,8 @@ function ProjectDisplay() {
       projectName &&
       activeTab === 'code' &&
       existingTab &&
-      !existingTab.code
+      !existingTab.code &&
+      !selectedNode.isNew
     ) {
       const fetchCode = async () => {
         try {
@@ -118,12 +119,12 @@ function ProjectDisplay() {
 
   useEffect(() => {
     if (!availableTabs.includes(activeTab)) {
-      setActiveConfigTab(selectedNode.id, availableTabs[0]);
+      setActiveConfigTab(selectedTab.id, availableTabs[0]);
     }
-  }, [selectedNode, availableTabs, activeTab, setActiveConfigTab]);
+  }, [selectedTab, availableTabs, activeTab, setActiveConfigTab]);
 
   const handleTabChange = (tab) => {
-    setActiveConfigTab(selectedNode.id, tab);
+    setActiveConfigTab(selectedTab.id, tab);
   };
 
   const fetchCode = async () => {
