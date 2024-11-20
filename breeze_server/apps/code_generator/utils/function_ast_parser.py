@@ -2,18 +2,19 @@
 import copy
 from .reference_helper import resolve_ref
 import apps.code_generator.core.new_component_generator as CompGenerator
-
+import uuid
 from .html_generator import HTMLGenerator
 
 
 class FunctionParser:
-    def __init__(self,projectId=None, resources=[]):
+    def __init__(self,projectId=None, resources=[],meta_config={}):
         self.projectId = projectId
         self.resources = copy.deepcopy(resources)
         self.generated_imports = {
             'other':[],
             'components':[],
         }
+        self.meta_config = meta_config
         self.scope = []
         
     def get_generated_imports(self):
@@ -27,14 +28,24 @@ class FunctionParser:
         if not config.get('type'):
             raise KeyError('type must be defined')
         
-        elif config["type"] =="COMPONENT":
+        statement_id = config.get("id")
+        if not statement_id:
+            statement_id = str(uuid.uuid4())
+            config["id"] = statement_id
+        
+        conf = {
+            "index": "<>".join(key_chaining)
+        }
+        self.meta_config[statement_id] = conf
+        
+        if config["type"] =="COMPONENT":
             code,tree, imports = CompGenerator.generate_react_component_code(config)
             self.generated_imports["other"].extend(imports.get('other',[]))
             self.generated_imports["components"].extend(imports.get('components',[]))
             return code
         
         elif config["type"] == "BLOCK":
-            statements = "\n".join([ self.generate_statement_code(code) for code in config['statements']])
+            statements = "\n".join([ self.generate_statement_code(code,key_chaining=key_chaining+["statements",i]) for i,code in enumerate(config['statements'])])
             if config.get("noWrap"):
                 return statements
             return f"""{{ 
@@ -48,7 +59,7 @@ class FunctionParser:
             
             return f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {", ".join([
                     self.get_function_param(p) for p in config.get("parameters",[])
-                ])} ) => {self.generate_statement_code(config.get('bodyConfig',{}))}"""
+                ])} ) => {self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])}"""
         
         
         elif config["type"] == "DECLARATION":
@@ -63,22 +74,22 @@ class FunctionParser:
             else:
                 varName = config["varName"]
             if declaration_type == "const" or config.get("value",False):
-                value = self.get_value_code(config["value"])
+                value = self.get_value_code(config["value"], key_chaining=key_chaining+["value"])
                 return f"""{declaration_type} {varName} = {value}"""
             else:
                 return f"""{declaration_type} {varName} """
             
         elif config["type"] == "ASSIGNMENT": 
             varName = config["varName"]
-            value = self.get_value_code(config["value"])
+            value = self.get_value_code(config["value"], key_chaining=key_chaining+["value"])
             return f"""{varName} = {value}"""
         
         
         
         elif config['type'] == "FUNCTION_CALL":
-            return self.get_function_call_code(config)
+            return self.get_function_call_code(config,key_chaining=key_chaining)
         elif config['type']== "CHAINED_FUNCTIONS":
-            function_calls = [ self.get_function_call_code(func,True) for func in config["functions"] ]
+            function_calls = [ self.get_function_call_code(func,True,key_chaining=key_chaining+["functions",i]) for i,func in enumerate(config["functions"]) ]
             isAwaited = ""
             if config.get("isAwaited", False):
                 isAwaited = "await "
@@ -88,11 +99,11 @@ class FunctionParser:
             return config.get("body","")
         
         elif config['type'] == "IF_BLOCK":
-            code = f""" if ({self.get_value_code(config["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
+            code = f""" if ({self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
             """
             if config.get('elseIf', False):
                 for x in config.get('elseIf'):
-                    code += f"""else if({self.get_value_code(x["condition"])}) {self.generate_statement_code(x.get('bodyConfig',{}))}"""
+                    code += f"""else if({self.get_value_code(x["condition"],key_chaining=key_chaining+["condition"])}) {self.generate_statement_code(x.get('bodyConfig',{}))}"""
             if config.get('elseBody', False):
                 code += f"""else  {self.generate_statement_code(config.get('elseBody',{}))}
             """
@@ -106,7 +117,7 @@ class FunctionParser:
             else:
                 iterator = f"""{config["iterator"].get("declarationType","const ")} {config["iterator"]["name"]}"""
                 iterate = "in" if config.get('loopType')=="FOR_IN" else "of"
-                iterable = self.get_value_code(config["iterable"])
+                iterable = self.get_value_code(config["iterable"],key_chaining=key_chaining+["iterable"])
                 return f""" for ( {iterator} {iterate} {iterable})
                     {self.generate_statement_code(config.get('bodyConfig'))}
                 """
@@ -124,20 +135,20 @@ class FunctionParser:
             return " ".join([tryBody,catchBody,finallyBody])
         
         elif config['type'] == "WHILE_BLOCK":
-            return f""" while ({self.get_value_code(config["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
+            return f""" while ({self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])}) {self.generate_statement_code(config.get('bodyConfig',{}))} 
         """
         
         elif config['type'] == "DO_WHILE_BLOCK":
-            return f"""do  {self.generate_statement_code(config.get('bodyConfig',{}))} while ({self.get_value_code(config["condition"])}) 
+            return f"""do  {self.generate_statement_code(config.get('bodyConfig',{}))} while ({self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])}) 
         """
         
         
         elif config['type'] == "RETURN":
-            return f""" return {self.get_value_code(config.get("value",{}))}
+            return f""" return {self.get_value_code(config.get("value",{}),key_chaining=key_chaining+["value"])}
         """
         
         elif config["type"] == "OPERATION":
-            return f" {self.get_operation_code(config)} "
+            return f" {self.get_operation_code(config,key_chaining=key_chaining)} "
         
         elif config["type"] == "IMPORT":
             if config.get("importType") == "DEFAULT":
@@ -152,8 +163,7 @@ class FunctionParser:
         
         return ""
         
-    def get_condition(self,config):
-        return "true"
+    
     
     
     def get_function_param(self,param):
@@ -165,13 +175,8 @@ class FunctionParser:
                 ])} }}"""
         
     
-    def get_resource_by_id(self,ref):
-        for resource in self.resources:
-            if resource.get("id") == ref:
-                return resource
-        raise IndexError(f"Resource with id {ref} not found.")
     
-    def get_value_code(self,value):
+    def get_value_code(self,value, key_chaining=[]):
         ref = value.get("$ref")
         type = value.get("type","UNDEFINED")
         if ref:
@@ -196,13 +201,13 @@ class FunctionParser:
                     return "false"
             
             elif type == "OBJECT":
-                return f"""{{ {",".join([ f" {x} : {self.get_value_code(value['properties'][x])}" for x in value.get("properties") ])}}}"""
+                return f"""{{ {",".join([ f" {x} : {self.get_value_code(value['properties'][x],key_chaining=key_chaining+['properties',x])}" for x in value.get("properties") ])}}}"""
             
             elif type == "ARRAY":
-                return f"[{', '.join([self.get_value_code(x) for x in value.get('values', [])])}]"
+                return f"[{', '.join([self.get_value_code(x,key_chaining=key_chaining+[i]) for i,x in enumerate(value.get('values', []))])}]"
 
             elif type == "OPERATION":
-                return self.get_operation_code(value)
+                return self.get_operation_code(value,key_chaining=key_chaining)
             
             elif type == "FUNCTION" or type == "CALLBACK":
                 return self.generate_statement_code(value)
@@ -283,7 +288,7 @@ class FunctionParser:
     def generate_attribute_code(self,attr,value):
         return f"{attr}={self.get_value_code(value)}"
         
-    def get_function_call_code(self,config,disableAwait = False):
+    def get_function_call_code(self,config,disableAwait = False,key_chaining=[]):
         ref = config.get("$ref",None)
         if ref:
             functionConfig = resolve_ref(
@@ -303,35 +308,29 @@ class FunctionParser:
         isAwait = ""
         if config.get("isAwaited") and not disableAwait:
             isAwait = "await "
-        return f"""{isAwait}{functionName}({self.get_parameter_mapping(config)})
+        return f"""{isAwait}{functionName}({self.get_parameter_mapping(config,key_chaining=key_chaining)})
         """
         
         
-    def get_parameter_mapping(self,config):
+    def get_parameter_mapping(self,config,key_chaining=[]):
         param_list =[]
-        for param in config.get("parameters",[]):
-            param_list.append(self.get_value_code(param))
+        for i,param in enumerate(config.get("parameters",[])):
+            param_list.append(self.get_value_code(param,key_chaining=key_chaining+["parameters",i]))
         return ", ".join([str(x) for x in param_list])
     
-    def get_operation_code(self,config):
+    def get_operation_code(self,config,key_chaining=[]):
         if config["operationType"] == "UNARY":
-            return f" {config['operation']}{self.get_operand_code(config['operand'] )}"
+            return f" {config['operation']}{self.get_value_code(config['operand'] )}"
 
         elif config["operationType"] == "BINARY":
-            operand1 = self.get_operand_code(config['operand1'] )
-            operand2 = self.get_operand_code(config['operand2'] )
-            return f" {operand1}{config['operation']}{operand2} "
+            operand1 = self.get_value_code(config['operand1'], key_chaining=key_chaining+["operand1"] )
+            operand2 = self.get_value_code(config['operand2'], key_chaining=key_chaining+["operand2"] )
+            return f" ({operand1}){config['operation']}({operand2}) "
             
         
         elif config["operationType"] == "TERNARY":
-            operand1 = self.get_operand_code(config['operand1'] )
-            operand2 = self.get_operand_code(config['operand2'] )
-            operand3 = self.get_operand_code(config['operand3'] )
-            return f" {operand1} ? {operand2} : {operand3} "
+            operand1 = self.get_value_code(config['operand1'], key_chaining=key_chaining+["operand1"] )
+            operand2 = self.get_value_code(config['operand2'], key_chaining=key_chaining+["operand2"] )
+            operand3 = self.get_value_code(config['operand3'], key_chaining=key_chaining+["operand3"])
+            return f" ({operand1} )? ({operand2}) : ({operand3}) "
             
-    def get_operand_code(self, operand):
-        if operand.get("type") == "OPERATION":
-            return f" ( {self.get_value_code(operand )} ) "
-        else:
-            return self.get_value_code(operand)
-        
