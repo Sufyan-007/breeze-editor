@@ -1,20 +1,10 @@
-from drf_yasg import openapi
-
+from drf_spectacular.utils import OpenApiResponse
+from ..data_models.serializers import RegisterResponseSerializer,RegisterSerializer
 register_schema ={
-    'rb':openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            "username":openapi.Schema(type=openapi.TYPE_STRING),
-            "email":openapi.Schema(type=openapi.FORMAT_EMAIL),
-            "password":openapi.Schema(type=openapi.FORMAT_PASSWORD)
-        },
-        required=['username','password','email']
-    ),
-    'response_201':openapi.Response(
-                    description='created',
-                    schema=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={'accessToken':openapi.Schema(type=openapi.TYPE_STRING)}
-                    )
-                )
+    'rb':RegisterSerializer,
+    'response_201': OpenApiResponse(
+        response = RegisterResponseSerializer,
+        description = 'created'
+    )
 }
+

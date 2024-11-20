@@ -62,7 +62,7 @@ export const TabProvider = ({ children, projectName }) => {
   }, [selectedNode, projectName]);
 
   const addTab = useCallback((node, code = '', language = '', activeTab = 'code') => {
-    if (node?.type !== 'DIRECTORY') {
+    if (node?.type !== 'DIRECTORY' && !node.isNew) {
       setOpenTabs((prevTabs) => {
         const existingTab = prevTabs.find((tab) => tab.id === node.id);
         if (existingTab) return prevTabs;
