@@ -3,13 +3,16 @@ import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
 import { BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
-import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
-import VariableConfigForm from '../../component-configuration/components/config-forms/VariableConfigForm';
-import AddELement from '../../component-configuration/components/config-forms/AddELement';
-import ImportConfigForm from '../../component-configuration/components/config-forms/ImportConfigForm';
-import FunctionConfigForm from '../../component-configuration/components/config-forms/FunctionConfigForm';
-import LifecycleConfigForm from '../../component-configuration/components/config-forms/LifecycleConfigForm';
-import HookConfigForm from '../../component-configuration/components/config-forms/HookConfigForm';
+import {
+  VariableConfigForm,
+  PropConfigForm,
+  FunctionConfigForm,
+  HookConfigForm,
+  ImportConfigForm,
+  LifecycleConfigForm,
+  AddELement,
+  IfBlockConfigForm,
+} from '../../component-configuration/components/config-forms';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 import { configTypeMapping, items } from '../constants/EditorList';
 import { getCodeDetails } from '../../../services/components/componentService';
@@ -32,7 +35,7 @@ const ConfigurableMonacoEditor = ({
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  const { showOffcanvas } = useOffcanvas();
+  const { showOffcanvas, closeOffcanvas } = useOffcanvas();
   const { projectName } = useParams();
 
   useEffect(() => {
@@ -106,32 +109,49 @@ const ConfigurableMonacoEditor = ({
     };
   }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
+  const onSubmit = (value) => {
+    console.log('value::>>', value);
+    closeOffcanvas();
+  };
+
   const handleMenuItemClick = (item) => {
     let contentComponent;
     switch (item) {
       case 'Add Import':
-        contentComponent = <ImportConfigForm onSubmit={() => {}} />;
+        contentComponent = <ImportConfigForm onSubmit={onSubmit} />;
         break;
       case 'Edit Import':
-        contentComponent = <ImportConfigForm onSubmit={() => {}} formData={{}} editMode={true} />;
+        contentComponent = <ImportConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
         break;
       case 'Props':
-        contentComponent = <PropConfigForm onSubmit={() => {}} />;
+        contentComponent = <PropConfigForm onSubmit={onSubmit} />;
+        break;
+      case 'Edit Prop':
+        contentComponent = <PropConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
         break;
       case 'Variable':
-        contentComponent = <VariableConfigForm onSubmit={() => {}} />;
+        contentComponent = <VariableConfigForm onSubmit={onSubmit} />;
         break;
       case 'Html elements':
         contentComponent = <AddELement />;
         break;
       case 'Function':
-        contentComponent = <FunctionConfigForm onSubmit={() => {}} />;
+        contentComponent = <FunctionConfigForm onSubmit={onSubmit} />;
         break;
+      // case 'Params':
+      //   contentComponent = <ParamConfigForm onSubmit={onSubmit} />;
+      //   break;
       case 'Lifecycle':
-        contentComponent = <LifecycleConfigForm onSubmit={() => {}} />;
+        contentComponent = <LifecycleConfigForm onSubmit={onSubmit} />;
         break;
       case 'Hook':
-        contentComponent = <HookConfigForm onSubmit={() => {}} />;
+        contentComponent = <HookConfigForm onSubmit={onSubmit} />;
+        break;
+      case 'If Block':
+        contentComponent = <IfBlockConfigForm onSubmit={onSubmit} />;
+        break;
+      case 'Edit If Block':
+        contentComponent = <IfBlockConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
         break;
       default:
         contentComponent = null;
