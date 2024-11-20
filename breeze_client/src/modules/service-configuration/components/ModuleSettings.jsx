@@ -1,12 +1,21 @@
 import { useSelector } from 'react-redux';
-import { CustomButtonField, CustomTextArea, CustomTextInput } from '../../../common/fields';
-import { useState } from 'react';
+import {
+  CustomButtonField,
+  CustomSelectField,
+  CustomTextArea,
+  CustomTextInput,
+  MonacoEditor,
+} from '../../../common/fields';
+import { useContext, useState } from 'react';
+import ThemeContext from '../../../contexts/ThemeContext';
+import { RequestInterceptors } from '../constants/Interceptors';
 
 function ModuleSettings({ moduleId }) {
   const moduleData = useSelector((state) => state.services.moduleList[moduleId]);
-  console.log(moduleData, moduleId);
+  const { theme } = useContext(ThemeContext);
+  const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
   const [availableServers, setAvailableServers] = useState(moduleData.servers_info || []);
-
+  const [interceptors, setInterceptors] = useState(moduleData.interceptors || [RequestInterceptors]);
   const handleServersChange = (operation, index = null, value = null) => {
     if (operation === 'add') {
       const newServers = [...availableServers, { url: '' }];
@@ -21,6 +30,18 @@ function ModuleSettings({ moduleId }) {
       const newServers = [...availableServers];
       newServers[index] = { url: value };
       setAvailableServers(newServers);
+    }
+  };
+
+  const handleInterceptorsChange = (operation, index = null, field = null, value = null) => {
+    if (operation === 'add') {
+      const newInterceptors = [...interceptors, RequestInterceptors];
+      setInterceptors(newInterceptors);
+    }
+    if (operation === 'update') {
+      const newInterceptors = [...interceptors];
+      newInterceptors[index][field] = value;
+      setInterceptors(newInterceptors);
     }
   };
   return (
@@ -117,10 +138,81 @@ function ModuleSettings({ moduleId }) {
                   className="bi bi-plus-circle mx-2 mt-4"
                   title="add-interceptors"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => {}}
+                  onClick={() => {
+                    handleInterceptorsChange('add');
+                  }}
                 ></i>
               </div>
-              <div className="col-sm-9"></div>
+              <div className="col-sm-9">
+                {interceptors.length > 0 ? (
+                  interceptors.map((interceptor, index) => (
+                    <div
+                      key={index}
+                      className="my-2 mx-1 ps-1"
+                      style={{ border: '1px solid gray', borderRadius: '5px' }}
+                    >
+                      <div className="row p-1">
+                        <div className="col-sm-2">Name:</div>
+                        <div className="col-sm-10">
+                          <CustomTextInput
+                            key={index}
+                            value={interceptor.name}
+                            onChange={(val) => {
+                              handleInterceptorsChange('update', index, 'name', val);
+                            }}
+                            className="form-control br-form-control form-control-sm my-1"
+                          />
+                        </div>
+                      </div>
+                      <div className="row p-1">
+                        <div className="col-sm-2">Type:</div>
+                        <div className="col-sm-10">
+                          <CustomSelectField
+                            name="type"
+                            value={interceptor.type}
+                            options={[
+                              { label: 'Select', value: '' },
+                              { label: 'Request', value: 'REQUEST' },
+                              { label: 'Response', value: 'RESPONSE' },
+                            ]}
+                            className="form-select br-form-select form-select-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="row p-1">
+                        <div className="col-sm-2">Interceptor:</div>
+                        <div className="col-sm-10">
+                          <MonacoEditor
+                            id={index}
+                            defaultValue={interceptor.interceptorCode}
+                            // onChange={(value) => handleChange('defaultValue', value)}
+                            language="javascript"
+                            height="50px"
+                            theme={projectTheme}
+                            config={{ label: 'Default Value' }}
+                          />
+                        </div>
+                      </div>
+                      <div className="row p-1">
+                        <div className="col-sm-2">Error:</div>
+                        <div className="col-sm-10">
+                          <MonacoEditor
+                            id={index}
+                            defaultValue={interceptor.errorCode}
+                            // onChange={(value) => handleChange('defaultValue', value)}
+                            language="javascript"
+                            height="50px"
+                            theme={projectTheme}
+                            config={{ label: 'Default Value' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No interceptors available</p>
+                )}
+              </div>
             </div>
           </div>
         </div>

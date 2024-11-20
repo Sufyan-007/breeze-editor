@@ -72,14 +72,18 @@ function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId }) {
     <>
       <div className="row br-background-secondary">
         <div className="col-12 mb-2">
-          <CustomSelectField
-            name="moduleSelect"
-            value={type ? type : $ref}
-            onChange={(val) => changeType(val)}
-            options={combinedOptions}
-            className="form-select br-form-select form-select-sm"
-            sendSelectedOption={true}
-          />
+          {/* {add condition } */}
+          {!openResolve ||
+            (type === 'object' && (
+              <CustomSelectField
+                name="moduleSelect"
+                value={type ? type : $ref}
+                onChange={(val) => changeType(val)}
+                options={combinedOptions}
+                className="form-select br-form-select form-select-sm"
+                sendSelectedOption={true}
+              />
+            ))}
           {type === 'object' && !openResolve && (
             <>
               <i

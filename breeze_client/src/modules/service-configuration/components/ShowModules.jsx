@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CustomTextInput } from '../../../common/fields';
 import ShowFiles from './ShowFiles';
-import { fetchFiles } from '../redux/ApiClientActions';
+import { deleteModuleById, fetchFiles, fetchModules } from '../redux/ApiClientActions';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import isEqual from 'lodash/isEqual';
@@ -20,6 +20,7 @@ function ShowModules({
   const [isOpen, setIsOpen] = useState(false);
   const [editingModule, setEditingModule] = useState(null);
   const [newModuleTitle, setNewModuleTitle] = useState('');
+  const [showActions, setShowActions] = useState(false);
   const { projectName } = useParams();
   const dispatch = useDispatch();
 
@@ -48,6 +49,11 @@ function ShowModules({
     setNewModuleTitle(trimmedNewName);
   };
 
+  const handleDeleteModule = async (moduleId) => {
+    await dispatch(deleteModuleById({ projectName, payload: { moduleId } })).unwrap();
+    await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+    setShowActions(false);
+  };
   const toggleEditing = (title) => {
     if (editingModule === title) {
       setEditingModule(null);
@@ -56,6 +62,10 @@ function ShowModules({
       setEditingModule(title);
       setNewModuleTitle(title);
     }
+  };
+  const handleActionsClick = (e) => {
+    e.stopPropagation();
+    setShowActions((prev) => !prev);
   };
   return (
     <div key={folderKey} className="my-2">
@@ -96,32 +106,57 @@ function ShowModules({
           </div>
           <div>
             <i
-              className="bi bi-gear mx-1"
-              title="module-properties"
-              onClick={(e) => {
-                setSelectedModule({ name: value.title, id: folderKey });
-                e.stopPropagation();
-                setView('MODULE_SETTINGS');
-              }}
-            ></i>
-            <i
-              className="bi bi-plus-circle mx-1"
+              className="bi bi-three-dots-vertical mx-1"
+              title="module-actions"
+              onClick={handleActionsClick}
               style={{ cursor: 'pointer' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onAdd(value.title, folderKey);
-              }}
-              title="add-function"
             ></i>
-            <i
-              className="bi bi-pencil-square mx-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedModule({ name: value.title, id: folderKey });
-                toggleEditing(value.title);
-              }}
-              title="edit-module-name"
-            ></i>
+
+            {showActions && (
+              <div
+                className="dropdown-menu show br-background-secondary d-flex justify-content-evenly"
+                style={{ position: 'absolute', zIndex: 10 }}
+              >
+                <i
+                  className="bi bi-gear mx-1 br-text-primary"
+                  title="module-properties"
+                  onClick={(e) => {
+                    setSelectedModule({ name: value.title, id: folderKey });
+                    e.stopPropagation();
+                    setView('MODULE_SETTINGS');
+                    setShowActions(false);
+                  }}
+                ></i>
+                <i
+                  className="bi bi-plus-circle mx-1 br-text-primary"
+                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAdd(value.title, folderKey);
+                    setShowActions(false);
+                  }}
+                  title="add-function"
+                ></i>
+                <i
+                  className="bi bi-pencil-square mx-1 br-text-primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedModule({ name: value.title, id: folderKey });
+                    toggleEditing(value.title);
+                    setShowActions(false);
+                  }}
+                  title="edit-module-name"
+                ></i>
+                <i
+                  className="bi bi-trash mx-1 br-text-primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteModule(folderKey);
+                  }}
+                  title="delete-module"
+                ></i>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -141,13 +176,16 @@ function ShowModules({
               />
             ))
           ) : (
-            <span className="m-2 br-text-primary">No services found</span>
+            <span className="m-2 br-text-primary" style={{ fontSize: '16px' }}>
+              No Files found
+            </span>
           )}
         </div>
       )}
     </div>
   );
 }
+
 ShowModules.propTypes = {
   folderKey: PropTypes.string.isRequired,
   saveTitle: PropTypes.func.isRequired,

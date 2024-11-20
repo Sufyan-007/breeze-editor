@@ -5,7 +5,7 @@ from ....common.constants.consts import CONFIG_PATH,CLIENT_API
 from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
 from ..core.intermediate_modification_helper import process_api_data, transfer_data_to_auth,add_auth_function
-from ..core.module_manager import add_module_helper,edit_module_title_helper
+from ..core.module_manager import add_module_helper,edit_module_title_helper,delete_helper
 from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema,get_response_token_schema,add_module_schema
 from ....code_generator.core.api_client_generator import generate_react_service
 from ....directory_management.core.directory_management_service import DirectoryManager
@@ -210,4 +210,10 @@ def add_module(request,project_id):
     return JsonResponse(result, status=status)
 
 
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def delete_module_file_function(request,project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    result,status = delete_helper(project_id,data.get("moduleId"), data.get("fileId"),data.get("functionId"))
+    return JsonResponse(result,status=status)
 
