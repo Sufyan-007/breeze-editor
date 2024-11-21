@@ -12,6 +12,7 @@ import {
   LifecycleConfigForm,
   AddELement,
   IfBlockConfigForm,
+  WhileBlockConfigForm,
 } from '../../component-configuration/components/config-forms';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 import { configTypeMapping, items } from '../constants/EditorList';
@@ -152,6 +153,12 @@ const ConfigurableMonacoEditor = ({
         break;
       case 'Edit If Block':
         contentComponent = <IfBlockConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
+        break;
+      case 'While Block':
+        contentComponent = <WhileBlockConfigForm onSubmit={onSubmit} />;
+        break;
+      case 'Edit While Block':
+        contentComponent = <WhileBlockConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
         break;
       default:
         contentComponent = null;
