@@ -10,7 +10,7 @@ import FunctionParams from '../helper-components/FunctionParams';
 import { availableDependentVars, hookTypes } from '../../constants/FormConstants';
 import { initialHookConfig } from '../../constants/ResourcesFormData';
 
-function HookConfigForm({ onSubmit }) {
+function HookConfigForm({ onSubmit, onCancel }) {
   const [formData, setFormData] = useState(initialHookConfig);
 
   const handleChange = (field, value) => {
@@ -25,6 +25,12 @@ function HookConfigForm({ onSubmit }) {
     console.log('formData::>>', formData);
     onSubmit(formData);
     setFormData(initialHookConfig);
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    setFormData(initialHookConfig);
+    onCancel();
   };
 
   return (
@@ -78,6 +84,12 @@ function HookConfigForm({ onSubmit }) {
         </div>
 
         <div className="d-flex justify-content-end">
+          <CustomButtonField
+            type="button"
+            label={'Cancel'}
+            className="btn br-secondary-button med-font mx-2"
+            onClick={handleCancel}
+          />
           <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
         </div>
       </div>
@@ -87,6 +99,7 @@ function HookConfigForm({ onSubmit }) {
 
 HookConfigForm.propTypes = {
   onSubmit: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default HookConfigForm;

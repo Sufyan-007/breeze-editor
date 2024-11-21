@@ -12,7 +12,7 @@ import {
 import { BreezeDatatypes } from '../../constants/FormConstants';
 import { initialPropConfig } from '../../constants/ResourcesFormData';
 
-function PropConfigForm({ onSubmit, formData: initialData, editMode = false }) {
+function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = false }) {
   const [formData, setFormData] = useState(initialData || initialPropConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
@@ -34,6 +34,12 @@ function PropConfigForm({ onSubmit, formData: initialData, editMode = false }) {
     e.preventDefault();
     onSubmit(formData);
     if (!editMode) setFormData(initialPropConfig); // Reset only in create mode
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    setFormData(initialPropConfig);
+    onCancel();
   };
 
   return (
@@ -90,6 +96,12 @@ function PropConfigForm({ onSubmit, formData: initialData, editMode = false }) {
         <div className="d-flex justify-content-end">
           <CustomButtonField
             type="button"
+            label={'Cancel'}
+            className="btn br-secondary-button med-font mx-2"
+            onClick={handleCancel}
+          />
+          <CustomButtonField
+            type="button"
             label={editMode ? 'Update' : 'Submit'}
             className="btn btn-filled med-font"
             onClick={handleSubmit}
@@ -102,6 +114,7 @@ function PropConfigForm({ onSubmit, formData: initialData, editMode = false }) {
 
 PropConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
   formData: PropTypes.shape({
     propName: PropTypes.string,
     isRequired: PropTypes.bool,

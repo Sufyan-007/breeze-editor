@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
 
-function DoWhileConfigForm({ onSubmit, formData: initialData, editMode }) {
+function DoWhileConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
   const initialDoWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['doWhileBlock']));
   const [formData, setFormData] = useState(initialData || { ...initialDoWhileConfig });
 
@@ -19,6 +19,13 @@ function DoWhileConfigForm({ onSubmit, formData: initialData, editMode }) {
     onSubmit(formData);
     if (!editMode) setFormData(initialDoWhileConfig);
   };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    setFormData(initialDoWhileConfig);
+    onCancel();
+  };
+
   return (
     <form className="doWhileBlock-config-form h-100">
       <div className="d-flex flex-column justify-content-between h-100">
@@ -35,7 +42,13 @@ function DoWhileConfigForm({ onSubmit, formData: initialData, editMode }) {
             />
           </div>
         </div>
-        <div className="d-flex justify-content-end pb-3">
+        <div className="d-flex justify-content-end">
+          <CustomButtonField
+            type="button"
+            label={'Cancel'}
+            className="btn br-secondary-button med-font mx-2"
+            onClick={handleCancel}
+          />
           <CustomButtonField
             type="button"
             label={editMode ? 'Update' : 'Submit'}
@@ -50,6 +63,7 @@ function DoWhileConfigForm({ onSubmit, formData: initialData, editMode }) {
 
 DoWhileConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
   formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
