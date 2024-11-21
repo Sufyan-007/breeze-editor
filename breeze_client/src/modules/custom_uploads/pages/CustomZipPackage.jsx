@@ -318,7 +318,6 @@ function CustomZipPackagePage() {
     {
       header: 'Last Modified',
       accessor: 'lastModified',
-      render: (value) => new Date(value).toLocaleDateString(),
       width: '40%',
     },
     {
