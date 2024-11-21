@@ -33,9 +33,11 @@ def prepare_api_models(json_data, project_name,isJson):
 
             ##security schemes to store in the swagger metadata
             security_schemes = openapi_data.get("components",{}).get("securitySchemes",{})
+            servers_info = openapi_data.get("servers")
             meta_data = openapi_data.get("info",{})
             meta_data["auth_apis"] = {}
             meta_data["security_schemes"] = security_schemes
+            meta_data["servers_info"] = servers_info
             with open(swagger_metadata_file_path, "r") as file:
                 swagger_metadata_file_content = json.load(file)
             swagger_metadata_id = generate_uuid_as_key()

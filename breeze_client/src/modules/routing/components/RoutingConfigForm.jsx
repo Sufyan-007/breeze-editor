@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import { initialRoutingConfig } from '../constants/RoutingConstants';
 import { getAllRoutesFullPath } from '../../../services/routing/routingService';
 import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
   const [formData, setFormData] = useState(initialData);
@@ -17,6 +18,7 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
   const [advancedDetailsOpen, setAdvancedDetailsOpen] = useState(false);
   const [availableRoutes, setAvailableRoutes] = useState([{ label: 'Select Route', value: '' }]);
   const { projectName } = useParams();
+  const selectedNodePayload = useSelector((state) => state.project.selectedNodePayload);
 
   useEffect(() => {
     if (initialData) {
@@ -53,7 +55,7 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit({ ...formData, ROUTING_CONFIG_CURRENT_VERSION: selectedNodePayload?.latestConfigVersion });
     setFormData(initialRoutingConfig);
   };
 

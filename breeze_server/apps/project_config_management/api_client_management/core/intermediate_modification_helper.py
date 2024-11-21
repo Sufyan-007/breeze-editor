@@ -37,7 +37,7 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
         if os.path.exists(file_path):
             with open(file_path, "r") as file:
                 existing_data = json.load(file)
-            is_duplicate = check_for_duplicate_names(modified_api.get("operation_id"), existing_data=existing_data)
+            is_duplicate = check_for_duplicate_names(modified_api.get("operation_id"),modified_api.get("id"), existing_data=existing_data)
             if is_duplicate:
                 return {'error': 'Duplicate Function name'}, 409
             
@@ -68,9 +68,9 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
         raise Exception(str(e))
 
 
-def check_for_duplicate_names(new_name, existing_data):
+def check_for_duplicate_names(new_name,func_id, existing_data):
     for key, value in existing_data.items():
-        if value.get("operation_id")== new_name:
+        if value.get("operation_id")== new_name and value.get("id") != func_id:
             return True
     return False
 

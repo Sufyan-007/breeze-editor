@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useParams } from 'react-router';
 import { CustomButtonField, CustomCheckBoxField, CustomSelectField, CustomTextInput } from '../../../common/fields';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchFiles, fetchFunctions, fetchModules, transferToAuthFile } from '../redux/ApiClientActions';
 
 function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInfo, onSuccessfulTransfer, moduleId }) {
   const [showModal, setShowModal] = useState(false);
@@ -22,13 +23,22 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
   };
   const handleConversion = async () => {
     const payload = {
-      filename: selectedServiceInfo.filename,
+      filename: selectedServiceInfo.fileId,
       id: selectedServiceInfo.serviceId,
       module_id: selectedServiceInfo.id,
     };
-    await dispatch(convertToAuthApi({ projectName, payload })).unwrap();
+    await dispatch(transferToAuthFile({ projectName, payload })).unwrap();
     setShowModal(!showModal);
-    onSuccessfulTransfer();
+    await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+    await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+    dispatch(fetchFiles({ projectName, payload: { category: 'api_client', module: moduleId } })).unwrap();
+    await dispatch(
+      fetchFunctions({
+        projectName,
+        payload: { category: 'api_client', files: selectedServiceInfo.fileId, module: moduleId },
+      })
+    ).unwrap();
+    // onSuccessfulTransfer();
   };
 
   const filteredFiles = filesIdList ? filesIdList.map((fileId) => filesList[fileId]).filter((file) => file) : [];
@@ -72,7 +82,9 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
 
       <div className="row mt-3">
         <div className=" br-background-secondary br-text-primary p-1">
-          <span className="mx-2 ">General Settings</span>
+          <span className="mx-2 " style={{ fontSize: '16px' }}>
+            General Settings
+          </span>
         </div>
         <div className="row mt-2">
           <div className="col-sm-6">
@@ -238,8 +250,8 @@ GeneralSettingsCard.propTypes = {
     filename: PropTypes.string,
     serviceId: PropTypes.string,
     id: PropTypes.string,
-  }).isRequired,
-  onSuccessfulTransfer: PropTypes.func.isRequired,
-  moduleId: PropTypes.string.isRequired,
+  }),
+  onSuccessfulTransfer: PropTypes.func,
+  moduleId: PropTypes.string,
 };
 export default GeneralSettingsCard;

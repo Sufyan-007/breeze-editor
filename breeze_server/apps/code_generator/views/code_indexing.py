@@ -3,7 +3,13 @@ from rest_framework.decorators import api_view
 from ...common.constants.consts import CONFIG_PATH
 import pickle
 import json
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(
+    methods=['POST'],
+    request=None,
+    responses=None
+)
 @api_view(["POST"])
 def get_config_by_index(request,project_id):
     data = json.loads(request.body)

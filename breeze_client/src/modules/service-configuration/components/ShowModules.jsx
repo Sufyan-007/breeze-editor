@@ -88,7 +88,7 @@ function ShowModules({
             ) : (
               <div className="">
                 <img width="20" height="20" src="https://img.icons8.com/ios-filled/50/AAAAAA/module.png" alt="module" />
-                <span className="mx-2 br-text-primary">
+                <span className="mx-2 br-text-primary" style={{ fontSize: '16px' }}>
                   {value.title.length > 30 ? `${value.title.slice(0, 30)}...` : value.title}
                 </span>
               </div>
@@ -101,7 +101,7 @@ function ShowModules({
               onClick={() => {
                 onAdd(value.title, folderKey);
               }}
-              title="add-to-module"
+              title="add-function"
             ></i>
             <i
               className="bi bi-pencil-square mx-1"

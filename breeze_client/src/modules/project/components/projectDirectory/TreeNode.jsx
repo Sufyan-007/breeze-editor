@@ -17,7 +17,7 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
 
   const inputRef = useRef(null);
   const handleContextMenuSelection = (nodeId) => {
-    parentMethods.addNodeToTree({ type: 'FILE', parentId: nodeId });
+    parentMethods.addNodeToTree({ type: 'FILE', parentId: nodeId, extension: 'jsx' });
     if (!isExpanded(nodeId)) {
       toggleNode(nodeId);
       return;
@@ -40,9 +40,9 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   };
 
   const handleInputSubmit = () => {
-    if (node.tempName.trim()) {
+    if (node?.tempName.trim()) {
       parentMethods.handleInputSubmit(node.id);
-      parentMethods.handleNodeClick(null);
+      // parentMethods.handleNodeClick(null);
     }
   };
 
@@ -75,10 +75,19 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   };
 
   const handleContextMenu = (e) => {
+    if (node.isProtected) {
+      return;
+    }
     contextMenuRef.current?.handleEvent(e);
     setMenuItems(
       node.type === 'DIRECTORY'
-        ? folderOptions(node.id, handleContextMenuSelection, parentMethods.handleRename)
+        ? folderOptions(
+            node.id,
+            handleContextMenuSelection,
+            parentMethods.handleRename,
+            parentMethods.handleAddFolder,
+            parentMethods.handleRemoveNode
+          )
         : fileOptions(node.id, parentMethods.handleRename, parentMethods.handleRemoveNode)
     );
   };
@@ -130,10 +139,23 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
                 ref={inputRef}
                 placeholder="Enter name"
               />
-              <button onClick={handleInputSubmit} className="node-input br-text-primary">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInputSubmit();
+                }}
+                type="button"
+                className="node-input br-text-primary"
+              >
                 <i className="bi bi-check" />
               </button>
-              <button onClick={handleInputCancel} className="node-input br-text-primary">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInputCancel();
+                }}
+                className="node-input br-text-primary"
+              >
                 <i className="bi bi-x" />
               </button>
             </div>
@@ -158,18 +180,16 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
               />
             </>
           )}
-          {!node.isProtected && (
-            <i
-              className="bi bi-pencil node-icon"
-              title="Rename"
-              onClick={(e) => {
-                e.stopPropagation();
-                parentMethods.handleRename(node.id);
-              }}
-            />
-          )}
-          {!isEditing && node.type === 'FILE' && (
+          {!isEditing && !node.isProtected && (
             <>
+              <i
+                className="bi bi-pencil node-icon"
+                title="Rename"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  parentMethods.handleRename(node.id);
+                }}
+              />
               {!node.isProtected && (
                 <i
                   className="bi bi-trash node-icon"

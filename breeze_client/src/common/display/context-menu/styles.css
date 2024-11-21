@@ -1,0 +1,14 @@
+.br-context-menu {
+    position: absolute;
+    box-sizing: border-box;
+    list-style: none;
+    z-index: 999;
+}
+
+.br-context-menu-item {
+    padding: 2px;
+}
+
+.br-context-menu-item:hover {
+    background-color: var(--color-background);
+}

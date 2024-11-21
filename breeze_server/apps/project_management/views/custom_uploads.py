@@ -7,13 +7,14 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from dotenv import load_dotenv
 from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file, set_prop_config, update_resource_config
-from drf_yasg.utils import swagger_auto_schema
+from apps.common.constants.consts import PORT  
+from drf_spectacular.utils import extend_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
 from ..utils.get_uploaded_resources import get_uploaded_resources as get_resources
 
-@swagger_auto_schema(
-    method='post',
-    request_body=add_custom_package_schema['rb'],
+@extend_schema(
+    methods=['POST'],
+    request=add_custom_package_schema['rb'],
     responses={
         200:add_custom_package_schema['response_200'],
         500:add_custom_package_schema['response_500']
@@ -74,9 +75,9 @@ def upload_and_update_file(projectName, file, fileName , file_id):
         update_resource_config(projectName, fileName, file_id, status="file upload failed", tag="ZIP")
         print(f"Error in upload_and_update_file: {e}")
     
-@swagger_auto_schema(
-    method='get',
-    request_body=None,
+@extend_schema(
+    methods=['GET'],
+    request=None,
     responses={
         200:get_custom_package_schema['response_200'],
         500:get_custom_package_schema['response_500'],
@@ -98,9 +99,9 @@ def get_uploaded_resources(request, projectName):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-@swagger_auto_schema(
-    method='delete',
-    request_body=delete_custom_package_schema['rb'],
+@extend_schema(
+    methods=['DELETE'],
+    request=delete_custom_package_schema['rb'],
     responses={
         200:delete_custom_package_schema['response_200'],
         400:delete_custom_package_schema['response_400'],
@@ -127,7 +128,11 @@ def delete_custom_package(request, projectName):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
+@extend_schema(
+    methods=['PUT'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['PUT'])
 def set_component_config(request, projectName):    

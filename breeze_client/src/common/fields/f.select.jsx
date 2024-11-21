@@ -30,6 +30,7 @@ function CustomSelectField({ config, name, value, onChange, options, className, 
             {/* <option value="">{'Select'}</option> */}
             {availableOptions.map((option, index) => (
               <option
+                defaultValue={option.defaultValue}
                 selected={option.selected}
                 disabled={option.disabled}
                 hidden={option.hidden}
@@ -51,15 +52,15 @@ function CustomSelectField({ config, name, value, onChange, options, className, 
 
 CustomSelectField.propTypes = {
   config: PropTypes.any,
-  name: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
+  name: PropTypes.string,
+  value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   className: PropTypes.string,
   sendSelectedOption: PropTypes.bool,
   options: PropTypes.arrayOf(
     PropTypes.shape({
-      value: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
+      value: PropTypes.string,
+      label: PropTypes.string,
     })
   ).isRequired,
 };

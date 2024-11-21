@@ -2,18 +2,17 @@ import { useEffect, useState } from 'react';
 import ParameterSettings from './ParameterSettings';
 import { CustomSelectField, CustomTextInput } from '../../../common/fields';
 import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
 
-function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
+function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars, moduleId }) {
   const [url, setUrl] = useState(urlData);
   const [pathParams, setPathParams] = useState([]);
   const [queryParams, setQueryParams] = useState([]);
   const [pathInputValue, setPathInputValue] = useState('');
-  const options = [
-    { label: 'select', value: '' },
-    // { label: 'abc', value: '', dataSource: 'envVars' },
-    // { label: 'abc', value: 'dfsdf', dataSource: 'envVars' },
-  ];
+  const currentModule = useSelector((state) => state.services.moduleList[moduleId]);
+  // console.log(currentModule, 'currentmodule');
 
+  const options = [{ label: 'select', value: '' }];
   useEffect(() => {
     setUrl(urlData);
     setPathInputValue(urlData?.path ? urlData.path.join('/') : '');
@@ -35,7 +34,20 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
       options.push({ value: server.url, label: server.url, dataSource: 'swagger' });
     });
   }
-  if (envVars) {
+  // if (envVars) {
+  //   envVars.forEach(({ id, name }) => {
+  //     options.push({ value: id, label: name, dataSource: 'envVars' });
+  //   });
+  // }
+  if (!envVars || envVars.length === 0) {
+    if (currentModule?.servers_info && currentModule?.servers_info.length > 0) {
+      currentModule?.servers_info.forEach(({ url }) => {
+        options.push({ value: url, label: url, dataSource: 'swagger' });
+      });
+    }
+    // console.log(options, 'optionss');
+  } else {
+    // If envVars exists, use them to populate options
     envVars.forEach(({ id, name }) => {
       options.push({ value: id, label: name, dataSource: 'envVars' });
     });
@@ -49,6 +61,12 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
     } else {
       newUrlData[prop] = newValue;
       const selectedOption = options.find((option) => option.value === newValue);
+      if (selectedOption.dataSource === 'envVars') {
+        newUrlData['env_label'] = selectedOption.label;
+      } else {
+        newUrlData['env_label'] = '';
+      }
+
       newUrlData['url_env'] = selectedOption?.dataSource === 'envVars' ? newValue : '';
     }
     onChange('url', newUrlData);
@@ -89,15 +107,15 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
 
       const allParams = [...updatedParamData, ...queryParams];
 
-      const remainingParamNames = updatedParamData.map((param) => param.name);
-      const deletedParams = pathParams.filter((param) => !remainingParamNames.includes(param.name));
+      // const remainingParamNames = updatedParamData.map((param) => param.name);
+      // const deletedParams = pathParams.filter((param) => !remainingParamNames.includes(param.name));
 
-      if (deletedParams.length > 0) {
-        console.log(
-          'Deleted parameters:',
-          deletedParams.map((param) => param.name)
-        );
-      }
+      // if (deletedParams.length > 0) {
+      //   console.log(
+      //     'Deleted parameters:',
+      //     deletedParams.map((param) => param.name)
+      //   );
+      // }
 
       onChange('parameters', allParams);
       setPathParams(updatedParamData);
@@ -184,7 +202,9 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
         />
       </div>
       <div className="br-text-primary mt-3" style={{ border: '1px solid rgba(128, 128, 128, 0.5)' }}>
-        <div className="m-2">Path Parameter Details:</div>
+        <div className="m-2" style={{ fontSize: '14px' }}>
+          Path Parameter Details:
+        </div>
         {pathParams && pathParams.length > 0 ? (
           pathParams.map((para, index) => (
             <div
@@ -265,7 +285,7 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars }) {
       </div>
 
       <div className="br-text-primary mt-3" style={{ border: '1px solid rgba(128, 128, 128, 0.5)' }}>
-        <div className="m-2">
+        <div className="m-2" style={{ fontSize: '14px' }}>
           Query Parameter Details:
           <i
             className="bi bi-plus-circle mx-3 mb-1"
@@ -285,7 +305,7 @@ UrlSettings.propTypes = {
   onChange: PropTypes.func.isRequired,
   paramData: PropTypes.any,
   onAdd: PropTypes.func.isRequired,
-  method: PropTypes.string.isRequired,
-  envVars: PropTypes.object,
+  method: PropTypes.string,
+  envVars: PropTypes.any,
 };
 export default UrlSettings;

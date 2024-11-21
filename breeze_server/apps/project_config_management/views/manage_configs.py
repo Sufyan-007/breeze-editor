@@ -3,8 +3,14 @@ from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from apps.common.utils.file_helpers.config_handler import write_config_file, read_config_file
-from apps.common.utils.file_helpers.config_tracker import rollback_config_file, rollforward_config_file
+from apps.common.utils.file_helpers.config_tracker import rollback_config_file, rollforward_config_file, get_latest_config_version
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(
+    methods=['POST'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['POST'])
 def update_configs(request, project_id):
@@ -15,11 +21,12 @@ def update_configs(request, project_id):
     filename = data.get("filename")
     config_data = data.get("configData")
     current_config_version = data.get("currentConfigVersion")
+    has_something_changed = False
     
     if data.get('updateMethod') == 'ROLLBACK':
-        rollback_config_file(project_id, category, filename, data.get('version'))
+        current_version, has_something_changed = rollback_config_file(project_id, category, filename, data.get('version'))
     elif data.get('updateMethod') == 'ROLLFORWARD':
-        rollforward_config_file(project_id, category, filename)
+        current_version, has_something_changed = rollforward_config_file(project_id, category, filename, data.get('version'))    
     elif data.get('updateMethod') == 'WRITE':
         # write_config_file(project_id, "routing_config", "routing_config", {
         #     "adb4fc12_414b_4ad2_89c5_631538232e68": {
@@ -36,6 +43,18 @@ def update_configs(request, project_id):
         #         "path": "/breeze/sandbox"
         #     }
         # }, transaction_id)    
-        write_config_file(project_id, category, filename, config_data, current_config_version, transaction_id)
+        current_version, has_something_changed = write_config_file(project_id, category, filename, config_data, current_config_version, transaction_id)
     config_data = read_config_file(project_id, category, filename)['data']
-    return JsonResponse(config_data, status=200)
+    print(config_data)
+    if has_something_changed:
+        message = 'version and code changed successfully..!'
+    else:
+        message = 'no changes were found..!'
+    return JsonResponse({'message': message, 'currentVersion': current_version}, status=200)
+
+@csrf_exempt
+@api_view(['POST'])
+def get_config_file_version(request, project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    latest_config_version, current_config_version = get_latest_config_version(project_id, data.get('category'), data.get('filename'))
+    return JsonResponse({'latestConfigVersion': latest_config_version, 'currentConfigVersion': current_config_version}, status=200)
