@@ -201,7 +201,7 @@ def get_nodes_upper_lineage(node_id, project_name, category, config_data = {}):
     node = config_data.get(node_id)
     path = ""
     if node is not None:
-        path = node.get('path')
+        path = node.get('path', 1)
         if node.get('parentId'):
             path = get_nodes_upper_lineage(node.get('parentId'), project_name, category, config_data ) + path
         return path

@@ -11,8 +11,8 @@ export const getAllProjects = async () => {
   }
 };
 
-export const getFolderConfig = async (id = null, projectName) => {
-  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/get/?target_id=${id}`;
+export const getFolderConfig = async (id = null, projectName, depth = 1) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/get/?target_id=${id}&depth=${depth}`;
   try {
     const response = await callApiClient(url, 'GET');
     return response;

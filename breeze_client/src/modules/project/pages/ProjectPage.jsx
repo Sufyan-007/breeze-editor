@@ -24,17 +24,19 @@ function ProjectPage() {
   return (
     <div>
       <TreeProvider projectName={projectName}>
-        <Layout
-          sidebar={<ProjectSidebar />}
-          mainContent={
-            <TabProvider projectName={projectName}>
-              <TabBar />
-              <ProjectDisplay />
-            </TabProvider>
-          }
-          currentPage="project"
-          projectName={projectName}
-        />
+        <TabProvider projectName={projectName}>
+          <Layout
+            sidebar={<ProjectSidebar />}
+            mainContent={
+              <>
+                <TabBar />
+                <ProjectDisplay />
+              </>
+            }
+            currentPage="project"
+            projectName={projectName}
+          />
+        </TabProvider>
       </TreeProvider>
       {projectStatus === 'loading' && <BreezeLoader />}
     </div>
