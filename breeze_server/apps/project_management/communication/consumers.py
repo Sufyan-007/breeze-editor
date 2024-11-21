@@ -2,7 +2,7 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .app_startup_manager import RUNNING_APPS
-
+from ..utils.custom_upload_status_tracker import send_ws_status_periodically
 
 class EchoConsumer(WebsocketConsumer):
     def connect(self):
@@ -40,27 +40,27 @@ class EchoConsumer(WebsocketConsumer):
                         ),
                     },
                 },
-            )
-
-        elif message_type == "custom_upload_status":
+            )  
+        elif message_type == "external_comp_status":
             async_to_sync(self.channel_layer.group_send)(
                 self.group_name,
                 {
-                    "type":"file_upload_status", 
-                    "file_id":file_id,
+                    "type":"file_status", 
                     "message":{
+                        "file_id":file_id,
                         "status":"Loading"
                     }
                 }
             )
+            send_ws_status_periodically(self.group_name)
+            
     def project_progress(self, event):
         self.send(text_data=json.dumps({"progress": event["message"]}))
 
     def app_status(self, event):
         self.send(text_data=json.dumps({"status": event["message"]}))
         
-    def file_upload_status(self, event):
-        self.send(text_data=json.dumps({
-                "file_id": event["file_id"],  
-                "status": event["message"]
-            }))
+    def file_status(self, event):
+        self.send(text_data= json.dumps( 
+               { "file_status": event["message"]}
+            ))

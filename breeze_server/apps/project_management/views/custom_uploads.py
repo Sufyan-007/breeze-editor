@@ -10,7 +10,6 @@ from ..core.custom_package_service import check_existing_folder, upload_file, ge
 from apps.common.constants.consts import PORT  
 from drf_spectacular.utils import extend_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
-from ..utils.custom_uploads_tracker import store_custom_upload
 from ..utils.get_uploaded_resources import get_uploaded_resources as get_resources
 
 @extend_schema(
@@ -43,32 +42,23 @@ def add_custom_package(request, projectName):
         if fileName.endswith('.zip'):
             fileName = fileName.replace('.zip', '')
 
-        # Check if the folder already exists in extracted_zip_folders
         if check_existing_folder(projectName, fileName):
             return JsonResponse({'error': 'A folder with this name already exists.'}, status=400)
 
-        update_resource_config(projectName, fileName,file_id, status="extracting...", tag="ZIP")
-        store_custom_upload(projectName,file_id,"extracting...")
-    
-        #run the file upload 
+        update_resource_config(projectName, fileName,file_id, status="extracting...", tag="ZIP")       
         thread =  threading.Thread(target= upload_and_update_file ,args=(projectName, file, fileName, file_id) )
         thread.start()
- 
-    
         return JsonResponse({'file_id': file_id  }, status=200)
 
     except Exception as e:
         update_resource_config(projectName, fileName, file_id,status="file upload failed", tag="ZIP")
         return JsonResponse({'error': str(e)}, status=500)
-
+                           
 def upload_and_update_file(projectName, file, fileName , file_id):
     try:
-        # Perform the file upload in the background
         upload_file(projectName, file, fileName,file_id)
-
-        # Update the resource config after upload completion
+        
         update_resource_config(projectName, fileName, file_id, status="file uploading...", tag="ZIP")
-        store_custom_upload(projectName, file_id, "file uploading...")
 
         # Call the external API asynchronously after upload is done
         load_dotenv()
@@ -83,7 +73,7 @@ def upload_and_update_file(projectName, file, fileName , file_id):
 
     except Exception as e:
         update_resource_config(projectName, fileName, file_id, status="file upload failed", tag="ZIP")
-        store_custom_upload(projectName, file_id, "file upload failed")
+        return JsonResponse({'error': str(e)}, status=500)
     
 @extend_schema(
     methods=['GET'],
@@ -170,25 +160,21 @@ def set_component_config(request, projectName):
 # Helper function to handle asynchronous API calls
 def call_external_api_async(api_url, payload, projectName , fileName, file_id):
     try:
+        
         response = requests.post(api_url, json=payload)
         if response.status_code == 200:
             update_resource_config(projectName, fileName,file_id, status="success", tag="ZIP")
-            store_custom_upload(projectName,file_id,"success")
             print("External API call successful")
-            # fun_name()
-           
         else:
             update_resource_config(projectName, fileName,file_id, status="components upload failed", tag="ZIP")
-            store_custom_upload(projectName,file_id,"components upload failed")
             print(f"Failed to call external API: {response.text}")
 
     except Exception as e:
         print(f"Error during external API call: {str(e)}")
         update_resource_config(projectName, fileName, file_id,status="components upload failed", tag="ZIP")
-        store_custom_upload(projectName,file_id,"components upload failed")
         raise Exception(f"Error during external API call:{str(e)}")
+    
 # Trigger the API in a separate thread
 def trigger_api(api_url, payload, projectName, fileName, file_id):
     threading.Thread(target=call_external_api_async, args=(api_url, payload , projectName, fileName, file_id)).start()
- 
  
