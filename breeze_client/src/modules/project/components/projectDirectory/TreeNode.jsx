@@ -12,18 +12,37 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   const isEditing = node.isEditing;
   const contextMenuRef = useRef(null);
   const [menuItems, setMenuItems] = useState([]);
-
+  const [isInContextMenu, setIsInContextMenu] = useState(false);
   const childNodes = getChildren(node.id);
 
   const inputRef = useRef(null);
   const handleContextMenuSelection = (nodeId) => {
     parentMethods.addNodeToTree({ type: 'FILE', parentId: nodeId, extension: 'jsx' });
+    setIsInContextMenu(false);
     if (!isExpanded(nodeId)) {
       toggleNode(nodeId);
-      return;
     }
-    toggleNode(nodeId);
   };
+  const handleContextMenuFolder = (nodeId) => {
+    parentMethods.handleAddFolder(nodeId);
+    setIsInContextMenu(false);
+    if (!isExpanded(nodeId)) {
+      toggleNode(nodeId);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (inputRef.current && !inputRef.current.contains(event.target) && !event.target.closest('.node-input')) {
+        handleInputCancel();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEditing]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -32,7 +51,9 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   }, [isEditing]);
 
   const handleToggle = () => {
-    toggleNode(node.id);
+    if (!isInContextMenu) {
+      toggleNode(node.id);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -70,14 +91,27 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
 
   const handleAddFileClick = (e) => {
     e.stopPropagation();
+    setIsInContextMenu(true);
+    parentMethods.cancelAllEditing();
     setMenuItems(addFileOptions(node.id, handleContextMenuSelection));
     contextMenuRef.current?.handleEvent(e);
   };
 
+  const handleAddFolderClick = (e) => {
+    e.stopPropagation();
+    if (!isExpanded(node.id)) {
+      toggleNode(node.id);
+    }
+    parentMethods.handleAddFolder(node.id);
+  };
+
   const handleContextMenu = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (node.isProtected) {
       return;
     }
+    setIsInContextMenu(true);
     contextMenuRef.current?.handleEvent(e);
     setMenuItems(
       node.type === 'DIRECTORY'
@@ -85,7 +119,7 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
             node.id,
             handleContextMenuSelection,
             parentMethods.handleRename,
-            parentMethods.handleAddFolder,
+            handleContextMenuFolder,
             parentMethods.handleRemoveNode
           )
         : fileOptions(node.id, parentMethods.handleRename, parentMethods.handleRemoveNode)
@@ -114,6 +148,7 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
           menuItems={menuItems}
           onSelection={(value) => {
             value();
+            setIsInContextMenu(false);
           }}
           width={180}
         />
@@ -170,14 +205,7 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
           {!isEditing && node.type === 'DIRECTORY' && !node.isProtected && (
             <>
               <i className="bi bi-file-earmark-plus node-icon" title="Add File" onClick={handleAddFileClick} />
-              <i
-                className="bi bi-folder-plus node-icon"
-                title="Add Folder"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  parentMethods.handleAddFolder(node.id);
-                }}
-              />
+              <i className="bi bi-folder-plus node-icon" title="Add Folder" onClick={handleAddFolderClick} />
             </>
           )}
           {!isEditing && !node.isProtected && (

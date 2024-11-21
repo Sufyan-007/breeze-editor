@@ -6,9 +6,11 @@ import CustomModal from '../../../common/display/modal/BreezeModal.jsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFiles, uploadFileAction, deleteFileAction, downloadFileAction } from '../redux/resourcesActions.js';
 import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions.js';
+import { useTabContext } from '../../project/context/TabContext.jsx';
 
 const Resources = () => {
   const [fileToDelete, setFileToDelete] = useState(null);
+  const { removeTab } = useTabContext();
 
   const { projectName } = useParams();
   const dispatch = useDispatch();
@@ -26,8 +28,9 @@ const Resources = () => {
       payload.append(key, formData[key]);
     });
     try {
-      await dispatch(uploadFileAction({ payload, projectName })).unwrap();
-      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
+      const response = await dispatch(uploadFileAction({ payload, projectName })).unwrap();
+      const depth = response.depth;
+      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth })).unwrap();
       dispatch(fetchFiles({ projectName }));
     } catch (error) {
       console.error('An error occurred while uploading the file:', error);
@@ -37,8 +40,10 @@ const Resources = () => {
   const handleDelete = async () => {
     if (!fileToDelete) return;
     try {
-      await dispatch(deleteFileAction({ file: fileToDelete, projectName })).unwrap();
-      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
+      const response = await dispatch(deleteFileAction({ fileId: fileToDelete.id, projectName })).unwrap();
+      const depth = response.depth;
+      removeTab(fileToDelete.id);
+      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth })).unwrap();
     } catch (error) {
       console.error('An error occurred while deleting the file:', error);
     } finally {

@@ -38,12 +38,6 @@ function CustomFileUploadField({
     const fileName = multiple ? [...files].map((file) => file.name).join(', ') : files[0]?.name || 'No file chosen';
     setSelectedFileName(fileName);
     onFileSelect(multiple ? [...files] : files[0]);
-
-    setTimeout(() => {
-      setSelectedFileName('No file chosen'); // Reset label
-      fileInputRef.current.value = '';
-    }, 5000);
-    
   };
 
   //trigger the hidden file input
