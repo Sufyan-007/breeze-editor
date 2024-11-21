@@ -9,6 +9,9 @@ import IfBlockConfigForm from './IfBlockConfigForm';
 import WhileBlockConfigForm from './WhileBlockConfigForm';
 import DoWhileConfigForm from './DoWhileConfigForm';
 import TryCatchConfigForm from './TryCatchConfigForm';
+import ComponentConfigForm from './ComponentConfigForm';
+import StateVariableConfigForm from './StateVariableConfigForm';
+import RefVarConfigForm from './RefVarConfigForm';
 
 export {
   VariableConfigForm,
@@ -22,4 +25,7 @@ export {
   WhileBlockConfigForm,
   DoWhileConfigForm,
   TryCatchConfigForm,
+  ComponentConfigForm,
+  StateVariableConfigForm,
+  RefVarConfigForm,
 };

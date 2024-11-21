@@ -1,6 +1,9 @@
 export const items = [
+  'Component Config',
   'Add Import',
   'Variable',
+  'State Variable',
+  'Ref Variable',
   'Props',
   'Function',
   'Lifecycle',
@@ -16,7 +19,10 @@ export const configTypeMapping = {
   IMPORT: ['Edit Import', 'Add Import'],
   PROP: ['Edit Prop', 'Props'],
   REACT_COMPONENT: [
+    'Component Config',
     'Variable',
+    'State Variable',
+    'Ref Variable',
     'Props',
     'Function',
     'Lifecycle',
@@ -34,4 +40,6 @@ export const configTypeMapping = {
   DO_WHILE_BLOCK: ['Do While Block', 'Edit Do While'],
   BLOCK: ['If Block', 'While Block', 'Do While Block', 'Try Catch'],
   TRY_CATCH: ['Try Catch'],
+  REACT_STATE_VAR: ['State Variable', 'Edit State Variable'],
+  REACT_REF_VAR: ['Ref Variable', 'Edit Ref Variable'],
 };

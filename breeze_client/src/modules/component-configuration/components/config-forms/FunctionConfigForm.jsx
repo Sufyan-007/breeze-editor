@@ -16,7 +16,6 @@ function FunctionConfigForm({ onSubmit, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('formData::>>', formData);
     onSubmit(formData);
     setFormData(initialFunctionConfig);
   };

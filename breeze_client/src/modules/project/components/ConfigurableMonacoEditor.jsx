@@ -3,23 +3,11 @@ import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
 import { BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
-import {
-  VariableConfigForm,
-  PropConfigForm,
-  FunctionConfigForm,
-  HookConfigForm,
-  ImportConfigForm,
-  LifecycleConfigForm,
-  AddELement,
-  IfBlockConfigForm,
-  WhileBlockConfigForm,
-  DoWhileConfigForm,
-  TryCatchConfigForm,
-} from '../../component-configuration/components/config-forms';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 import { configTypeMapping, items } from '../constants/EditorList';
 import { getCodeDetails } from '../../../services/components/componentService';
 import { useParams } from 'react-router-dom';
+import useConfigurableMenuItems from '../hooks/useConfigurableMenuItems';
 
 const ConfigurableMonacoEditor = ({
   defaultValue = '',
@@ -121,66 +109,10 @@ const ConfigurableMonacoEditor = ({
     closeOffcanvas();
   };
 
-  const handleMenuItemClick = (item) => {
-    let contentComponent;
-    switch (item) {
-      case 'Add Import':
-        contentComponent = <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      case 'Edit Import':
-        contentComponent = <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
-        break;
-      case 'Props':
-        contentComponent = <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      case 'Edit Prop':
-        contentComponent = <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
-        break;
-      case 'Variable':
-        contentComponent = <VariableConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      case 'Html elements':
-        contentComponent = <AddELement />;
-        break;
-      case 'Function':
-        contentComponent = <FunctionConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      // case 'Params':
-      //   contentComponent = <ParamConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      //   break;
-      case 'Lifecycle':
-        contentComponent = <LifecycleConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      case 'Hook':
-        contentComponent = <HookConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      case 'If Block':
-        contentComponent = <IfBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      case 'Edit If Block':
-        contentComponent = <IfBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
-        break;
-      case 'While Block':
-        contentComponent = <WhileBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      case 'Edit While Block':
-        contentComponent = (
-          <WhileBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />
-        );
-        break;
-      case 'Do While Block':
-        contentComponent = <DoWhileConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      case 'Edit Do While':
-        contentComponent = <DoWhileConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
-        break;
-      case 'Try Catch':
-        contentComponent = <TryCatchConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-        break;
-      default:
-        contentComponent = null;
-    }
+  const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel);
 
+  const handleMenuItemClick = (item) => {
+    const contentComponent = getConfigComponent(item);
     showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, '40%');
     setShowMenu(false);
   };
