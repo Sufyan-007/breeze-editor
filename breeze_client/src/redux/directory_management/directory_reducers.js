@@ -57,6 +57,12 @@ const directorySlice = createSlice({
         state.directoryConfig[parentId].children.push(newNode.id);
       }
     },
+    cancelAllEditing: (state) => {
+      Object.keys(state.directoryConfig).forEach((nodeId) => {
+        state.directoryConfig[nodeId].isEditing = false;
+        delete state.directoryConfig[nodeId].tempName;
+      });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -142,5 +148,6 @@ const directorySlice = createSlice({
   },
 });
 
-export const { addNode, updateNodeTempName, cancelRename, updateNodeEditing, cancelAdd } = directorySlice.actions;
+export const { addNode, updateNodeTempName, cancelRename, updateNodeEditing, cancelAdd, cancelAllEditing } =
+  directorySlice.actions;
 export default directorySlice.reducer;
