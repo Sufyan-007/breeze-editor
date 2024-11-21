@@ -7,6 +7,7 @@ import LifecycleConfigForm from './LifecycleConfigForm';
 import AddELement from './AddELement';
 import IfBlockConfigForm from './IfBlockConfigForm';
 import WhileBlockConfigForm from './WhileBlockConfigForm';
+import DoWhileConfigForm from './DoWhileConfigForm';
 
 export {
   VariableConfigForm,
@@ -18,4 +19,5 @@ export {
   AddELement,
   IfBlockConfigForm,
   WhileBlockConfigForm,
+  DoWhileConfigForm,
 };
