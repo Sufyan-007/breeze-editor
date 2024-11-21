@@ -3,7 +3,7 @@ from apps.common.constants.enums.tree_type import TreeType
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.constants.consts import CONFIG_PATH
 from apps.common.utils.file_helpers.json_handler import read_json_file
-from ..utils.utils import get_routing_config
+from ..utils.utils import get_routing_config, is_valid_url_path
 
 def get_previous_object_state(route_obj_id, project_id="", routing_config = {}):
     routing_config = get_routing_config(project_id, routing_config)
@@ -19,6 +19,11 @@ def check_for_mandatory_route_props(route_obj, project_id):
         route_obj['path'] = "/" + route_obj['path'].strip('/')
     else:
         raise ValueError("path is missing")
+    if route_obj.get('path') == '/' and route_obj.get('id') == None:
+        raise Exception('default path is already added..')
+    if not is_valid_url_path(route_obj.get('path')):
+        raise Exception('invalid path provided..')
+        
     if route_obj.get('componentId'):
         route_obj.pop('redirectTo') if route_obj.get('redirectTo') else ''
         route_obj['componentId'] = route_obj.get('componentId').strip()
@@ -33,11 +38,15 @@ def check_for_mandatory_route_props(route_obj, project_id):
     else:
         raise ValueError("component or redirectTo is missing")
 
-
 def validate_route_path(route_obj,target_id, project_id="",skip_ids=[]):
+    if target_id:
+        routing_config = get_routing_config(project_id)
+        parent_obj = routing_config.get(target_id)
+        if parent_obj.get('path') == '/':
+            target_id = ''
     full_route_paths = get_all_path_of_node(project_id,TreeType["ROUTES"],target_id,'path',skip_ids =skip_ids) 
-    route_full_path = route_obj.get("path")
-    if 'parentId' in route_obj and route_obj.get('parentId') not in  [None, ""]:
+    route_full_path = '/' + route_obj.get("path").strip('/')
+    if 'parentId' in route_obj and route_obj.get('parentId') not in  [None, ""] and target_id:
         route_full_path = get_nodes_upper_lineage(route_obj['parentId'], project_id, TreeType["ROUTES"])+route_full_path
     for full_route_path in full_route_paths:
         if  route_full_path== full_route_path.get("path"):
@@ -55,8 +64,8 @@ def update_route_in_config(request, project_id="", _routing_config = {}):
         # get updated_object's previous state
         prev_obj = get_previous_object_state(route_id, project_id, _routing_config)
         if prev_obj.get('path') == '/' and route_obj.get('path') != '/':
-            raise Exception('default path can\'t be edited..')
-        if route_obj.get('parentId', "") != "" and prev_obj.get('path') == '/':
+            raise Exception('default route\'s path can\'t be edited..')
+        if route_obj.get('parentId', "") and prev_obj.get('path') == '/':
             raise Exception('default route can\'t have parent routes..')
            
         
