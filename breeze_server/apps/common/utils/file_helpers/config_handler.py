@@ -128,7 +128,7 @@ def write_config_file(project_name, category, filename, json_data, current_confi
         
         # Signal that writing is completed
         write_completed.send(sender=None, file_id=filename)
-        return file_version_json.get("current_version")
+        return file_version_json.get("current_version"), has_something_changed
                  
 def get_breeze_config_file(project_id, config_type='APP_CONFIG'):
     path = f"{CONFIG_PATH}/{project_id}"
@@ -150,7 +150,6 @@ def update_file_config(version_file_path, file_path, flatten_data_json, current_
         
         ## increment the version number
         current_version = file_version_json.get("current_version")
-        file_version_json["current_version"] = current_version + 1
         current_version = str(current_version)
         
         # TODO: upon completion of the flow discussion un/comment and/or update below code
@@ -197,13 +196,15 @@ def update_file_config(version_file_path, file_path, flatten_data_json, current_
         
         for key in file_config_json:
             if key not in flatten_data_json:
-                if not file_version_json.get("deleted_keys", {}).get(str(int(current_version) + 1)):
-                    file_version_json["deleted_keys"][file_version_json["current_version"]] = []
-                file_version_json["deleted_keys"][file_version_json["current_version"]].append(key)
+                if not file_version_json.get("deleted_keys", {}).get(str(int(current_version))):
+                    file_version_json["deleted_keys"][str(file_version_json["current_version"])] = []
+                file_version_json["deleted_keys"][str(file_version_json["current_version"])].append(key)
                 has_something_changed = True
         file_version_json["versions"] = versions    
         file_version_json["changes"] = changes
     
+        if has_something_changed:
+            file_version_json["current_version"] = int(current_version) + 1
         return has_something_changed, file_version_json
     
 def save_config_file(filename, project_name, category, json_data, version_file_path, file_version_json, flatten_data_json, file_path, INDEX_FILE_PATH, transaction_id):

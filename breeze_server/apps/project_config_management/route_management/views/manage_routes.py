@@ -95,9 +95,15 @@ def update_route(request, project_id):
         res = update_route_in_config(data, project_id)
         config_data = res['config']
         # add_params_to_route_object()
-        rewrite_clean_route_config(project_id, config_data, data['id'], ROUTING_CONFIG_CURRENT_VERSION)
-        process_route_config(project_id, config_data)
+        has_something_changed = rewrite_clean_route_config(project_id, config_data, data['id'], ROUTING_CONFIG_CURRENT_VERSION)
+        if has_something_changed:
+            process_route_config(project_id, config_data)
         include_all_routes_accessory_data(project_id, [config_data[data['id']]])
+        # later will share the message in response...
+        if has_something_changed:
+            message = 'changes were made successfully..!'
+        else:
+            message = 'no changes were found..!'
         return JsonResponse(config_data[data['id']], status=200)
     except Exception as e:
         print("Error ", e)
