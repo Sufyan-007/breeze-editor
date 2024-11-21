@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { BreezeTable, BreezeModal, BreezeToaster } from '../../../common/display/index';
@@ -32,19 +32,44 @@ function CustomZipPackagePage() {
   });
   const [error, setError] = useState('');
   const [uploadStatus, setUploadStatus] = useState({});
-  const [socket, setSocket] = useState(null); // WebSocket state
-  // const [fileIdws, setFileIdws] = useState('');
-  // const [fileIds, setFileIds] = useState([]);
+  const wsStatus = useRef(null);
   const dispatch = useDispatch();
   const { zipFiles, fileId, components, props } = useSelector((state) => state.zip);
 
-  //fetch the list of zip files on component mount
   useEffect(() => {
-    // Append the fileId to the fileIds array when fileId is available
-    // if (fileId) {
-    //   setFileIds((prevFileIds) => [...prevFileIds, fileId]);
-    // }
+    wsStatus.current = new WebSocket(`${import.meta.env.VITE_SOCKET_URL}/ws/external-comp-status/`);
 
+    wsStatus.current.onopen = () => {
+      console.log('Connected to the WebSocket of external component status');
+      if (wsStatus.current && wsStatus.current.readyState === WebSocket.OPEN) {
+        wsStatus.current.send(
+          JSON.stringify({
+            command: 'external_comp_status',
+            project_id: projectName.toLowerCase().replace(/ /g, '_'),
+          })
+        );
+      }
+    };
+    wsStatus.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log('Received WebSocket message status:', message);
+
+      const fileStatuses = message?.file_status?.file_statuses; 
+      if (fileStatuses) {
+     
+        setUploadStatus((prevStatuses) => ({
+          ...prevStatuses,
+          ...fileStatuses,
+        }));
+      }
+
+    };
+    wsStatus.current.onclose = () => {
+      console.log('Disconnected from the WebSocket');
+    };
+  }, []);
+
+  useEffect(() => {
     const folders = zipFiles?.folders || [];
 
     const initialUploadStatus = { ...uploadStatus };
@@ -61,45 +86,6 @@ function CustomZipPackagePage() {
       dispatch(fetchZipFilesAction(projectName));
     }
   }, [dispatch, projectName, zipFiles]);
-
-  // Establish WebSocket connection when the component mounts
-  useEffect(() => {
-    const ws = new WebSocket(`${import.meta.env.VITE_SOCKET_URL}/ws/custom-upload-progress/`);
-
-    // Set up WebSocket listeners
-    ws.onopen = () => {
-      console.log('WebSocket connection established');
-    };
-
-    //messages from the server are received here . the message is a string
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data); // Converts the string to a JS object
-      console.log('Received WebSocket message:', data);
-      // Update upload progress and status based on WebSocket data
-      if (data.file_id && data.status) {
-        // setFileIdws(data.file_id);
-        // Update the status for the specific file_id
-        setUploadStatus((prevStatuses) => ({
-          ...prevStatuses,
-          [data.file_id]: data.status,
-        }));
-      }
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    setSocket(ws);
-
-    return () => {
-      ws.close();
-    };
-  }, []);
 
   const getComponents = async (filename) => {
     try {
@@ -150,7 +136,7 @@ function CustomZipPackagePage() {
 
       // Update formData with the projectId and the selected file
       formData.projectId = projectName;
-      formData.file = selectedFile; // Set the selected file in formData
+      formData.file = selectedFile;
 
       const submitData = new FormData();
       for (const key in formData) {
@@ -159,16 +145,6 @@ function CustomZipPackagePage() {
         }
       }
       submitData.append('file', formData.file);
-
-      // Initialize WebSocket and notify the server about the start of the upload
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(
-          JSON.stringify({
-            command: 'custom_upload_status',
-            project_id: projectName.toLowerCase().replace(/ /g, '_'),
-          })
-        );
-      }
 
       try {
         setShowModal(false);
@@ -264,9 +240,9 @@ function CustomZipPackagePage() {
       },
     ],
   };
+
   // Map the folders array to the desired format
   const folders = zipFiles?.folders || [];
-
   const filesData = folders.map((folder) => ({
     fileName: folder.name,
     zipFileId: folder.zip_file_id,
@@ -316,7 +292,9 @@ function CustomZipPackagePage() {
               }}
               className="btn toggle-btn btn-outline-danger settings-no-outline-button"
             />
-            <p>({uploadStatus[folder.zip_file_id]})</p>
+            <span className="badge breeze-badge">
+              <span className="med-font">{uploadStatus[folder.zip_file_id]}</span>
+            </span>
           </>
         ) : null}
       </div>

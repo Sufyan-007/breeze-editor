@@ -42,7 +42,8 @@ function CustomFileUploadField({
     setTimeout(() => {
       setSelectedFileName('No file chosen'); // Reset label
       fileInputRef.current.value = '';
-    }, 2000);
+    }, 5000);
+    
   };
 
   //trigger the hidden file input
