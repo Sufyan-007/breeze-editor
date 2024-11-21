@@ -7,7 +7,6 @@ import CustomContextMenu from '../../../common/display/context-menu/BreezeContex
 import { addFileOptions } from '../constants/contextMenuOptions';
 import {
   addNodeAsync,
-  deleteNodeAsync,
   fetchFolderConfig,
   renameNodeAsync,
 } from '../../../redux/directory_management/directory_actions';
@@ -23,6 +22,7 @@ import {
 } from '../../../redux/directory_management/directory_reducers';
 import CustomModal from '../../../common/display/modal/BreezeModal';
 import { useTabContext } from '../context/TabContext';
+import { deleteNodeAsPerCategory } from '../hooks/deleteNodeAsPerCategory';
 
 function ProjectSidebar() {
   const { directoryConfig } = useSelector((state) => state.directory);
@@ -141,10 +141,10 @@ function ProjectSidebar() {
     setNodeToDelete(nodeId);
     setModalOpen(true);
   };
-  const confirmDelete = () => {
-    if (nodeToDelete) {
-      dispatch(deleteNodeAsync({ projectId: projectName, nodeId: nodeToDelete }));
-    }
+  const confirmDelete = async () => {
+    const node = directoryConfig[nodeToDelete];
+    await deleteNodeAsPerCategory(node, dispatch, projectName);
+    dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
     removeTab(nodeToDelete);
     setModalOpen(false);
     setNodeToDelete(null);
@@ -284,7 +284,7 @@ function ProjectSidebar() {
               label: 'Delete',
               onClick: confirmDelete,
               className: 'btn btn-danger',
-              disabled: true,
+              // disabled: true,
             },
             {
               label: 'Cancel',

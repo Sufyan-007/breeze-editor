@@ -8,9 +8,9 @@ import {
 
 export const fetchFolderConfig = createAsyncThunk(
   'directory_management/fetchFolderConfig',
-  async ({ id = null, projectName }, { rejectWithValue }) => {
+  async ({ id = null, projectName, depth }, { rejectWithValue }) => {
     try {
-      const response = await getFolderConfig(id, projectName);
+      const response = await getFolderConfig(id, projectName, depth);
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);
