@@ -73,7 +73,7 @@ def upload_and_update_file(projectName, file, fileName , file_id):
 
     except Exception as e:
         update_resource_config(projectName, fileName, file_id, status="file upload failed", tag="ZIP")
-        print(f"Error in upload_and_update_file: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
     
 @extend_schema(
     methods=['GET'],

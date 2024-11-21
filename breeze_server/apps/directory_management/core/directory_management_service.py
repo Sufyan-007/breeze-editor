@@ -54,7 +54,7 @@ class DirectoryManager:
         if file_id and file_id in self.directory_management_config:
             raise KeyError("Id already in directory management")
         
-        if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir) or overwrite==True:
+        if os.path.exists(parent_dir) and fullName in os.listdir(parent_dir) and overwrite==False:
             raise FileExistsError("Given file name already exists")
         
         
