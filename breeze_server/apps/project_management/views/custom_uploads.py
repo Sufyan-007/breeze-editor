@@ -115,15 +115,15 @@ def delete_custom_package(request, projectName):
     try:
         data = json.loads(request.body)
         fileName = data.get("fileName")
-        fileId = data.get("fileId")
+        file_id = data.get("fileId")
 
         if not projectName:
             return JsonResponse({'error': 'Project name is required'}, status=400)
 
-        if not fileName or not fileId :
+        if not fileName or not file_id :
             return JsonResponse({'error': 'File name or Id is required'}, status=400)
 
-        delete_file(projectName, fileName, fileId)
+        delete_file(projectName, fileName, file_id)
         return JsonResponse({'message': "File deleted successfully"}, status=200)
 
     except Exception as e:

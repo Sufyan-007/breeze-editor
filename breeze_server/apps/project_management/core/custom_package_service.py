@@ -9,7 +9,8 @@ from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH , EXTERN
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists,create_dir_if_not_exists
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
 from apps.directory_management.core.directory_management_service import DirectoryManager
-from .custom_uploads_directory_config import create_json_structure, save_json_to_file
+from .custom_uploads_directory_config import create_json_structure
+
 def save_extracted_file(file, path):
     create_parent_dir_if_not_exists(path)
 
@@ -151,7 +152,7 @@ def get_zip_files(project_name):
     except Exception as e:
         raise Exception(f"An error occurred while retrieving extracted folders: {str(e)}")
                 
-def delete_file(project_name, fileName, fileId):
+def delete_file(project_name, fileName, file_id):
     try:
         app_config, react_app_dir, app_config_dir = get_project_config(project_name)
         react_app_file_path = os.path.join(react_app_dir, EXTERNAL_COMPONENTS, fileName)
@@ -171,27 +172,26 @@ def delete_file(project_name, fileName, fileId):
 
         delete_path(react_app_file_path, "React app")
         delete_path(external_components_config_path, "external components config")
- 
+  
         #delete the file object from resource config 
         if os.path.exists(uploaded_resources_config_path):
             with open(uploaded_resources_config_path, 'r+') as config_file:
                 data = json.load(config_file)
                 
-                # Check if the fileId exists and delete the object if found
-                if fileId in data:
-                    
-                    del data[fileId]
-                    print(f"File object with ID {fileId} deleted successfully from resource config.")
-                    
-                    # Write the updated data back to the JSON file
+                # Check if the file_id exists and delete the object if found
+                if file_id in data:
+                    del data[file_id]                
                     config_file.seek(0)
                     json.dump(data, config_file, indent=4)
                     config_file.truncate()
                 else:
-                    print(f"File object with ID {fileId} not found in resource config.")
+                    print(f"File object with ID {file_id} not found in resource config.")
         else:
             raise FileNotFoundError("Resource config file does not exist.")
     
+        # directory_manager =  DirectoryManager(project_name)
+        # directory_manager.delete_node(file_id, recursive=True)
+        
     except Exception as e:
         raise Exception(f"Error deleting file or directory: {e}")
     
