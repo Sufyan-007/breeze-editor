@@ -8,6 +8,7 @@ import AddELement from './AddELement';
 import IfBlockConfigForm from './IfBlockConfigForm';
 import WhileBlockConfigForm from './WhileBlockConfigForm';
 import DoWhileConfigForm from './DoWhileConfigForm';
+import TryCatchConfigForm from './TryCatchConfigForm';
 
 export {
   VariableConfigForm,
@@ -20,4 +21,5 @@ export {
   IfBlockConfigForm,
   WhileBlockConfigForm,
   DoWhileConfigForm,
+  TryCatchConfigForm,
 };

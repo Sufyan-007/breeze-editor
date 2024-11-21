@@ -14,6 +14,7 @@ import {
   IfBlockConfigForm,
   WhileBlockConfigForm,
   DoWhileConfigForm,
+  TryCatchConfigForm,
 } from '../../component-configuration/components/config-forms';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 import { configTypeMapping, items } from '../constants/EditorList';
@@ -59,7 +60,7 @@ const ConfigurableMonacoEditor = ({
       value: value,
       language: language,
       theme: projectTheme,
-      readOnly: readOnlyMode,
+      readOnly: node?.tag === 'COMPONENTS' ? 'true' : readOnlyMode,
       contextmenu: node?.tag === 'COMPONENTS' ? 'false' : 'true',
     });
     setEditor(editorInstance);
@@ -116,62 +117,71 @@ const ConfigurableMonacoEditor = ({
     closeOffcanvas();
   };
 
+  const onCancel = () => {
+    closeOffcanvas();
+  };
+
   const handleMenuItemClick = (item) => {
     let contentComponent;
     switch (item) {
       case 'Add Import':
-        contentComponent = <ImportConfigForm onSubmit={onSubmit} />;
+        contentComponent = <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       case 'Edit Import':
-        contentComponent = <ImportConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
+        contentComponent = <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
         break;
       case 'Props':
-        contentComponent = <PropConfigForm onSubmit={onSubmit} />;
+        contentComponent = <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       case 'Edit Prop':
-        contentComponent = <PropConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
+        contentComponent = <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
         break;
       case 'Variable':
-        contentComponent = <VariableConfigForm onSubmit={onSubmit} />;
+        contentComponent = <VariableConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       case 'Html elements':
         contentComponent = <AddELement />;
         break;
       case 'Function':
-        contentComponent = <FunctionConfigForm onSubmit={onSubmit} />;
+        contentComponent = <FunctionConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       // case 'Params':
-      //   contentComponent = <ParamConfigForm onSubmit={onSubmit} />;
+      //   contentComponent = <ParamConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       //   break;
       case 'Lifecycle':
-        contentComponent = <LifecycleConfigForm onSubmit={onSubmit} />;
+        contentComponent = <LifecycleConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       case 'Hook':
-        contentComponent = <HookConfigForm onSubmit={onSubmit} />;
+        contentComponent = <HookConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       case 'If Block':
-        contentComponent = <IfBlockConfigForm onSubmit={onSubmit} />;
+        contentComponent = <IfBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       case 'Edit If Block':
-        contentComponent = <IfBlockConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
+        contentComponent = <IfBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
         break;
       case 'While Block':
-        contentComponent = <WhileBlockConfigForm onSubmit={onSubmit} />;
+        contentComponent = <WhileBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       case 'Edit While Block':
-        contentComponent = <WhileBlockConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
+        contentComponent = (
+          <WhileBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />
+        );
         break;
       case 'Do While Block':
-        contentComponent = <DoWhileConfigForm onSubmit={onSubmit} />;
+        contentComponent = <DoWhileConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       case 'Edit Do While':
-        contentComponent = <DoWhileConfigForm onSubmit={onSubmit} formData={{}} editMode={true} />;
+        contentComponent = <DoWhileConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
+        break;
+      case 'Try Catch':
+        contentComponent = <TryCatchConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
         break;
       default:
         contentComponent = null;
     }
 
-    showOffcanvas(contentComponent, 'Component Configuration', 'end', true, '40%');
+    showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, '40%');
     setShowMenu(false);
   };
 
