@@ -6,9 +6,11 @@ import CustomModal from '../../../common/display/modal/BreezeModal.jsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFiles, uploadFileAction, deleteFileAction, downloadFileAction } from '../redux/resourcesActions.js';
 import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions.js';
+import { useTabContext } from '../../project/context/TabContext.jsx';
 
 const Resources = () => {
   const [fileToDelete, setFileToDelete] = useState(null);
+  const { removeTab } = useTabContext();
 
   const { projectName } = useParams();
   const dispatch = useDispatch();
@@ -38,6 +40,7 @@ const Resources = () => {
     if (!fileToDelete) return;
     try {
       await dispatch(deleteFileAction({ file: fileToDelete, projectName })).unwrap();
+      removeTab(fileToDelete.id);
       await dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
     } catch (error) {
       console.error('An error occurred while deleting the file:', error);
