@@ -196,7 +196,7 @@ function ProjectDisplay() {
                   defaultValue={editorCode ? editorCode : '// Loading...'}
                   height={selectedNode.id !== 'ROUTE_COMPONENT' ? 'calc(100vh - 161px)' : 'calc(100vh - 230px)'}
                   language={editorLanguage}
-                  node={selectedNode}
+                  node={selectedTab}
                 />
               </div>
             </div>
