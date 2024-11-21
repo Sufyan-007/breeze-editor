@@ -19,7 +19,6 @@ function RoutingConfigForm({ onSubmit, initialData, availableComponents }) {
   const [availableRoutes, setAvailableRoutes] = useState([{ label: 'Select Route', value: '' }]);
   const { projectName } = useParams();
   const selectedNodePayload = useSelector((state) => state.project.selectedNodePayload);
-  console.log(selectedNodePayload);
 
   useEffect(() => {
     if (initialData) {
