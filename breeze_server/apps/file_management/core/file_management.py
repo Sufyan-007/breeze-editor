@@ -13,12 +13,10 @@ TEMPLATE_CODE_FILE = {
       "components":[],  
     },
     "BLOCK":{
-        "id" : "S0",
         "type": "BLOCK",
         "noWrap": 1,
         "statements": [
             {
-                "id" : "S1",
                 "type" : "COMMENT",
                 "text" : " Happy coding!!"
             }
@@ -32,16 +30,6 @@ TEMPLATE_CODE_FILE = {
         "others":[]
     }
 
-}
-TEMPLATE_FLATTEN_CONFIG = {
-    "S0":{
-        "index":"BLOCK",
-        "type":"BLOCK"
-    },
-    "S1":{
-        "index":"BLOCK<>statements<>0",
-        "type":"RAW"
-    },
 }
 
 def get_section_from_flattened_index(flattened_index, config, configMeta):
@@ -154,12 +142,6 @@ def add_statement(projectId,fileId,parentId,statement):
         filename=fileId,
         json_data=fileConfig
     )
-    write_config_file(
-        project_name=projectId,
-        category=ResourceCategory.CODE_FILE.value,
-        filename=fileId+"_meta",
-        json_data=fileConfigMeta
-    )
     
     return {}
 
@@ -188,12 +170,7 @@ def add_code_file(projectId, fileName,parentId):
         filename=fileId,
         json_data=TEMPLATE_CODE_FILE
     )
-    write_config_file(
-        project_name=projectId,
-        category=ResourceCategory.CODE_FILE.value,
-        filename=fileId+"_meta",
-        json_data=TEMPLATE_FLATTEN_CONFIG
-    )
+    
     
     return node
     
@@ -213,9 +190,11 @@ def update_code_file(projectId, fileId, config):
 
 def generate_file_code(projectId,fileId,config):
     functionParser = FunctionParser(projectId=projectId)
-    code = functionParser.generate_statement_code(config["BLOCK"])
+    code,tree = functionParser.generate_statement_code(config["BLOCK"],["BLOCK"])
     
     generated_imports = functionParser.get_generated_imports()
+    
+    meta_config = functionParser.get_meta_config()
     
     imports = deepcopy(config["IMPORTS"])
     
@@ -237,6 +216,14 @@ def generate_file_code(projectId,fileId,config):
         {code}
         {export_statements}
     """
+    
+    write_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId+"_meta",
+        json_data=meta_config
+    )
+    
     directoryManager = DirectoryManager(projectId)
     directoryManager.save_file(file_id=fileId,content=code,formatted=True)
     
