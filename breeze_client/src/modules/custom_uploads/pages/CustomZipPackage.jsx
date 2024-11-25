@@ -23,6 +23,7 @@ function CustomZipPackagePage() {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [selectedFilename, setSelectedFilename] = useState(null);
+  const[selectedComponent, setSelectedComponent] =  useState(null)
   const [currentPage, setCurrentPage] = useState(1);
   const { projectName } = useParams();
   const [formData, setFormData] = useState({
@@ -52,7 +53,6 @@ function CustomZipPackagePage() {
     };
     wsStatus.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log('Received WebSocket message status:', message);
 
       const fileStatuses = message?.file_status?.file_statuses; 
       if (fileStatuses) {
@@ -300,10 +300,11 @@ function CustomZipPackagePage() {
       </div>
     ),
   }));
-
-  const handleClick = (fileid, filename) => {
+ //fileid- component id , filename- zip file name 
+  const handleClick = (component_id, filename) => {
+    setSelectedComponent(component_id)
     const payload = {
-      resource: fileid,
+      resource: component_id,
       select: ['props'],
     };
     dispatch(fetchZipFileComponentsAction({ filename, projectName, payload }));
@@ -440,7 +441,7 @@ function CustomZipPackagePage() {
           </div>
 
           <div style={{ flex: '1', paddingLeft: '20px', maxWidth: '80%' }}>
-            {props && <CustomPropsList components={components} props={props} />}
+            {props && <CustomPropsList selectedFile={selectedFilename} selectedComponentId={selectedComponent} components={components} props={props} />}
           </div>
         </div>
       </BreezeOffCanvas>

@@ -62,4 +62,16 @@ const fetchZipFileComponentsService = async (selectedFilename, projectName, addi
   }
 };
 
-export { uploadZipFile, fetchZipFiles, deleteFile, fetchZipFileComponentsService };
+const setPropConfigService = async(projectName, submitData) => {
+  console.log(projectName, submitData,"in service " );
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/set-prop-config/${projectName}`;
+  try {
+    const response = await callApiClient(url, 'POST', submitData);
+    return response;
+  } catch (error) {
+    console.error('Error updating prop configuration:', error);
+    throw error;
+  }
+};
+
+export { uploadZipFile, fetchZipFiles, deleteFile, fetchZipFileComponentsService, setPropConfigService };

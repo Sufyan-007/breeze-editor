@@ -195,7 +195,7 @@ def delete_file(project_name, fileName, file_id):
     except Exception as e:
         raise Exception(f"Error deleting file or directory: {e}")
     
-def set_prop_config(project_name, file_name , component_id ,prop_id , new_prop_name=None, new_type=None, new_default_value=None ):
+def set_prop_config_service(project_name, file_name , component_id ,prop_id , new_prop_name=None, new_type=None, new_default_value=None ):
     try:
         #load the existing config for the project
         app_config, react_app_dir , app_config_dir = get_project_config(project_name)
@@ -250,3 +250,22 @@ def update_resource_config(project_name, file_name ,file_id, status,  tag="ZIP")
     with open(resource_config_file_path, 'w') as config_file:
         json.dump(config_data, config_file, indent=4)
         
+# def get_props(project_name,file_name,component_id, prop_id):
+#     try:
+#         component_config_path = os.path.join(CONFIG_PATH,project_name,"external_components_config",file_name,f"{component_id}.json" )
+        
+#         if not os.path.exists(component_config_path):
+#             raise FileNotFoundError(f"File not found: {component_config_path}")
+        
+#         with open(component_config_path,'r') as file:
+#             config_data = json.load(file)
+            
+#         props= config_data.get("props",{})
+        
+#         if prop_id in props:
+#             return props[prop_id]
+#         else:
+#             raise KeyError(f"Prop ID '{prop_id}' not found in the configuration.")
+        
+#     except Exception as e:
+#         raise Exception(f"An error occurred while retrieving props config: {str(e)}")
