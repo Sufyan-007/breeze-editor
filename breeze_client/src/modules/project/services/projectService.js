@@ -144,3 +144,18 @@ export const deleteNodeApi = async (projectName, nodeId) => {
     throw error;
   }
 };
+
+export const moveNodeApi = async (projectName, nodeId, targetId) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/move-file/`;
+  const payload = {
+    file_id: nodeId,
+    new_parent_id: targetId,
+  };
+  try {
+    const response = await callApiClient(url, 'POST', payload);
+    return response;
+  } catch (error) {
+    console.error('Error moving node:', error.message);
+    throw error;
+  }
+};
