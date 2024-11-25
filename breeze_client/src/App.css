@@ -167,6 +167,15 @@
   cursor: pointer;
 }
 
+.br-truncate-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 90%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 ::-webkit-scrollbar {
   width: 2px;
   height: 2px;

@@ -63,7 +63,6 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   const handleInputSubmit = () => {
     if (node?.tempName.trim()) {
       parentMethods.handleInputSubmit(node.id);
-      // parentMethods.handleNodeClick(null);
     }
   };
 
@@ -82,6 +81,9 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    if (!isExpanded(node.id)) {
+      toggleNode(node.id);
+    }
   };
 
   const handleDrop = (e) => {
@@ -128,11 +130,15 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
 
   return (
     <div
-      style={{ marginLeft: `${level * 10}px` }}
-      draggable
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
+      style={{ marginLeft: `${level * 2}px` }}
+      draggable={!node.isProtected}
+      onDragStart={!node.isProtected ? handleDragStart : undefined}
+      onDragOver={(e) => {
+        if (!node.isProtected) handleDragOver(e);
+      }}
+      onDrop={(e) => {
+        if (!node.isProtected) handleDrop(e);
+      }}
     >
       <div
         className={`tree-node ${isSelected ? 'selected-node' : ''}`}
@@ -195,10 +201,10 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
               </button>
             </div>
           ) : (
-            <>
+            <span className="br-truncate-text" title={node.name}>
               {node.name}
               {node.extension && <span>.{node.extension === 'SX' ? 'jsx' : node.extension}</span>}
-            </>
+            </span>
           )}
         </span>
         <span className="tree-node-state">

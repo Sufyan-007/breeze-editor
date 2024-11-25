@@ -29,7 +29,6 @@ function ProjectDisplay() {
   const [selectedVersion, setSelectedVersion] = useState('');
   const [isVersionMismatched, setIsVersionMismatched] = useState(null);
   const dispatch = useDispatch();
-
   useEffect(() => {
     const fetchConfigFileVersions = async () => {
       try {
