@@ -6,6 +6,13 @@ export const initialPropConfig = {
   description: '',
 };
 
+export const initialComponentConfig = {
+  type: 'REACT_COMPONENT',
+  name: '',
+  description: '',
+  propsVar: [],
+};
+
 export const initialVariableConfig = {
   type: 'DECLARATION',
   varName: '',

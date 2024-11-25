@@ -43,7 +43,7 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
   };
 
   return (
-    <form className="prop-config-form h-100">
+    <div className="prop-config-form h-100">
       <div className="d-flex flex-column justify-content-between h-100">
         <div>
           <div className="row">
@@ -92,23 +92,23 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
             onChange={(value) => handleChange('description', value)}
             config={{ label: 'Description', groupClass: 'form-group my-2' }}
           />
-        </div>
-        <div className="d-flex justify-content-end">
-          <CustomButtonField
-            type="button"
-            label={'Cancel'}
-            className="btn br-secondary-button med-font mx-2"
-            onClick={handleCancel}
-          />
-          <CustomButtonField
-            type="button"
-            label={editMode ? 'Update' : 'Submit'}
-            className="btn btn-filled med-font"
-            onClick={handleSubmit}
-          />
+          <div className="d-flex justify-content-end">
+            <CustomButtonField
+              type="button"
+              label={'Cancel'}
+              className="btn br-secondary-button med-font mx-2"
+              onClick={handleCancel}
+            />
+            <CustomButtonField
+              type="button"
+              label={editMode ? 'Update' : 'Add'}
+              className="btn br-secondary-button med-font"
+              onClick={handleSubmit}
+            />
+          </div>
         </div>
       </div>
-    </form>
+    </div>
   );
 }
 

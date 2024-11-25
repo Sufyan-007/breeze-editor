@@ -17,7 +17,6 @@ export const items = [
 export const configTypeMapping = {
   ALL_IMPORTS: ['Edit Import', 'Add Import'],
   IMPORT: ['Edit Import', 'Add Import'],
-  PROP: ['Edit Prop', 'Props'],
   REACT_COMPONENT: [
     'Component Config',
     'Variable',

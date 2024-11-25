@@ -1,6 +1,5 @@
 import {
   ImportConfigForm,
-  PropConfigForm,
   VariableConfigForm,
   AddELement,
   FunctionConfigForm,
@@ -25,9 +24,9 @@ const useConfigurableMenuItems = (onSubmit, onCancel) => {
       case 'Edit Import':
         return <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
       case 'Props':
-        return <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Edit Prop':
-        return <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
+        return <ComponentConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      // case 'Edit Prop':
+      //   return <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
       case 'Variable':
         return <VariableConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'State Variable':

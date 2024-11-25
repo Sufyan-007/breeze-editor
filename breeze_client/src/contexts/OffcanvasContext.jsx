@@ -35,12 +35,20 @@ export const OffcanvasProvider = ({ children }) => {
     }));
   }, []);
 
+  const setOffcanvasSize = useCallback((newSize) => {
+    setOffcanvasConfig((prevConfig) => ({
+      ...prevConfig,
+      size: newSize,
+    }));
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       showOffcanvas,
       closeOffcanvas,
+      setOffcanvasSize,
     }),
-    [showOffcanvas, closeOffcanvas]
+    [showOffcanvas, closeOffcanvas, setOffcanvasSize]
   );
 
   return (
