@@ -1,71 +1,98 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { CustomTextInput, CustomSelectField } from '../../../../common/fields';
+import {
+  CustomTextInput,
+  CustomSelectField,
+  MonacoEditor,
+  CustomTextArea,
+  CustomButtonField,
+} from '../../../../common/fields';
 import { BreezeDatatypes } from '../../constants/FormConstants';
+import { initialParamConfig } from '../../constants/ResourcesFormData';
+import ThemeContext from '../../../../contexts/ThemeContext';
 
-function ParamForm({ param, onSubmit, onCancel }) {
-  const [paramData, setParamData] = useState({
-    paramName: param?.paramName || 'param1',
-    paramDataType: param?.paramDataType || 'string',
-    defaultValue: param?.defaultValue || '',
-    description: param?.description || '',
-  });
+function ParamForm({ param, onSubmit, onCancel, editMode }) {
+  const [formData, setFormData] = useState(param || initialParamConfig);
+  const { theme } = useContext(ThemeContext);
+  const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+
+  useEffect(() => {
+    if (editMode && param) {
+      setFormData(param);
+    }
+  }, [param, editMode]);
 
   const handleParamChange = (field, value) => {
-    setParamData({
-      ...paramData,
+    setFormData({
+      ...formData,
       [field]: value,
     });
   };
 
-  const handleSubmit = () => {
-    onSubmit(paramData);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+    if (!editMode) setFormData(initialParamConfig);
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    setFormData(initialParamConfig);
+    onCancel();
   };
 
   return (
-    <div className="param-form">
-      <div className="row mx-0">
-        <div className="col-3 px-0">
+    <div className="param-config-form h-100">
+      <div className="d-flex flex-column justify-content-between h-100">
+        <div>
           <CustomTextInput
-            name="paramName"
-            value={paramData.paramName}
-            onChange={(value) => handleParamChange('paramName', value)}
-            config={{ label: 'Name', groupClass: 'form-group mb-2 me-2' }}
+            name="name"
+            value={formData.name}
+            onChange={(value) => handleParamChange('name', value)}
+            config={{
+              label: 'Param Name',
+              groupClass: 'form-group mb-2',
+            }}
           />
-        </div>
-        <div className="col-3 px-0">
           <CustomSelectField
-            name="paramDataType"
-            value={paramData.paramDataType}
-            onChange={(value) => handleParamChange('paramDataType', value)}
+            name="dataType"
+            value={formData.dataType}
+            onChange={(value) => handleParamChange('dataType', value)}
             options={BreezeDatatypes}
-            config={{ label: 'Data Type', groupClass: 'form-group mb-2 me-2' }}
+            config={{
+              label: 'Data Type',
+              groupClass: 'form-group mb-2',
+            }}
           />
-        </div>
-        <div className="col-3 px-0">
-          <CustomTextInput
-            name="defaultValue"
-            value={paramData.defaultValue}
+          <label className="form-label br-text-primary med-font fw-semibold">Default Value</label>
+          <MonacoEditor
+            defaultValue={formData.defaultValue}
             onChange={(value) => handleParamChange('defaultValue', value)}
-            config={{ label: 'Default Value', groupClass: 'form-group mb-2 me-2' }}
+            language="javascript"
+            height="100px"
+            theme={projectTheme}
+            config={{ label: 'Default Value' }}
           />
-        </div>
-        <div className="col-3 px-0">
-          <CustomTextInput
+          <CustomTextArea
             name="description"
-            value={paramData.description}
+            value={formData.description}
             onChange={(value) => handleParamChange('description', value)}
-            config={{ label: 'Description', groupClass: 'form-group mb-2' }}
+            config={{ label: 'Description', groupClass: 'form-group my-2' }}
           />
-        </div>
-      </div>
-
-      <div className="d-flex justify-content-end">
-        <div className="mx-2" role="button" onClick={onCancel}>
-          <i className="bi bi-x"></i>
-        </div>
-        <div role="button" onClick={handleSubmit}>
-          <i className="bi bi-check2"></i>
+          <div className="d-flex justify-content-end">
+            <CustomButtonField
+              type="button"
+              label={'Cancel'}
+              className="btn br-secondary-button med-font mx-2"
+              onClick={handleCancel}
+            />
+            <CustomButtonField
+              type="button"
+              label={editMode ? 'Update' : 'Add'}
+              className="btn br-secondary-button med-font"
+              onClick={handleSubmit}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -76,6 +103,7 @@ ParamForm.propTypes = {
   param: PropTypes.object,
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+  editMode: PropTypes.bool,
 };
 
 export default ParamForm;

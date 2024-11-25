@@ -6,6 +6,13 @@ export const initialPropConfig = {
   description: '',
 };
 
+export const initialParamConfig = {
+  name: '',
+  dataType: 'string',
+  defaultValue: '',
+  description: '',
+};
+
 export const initialComponentConfig = {
   type: 'REACT_COMPONENT',
   name: '',
@@ -48,12 +55,16 @@ export const initialImportConfig = {
 };
 
 export const initialFunctionConfig = {
-  functionName: '',
+  type: 'FUNCTION',
+  name: '',
   isAsync: false,
   isAnonymous: false,
   description: '',
-  params: [],
-  functionBody: '',
+  parameters: [],
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
 };
 
 export const initialLifecycleConfig = {
