@@ -27,7 +27,7 @@ def get_uploaded_resources(project_name, tag):
                     os.path.getmtime(os.path.join(uploaded_resources_config_path))
                 )
                 .astimezone(timezone.utc)
-                .strftime("%Y-%m-%d "),
+                .strftime("%Y-%m-%d"),
                 "status": value.get("status"),
             })
             elif not tag and value.get('tag') != "ZIP":
