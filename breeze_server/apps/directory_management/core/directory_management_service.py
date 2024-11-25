@@ -116,7 +116,7 @@ class DirectoryManager:
         if not new_parent:
             raise KeyError("New parent not found")
         
-        if new_parent["type"]!="DIRECTORY":
+        if new_parent_id != "ROOT" and new_parent["type"]!="DIRECTORY":
             raise NotADirectoryError()
         
         new_parent["children"].append(node_id)

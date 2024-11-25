@@ -3,6 +3,7 @@ import {
   addNodeApi,
   deleteNodeApi,
   getFolderConfig,
+  moveNodeApi,
   renameNodeApi,
 } from '../../modules/project/services/projectService';
 
@@ -47,6 +48,18 @@ export const deleteNodeAsync = createAsyncThunk(
       return { nodeId };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to delete node');
+    }
+  }
+);
+
+export const moveNodeAsync = createAsyncThunk(
+  'directory/moveNode',
+  async ({ projectName, nodeId, targetId }, { rejectWithValue }) => {
+    try {
+      await moveNodeApi(projectName, nodeId, targetId);
+      return { nodeId, targetId };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to move node');
     }
   }
 );
