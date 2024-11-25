@@ -68,11 +68,16 @@ export const initialFunctionConfig = {
 };
 
 export const initialLifecycleConfig = {
+  type: 'REACT_USE_EFFECT',
   description: '',
   lifecycleType: 'onInitialMount',
-  dependentVars: [],
-  lifecycleBody: '',
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
+  dependencies: { type: 'ARRAY', values: [] },
 };
+
 export const initialHookConfig = {
   hookName: '',
   hookDescription: '',

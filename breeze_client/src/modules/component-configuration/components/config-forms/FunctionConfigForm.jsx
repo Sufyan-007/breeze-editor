@@ -34,8 +34,6 @@ function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMod
     setOffcanvasSize('60%');
   };
 
-  console.log('paramData::>>', paramData);
-
   const handleDeleteParam = (index) => {
     const updatedParams = formData.parameters.filter((_, i) => i !== index);
     setFormData({ ...formData, parameters: updatedParams });
