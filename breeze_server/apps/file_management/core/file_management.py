@@ -149,6 +149,36 @@ def add_statement(projectId,fileId,parentId,statement):
     
     return {}
 
+def update_statement(projectId,fileId,statementId,statement):
+    fileConfig = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId
+    )["data"]
+    fileConfigMeta = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId+"_meta"
+    )["data"]
+    
+    try:
+        configMeta = fileConfigMeta[statementId]
+    except:
+        raise KeyError("Could not find key %s" % statementId)
+
+    set_value_in_flattened_index(statementId,statement,fileConfig,fileConfigMeta)
+
+    generate_file_code(projectId=projectId,fileId=fileId,config=fileConfig)
+    
+    write_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId,
+        json_data=fileConfig
+    )
+    
+    return {}
+
 def add_code_file(projectId, fileName,parentId):
     if not parentId:
         parentId = "ROOT"
@@ -233,12 +263,12 @@ def generate_file_code(projectId,fileId,config):
     
     content = directoryManager.get_file_content(fileId)
     
-    # code_tree = get_code_index([tree], content)
+    code_tree = get_code_index([tree], content)
     
-    # pickle_dir = f"{CONFIG_PATH}/{projectId}/pickles/{fileId}.bytes"
-    # create_parent_dir_if_not_exists(pickle_dir)
-    # with open(pickle_dir,"wb") as file:
-    #     pickle.dump(code_tree, file)
+    pickle_dir = f"{CONFIG_PATH}/{projectId}/pickles/{fileId}.bytes"
+    create_parent_dir_if_not_exists(pickle_dir)
+    with open(pickle_dir,"wb") as file:
+        pickle.dump(code_tree, file)
     
 def get_statement_config(projectId,fileId,statementId):
     fileConfig = read_config_file(

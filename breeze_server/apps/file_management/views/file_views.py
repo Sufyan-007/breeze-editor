@@ -30,6 +30,15 @@ def add_statements(request,project_id):
     conf = file_management.add_statement(projectId=project_id,fileId=fileId,parentId=parentId,statement=config)
     return JsonResponse(conf,status=200)
 
+@api_view(["POST"])
+def update_statements(request,project_id):
+    data = json.loads(request.body.decode('utf8'))
+    fileId = data['fileId']
+    statementId = data['statementId']
+    config = data['config']
+    conf = file_management.update_statement(projectId=project_id,fileId=fileId,statementId=statementId,statement=config)
+    return JsonResponse(conf,status=200)
+
 @api_view(['POST'])
 def get_statement_config(request,project_id):
     data = json.loads(request.body.decode('utf-8'))

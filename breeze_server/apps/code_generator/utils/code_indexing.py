@@ -27,7 +27,7 @@ def find_ignore_whitespace(target, query):
     cleaned_idx = 0
     
     for original_idx, char in enumerate(target):
-        if not char.isspace() and char!="\n" and char!=";":
+        if not char.isspace() and char!="\n" and char!=";" and char!=")" and char!="(" and char!=",":
             if cleaned_idx == start_index_cleaned:
 
                 original_indices.append(original_idx)
@@ -106,16 +106,17 @@ class CodeTree:
 def get_code_index(statements,code):
     tree=CodeTree()
     for statement in statements:
-        indexes = find_ignore_whitespace(code,statement["code"])
-        if len(indexes) !=2:
-            continue
-        children = statement.get("children")
-        if indexes ==None:
-            raise Exception()
-        
-        obj = {k:statement[k] for k in statement if k in ["id","type"] }
-        if children:
-            childCode= code[indexes[0]:indexes[1]+1]
-            obj["children"] = get_code_index(children,childCode)
-        tree.insertElem(indexes[0],indexes[1],obj)
+        if statement:
+            indexes = find_ignore_whitespace(code,statement["code"])
+            if len(indexes) !=2:
+                continue
+            children = statement.get("children")
+            if indexes ==None:
+                raise Exception()
+            
+            obj = {k:statement[k] for k in statement if k in ["id","type"] }
+            if children:
+                childCode= code[indexes[0]:indexes[1]+1]
+                obj["children"] = get_code_index(children,childCode)
+            tree.insertElem(indexes[0],indexes[1],obj)
     return tree

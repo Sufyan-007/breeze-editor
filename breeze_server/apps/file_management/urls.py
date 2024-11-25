@@ -5,6 +5,7 @@ urlpatterns = [
     path('update/',file_views.update),
     path('add-statement/',file_views.add_statements),
     path('get-statement/',file_views.get_statement_config),
+    path('update-statement/',file_views.update_statements),
     
     
 ]

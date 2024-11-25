@@ -52,8 +52,11 @@ class FunctionParser:
             "code":""
         }
         
-        if config["type"] =="COMPONENT":
-            raise NotImplementedError("Not implemented")
+        if config["type"] =="REACT_STATEVAR":
+            varName = config["varName"]
+            defaultValue = self.get_value_code(config["defaltValue"], key_chaining=key_chaining+["defaultValue"])
+            code = f"const [{varName},set{varName}] = useState({defaultValue})"
+            # raise NotImplementedError("Not implemented")
         
         elif config["type"] == "BLOCK":
             statements = []
@@ -68,9 +71,10 @@ class FunctionParser:
             
             if config.get("noWrap"):
                 code = statements
-            code = f"""{{ 
-                {statements}
-            }}"""
+            else:
+                code = f"""{{ 
+                    {statements}
+                }}"""
         
         elif config['type'].upper() == "FUNCTION":
             func_name = ""
