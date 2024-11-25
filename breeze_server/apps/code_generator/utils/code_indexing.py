@@ -5,6 +5,9 @@ def find_ignore_whitespace(target, query):
     def clean_text(text):
         text = text.replace("'", '"')  # Replace double quotes with single quotes
         text = text.replace(';', '')   # Remove semicolons
+        text = text.replace('(', '')   # Remove semicolons
+        text = text.replace(')', '')   # Remove semicolons
+        text = text.replace(',', '')   # Remove semicolons
         text = re.sub(r'[\s\r\n]+', '', text)  # Remove all whitespace and newline
         return text
 
@@ -14,7 +17,7 @@ def find_ignore_whitespace(target, query):
     match = re.search(re.escape(cleaned_query), cleaned_target)
     
     if not match:
-        return None 
+        raise IndexError("No match found ") 
     
     start_index_cleaned = match.start()
     end_index_cleaned = match.end()

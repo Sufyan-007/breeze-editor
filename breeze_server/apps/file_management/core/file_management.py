@@ -1,11 +1,15 @@
 from ...directory_management.core.directory_management_service import DirectoryManager
 import uuid
 from ...common.utils.file_helpers.config_handler import write_config_file,read_config_file
+from ...common.utils.file_helpers.file_handler import create_parent_dir_if_not_exists
 from ...common.constants.enums.ResourceCategory import ResourceCategory
 from ...code_generator.utils.function_ast_parser import FunctionParser
 from copy import deepcopy
 from ...code_generator.utils.import_helper import ImportHelper
 import uuid
+from ...code_generator.utils.code_indexing import get_code_index
+import pickle
+from apps.common.constants.consts import CONFIG_PATH
 
 TEMPLATE_CODE_FILE = {
     "IMPORTS":{
@@ -201,7 +205,7 @@ def generate_file_code(projectId,fileId,config):
     imports["other"].extend(generated_imports["other"])
     imports["components"].extend(generated_imports["components"])
     
-    imports,tree = ImportHelper.generate_imports_code(imports,projectId)
+    imports,importTree = ImportHelper.generate_imports_code(imports,projectId)
     
     export_statements = ""
     
@@ -227,6 +231,14 @@ def generate_file_code(projectId,fileId,config):
     directoryManager = DirectoryManager(projectId)
     directoryManager.save_file(file_id=fileId,content=code,formatted=True)
     
+    content = directoryManager.get_file_content(fileId)
+    
+    # code_tree = get_code_index([tree], content)
+    
+    # pickle_dir = f"{CONFIG_PATH}/{projectId}/pickles/{fileId}.bytes"
+    # create_parent_dir_if_not_exists(pickle_dir)
+    # with open(pickle_dir,"wb") as file:
+    #     pickle.dump(code_tree, file)
     
 def get_statement_config(projectId,fileId,statementId):
     fileConfig = read_config_file(

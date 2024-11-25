@@ -99,6 +99,8 @@ class FunctionParser:
                 varName = config["varName"]
             if declaration_type == "const" or config.get("value",False):
                 value,t = self.get_value_code(config["value"], key_chaining=key_chaining+["value"])
+                if t:
+                    tree["children"].append(t)
                 code = f"""{declaration_type} {varName} = {value}"""
             else:
                 code= f"""{declaration_type} {varName} """
@@ -106,6 +108,9 @@ class FunctionParser:
         elif config["type"] == "ASSIGNMENT": 
             varName = config["varName"]
             value,t = self.get_value_code(config["value"], key_chaining=key_chaining+["value"])
+            if t:
+                tree["children"].append(t)
+                
             code = f"""{varName} = {value}"""
         
         
@@ -144,35 +149,53 @@ class FunctionParser:
                 iterator = f"""{config["iterator"].get("declarationType","const ")} {config["iterator"]["name"]}"""
                 iterate = "in" if config.get('loopType')=="FOR_IN" else "of"
                 iterable,t = self.get_value_code(config["iterable"],key_chaining=key_chaining+["iterable"])
+                if t:
+                    tree["children"].append(t)
                 code= f""" for ( {iterator} {iterate} {iterable})
                     {self.generate_statement_code(config.get('bodyConfig'),key_chaining=key_chaining+["bodyConfig"])}
                 """
             pass
         
         elif config['type'] == 'TRY_CATCH':
-            tryBody = f"""try {self.generate_statement_code(config["tryBody"],key_chaining=key_chaining+["tryBody"])}"""
-            catchBody = f"""catch (err) {self.generate_statement_code(config["catchBody"],key_chaining=key_chaining+["catchBody"])}"""
+            tryBody,t = self.generate_statement_code(config["tryBody"],key_chaining=key_chaining+["tryBody"])
+            tree["children"].append(t)
+            tryBody = f"""try {tryBody}"""
+            catchBody,t = self.generate_statement_code(config["catchBody"],key_chaining=key_chaining+["catchBody"])
+            tree["children"].append(t)
+            catchBody = f"""catch (err) {catchBody}"""
             
             finallyBody = ""
             if config.get('finallyBody'):
-                
-                finallyBody = f"""finally {self.generate_statement_code(config["finallyBody"],key_chaining=key_chaining+["finallyBody"])}"""
+                finallyBody,t = self.generate_statement_code(config["finallyBody"],key_chaining=key_chaining+["finallyBody"])
+                tree["children"].append(t)
+                finallyBody = f"""finally {finallyBody}"""
             
             code= " ".join([tryBody,catchBody,finallyBody])
         
         elif config['type'] == "WHILE_BLOCK":
             cond,t = self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])
-            code= f""" while ({cond}) {self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])} 
+            if t:
+                tree["children"].append(t)
+                
+            body, t =self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])
+            tree["children"].append(t)
+            code= f""" while ({cond}) {body} 
         """
         
         elif config['type'] == "DO_WHILE_BLOCK":
             cond,t = self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])
-            code= f"""do  {self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])} while ({cond}) 
+            if t:
+                tree["children"].append(t)
+            body,t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])
+            tree["children"].append(t)
+            code= f"""do  {body} while ({cond}) 
         """
         
         
         elif config['type'] == "RETURN":
             val, t =self.get_value_code(config.get("value",{}),key_chaining=key_chaining+["value"])
+            if t:
+                tree["children"].append(t)
             code= f""" return {val}
         """
         
