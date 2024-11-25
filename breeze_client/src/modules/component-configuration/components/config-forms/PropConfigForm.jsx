@@ -18,10 +18,8 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
 
   useEffect(() => {
-    if (editMode && initialData) {
-      setFormData(initialData);
-    }
-  }, [initialData, editMode]);
+    setFormData(initialData);
+  }, [initialData]);
 
   const handleChange = (field, value) => {
     setFormData({

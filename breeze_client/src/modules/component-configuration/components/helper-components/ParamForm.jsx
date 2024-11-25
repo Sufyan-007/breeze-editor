@@ -17,10 +17,8 @@ function ParamForm({ param, onSubmit, onCancel, editMode }) {
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
 
   useEffect(() => {
-    if (editMode && param) {
-      setFormData(param);
-    }
-  }, [param, editMode]);
+    setFormData(param);
+  }, [param]);
 
   const handleParamChange = (field, value) => {
     setFormData({
