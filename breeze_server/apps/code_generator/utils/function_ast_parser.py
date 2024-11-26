@@ -133,15 +133,27 @@ class FunctionParser:
         
         elif config['type'] == "IF_BLOCK":
             cond,t =self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])
-            code = f""" if ({cond}) {self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])} 
-            """
+            if t:
+                tree["children"].append(t)
+            
+            if_code,t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])
+            tree["children"].append(t)
+        
+            code = f""" if ({cond}) {if_code} """
             if config.get('elseIf', False):
                 for x in config.get('elseIf'):
                     cond2,t =self.get_value_code(x["condition"],key_chaining=key_chaining+["condition"])
-                    code += f"""else if({cond2}) {self.generate_statement_code(x.get('bodyConfig',{},key_chaining=key_chaining+["bodyConfig"]))}"""
+                    if t:
+                        tree["children"].append(t)
+                    elif_body,t = self.generate_statement_code(x.get('bodyConfig',{},key_chaining=key_chaining+["bodyConfig"]))
+                    tree["children"].append(t)
+                    
+                    code += f"""else if({cond2}) {elif_body}"""
             if config.get('elseBody', False):
-                code += f"""else  {self.generate_statement_code(config.get('elseBody',{}),key_chaining=key_chaining+["elseBody"])}
-            """
+                else_body,t = self.generate_statement_code(config.get('elseBody',{}),key_chaining=key_chaining+["elseBody"])
+                tree["children"].append(t)
+
+                code += f"""else  {else_body}"""
             
         
         elif config['type'] == "FOR_BLOCK":
