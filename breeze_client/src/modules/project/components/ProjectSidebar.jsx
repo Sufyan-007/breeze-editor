@@ -7,8 +7,8 @@ import CustomContextMenu from '../../../common/display/context-menu/BreezeContex
 import { addFileOptions } from '../constants/contextMenuOptions';
 import {
   addNodeAsync,
-  deleteNodeAsync,
   fetchFolderConfig,
+  moveNodeAsync,
   renameNodeAsync,
 } from '../../../redux/directory_management/directory_actions';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,8 +19,11 @@ import {
   updateNodeTempName,
   addNode,
   cancelAdd,
+  cancelAllEditing,
 } from '../../../redux/directory_management/directory_reducers';
 import CustomModal from '../../../common/display/modal/BreezeModal';
+import { useTabContext } from '../context/TabContext';
+import { deleteNodeAsPerCategory } from '../hooks/deleteNodeAsPerCategory';
 
 function ProjectSidebar() {
   const { directoryConfig } = useSelector((state) => state.directory);
@@ -32,6 +35,9 @@ function ProjectSidebar() {
   const contextMenuRef = useRef(null);
   const { selectedNodeId, setSelectedNode, setSelectedNodeId } = useTreeContext();
   const { projectName } = useParams();
+  const { removeTab, addTab, openTabs, selectTab } = useTabContext();
+  const toggling = useRef(false);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,21 +46,25 @@ function ProjectSidebar() {
   }, [dispatch, projectName]);
 
   const toggleNode = async (nodeId) => {
-    const isNodeExpanded = expandedNodes[nodeId];
-    const node = directoryConfig[nodeId];
-    const children = node?.children || [];
-    const areAllChildrenLoaded = children.every((childId) => directoryConfig[childId]);
-    if (!isNodeExpanded && !areAllChildrenLoaded) {
-      try {
-        await dispatch(fetchFolderConfig({ id: nodeId, projectName })).unwrap();
-      } catch (error) {
-        console.error('Error fetching children for node:', nodeId, error);
+    if (!toggling.current) {
+      toggling.current = true;
+      const isNodeExpanded = expandedNodes[nodeId];
+      const node = directoryConfig[nodeId];
+      const children = node?.children || [];
+      const areAllChildrenLoaded = children.every((childId) => directoryConfig[childId]);
+      if (!isNodeExpanded && !areAllChildrenLoaded) {
+        try {
+          await dispatch(fetchFolderConfig({ id: nodeId, projectName })).unwrap();
+        } catch (error) {
+          console.error('Error fetching children for node:', nodeId, error);
+        }
       }
+      setExpandedNodes((prev) => ({
+        ...prev,
+        [nodeId]: !isNodeExpanded,
+      }));
+      toggling.current = false;
     }
-    setExpandedNodes((prev) => ({
-      ...prev,
-      [nodeId]: !isNodeExpanded,
-    }));
   };
 
   const handleNodeClick = (nodeId) => {
@@ -73,20 +83,29 @@ function ProjectSidebar() {
 
   const handleDragStart = (node) => setDraggedNode(node);
 
-  const handleDrop = (destinationNode) => {
-    // if (!draggedNode) return;
-    // const newParentId = destinationNode?.type === 'FILE' ? destinationNode.parentId : destinationNode?.id || null;
-    // setTreeData((prev) => ({
-    //   ...prev,
-    //   [draggedNode.id]: {
-    //     ...draggedNode,
-    //     parentId: newParentId,
-    //   },
-    // }));
-    // setDraggedNode(null);
+  const handleDrop = async (destinationNode) => {
+    if (!draggedNode) return;
+
+    const draggedNodeId = draggedNode.id;
+    const destinationNodeId =
+      destinationNode?.type === 'FILE' ? destinationNode.parentId : destinationNode?.id || 'ROOT';
+
+    if (draggedNodeId === destinationNodeId) {
+      console.warn('Cannot move node into itself');
+      return;
+    }
+
+    try {
+      await dispatch(moveNodeAsync({ projectName, nodeId: draggedNodeId, targetId: destinationNodeId })).unwrap();
+    } catch (error) {
+      console.error('Failed to move node:', error);
+    } finally {
+      setDraggedNode(null);
+    }
   };
 
   const handleRename = (nodeId) => {
+    dispatch(cancelAllEditing());
     dispatch(updateNodeEditing({ nodeId, isEditing: true, tempName: directoryConfig[nodeId].name }));
   };
 
@@ -98,7 +117,24 @@ function ProjectSidebar() {
     const node = directoryConfig[nodeId];
     if (!node.isNew) {
       if (node?.tempName.trim()) {
-        dispatch(renameNodeAsync({ projectId: projectName, nodeId, newName: node.tempName })).unwrap();
+        dispatch(renameNodeAsync({ projectId: projectName, nodeId, newName: node.tempName }))
+          .unwrap()
+          .then(() => {
+            const existingTab = openTabs.find((tab) => tab.id === nodeId);
+            if (existingTab) {
+              removeTab(nodeId);
+            }
+
+            const updatedNode = { ...node, name: node.tempName };
+            addTab(updatedNode);
+
+            if (nodeId === existingTab?.id) {
+              selectTab(updatedNode);
+            }
+          })
+          .catch((err) => {
+            console.error('Error renaming node:', err);
+          });
       }
     } else {
       // TODO : add folder api as per condition
@@ -119,10 +155,11 @@ function ProjectSidebar() {
     setNodeToDelete(nodeId);
     setModalOpen(true);
   };
-  const confirmDelete = () => {
-    if (nodeToDelete) {
-      dispatch(deleteNodeAsync({ projectId: projectName, nodeId: nodeToDelete }));
-    }
+  const confirmDelete = async () => {
+    const node = directoryConfig[nodeToDelete];
+    await deleteNodeAsPerCategory(node, dispatch, projectName);
+    dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
+    removeTab(nodeToDelete);
     setModalOpen(false);
     setNodeToDelete(null);
   };
@@ -133,8 +170,15 @@ function ProjectSidebar() {
 
   const toggleSidebar = () => setShow((prev) => !prev);
 
-  const handleAddFile = (parentId) => addNodeToTree({ type: 'FILE', parentId, extension: 'jsx' });
-  const handleAddFolder = (parentId) => addNodeToTree({ type: 'DIRECTORY', parentId, extension: '' });
+  const handleAddFile = (parentId) => {
+    dispatch(cancelAllEditing());
+    addNodeToTree({ type: 'FILE', parentId, extension: 'jsx' });
+  };
+
+  const handleAddFolder = (parentId) => {
+    dispatch(cancelAllEditing());
+    addNodeToTree({ type: 'DIRECTORY', parentId, extension: '' });
+  };
 
   const methods = {
     handleNodeClick,
@@ -147,6 +191,7 @@ function ProjectSidebar() {
     handleRename,
     handleAddFile,
     handleAddFolder,
+    cancelAllEditing,
     addNodeToTree,
   };
 
@@ -253,7 +298,7 @@ function ProjectSidebar() {
               label: 'Delete',
               onClick: confirmDelete,
               className: 'btn btn-danger',
-              disabled: true,
+              // disabled: true,
             },
             {
               label: 'Cancel',

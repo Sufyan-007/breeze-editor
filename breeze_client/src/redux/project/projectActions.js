@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { getAppBasicConfig } from '../../modules/project/services/projectService';
 import { getConfigVersion } from '../../services/configs/configService';
-import { clearSelectedNodePayload } from './projectReducers';
+import { clearSelectedNodePayload, updateSelectedNodePayload } from './projectReducers';
 
 export const fetchProjectConfig = createAsyncThunk(
   'project/fetchProjectConfig',
@@ -27,4 +27,4 @@ export const fetchConfigVersion = createAsyncThunk(
   }
 );
 
-export { clearSelectedNodePayload };
+export { clearSelectedNodePayload, updateSelectedNodePayload };

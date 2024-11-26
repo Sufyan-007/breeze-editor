@@ -9,7 +9,7 @@ import {
 import { availableDependentVars, lifecycleTypes } from '../../constants/FormConstants';
 import { initialLifecycleConfig } from '../../constants/ResourcesFormData';
 
-function LifecycleConfigForm({ onSubmit }) {
+function LifecycleConfigForm({ onSubmit, onCancel }) {
   const [formData, setFormData] = useState(initialLifecycleConfig);
 
   const handleChange = (field, value) => {
@@ -21,9 +21,14 @@ function LifecycleConfigForm({ onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('formData::>>', formData);
     onSubmit(formData);
     setFormData(initialLifecycleConfig);
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    setFormData(initialLifecycleConfig);
+    onCancel();
   };
 
   return (
@@ -65,6 +70,12 @@ function LifecycleConfigForm({ onSubmit }) {
         </div>
 
         <div className="d-flex justify-content-end">
+          <CustomButtonField
+            type="button"
+            label={'Cancel'}
+            className="btn br-secondary-button med-font mx-2"
+            onClick={handleCancel}
+          />
           <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
         </div>
       </div>
@@ -74,6 +85,7 @@ function LifecycleConfigForm({ onSubmit }) {
 
 LifecycleConfigForm.propTypes = {
   onSubmit: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default LifecycleConfigForm;

@@ -44,7 +44,7 @@ const resourceSlice = createSlice({
       })
       .addCase(deleteFileAction.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.files = state.files.filter((file) => file.id !== action.meta.arg.file.id);
+        state.files = state.files.filter((file) => file.id !== action.meta.arg.fileId);
       })
       .addCase(deleteFileAction.rejected, (state, action) => {
         state.status = 'failed';

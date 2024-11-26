@@ -27,9 +27,9 @@ export const uploadFileAction = createAsyncThunk(
 
 export const deleteFileAction = createAsyncThunk(
   'files/deleteFile',
-  async ({ file, projectName }, { rejectWithValue }) => {
+  async ({ fileId, projectName }, { rejectWithValue }) => {
     try {
-      return await deleteFile(file, projectName);
+      return await deleteFile(fileId, projectName);
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to delete file.');
     }

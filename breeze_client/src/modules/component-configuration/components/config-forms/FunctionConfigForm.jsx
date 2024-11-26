@@ -4,7 +4,7 @@ import { CustomTextInput, CustomCheckBoxField, CustomButtonField } from '../../.
 import FunctionParams from '../helper-components/FunctionParams';
 import { initialFunctionConfig } from '../../constants/ResourcesFormData';
 
-function FunctionConfigForm({ onSubmit }) {
+function FunctionConfigForm({ onSubmit, onCancel }) {
   const [formData, setFormData] = useState(initialFunctionConfig);
 
   const handleChange = (field, value) => {
@@ -16,9 +16,14 @@ function FunctionConfigForm({ onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('formData::>>', formData);
     onSubmit(formData);
     setFormData(initialFunctionConfig);
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    setFormData(initialFunctionConfig);
+    onCancel();
   };
 
   return (
@@ -53,7 +58,13 @@ function FunctionConfigForm({ onSubmit }) {
           />
           <FunctionParams params={formData.params} setParams={(params) => handleChange('params', params)} />
         </div>
-        <div className="d-flex justify-content-end my-2">
+        <div className="d-flex justify-content-end">
+          <CustomButtonField
+            type="button"
+            label={'Cancel'}
+            className="btn br-secondary-button med-font mx-2"
+            onClick={handleCancel}
+          />
           <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
         </div>
       </div>
@@ -63,6 +74,7 @@ function FunctionConfigForm({ onSubmit }) {
 
 FunctionConfigForm.propTypes = {
   onSubmit: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default FunctionConfigForm;

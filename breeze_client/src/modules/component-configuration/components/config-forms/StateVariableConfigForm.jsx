@@ -1,18 +1,18 @@
-import { useState, useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import ThemeContext from '../../../../contexts/ThemeContext';
 import {
-  CustomTextInput,
+  CustomButtonField,
   CustomSelectField,
   CustomTextArea,
+  CustomTextInput,
   MonacoEditor,
-  CustomButtonField,
 } from '../../../../common/fields';
-import { BreezeDatatypes, DeclarationTypes } from '../../constants/FormConstants';
-import { initialVariableConfig } from '../../constants/ResourcesFormData';
+import { BreezeDatatypes } from '../../constants/FormConstants';
+import { useCallback, useContext, useState } from 'react';
+import ThemeContext from '../../../../contexts/ThemeContext';
+import { initialStateVarConfig } from '../../constants/ResourcesFormData';
 
-function VariableConfigForm({ onSubmit, onCancel }) {
-  const [formData, setFormData] = useState(initialVariableConfig);
+function StateVariableConfigForm({ onSubmit, onCancel }) {
+  const [formData, setFormData] = useState(initialStateVarConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
 
@@ -25,17 +25,17 @@ function VariableConfigForm({ onSubmit, onCancel }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
-    setFormData(initialVariableConfig);
+    setFormData(initialStateVarConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialVariableConfig);
+    setFormData(initialStateVarConfig);
     onCancel();
   };
 
   return (
-    <form className="variable-config-form h-100">
+    <form className="state-variable-config-form h-100">
       <div className="d-flex flex-column justify-content-between h-100">
         <div>
           <CustomTextInput
@@ -44,16 +44,6 @@ function VariableConfigForm({ onSubmit, onCancel }) {
             onChange={(value) => handleChange('varName', value)}
             config={{
               label: 'Variable Name',
-              groupClass: 'form-group mb-2',
-            }}
-          />
-          <CustomSelectField
-            name="declarationType"
-            value={formData.declarationType}
-            onChange={(value) => handleChange('declarationType', value)}
-            options={DeclarationTypes}
-            config={{
-              label: 'Declaration Type',
               groupClass: 'form-group mb-2',
             }}
           />
@@ -97,9 +87,9 @@ function VariableConfigForm({ onSubmit, onCancel }) {
   );
 }
 
-VariableConfigForm.propTypes = {
+StateVariableConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
 };
 
-export default VariableConfigForm;
+export default StateVariableConfigForm;

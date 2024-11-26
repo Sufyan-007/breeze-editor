@@ -1,10 +1,16 @@
 import React from 'react';
 import logos from '../../../assets/svgs/index';
 
-export const folderOptions = (nodeId, handleContextMenuSelection, handleRename, handleAddFolder, handleRemoveNode) => [
+export const folderOptions = (
+  nodeId,
+  handleContextMenuSelection,
+  handleRename,
+  handleContextMenuFolder,
+  handleRemoveNode
+) => [
   {
     label: 'Add Folder',
-    value: () => handleAddFolder(nodeId),
+    value: () => handleContextMenuFolder(nodeId),
     icon: React.createElement('i', { className: 'bi bi-folder-plus' }),
   },
   {

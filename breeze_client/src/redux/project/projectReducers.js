@@ -16,6 +16,9 @@ const projectSlice = createSlice({
     clearSelectedNodePayload: (state) => {
       state.selectedNodePayload = {};
     },
+    updateSelectedNodePayload: (state, action) => {
+      state.selectedNodePayload = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -44,5 +47,6 @@ const projectSlice = createSlice({
   },
 });
 
+export const { updateSelectedNodePayload } = projectSlice.actions;
 export const { clearSelectedNodePayload } = projectSlice.actions;
 export default projectSlice.reducer;
