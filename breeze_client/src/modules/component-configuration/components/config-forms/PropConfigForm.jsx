@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import {
@@ -12,10 +12,16 @@ import {
 import { BreezeDatatypes } from '../../constants/FormConstants';
 import { initialPropConfig } from '../../constants/ResourcesFormData';
 
-function PropConfigForm({ onSubmit }) {
-  const [formData, setFormData] = useState(initialPropConfig);
+function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = false }) {
+  const [formData, setFormData] = useState(initialData || initialPropConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+
+  useEffect(() => {
+    if (editMode && initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData, editMode]);
 
   const handleChange = (field, value) => {
     setFormData({
@@ -26,9 +32,14 @@ function PropConfigForm({ onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('formData::>>', formData);
     onSubmit(formData);
+    if (!editMode) setFormData(initialPropConfig); // Reset only in create mode
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
     setFormData(initialPropConfig);
+    onCancel();
   };
 
   return (
@@ -83,7 +94,18 @@ function PropConfigForm({ onSubmit }) {
           />
         </div>
         <div className="d-flex justify-content-end">
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={'Cancel'}
+            className="btn br-secondary-button med-font mx-2"
+            onClick={handleCancel}
+          />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -91,7 +113,16 @@ function PropConfigForm({ onSubmit }) {
 }
 
 PropConfigForm.propTypes = {
-  onSubmit: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  formData: PropTypes.shape({
+    propName: PropTypes.string,
+    isRequired: PropTypes.bool,
+    dataType: PropTypes.string,
+    defaultValue: PropTypes.string,
+    description: PropTypes.string,
+  }),
+  editMode: PropTypes.bool,
 };
 
 export default PropConfigForm;

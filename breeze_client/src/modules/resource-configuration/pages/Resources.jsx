@@ -3,51 +3,47 @@ import { useParams } from 'react-router';
 import ResourcesUploadCanvas from '../components/ResourcesUploadCanvas.jsx';
 import CustomTable from '../../../common/display/datatable/BreezeCustomTable.jsx';
 import CustomModal from '../../../common/display/modal/BreezeModal.jsx';
-import { deleteFile, downloadFile, getAllUploadedFiles, uploadFile } from '../services/ResourcesService.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchFiles, uploadFileAction, deleteFileAction, downloadFileAction } from '../redux/resourcesActions.js';
+import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions.js';
+import { useTabContext } from '../../project/context/TabContext.jsx';
 
 const Resources = () => {
-  const [files, setFiles] = useState([]);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const { removeTab } = useTabContext();
 
   const { projectName } = useParams();
+  const dispatch = useDispatch();
 
+  const files = useSelector((state) => state.resources.files);
   useEffect(() => {
-    fetchFiles();
-  }, []);
-
-  const fetchFiles = async () => {
-    try {
-      const fileData = await getAllUploadedFiles(projectName);
-      const fileArray = Object.keys(fileData.data).map((fileId) => ({
-        id: fileId,
-        name: fileData.data[fileId].name,
-        type: fileData.data[fileId].type,
-      }));
-      setFiles(fileArray);
-    } catch (error) {
-      console.error('Error fetching files:', error);
+    if (files.length === 0) {
+      dispatch(fetchFiles({ projectName }));
     }
-  };
+  }, [dispatch, projectName, files.length]);
 
   const handleUpload = async (formData) => {
     const payload = new FormData();
     Object.keys(formData).forEach((key) => {
       payload.append(key, formData[key]);
     });
-
     try {
-      await uploadFile(payload, projectName);
-      fetchFiles();
+      const response = await dispatch(uploadFileAction({ payload, projectName })).unwrap();
+      const depth = response.depth;
+      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth })).unwrap();
+      dispatch(fetchFiles({ projectName }));
     } catch (error) {
       console.error('An error occurred while uploading the file:', error);
     }
   };
 
   const handleDelete = async () => {
+    if (!fileToDelete) return;
     try {
-      if (!fileToDelete) return;
-      await deleteFile(fileToDelete, projectName);
-      fetchFiles();
+      const response = await dispatch(deleteFileAction({ fileId: fileToDelete.id, projectName })).unwrap();
+      const depth = response.depth;
+      removeTab(fileToDelete.id);
+      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth })).unwrap();
     } catch (error) {
       console.error('An error occurred while deleting the file:', error);
     } finally {
@@ -57,23 +53,15 @@ const Resources = () => {
 
   const handleDownload = async (file) => {
     try {
-      await downloadFile(file, projectName);
+      await dispatch(downloadFileAction({ file, projectName })).unwrap();
     } catch (error) {
       console.error('An error occurred while downloading the file:', error);
     }
   };
 
   const columns = [
-    {
-      header: 'File Name',
-      accessor: 'name',
-      align: 'left',
-    },
-    {
-      header: 'File Type',
-      accessor: 'type',
-      align: 'left',
-    },
+    { header: 'File Name', accessor: 'name', align: 'left' },
+    { header: 'File Type', accessor: 'type', align: 'left' },
   ];
 
   const actions = (item) => (

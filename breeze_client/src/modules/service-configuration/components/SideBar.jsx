@@ -54,7 +54,9 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
         style={{ borderBottom: '1px solid gray' }}
       >
         <div className="d-flex justify-content-between mb-2 br-background-primary">
-          <h5 className="mt-4">Services</h5>
+          <h5 className="mt-4" style={{ fontSize: '18px' }}>
+            Services
+          </h5>
           <div className="d-flex pe-1">
             <i
               className="bi bi-plus-circle mx-1 mt-4"
@@ -87,14 +89,16 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
             />
           ))
         ) : (
-          <span className="m-2 br-text-primary">No services found</span>
+          <span className="m-2 br-text-primary" style={{ fontSize: '14px' }}>
+            No services found
+          </span>
         )}
       </div>
       <div id="schemas-div" className="h-50 overflow-auto">
         <div className="br-text-primary mt-2 d-flex justify-content-between">
-          <h5>Authentication Config</h5>
+          <h5 style={{ fontSize: '18px' }}>Authentication Config</h5>
           <i
-            className="bi bi-plus-circle mx-1 mt-1"
+            className="bi bi-plus-circle mx-1 "
             onClick={() => {
               setView('AUTH_API');
               setSelectedAuthApi({});
@@ -106,12 +110,10 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
         {Object.keys(moduleList).length > 0
           ? Object.entries(moduleList).map(([folderKey, value]) => (
               <div key={folderKey} className="my-2">
-                <div
-                  // className={`mb-2 p-1 br-text-primary ${expandedModules.includes(folderKey) ? 'br-background-secondary' : 'br-background-primary'}`}
-                  onClick={() => toggleAuthModuleExpansion(folderKey)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="d-flex justify-content-between align-items-center">
+                <div onClick={() => toggleAuthModuleExpansion(folderKey)} style={{ cursor: 'pointer' }}>
+                  <div
+                    className={`d-flex justify-content-between align-items-center mb-2 p-1 br-text-primary ${expandedAuthModules.includes(folderKey) ? 'br-background-secondary' : 'br-background-primary'}`}
+                  >
                     <div>
                       {editingModule === value.title ? (
                         <CustomTextInput
@@ -146,7 +148,7 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
                   </div>
                 </div>
                 {expandedAuthModules.includes(folderKey) && editingModule === null && (
-                  <div className="br-background-primary br-text-primary" style={{ cursor: 'pointer' }}>
+                  <div className="br-background-primary br-text-primary mx-1" style={{ cursor: 'pointer' }}>
                     {Object.keys(value['auth_apis'])?.length > 0 ? (
                       Object.entries(value['auth_apis']).map(([funcId, funcVal]) => (
                         <ShowFunctions
@@ -158,7 +160,9 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
                         />
                       ))
                     ) : (
-                      <span className="m-2 br-text-primary">No services found</span>
+                      <span className="mx-4 my-2 br-text-primary" style={{ fontSize: '14px' }}>
+                        No services found
+                      </span>
                     )}
                   </div>
                 )}
@@ -173,10 +177,10 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
 SideBar.propTypes = {
   moduleList: PropTypes.arrayOf(
     PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      id: PropTypes.string.isRequired,
+      title: PropTypes.string,
+      id: PropTypes.string,
     })
-  ).isRequired,
+  ),
   setView: PropTypes.func.isRequired,
   setSelectedApi: PropTypes.func.isRequired,
   setSelectedModule: PropTypes.func.isRequired,

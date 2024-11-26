@@ -5,7 +5,6 @@ import BreezeDirectory from '../../../common/directory/BreezeDirectory';
 import { CustomButtonField, CustomTextInput } from '../../../common/fields';
 import BreezeOffCanvas from '../../../common/display/offcanvas/BreezeOffcanvas';
 import CustomFileUploadField from '../../../common/fields/f.upload-file-button';
-import { validator } from '../../../utils/Validator';
 
 const ResourcesUploadCanvas = ({ onSubmit }) => {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
@@ -20,6 +19,11 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
     file: null,
   });
   const [showFolderModal, setShowFolderModal] = useState(false);
+  const [errors, setErrors] = useState({
+    filename: '',
+    selectedFolderId: '',
+    file: '',
+  });
 
   useEffect(() => {
     setFormData((prevData) => ({
@@ -33,6 +37,11 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
       ...prevData,
       [name]: value,
     }));
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: value ? '' : prevErrors[name],
+    }));
   };
 
   const handleFileChange = (file) => {
@@ -42,16 +51,31 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
         filename: file.name,
         file: file,
       }));
+
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        file: '',
+        filename: '',
+      }));
     }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.filename) newErrors.filename = 'File name is required';
+    if (!formData.file) newErrors.file = 'File is required';
+    if (!formData.selectedFolderId) newErrors.selectedFolderId = 'Folder is required';
+    return newErrors;
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     setIsSubmitted(true);
 
-    const formIsValid = [formData.selectedFolderId].every(Boolean);
+    const formErrors = validateForm();
+    setErrors(formErrors);
 
-    if (formIsValid) {
+    if (Object.keys(formErrors).length === 0) {
       onSubmit(formData);
       resetForm();
       setShowOffCanvas(false);
@@ -59,7 +83,13 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
   };
 
   const handleFolderSelection = () => {
-    setSelectedFolderId(tempSelectedFolderId);
+    if (tempSelectedFolderId) {
+      setSelectedFolderId(tempSelectedFolderId);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        selectedFolderId: '',
+      }));
+    }
     setShowFolderModal(false);
   };
 
@@ -74,6 +104,7 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
       file: null,
     });
     setIsSubmitted(false);
+    setErrors({});
   };
 
   const closeOffCanvas = () => {
@@ -99,23 +130,34 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
             <CustomFileUploadField
               key={fileInputKey}
               onFileSelect={handleFileChange}
+              style={{
+                borderColor: '#666666',
+                color: 'br-text-primary',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+              }}
               config={{
-                label: 'Choose File',
+                innerlabel: 'Choose File',
+                outerlabel: 'Choose File',
                 groupClass: 'form-group',
                 className: 'btn br-text-primary med-font',
               }}
             />
+            {errors.file && <div className="text-danger small-font">{errors.file}</div>}
           </div>
           <div className="mb-3">
             <CustomTextInput
               name="selectedFolderId"
               value={formData.selectedFolderId || 'No Folder Selected'}
               config={{ label: 'Selected Folder' }}
-              // customValidations={[validator.REQUIRED]}
               isSubmitted={isSubmitted}
               onClick={() => setShowFolderModal(true)}
               readOnly
             />
+            {errors.selectedFolderId && <div className="text-danger small-font">{errors.selectedFolderId}</div>}
           </div>
           <div className="mb-3">
             <CustomTextInput
@@ -125,7 +167,7 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
               config={{ label: 'Description' }}
             />
           </div>
-          {formData.filename && (
+          {formData.file && (
             <div className="mb-3">
               <CustomTextInput
                 name="filename"
@@ -133,6 +175,7 @@ const ResourcesUploadCanvas = ({ onSubmit }) => {
                 onChange={(value) => handleInputChange('filename', value)}
                 config={{ label: 'File Name' }}
               />
+              {errors.filename && <div className="text-danger small-font">{errors.filename}</div>}
             </div>
           )}
           <div className="d-flex justify-content-end">

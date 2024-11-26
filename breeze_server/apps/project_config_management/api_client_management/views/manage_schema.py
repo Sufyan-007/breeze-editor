@@ -5,11 +5,11 @@ from ..core.schema_manager import add_or_edit_schema_helper, delete_schema_helpe
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from ..swagger_schema.manage_schema_schema import add_or_edit_swagger_schema,delete_schema_swagger
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 
-@swagger_auto_schema(
-    methods=['post','put'],
-    request_body=add_or_edit_swagger_schema['rb'],
+@extend_schema(
+    methods=['POST','PUT'],
+    request=add_or_edit_swagger_schema['rb'],
     responses={
         200:add_or_edit_swagger_schema['response_200'],
         400:add_or_edit_swagger_schema['response_400'],
@@ -36,9 +36,10 @@ def add_or_edit_schema(request,project_id):
     return JsonResponse(result, status=status)
 
 
-@swagger_auto_schema(
-    method='delete',
-    request_body=delete_schema_swagger['rb'],
+
+@extend_schema(
+    methods=['DELETE'],
+    request=delete_schema_swagger['rb'],
     responses={
         200:delete_schema_swagger['response_200'],
         400:delete_schema_swagger['response_400'],
@@ -56,7 +57,11 @@ def delete_schema(request,project_id):
     result,status = delete_schema_helper(schema_file_path=schema_file_path, schemaId=schema_id)
     return JsonResponse(result, status=status)
 
-
+@extend_schema(
+    tags=['manage-api-client'],
+    request=None,
+    responses=None
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def resolve_schemas(request,project_id):

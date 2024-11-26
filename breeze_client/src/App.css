@@ -85,6 +85,12 @@
   color: var(--color-tertiary) !important;
 }
 
+.br-secondary-button {
+  background-color: var(--color-secondary) !important;
+  color: var(--color-white) !important;
+  border-radius: 3px !important;
+}
+
 .btn-delete {
   background-color: var(--color-red) !important;
   color: var(--color-white) !important;
@@ -165,6 +171,15 @@
 
 .br-cursor-pointer {
   cursor: pointer;
+}
+
+.br-truncate-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 90%;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 ::-webkit-scrollbar {

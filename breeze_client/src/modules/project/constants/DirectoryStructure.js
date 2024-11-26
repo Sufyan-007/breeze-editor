@@ -8,6 +8,7 @@ const breezeConfigData = {
     wasOpen: false,
     tag: 'SERVICE-CONFIG',
     parentId: null,
+    isProtected: true,
   },
   'external-comp-config': {
     id: 'external-comp-config',
@@ -18,6 +19,7 @@ const breezeConfigData = {
     wasOpen: false,
     tag: 'EXTERNAL_COMP',
     parentId: null,
+    isProtected: true,
   },
   'schema-config': {
     id: 'schema-config',
@@ -28,6 +30,7 @@ const breezeConfigData = {
     wasOpen: false,
     tag: 'SCHEMAS',
     parentId: null,
+    isProtected: true,
   },
   'resource-config': {
     id: 'resource-config',
@@ -36,8 +39,9 @@ const breezeConfigData = {
     type: 'CONFIG',
     children: [],
     wasOpen: false,
-    tag: 'RESOURCE',
+    tag: 'RESOURCE_CONFIG',
     parentId: null,
+    isProtected: true,
   },
 };
 

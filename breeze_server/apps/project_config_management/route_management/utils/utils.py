@@ -1,5 +1,6 @@
 import random
 import string, re
+from urllib.parse import urlsplit, quote
 from apps.common.middlewares.TransactionMiddleware import get_transaction_id
 from apps.common.constants.consts import CONFIG_FILES_PATH, CONFIG_PATH, ROUTING
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
@@ -66,8 +67,54 @@ def rewrite_clean_route_config(project_name, updated_route_config, route_id, cur
     # routing_config_path = f"{CONFIG_PATH}/{project_name}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}"
     # write_json_file(f"{routing_config_path}.json", updated_route_config)
     transaction_id = get_transaction_id()
-    write_config_file( project_name, ROUTING, ROUTING, updated_route_config, current_version, transaction_id)
+    _, has_something_changed = write_config_file( project_name, ROUTING, ROUTING, updated_route_config, current_version, transaction_id, True)
+    return has_something_changed
     
+def is_valid_url_path(url_path):
+    """
+    Validates a URL excluding the protocol and domain, focusing on the path, query strings, and fragments.
+    Args:
+        url_path (str): The URL path to validate (e.g., "/path?query#fragment").
+    Returns:
+        bool: True if valid, False otherwise.
+    """
+    try:
+        # Parse the input into path, query, and fragment
+        split_result = urlsplit(url_path)
+        path = split_result.path
+        query = split_result.query
+        fragment = split_result.fragment
+
+        # Validate path
+        if path:
+            segments = path.split('/')
+            for segment in segments:
+                if segment and quote(segment, safe='-._~') != segment:
+                    return False
+
+        # Validate query string
+        if query:
+            query_parts = query.split('&')
+            for part in query_parts:
+                key_value = part.split('=')
+                if len(key_value) == 2:
+                    key, value = key_value
+                    if quote(key, safe='-._~[]') != key or quote(value, safe='-._~[]') != value:
+                        return False
+                elif len(key_value) == 1:
+                    key = key_value[0]
+                    if quote(key, safe='-._~[]') != key:
+                        return False
+                else:
+                    return False
+
+        # Validate fragment (optional, can be ignored)
+        if fragment and quote(fragment, safe='-._~[]') != fragment:
+            return False
+
+        return True
+    except Exception as e:
+        return False
 def extract_function_details(js_function, id):
     function_pattern = r'(async\s+)?(?:function\s+(\w+)\s*)?\(([^)]*)\)\s*{([^}]*)}'
     match_function = re.search(function_pattern, js_function, re.DOTALL)

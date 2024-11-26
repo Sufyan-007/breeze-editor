@@ -14,7 +14,9 @@ import {
   updateRouteConfig,
   deleteRouteConfig,
 } from '../../../redux/routing/routingActions';
+import { fetchConfigVersion } from '../../../redux/project/projectActions';
 import { getRouteDetails } from '../../../services/routing/routingService';
+import { configDetailsKeyMapper } from '../../project/constants/configDetailsKeyMapper';
 
 function RoutingConfig() {
   const dispatch = useDispatch();
@@ -26,6 +28,7 @@ function RoutingConfig() {
   const [showRouterProviderForm, setShowRouterProviderForm] = useState(false);
   const { components } = useSelector((state) => state.component);
   const { routingConfig, status } = useSelector((state) => state.routing);
+  const selectedNodePayload = useSelector((state) => state.project.selectedNodePayload);
   const [flag, setFlag] = useState(false);
 
   useEffect(() => {
@@ -60,6 +63,7 @@ function RoutingConfig() {
     setShowRouterProviderForm(false);
     const res = await getRouteDetails(projectName, route.id);
     setSelectedRoute(res.data);
+    setIsNewRoute(false);
     setIsEditing(true);
   };
 
@@ -70,6 +74,22 @@ function RoutingConfig() {
     setSelectedRoute(initialRoutingConfig);
   };
 
+  const updateConfigVersions = () => {
+    try {
+      const payload = {
+        category: configDetailsKeyMapper['category']['ROUTING'],
+        filename: configDetailsKeyMapper['filename']['ROUTE_COMPONENT'],
+      };
+      dispatch(fetchConfigVersion({ projectName, payload }))
+        .unwrap()
+        .then((res) => {
+          console.log(res);
+        });
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
   const handleFormSubmit = async (routeData) => {
     try {
       if (isNewRoute) {
@@ -77,6 +97,7 @@ function RoutingConfig() {
       } else if (isEditing) {
         await dispatch(updateRouteConfig({ projectName, payload: routeData })).unwrap();
       }
+      updateConfigVersions();
     } catch (error) {
       console.error('Error submitting route data:', error);
     } finally {
@@ -89,10 +110,16 @@ function RoutingConfig() {
   const handleDeleteRoute = async () => {
     if (selectedRoute) {
       const id = selectedRoute.id;
-      await dispatch(deleteRouteConfig({ projectName, payload: { id } })).unwrap();
+      await dispatch(
+        deleteRouteConfig({
+          projectName,
+          payload: { id, ROUTING_CONFIG_CURRENT_VERSION: selectedNodePayload?.latestConfigVersion },
+        })
+      ).unwrap();
       setSelectedRoute(initialRoutingConfig);
       setIsEditing(false);
       dispatch(fetchRoutingConfig({ projectName }));
+      updateConfigVersions();
     }
   };
 

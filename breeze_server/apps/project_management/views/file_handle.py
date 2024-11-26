@@ -5,6 +5,15 @@ from django.http import JsonResponse, FileResponse
 from ..core.resource_upload_service import file_duplicacy
 from apps.common.utils.file_helpers.file_handler import upload_file as uf, delete_file as df, get_file_path
 from apps.project_management.core.resource_upload_service import update_config, save_file, delete_config
+from drf_spectacular.utils import extend_schema
+from apps.common.constants.enums.tree_type import TreeType
+from apps.common.utils.tree_management import get_nodes_upper_lineage 
+
+@extend_schema(
+    methods=['POST'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['POST'])
 def upload_file(request, project_id):
@@ -24,13 +33,21 @@ def upload_file(request, project_id):
         file_id = uf(project_id, file)
         destination_path = update_config(project_id, file_name, description, file_id, parentFolderId)
         save_file(project_id, file_id, destination_path)
+        depth = get_nodes_upper_lineage(file_id, project_id, TreeType['DIRECTORY'])
+
         return JsonResponse({
             'message': 'File uploaded successfully',
-            'fileId': file_id
+            'fileId': file_id,
+            'depth': depth
         }, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@extend_schema(
+    methods=['DELETE'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['DELETE'])
 def delete_file(request, project_id):
@@ -44,14 +61,23 @@ def delete_file(request, project_id):
         if not file_id:
             return JsonResponse({'error': 'File name is required.'}, status=400)
 
+        depth = get_nodes_upper_lineage(file_id, project_id, TreeType['DIRECTORY'])
         df(project_id, file_id)
         delete_config(project_id, file_id)
+        # TODO: User should be given warning on logo deletion and for that
+        # we need to implement resources usage check feature
         return JsonResponse({
-            'message': 'File deleted successfully'
+            'message': 'File deleted successfully',
+            'depth': depth
         }, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@extend_schema(
+    methods=['GET'],
+    request=None,
+    responses=None
+)
 @csrf_exempt
 @api_view(['GET'])
 def download_file(request, project_id, fileId):

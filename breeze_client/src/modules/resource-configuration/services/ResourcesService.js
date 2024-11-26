@@ -1,12 +1,9 @@
 import { callApiClient } from '../../../utils/breezeApiCall';
 
 const getAllUploadedFiles = async (projectName) => {
-  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/query_resource/${projectName}/`;
-  const payload = {
-    category: 'resource_config',
-  };
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/get-uploaded-resource/${projectName}`;
   try {
-    const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
+    const response = await callApiClient(url, 'GET');
     return response;
   } catch (error) {
     console.log(error);
@@ -24,8 +21,7 @@ const uploadFile = async (payload, projectName) => {
   }
 };
 
-const deleteFile = async (file, projectName) => {
-  const file_id = file.id;
+const deleteFile = async (file_id, projectName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/delete-file/${projectName}/`;
   try {
     const response = await callApiClient(url, 'DELETE', { file_id });

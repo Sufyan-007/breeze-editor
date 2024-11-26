@@ -1,122 +1,112 @@
 from drf_yasg import openapi
 
-
+from drf_spectacular.utils import OpenApiResponse,OpenApiExample,extend_schema_serializer
+from ..data_models.serializers import *
+from ....common.serializers.ResponseSerializers import ResponseStatus200Serializer,ResponseStatus400Serializer
 generate_service_config_schema ={
-    'rb':openapi.Schema(
-        type=openapi.TYPE_FILE
+    'rb': {
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'file':{
+                    'type':'string',
+                    'format':'binary',
+                }
+            },
+        }
+        
+    },
+    'response_500':OpenApiResponse(
+        response = ErrorSerializer,
     ),
-    'response_501':openapi.Response(
-            description='',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
-        ),
-    'response_201':openapi.Response(
-            description='',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'files_with_apis':openapi.Schema(
-                        type=openapi.TYPE_ARRAY,
-                        items=openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'filename':openapi.Schema(type=openapi.TYPE_STRING),
-                                'apis':openapi.Schema(type=openapi.TYPE_STRING),
-                                'errors':openapi.Schema(
-                                    type=openapi.TYPE_ARRAY,
-                                    items = openapi.Schema(
-                                        type=openapi.TYPE_STRING
-                                    )
-                                )
-                            }
-                        )
-                    )
-                }
-            )
-        )
+    'response_201':OpenApiResponse(
+        response=FilesWithApisResponseSerializer,
+        description=''
+    )
 }
 
 
 modify_function_config_schema={
-    'rb':openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'filename':openapi.Schema(type=openapi.TYPE_STRING),
-            'moduleId':openapi.Schema(type=openapi.TYPE_STRING),
-            'api_type':openapi.Schema(type=openapi.TYPE_STRING),
-            'api_data':openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'id':openapi.Schema(type=openapi.TYPE_STRING),
-                    'tag':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-                )
-        }
-    ),
-    'response_200':openapi.Response(
-                description='Created',
-                schema = openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'message':openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                ),
-                examples={'application/json':{'message':'Functions added successfully'}}
+    'rb':ModifyFunctionConfigRequestBodySerializer,
+    'response_200':OpenApiResponse(
+        description='created',
+        response=ResponseStatus200Serializer,
+        examples=[
+            OpenApiExample(
+                name='Success',
+                value={'message':'Function added successfully'}
             )
+        ]
+    )
+    
 }
 
 transfer_to_auth_schema = {
-    'rb':openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'moduleId':openapi.Schema(type=openapi.TYPE_STRING,description='id of module'),
-            'id':openapi.Schema(type=openapi.TYPE_STRING,description='id'),
-            'filename':openapi.Schema(type=openapi.TYPE_STRING,description='name of file')
-        }
-    ),
-    'response_201':openapi.Response(
-            description='successful',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'message':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            ),
-            examples={'application/json':{'message':' Data transfer Successfully'}}
-        )
+    'rb':TransferToAuthRequestBodySerializer,
+    'response_200':OpenApiResponse(
+        description='successful',
+        response=ResponseStatus200Serializer,
+        examples=[
+            OpenApiExample(
+                name='Success',
+                value={'message':'Data transfer Successfully'}
+            )
+        ]
+    )
 }
 
 
 edit_module_title_schema = {
-    'rb':openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'moduleId':openapi.Schema(type=openapi.TYPE_STRING,description='id of module'),
-            'title':openapi.Schema(type=openapi.TYPE_STRING,description='title')
-        }
+    'rb':EditModuleTitleSerializer,
+    'response_200':OpenApiResponse(
+        description='Edit on a resource is successful',
+        response=ResponseStatus200Serializer,
+        examples=[
+            OpenApiExample(
+                name='Success',
+                value={'message':'Module name edited Successfully'}
+            )
+        ]
     ),
-    'response_200':openapi.Response(
-            description='Edit on a resource is successful',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'message':openapi.Schema(type=openapi.TYPE_STRING)
-                }
+    'response_400':OpenApiResponse(
+        description='Request has failed due to incorrect parameters in the request.',
+        response=ResponseStatus400Serializer,
+        examples=[
+            OpenApiExample(
+                name='Not Found',
+                value={'error':'module not found or module name should be unique'}
             ),
-            examples={'application/json':{'message':'Module name edited Successfully'}}
-        ),
-    'response_400':openapi.Response(
-            description='Request has failed due to incorrect parameters in the request.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            ),
-            examples={'application/json':{'error':'module not found or module name should be unique'}}
-        )
+            OpenApiExample(
+                name='Not Unique',
+                value={'error':'module name should be unique'}
+            )
+        ]
+    )
+}
+
+get_response_token_schema = {
+    'response_400':OpenApiResponse(
+        description='Request has failed due to incorrect parameters in the request.',
+        response=ResponseStatus400Serializer,
+        examples=[
+            OpenApiExample(
+                name='Bad Request',
+                value={'error':'Module ID or API ID not provided'}
+            )
+        ]
+    ),
+    'response_404':OpenApiResponse(
+        description='Not Found',
+        response=ResponseStatus400Serializer,
+        examples=[
+            OpenApiExample(
+                name='Not Found',
+                value={'error':'File Not Found'}
+            )
+        ]
+    )
+}
+
+add_module_schema = {
+    'rb':AddModuleRequestBodySerializer
 }

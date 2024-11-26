@@ -12,7 +12,7 @@ const uploadZipFile = async (submitData, projectName) => {
 };
 
 const fetchZipFiles = async (projectName) => {
-  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/custom-package/${projectName}`;
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/get-uploaded-resource/${projectName}?tag=ZIP`;
   try {
     const response = await callApiClient(url, 'GET');
     return response;
@@ -30,7 +30,7 @@ const deleteFile = async (fileName, fileId, projectName) => {
   };
   try {
     const response = await callApiClient(url, 'DELETE', payload);
-    if (response.ok) {
+    if (response) {
       return { message: 'File deleted successfully' };
     } else {
       throw new Error(response.Error || 'Failed to delete the file');

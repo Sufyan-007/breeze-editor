@@ -68,11 +68,12 @@ mkdir -p "$BASE_SIR/configurations"
 # Start breeze_server server
 echo "Starting breeze_server server in staging mode..."
 export RUN_ENV=staging
-python3 breeze_server/manage.py runserver > /dev/null 2>> "$BASE_DIR/breeze_server.log" &
+python3 breeze_server/manage.py runserver > "$BASE_DIR/breeze_server.log" 2>&1 &
 
 # Start third_party_package_parser server
 echo "Starting third_party_package_parser server in staging mode..."
-npm run staging --prefix ."$BASE_DIR/third_party_package_parser/" > /dev/null 2>> "$BASE_DIR/third_party_package_parser.log" &
+# npm run staging --prefix ."$BASE_DIR/third_party_package_parser/" > /dev/null 2>> "$BASE_DIR/third_party_package_parser.log" &
+npm run staging --prefix "third_party_package_parser/" > "$BASE_DIR/third_party_package_parser.log" 2>&1 &
 
 # start breeze_client server
 npm run staging --prefix "$BASE_DIR/breeze_client/" > /dev/null 2>> "$BASE_DIR/breeze_client.log"  &

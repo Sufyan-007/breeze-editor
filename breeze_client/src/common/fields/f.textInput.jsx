@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { validator } from '../../utils/Validator';
 
 function CustomTextInput({
@@ -17,22 +17,24 @@ function CustomTextInput({
   const hasRequiredValidation = customValidations.includes(validator.REQUIRED);
   const [error, setError] = useState('');
 
+  const validateField = useCallback(
+    (inputValue) => {
+      for (let validate of customValidations) {
+        const error = validate(inputValue);
+        if (error) {
+          return error;
+        }
+      }
+      return '';
+    },
+    [customValidations]
+  );
   useEffect(() => {
     if (hasTouched || isSubmitted) {
       const validationError = validateField(value);
       setError(validationError);
     }
-  }, [value, hasTouched, isSubmitted]);
-
-  const validateField = (inputValue) => {
-    for (let validate of customValidations) {
-      const error = validate(inputValue);
-      if (error) {
-        return error;
-      }
-    }
-    return '';
-  };
+  }, [value, hasTouched, isSubmitted, validateField]);
 
   const handleBlur = () => {
     setHasTouched(true);
@@ -73,7 +75,7 @@ function CustomTextInput({
 
 CustomTextInput.propTypes = {
   config: PropTypes.any,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
   className: PropTypes.string,

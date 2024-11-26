@@ -4,12 +4,11 @@ from rest_framework.decorators import api_view
 from ..core.environment_management import set_environment, generate_config_from_payload, delete_proj_env, get_env_config
 from ..core.environment_management import delete_env_variable, update_env_vars, update_environment_name
 from django.http import JsonResponse
-from drf_yasg.utils import swagger_auto_schema
-from ..swagger_schema.env_apis_schema import set_env_schema
-
-@swagger_auto_schema(
-    method='post',
-    request_body=set_env_schema['rb'],
+from ..swagger_schema.env_apis_schema import set_env_schema,get_env_config_schema
+from drf_spectacular.utils import extend_schema
+@extend_schema(
+    methods=['POST'],
+    request=set_env_schema['rb'],
     responses={
         200:set_env_schema['response_200'],
         500:set_env_schema['response_500']
@@ -38,10 +37,12 @@ def set_env(request, project_id):
         print(f"Error: {e}")
         return JsonResponse({'error': 'Server error'}, status=500)
 
-@swagger_auto_schema(
-    method='get',
-    request_body=None,
-    responses=None,
+@extend_schema(
+    methods=['GET'],
+    request=None,
+    responses={
+        500:get_env_config_schema['response_500']
+    },
     tags=['environment']
 )
 @csrf_exempt
@@ -54,9 +55,9 @@ def get_environment_config(request, project_id):
         print(f"error: {e}")
         return JsonResponse({'error': 'Server error'}, status=500)
 
-@swagger_auto_schema(
-    method='post',
-    request_body=None,
+@extend_schema(
+    methods=['POST'],
+    request=None,
     responses=None,
     tags=['environment']
 )
@@ -72,9 +73,9 @@ def add_env_config(request, project_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
     
-@swagger_auto_schema(
-    method='put',
-    request_body=None,
+@extend_schema(
+    methods=['PUT'],
+    request=None,
     responses=None,
     tags=['environment']
 )
@@ -103,9 +104,9 @@ def update_env_config(request, project_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-@swagger_auto_schema(
-    method='delete',
-    request_body=None,
+@extend_schema(
+    methods=['DELETE'],
+    request=None,
     responses=None,
     tags=['environment']
 )

@@ -38,12 +38,11 @@ def check_existing_folder(project_name, file_name):
         if not os.path.exists(uploaded_resources_config_path):
             return False 
         
-        # Load the JSON content from the config file
         with open(uploaded_resources_config_path, 'r') as config_file:
             resources_config = json.load(config_file)
             
         for resource_info in resources_config.values():
-            if resource_info.get('zip_file_name') == file_name:
+            if resource_info.get('name') == file_name:
                 return True
             
         return False
@@ -126,7 +125,6 @@ def get_zip_files(project_name):
         app_config, react_app_dir, app_config_dir = get_project_config(project_name)
         uploaded_resources_config_path = os.path.join(app_config_dir,'uploaded_resources_config.json')
 
-        # custom_uploads_path = os.path.join(react_app_dir,CUSTOM_UPLOADS)
         if not os.path.exists(uploaded_resources_config_path):
             return {'folders': []}
 
@@ -135,7 +133,7 @@ def get_zip_files(project_name):
             
         extracted_folders = [
             {
-                'zip_file_name': resource_info.get('zip_file_name'),
+                'name': resource_info.get('name'),
                 "zip_file_id":resource_info.get('zip_file_id'),
                 "lastModified": datetime.fromtimestamp(
                     os.path.getmtime(os.path.join(uploaded_resources_config_path))
@@ -144,7 +142,7 @@ def get_zip_files(project_name):
 
             }
             for resource_info in resources_config.values()
-            if 'zip_file_name' in resource_info
+            if 'name' in resource_info
         ]
        
         return {
@@ -156,9 +154,6 @@ def get_zip_files(project_name):
 def delete_file(project_name, fileName, fileId):
     try:
         app_config, react_app_dir, app_config_dir = get_project_config(project_name)
-        
-        extracted_dir = os.path.join(CONFIG_PATH, project_name, EXTERNAL_COMPONENTS)
-        uploaded_file_path = os.path.join(extracted_dir, fileName)
         react_app_file_path = os.path.join(react_app_dir, EXTERNAL_COMPONENTS, fileName)
         external_components_config_path = os.path.join(CONFIG_PATH, project_name, "external_components_config", fileName)
         uploaded_resources_config_path = os.path.join(CONFIG_PATH,project_name,"uploaded_resources_config.json")
@@ -167,16 +162,13 @@ def delete_file(project_name, fileName, fileId):
             if os.path.exists(file_path):
                 if os.path.isfile(file_path):
                     os.remove(file_path)
-                    print(f"File {fileName} deleted successfully from {location_name}.")
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
-                    print(f"Directory {fileName} deleted successfully from {location_name}.")
                 else:
                     print(f"{fileName} is neither a file nor a directory in {location_name}.")
             else:
                 print(f"{fileName} does not exist at {file_path} in {location_name}.")
 
-        delete_path(uploaded_file_path,"external components")
         delete_path(react_app_file_path, "React app")
         delete_path(external_components_config_path, "external components config")
  
@@ -201,7 +193,7 @@ def delete_file(project_name, fileName, fileId):
             raise FileNotFoundError("Resource config file does not exist.")
     
     except Exception as e:
-        print(f"Error deleting file or directory: {e}")
+        raise Exception(f"Error deleting file or directory: {e}")
     
 def set_prop_config(project_name, file_name , component_id ,prop_id , new_prop_name=None, new_type=None, new_default_value=None ):
     try:
@@ -233,7 +225,7 @@ def set_prop_config(project_name, file_name , component_id ,prop_id , new_prop_n
             
         return component_config
     except Exception as e:
-        print(f"Error editing the props: {e}")
+        raise Exception(f"Error editing the props: {e}")
         #raise exception errror
 
         
@@ -248,7 +240,7 @@ def update_resource_config(project_name, file_name ,file_id, status,  tag="ZIP")
         
     # Update or add the new entry for the zip file
     config_data[file_id] = {
-        "zip_file_name":file_name,
+        "name":file_name,
         "zip_file_id":file_id,
         "status": status,
         "tag": tag

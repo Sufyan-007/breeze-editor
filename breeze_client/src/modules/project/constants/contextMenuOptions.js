@@ -1,9 +1,20 @@
 import React from 'react';
 import logos from '../../../assets/svgs/index';
 
-export const folderOptions = (nodeId, handleContextMenuSelection, handleRename) => [
+export const folderOptions = (
+  nodeId,
+  handleContextMenuSelection,
+  handleRename,
+  handleContextMenuFolder,
+  handleRemoveNode
+) => [
   {
-    label: 'Add Components',
+    label: 'Add Folder',
+    value: () => handleContextMenuFolder(nodeId),
+    icon: React.createElement('i', { className: 'bi bi-folder-plus' }),
+  },
+  {
+    label: 'Add Component',
     value: () => handleContextMenuSelection(nodeId),
     icon: React.createElement('img', {
       src: logos.componentsLogo,
@@ -11,7 +22,7 @@ export const folderOptions = (nodeId, handleContextMenuSelection, handleRename) 
     }),
   },
   {
-    label: 'Add Services',
+    label: 'Add Service',
     value: () => handleContextMenuSelection(nodeId),
     icon: React.createElement('img', {
       src: logos.servicesLogo,
@@ -19,12 +30,12 @@ export const folderOptions = (nodeId, handleContextMenuSelection, handleRename) 
     }),
   },
   {
-    label: 'Add Routes',
+    label: 'Add Hook',
     value: () => handleContextMenuSelection(nodeId),
     icon: React.createElement('img', { src: logos.routesLogo, alt: 'Routes' }),
   },
   {
-    label: 'Add ApiClients',
+    label: 'Add Custom File',
     value: () => handleContextMenuSelection(nodeId),
     icon: React.createElement('i', { className: 'bi bi-file-earmark-code' }),
   },
@@ -34,9 +45,9 @@ export const folderOptions = (nodeId, handleContextMenuSelection, handleRename) 
     icon: React.createElement('i', { className: 'bi bi-pencil-square' }),
   },
   {
-    label: 'Add Folder',
-    value: () => handleContextMenuSelection(nodeId),
-    icon: React.createElement('i', { className: 'bi bi-folder-plus' }),
+    label: 'Delete Folder',
+    value: () => handleRemoveNode(nodeId),
+    icon: React.createElement('i', { className: 'bi bi-trash' }),
   },
 ];
 
@@ -54,7 +65,7 @@ export const fileOptions = (nodeId, handleRename, handleRemoveNode) => [
 ];
 export const addFileOptions = (nodeId, handleContextMenuSelection) => [
   {
-    label: 'Add Components',
+    label: 'Add Component',
     value: () => handleContextMenuSelection(nodeId),
     icon: React.createElement('img', {
       src: logos.componentsLogo,
@@ -62,7 +73,7 @@ export const addFileOptions = (nodeId, handleContextMenuSelection) => [
     }),
   },
   {
-    label: 'Add Services',
+    label: 'Add Service',
     value: () => handleContextMenuSelection(nodeId),
     icon: React.createElement('img', {
       src: logos.servicesLogo,
@@ -70,12 +81,12 @@ export const addFileOptions = (nodeId, handleContextMenuSelection) => [
     }),
   },
   {
-    label: 'Add Routes',
+    label: 'Add Hook',
     value: () => handleContextMenuSelection(nodeId),
     icon: React.createElement('img', { src: logos.routesLogo, alt: 'Routes' }),
   },
   {
-    label: 'Add ApiClients',
+    label: 'Add Custom File',
     value: () => handleContextMenuSelection(nodeId),
     icon: React.createElement('i', { className: 'bi bi-file-earmark-code' }),
   },

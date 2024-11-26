@@ -6,20 +6,18 @@ from django.http import JsonResponse
 from ..core.openapi_swagger_convertor import prepare_api_models,wrap_conversion
 from ..core.intermediate_modification_helper import process_api_data, transfer_data_to_auth,add_auth_function
 from ..core.module_manager import add_module_helper,edit_module_title_helper
-from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from ..swagger_schema.manage_api_client_schema import generate_service_config_schema,modify_function_config_schema,transfer_to_auth_schema,edit_module_title_schema,get_response_token_schema,add_module_schema
 from ....code_generator.core.api_client_generator import generate_react_service
 from ....directory_management.core.directory_management_service import DirectoryManager
+from drf_spectacular.utils import extend_schema
 
 
-
-@swagger_auto_schema(
-    method='post',
-    request_body=generate_service_config_schema['rb'],
+@extend_schema(
+    methods=['POST'],
+    request = generate_service_config_schema['rb'],
     responses={
-        201:generate_service_config_schema['response_201'],
-        500:generate_service_config_schema['response_501']
+        500:generate_service_config_schema['response_500'],
+        201:generate_service_config_schema['response_201']
     },
     tags=['manage-api-client']
 )
@@ -44,6 +42,7 @@ def generate_service_config(request, collectionType, project_id):
                 converted_data = prepare_api_models(json_data, project_id,isJson)
                 module_id = converted_data.get("id")
                 module_name = converted_data.get("title")
+                security_schemes = converted_data.get("security_schemes")
                 files_with_apis, is_erroroneous = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
                 if not is_erroroneous:
                     directory_manager = DirectoryManager(project_name=project_id)
@@ -57,7 +56,7 @@ def generate_service_config(request, collectionType, project_id):
                         isProtected=False
                     )
                     for file in files_with_apis:
-                        generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name)
+                        generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name, security_schemes= security_schemes)
                 return JsonResponse({"module_id": module_id}, status=201)
             
             # elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
@@ -72,14 +71,12 @@ def generate_service_config(request, collectionType, project_id):
             return JsonResponse({"error": str(e)}, status=500)
         
 
-@swagger_auto_schema(
-    method='post',
-    request_body=modify_function_config_schema['rb'],
-    responses={
-            200:modify_function_config_schema['response_200']
-        },
+@extend_schema(
+    methods=['POST'],
+    request=modify_function_config_schema['rb'],
+    responses=modify_function_config_schema['response_200'],
     tags=['manage-api-client']
-) 
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def modify_function_config(request,operation,project_id):
@@ -89,22 +86,19 @@ def modify_function_config(request,operation,project_id):
     api_type = data.get("api_type")
     api_data = data.get("api_data")
     if api_type.lower() == "auth":
-        result = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id,operation=operation)
+        result,status = add_auth_function(auth_model=api_data,appName=project_id,moduleId=module_id,operation=operation)
     else:
-        result = process_api_data(operation,api_data, filename,project_id,module_id)
-    if result:
-        return JsonResponse({"message": "Function Added Successfully" }, status=200)
-    else:
-        return JsonResponse({"message": result }, status=200)
-
-@swagger_auto_schema(
-    method='post',
-    request_body=transfer_to_auth_schema['rb'],
+        result,status = process_api_data(operation,api_data, filename,project_id,module_id)
+    return JsonResponse(result, status=status)
+     
+@extend_schema(
+    methods=['POST'],
+    request=transfer_to_auth_schema['rb'],
     responses={
-        200:transfer_to_auth_schema['response_201']
+        200:transfer_to_auth_schema['response_200']
     },
     tags=['manage-api-client']
-)   
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def transfer_to_auth(request,project_id):
@@ -117,9 +111,9 @@ def transfer_to_auth(request,project_id):
     result,status = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
     return JsonResponse(result, status=status)
 
-@swagger_auto_schema(
-    method='post',
-    request_body=edit_module_title_schema['rb'],
+@extend_schema(
+    methods=['POST'],
+    request=edit_module_title_schema['rb'],
     responses={
         200:edit_module_title_schema['response_200'],
         400:edit_module_title_schema['response_400']
@@ -136,7 +130,18 @@ def edit_module_title(request, project_id):
         swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
         result,status = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
         return JsonResponse(result,status=status)
+
+
+@extend_schema(
+    methods=['GET'],
+    request=None,
+    responses={
+        400:get_response_token_schema['response_400'],
+        404:get_response_token_schema['response_404']
+    },
+    tags=['manage-api-client']
     
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])   
 def get_response_token( request, project_id,apiId, moduleId):
@@ -163,6 +168,7 @@ def get_response_token( request, project_id,apiId, moduleId):
                             "id" : key,
                             "operation_id" : api.get("operation_id"),
                             "response_tokens": response_tokens,
+                            "type": api.get("authentication_type")
                         })
                 else:
                     result = auth_apis.get(apiId)
@@ -173,7 +179,12 @@ def get_response_token( request, project_id,apiId, moduleId):
             return JsonResponse({"error": str(e)}, status=400)
 
 
-
+@extend_schema(
+    methods=['POST'],
+    tags=['manage-api-client'],
+    request=add_module_schema['rb'],
+    responses=None
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def add_module(request,project_id):
@@ -184,7 +195,7 @@ def add_module(request,project_id):
         return JsonResponse({"error": "Module name and description are required."}, status=400)
     swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/"
     swagger_schema_path = f"{CONFIG_PATH}/{project_id}/models"
-    result,status = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description)
+    result,status = add_module_helper(swagger_metadata_path=swagger_metadata_path, swagger_schema_path=swagger_schema_path, module_name=module_name, module_description= module_description, project_id=project_id)
     return JsonResponse(result, status=status)
 
 
