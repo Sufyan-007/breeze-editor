@@ -230,6 +230,8 @@ class FunctionParser:
         elif config["type"] == "COMMENT":
             code= f" /* {config['text']} */"
         
+        elif config["type"] == "Element":
+            return self.generate_html(config,key_chaining=key_chaining)
         
         tree["code"] = code
         
@@ -296,19 +298,19 @@ class FunctionParser:
                 
             
             elif type == "FUNCTION" or type == "CALLBACK":
-                code, t= self.generate_statement_code(value)
+                code, t= self.generate_statement_code(value, key_chaining=key_chaining)
             
             elif type == "CUSTOM":
                 code= value["value"]
 
             elif type == "FUNCTION_CALL":
-                code,t= self.generate_statement_code(value)
+                code,t= self.generate_statement_code(value, key_chaining=key_chaining)
             
             elif type == "CHAINED_FUNCTIONS":
-                code,t= self.generate_statement_code(value)
+                code,t= self.generate_statement_code(value, key_chaining=key_chaining)
             
             elif type == "Element":
-                code,t = self.generate_html(value,key_chaining=key_chaining)
+                code,t = self.generate_statement_code(value,key_chaining=key_chaining)
                 
         return code,t
         
