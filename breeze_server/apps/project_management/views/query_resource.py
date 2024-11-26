@@ -17,7 +17,7 @@ from apps.common.constants.consts import (
     MODEL,
     INDEX,
     ROUTING,
-    COMPONENT,
+    CODE_FILE,
     RESOURCE
 )
 from ..swagger_schema.query_resource_schema import manage_resource_schema
@@ -73,8 +73,12 @@ def manage_resource(request, param):
         # category=category.lower()
         if category in [
             ResourceCategory.COMPONENTS.value,
+            # need to test and/or update since the code_file category is meant for implementation of many entities
+            ResourceCategory.CODE_FILE.value,
             ResourceCategory.SERVICES.value,
         ]:
+            if category == "components":
+                category = ResourceCategory.CODE_FILE.value
             if not resource:
                 selected_data = get_json_config_data(INDEX, category, projectname)
             else:
@@ -246,7 +250,10 @@ def manage_resource(request, param):
                 selected_data = routing_config
                 
                 # selected_data = read_file(config_path)
-                comp_path = os.path.join(CONFIG_PATH,projectname,COMPONENT,INDEX)
+                
+                comp_path = os.path.join(CONFIG_PATH,projectname,CODE_FILE,INDEX)
+                # component index file location changed. 
+                # comp_path = os.path.join(CONFIG_PATH,projectname,COMPONENT,INDEX)
                 comp_data = read_file(comp_path)
                 # print(selected_data)
                 for key,value in selected_data.items():
@@ -301,6 +308,8 @@ def manage_resource(request, param):
         if select:
             if category in [
                 ResourceCategory.COMPONENTS.value,
+                # need to test and/or update since the code_file category is meant for implementation of many entities 
+                ResourceCategory.CODE_FILE.value,
                 ResourceCategory.SERVICES.value,
                 ResourceCategory.THIRD_PARTY.value,
                 ResourceCategory.CUSTOMIZED_PROJ.value,

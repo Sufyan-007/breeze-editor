@@ -1,11 +1,7 @@
 # from breeze.apps.editor_api.core.component_config_service import ComponentConfigService
 import copy
-
 from apps.common.utils.uuid_as_key import generate_uuid_as_key
 from .reference_helper import resolve_ref
-import apps.code_generator.core.new_component_generator as CompGenerator
-from .html_generator import HTMLGenerator
-
 
 class FunctionParser:
     def __init__(self,projectId=None, resources=[],meta_config={}):
@@ -64,6 +60,12 @@ class FunctionParser:
             
             for i,code in enumerate(config['statements']):
                 statement,t =  self.generate_statement_code(code,key_chaining=key_chaining+["statements",i])
+                # function_parser = FunctionParser(
+                #     projectId=self.projectId,
+                #     resources=self.scope+self.resources,
+                #     meta_config=self.meta_config
+                # )
+                # statement,t =  function_parser.generate_statement_code(code,key_chaining=key_chaining+["statements",i])
                 statements.append(statement)
                 tree["children"].append(t)
             

@@ -249,8 +249,8 @@ def replace_node(source_id,new_id,data):
         if data[parent_id]["children"][i] == source_id:
             data[parent_id]["children"][i] = new_id
 
-     
     data[new_id] = source_data
+    del data[source_id]
     return data
 
 

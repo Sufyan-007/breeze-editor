@@ -6,6 +6,14 @@ from .dir_handler import create_parent_dir_if_not_exists,create_dir_if_not_exist
 def get_filename_without_ext(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
+def is_json_file_available(file_path):
+    # Check if the file exists
+    if os.path.isfile(file_path):
+        # Check if the file has a .json extension
+        if file_path.endswith('.json'):
+            return True
+    return False
+
 def save_file(file, path):
     print(path)
     create_parent_dir_if_not_exists(path)

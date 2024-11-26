@@ -29,7 +29,8 @@ def check_for_mandatory_route_props(route_obj, project_id):
         route_obj['componentId'] = route_obj.get('componentId').strip()
         
         app_config_dir = f"{CONFIG_PATH}/{project_id}"
-        comp_index_file = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
+        # comp_index_file = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
+        comp_index_file = read_json_file(f"{app_config_dir}/{ResourceCategory.CODE_FILE.value}/index")
         if not route_obj['componentId'] in comp_index_file.keys():
             raise ValueError("invalid componentId provided..")
         

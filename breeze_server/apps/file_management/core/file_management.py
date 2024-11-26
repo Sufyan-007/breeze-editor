@@ -10,31 +10,8 @@ import uuid
 from ...code_generator.utils.code_indexing import get_code_index
 import pickle
 from apps.common.constants.consts import CONFIG_PATH
-
-TEMPLATE_CODE_FILE = {
-    "IMPORTS":{
-      "other":[],
-      "components":[],  
-    },
-    "BLOCK":{
-        "type": "BLOCK",
-        "noWrap": 1,
-        "statements": [
-            {
-                "type" : "COMMENT",
-                "text" : " Happy coding!!"
-            }
-                
-                
-            
-        ]
-    },
-    "EXPORTS":{
-        "default":None,
-        "others":[]
-    }
-
-}
+from apps.code_generator.utils.static_configs import TEMPLATE_CODE_FILE, TEMPLATE_COMP_CONFIG
+from apps.common.utils.replace_variable import replace_variable
 
 def get_section_from_flattened_index(flattened_index, config, configMeta):
     if flattened_index not in configMeta:
@@ -179,37 +156,57 @@ def update_statement(projectId,fileId,statementId,statement):
     
     return {}
 
-def add_code_file(projectId, fileName,parentId):
+def get_config_by_tag(tag,fileName,entityId):
+    if tag == "COMPONENTS":
+        file_config = deepcopy(TEMPLATE_COMP_CONFIG)
+        replace_variable(file_config,"DEFAULT_COMP_ID",entityId)
+        replace_variable(file_config,"DEFAULT_COMP_NAME",fileName)
+    elif tag == "CODE_FILE":
+        file_config = deepcopy(TEMPLATE_CODE_FILE)
+    else:
+        raise NotImplementedError()
+    file_config["name"] = fileName
+    return file_config
+
+def add_code_file(projectId, fileName, parentId, file_id=None,  tag="CODE_FILE", entity_id=None, transaction_id=None):
+    if file_id is None:
+        file_id = str(uuid.uuid4())
     if not parentId:
         parentId = "ROOT"
-        
-    fileId = str(uuid.uuid4())
+    if not entity_id:
+        entity_id = file_id
 
     directoryManager = DirectoryManager(projectId)
     node = directoryManager.add_node_to_config(
         parent_id=parentId,
-        tag="CODE_FILE",
+        tag=tag,
         name=fileName,
         node_type="FILE",
         ext="SX",
-        file_id=fileId,
-        entity_id=fileId
+        file_id=file_id,
+        entity_id=entity_id
     )
-    
-    generate_file_code(projectId=projectId,fileId=fileId,config=TEMPLATE_CODE_FILE)
+   
+    file_config = get_config_by_tag(tag, fileName, entity_id)
+    generate_file_code(
+        projectId=projectId,
+        fileId=file_id,
+        config= file_config
+    )
     
     write_config_file(
         project_name=projectId,
         category=ResourceCategory.CODE_FILE.value,
-        filename=fileId,
-        json_data=TEMPLATE_CODE_FILE
+        filename=file_id,
+        json_data=file_config,
+        transaction_id=transaction_id
     )
     
     
     return node
     
     
-def update_code_file(projectId, fileId, config):
+def update_code_file(projectId, fileId, config, transaction_id=None):
     
     generate_file_code(projectId, fileId, config)
     
@@ -217,7 +214,8 @@ def update_code_file(projectId, fileId, config):
         project_name=projectId,
         category=ResourceCategory.CODE_FILE.value,
         filename=fileId,
-        json_data=config
+        json_data=config,
+        transaction_id=transaction_id
     )
     
     return {}
@@ -250,7 +248,7 @@ def generate_file_code(projectId,fileId,config):
         {code}
         {export_statements}
     """
-    
+
     write_config_file(
         project_name=projectId,
         category=ResourceCategory.CODE_FILE.value,

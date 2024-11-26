@@ -15,7 +15,9 @@ from .project_generation_progress import ProjectGenerationProgress
 from ..utils.dependencies_manager import DependencyManager
 from ..utils import static_code
 from apps.project_management.core.resource_upload_service import save_file
-
+from apps.code_generator.utils.static_code import SANDBOX_CODE
+from apps.file_management.core.file_management import add_code_file
+from apps.common.middlewares.TransactionMiddleware import get_transaction_id
 
 def generate_project(project_config):
     
@@ -91,75 +93,7 @@ def create_react_app(app_config):
 
 def add_sandbox(app_config):
     with open(f"{app_config['path']}/src/SandBox.jsx", "w") as component_file:
-        component_code = """
-            import React, { useState, useEffect, Fragment } from "react";
-            const SandBox = () => {
-                const [MyComponent, setMyComponent] = useState(() => () => <div>Sandbox</div>);
-                const [inputVal, setInputVal] = useState("");
-                const [componentDir, setComponentDir] = useState("");
-                const [customProps, setCustomProps] = useState({});
-
-                useEffect(() => {
-                    const handleMessage = (event) => {
-                        if (event.origin === "http://localhost:3000" || true) {
-                            if (event.data.type === "resource") {
-                                const resource = event.data.resource;
-                                if (resource.type === "component") {
-                                    setComponentDir(resource.component.containingFile);
-                                }
-                                if (resource.type === "props") {
-                                    setCustomProps(resource.props);
-                                }
-                            }
-                        }
-                    };
-                    window.parent.postMessage(
-                        { source: "APP", type: "request", request: { type: "component" } },
-                        "*",
-                    );
-                    window.parent.postMessage(
-                        { source: "APP", type: "request", request: { type: "props" } },
-                        "*",
-                    );
-
-                    window.addEventListener("message", handleMessage);
-
-                    return () => {
-                        window.removeEventListener("message", handleMessage);
-                    };
-                }, []);
-
-                useEffect(() => {
-                    const loader = async () => {
-                        try {
-                            const comp = await import(`/${componentDir}`);
-                            setMyComponent(() => comp.default || comp);
-                            console.log(comp)
-                        } catch (error) {
-                            console.error("Failed to load component:", error);
-                        }
-                    };
-
-                    if (componentDir) {
-                        loader();
-                    }
-                }, [componentDir]);
-
-                return (
-                    <Fragment>
-                        <div className="container-fluid" id="SandBox">
-                            
-                            <MyComponent {...customProps} id="SandBox-1-1" />
-
-                        </div>
-                    </Fragment>
-                );
-            };
-
-            export default SandBox;
-
-        """
-
+        component_code = SANDBOX_CODE
         formatted_code = format_by_prettier(component_code)
         component_file.write(formatted_code)
     
@@ -168,21 +102,19 @@ def add_sandbox(app_config):
 def write_main_app_and_routing_component(app_config, routing_config):
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
     
-    comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
+    config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.CODE_FILE.value}/index")
     # reading routing config
     config_data_obj = read_config_file(app_config['name'], "routing_config", "routing_config")
     if config_data_obj.get('err'):
         raise Exception(config_data_obj['message'], ": not able to read routing_config..")
     routing_config = config_data_obj.get('data')
     # routing_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['ROUTING_CONFIG'])
-    main_comp_config_obj = read_config_file(app_config['name'], ResourceCategory.COMPONENTS.value, app_config['defaultCompId'])
-    main_comp_config_data = main_comp_config_obj.get('data')[comp_config_index[app_config['defaultCompId']]]
     
-    # write Main.jsx component (in src/components folder of generated project)
-    write_component(app_config, main_comp_config_data, comp_config_index)
-    
-    
-    
+    # writing Main.jsx component (in src/components folder of generated project) AND ITS CONFIG ALSO..!?
+    _id = app_config['defaultCompId']
+    name = config_index.get(_id)
+    transaction_id = get_transaction_id()
+    add_code_file(f"{app_config['name']}", name, "SRC", f"{_id}", "COMPONENTS", "MAIN", transaction_id)    
     
     directory_manager= DirectoryManager(app_config['name'])
     
@@ -191,7 +123,7 @@ def write_main_app_and_routing_component(app_config, routing_config):
     directory_manager.save_file("MAIN_COMPONENT", app_comp_code)
         
     # write Routing.jsx component (in src/components folder of generated project)
-    routing_code = get_routing_code(app_config, routing_config, comp_config_index, )
+    routing_code = get_routing_code(app_config, routing_config, config_index, )
     directory_manager.save_file("ROUTE_COMPONENT", routing_code)
 
 def setup_base_path_for_comps(app_config):

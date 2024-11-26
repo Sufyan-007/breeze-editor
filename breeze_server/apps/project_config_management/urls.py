@@ -4,7 +4,7 @@ from .views import get_file_path
 
 urlpatterns = [
     
-    # TODO: create files in views and add required method
+    # create files in views and add required method
     # past endpoint: POST - /editor/write-config 
     # both POST, PUT and DELETE will be handled for all 
     

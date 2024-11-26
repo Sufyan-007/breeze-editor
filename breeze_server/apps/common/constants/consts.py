@@ -13,7 +13,7 @@ CONFIG_FILES_PATH = {
     'ENVIRONMENT_SETTINGS' : 'environment_settings',
 }
 
-MULTI_NODE_MULTI_FILE = ['components', 'services', 'api_client']
+MULTI_NODE_MULTI_FILE = ['components', 'services', 'api_client', 'file_config']
 MULTI_NODE_SINGLE_FILE = ['routing', 'resource_config', 'directory_management']
 
 JSX_TEMPLATE_PATH = "project_templates/jsx_template"
@@ -39,6 +39,7 @@ MODEL = "models"
 INDEX = "index"
 ROUTING = "routing_config"
 COMPONENT = "components"
+CODE_FILE = "file_config"
 RESOURCE = "uploaded_resources_config"
 
 APP_CONFIG_PATH = "configurations"

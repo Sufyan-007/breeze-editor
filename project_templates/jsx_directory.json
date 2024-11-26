@@ -26,16 +26,7 @@
     "id": "COMPONENTS",
     "tag": "COMPONENTS",
     "type": "DIRECTORY",
-    "children": ["DEFAULT_COMP"]
-  },
-  "DEFAULT_COMP": {
-    "name": "Main",
-    "extension": "SX",
-    "parentId": "COMPONENTS",
-    "entityId": "MAIN",
-    "id": "DEFAULT_COMP",
-    "tag": "COMPONENTS",
-    "type": "FILE"
+    "children": []
   },
   "SERVICES": {
     "name": "services",
