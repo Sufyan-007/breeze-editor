@@ -16,7 +16,8 @@ def create_json_structure(directory_manager, folder_path,file_id, parent_id=None
         tag=tag, 
         name=folder_name, 
         node_type="DIRECTORY",
-        file_id=file_id
+        file_id=file_id,
+        overwrite=True
     )
     folder_id = folder_node['id']
 
@@ -38,7 +39,8 @@ def create_json_structure(directory_manager, folder_path,file_id, parent_id=None
                 parent_id=folder_id, 
                 tag="ZIP", 
                 name=item, 
-                node_type="FILE"
+                node_type="FILE",
+                overwrite= True
             )
     
     return folder_node

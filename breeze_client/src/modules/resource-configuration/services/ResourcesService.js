@@ -21,8 +21,7 @@ const uploadFile = async (payload, projectName) => {
   }
 };
 
-const deleteFile = async (file, projectName) => {
-  const file_id = file.id;
+const deleteFile = async (file_id, projectName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/delete-file/${projectName}/`;
   try {
     const response = await callApiClient(url, 'DELETE', { file_id });

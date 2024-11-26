@@ -7,12 +7,6 @@ export const BreezeDatatypes = [
   { value: 'function', label: 'Function' },
 ];
 
-export const VariableTypes = [
-  { label: 'State Variable', value: 'statevar' },
-  { label: 'Ref Variable', value: 'refvar' },
-  { label: 'Other', value: 'othervar' },
-];
-
 export const DeclarationTypes = [
   { label: 'const', value: 'const' },
   { label: 'let', value: 'let' },

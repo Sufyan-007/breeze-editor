@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 import { getFileCode, getProjectPort } from '../services/projectService';
 import { useTabContext } from '../context/TabContext';
 import { changeConfigAndCodeAsOfVersion } from '../../../services/configs/configService';
-import { fetchConfigVersion, clearSelectedNodePayload } from '../../../redux/project/projectActions';
+import { fetchConfigVersion, updateSelectedNodePayload } from '../../../redux/project/projectActions';
 import { configDetailsKeyMapper } from '../constants/configDetailsKeyMapper';
 import { useDispatch } from 'react-redux';
 import { BreezeToaster } from '../../../common/display';
@@ -27,11 +27,8 @@ function ProjectDisplay() {
   const [latestConfigVersion, setLatestConfigVersion] = useState(null);
   const [versionError, setVersionError] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState('');
-  const [isVersionLimitCrossed, setIsVersionLimitCrossed] = useState(null);
+  const [isVersionMismatched, setIsVersionMismatched] = useState(null);
   const dispatch = useDispatch();
-
-  // console.log('versionError::>>', versionError);
-
   useEffect(() => {
     const fetchConfigFileVersions = async () => {
       try {
@@ -43,25 +40,22 @@ function ProjectDisplay() {
           .unwrap()
           .then((res) => {
             setLatestConfigVersion(res?.latestConfigVersion);
-            // if (selectedVersion !== '') setSelectedVersion(version?.config_file_version);
             setSelectedVersion(res?.currentConfigVersion);
-            console.log('version: ' + res?.currentConfigVersion);
           });
       } catch (err) {
         setVersionError(err.message);
       }
     };
 
-    if (selectedNode?.id == 'ROUTE_COMPONENT') {
+    if (!latestConfigVersion && selectedNode?.id == 'ROUTE_COMPONENT') {
       fetchConfigFileVersions();
     }
-
-    return () => {
-      if (selectedNode?.id == 'ROUTE_COMPONENT') {
-        dispatch(clearSelectedNodePayload());
+    if (selectedNode.activeTab === 'config' && selectedNode?.id == 'ROUTE_COMPONENT') {
+      if (selectedVersion != latestConfigVersion) {
+        handleVersionSelection('ROLLFORWARD', latestConfigVersion);
       }
-    };
-  }, [projectName, selectedNode, activeTab, dispatch]);
+    }
+  }, [projectName, selectedNode, dispatch]);
 
   const fetchPort = useCallback(async () => {
     const port = await getProjectPort(projectName);
@@ -153,22 +147,36 @@ function ProjectDisplay() {
         version: version,
       };
       if (selectedVersion >= latestConfigVersion && updateMethod === 'ROLLFORWARD') {
-        setIsVersionLimitCrossed(true);
+        setIsVersionMismatched(true);
+        setVersionError('currently present on the latest version..');
         setTimeout(() => {
-          setIsVersionLimitCrossed(false);
+          setIsVersionMismatched(false);
+          setVersionError('');
         }, 3000);
         return;
       }
       if (selectedVersion <= 1 && updateMethod === 'ROLLBACK') {
-        setIsVersionLimitCrossed(true);
+        setIsVersionMismatched(true);
+        setVersionError('currently present on the initial version..');
         setTimeout(() => {
-          setIsVersionLimitCrossed(false);
+          setIsVersionMismatched(false);
+          setVersionError('');
         }, 3000);
         return;
       }
-      const response = await changeConfigAndCodeAsOfVersion(projectName, payload);
-      if (response?.currentVersion) setSelectedVersion(response.currentVersion);
-      fetchCode();
+      if (updateMethod) {
+        const response = await changeConfigAndCodeAsOfVersion(projectName, payload);
+        if (response?.currentVersion) {
+          setSelectedVersion(response.currentVersion);
+          dispatch(
+            updateSelectedNodePayload({
+              latestConfigVersion: latestConfigVersion,
+              currentConfigVersion: response.currentVersion,
+            })
+          );
+        }
+        fetchCode();
+      }
     } catch (err) {
       setVersionError(err.message);
     }
@@ -187,7 +195,7 @@ function ProjectDisplay() {
                   defaultValue={editorCode ? editorCode : '// Loading...'}
                   height={selectedNode.id !== 'ROUTE_COMPONENT' ? 'calc(100vh - 161px)' : 'calc(100vh - 230px)'}
                   language={editorLanguage}
-                  node={selectedNode}
+                  node={selectedTab}
                 />
               </div>
             </div>
@@ -217,12 +225,24 @@ function ProjectDisplay() {
                     name="versionList"
                     id="versionList"
                     className="form-contro border-primary rounded shadow  form-select form-select "
-                    onClick={() => console.log(123)}
                     onChange={(e) => {
                       const selectedValue = e.target.value;
-                      console.log(selectedValue); // Log the selected value
                       if (selectedValue) {
-                        handleVersionSelection('ROLLBACK', selectedValue); // Call your function with the selected value
+                        let method = '';
+                        if (selectedValue <= selectedVersion) {
+                          method = 'ROLLBACK';
+                        } else if (selectedValue >= selectedVersion) {
+                          method = 'ROLLFORWARD';
+                        } else {
+                          setIsVersionMismatched(true);
+                          setVersionError('currently present on the same version..');
+                          setTimeout(() => {
+                            setIsVersionMismatched(false);
+                            setVersionError('');
+                          }, 2000);
+                          return;
+                        }
+                        handleVersionSelection(method, selectedValue); // Call your function with the selected value
                       }
                     }}
                   >
@@ -243,7 +263,7 @@ function ProjectDisplay() {
                 </div>
               </div>
             )}
-            {isVersionLimitCrossed && <BreezeToaster message="version limit reached..!" type="info" />}
+            {isVersionMismatched && <BreezeToaster message={versionError} type="info" />}
           </div>
         )}
 

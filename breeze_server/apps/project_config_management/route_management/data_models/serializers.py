@@ -25,6 +25,7 @@ class GetAllRoutesResponeStatus200Serializer(serializers.Serializer):
     
 class AddRouteRequestBodySerializer(serializers.Serializer):
     # Representing the child routes if they are present
+    ROUTING_CONFIG_CURRENT_VERSION = serializers.CharField(help_text="The latest version of routing config")
     path = serializers.CharField(help_text="The URL path for the route")
     componentId = serializers.CharField(help_text="The ID of the component to render for the route")
     children = serializers.ListSerializer(child=serializers.DictField(), help_text="List of child routes",required=False)
@@ -39,19 +40,14 @@ class AddRouteRequestBodySerializer(serializers.Serializer):
     shouldRevalidate = serializers.CharField(help_text="Function to determine if the route should revalidate", required=False, allow_null=True)
     caseSensitive = serializers.BooleanField(help_text="Whether the path is case-sensitive",required=False)
     index = serializers.BooleanField(help_text="Indicates if the route is an index route",required=False)
-    
-class UpdateRouteRequestBodySerializer(serializers.Serializer):
-    path = serializers.CharField(
-        help_text="The URL path for the route"
-    )
-    componentId = serializers.CharField(
-        help_text="The ID of the component to render for the route"
-    ) 
+
+class UpdateRouteRequestBodySerializer(AddRouteRequestBodySerializer):
     id = serializers.CharField(
         help_text="Unique identifier for the route"
     )  
     
 class DeleteRouteRequestBodySerializer(serializers.Serializer):
+    ROUTING_CONFIG_CURRENT_VERSION = serializers.CharField(help_text="The latest version of routing config")
     id = serializers.CharField(
         help_text="Unique identifier for the route"
     )

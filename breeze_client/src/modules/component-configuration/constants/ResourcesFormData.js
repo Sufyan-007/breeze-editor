@@ -7,10 +7,28 @@ export const initialPropConfig = {
 };
 
 export const initialVariableConfig = {
+  type: 'DECLARATION',
   varName: '',
-  varType: 'stateVar',
   declarationType: 'const',
-  dataType: '',
+  dataType: 'string',
+  defaultValue: '',
+  description: '',
+};
+
+export const initialStateVarConfig = {
+  type: 'REACT_STATE_VAR',
+  varName: '',
+  declarationType: 'const',
+  dataType: 'string',
+  defaultValue: '',
+  description: '',
+};
+
+export const initialRefVarConfig = {
+  type: 'REACT_REF_VAR',
+  varName: '',
+  declarationType: 'const',
+  dataType: 'string',
   defaultValue: '',
   description: '',
 };
