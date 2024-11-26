@@ -170,9 +170,15 @@ def delete_file(project_name, fileName, file_id):
             else:
                 print(f"{fileName} does not exist at {file_path} in {location_name}.")
 
-        delete_path(react_app_file_path, "React app")
+        
+        directory_manager = DirectoryManager(project_name)
+        directory_manager.delete_node(file_id, recursive=True)
+        
+        # delete_path(react_app_file_path, "React app")
         delete_path(external_components_config_path, "external components config")
   
+       
+       
         #delete the file object from resource config 
         if os.path.exists(uploaded_resources_config_path):
             with open(uploaded_resources_config_path, 'r+') as config_file:
@@ -250,22 +256,3 @@ def update_resource_config(project_name, file_name ,file_id, status,  tag="ZIP")
     with open(resource_config_file_path, 'w') as config_file:
         json.dump(config_data, config_file, indent=4)
         
-# def get_props(project_name,file_name,component_id, prop_id):
-#     try:
-#         component_config_path = os.path.join(CONFIG_PATH,project_name,"external_components_config",file_name,f"{component_id}.json" )
-        
-#         if not os.path.exists(component_config_path):
-#             raise FileNotFoundError(f"File not found: {component_config_path}")
-        
-#         with open(component_config_path,'r') as file:
-#             config_data = json.load(file)
-            
-#         props= config_data.get("props",{})
-        
-#         if prop_id in props:
-#             return props[prop_id]
-#         else:
-#             raise KeyError(f"Prop ID '{prop_id}' not found in the configuration.")
-        
-#     except Exception as e:
-#         raise Exception(f"An error occurred while retrieving props config: {str(e)}")

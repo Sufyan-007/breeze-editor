@@ -35,8 +35,11 @@ function CustomPropsList({ selectedFile, selectedComponentId, components, props 
     }
   };
 
+  const handleCancel = () => {
+    setIsFormVisible(false);
+  };
+
   const handleFormSubmit = (formData) => {
-    console.log('Form submitted with data:', formData);
     const payload = {
       ...formData,
       id: selectedProp,
@@ -44,7 +47,7 @@ function CustomPropsList({ selectedFile, selectedComponentId, components, props 
       componentId: selectedComponentId,
     };
     if (projectName) {
-      dispatch(updatePropConfigAction({projectName, formData: payload}));
+      dispatch(updatePropConfigAction({ projectName, formData: payload }));
     } else {
       console.error('Project name is undefined!');
     }
@@ -81,6 +84,7 @@ function CustomPropsList({ selectedFile, selectedComponentId, components, props 
           <div className="collapsible-form">
             <ExternalCompPropEditForm
               onSubmit={handleFormSubmit}
+              onCancel={handleCancel}
               initialData={currentProps}
               selectedProp={selectedProp}
             />
@@ -90,5 +94,6 @@ function CustomPropsList({ selectedFile, selectedComponentId, components, props 
     </div>
   );
 }
+
 
 export default CustomPropsList;
