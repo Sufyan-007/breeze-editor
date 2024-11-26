@@ -8,6 +8,7 @@ import { addFileOptions } from '../constants/contextMenuOptions';
 import {
   addNodeAsync,
   fetchFolderConfig,
+  moveNodeAsync,
   renameNodeAsync,
 } from '../../../redux/directory_management/directory_actions';
 import { useDispatch, useSelector } from 'react-redux';
@@ -35,6 +36,7 @@ function ProjectSidebar() {
   const { selectedNodeId, setSelectedNode, setSelectedNodeId } = useTreeContext();
   const { projectName } = useParams();
   const { removeTab, addTab, openTabs, selectTab } = useTabContext();
+  const toggling = useRef(false);
 
   const dispatch = useDispatch();
 
@@ -44,21 +46,25 @@ function ProjectSidebar() {
   }, [dispatch, projectName]);
 
   const toggleNode = async (nodeId) => {
-    const isNodeExpanded = expandedNodes[nodeId];
-    const node = directoryConfig[nodeId];
-    const children = node?.children || [];
-    const areAllChildrenLoaded = children.every((childId) => directoryConfig[childId]);
-    if (!isNodeExpanded && !areAllChildrenLoaded) {
-      try {
-        await dispatch(fetchFolderConfig({ id: nodeId, projectName })).unwrap();
-      } catch (error) {
-        console.error('Error fetching children for node:', nodeId, error);
+    if (!toggling.current) {
+      toggling.current = true;
+      const isNodeExpanded = expandedNodes[nodeId];
+      const node = directoryConfig[nodeId];
+      const children = node?.children || [];
+      const areAllChildrenLoaded = children.every((childId) => directoryConfig[childId]);
+      if (!isNodeExpanded && !areAllChildrenLoaded) {
+        try {
+          await dispatch(fetchFolderConfig({ id: nodeId, projectName })).unwrap();
+        } catch (error) {
+          console.error('Error fetching children for node:', nodeId, error);
+        }
       }
+      setExpandedNodes((prev) => ({
+        ...prev,
+        [nodeId]: !isNodeExpanded,
+      }));
+      toggling.current = false;
     }
-    setExpandedNodes((prev) => ({
-      ...prev,
-      [nodeId]: !isNodeExpanded,
-    }));
   };
 
   const handleNodeClick = (nodeId) => {
@@ -77,17 +83,25 @@ function ProjectSidebar() {
 
   const handleDragStart = (node) => setDraggedNode(node);
 
-  const handleDrop = (destinationNode) => {
-    // if (!draggedNode) return;
-    // const newParentId = destinationNode?.type === 'FILE' ? destinationNode.parentId : destinationNode?.id || null;
-    // setTreeData((prev) => ({
-    //   ...prev,
-    //   [draggedNode.id]: {
-    //     ...draggedNode,
-    //     parentId: newParentId,
-    //   },
-    // }));
-    // setDraggedNode(null);
+  const handleDrop = async (destinationNode) => {
+    if (!draggedNode) return;
+
+    const draggedNodeId = draggedNode.id;
+    const destinationNodeId =
+      destinationNode?.type === 'FILE' ? destinationNode.parentId : destinationNode?.id || 'ROOT';
+
+    if (draggedNodeId === destinationNodeId) {
+      console.warn('Cannot move node into itself');
+      return;
+    }
+
+    try {
+      await dispatch(moveNodeAsync({ projectName, nodeId: draggedNodeId, targetId: destinationNodeId })).unwrap();
+    } catch (error) {
+      console.error('Failed to move node:', error);
+    } finally {
+      setDraggedNode(null);
+    }
   };
 
   const handleRename = (nodeId) => {
