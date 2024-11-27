@@ -78,10 +78,32 @@ export const initialLifecycleConfig = {
   dependencies: { type: 'ARRAY', values: [] },
 };
 
-export const initialHookConfig = {
-  hookName: '',
-  hookDescription: '',
-  hookType: 'useMemo',
-  dependentVars: [],
-  functionParams: [],
+export const initialUseMemoConfig = {
+  type: 'REACT_USE_MEMO',
+  name: '',
+  description: '',
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
+  dependencies: { type: 'ARRAY', values: [] },
+};
+
+export const initialUseCallbackConfig = {
+  type: 'REACT_USE_CALLBACK',
+  name: '',
+  description: '',
+  callback: {
+    type: 'FUNCTION',
+    name: '',
+    isAsync: false,
+    isAnonymous: true,
+    description: '',
+    parameters: [],
+    bodyConfig: {
+      type: 'BLOCK',
+      statements: [],
+    },
+  },
+  dependencies: { type: 'ARRAY', values: [] },
 };

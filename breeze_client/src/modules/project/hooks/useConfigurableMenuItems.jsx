@@ -4,7 +4,8 @@ import {
   AddELement,
   FunctionConfigForm,
   LifecycleConfigForm,
-  HookConfigForm,
+  UseMemoConfigForm,
+  UseCallbackConfigForm,
   IfBlockConfigForm,
   WhileBlockConfigForm,
   DoWhileConfigForm,
@@ -43,8 +44,10 @@ const useConfigurableMenuItems = (onSubmit, onCancel) => {
         return <FunctionConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Lifecycle':
         return <LifecycleConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Hook':
-        return <HookConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Use Memo':
+        return <UseMemoConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Use Callback':
+        return <UseCallbackConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'If Block':
         return <IfBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Edit If Block':

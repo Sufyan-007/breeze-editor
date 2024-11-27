@@ -25,7 +25,8 @@ export const configTypeMapping = {
     'Props',
     'Function',
     'Lifecycle',
-    'Hook',
+    'Use Memo',
+    'Use Callback',
     'If Block',
     'While Block',
     'Do While Block',
@@ -41,4 +42,7 @@ export const configTypeMapping = {
   TRY_CATCH: ['Try Catch'],
   REACT_STATE_VAR: ['State Variable', 'Edit State Variable'],
   REACT_REF_VAR: ['Ref Variable', 'Edit Ref Variable'],
+  REACT_USE_EFFECT: ['Edit Lifecycle'],
+  REACT_USE_MEMO: ['Edit Use Memo'],
+  REACT_USE_CALLBACK: ['Edit Use Callback'],
 };
