@@ -1,11 +1,11 @@
 import {
   ImportConfigForm,
-  PropConfigForm,
   VariableConfigForm,
   AddELement,
   FunctionConfigForm,
   LifecycleConfigForm,
-  HookConfigForm,
+  UseMemoConfigForm,
+  UseCallbackConfigForm,
   IfBlockConfigForm,
   WhileBlockConfigForm,
   DoWhileConfigForm,
@@ -25,9 +25,9 @@ const useConfigurableMenuItems = (onSubmit, onCancel) => {
       case 'Edit Import':
         return <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
       case 'Props':
-        return <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Edit Prop':
-        return <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
+        return <ComponentConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      // case 'Edit Prop':
+      //   return <PropConfigForm onSubmit={onSubmit} onCancel={onCancel} formData={{}} editMode={true} />;
       case 'Variable':
         return <VariableConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'State Variable':
@@ -42,10 +42,12 @@ const useConfigurableMenuItems = (onSubmit, onCancel) => {
         return <AddELement />;
       case 'Function':
         return <FunctionConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Lifecycle':
+      case 'Use Effect':
         return <LifecycleConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Hook':
-        return <HookConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Use Memo':
+        return <UseMemoConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Use Callback':
+        return <UseCallbackConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'If Block':
         return <IfBlockConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Edit If Block':
