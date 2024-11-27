@@ -52,12 +52,10 @@ class FunctionParser:
             "code":""
         }
         
-        if config["type"] =="REACT_STATEVAR":
-            varName = config["varName"]
-            defaultValue = self.get_value_code(config["defaltValue"], key_chaining=key_chaining+["defaultValue"])
-            code = f"const [{varName},set{varName}] = useState({defaultValue})"
-            # raise NotImplementedError("Not implemented")
-        
+        if config["type"][:5] =="REACT":
+            code,t = self.generate_react_code(config = config, key_chaining=key_chaining)
+            if t:
+                tree["children"].append(t)
         elif config["type"] == "BLOCK":
             statements = []
             
@@ -462,3 +460,75 @@ class FunctionParser:
             code= f" ({operand1} )? ({operand2}) : ({operand3}) "
         
         return code,tree
+
+    def generate_react_code(self,config,key_chaining=[]):
+        code = ""
+        t= None
+        if config["type"]== "REACT_COMPONENT":
+            bodyCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"])
+            props=[]
+            for prop in config.get("propVars",[]):
+                props.append(prop["name"])
+            
+            if config.get("hasImperativeHandling"):
+                code = f""" const {config["name"]} = forwardRef( ({{ {','.join(props)} }}, ref) => {bodyCode} )"""
+                
+            else:
+                code = f""" const {config["name"]} = ({{ {','.join(props)} }}) => {bodyCode} """
+            
+        elif config["type"] == "REACT_USE_STATE":
+            varName = config["varName"]
+            varName = "".join(varName.split())
+            defaultValue = ""
+            if config.get("defaultValue"):
+                defaultValue,t = self.get_value_code(config["defaultValue"],key_chaining=key_chaining+["defaultValue"])
+            code = f"const [{varName},{varName.title()}] = useState({defaultValue})"
+        
+        elif config["type"] == "REACT_USE_REF":
+            varName = config["varName"]
+            varName = "".join(varName.split())
+            defaultValue = ""
+            if config.get("defaultValue"):
+                defaultValue,t = self.get_value_code(config["defaultValue"],key_chaining=key_chaining+["defaultValue"])
+            code = f"const {varName} = useRef({defaultValue})"
+        
+        elif config["type"] == "REACT_USE_EFFECT":
+            blockCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"])
+            
+            if not config.get("dependencies") and config["dependencies"]!=[]:
+                code = f"useEffect(()=>{blockCode})"
+            else:
+                dependencies =[]
+                for i,val in enumerate(config["dependencies"]):
+                    value, _ = self.get_value_code(val)
+                    dependencies.append(value)
+                code = f"useEffect(()=>{blockCode}, [{','.join(dependencies)}] )"
+
+        elif config["type"] == "REACT_USE_CALLBACK":
+            callBackCode, t = self.generate_statement_code(config["callback"],key_chaining=key_chaining+["callback"])
+            varname = config["varName"]
+            if not config.get("dependencies") and config["dependencies"]!=[]:
+                code = f"const {varname} = useCallback({callBackCode})"
+            else:
+                dependencies =[]
+                for i,val in enumerate(config["dependencies"]):
+                    value, _ = self.get_value_code(val)
+                    dependencies.append(value)
+                code = f"const {varname} = useCallback({callBackCode}), [{','.join(dependencies)}] )"
+        
+        elif config["type"] == "REACT_USE_MEMO":
+            blockCode,t = self.generate_statement_code(config["blockConfig"],key_chaining=key_chaining+["blockConfig"])
+            varname = config["varName"]
+            if not config.get("dependencies") and config["dependencies"]!=[]:
+                code = f"const {varname} = useMemo(() => {blockCode})"
+            else:
+                dependencies =[]
+                for i,val in enumerate(config["dependencies"]):
+                    value, _ = self.get_value_code(val)
+                    dependencies.append(value)
+                code = f"const {varname} = useMemo(() => {blockCode}), [{','.join(dependencies)}] )"
+                
+
+        
+        return code , t
+            
