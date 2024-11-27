@@ -117,7 +117,7 @@ def add_statement(projectId,fileId,parentId,statement):
     
     parentConfig = get_section_from_flattened_index(parentId,fileConfig,fileConfigMeta)
     
-    if parentConfig["type"] != "BLOCK":
+    if parentConfig["type"] != "BLOCK" and parentConfig["type"] != "Element":
         raise TypeError("Cannot add statement to non block elements")
     
     
@@ -127,8 +127,10 @@ def add_statement(projectId,fileId,parentId,statement):
     
     parentIndex = parentConfigMeta["index"]
     
-    newIndex = parentIndex+"<>statements<>"+str(len(parentConfig["statements"]))
-    
+    if parentConfig["type"] == "BLOCK":
+        newIndex = parentIndex+"<>statements<>"+str(len(parentConfig["statements"]))
+    elif parentConfig["type"] == "Element":
+        newIndex = parentIndex+"<>children<>"+str(len(parentConfig["children"]))
     newMeta = {
         "index": newIndex,
         "type": "RAW"
@@ -147,7 +149,7 @@ def add_statement(projectId,fileId,parentId,statement):
         json_data=fileConfig
     )
     
-    return {}
+    return {"id": id}
 
 def update_statement(projectId,fileId,statementId,statement):
     fileConfig = read_config_file(
@@ -232,8 +234,8 @@ def generate_file_code(projectId,fileId,config):
     
     imports = deepcopy(config["IMPORTS"])
     
-    imports["other"].extend(generated_imports["other"])
-    imports["components"].extend(generated_imports["components"])
+    # imports["other"].extend(generated_imports["other"])
+    # imports["components"].extend(generated_imports["components"])
     
     imports,importTree = ImportHelper.generate_imports_code(imports,projectId)
     
@@ -263,7 +265,7 @@ def generate_file_code(projectId,fileId,config):
     
     content = directoryManager.get_file_content(fileId)
     
-    code_tree = get_code_index([tree], content)
+    code_tree = get_code_index(importTree+[tree], content)
     
     pickle_dir = f"{CONFIG_PATH}/{projectId}/pickles/{fileId}.bytes"
     create_parent_dir_if_not_exists(pickle_dir)

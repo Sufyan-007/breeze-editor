@@ -99,12 +99,18 @@ class CodeTree:
                 return True
         return False
     
+    def __str__(self):
+        print("OBJ")
+        for k,v in self.codes.items():
+            print("   {}:{}".format(k,v))
+        return ""
 
 
 
 
 def get_code_index(statements,code):
     tree=CodeTree()
+    base = 0
     for statement in statements:
         if statement:
             indexes = find_ignore_whitespace(code,statement["code"])
@@ -118,5 +124,9 @@ def get_code_index(statements,code):
             if children:
                 childCode= code[indexes[0]:indexes[1]+1]
                 obj["children"] = get_code_index(children,childCode)
-            tree.insertElem(indexes[0],indexes[1],obj)
+            # print(base, base + indexes[0],base + indexes[1],obj)
+            print(tree)
+            tree.insertElem(base + indexes[0],base + indexes[1],obj)
+            base += indexes[1]
+            code = code[indexes[1]:]
     return tree
