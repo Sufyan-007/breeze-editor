@@ -32,6 +32,10 @@ const phoneValidation = (value) => {
     : '';
 };
 
+const projectNameValidation = (value) => {
+  return /[^a-zA-Z0-9_-]/.test(value) ? 'Project name should not contain special characters!' : '';
+};
+
 export const validator = {
   REQUIRED: required,
   NUMBER_VALIDATION: numberValidation,
@@ -41,4 +45,5 @@ export const validator = {
   PASSWORD_VALIDATION: passwordValidation,
   CONFIRM_PASSWORD_VALIDATION: confirmPasswordValidation,
   PHONE_VALIDATION: phoneValidation,
+  PROJECT_NAME_VALIDATION: projectNameValidation,
 };
