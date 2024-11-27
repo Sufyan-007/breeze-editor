@@ -42,7 +42,7 @@ const useConfigurableMenuItems = (onSubmit, onCancel) => {
         return <AddELement />;
       case 'Function':
         return <FunctionConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Lifecycle':
+      case 'Use Effect':
         return <LifecycleConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Use Memo':
         return <UseMemoConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
