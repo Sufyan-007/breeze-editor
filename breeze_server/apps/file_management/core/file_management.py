@@ -138,7 +138,9 @@ def add_statement(projectId,fileId,parentId,statement):
     
     fileConfigMeta[id] = newMeta
     
-    set_value_in_flattened_index(id,statement,fileConfig,fileConfigMeta)
+    if not set_value_in_flattened_index(id,statement,fileConfig,fileConfigMeta):
+        raise Exception("Could not add statement")
+        
     
     generate_file_code(projectId=projectId,fileId=fileId,config=fileConfig)
     
@@ -168,7 +170,8 @@ def update_statement(projectId,fileId,statementId,statement):
     except:
         raise KeyError("Could not find key %s" % statementId)
 
-    set_value_in_flattened_index(statementId,statement,fileConfig,fileConfigMeta)
+    if not set_value_in_flattened_index(statementId,statement,fileConfig,fileConfigMeta):
+        raise Exception("Could not update statement %s" % statementId)
 
     generate_file_code(projectId=projectId,fileId=fileId,config=fileConfig)
     
