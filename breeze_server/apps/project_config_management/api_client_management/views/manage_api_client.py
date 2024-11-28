@@ -10,6 +10,11 @@ from ..swagger_schema.manage_api_client_schema import generate_service_config_sc
 from ....code_generator.core.api_client_generator import generate_react_service
 from ....directory_management.core.directory_management_service import DirectoryManager
 from drf_spectacular.utils import extend_schema
+from ....common.utils.uuid_as_key import generate_uuid_as_key
+from ..consts.global_interceptor_template import GLOBAL_INTERCEPTOR_CODE
+from ..consts.module_interceptor_template import MODULE_INTERCEPTOR_CODE
+from ..utils.append_dict_file import append_to_dict_file
+
 
 
 @extend_schema(
@@ -43,7 +48,11 @@ def generate_service_config(request, collectionType, project_id):
                 module_id = converted_data.get("id")
                 module_name = converted_data.get("title")
                 security_schemes = converted_data.get("security_schemes")
-                files_with_apis, is_erroroneous = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
+                files_with_apis, is_erroroneous,auth_apis = wrap_conversion(converted_data=converted_data, project_name=project_id, folder_path=folder_path)
+                swagger_metadata_config_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
+                with open(swagger_metadata_config_path, "r") as file:
+                    swagger_metadata_content = json.load(file)
+                current_module = swagger_metadata_content[module_id]
                 directory_manager = DirectoryManager(project_name=project_id)
                 if not is_erroroneous:
                     directory_manager.add_node_to_config(
@@ -55,19 +64,45 @@ def generate_service_config(request, collectionType, project_id):
                         entity_id=module_id,
                         isProtected=False
                     )
-                    # directory_manager.add_node_to_config(
-                    #     parent_id= module_id,
-                    #     tag= "SERVICES",
-                    #     name= 'interceptors',
-                    #     node_type="FILE",
-                    #     file_id= interceptor_file_id ,
-                    #     entity_id=interceptor_file_id,
-                    #     isProtected=False,
-                    #     ext="SX"
-                    # )
+                    interceptor_file_id = 'GLOBAL_INTERCEPTOR'
+                    path_to_global_interceptors = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{interceptor_file_id}.json"
+                    if not os.path.exists(path_to_global_interceptors):
+                        with open(path_to_global_interceptors, "w") as file:
+                            json.dump({}, file)
+                        directory_manager.add_node_to_config(
+                            parent_id= "SERVICES",
+                            tag= "SERVICES",
+                            name= 'interceptors',
+                            node_type="FILE",
+                            file_id= interceptor_file_id ,
+                            entity_id=interceptor_file_id,
+                            isProtected=False,
+                            ext="SX"
+                        )
+                        interceptor_file_content = GLOBAL_INTERCEPTOR_CODE
+                        directory_manager.save_file(file_id=interceptor_file_id, content=interceptor_file_content)
+                    
+                    module_interceptor_id = generate_uuid_as_key()
+                    module_interceptor_code = MODULE_INTERCEPTOR_CODE
+                    directory_manager.add_node_to_config(
+                        parent_id= module_id,
+                        tag= "SERVICES",
+                        name= 'interceptors',
+                        node_type="FILE",
+                        file_id= module_interceptor_id ,
+                        entity_id=module_interceptor_id,
+                        isProtected=False,
+                        ext="SX"
+                    )
+                    directory_manager.save_file(file_id=module_interceptor_id, content=module_interceptor_code)
+                    current_module["interceptor_file_id"] = module_interceptor_id
+                    swagger_metadata_content[module_id] = current_module
+                    append_to_dict_file(swagger_metadata_config_path, swagger_metadata_content)
                     
                     for file in files_with_apis:
                         generate_react_service(app_name=project_id, filename=file.get("fileId"), service_type="ORDINARY", module_id=module_id, module_name= module_name, security_schemes= security_schemes)
+                    for apis in auth_apis:
+                        generate_react_service(project_id, module_id+'_auth', "AUTH", module_id, security_schemes= {}, module_name=module_name)
                 return JsonResponse({"module_id": module_id}, status=201)
             
             # elif collectionType.lower() == 'websocket' and (json_file.name.endswith('.yml') or json_file.name.endswith('.yaml') or json_file.name.endswith('.json')):
@@ -117,9 +152,11 @@ def transfer_to_auth(request,project_id):
     filename = data.get("filename")
     id_value = data.get("id")
     module_id = data.get("module_id")
+    is_imported = data.get("is_imported", False)
+    replaced_function_id = data.get("replaced_function_id")
     file_path = os.path.join(f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{module_id}", f"{filename}.json")
     target_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
-    result,status = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id)
+    result,status = transfer_data_to_auth(filename= filename, id_value=id_value,file_path=file_path,target_file_path=target_file_path,module_id=module_id,project_id=project_id, replaced_function_id=replaced_function_id, is_imported=is_imported)
     return JsonResponse(result, status=status)
 
 @extend_schema(

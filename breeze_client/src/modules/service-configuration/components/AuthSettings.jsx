@@ -74,27 +74,23 @@ function AuthSettings({ authData, onChange, moduleId }) {
   return (
     <>
       <div id="main" className="d-flex mx-2">
-        {auth.type === 'BASIC' ? (
-          <>{/* Additional fields for BASIC auth can be added here */}</>
-        ) : (
-          <>
-            <CustomSelectField
-              name="loginApi"
-              value={
-                login_apis.find((api) => api.id === auth.login_api)
-                  ? `${login_apis.find((api) => api.id === auth.login_api).operation_id}-${auth.token_id}`
-                  : ''
-              }
-              onChange={(value) => handleChange(value, 'login_api')}
-              options={loginApiOptions}
-              className="form-select br-form-select form-select-sm"
-              config={{
-                label: 'Authentication Api',
-                groupClass: 'form-group mb-2 mx-2 w-100',
-              }}
-            />
-          </>
-        )}
+        <>
+          <CustomSelectField
+            name="loginApi"
+            value={
+              login_apis.find((api) => api.id === auth.login_api)
+                ? `${login_apis.find((api) => api.id === auth.login_api).operation_id}-${auth.token_id}`
+                : ''
+            }
+            onChange={(value) => handleChange(value, 'login_api')}
+            options={loginApiOptions}
+            className="form-select br-form-select form-select-sm"
+            config={{
+              label: 'Authentication Api',
+              groupClass: 'form-group mb-2 mx-2 w-100',
+            }}
+          />
+        </>
       </div>
       {renderError(auth.errors)} {/* Render any errors here */}
     </>

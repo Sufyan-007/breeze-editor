@@ -15,7 +15,7 @@ function ModuleSettings({ moduleId }) {
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
   const [availableServers, setAvailableServers] = useState(moduleData.servers_info || []);
-  const [interceptors, setInterceptors] = useState(moduleData.interceptors || [RequestInterceptors]);
+  // const [interceptors, setInterceptors] = useState(moduleData.interceptors || [RequestInterceptors]);
   const handleServersChange = (operation, index = null, value = null) => {
     if (operation === 'add') {
       const newServers = [...availableServers, { url: '' }];
@@ -33,17 +33,17 @@ function ModuleSettings({ moduleId }) {
     }
   };
 
-  const handleInterceptorsChange = (operation, index = null, field = null, value = null) => {
-    if (operation === 'add') {
-      const newInterceptors = [...interceptors, RequestInterceptors];
-      setInterceptors(newInterceptors);
-    }
-    if (operation === 'update') {
-      const newInterceptors = [...interceptors];
-      newInterceptors[index][field] = value;
-      setInterceptors(newInterceptors);
-    }
-  };
+  // const handleInterceptorsChange = (operation, index = null, field = null, value = null) => {
+  //   if (operation === 'add') {
+  //     const newInterceptors = [...interceptors, RequestInterceptors];
+  //     setInterceptors(newInterceptors);
+  //   }
+  //   if (operation === 'update') {
+  //     const newInterceptors = [...interceptors];
+  //     newInterceptors[index][field] = value;
+  //     setInterceptors(newInterceptors);
+  //   }
+  // };
   return (
     <div className="row h-100">
       <div className="d-flex justify-content-between flex-column">
@@ -129,7 +129,7 @@ function ModuleSettings({ moduleId }) {
             </div>
 
             {/* {Interceptors Section } */}
-            <div className="row">
+            {/* <div className="row">
               <div className="col-sm-3">
                 <label className="br-text-primary" htmlFor="module-name">
                   Interceptors:
@@ -187,7 +187,7 @@ function ModuleSettings({ moduleId }) {
                             defaultValue={interceptor.interceptorCode}
                             // onChange={(value) => handleChange('defaultValue', value)}
                             language="javascript"
-                            height="50px"
+                            height="70px"
                             theme={projectTheme}
                             config={{ label: 'Default Value' }}
                           />
@@ -201,7 +201,7 @@ function ModuleSettings({ moduleId }) {
                             defaultValue={interceptor.errorCode}
                             // onChange={(value) => handleChange('defaultValue', value)}
                             language="javascript"
-                            height="50px"
+                            height="70px"
                             theme={projectTheme}
                             config={{ label: 'Default Value' }}
                           />
@@ -213,7 +213,7 @@ function ModuleSettings({ moduleId }) {
                   <p>No interceptors available</p>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="d-flex justify-content-end mb-3">

@@ -1,10 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { schemaTemplate } from '../constants/templates';
 import { useEffect, useState } from 'react';
-import { fetchSchemas } from '../redux/schemaConfigActions';
+import { fetchSchemas, handleDeleteSchema } from '../redux/schemaConfigActions';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { isEqual } from 'lodash';
+import { deleteSchemaFromList } from '../redux/schemaConfigReducers';
+import { deleteModuleById, fetchModules } from '../../service-configuration/redux/ApiClientActions';
 
 function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSchema, setSelectedSchema }) {
   const schemaList = useSelector((state) => state.schemas.schemaList[moduleId]);
@@ -20,6 +22,18 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
 
   const toggleModuleExpand = () => {
     setIsOpen(!isOpen);
+  };
+
+  const deleteSchema = async (id) => {
+    const res = await dispatch(
+      handleDeleteSchema({ projectName, payload: { schemaId: id, moduleId: moduleId } })
+    ).unwrap();
+    if (res && res.message) dispatch(deleteSchemaFromList({ schemaId: id, moduleId: moduleId }));
+  };
+
+  const handleDeleteModule = async (moduleId) => {
+    await dispatch(deleteModuleById({ projectName, payload: { moduleId } })).unwrap();
+    await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
   };
 
   useEffect(() => {
@@ -38,18 +52,26 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
         }}
       >
         <div className="d-flex justify-content-between">
-          <span className="p-1 mx-1 br-text-primary">{title}</span>
-          <i
-            className="bi bi-plus-circle mx-1 mt-1"
-            style={{ cursor: 'pointer' }}
-            title="add-schema"
-            onClick={(e) => {
-              e.stopPropagation();
-              setCurrentSchema(schemaTemplate);
-              setSelectedModule(moduleId);
-              setView('SCHEMA_CONFIG');
-            }}
-          ></i>
+          <span className="p-1 mx-1 br-text-primary">{title.length > 30 ? `${title.slice(0, 30)}...` : title}</span>
+          <div className="mt-1">
+            <i
+              className="bi bi-plus-circle mx-1 mt-1"
+              style={{ cursor: 'pointer' }}
+              title="add-schema"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentSchema(schemaTemplate);
+                setSelectedModule(moduleId);
+                setView('SCHEMA_CONFIG');
+              }}
+            ></i>
+            <i
+              className="bi bi-trash mx-1 mt-1"
+              style={{ cursor: 'pointer' }}
+              title="delete-module"
+              onClick={() => handleDeleteModule(moduleId)}
+            ></i>
+          </div>
         </div>
       </div>
       {isOpen &&
@@ -65,8 +87,25 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
                 setView('SCHEMA_CONFIG');
               }}
             >
-              <i className="bi bi-dot"></i> {schema.name}
-              {schema.isUnresolved && <i className="bi bi-exclamation-circle text-danger mx-2"></i>}
+              <div className="d-flex justify-content-between">
+                <span className="p-1 mx-1 br-text-primary">
+                  <i className="bi bi-dot"></i>
+                  {schema.name.length > 30 ? `${schema.name.slice(0, 30)}...` : schema.name}
+                </span>
+
+                <div>
+                  {schema.isUnresolved && <i className="bi bi-exclamation-circle text-danger mx-2 mt-1"></i>}
+                  <i
+                    className="bi bi-trash mx-1 mt-1"
+                    style={{ cursor: 'pointer' }}
+                    title="delete-schema"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSchema(key);
+                    }}
+                  ></i>
+                </div>
+              </div>
             </div>
           ))
         ) : (

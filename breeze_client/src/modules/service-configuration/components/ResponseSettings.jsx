@@ -29,6 +29,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   const dispatch = useDispatch();
   const { projectName } = useParams();
   const [properties, setProperties] = useState([]);
+  const [selectedProperty, setSelectedProperty] = useState(null);
 
   useEffect(() => {
     if (status === 'ready' && moduleId)
@@ -173,6 +174,10 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     });
   };
 
+  const handlePropertySelection = (propName) => {
+    setSelectedProperty((prev) => (prev === propName ? null : propName));
+  };
+
   const renderResponses = () => {
     if (!response || response.length === 0) {
       return null;
@@ -201,6 +206,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                     onChange={(e) => handleInputChange(index, 'status', e)}
                     options={[
                       { label: 'S_200', value: 'S_200' },
+                      { label: 'S_201', value: 'S_201' },
                       { label: 'S_400', value: 'S_400' },
                       { label: 'S_404', value: 'S_404' },
                       { label: 'S_500', value: 'S_500' },
@@ -219,6 +225,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                     <table className="table table-bordered br-background-secondary" style={{ borderColor: 'gray' }}>
                       <thead>
                         <tr className="br-background-secondary">
+                          <th className="br-background-secondary br-text-primary">Save as Token</th>
                           <th className="br-background-secondary br-text-primary">Property</th>
                           <th className="br-background-secondary br-text-primary">Storage Key</th>
                           <th className="br-background-secondary br-text-primary">Save As</th>
@@ -227,10 +234,17 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                       <tbody>
                         {properties.map((prop, idx) => (
                           <tr key={idx}>
+                            <td className="br-background-secondary br-text-primary">
+                              <input
+                                type="checkbox"
+                                checked={selectedProperty === prop.name}
+                                onChange={() => handlePropertySelection(prop.name)}
+                              />
+                            </td>
                             <td className="br-background-secondary br-text-primary">{prop.name}</td>
                             <td className="br-background-secondary br-text-primary">
                               <CustomTextInput
-                                className=" form-control br-form-control form-control-sm"
+                                className="form-control br-form-control form-control-sm"
                                 placeholder="Storage Key"
                                 value={res.token_store[`${prop.name}`]?.storage_key || ''}
                                 onChange={(e) => handleInputChange(index, 'token_store', e, prop.name, 'storage_key')}
@@ -316,6 +330,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
             options={[
               { value: '', label: 'Select' },
               { label: 'S_200', value: 'S_200' },
+              { label: 'S_201', value: 'S_201' },
               { label: 'S_400', value: 'S_400' },
               { label: 'S_404', value: 'S_404' },
               { label: 'S_500', value: 'S_500' },
@@ -327,55 +342,59 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
             onChange={(e) => handleSchemaChange(e)}
             options={schemaOptions}
           />
-          {isAuthApi && newResponse.status === 'S_200' && (
-            <>
-              {properties.length > 0 && (
-                <div className="mt-3 w-100">
-                  <table
-                    className="table table-bordered br-background-secondary"
-                    style={{ borderColor: 'gray', fontSize: '14px' }}
-                  >
-                    <thead>
-                      <tr className="br-background-secondary br-text-primary">
-                        <th className="br-background-secondary br-text-primary">Property</th>
-                        <th className="br-background-secondary br-text-primary">Storage Key</th>
-                        <th className="br-background-secondary br-text-primary">Save As</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {properties.map((prop, idx) => (
-                        <tr key={idx} className="br-background-secondary br-text-primary">
-                          <td className="br-background-secondary br-text-primary">{prop.name}</td>
-                          <td className="br-background-secondary br-text-primary">
-                            <CustomTextInput
-                              className=" form-control br-form-control form-control-sm"
-                              placeholder="Storage Key"
-                              value={newResponse.token_store[`${prop.name}`]?.storage_key || ''}
-                              onChange={(e) => handlePropertyChange(prop.name, 'storage_key', e)}
-                            />
-                          </td>
-                          <td className="br-background-secondary br-text-primary">
-                            <CustomSelectField
-                              name="valueSelect"
-                              value={newResponse.token_store[`${prop.name}`]?.store_in || ''}
-                              onChange={(e) => handlePropertyChange(prop.name, 'store_in', e)}
-                              options={[
-                                { label: 'Select', value: '' },
-                                { label: 'DontSave', value: 'DontSave' },
-                                { label: 'COOKIE', value: 'COOKIE' },
-                                { label: 'LOCAL STORAGE', value: 'LOCAL_STORAGE' },
-                                { label: 'SESSION', value: 'SESSION' },
-                              ]}
-                              className="form-select br-form-select form-select-sm"
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </>
+          {isAuthApi && newResponse.status === 'S_200' && properties.length > 0 && (
+            <div className="mt-3 w-100">
+              <table
+                className="table table-bordered br-background-secondary"
+                style={{ borderColor: 'gray', fontSize: '14px' }}
+              >
+                <thead>
+                  <tr className="br-background-secondary br-text-primary">
+                    <th className="br-background-secondary br-text-primary">Save as Token</th>
+                    <th className="br-background-secondary br-text-primary">Property</th>
+                    <th className="br-background-secondary br-text-primary">Storage Key</th>
+                    <th className="br-background-secondary br-text-primary">Save As</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {properties.map((prop, idx) => (
+                    <tr key={idx} className="br-background-secondary br-text-primary">
+                      <td className="br-background-secondary br-text-primary">
+                        <input
+                          type="checkbox"
+                          checked={selectedProperty === prop.name}
+                          onChange={() => handlePropertySelection(prop.name)}
+                        />
+                      </td>
+                      <td className="br-background-secondary br-text-primary">{prop.name}</td>
+                      <td className="br-background-secondary br-text-primary">
+                        <CustomTextInput
+                          className="form-control br-form-control form-control-sm"
+                          placeholder="Storage Key"
+                          value={newResponse.token_store[`${prop.name}`]?.storage_key || ''}
+                          onChange={(e) => handlePropertyChange(prop.name, 'storage_key', e)}
+                        />
+                      </td>
+                      <td className="br-background-secondary br-text-primary">
+                        <CustomSelectField
+                          name="valueSelect"
+                          value={newResponse.token_store[`${prop.name}`]?.store_in || ''}
+                          onChange={(e) => handlePropertyChange(prop.name, 'store_in', e)}
+                          options={[
+                            { label: 'Select', value: '' },
+                            { label: 'DontSave', value: 'DontSave' },
+                            { label: 'COOKIE', value: 'COOKIE' },
+                            { label: 'LOCAL STORAGE', value: 'LOCAL_STORAGE' },
+                            { label: 'SESSION', value: 'SESSION' },
+                          ]}
+                          className="form-select br-form-select form-select-sm"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
         <div className="d-flex align-items-center">

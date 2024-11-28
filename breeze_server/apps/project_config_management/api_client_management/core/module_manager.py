@@ -115,9 +115,27 @@ def delete_helper(project_id,module_id, file_id = None, function_id = None):
             pass
         else:
             if module_id in swagger_metadata:
+                
+                interceptor_file_id = swagger_metadata[module_id].get("interceptor_file_id")
+                
                 del swagger_metadata[module_id]
                 append_to_dict_file(swagger_metadata_path, swagger_metadata,False)
                 shutil.rmtree(base_path)
+                
+                #delete interceptor file
+                directory_manager = DirectoryManager(project_name=project_id)
+                directory_manager.delete_node(interceptor_file_id)
+                
+                #also delete related models
+                models_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
+                models_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
+                with open(models_index_path, 'r') as f:
+                    index_content = json.load(f)
+                del index_content[module_id]
+                append_to_dict_file(models_index_path, index_content, False)
+                os.remove(models_file_path)
+                
+                #remove from directory manager too
                 directory_manager = DirectoryManager(project_name=project_id)
                 directory_manager.delete_node(module_id, True)
                 return {"message": "Module deleted successfully"},200

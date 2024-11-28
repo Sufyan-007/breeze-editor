@@ -20,6 +20,7 @@ import AddModule from '../components/AddModule';
 import { isValidApiStructure } from '../constants/ValidatorFunctions';
 import { fetchSchemas } from '../../schema-configuration/redux/schemaConfigActions';
 import ModuleSettings from '../components/ModuleSettings';
+import InterceptorSettings from '../components/InterceptorSettings';
 function ServiceConfiguration() {
   const { transformedOptions, message, status } = useSelector((state) => state.services);
   const dispatch = useDispatch();
@@ -112,9 +113,7 @@ function ServiceConfiguration() {
       await dispatch(editFunction({ projectName, operation, payload })).unwrap();
     }
     await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
-    // if (operation === 'ADD') {
     dispatch(fetchFiles({ projectName, payload: { category: 'api_client', module: selectedModule.id } })).unwrap();
-    // }
     await dispatch(
       fetchFunctions({
         projectName,
@@ -165,7 +164,7 @@ function ServiceConfiguration() {
 
       <div className="row h-100 br-background-primary">
         <div
-          className="col-sm-3 "
+          className="col-sm-3"
           style={{
             borderRight: '1px solid rgba(128, 128, 128, 0.5)',
           }}
@@ -277,6 +276,7 @@ function ServiceConfiguration() {
                   title="Response Settings"
                   responseType="response"
                 />
+                <InterceptorSettings moduleId={selectedModule && selectedModule.id} selectedApi={selectedAuthApi} />
               </div>
             </>
           ) : view === 'IMPORT_API' ? (

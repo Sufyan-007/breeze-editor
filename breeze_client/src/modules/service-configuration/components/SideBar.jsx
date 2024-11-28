@@ -9,28 +9,6 @@ import { useSelector } from 'react-redux';
 function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSelectedFile, setSelectedAuthApi }) {
   const { moduleList } = useSelector((state) => state.services);
 
-  const [expandedAuthModules, setExpandedAuthModules] = useState([]);
-  const [editingModule, setEditingModule] = useState(null);
-  const [newModuleTitle, setNewModuleTitle] = useState('');
-
-  const toggleAuthModuleExpansion = (module) => {
-    const isExpanded = expandedAuthModules.includes(module);
-    setExpandedAuthModules((prev) => (isExpanded ? prev.filter((title) => title !== module) : [...prev, module]));
-  };
-
-  const handleInputChange = (value) => {
-    setNewModuleTitle(value);
-  };
-
-  const toggleEditing = (title) => {
-    if (editingModule === title) {
-      setEditingModule(null);
-      setNewModuleTitle('');
-    } else {
-      setEditingModule(title);
-      setNewModuleTitle(title);
-    }
-  };
   const onAuthSelect = (api, moduleName, moduleId) => {
     setSelectedModule({
       name: moduleName,
@@ -94,7 +72,7 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
           </span>
         )}
       </div>
-      <div id="schemas-div" className="h-50 overflow-auto">
+      <div id="auth-div" className="h-50 overflow-auto">
         <div className="br-text-primary mt-2 d-flex justify-content-between">
           <h5 style={{ fontSize: '18px' }}>Authentication Config</h5>
           <i
@@ -110,47 +88,9 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
         {Object.keys(moduleList).length > 0
           ? Object.entries(moduleList).map(([folderKey, value]) => (
               <div key={folderKey} className="my-2">
-                <div onClick={() => toggleAuthModuleExpansion(folderKey)} style={{ cursor: 'pointer' }}>
-                  <div
-                    className={`d-flex justify-content-between align-items-center mb-2 p-1 br-text-primary ${expandedAuthModules.includes(folderKey) ? 'br-background-secondary' : 'br-background-primary'}`}
-                  >
-                    <div>
-                      {editingModule === value.title ? (
-                        <CustomTextInput
-                          value={newModuleTitle}
-                          className="form-control form-control-sm br-text-primary br-background-primary"
-                          onChange={handleInputChange}
-                          onBlur={() => saveTitle(value.title, folderKey, newModuleTitle)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              saveTitle(value.title, folderKey, newModuleTitle);
-                            } else if (e.key === 'Escape') {
-                              toggleEditing(value.title);
-                            }
-                          }}
-                          autoFocus
-                        />
-                      ) : (
-                        <div className="">
-                          <img
-                            width="20"
-                            height="20"
-                            src="https://img.icons8.com/ios-filled/50/AAAAAA/module.png"
-                            alt="module"
-                          />
-                          <span className="mx-2 br-text-primary">
-                            {value.title.length > 30 ? `${value.title.slice(0, 30)}...` : value.title}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <i className="bi bi-pencil-square" onClick={() => toggleEditing(value.title)}></i>
-                  </div>
-                </div>
-                {expandedAuthModules.includes(folderKey) && editingModule === null && (
-                  <div className="br-background-primary br-text-primary mx-1" style={{ cursor: 'pointer' }}>
-                    {Object.keys(value['auth_apis'])?.length > 0 ? (
-                      Object.entries(value['auth_apis']).map(([funcId, funcVal]) => (
+                {
+                  Object.keys(value['auth_apis'])?.length > 0
+                    ? Object.entries(value['auth_apis']).map(([funcId, funcVal]) => (
                         <ShowFunctions
                           key={funcId}
                           functionId={funcId}
@@ -159,13 +99,11 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
                           moduleId={folderKey}
                         />
                       ))
-                    ) : (
-                      <span className="mx-4 my-2 br-text-primary" style={{ fontSize: '14px' }}>
-                        No services found
-                      </span>
-                    )}
-                  </div>
-                )}
+                    : null
+                  // <span className="mx-4 my-2 br-text-primary" style={{ fontSize: '14px' }}>
+                  //   No functions found
+                  // </span>
+                }
               </div>
             ))
           : null}

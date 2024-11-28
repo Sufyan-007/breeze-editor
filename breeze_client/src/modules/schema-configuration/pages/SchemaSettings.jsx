@@ -62,7 +62,7 @@ function SchemaSettings() {
   return (
     <div className="container-fluid h-100 overflow-auto">
       <div className="row h-100 br-background-primary">
-        <div className="col-sm-3 h-100" style={{ borderRight: '1px solid rgba(128, 128, 128, 0.5)' }}>
+        <div className="col-sm-3 h-100 overflow-auto" style={{ borderRight: '1px solid rgba(128, 128, 128, 0.5)' }}>
           <div className="mt-2 d-flex justify-content-between">
             <h5 className="mt-1 br-text-primary">Schema Configuration</h5>
             <i

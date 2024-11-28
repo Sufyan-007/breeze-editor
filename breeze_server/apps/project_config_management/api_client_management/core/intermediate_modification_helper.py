@@ -3,7 +3,10 @@ from ..utils.append_dict_file import append_to_dict_file
 from ....common.utils.uuid_as_key import generate_uuid_as_key
 from .api_model_loader import ApiModelLoader
 from ....common.constants.consts import CONFIG_PATH, CLIENT_API
-
+from ..consts.module_interceptor_template import MODULE_INTERCEPTOR_CODE
+from ....code_generator.core.api_client_generator import generate_interceptors_code
+from ....directory_management.core.directory_management_service import DirectoryManager
+from ....code_generator.core.api_client_generator import generate_react_service
 
 def process_api_data(operation, modified_api, filename, project_name, moduleId):
     api_client_index_path = (
@@ -82,22 +85,48 @@ def add_auth_function(auth_model, appName, moduleId,operation):
     json_data = {}
     if operation == "ADD":
         auth_model["id"] = generate_uuid_as_key()
+    if not auth_model.get("auth_api_type"):
+        auth_model["auth_api_type"] = "LOGIN"
     with open(folder_path) as fp:
         json_data = json.load(fp)
         auth_api_data = json_data[moduleId].get("auth_apis", {})
         auth_api_data[auth_model.get("id")] = auth_model
         json_data[moduleId]["auth_apis"] = auth_api_data
         append_to_dict_file(folder_path, json_data)
-        return {'message': 'added successfully'},200
+    #generate the file
+    generate_react_service(appName, moduleId+'_auth', "AUTH", moduleId, security_schemes= json_data[moduleId]["security_schemes"], module_name='')
+    
+    # #generate the interceptors
+    # module_interceptor_code = MODULE_INTERCEPTOR_CODE
+    # interceptor_file_id = json_data[moduleId]["interceptor_file_id"]
+    # auth_interceptor_code,interceptor_id = generate_interceptors_code(json_data[moduleId]["interceptors"], auth_model, json_data[moduleId]["security_schemes"],folder_path,moduleId)    
+    # module_interceptor_code = module_interceptor_code.replace('{AUTH_INTERCEPTORS_CODE}',auth_interceptor_code)
+    # module_interceptor_code = module_interceptor_code.replace('{AUTH_ERROR_INTERCEPTORS_CODE}', '')
+    # directory_manager = DirectoryManager(project_name=project_name)
+    # directory_manager.save_file(interceptor_file_id,module_interceptor_code)
+
+    return {'message': 'added successfully'},200
 
 
-def transfer_data_to_auth(filename, id_value, file_path, target_file_path, module_id):
+def create_token_store(properties):
+    """Helper function to create token store from response schema properties."""
+    token_store = {}
+    for prop_name, prop_info in properties.items():
+        if prop_info.get("type") == 'string':
+            token_store[prop_name] = {"store_in": "LOCAL_STORAGE", "storage_key": prop_name}
+        elif prop_info.get("types"):
+            for type_info in prop_info.get("types"):
+                if type_info.get("type") == 'string':
+                    token_store[prop_name] = {"store_in": "LOCAL_STORAGE", "storage_key": prop_name}
+    return token_store
+
+def transfer_data_to_auth(filename, id_value, file_path, target_file_path, module_id, project_id, is_imported=False, replaced_function_id=None):
     auth_api_template = {
         "id": "",
         "operation_id": "",
         "tags": "",
-        "auth_api_type": "NONE",
-        "authentication_type": "NOAUTH",
+        "auth_api_type": "LOGIN",
+        "authentication_type": "BASIC",
         "request": {
             "method": "POST",
             "auth": [],
@@ -111,6 +140,7 @@ def transfer_data_to_auth(filename, id_value, file_path, target_file_path, modul
         "token_store": {},
         "errors": {},
         "is_authentication_api": True,
+        "interceptor_id": '',
     }
 
     if not filename or not id_value:
@@ -119,22 +149,53 @@ def transfer_data_to_auth(filename, id_value, file_path, target_file_path, modul
     with open(target_file_path, "r") as file:
         swagger_content = json.load(file)
 
-    current_auth_apis = swagger_content.get(module_id).get("auth_apis", {})
-
-    if not os.path.exists(file_path):
-        return {"error": "File not found."}, 404
-
+    current_auth_apis = swagger_content.get(module_id, {}).get("auth_apis", {})
+    security_schemes = swagger_content.get(module_id, {}).get("security_schemes", {})
+    
     with open(file_path, "r+") as file:
         file_data = json.load(file)
         api_info = file_data.get(id_value)
 
-        if not api_info:
-            return {"error": "API ID not found."}, 404
+    if not api_info:
+        return {"error": "API ID not found."}, 404
 
+    if is_imported and replaced_function_id:
+        # Handle function replacement logic
+        replaced_function = current_auth_apis.get(replaced_function_id, {})
+        replaced_function["request"] = api_info["request"]
+        replaced_function["response"] = api_info["response"]
+        
+        # Process token store for response
+        if api_info.get("response"):
+            for idx, res in enumerate(api_info["response"]):
+                if "S_200" in res.get("status", ""):
+                    schema = res.get("schema", {})
+                    if schema and "properties" in schema:
+                        replaced_function["response"][idx]["token_store"] = create_token_store(schema["properties"])
+        
+        current_auth_apis[replaced_function_id] = replaced_function
+        swagger_content[module_id]["auth_apis"] = current_auth_apis
+        append_to_dict_file(target_file_path, swagger_content)
+    
+    else:
+        # Default to first scheme
+        for scheme_info in security_schemes.values():
+            auth_api_template["authentication_type"] = scheme_info["scheme"]
+            break
+        
+        auth_api_template["response"] = api_info["response"]
+
+        # Process token store for response
+        if api_info.get("response"):
+            for idx, res in enumerate(api_info["response"]):
+                if "S_200" in res.get("status", ""):
+                    schema = res.get("schema", {})
+                    if schema and "properties" in schema:
+                        auth_api_template["response"][idx]["token_store"] = create_token_store(schema["properties"])
+            
         auth_api_template["id"] = api_info["id"]
         auth_api_template["operation_id"] = api_info["operation_id"]
         auth_api_template["request"] = api_info["request"]
-        auth_api_template["response"] = api_info["response"]
         auth_api_template["summary"] = api_info["summary"]
 
         model = ApiModelLoader.load_auth_api_model(auth_api_template)
@@ -143,7 +204,13 @@ def transfer_data_to_auth(filename, id_value, file_path, target_file_path, modul
         current_auth_apis[model_json["id"]] = model_json
         swagger_content[module_id]["auth_apis"] = current_auth_apis
         append_to_dict_file(target_file_path, swagger_content)
-        del file_data[id_value]
-        append_to_dict_file(file_path, file_data, False)
+    
+    # Remove the transferred API info from the source file
+    del file_data[id_value]
+    append_to_dict_file(file_path, file_data, False)
 
-        return {"message": "Data transferred successfully."}, 200
+    # Generate the React service
+    generate_react_service(project_id, f"{module_id}_auth", "AUTH", module_id, security_schemes={}, module_name='')
+
+    return {"message": "Data transferred successfully."}, 200
+

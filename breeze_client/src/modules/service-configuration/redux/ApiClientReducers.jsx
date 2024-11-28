@@ -105,7 +105,6 @@ const serviceConfigSlice = createSlice({
             state.functionsList[moduleId] = api;
           }
           state.status = 'succeeded';
-          state.message = action.payload;
         })
         .addCase(editFunction.rejected, (state, action) => {
           state.status = 'failed';

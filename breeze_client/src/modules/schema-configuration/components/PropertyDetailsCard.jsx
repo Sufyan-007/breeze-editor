@@ -45,6 +45,7 @@ function PropertyDetailsCard({
               </div>
               <div className="col-10">
                 <Types
+                  isUnresolved={isUnresolved}
                   propertyData={property}
                   onUpdate={(val) => handleChange(propKey, val)}
                   moduleId={moduleId}
