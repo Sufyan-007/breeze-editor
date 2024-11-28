@@ -3,9 +3,9 @@ import { CustomButtonField, CustomSwitchField, CustomTextInput } from '../../../
 import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 
-function IfBlockConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
+function IfBlockConfigForm({ onSubmit, onCancel, editMode }) {
   const initialIfConfig = JSON.parse(JSON.stringify(funcConfigTemplates['ifBlock']));
-  const [formData, setFormData] = useState(initialData || { ...initialIfConfig });
+  const [formData, setFormData] = useState({ ...initialIfConfig });
 
   const updateCondition = (value) => {
     setFormData((state) => ({
@@ -158,7 +158,6 @@ function IfBlockConfigForm({ onSubmit, onCancel, formData: initialData, editMode
 IfBlockConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 

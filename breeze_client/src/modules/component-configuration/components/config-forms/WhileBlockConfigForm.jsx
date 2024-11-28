@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
 
-function WhileBlockConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
+function WhileBlockConfigForm({ onSubmit, onCancel, editMode }) {
   const initialWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['whileBlock']));
-  const [formData, setFormData] = useState(initialData || { ...initialWhileConfig });
+  const [formData, setFormData] = useState({ ...initialWhileConfig });
 
   function updateCondition(value) {
     setFormData((state) => {
@@ -17,7 +17,7 @@ function WhileBlockConfigForm({ onSubmit, onCancel, formData: initialData, editM
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
-    if (!editMode) setFormData(initialWhileConfig);
+    setFormData(initialWhileConfig);
   };
 
   const handleCancel = (e) => {
@@ -64,7 +64,6 @@ function WhileBlockConfigForm({ onSubmit, onCancel, formData: initialData, editM
 WhileBlockConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 

@@ -11,7 +11,7 @@ import {
 import { BreezeDatatypes, DeclarationTypes } from '../../constants/FormConstants';
 import { initialVariableConfig } from '../../constants/ResourcesFormData';
 
-function VariableConfigForm({ onSubmit, onCancel }) {
+function VariableConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialVariableConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
@@ -24,7 +24,14 @@ function VariableConfigForm({ onSubmit, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    const transformedData = {
+      ...formData,
+      value: {
+        type: ['STRING', 'NUMBER', 'BOOLEAN'].includes(formData.dataType) ? formData.dataType : 'CUSTOM',
+        value: formData.defaultValue,
+      },
+    };
+    onSubmit(transformedData);
     setFormData(initialVariableConfig);
   };
 
@@ -90,7 +97,12 @@ function VariableConfigForm({ onSubmit, onCancel }) {
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -100,6 +112,7 @@ function VariableConfigForm({ onSubmit, onCancel }) {
 VariableConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
+  editMode: PropTypes.bool,
 };
 
 export default VariableConfigForm;

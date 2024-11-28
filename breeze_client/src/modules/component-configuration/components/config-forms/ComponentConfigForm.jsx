@@ -5,8 +5,8 @@ import { initialComponentConfig, initialPropConfig } from '../../constants/Resou
 import PropConfigForm from './PropConfigForm';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
 
-function ComponentConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
-  const [formData, setFormData] = useState(initialData || initialComponentConfig);
+function ComponentConfigForm({ onSubmit, onCancel, editMode }) {
+  const [formData, setFormData] = useState(initialComponentConfig);
   const [isPropFormVisible, setIsPropFormVisible] = useState(false);
   const [editPropIndex, setPropEditIndex] = useState(null);
   const [propData, setPropData] = useState(initialPropConfig);
@@ -27,8 +27,8 @@ function ComponentConfigForm({ onSubmit, onCancel, formData: initialData, editMo
   };
 
   const handleDeleteParam = (index) => {
-    const updatedProps = formData.propsVar.filter((_, i) => i !== index);
-    setFormData({ ...formData, propsVar: updatedProps });
+    const updatedProps = formData.propVars.filter((_, i) => i !== index);
+    setFormData({ ...formData, propVars: updatedProps });
     clearPropForm();
   };
 
@@ -40,13 +40,13 @@ function ComponentConfigForm({ onSubmit, onCancel, formData: initialData, editMo
   };
 
   const addOrUpdateProp = (propData) => {
-    const updatedProps = [...formData.propsVar];
+    const updatedProps = [...formData.propVars];
     if (editPropIndex !== null) {
       updatedProps[editPropIndex] = propData;
     } else {
       updatedProps.push(propData);
     }
-    setFormData({ ...formData, propsVar: updatedProps });
+    setFormData({ ...formData, propVars: updatedProps });
     clearPropForm();
   };
 
@@ -103,15 +103,15 @@ function ComponentConfigForm({ onSubmit, onCancel, formData: initialData, editMo
                     <i className="bi bi-plus-circle br-text-primary"></i>
                   </div>
                 </div>
-                {formData.propsVar.length > 0 &&
-                  formData.propsVar.map((prop, index) => (
+                {formData.propVars.length > 0 &&
+                  formData.propVars.map((prop, index) => (
                     <div
                       key={index}
                       className="br-background-primary my-1 py-1 px-2 d-flex justify-content-between"
                       style={{ borderRadius: '0.275rem' }}
                     >
                       <div>
-                        <span className="br-text-primary med-font">{prop.propName}</span>
+                        <span className="br-text-primary med-font">{prop.name}</span>
                       </div>
                       <div className="d-flex">
                         <div
@@ -136,7 +136,7 @@ function ComponentConfigForm({ onSubmit, onCancel, formData: initialData, editMo
                       </div>
                     </div>
                   ))}
-                {formData.propsVar.length === 0 && <span className="med-font br-text-primary">No Props Present</span>}
+                {formData.propVars.length === 0 && <span className="med-font br-text-primary">No Props Present</span>}
               </div>
             </div>
           </div>
@@ -176,7 +176,6 @@ function ComponentConfigForm({ onSubmit, onCancel, formData: initialData, editMo
 ComponentConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 

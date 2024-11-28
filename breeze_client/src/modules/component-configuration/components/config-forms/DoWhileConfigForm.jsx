@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
 
-function DoWhileConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
+function DoWhileConfigForm({ onSubmit, onCancel, editMode }) {
   const initialDoWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['doWhileBlock']));
-  const [formData, setFormData] = useState(initialData || { ...initialDoWhileConfig });
+  const [formData, setFormData] = useState({ ...initialDoWhileConfig });
 
   function updateCondition(value) {
     setFormData((state) => {
@@ -17,7 +17,7 @@ function DoWhileConfigForm({ onSubmit, onCancel, formData: initialData, editMode
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
-    if (!editMode) setFormData(initialDoWhileConfig);
+    setFormData(initialDoWhileConfig);
   };
 
   const handleCancel = (e) => {
@@ -64,7 +64,6 @@ function DoWhileConfigForm({ onSubmit, onCancel, formData: initialData, editMode
 DoWhileConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 

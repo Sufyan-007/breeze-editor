@@ -5,8 +5,8 @@ import { initialFunctionConfig, initialParamConfig } from '../../constants/Resou
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
 import ParamForm from '../helper-components/ParamForm';
 
-function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
-  const [formData, setFormData] = useState(initialData || initialFunctionConfig);
+function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
+  const [formData, setFormData] = useState(initialFunctionConfig);
   const [isParamFormVisible, setIsParamFormVisible] = useState(false);
   const [editParamIndex, setParamEditIndex] = useState(null);
   const [paramData, setParamData] = useState(initialParamConfig);
@@ -60,7 +60,7 @@ function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMod
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
-    if (!editMode) setFormData(initialFunctionConfig);
+    setFormData(initialFunctionConfig);
   };
   const handleCancel = (e) => {
     e.preventDefault();
@@ -170,7 +170,12 @@ function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMod
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -180,7 +185,6 @@ function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMod
 FunctionConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 

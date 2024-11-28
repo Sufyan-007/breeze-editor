@@ -47,9 +47,9 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
           <div className="row">
             <div className="col-8">
               <CustomTextInput
-                name="propName"
-                value={formData.propName}
-                onChange={(value) => handleChange('propName', value)}
+                name="name"
+                value={formData.name}
+                onChange={(value) => handleChange('name', value)}
                 config={{
                   label: 'Prop Name',
                   groupClass: 'form-group mb-2',
@@ -114,7 +114,7 @@ PropConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   formData: PropTypes.shape({
-    propName: PropTypes.string,
+    name: PropTypes.string,
     isRequired: PropTypes.bool,
     dataType: PropTypes.string,
     defaultValue: PropTypes.string,

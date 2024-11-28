@@ -11,7 +11,7 @@ import { useCallback, useContext, useState } from 'react';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import { initialStateVarConfig } from '../../constants/ResourcesFormData';
 
-function StateVariableConfigForm({ onSubmit, onCancel }) {
+function StateVariableConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialStateVarConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
@@ -24,7 +24,14 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    const transformedData = {
+      ...formData,
+      value: {
+        type: ['STRING', 'NUMBER', 'BOOLEAN'].includes(formData.dataType) ? formData.dataType : 'CUSTOM',
+        value: formData.defaultValue,
+      },
+    };
+    onSubmit(transformedData);
     setFormData(initialStateVarConfig);
   };
 
@@ -80,7 +87,12 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -90,6 +102,7 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
 StateVariableConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
+  editMode: PropTypes.bool,
 };
 
 export default StateVariableConfigForm;
