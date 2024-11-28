@@ -94,7 +94,6 @@ const directorySlice = createSlice({
       .addCase(addNodeAsync.fulfilled, (state, action) => {
         state.status = 'succeeded';
         const node = action.payload;
-        //TODO : entry as per new ID in directory management.
         if (state.directoryConfig[node.id]) {
           state.directoryConfig[node.id].name = node.tempName;
           delete state.directoryConfig[node.id].tempName;
@@ -102,6 +101,24 @@ const directorySlice = createSlice({
           state.directoryConfig[node.id].isNew = false;
         }
       })
+      //TODO : when connected with API
+      // .addCase(addNodeAsync.fulfilled, (state, action) => {
+      //   state.status = 'succeeded';
+      //   const tempNode = action.meta.arg;
+      //   const node = action.payload;
+      //   if (!state.directoryConfig[node.id]) {
+      //     state.directoryConfig[node.id] = node;
+      //   }
+      //   if (state.directoryConfig[tempNode.node['id']]) {
+      //     delete state.directoryConfig[tempNode.node['id']];
+      //   }
+      //   const parentId = tempNode.node['parentId'];
+      //   if (parentId && state.directoryConfig[parentId]?.children) {
+      //     state.directoryConfig[parentId].children = state.directoryConfig[parentId].children
+      //       .filter((childId) => childId !== tempNode.node['id'])
+      //       .concat(node.id);
+      //   }
+      // })
       .addCase(addNodeAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
