@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from dotenv import load_dotenv
-from ..core.custom_package_service import check_existing_folder, upload_file, get_zip_files, delete_file, set_prop_config, update_resource_config
+from ..core.custom_package_service import check_existing_folder, upload_file, delete_file, set_prop_config_service, update_resource_config , add_prop_config_service, delete_prop_config_service
 from apps.common.constants.consts import PORT  
 from drf_spectacular.utils import extend_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
@@ -24,7 +24,7 @@ from ..utils.get_uploaded_resources import get_uploaded_resources as get_resourc
 @csrf_exempt
 @api_view(['POST'])
 def add_custom_package(request, projectName):
-    file_id = str(uuid.uuid4())
+    file_id = str(uuid.uuid4()).replace("-", "_")
     try:
         file = request.FILES.get('file')
         fileName = request.POST.get("filename")
@@ -115,19 +115,20 @@ def delete_custom_package(request, projectName):
     try:
         data = json.loads(request.body)
         fileName = data.get("fileName")
-        fileId = data.get("fileId")
+        file_id = data.get("fileId")
 
         if not projectName:
             return JsonResponse({'error': 'Project name is required'}, status=400)
 
-        if not fileName or not fileId :
+        if not fileName or not file_id :
             return JsonResponse({'error': 'File name or Id is required'}, status=400)
 
-        delete_file(projectName, fileName, fileId)
+        delete_file(projectName, fileName, file_id)
         return JsonResponse({'message': "File deleted successfully"}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
 @extend_schema(
     methods=['PUT'],
     request=None,
@@ -135,14 +136,15 @@ def delete_custom_package(request, projectName):
 )
 @csrf_exempt
 @api_view(['PUT'])
-def set_component_config(request, projectName):    
+def set_prop_config(request, projectName):    
     try:
-        prop_id= request.data.get('id')
-        new_prop_name = request.data.get('propName')
-        new_type = request.data.get('type')
-        new_default_value = request.data.get('defaultValue')
-        file_name = request.data.get('fileName')
-        component_id =  request.data.get('componentId')
+        data= json.loads(request.body)
+        prop_id= data.get('id')
+        new_prop_name = data.get('prop_name')
+        new_type = data.get('type')
+        new_default_value = data.get('default_value')
+        file_name = data.get('fileName')
+        component_id =  data.get('componentId')
  
         if not projectName:
             return JsonResponse({'error': 'Project name is required'}, status=400)
@@ -150,13 +152,59 @@ def set_component_config(request, projectName):
         if not (prop_id and component_id and file_name):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
         
-        updated_component_config = set_prop_config(projectName, file_name, component_id, prop_id, new_prop_name, new_type, new_default_value)
+        updated_component_config = set_prop_config_service(projectName, file_name, component_id, prop_id, new_prop_name, new_type, new_default_value)
         
         return JsonResponse(updated_component_config, status=200)
     
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
         
+@csrf_exempt
+@api_view(['POST'])
+def add_prop_config(request, projectName):    
+    prop_id = str(uuid.uuid4()).replace("-", "_")
+    try:
+        data= json.loads(request.body)
+        prop_name = data.get('prop_name')
+        type = data.get('type')
+        default_value = data.get('default_value')
+        file_name = data.get('fileName')
+        component_id =  data.get('componentId')
+ 
+        if not projectName:
+            return JsonResponse({'error': 'Project name is required'}, status=400)
+        
+        if not (component_id and file_name):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        add_prop_config_service(projectName, file_name, component_id, prop_id, prop_name, type, default_value)
+        
+        return JsonResponse({'message': "Prop added successfully"}, status=200)
+    
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    
+@csrf_exempt
+@api_view(['DELETE'])
+def delete_prop_config(request, projectName):
+    try:
+        data = json.loads(request.body)
+        prop_id = data.get("propId")
+        file_name = data.get("fileName")
+        component_id = data.get("componentId")
+
+        if not projectName:
+            return JsonResponse({'error': 'Project name is required'}, status=400)
+
+        if not file_name or not component_id or not prop_id :
+            return JsonResponse({'error': 'missing fields'}, status=400)
+
+        delete_prop_config_service(projectName, prop_id,file_name, component_id)
+        return JsonResponse({'message': "File deleted successfully"}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
 # Helper function to handle asynchronous API calls
 def call_external_api_async(api_url, payload, projectName , fileName, file_id):
     try:

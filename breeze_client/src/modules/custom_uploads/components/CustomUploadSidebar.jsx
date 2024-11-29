@@ -5,10 +5,10 @@ import { CustomButtonField } from '../../../common/fields';
 export default function CustomUploadSidebar({ components, selectedFilename, handleClick }) {
   const [selectedKey, setSelectedKey] = useState(null);
   const handleButtonClick = (key) => {
-    console.log(key);
     setSelectedKey(key);
     handleClick(key, selectedFilename);
   };
+
   return (
     <div
       className="br-background-primary"

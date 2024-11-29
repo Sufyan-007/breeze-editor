@@ -6,6 +6,7 @@ from apps.common.constants.consts import CONFIG_PATH
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists
 from apps.common.utils.formatter import format_by_prettier
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
+import copy
 class DirectoryManager:
     def __init__(self,project_name):
         self.project_name = project_name
@@ -139,7 +140,8 @@ class DirectoryManager:
         children = node.get("children",[])
         if children:
             if recursive:
-                for child in children:
+                # This is very intentioanl - Suf
+                for child in [x for x in children]:
                     self.delete_node(child,recursive=True)
             else:
                 raise Exception("Directory contains entries")
