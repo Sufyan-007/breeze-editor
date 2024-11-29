@@ -4,6 +4,7 @@ import { CustomTextInput, CustomCheckBoxField, CustomButtonField, CustomTextArea
 import { initialFunctionConfig, initialParamConfig } from '../../constants/ResourcesFormData';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
 import ParamForm from '../helper-components/ParamForm';
+import { validator } from '../../../../utils/Validator';
 
 function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialFunctionConfig);
@@ -11,6 +12,7 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
   const [editParamIndex, setParamEditIndex] = useState(null);
   const [paramData, setParamData] = useState(initialParamConfig);
   const { setOffcanvasSize } = useOffcanvas();
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData({
@@ -59,12 +61,18 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.name].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     onSubmit(formData);
     setFormData(initialFunctionConfig);
   };
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialFunctionConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -79,27 +87,29 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
             <div>
               <CustomTextInput
                 name="name"
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={(value) => handleChange('name', value)}
                 config={{ label: 'Function Name', groupClass: 'form-group mb-2' }}
+                customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+                isSubmitted={isSubmitted}
               />
               <div className="d-flex mt-3">
                 <CustomCheckBoxField
                   name="isAsync"
-                  value={formData.isAsync}
+                  value={formData.isAsync || false}
                   onChange={(value) => handleChange('isAsync', value)}
                   config={{ label: 'Is Async', groupClass: 'form-check me-2' }}
                 />
                 <CustomCheckBoxField
                   name="isAnonymous"
-                  value={formData.isAnonymous}
+                  value={formData.isAnonymous || false}
                   onChange={(value) => handleChange('isAnonymous', value)}
                   config={{ label: 'Is Anonymous', groupClass: 'form-check mx-2' }}
                 />
               </div>
               <CustomTextArea
                 name="description"
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={(value) => handleChange('description', value)}
                 config={{ label: 'Description', groupClass: 'form-group mb-2' }}
               />

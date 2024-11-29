@@ -2,10 +2,12 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
+import { validator } from '../../../../utils/Validator';
 
 function WhileBlockConfigForm({ onSubmit, onCancel, editMode }) {
   const initialWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['whileBlock']));
   const [formData, setFormData] = useState({ ...initialWhileConfig });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   function updateCondition(value) {
     setFormData((state) => {
@@ -16,6 +18,11 @@ function WhileBlockConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.condition.value].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     onSubmit(formData);
     setFormData(initialWhileConfig);
   };
@@ -23,6 +30,7 @@ function WhileBlockConfigForm({ onSubmit, onCancel, editMode }) {
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialWhileConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -33,12 +41,14 @@ function WhileBlockConfigForm({ onSubmit, onCancel, editMode }) {
           <div>
             <CustomTextInput
               name="whileCondition"
-              value={formData?.condition.value}
+              value={formData?.condition.value || ''}
               onChange={(value) => updateCondition(value)}
               config={{
                 label: 'While Condition',
                 groupClass: 'form-group mb-2',
               }}
+              customValidations={[validator.REQUIRED]}
+              isSubmitted={isSubmitted}
             />
           </div>
         </div>

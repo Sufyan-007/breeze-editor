@@ -10,11 +10,13 @@ import { BreezeDatatypes } from '../../constants/FormConstants';
 import { useCallback, useContext, useState } from 'react';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import { initialRefVarConfig } from '../../constants/ResourcesFormData';
+import { validator } from '../../../../utils/Validator';
 
 function RefVarConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialRefVarConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = useCallback((field, value) => {
     setFormData((formData) => {
@@ -24,6 +26,11 @@ function RefVarConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.varName].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     const transformedData = {
       ...formData,
       value: {
@@ -38,6 +45,7 @@ function RefVarConfigForm({ onSubmit, onCancel, editMode }) {
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialRefVarConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -47,12 +55,14 @@ function RefVarConfigForm({ onSubmit, onCancel, editMode }) {
         <div>
           <CustomTextInput
             name="varName"
-            value={formData.varName}
+            value={formData.varName || ''}
             onChange={(value) => handleChange('varName', value)}
             config={{
               label: 'Variable Name',
               groupClass: 'form-group mb-2',
             }}
+            customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+            isSubmitted={isSubmitted}
           />
           <CustomSelectField
             name="dataType"

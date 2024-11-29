@@ -11,6 +11,7 @@ import { availableDependentVars } from '../../constants/FormConstants';
 import { initialUseCallbackConfig, initialParamConfig } from '../../constants/ResourcesFormData';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
 import ParamForm from '../helper-components/ParamForm';
+import { validator } from '../../../../utils/Validator';
 
 function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialUseCallbackConfig);
@@ -19,6 +20,7 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
   const [paramData, setParamData] = useState(initialParamConfig);
   const { setOffcanvasSize } = useOffcanvas();
   const [selectedDependencies, setSelectedDependencies] = useState([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (field, value) => {
     let updatedData = { ...formData };
@@ -76,13 +78,20 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.name].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     onSubmit(formData);
-    if (!editMode) setFormData(initialUseCallbackConfig);
+    setFormData(initialUseCallbackConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialUseCallbackConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -97,20 +106,22 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
             <div>
               <CustomTextInput
                 name="hookName"
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={(value) => handleChange('name', value)}
                 config={{ label: 'Hook Name', groupClass: 'form-group mb-2' }}
+                customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+                isSubmitted={isSubmitted}
               />
               <CustomTextArea
                 name="hookDescription"
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={(value) => handleChange('description', value)}
                 config={{ label: 'Hook Description', groupClass: 'form-group mb-2' }}
               />
 
               <CustomMultiSelectField
                 name="dependencies"
-                values={selectedDependencies}
+                values={selectedDependencies || []}
                 onChange={(value) => handleChange('dependencies', value)}
                 options={availableDependentVars}
                 config={{
@@ -121,7 +132,7 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
               <div>
                 <CustomCheckBoxField
                   name="isAsync"
-                  value={formData.callback.isAsync}
+                  value={formData.callback.isAsync || false}
                   onChange={(value) => handleChange('isAsync', value)}
                   config={{ label: 'Is Async', groupClass: 'form-check me-2' }}
                 />
@@ -139,7 +150,7 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
                       style={{ borderRadius: '0.275rem' }}
                     >
                       <div>
-                        <span className="br-text-primary med-font">{param.name}</span>
+                        <span className="br-text-primary med-font">{param.name || ''}</span>
                       </div>
                       <div className="d-flex">
                         <div

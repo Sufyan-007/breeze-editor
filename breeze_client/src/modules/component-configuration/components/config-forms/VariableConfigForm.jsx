@@ -10,11 +10,13 @@ import {
 } from '../../../../common/fields';
 import { BreezeDatatypes, DeclarationTypes } from '../../constants/FormConstants';
 import { initialVariableConfig } from '../../constants/ResourcesFormData';
+import { validator } from '../../../../utils/Validator';
 
 function VariableConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialVariableConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = useCallback((field, value) => {
     setFormData((formData) => {
@@ -24,6 +26,11 @@ function VariableConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.varName, formData.declarationType, formData.dataType].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     const transformedData = {
       ...formData,
       value: {
@@ -38,6 +45,7 @@ function VariableConfigForm({ onSubmit, onCancel, editMode }) {
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialVariableConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -47,36 +55,43 @@ function VariableConfigForm({ onSubmit, onCancel, editMode }) {
         <div>
           <CustomTextInput
             name="varName"
-            value={formData.varName}
+            value={formData.varName || ''}
             onChange={(value) => handleChange('varName', value)}
             config={{
               label: 'Variable Name',
               groupClass: 'form-group mb-2',
             }}
+            customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+            isSubmitted={isSubmitted}
           />
           <CustomSelectField
             name="declarationType"
-            value={formData.declarationType}
+            value={formData.declarationType || 'const'}
             onChange={(value) => handleChange('declarationType', value)}
             options={DeclarationTypes}
             config={{
               label: 'Declaration Type',
               groupClass: 'form-group mb-2',
             }}
+            customValidations={[validator.REQUIRED]}
+            isSubmitted={isSubmitted}
           />
           <CustomSelectField
             name="dataType"
-            value={formData.dataType}
+            value={formData.dataType || 'CUSTOM'}
             onChange={(value) => handleChange('dataType', value)}
             options={BreezeDatatypes}
             config={{
               label: 'Data Type',
               groupClass: 'form-group mb-2',
             }}
+            customValidations={[validator.REQUIRED]}
+            isSubmitted={isSubmitted}
           />
           <label className="form-label br-text-primary med-font fw-semibold">Default Value</label>
+          {formData.declarationType === 'const' && <span className="text-danger"> *</span>}
           <MonacoEditor
-            defaultValue={formData.defaultValue}
+            defaultValue={formData.defaultValue || ''}
             onChange={(value) => handleChange('defaultValue', value)}
             language="javascript"
             height="100px"

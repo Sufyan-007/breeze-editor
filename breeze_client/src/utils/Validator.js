@@ -36,6 +36,10 @@ const projectNameValidation = (value) => {
   return /[^a-zA-Z0-9_-]/.test(value) ? 'Project name should not contain special characters!' : '';
 };
 
+const shouldNotContainSpaces = (value) => {
+  return /\s/.test(value) ? 'Cannot contain spaces.' : '';
+};
+
 export const validator = {
   REQUIRED: required,
   NUMBER_VALIDATION: numberValidation,
@@ -46,4 +50,5 @@ export const validator = {
   CONFIRM_PASSWORD_VALIDATION: confirmPasswordValidation,
   PHONE_VALIDATION: phoneValidation,
   PROJECT_NAME_VALIDATION: projectNameValidation,
+  CANNOT_CONTAIN_SPACE: shouldNotContainSpaces,
 };

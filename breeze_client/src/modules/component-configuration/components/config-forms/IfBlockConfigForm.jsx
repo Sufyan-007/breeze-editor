@@ -2,10 +2,12 @@ import PropTypes from 'prop-types';
 import { CustomButtonField, CustomSwitchField, CustomTextInput } from '../../../../common/fields';
 import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
+import { validator } from '../../../../utils/Validator';
 
 function IfBlockConfigForm({ onSubmit, onCancel, editMode }) {
   const initialIfConfig = JSON.parse(JSON.stringify(funcConfigTemplates['ifBlock']));
   const [formData, setFormData] = useState({ ...initialIfConfig });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const updateCondition = (value) => {
     setFormData((state) => ({
@@ -56,13 +58,19 @@ function IfBlockConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.condition.value].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     onSubmit(formData);
-    if (!editMode) setFormData(initialIfConfig);
+    setFormData(initialIfConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialIfConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -73,12 +81,14 @@ function IfBlockConfigForm({ onSubmit, onCancel, editMode }) {
           <div>
             <CustomTextInput
               name="ifCondition"
-              value={formData?.condition.value}
+              value={formData?.condition.value || ''}
               onChange={(value) => updateCondition(value)}
               config={{
                 label: 'If Condition',
                 groupClass: 'form-group mb-2',
               }}
+              customValidations={[validator.REQUIRED]}
+              isSubmitted={isSubmitted}
             />
           </div>
           <div>
