@@ -115,6 +115,21 @@ export const addNodeApi = async (projectName, node) => {
   }
 };
 
+// export const addNodeApi = async (projectName, node) => {
+//   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/file/add/`;
+//   const payload = {
+//     fileName: node.tempName,
+//     parentId: node.parentId,
+//   };
+//   try {
+//     const response = await callApiClient(url, 'POST', payload, false, {}, true, true);
+//     return response;
+//   } catch (error) {
+//     console.error('Error adding node:', error.message);
+//     throw error;
+//   }
+// };
+
 export const renameNodeApi = async (projectName, nodeId, newName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/rename-file/`;
   const payload = {

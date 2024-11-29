@@ -4,13 +4,15 @@ import { CustomTextInput, CustomCheckBoxField, CustomButtonField, CustomTextArea
 import { initialFunctionConfig, initialParamConfig } from '../../constants/ResourcesFormData';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
 import ParamForm from '../helper-components/ParamForm';
+import { validator } from '../../../../utils/Validator';
 
-function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
-  const [formData, setFormData] = useState(initialData || initialFunctionConfig);
+function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
+  const [formData, setFormData] = useState(initialFunctionConfig);
   const [isParamFormVisible, setIsParamFormVisible] = useState(false);
   const [editParamIndex, setParamEditIndex] = useState(null);
   const [paramData, setParamData] = useState(initialParamConfig);
   const { setOffcanvasSize } = useOffcanvas();
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData({
@@ -59,12 +61,18 @@ function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMod
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.name].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     onSubmit(formData);
-    if (!editMode) setFormData(initialFunctionConfig);
+    setFormData(initialFunctionConfig);
   };
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialFunctionConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -79,27 +87,29 @@ function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMod
             <div>
               <CustomTextInput
                 name="name"
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={(value) => handleChange('name', value)}
                 config={{ label: 'Function Name', groupClass: 'form-group mb-2' }}
+                customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+                isSubmitted={isSubmitted}
               />
               <div className="d-flex mt-3">
                 <CustomCheckBoxField
                   name="isAsync"
-                  value={formData.isAsync}
+                  value={formData.isAsync || false}
                   onChange={(value) => handleChange('isAsync', value)}
                   config={{ label: 'Is Async', groupClass: 'form-check me-2' }}
                 />
                 <CustomCheckBoxField
                   name="isAnonymous"
-                  value={formData.isAnonymous}
+                  value={formData.isAnonymous || false}
                   onChange={(value) => handleChange('isAnonymous', value)}
                   config={{ label: 'Is Anonymous', groupClass: 'form-check mx-2' }}
                 />
               </div>
               <CustomTextArea
                 name="description"
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={(value) => handleChange('description', value)}
                 config={{ label: 'Description', groupClass: 'form-group mb-2' }}
               />
@@ -170,7 +180,12 @@ function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMod
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -180,7 +195,6 @@ function FunctionConfigForm({ onSubmit, onCancel, formData: initialData, editMod
 FunctionConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 

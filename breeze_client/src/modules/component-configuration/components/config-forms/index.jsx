@@ -13,6 +13,7 @@ import StateVariableConfigForm from './StateVariableConfigForm';
 import RefVarConfigForm from './RefVarConfigForm';
 import UseMemoConfigForm from './UseMemoConfigForm';
 import UseCallbackConfigForm from './UseCallbackConfigForm';
+import CustomCode from './CustomCode';
 
 export {
   VariableConfigForm,
@@ -30,4 +31,5 @@ export {
   RefVarConfigForm,
   UseMemoConfigForm,
   UseCallbackConfigForm,
+  CustomCode,
 };

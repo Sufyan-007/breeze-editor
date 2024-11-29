@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomSwitchField } from '../../../../common/fields';
 
-function TryCatchConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
+function TryCatchConfigForm({ onSubmit, onCancel, editMode }) {
   const initialTryCatchConfig = JSON.parse(JSON.stringify(funcConfigTemplates['tryCatch']));
-  const [formData, setFormData] = useState(initialData || { ...initialTryCatchConfig });
+  const [formData, setFormData] = useState({ ...initialTryCatchConfig });
 
   const toggleFinallyBody = () => {
     setFormData((state) => ({
@@ -17,7 +17,7 @@ function TryCatchConfigForm({ onSubmit, onCancel, formData: initialData, editMod
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
-    if (!editMode) setFormData(initialTryCatchConfig);
+    setFormData(initialTryCatchConfig);
   };
 
   const handleCancel = (e) => {
@@ -66,7 +66,6 @@ function TryCatchConfigForm({ onSubmit, onCancel, formData: initialData, editMod
 TryCatchConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 

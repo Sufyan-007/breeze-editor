@@ -2,10 +2,12 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
+import { validator } from '../../../../utils/Validator';
 
-function DoWhileConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
+function DoWhileConfigForm({ onSubmit, onCancel, editMode }) {
   const initialDoWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['doWhileBlock']));
-  const [formData, setFormData] = useState(initialData || { ...initialDoWhileConfig });
+  const [formData, setFormData] = useState({ ...initialDoWhileConfig });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   function updateCondition(value) {
     setFormData((state) => {
@@ -16,13 +18,19 @@ function DoWhileConfigForm({ onSubmit, onCancel, formData: initialData, editMode
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.condition.value].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     onSubmit(formData);
-    if (!editMode) setFormData(initialDoWhileConfig);
+    setFormData(initialDoWhileConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialDoWhileConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -33,12 +41,14 @@ function DoWhileConfigForm({ onSubmit, onCancel, formData: initialData, editMode
           <div>
             <CustomTextInput
               name="whileCondition"
-              value={formData?.condition.value}
+              value={formData?.condition.value || ''}
               onChange={(value) => updateCondition(value)}
               config={{
                 label: 'While Condition',
                 groupClass: 'form-group mb-2',
               }}
+              customValidations={[validator.REQUIRED]}
+              isSubmitted={isSubmitted}
             />
           </div>
         </div>
@@ -64,7 +74,6 @@ function DoWhileConfigForm({ onSubmit, onCancel, formData: initialData, editMode
 DoWhileConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 
