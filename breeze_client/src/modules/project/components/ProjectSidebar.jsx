@@ -24,6 +24,7 @@ import {
 import CustomModal from '../../../common/display/modal/BreezeModal';
 import { useTabContext } from '../context/TabContext';
 import { deleteNodeAsPerCategory } from '../hooks/deleteNodeAsPerCategory';
+import { fetchFiles } from '../../resource-configuration/redux/resourcesActions';
 
 function ProjectSidebar() {
   const { directoryConfig } = useSelector((state) => state.directory);
@@ -127,6 +128,7 @@ function ProjectSidebar() {
             if (nodeId === existingTab?.id) {
               selectTab(updatedNode);
             }
+            dispatch(fetchFiles({ projectName }));
           })
           .catch((err) => {
             console.error('Error renaming node:', err);
