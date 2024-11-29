@@ -1,24 +1,41 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { CustomTextInput, CustomCheckBoxField, CustomButtonField, CustomTextArea } from '../../../../common/fields';
-import { initialFunctionConfig, initialParamConfig } from '../../constants/ResourcesFormData';
+import {
+  CustomTextInput,
+  CustomMultiSelectField,
+  CustomButtonField,
+  CustomTextArea,
+  CustomCheckBoxField,
+} from '../../../../common/fields';
+import { availableDependentVars } from '../../constants/FormConstants';
+import { initialUseCallbackConfig, initialParamConfig } from '../../constants/ResourcesFormData';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
 import ParamForm from '../helper-components/ParamForm';
 import { validator } from '../../../../utils/Validator';
 
-function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
-  const [formData, setFormData] = useState(initialFunctionConfig);
+function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
+  const [formData, setFormData] = useState(initialUseCallbackConfig);
   const [isParamFormVisible, setIsParamFormVisible] = useState(false);
   const [editParamIndex, setParamEditIndex] = useState(null);
   const [paramData, setParamData] = useState(initialParamConfig);
   const { setOffcanvasSize } = useOffcanvas();
+  const [selectedDependencies, setSelectedDependencies] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
+    let updatedData = { ...formData };
+
+    if (field === 'dependencies') {
+      const formattedDependencies = value.map((dep) => ({ type: 'TOKEN', value: dep }));
+      updatedData = { ...updatedData, dependencies: formattedDependencies };
+      setSelectedDependencies(value);
+    } else if (field === 'isAsync') {
+      updatedData.callback.isAsync = value;
+    } else {
+      updatedData[field] = value;
+    }
+
+    setFormData(updatedData);
   };
 
   const handleAddClick = () => {
@@ -35,23 +52,6 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
     setOffcanvasSize('60%');
   };
 
-  const handleDeleteParam = (index) => {
-    const updatedParams = formData.parameters.filter((_, i) => i !== index);
-    setFormData({ ...formData, parameters: updatedParams });
-    clearParamForm();
-  };
-
-  const addOrUpdateParam = (paramData) => {
-    const updatedParams = [...formData.parameters];
-    if (editParamIndex !== null) {
-      updatedParams[editParamIndex] = paramData;
-    } else {
-      updatedParams.push(paramData);
-    }
-    setFormData({ ...formData, parameters: updatedParams });
-    clearParamForm();
-  };
-
   const clearParamForm = () => {
     setIsParamFormVisible(false);
     setOffcanvasSize('40%');
@@ -59,7 +59,25 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
     setParamEditIndex(null);
   };
 
+  const handleDeleteParam = (index) => {
+    const updatedParams = formData.callback.parameters.filter((_, i) => i !== index);
+    setFormData({ ...formData, callback: { ...formData.callback, parameters: updatedParams } });
+    clearParamForm();
+  };
+
+  const addOrUpdateParam = (paramData) => {
+    const updatedParams = [...formData.callback.parameters];
+    if (editParamIndex !== null) {
+      updatedParams[editParamIndex] = paramData;
+    } else {
+      updatedParams.push(paramData);
+    }
+    setFormData({ ...formData, callback: { ...formData.callback, parameters: updatedParams } });
+    clearParamForm();
+  };
+
   const handleSubmit = (e) => {
+    e.preventDefault();
     e.preventDefault();
     setIsSubmitted(true);
     const isFormValid = [formData.name].every(Boolean);
@@ -67,17 +85,18 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
       return;
     }
     onSubmit(formData);
-    setFormData(initialFunctionConfig);
+    setFormData(initialUseCallbackConfig);
   };
+
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialFunctionConfig);
+    setFormData(initialUseCallbackConfig);
     setIsSubmitted(false);
     onCancel();
   };
 
   return (
-    <form className="component-config-form h-100">
+    <form className="hook-config-form h-100">
       <div className="d-flex flex-column justify-content-between h-100">
         <div className={`d-flex  ${isParamFormVisible ? 'h-100 mb-2' : 'col-12'}`}>
           <div
@@ -86,49 +105,52 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
           >
             <div>
               <CustomTextInput
-                name="name"
+                name="hookName"
                 value={formData.name || ''}
                 onChange={(value) => handleChange('name', value)}
-                config={{ label: 'Function Name', groupClass: 'form-group mb-2' }}
+                config={{ label: 'Hook Name', groupClass: 'form-group mb-2' }}
                 customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
                 isSubmitted={isSubmitted}
               />
-              <div className="d-flex mt-3">
+              <CustomTextArea
+                name="hookDescription"
+                value={formData.description || ''}
+                onChange={(value) => handleChange('description', value)}
+                config={{ label: 'Hook Description', groupClass: 'form-group mb-2' }}
+              />
+
+              <CustomMultiSelectField
+                name="dependencies"
+                values={selectedDependencies || []}
+                onChange={(value) => handleChange('dependencies', value)}
+                options={availableDependentVars}
+                config={{
+                  label: 'Dependent Variables',
+                  groupClass: 'form-group mb-3',
+                }}
+              />
+              <div>
                 <CustomCheckBoxField
                   name="isAsync"
-                  value={formData.isAsync || false}
+                  value={formData.callback.isAsync || false}
                   onChange={(value) => handleChange('isAsync', value)}
                   config={{ label: 'Is Async', groupClass: 'form-check me-2' }}
                 />
-                <CustomCheckBoxField
-                  name="isAnonymous"
-                  value={formData.isAnonymous || false}
-                  onChange={(value) => handleChange('isAnonymous', value)}
-                  config={{ label: 'Is Anonymous', groupClass: 'form-check mx-2' }}
-                />
-              </div>
-              <CustomTextArea
-                name="description"
-                value={formData.description || ''}
-                onChange={(value) => handleChange('description', value)}
-                config={{ label: 'Description', groupClass: 'form-group mb-2' }}
-              />
-              <div>
                 <div className="d-flex justify-content-between align-items-center">
                   <h6 className="br-text-primary med-font fw-bold mb-0">Params</h6>
                   <div onClick={handleAddClick} role="button">
                     <i className="bi bi-plus-circle br-text-primary"></i>
                   </div>
                 </div>
-                {formData.parameters.length > 0 &&
-                  formData.parameters.map((param, index) => (
+                {formData.callback.parameters.length > 0 &&
+                  formData.callback.parameters.map((param, index) => (
                     <div
                       key={index}
                       className="br-background-primary my-1 py-1 px-2 d-flex justify-content-between"
                       style={{ borderRadius: '0.275rem' }}
                     >
                       <div>
-                        <span className="br-text-primary med-font">{param.name}</span>
+                        <span className="br-text-primary med-font">{param.name || ''}</span>
                       </div>
                       <div className="d-flex">
                         <div
@@ -153,7 +175,7 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
                       </div>
                     </div>
                   ))}
-                {formData.parameters.length === 0 && (
+                {formData.callback.parameters.length === 0 && (
                   <span className="med-font br-text-primary">No Params Present</span>
                 )}
               </div>
@@ -192,10 +214,10 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
   );
 }
 
-FunctionConfigForm.propTypes = {
+UseCallbackConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
   editMode: PropTypes.bool,
 };
 
-export default FunctionConfigForm;
+export default UseCallbackConfigForm;

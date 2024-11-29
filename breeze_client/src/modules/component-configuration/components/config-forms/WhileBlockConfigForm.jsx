@@ -2,10 +2,12 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
+import { validator } from '../../../../utils/Validator';
 
-function WhileBlockConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
+function WhileBlockConfigForm({ onSubmit, onCancel, editMode }) {
   const initialWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['whileBlock']));
-  const [formData, setFormData] = useState(initialData || { ...initialWhileConfig });
+  const [formData, setFormData] = useState({ ...initialWhileConfig });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   function updateCondition(value) {
     setFormData((state) => {
@@ -16,13 +18,19 @@ function WhileBlockConfigForm({ onSubmit, onCancel, formData: initialData, editM
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.condition.value].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     onSubmit(formData);
-    if (!editMode) setFormData(initialWhileConfig);
+    setFormData(initialWhileConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialWhileConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -33,12 +41,14 @@ function WhileBlockConfigForm({ onSubmit, onCancel, formData: initialData, editM
           <div>
             <CustomTextInput
               name="whileCondition"
-              value={formData?.condition.value}
+              value={formData?.condition.value || ''}
               onChange={(value) => updateCondition(value)}
               config={{
                 label: 'While Condition',
                 groupClass: 'form-group mb-2',
               }}
+              customValidations={[validator.REQUIRED]}
+              isSubmitted={isSubmitted}
             />
           </div>
         </div>
@@ -64,7 +74,6 @@ function WhileBlockConfigForm({ onSubmit, onCancel, formData: initialData, editM
 WhileBlockConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.object,
   editMode: PropTypes.bool,
 };
 
