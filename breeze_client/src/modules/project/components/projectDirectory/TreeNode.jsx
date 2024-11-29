@@ -12,18 +12,37 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   const isEditing = node.isEditing;
   const contextMenuRef = useRef(null);
   const [menuItems, setMenuItems] = useState([]);
-
+  const [isInContextMenu, setIsInContextMenu] = useState(false);
   const childNodes = getChildren(node.id);
 
   const inputRef = useRef(null);
   const handleContextMenuSelection = (nodeId) => {
-    parentMethods.addNodeToTree({ type: 'FILE', parentId: nodeId });
+    parentMethods.addNodeToTree({ type: 'FILE', parentId: nodeId, extension: 'jsx' });
+    setIsInContextMenu(false);
     if (!isExpanded(nodeId)) {
       toggleNode(nodeId);
-      return;
     }
-    toggleNode(nodeId);
   };
+  const handleContextMenuFolder = (nodeId) => {
+    parentMethods.handleAddFolder(nodeId);
+    setIsInContextMenu(false);
+    if (!isExpanded(nodeId)) {
+      toggleNode(nodeId);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (inputRef.current && !inputRef.current.contains(event.target) && !event.target.closest('.node-input')) {
+        handleInputCancel();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEditing]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -32,7 +51,9 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   }, [isEditing]);
 
   const handleToggle = () => {
-    toggleNode(node.id);
+    if (!isInContextMenu) {
+      toggleNode(node.id);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -40,9 +61,8 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   };
 
   const handleInputSubmit = () => {
-    if (node.tempName.trim()) {
+    if (node?.tempName.trim()) {
       parentMethods.handleInputSubmit(node.id);
-      parentMethods.handleNodeClick(null);
     }
   };
 
@@ -61,6 +81,9 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    if (!isExpanded(node.id)) {
+      toggleNode(node.id);
+    }
   };
 
   const handleDrop = (e) => {
@@ -70,26 +93,52 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
 
   const handleAddFileClick = (e) => {
     e.stopPropagation();
+    setIsInContextMenu(true);
+    parentMethods.cancelAllEditing();
     setMenuItems(addFileOptions(node.id, handleContextMenuSelection));
     contextMenuRef.current?.handleEvent(e);
   };
 
+  const handleAddFolderClick = (e) => {
+    e.stopPropagation();
+    if (!isExpanded(node.id)) {
+      toggleNode(node.id);
+    }
+    parentMethods.handleAddFolder(node.id);
+  };
+
   const handleContextMenu = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (node.isProtected) {
+      return;
+    }
+    setIsInContextMenu(true);
     contextMenuRef.current?.handleEvent(e);
     setMenuItems(
       node.type === 'DIRECTORY'
-        ? folderOptions(node.id, handleContextMenuSelection, parentMethods.handleRename)
+        ? folderOptions(
+            node.id,
+            handleContextMenuSelection,
+            parentMethods.handleRename,
+            handleContextMenuFolder,
+            parentMethods.handleRemoveNode
+          )
         : fileOptions(node.id, parentMethods.handleRename, parentMethods.handleRemoveNode)
     );
   };
 
   return (
     <div
-      style={{ marginLeft: `${level * 10}px` }}
-      draggable
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
+      style={{ marginLeft: `${level * 2}px` }}
+      draggable={!node.isProtected}
+      onDragStart={!node.isProtected ? handleDragStart : undefined}
+      onDragOver={(e) => {
+        if (!node.isProtected) handleDragOver(e);
+      }}
+      onDrop={(e) => {
+        if (!node.isProtected) handleDrop(e);
+      }}
     >
       <div
         className={`tree-node ${isSelected ? 'selected-node' : ''}`}
@@ -105,6 +154,7 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
           menuItems={menuItems}
           onSelection={(value) => {
             value();
+            setIsInContextMenu(false);
           }}
           width={180}
         />
@@ -130,46 +180,50 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
                 ref={inputRef}
                 placeholder="Enter name"
               />
-              <button onClick={handleInputSubmit} className="node-input br-text-primary">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInputSubmit();
+                }}
+                type="button"
+                className="node-input br-text-primary"
+              >
                 <i className="bi bi-check" />
               </button>
-              <button onClick={handleInputCancel} className="node-input br-text-primary">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInputCancel();
+                }}
+                className="node-input br-text-primary"
+              >
                 <i className="bi bi-x" />
               </button>
             </div>
           ) : (
-            <>
+            <span className="br-truncate-text" title={node.name}>
               {node.name}
               {node.extension && <span>.{node.extension === 'SX' ? 'jsx' : node.extension}</span>}
-            </>
+            </span>
           )}
         </span>
         <span className="tree-node-state">
           {!isEditing && node.type === 'DIRECTORY' && !node.isProtected && (
             <>
               <i className="bi bi-file-earmark-plus node-icon" title="Add File" onClick={handleAddFileClick} />
-              <i
-                className="bi bi-folder-plus node-icon"
-                title="Add Folder"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  parentMethods.handleAddFolder(node.id);
-                }}
-              />
+              <i className="bi bi-folder-plus node-icon" title="Add Folder" onClick={handleAddFolderClick} />
             </>
           )}
-          {!node.isProtected && (
-            <i
-              className="bi bi-pencil node-icon"
-              title="Rename"
-              onClick={(e) => {
-                e.stopPropagation();
-                parentMethods.handleRename(node.id);
-              }}
-            />
-          )}
-          {!isEditing && node.type === 'FILE' && (
+          {!isEditing && !node.isProtected && (
             <>
+              <i
+                className="bi bi-pencil node-icon"
+                title="Rename"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  parentMethods.handleRename(node.id);
+                }}
+              />
               {!node.isProtected && (
                 <i
                   className="bi bi-trash node-icon"

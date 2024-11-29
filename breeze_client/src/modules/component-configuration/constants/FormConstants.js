@@ -7,12 +7,6 @@ export const BreezeDatatypes = [
   { value: 'function', label: 'Function' },
 ];
 
-export const VariableTypes = [
-  { label: 'State Variable', value: 'statevar' },
-  { label: 'Ref Variable', value: 'refvar' },
-  { label: 'Other', value: 'othervar' },
-];
-
 export const DeclarationTypes = [
   { label: 'const', value: 'const' },
   { label: 'let', value: 'let' },
@@ -37,8 +31,8 @@ export const lifecycleTypes = [
 ];
 
 export const hookTypes = [
-  { label: 'useMemo', value: 'useMemo' },
-  { label: 'useCallback', value: 'useCallback' },
+  { label: 'useMemo', value: 'REACT_USE_MEMO' },
+  { label: 'useCallback', value: 'REACT_USE_CALLBACK' },
 ];
 
 export const availableDependentVars = [

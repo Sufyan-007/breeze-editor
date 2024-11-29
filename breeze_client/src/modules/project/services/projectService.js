@@ -11,8 +11,8 @@ export const getAllProjects = async () => {
   }
 };
 
-export const getFolderConfig = async (id = null, projectName) => {
-  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/get/?target_id=${id}`;
+export const getFolderConfig = async (id = null, projectName, depth = 1) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/get/?target_id=${id}&depth=${depth}`;
   try {
     const response = await callApiClient(url, 'GET');
     return response;
@@ -98,6 +98,64 @@ export const getProjectLogo = async (projectName, logoId) => {
     return response;
   } catch (error) {
     console.error('Error fetching project logo:', error);
+    throw error;
+  }
+};
+
+export const addNodeApi = async (projectName, node) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/add-file/`;
+  const payload = {};
+  try {
+    // const response = await callApiClient(url, 'POST', payload);
+    // console.log(response);
+    return node;
+  } catch (error) {
+    console.error('Error adding node:', error.message);
+    throw error;
+  }
+};
+
+export const renameNodeApi = async (projectName, nodeId, newName) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/rename-file/`;
+  const payload = {
+    file_id: nodeId,
+    new_name: newName,
+  };
+  try {
+    const response = await callApiClient(url, 'POST', payload);
+    //update the open tab.
+    return response;
+  } catch (error) {
+    console.error('Error renaming node:', error.message);
+    throw error;
+  }
+};
+
+export const deleteNodeApi = async (projectName, nodeId) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/delete/`;
+  const payload = {
+    file_id: nodeId,
+  };
+  try {
+    const response = await callApiClient(url, 'DELETE', payload);
+    return response;
+  } catch (error) {
+    console.error('Error deleting node:', error.message);
+    throw error;
+  }
+};
+
+export const moveNodeApi = async (projectName, nodeId, targetId) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/move-file/`;
+  const payload = {
+    file_id: nodeId,
+    new_parent_id: targetId,
+  };
+  try {
+    const response = await callApiClient(url, 'POST', payload);
+    return response;
+  } catch (error) {
+    console.error('Error moving node:', error.message);
     throw error;
   }
 };

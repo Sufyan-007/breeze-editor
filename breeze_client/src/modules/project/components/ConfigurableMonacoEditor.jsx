@@ -3,17 +3,11 @@ import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
 import { BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
-import PropConfigForm from '../../component-configuration/components/config-forms/PropConfigForm';
-import VariableConfigForm from '../../component-configuration/components/config-forms/VariableConfigForm';
-import AddELement from '../../component-configuration/components/config-forms/AddELement';
-import ImportConfigForm from '../../component-configuration/components/config-forms/ImportConfigForm';
-import FunctionConfigForm from '../../component-configuration/components/config-forms/FunctionConfigForm';
-import LifecycleConfigForm from '../../component-configuration/components/config-forms/LifecycleConfigForm';
-import HookConfigForm from '../../component-configuration/components/config-forms/HookConfigForm';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 import { configTypeMapping, items } from '../constants/EditorList';
 import { getCodeDetails } from '../../../services/components/componentService';
 import { useParams } from 'react-router-dom';
+import useConfigurableMenuItems from '../hooks/useConfigurableMenuItems';
 
 const ConfigurableMonacoEditor = ({
   defaultValue = '',
@@ -32,7 +26,7 @@ const ConfigurableMonacoEditor = ({
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  const { showOffcanvas } = useOffcanvas();
+  const { showOffcanvas, closeOffcanvas } = useOffcanvas();
   const { projectName } = useParams();
 
   useEffect(() => {
@@ -54,7 +48,7 @@ const ConfigurableMonacoEditor = ({
       value: value,
       language: language,
       theme: projectTheme,
-      readOnly: readOnlyMode,
+      readOnly: node?.tag === 'COMPONENTS' ? 'true' : readOnlyMode,
       contextmenu: node?.tag === 'COMPONENTS' ? 'false' : 'true',
     });
     setEditor(editorInstance);
@@ -72,8 +66,8 @@ const ConfigurableMonacoEditor = ({
       const count = text.slice(0, index).length;
 
       const payload = {
-        type: node?.tag,
-        compId: node.id,
+        type: node?.tag, //removed
+        compId: node.id, // renamed as fileId
         index: count,
       };
       const result = await getCodeDetails(projectName, payload);
@@ -106,38 +100,21 @@ const ConfigurableMonacoEditor = ({
     };
   }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
-  const handleMenuItemClick = (item) => {
-    let contentComponent;
-    switch (item) {
-      case 'Add Import':
-        contentComponent = <ImportConfigForm onSubmit={() => {}} />;
-        break;
-      case 'Edit Import':
-        contentComponent = <ImportConfigForm onSubmit={() => {}} formData={{}} editMode={true} />;
-        break;
-      case 'Props':
-        contentComponent = <PropConfigForm onSubmit={() => {}} />;
-        break;
-      case 'Variable':
-        contentComponent = <VariableConfigForm onSubmit={() => {}} />;
-        break;
-      case 'Html elements':
-        contentComponent = <AddELement />;
-        break;
-      case 'Function':
-        contentComponent = <FunctionConfigForm onSubmit={() => {}} />;
-        break;
-      case 'Lifecycle':
-        contentComponent = <LifecycleConfigForm onSubmit={() => {}} />;
-        break;
-      case 'Hook':
-        contentComponent = <HookConfigForm onSubmit={() => {}} />;
-        break;
-      default:
-        contentComponent = null;
-    }
+  const onSubmit = (value) => {
+    console.log('value::>>', value);
+    closeOffcanvas();
+  };
 
-    showOffcanvas(contentComponent, 'Component Configuration', 'end', true, '40%');
+  const onCancel = () => {
+    closeOffcanvas();
+  };
+
+  const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel);
+
+  const handleMenuItemClick = (item) => {
+    const contentComponent = getConfigComponent(item);
+    const width = '40%';
+    showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
     setShowMenu(false);
   };
 

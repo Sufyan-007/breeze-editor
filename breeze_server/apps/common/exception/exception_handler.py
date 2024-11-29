@@ -43,7 +43,7 @@ def custom_exception_handler(exc, context):
     elif isinstance(exc, AttributeError):
         return JsonResponse({'error': 'AttributeError: An attribute was referenced that does not exist.'}, status=400)
     elif isinstance(exc, customException):
-        return JsonResponse({'error': 'CustomException: ' + exc.get_error_message(), 'errorBody': exc.get_error_body()}, status=exc.get_error_code())
+        return JsonResponse({'error': exc.get_error_message(), 'errorBody': exc.get_error_body()}, status=exc.get_error_code())
     
     if response is not None:
         return response

@@ -15,6 +15,7 @@ urlpatterns = [
     # context
     # 
     path('update-project-config/', manage_configs.update_configs),
+    path('get-project-config-version/', manage_configs.get_config_file_version),
     
     # to manage whole route scenario individually
     path('routes/', include('apps.project_config_management.route_management.urls')),
