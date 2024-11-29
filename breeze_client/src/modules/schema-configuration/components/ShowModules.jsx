@@ -62,6 +62,7 @@ function ShowModules({ setView, moduleId, title, setSelectedModule, setCurrentSc
                 e.stopPropagation();
                 setCurrentSchema(schemaTemplate);
                 setSelectedModule(moduleId);
+                setSelectedSchema('');
                 setView('SCHEMA_CONFIG');
               }}
             ></i>

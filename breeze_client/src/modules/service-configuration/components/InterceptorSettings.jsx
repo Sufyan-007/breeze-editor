@@ -41,6 +41,7 @@ function InterceptorSettings({ moduleId, selectedApi }) {
           <div className="col-sm-2 br-text-primary">Name:</div>
           <div className="col-sm-10">
             <CustomTextInput
+              readOnly={true}
               value={currentInterceptor.name}
               onChange={(val) => {
                 handleInterceptorsChange('name', val);
@@ -49,7 +50,7 @@ function InterceptorSettings({ moduleId, selectedApi }) {
             />
           </div>
         </div>
-        <div className="row p-1">
+        {/* <div className="row p-1">
           <div className="col-sm-2 br-text-primary">Type:</div>
           <div className="col-sm-10">
             <CustomSelectField
@@ -63,7 +64,7 @@ function InterceptorSettings({ moduleId, selectedApi }) {
               className="form-select br-form-select form-select-sm"
             />
           </div>
-        </div>
+        </div> */}
         <div className="row p-1">
           <div className="col-sm-2 br-text-primary">Interceptor:</div>
           <div className="col-sm-10">
@@ -74,6 +75,7 @@ function InterceptorSettings({ moduleId, selectedApi }) {
               height="100px"
               theme={projectTheme}
               config={{ label: 'Interceptor Code' }}
+              readOnlyMode={true}
             />
           </div>
         </div>
