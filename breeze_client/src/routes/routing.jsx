@@ -5,7 +5,7 @@ import AllProjects from '../modules/project/pages/AllProjects';
 import PropTypes from 'prop-types';
 import UserManagement from '../modules/user-management/pages/UserManagement';
 import RoleManagement from '../modules/role-management/pages/RoleManagement';
-
+import { OffcanvasProvider } from '../contexts/OffcanvasContext';
 const isAuthenticated = () => {
   return !!localStorage.getItem('accessToken');
 };
@@ -71,7 +71,9 @@ export const router = createBrowserRouter([
     path: '/project/:projectName',
     element: (
       // <ProtectedRoute>
-      <ProjectPage />
+      <OffcanvasProvider>
+        <ProjectPage />
+      </OffcanvasProvider>
       // </ProtectedRoute>
     ),
   },
