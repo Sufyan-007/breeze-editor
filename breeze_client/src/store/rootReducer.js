@@ -8,6 +8,7 @@ import directory_reducers from '../redux/directory_management/directory_reducers
 import serviceConfigReducer from '../modules/service-configuration/redux/ApiClientReducers';
 import schemaConfigReducers from '../modules/schema-configuration/redux/schemaConfigReducers';
 import resourceReducer from '../modules/resource-configuration/redux/resourcesReducers';
+import userReducer from '../redux/user/userReducer';
 
 import thirdPartyDependenciesReducer from '../redux/third-party-dependencies/thirdPartyDependenciesReducer';
 import { RESET_STORE } from './actions';
@@ -22,6 +23,7 @@ const appReducer = combineReducers({
   services: serviceConfigReducer,
   schemas: schemaConfigReducers,
   resources: resourceReducer,
+  user: userReducer,
 });
 
 const rootReducer = (state, action) => {
