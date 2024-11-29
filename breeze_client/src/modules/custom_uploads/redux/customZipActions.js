@@ -1,5 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { uploadZipFile, fetchZipFiles, deleteFile, fetchZipFileComponentsService, setPropConfigService } from '../services/customZipService';
+import {
+  uploadZipFile,
+  fetchZipFiles,
+  deleteFile,
+  fetchZipFileComponentsService,
+  setPropConfigService,
+  addPropConfigService,
+  deletePropConfigService,
+} from '../services/customZipService';
 
 // Action to upload a zip file
 export const uploadZipFileAction = createAsyncThunk(
@@ -51,13 +59,36 @@ export const fetchZipFileComponentsAction = createAsyncThunk(
 
 export const updatePropConfigAction = createAsyncThunk(
   'zip/setPropConfig',
- async({projectName, formData}, {rejectWithValue}) => {
-  try {
-    console.log(projectName,formData,"inside actions");
-    const data= await setPropConfigService(projectName, formData);
-    return data
-  }catch(error){
-    return rejectWithValue(error.response.data || 'An error occurred while updating props');
+  async ({ projectName, formData }, { rejectWithValue }) => {
+    try {
+      const data = await setPropConfigService(projectName, formData);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data || 'An error occurred while updating props');
+    }
   }
- }
-)
+);
+
+export const addPropConfigAction = createAsyncThunk(
+  'zip/addPropConfig',
+  async ({ projectName, formData }, { rejectWithValue }) => {
+    try {
+      const data = await addPropConfigService(projectName, formData);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data || 'An error occurred while adding props');
+    }
+  }
+);
+
+export const deletePropConfigAction = createAsyncThunk(
+  'zip/deletePropConfig',
+  async ({ projectName, propId, fileName, componentId }, { rejectWithValue }) => {
+    try {
+      const data = await deletePropConfigService(projectName, propId, fileName, componentId);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data || 'An error occurred while deleting props');
+    }
+  }
+);

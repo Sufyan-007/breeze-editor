@@ -28,6 +28,7 @@ function CustomFileUploadField({
   translate = 'yes',
   config = {},
   multiple = false,
+
   ...eventHandlers
 }) {
   const fileInputRef = useRef(null);
@@ -91,7 +92,7 @@ function CustomFileUploadField({
 }
 
 CustomFileUploadField.propTypes = {
-  onFileSelect: PropTypes.func.isRequired,
+  onFileSelect: PropTypes.func,
   label: PropTypes.string,
   accept: PropTypes.string,
   disabled: PropTypes.bool,

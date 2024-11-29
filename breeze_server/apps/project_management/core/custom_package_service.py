@@ -177,8 +177,6 @@ def delete_file(project_name, fileName, file_id):
         # delete_path(react_app_file_path, "React app")
         delete_path(external_components_config_path, "external components config")
   
-       
-       
         #delete the file object from resource config 
         if os.path.exists(uploaded_resources_config_path):
             with open(uploaded_resources_config_path, 'r+') as config_file:
@@ -195,9 +193,6 @@ def delete_file(project_name, fileName, file_id):
         else:
             raise FileNotFoundError("Resource config file does not exist.")
     
-        # directory_manager =  DirectoryManager(project_name)
-        # directory_manager.delete_node(file_id, recursive=True)
-        
     except Exception as e:
         raise Exception(f"Error deleting file or directory: {e}")
     
@@ -232,7 +227,62 @@ def set_prop_config_service(project_name, file_name , component_id ,prop_id , ne
         return component_config
     except Exception as e:
         raise Exception(f"Error editing the props: {e}")
-        #raise exception errror
+
+  
+def add_prop_config_service(project_name, file_name , component_id ,prop_id , prop_name=None, type=None, default_value=None ):
+    try:
+        #load the existing config for the project
+        _, _, app_config_dir = get_project_config(project_name)
+        component_config_path= os.path.join(app_config_dir,"external_components_config",file_name,f"{component_id}.json")
+        if not os.path.exists(component_config_path):
+            raise FileNotFoundError("Component configuration file not found.")
+
+        with open(component_config_path, 'r') as file:
+            component_config= json.load(file)
+            
+        # Validate the props structure
+        if "props" not in component_config:
+            component_config["props"] = {}
+            
+        # Create the new prop configuration
+        new_prop = {
+            "prop_name": prop_name or "",
+            "type": type or "any",
+            "default_value": default_value or "",
+            "id": prop_id
+        }
+            
+        # Add the new prop to the props dictionary
+        component_config["props"][prop_id] = new_prop
+        
+        # Save the updated configuration back to the file
+        with open(component_config_path, 'w') as file:
+            json.dump(component_config, file, indent=4)
+            
+        return component_config
+    except Exception as e:
+        raise Exception(f"Error adding the props: {e}")
+
+def delete_prop_config_service(project_name, prop_id,file_name, component_id):
+    try:
+        _,_ ,app_config_dir = get_project_config(project_name)
+        component_config_path= os.path.join(app_config_dir,"external_components_config",file_name,f"{component_id}.json")
+        if not os.path.exists(component_config_path):
+            raise FileNotFoundError("Component configuration file not found.")
+ 
+        with open(component_config_path, 'r+') as file:
+            component_config= json.load(file)
+            
+            if 'props' not in component_config or prop_id not in component_config['props']:
+                    raise KeyError(f"Property with ID {prop_id} not found in the configuration.")
+            # Remove the prop with the specified prop_id
+            del component_config['props'][prop_id]
+            file.seek(0)
+            file.truncate()
+            json.dump(component_config, file, indent=4)
+             
+    except Exception as e:
+        raise Exception(f"Error deleting the props: {e}")
 
         
 def update_resource_config(project_name, file_name ,file_id, status,  tag="ZIP"):

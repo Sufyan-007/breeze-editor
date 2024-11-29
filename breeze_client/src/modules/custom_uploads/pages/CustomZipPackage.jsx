@@ -23,7 +23,7 @@ function CustomZipPackagePage() {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [selectedFilename, setSelectedFilename] = useState(null);
-  const[selectedComponent, setSelectedComponent] =  useState(null)
+  const [selectedComponent, setSelectedComponent] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { projectName } = useParams();
   const [formData, setFormData] = useState({
@@ -36,6 +36,7 @@ function CustomZipPackagePage() {
   const wsStatus = useRef(null);
   const dispatch = useDispatch();
   const { zipFiles, fileId, components, props } = useSelector((state) => state.zip);
+  // const { removeTab } = useTabContext();
 
   useEffect(() => {
     wsStatus.current = new WebSocket(`${import.meta.env.VITE_SOCKET_URL}/ws/external-comp-status/`);
@@ -53,19 +54,26 @@ function CustomZipPackagePage() {
     };
     wsStatus.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
-
-      const fileStatuses = message?.file_status?.file_statuses; 
+      console.log('data received from wb', message);
+      const fileStatuses = message?.file_status?.file_statuses;
       if (fileStatuses) {
-     
         setUploadStatus((prevStatuses) => ({
           ...prevStatuses,
           ...fileStatuses,
         }));
       }
-
     };
     wsStatus.current.onclose = () => {
       console.log('Disconnected from the WebSocket');
+    };
+    wsStatus.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    return () => {
+      if (wsStatus.current) {
+        wsStatus.current.close();
+        console.log('WebSocket connection closed');
+      }
     };
   }, []);
 
@@ -95,21 +103,29 @@ function CustomZipPackagePage() {
     }
   };
 
-  const handleDelete = () => {
-    if (fileToDelete) {
-      // Dispatch delete action
-      dispatch(
+  const handleDelete = async () => {
+    if (!fileToDelete) return;
+    try {
+      // Dispatch delete action and await its completion
+      await dispatch(
         deleteZipFileAction({
           fileName: fileToDelete.name,
           fileId: fileToDelete.zip_file_id,
           projectName: projectName,
         })
-      ).then(() => {
-        dispatch(fetchZipFilesAction(projectName));
-      });
+      ).unwrap();
+
+      // Fetch updated zip files
+      await dispatch(fetchZipFilesAction(projectName)).unwrap();
+
+      // Fetch updated folder config
+      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
+    } catch (error) {
+      console.error('An error occurred while deleting the file:', error);
+    } finally {
+      setShowDeleteModal(false);
+      setFileToDelete(null);
     }
-    setShowDeleteModal(false);
-    setFileToDelete(null);
   };
 
   const handleModal = () => {
@@ -148,15 +164,12 @@ function CustomZipPackagePage() {
 
       try {
         setShowModal(false);
-        await dispatch(uploadZipFileAction({ formData: submitData, projectName }));
-
-        await dispatch(fetchZipFilesAction(projectName));
-        await dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
-
-        // Reset the form and close the modal
+        await dispatch(uploadZipFileAction({ formData: submitData, projectName })).unwrap();
+        await dispatch(fetchZipFilesAction(projectName)).unwrap();
+        await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
         resetForm();
       } catch (error) {
-        console.error('Error during file upload or fetching folder config:', error);
+        setError('An error occurred. Please try again.');
       }
     } else {
       setError('Please select a file.');
@@ -300,9 +313,9 @@ function CustomZipPackagePage() {
       </div>
     ),
   }));
- //fileid- component id , filename- zip file name 
+  //fileid- component id , filename- zip file name
   const handleClick = (component_id, filename) => {
-    setSelectedComponent(component_id)
+    setSelectedComponent(component_id);
     const payload = {
       resource: component_id,
       select: ['props'],
@@ -441,7 +454,14 @@ function CustomZipPackagePage() {
           </div>
 
           <div style={{ flex: '1', paddingLeft: '20px', maxWidth: '80%' }}>
-            {props && <CustomPropsList selectedFile={selectedFilename} selectedComponentId={selectedComponent} components={components} props={props} />}
+            {props && (
+              <CustomPropsList
+                selectedFile={selectedFilename}
+                selectedComponentId={selectedComponent}
+                components={components}
+                props={props}
+              />
+            )}
           </div>
         </div>
       </BreezeOffCanvas>

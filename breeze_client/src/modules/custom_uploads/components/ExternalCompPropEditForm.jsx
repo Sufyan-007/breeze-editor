@@ -3,7 +3,7 @@ import { CustomTextInput, CustomSelectField, MonacoEditor, CustomButtonField } f
 import { BreezeDatatypes } from '../../component-configuration/constants/FormConstants';
 import ThemeContext from '../../../contexts/ThemeContext';
 
-function ExternalCompPropEditForm({ onSubmit, onCancel, initialData, selectedProp, editMode = false }) {
+function ExternalCompPropEditForm({ onSubmit, onCancel, initialData, selectedProp, addNewProp, editMode = false }) {
   const [formData, setFormData] = useState({
     prop_name: '',
     type: '',
@@ -30,6 +30,16 @@ function ExternalCompPropEditForm({ onSubmit, onCancel, initialData, selectedPro
       setFormData(initialData[selectedProp]);
     }
   }, [initialData, editMode, selectedProp]);
+
+  useEffect(() => {
+    if (addNewProp) {
+      setFormData({
+        prop_name: '',
+        type: '',
+        default_value: '',
+      });
+    }
+  }, [addNewProp]);
 
   const handleChange = (field, value) => {
     setFormData({

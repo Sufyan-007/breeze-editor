@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from dotenv import load_dotenv
-from ..core.custom_package_service import check_existing_folder, upload_file, delete_file, set_prop_config_service, update_resource_config
+from ..core.custom_package_service import check_existing_folder, upload_file, delete_file, set_prop_config_service, update_resource_config , add_prop_config_service, delete_prop_config_service
 from apps.common.constants.consts import PORT  
 from drf_spectacular.utils import extend_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
@@ -24,7 +24,7 @@ from ..utils.get_uploaded_resources import get_uploaded_resources as get_resourc
 @csrf_exempt
 @api_view(['POST'])
 def add_custom_package(request, projectName):
-    file_id = str(uuid.uuid4())
+    file_id = str(uuid.uuid4()).replace("-", "_")
     try:
         file = request.FILES.get('file')
         fileName = request.POST.get("filename")
@@ -128,13 +128,14 @@ def delete_custom_package(request, projectName):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
 @extend_schema(
     methods=['PUT'],
     request=None,
     responses=None
 )
 @csrf_exempt
-@api_view(['POST'])
+@api_view(['PUT'])
 def set_prop_config(request, projectName):    
     try:
         data= json.loads(request.body)
@@ -158,6 +159,51 @@ def set_prop_config(request, projectName):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
         
+@csrf_exempt
+@api_view(['POST'])
+def add_prop_config(request, projectName):    
+    prop_id = str(uuid.uuid4()).replace("-", "_")
+    try:
+        data= json.loads(request.body)
+        prop_name = data.get('prop_name')
+        type = data.get('type')
+        default_value = data.get('default_value')
+        file_name = data.get('fileName')
+        component_id =  data.get('componentId')
+ 
+        if not projectName:
+            return JsonResponse({'error': 'Project name is required'}, status=400)
+        
+        if not (component_id and file_name):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        add_prop_config_service(projectName, file_name, component_id, prop_id, prop_name, type, default_value)
+        
+        return JsonResponse({'message': "Prop added successfully"}, status=200)
+    
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    
+@csrf_exempt
+@api_view(['DELETE'])
+def delete_prop_config(request, projectName):
+    try:
+        data = json.loads(request.body)
+        prop_id = data.get("propId")
+        file_name = data.get("fileName")
+        component_id = data.get("componentId")
+
+        if not projectName:
+            return JsonResponse({'error': 'Project name is required'}, status=400)
+
+        if not file_name or not component_id or not prop_id :
+            return JsonResponse({'error': 'missing fields'}, status=400)
+
+        delete_prop_config_service(projectName, prop_id,file_name, component_id)
+        return JsonResponse({'message': "File deleted successfully"}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
     
 # Helper function to handle asynchronous API calls
 def call_external_api_async(api_url, payload, projectName , fileName, file_id):

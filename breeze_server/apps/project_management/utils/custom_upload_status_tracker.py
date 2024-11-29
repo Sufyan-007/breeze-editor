@@ -31,7 +31,6 @@ def send_ws_status_periodically(project_id):
                             "message": message
                         }
                     )
-                print(f"Sent WS status: {message} to project: {project_id}")
         except FileNotFoundError:
             print(f"Error: {resource_config_path} file not found.")
         except Exception as e:
