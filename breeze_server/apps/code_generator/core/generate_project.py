@@ -172,17 +172,13 @@ def add_sandbox(app_config):
                         }
                         let lib;
                         switch (library) {
-                        case "@mui/material":
-                            lib = await import("@mui/material");
-                            break;
+                        
 
                         case "react-bootstrap":
                             lib = await import("react-bootstrap");
                             break;
 
-                        case "@chakra-ui/react":
-                            lib = await import("@chakra-ui/react");
-                            break;
+                       
 
                         default:
                             console.error("Library not supported");
