@@ -29,7 +29,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   const { status } = useSelector((state) => state.schemas);
   const dispatch = useDispatch();
   const { projectName } = useParams();
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  // const [selectedProperty, setSelectedProperty] = useState(null);
 
   useEffect(() => {
     if (status === 'ready' && moduleId)
@@ -182,9 +182,9 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     });
   };
 
-  const handlePropertySelection = (propName) => {
-    setSelectedProperty((prev) => (prev === propName ? null : propName));
-  };
+  // const handlePropertySelection = (propName) => {
+  //   setSelectedProperty((prev) => (prev === propName ? null : propName));
+  // };
 
   const renderResponses = () => {
     if (!response || response.length === 0) {
@@ -233,7 +233,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                     <table className="table table-bordered br-background-secondary" style={{ borderColor: 'gray' }}>
                       <thead>
                         <tr className="br-background-secondary">
-                          <th className="br-background-secondary br-text-primary">Save as Token</th>
+                          {/* <th className="br-background-secondary br-text-primary">Save as Token</th> */}
                           <th className="br-background-secondary br-text-primary">Property</th>
                           <th className="br-background-secondary br-text-primary">Storage Key</th>
                           <th className="br-background-secondary br-text-primary">Save As</th>
@@ -242,13 +242,13 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                       <tbody>
                         {res.properties?.map((prop, idx) => (
                           <tr key={idx}>
-                            <td className="br-background-secondary br-text-primary">
+                            {/* <td className="br-background-secondary br-text-primary">
                               <input
                                 type="checkbox"
                                 checked={selectedProperty === prop.name}
                                 onChange={() => handlePropertySelection(prop.name)}
                               />
-                            </td>
+                            </td> */}
                             <td className="br-background-secondary br-text-primary">{prop.name}</td>
                             <td className="br-background-secondary br-text-primary">
                               <CustomTextInput
@@ -358,7 +358,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
               >
                 <thead>
                   <tr className="br-background-secondary br-text-primary">
-                    <th className="br-background-secondary br-text-primary">Save as Token</th>
+                    {/* <th className="br-background-secondary br-text-primary">Save as Token</th> */}
                     <th className="br-background-secondary br-text-primary">Property</th>
                     <th className="br-background-secondary br-text-primary">Storage Key</th>
                     <th className="br-background-secondary br-text-primary">Save As</th>
@@ -367,13 +367,13 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                 <tbody>
                   {newResponse.properties?.map((prop, idx) => (
                     <tr key={idx} className="br-background-secondary br-text-primary">
-                      <td className="br-background-secondary br-text-primary">
+                      {/* <td className="br-background-secondary br-text-primary">
                         <input
                           type="checkbox"
                           checked={selectedProperty === prop.name}
                           onChange={() => handlePropertySelection(prop.name)}
                         />
-                      </td>
+                      </td> */}
                       <td className="br-background-secondary br-text-primary">{prop.name}</td>
                       <td className="br-background-secondary br-text-primary">
                         <CustomTextInput

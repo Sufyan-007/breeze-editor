@@ -36,23 +36,25 @@ function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId, fileId, 
     }
   };
   const handleAuthFunctionMove = async () => {
-    const res = await dispatch(
-      transferToAuthFile({
-        projectName,
-        payload: {
-          module_id: selectedFunction.moduleId,
-          filename: selectedFunction.fileId,
-          id: selectedFunction.value,
-          is_imported: true,
-          replaced_function_id: functionId,
-        },
-      })
-    ).unwrap();
-    if (res && res.message) {
-      setModalVisible(false);
-      setSelectedAuthApi({});
-      await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
-      dispatch(deleteFunctionFromList({ functionId: selectedFunction.value }));
+    if (Object.keys(selectedFunction).length > 0) {
+      const res = await dispatch(
+        transferToAuthFile({
+          projectName,
+          payload: {
+            module_id: selectedFunction.moduleId,
+            filename: selectedFunction.fileId,
+            id: selectedFunction.value,
+            is_imported: true,
+            replaced_function_id: functionId,
+          },
+        })
+      ).unwrap();
+      if (res && res.message) {
+        setModalVisible(false);
+        setSelectedAuthApi({});
+        await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+        dispatch(deleteFunctionFromList({ functionId: selectedFunction.value }));
+      }
     }
   };
   return (
@@ -79,7 +81,14 @@ function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId, fileId, 
         footer={{
           buttons: [
             { label: 'Move', onClick: () => handleAuthFunctionMove(), type: 'button' },
-            { label: 'Cancel', onClick: () => setModalVisible(false), type: 'button' },
+            {
+              label: 'Cancel',
+              onClick: () => {
+                setModalVisible(false);
+                setSelectedFunction({});
+              },
+              type: 'button',
+            },
           ],
         }}
       >
