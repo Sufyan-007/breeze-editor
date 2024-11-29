@@ -31,23 +31,19 @@ function UrlSettings({ urlData, onChange, paramData, onAdd, method, envVars, mod
 
   if (servers) {
     servers.forEach((server) => {
-      options.push({ value: server.url, label: server.url, dataSource: 'swagger' });
+      if (server.url !== baseurl) {
+        options.push({ value: server.url, label: server.url, dataSource: 'swagger' });
+      }
     });
   }
-  // if (envVars) {
-  //   envVars.forEach(({ id, name }) => {
-  //     options.push({ value: id, label: name, dataSource: 'envVars' });
-  //   });
-  // }
+
   if (!envVars || envVars.length === 0) {
     if (currentModule?.servers_info && currentModule?.servers_info.length > 0) {
       currentModule?.servers_info.forEach(({ url }) => {
         options.push({ value: url, label: url, dataSource: 'swagger' });
       });
     }
-    // console.log(options, 'optionss');
   } else {
-    // If envVars exists, use them to populate options
     envVars.forEach(({ id, name }) => {
       options.push({ value: id, label: name, dataSource: 'envVars' });
     });

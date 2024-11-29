@@ -66,4 +66,5 @@ export const schemaTemplate = {
   required: [],
   additionalProperties: {},
   templateInputs: [],
+  name: '',
 };

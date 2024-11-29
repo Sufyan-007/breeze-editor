@@ -8,24 +8,28 @@ import darkLightModeSwitch from '../../assets/svgs/dark-light-mode-switch.svg';
 import './Navbar.css';
 import { router } from '../../routes/routing';
 import ProfileOffCanvas from './ProfileOffCanvas';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserDetails } from '../../redux/user/userActions';
 
 function Navbar({ currentPage = 'index', projectName = '' }) {
   const { toggleTheme } = useContext(ThemeContext);
-
+  const userDetails = useSelector((state) => state.user.userDetails);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showOffCanvas, setShowOffCanvas] = useState(false);
+  const dispatch = useDispatch();
 
   const menuRef = useRef(null);
   const profileMenuRef = useRef(null);
-
-  const username = localStorage.getItem('username') || 'John Doe';
-  const userRole = localStorage.getItem('userRole') || 'User';
 
   const toggleOffCanvas = () => setShowOffCanvas(!showOffCanvas);
 
   const toggleMenu = () => setMenuOpen((prev) => !prev);
   const toggleAppMenu = () => setIsMenuOpen((prev) => !prev);
+
+  useEffect(() => {
+    dispatch(fetchUserDetails());
+  }, [dispatch]);
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -111,7 +115,7 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
           <div className="profile d-flex align-items-center ms-3 br-cursor-pointer" ref={profileMenuRef}>
             <div className="d-flex align-items-center" onClick={toggleMenu}>
               <img className="avatar" src={Avatar} alt="Profile Avatar" />
-              <span className="ms-2 small-font br-text-primary">{username}</span>
+              <span className="ms-2 small-font br-text-primary">{userDetails.username || 'user'}</span>
             </div>
 
             {menuOpen && (
@@ -139,13 +143,7 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
         </div>
       </div>
 
-      <ProfileOffCanvas
-        show={showOffCanvas}
-        onClose={toggleOffCanvas}
-        username={username}
-        userRole={userRole}
-        onSave={handleSaveProfile}
-      />
+      <ProfileOffCanvas show={showOffCanvas} onClose={toggleOffCanvas} onSave={handleSaveProfile} />
     </nav>
   );
 }
