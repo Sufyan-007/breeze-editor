@@ -27,3 +27,15 @@ export const getAllUsers = async () => {
     throw error;
   }
 };
+
+export const getUserDetails = async () => {
+  const userId = localStorage.getItem('userId');
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/auth/get-user/${userId}/`;
+  try {
+    const response = await callApiClient(url, 'GET');
+    return response;
+  } catch (error) {
+    console.error('Error fetching user details:', error.message);
+    throw error;
+  }
+};

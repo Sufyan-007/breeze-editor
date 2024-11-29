@@ -18,13 +18,15 @@ function SchemaSettings() {
   const [view, setView] = useState('ADD_MODULE');
   const [currentSchema, setCurrentSchema] = useState({});
   const { projectName } = useParams();
-  const { moduleList } = useSelector((state) => state.services);
+  const { moduleList, status } = useSelector((state) => state.services);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
-  }, [dispatch, projectName]);
+    if (status === 'ready') {
+      dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+    }
+  }, [dispatch, projectName, status]);
 
   const updateSchema = async (schema) => {
     setCurrentSchema({ ...schema });
@@ -60,7 +62,7 @@ function SchemaSettings() {
   return (
     <div className="container-fluid h-100 overflow-auto">
       <div className="row h-100 br-background-primary">
-        <div className="col-sm-3 h-100" style={{ borderRight: '1px solid rgba(128, 128, 128, 0.5)' }}>
+        <div className="col-sm-3 h-100 overflow-auto" style={{ borderRight: '1px solid rgba(128, 128, 128, 0.5)' }}>
           <div className="mt-2 d-flex justify-content-between">
             <h5 className="mt-1 br-text-primary">Schema Configuration</h5>
             <i

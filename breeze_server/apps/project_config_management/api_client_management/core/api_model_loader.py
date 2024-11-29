@@ -252,6 +252,7 @@ class ApiModelLoader:
             authentication_type= AuthTypeEnum[model_json.get("authentication_type").upper()],
             token_store=api_model_loader.load_token_store(model_json.get("token_store",{})),
             is_authentication_api= model_json.get("is_authentication_api", False),
+            interceptor_id=model_json.get("interceptor_id", ''),
             errors={}
         )
         return api_model

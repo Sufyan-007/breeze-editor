@@ -161,7 +161,7 @@ function GeneralSettingsCard({ settings, onChange, isAuthApi, selectedServiceInf
                         { label: 'Select', value: '' },
                         { label: 'Bearer', value: 'BEARER' },
                         { label: 'Basic', value: 'BASIC' },
-                        { label: 'Oauth2', value: 'OAUTH2' },
+                        // { label: 'Oauth2', value: 'OAUTH2' },
                         { label: 'ApiKey', value: 'APIKEY' },
                       ]}
                     />

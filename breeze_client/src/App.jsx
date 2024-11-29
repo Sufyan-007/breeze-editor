@@ -4,14 +4,11 @@ import { router } from './routes/routing';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Provider } from 'react-redux';
 import breezeStore from './store/breezeStore';
-import { OffcanvasProvider } from './contexts/OffcanvasContext';
 function App() {
   return (
     <Provider store={breezeStore}>
       <ThemeProvider>
-        <OffcanvasProvider>
-          <RouterProvider router={router} />
-        </OffcanvasProvider>
+        <RouterProvider router={router} />
       </ThemeProvider>
     </Provider>
   );

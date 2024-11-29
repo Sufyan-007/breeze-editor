@@ -1,5 +1,5 @@
-import yaml,json,os,traceback,copy
-from ....common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH,CLIENT_API
+import yaml,json,os,traceback,copy,hashlib
+from ....common.constants.consts import CONFIG_PATH,CLIENT_API
 from apps.common.utils.file_helpers.json_handler import read_json_file
 from ....common.utils.uuid_as_key import generate_uuid_as_key
 from ..utils.json_encoder import EnhancedJSONEncoder
@@ -13,9 +13,6 @@ from ....common.utils.replace_variable import replace_variable
 from ..utils.set_unresolved_key import set_unresolved_keys
 def prepare_api_models(json_data, project_name,isJson):
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
-        # app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
-        # app_config = read_json_file(app_config_path)
-        # app_config['APP_SOURCE_DIR'] = f"{app_config['path']}/{app_config['name']}/{app_config['componentsSrcDir']}"
         try:
             if isJson:
                 openapi_data = json.loads(json_data)
@@ -38,6 +35,7 @@ def prepare_api_models(json_data, project_name,isJson):
             meta_data["auth_apis"] = {}
             meta_data["security_schemes"] = security_schemes
             meta_data["servers_info"] = servers_info
+            meta_data["interceptors"] = []
             with open(swagger_metadata_file_path, "r") as file:
                 swagger_metadata_file_content = json.load(file)
             swagger_metadata_id = generate_uuid_as_key()
@@ -62,7 +60,7 @@ def prepare_api_models(json_data, project_name,isJson):
                 avalilable_schemas = {}
             structured_schema_data = {}
             for key, val in avalilable_schemas.items():
-                if "properties" in val:
+                if val.get("type") and val["type"]=="object":
                     structured_schema_data[key] = object_converter(val)
                     structured_schema_data[key]["schemaType"] = "modals"
                     
@@ -86,8 +84,8 @@ def prepare_api_models(json_data, project_name,isJson):
                 
             security_schemes_models = handle_security_schema(security_schemes,openapi_data) 
             
-            tags_map = classified_tags_and_method(openapi_data) 
-            converted_json_tags_mapping = convert_to_json_data_model(tags_map,openapi_data, swagger_metadata_id,security_schemes_models)
+            tags_map = classified_tags_and_method(openapi_data, schema_file_path) 
+            converted_json_tags_mapping = convert_to_json_data_model(tags_map,openapi_data, swagger_metadata_id,schema_file_path,security_schemes_models)
             ## now load these json obj to api models
             for tag,arr_obj in converted_json_tags_mapping.items():
                 for obj in arr_obj:
@@ -158,7 +156,10 @@ def _create_auth_arr_json( path_data, meta_data,security_schemes_models= []):
         if  isinstance(auth_data,dict):
             for security_name,scopes in auth_data.items():
                 scheme_details = security_schemes.get(security_name, {})
-                auth_type = scheme_details.get("type","")
+                if scheme_details.get("scheme"):
+                    auth_type = scheme_details.get("scheme") 
+                elif scheme_details.get("type"):
+                    auth_type = scheme_details.get("type")
                 auth_type = auth_type.strip().upper()
                 if security_name.lower() == "bearerauth":
                     auth_type = "BEARER" 
@@ -177,23 +178,29 @@ def _create_auth_arr_json( path_data, meta_data,security_schemes_models= []):
                 auth_type= "NOAUTH"
                 if isinstance(security_item,str):
                     scheme_details = security_schemes.get(security_item, {})
-                    auth_type = scheme_details.get("type","")
+                    if scheme_details.get("scheme"):
+                        auth_type = scheme_details.get("scheme") 
+                    elif scheme_details.get("type"):
+                        auth_type = scheme_details.get("type")
                     auth_type = auth_type.strip().upper()
-                    if security_item.lower() == "bearerauth":
-                        auth_type = "BEARER" 
-                    elif security_item.lower() == "basicauth":
-                        auth_type = "BASIC"
+                    # if security_item.lower() == "bearerauth":
+                    #     auth_type = "BEARER" 
+                    # elif security_item.lower() == "basicauth":
+                    #     auth_type = "BASIC"
                 
                     
                 else:
                     for security_name, _ in security_item.items():
                         scheme_details = security_schemes.get(security_name, {})
-                        auth_type = scheme_details.get("type","")
+                        if scheme_details.get("scheme"):
+                            auth_type = scheme_details.get("scheme") 
+                        elif scheme_details.get("type"):
+                            auth_type = scheme_details.get("type")
                         auth_type = auth_type.strip().upper()
-                        if security_name.lower() == "bearerauth":
-                            auth_type = "BEARER" 
-                        elif security_name.lower() == "basicauth":
-                            auth_type = "BASIC"
+                        # if security_name.lower() == "bearerauth":
+                        #     auth_type = "BEARER" 
+                        # elif security_name.lower() == "basicauth":
+                        #     auth_type = "BASIC"
                 
                 login_api,token_api = _get_login_refresh_auth_id_from_models(auth_type,security_schemes_models)
                 arr_auth.append({
@@ -359,63 +366,80 @@ def _create_schema( schema_name, components_schemas, seen=None):
         return schema
     
     
-def create_response_arr_json( path_data, meta_data):
-        operation_responses = path_data.get("responses", {})
-        responses = []
-        if operation_responses is None or len(operation_responses) <= 0:
-            return []
-        
-        for status, data in operation_responses.items():
-            content_type = None
-            schema_name = None
-            schema= {}
-            raw_content = ""
-            content = data.get("content", None)
-            if content and not bool(content):
-                for key, value in content.items():
-                    content_type,mode = get_content_type_and_mode(key)    
-                    schema = content.get("schema",{})
-                    if "$ref" in schema: 
-                        schema_name = schema.get("$ref",None)
-                        schema = {
-                                'type': "object",
-                                'properties': {},
-                                'required': []
-                        }
-                    else:
-                        is_anonymous = True
-                        if schema.get("type") == "object":
-                            schema = {
-                                'type': "object",
-                                'properties': {},
-                                'required': []
-                            }
-                        else:
-                            pass
-                                   
-            else:
-                content_type = 'TEXT'
-                raw_content = data.get("description")
+def create_response_arr_json( path_data, meta_data,schema_file_path):
+    with open(schema_file_path, 'r') as f:
+        all_schemas = json.load(f)
+    operation_responses = path_data.get("responses", {})
+    responses = []
+    if operation_responses is None or len(operation_responses) <= 0:
+        return []
+    
+    for status, data in operation_responses.items():
+        content_type = None
+        schema_name = None
+        schema= {}
+        raw_content = ""
+        content = data.get("content", None)
+        if content:
+            for key, value in content.items():
+                content_type,mode = get_content_type_and_mode(key)    
+                schema = value.get("schema",{})
+                if "$ref" in schema: 
+                    schema_name = schema.get("$ref",None)
+                    schema_name = schema_name.split('/')[-1]
+                    for id,val in all_schemas.items():
+                        if schema_name in val["name"]:
+                            schema = val
+                            schema_name = id
+                            break
+                            
+                # else:
+                #     is_anonymous = True
+                #     if schema.get("type") == "object":
+                #         schema = {
+                #             'type': "object",
+                #             'properties': {},
+                #             'required': []
+                #         }
+                #     else:
+                #         pass
+                                
+        else:
+            content_type = 'TEXT'
+            raw_content = data.get("description")
 
-            responses.append(
-                {
-                    "status":set_response_status(status),
-                    "content_type":content_type.strip().upper(),
-                    "schema_name":schema_name,
-                    "schema":schema,
-                    "raw_content":raw_content,
-                    "file":'',
-                    "description":data.get("description","")
-                }
-            )
-        return responses
+        responses.append(
+            {
+                "status":set_response_status(status),
+                "content_type":content_type.strip().upper(),
+                "schema_name":schema_name,
+                "schema":schema,
+                "raw_content":raw_content,
+                "file":'',
+                "description":data.get("description","")
+            }
+        )
+    return responses
     
 
 def generate_json_for_security_schema(schema_name,schema_data,meta_data):
+        servers = meta_data.get("servers")
+        if servers is None or len(servers) == 0:
+            servers = [{"url": "your_server_url"}]
         auth_obj = {
             "tags" : "auth",
-            "body" : None,
-            "request" : {"method" : "POST"},
+            "body" : [],
+            "request" : {"method" : "POST",
+            "url": {
+                "servers": servers,
+                "baseurl": servers[0].get("url"),
+                "host": [],
+                "protocol": "HTTP",
+                "port": None,
+                "path": [],
+                "url_env": None,
+                "errors": None
+                }},
             "response" : [],
             "token_store" : None,
             "authentication_type" : "BASIC",
@@ -423,9 +447,14 @@ def generate_json_for_security_schema(schema_name,schema_data,meta_data):
             "summary":"",
             "is_authentication_api" : False
         }
-
+        security_scheme = None
         auth_api_objects = []
-        if schema_name.lower() == "basicauth":
+        if schema_data.get("scheme"):
+            security_scheme = schema_data.get("scheme").lower()
+        elif schema_data.get("type"):
+            security_scheme = schema_data.get("type").lower()
+            
+        if security_scheme == "basic":
             auth_obj["id"] = generate_uuid_as_key()
             auth_obj["operation_id"] = schema_name + "_basic"
             auth_obj["authentication_type"] = "BASIC"
@@ -433,21 +462,21 @@ def generate_json_for_security_schema(schema_name,schema_data,meta_data):
 
             auth_api_objects.append(auth_obj)
 
-        elif schema_name.lower() == "bearerauth":
-            br_auth_login = copy.deepcopy(auth_obj)
-            br_auth_login["id"] = generate_uuid_as_key()
-            br_auth_login["operation_id"] =schema_name+"_login"
-            br_auth_login["authentication_type"] = "BEARER"
-            br_auth_login["auth_api_type"] = "LOGIN"
-            auth_api_objects.append(br_auth_login)
+        elif security_scheme == "bearer":
+            auth_obj = copy.deepcopy(auth_obj)
+            auth_obj["id"] = generate_uuid_as_key()
+            auth_obj["operation_id"] =schema_name+"_login"
+            auth_obj["authentication_type"] = "BEARER"
+            auth_obj["auth_api_type"] = "LOGIN"
+            auth_api_objects.append(auth_obj)
             
-        elif schema_name.lower() == "api_key":
-            br_auth_login = copy.deepcopy(auth_obj)
-            br_auth_login["id"] = generate_uuid_as_key()
-            br_auth_login["operation_id"] =schema_name+"_login"
-            br_auth_login["authentication_type"] = "APIKEY"
-            br_auth_login["auth_api_type"] = "LOGIN"
-            auth_api_objects.append(br_auth_login) 
+        elif security_scheme == "apikey":
+            auth_obj = copy.deepcopy(auth_obj)
+            auth_obj["id"] = generate_uuid_as_key()
+            auth_obj["operation_id"] =schema_name+"_login"
+            auth_obj["authentication_type"] = "APIKEY"
+            auth_obj["auth_api_type"] = "LOGIN"
+            auth_api_objects.append(auth_obj) 
 
         return auth_api_objects
     
@@ -482,17 +511,84 @@ def append_auth_json(auth_model, appName,moduleId):
                 json.dump(json_data,file, cls=EnhancedJSONEncoder)
                 
                 
-def classified_tags_and_method(open_api_json_data):
+def classified_tags_and_method(open_api_json_data, file_path):
         paths = open_api_json_data.get('paths', {})
         tags_map = {
             "default" : []
         }
+        all_schemas = []
+        seen_schemas = set()
+        def process_schema_data(content_data,tags,path,operation):
+            extracted_schema = content_data.get("schema")
+            schema = {}
+            if extracted_schema.get("type") and extracted_schema["type"]== 'object':
+                schema = object_converter(extracted_schema)
+                schema["schemaType"] = "modals"
+                
+            elif "$ref" in extracted_schema:
+                pass
+                # schema_name = extracted_schema.get("$ref",None)
+                # schema_name = schema_name.split('/')[-1]
+                # for values in combined_schemas.values():
+                #     if schema_name in values["name"]:
+                #         #later we will replace the ids
+                #         pass
+            
+            else:
+                schema = convert_type_to_config(extracted_schema)
+                schema["schemaType"] = "combined_schema"
+            schema_str = json.dumps(schema, sort_keys=True)
+            
+            # Check if this schema has already been processed
+            if schema_str != '{}' and schema_str not in seen_schemas:
+                seen_schemas.add(schema_str)
+                schema_name_parts = []
+                
+                if tags:
+                    schema_name_parts.append(tags[0])  
+                path_segments = path.strip('/').split('/')                
+                last_valid_segment = None
+                for segment in reversed(path_segments):
+                    if not segment.startswith("{") and "?" not in segment: 
+                        last_valid_segment = segment
+                        break
+                
+                if last_valid_segment:
+                    schema_name_parts.append(last_valid_segment.replace('-', '_'))  
+                else:
+                    schema_name_parts.append("unknown") 
+                
+                schema_name_parts.append(operation.lower())  
+                
+                schema_name_base = '_'.join(schema_name_parts)
+                
+                schema["name"] = f"schema_{schema_name_base}".lower()
+                
+                if any(existing_schema["name"] == schema["name"] for existing_schema in all_schemas):
+                    schema["name"] = f"schema_{schema_name_base}_{hashlib.md5(schema_str.encode('utf-8')).hexdigest()[:6]}"
+                
+                schema["name"] = schema["name"]  
+                
+                all_schemas.append(schema)
+                
         for path, path_data in paths.items():
             for operation in ["get", "post", "put", "patch", "delete", "head", "options", "trace"]:
                 operation_data = path_data.get(operation)
                 if not operation_data: 
                     continue
                 tags = operation_data.get("tags", None)
+                request_body = operation_data.get("requestBody")
+                response = operation_data.get("responses")
+                if request_body:
+                    for _, content_data in request_body.get("content").items():
+                        process_schema_data(content_data, tags, path, operation)
+                            
+                if response:
+                    for res_data in response.values():
+                        if res_data.get("content"):
+                            for content_data in res_data.get("content").values():
+                                process_schema_data(content_data,tags,path,operation)  
+                                              
                 if isinstance(tags,list):
                     for tag in tags:
                         if tag not in tags_map:
@@ -506,10 +602,21 @@ def classified_tags_and_method(open_api_json_data):
                 else:
                     operation_data["tag"] = "default"
                     tags_map["default"].append((path, operation, operation_data))
+        schema_with_ids = generate_ids(all_schemas, True)
+        set_unresolved_keys(schema_with_ids)
+        append_to_dict_file(file_path,schema_with_ids)
+        
+        with open(file_path) as fp:
+            combined_schemas = json.load(fp)
+            
+        for key, val in combined_schemas.items():
+            replace_variable(combined_schemas, f"#/components/schemas/{val['name']}",key)
+            
+        append_to_dict_file(file_path,combined_schemas)
         return tags_map
     
 
-def create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data):
+def create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data,schema_file_path):
     return {
         "type": "FUNCTION",
         "isAsync": True,
@@ -518,13 +625,13 @@ def create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta
         "operation_id": funcName,
         "tags": tag,
         "request": request_obj_new,
-        "response": create_response_arr_json(path_data=operation_data, meta_data=meta_data),
+        "response": create_response_arr_json(path_data=operation_data, meta_data=meta_data,schema_file_path=schema_file_path),
         "summary": operation_data.get("summary"),
         "is_authentication_api": False
     }
 
 
-def convert_to_json_data_model(tags_map, meta_data, module_id, security_schemes_models=[]):
+def convert_to_json_data_model(tags_map, meta_data, module_id,schema_file_path, security_schemes_models=[]):
     tag_mappings = {}
 
     for tag, tag_operations in tags_map.items():
@@ -555,9 +662,10 @@ def convert_to_json_data_model(tags_map, meta_data, module_id, security_schemes_
                         request_obj_new["body"] = [body]  
                         id = generate_uuid_as_key()
                         funcName = operation_data.get("operationId", f"function_name{id[:4]}")
-                        funcName += f"_{body['content_type']}"
+                        if len(body_items) > 1:
+                            funcName += f"_{body['content_type']}"
                         
-                        api_model_obj = create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data)
+                        api_model_obj = create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data,schema_file_path)
 
                         tag_mappings.setdefault(tag, []).append(api_model_obj)
 
@@ -565,7 +673,7 @@ def convert_to_json_data_model(tags_map, meta_data, module_id, security_schemes_
                     # Handle case with no body items
                     id = generate_uuid_as_key()
                     funcName = operation_data.get("operationId", f"function_name{id[:4]}")
-                    api_model_obj = create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data)
+                    api_model_obj = create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data,schema_file_path)
 
                     tag_mappings.setdefault(tag, []).append(api_model_obj)
 
@@ -641,7 +749,7 @@ def wrap_conversion(converted_data, project_name, folder_path):
     with open(api_models_index_file_path, "w") as file:
         json.dump(index_content, file)
 
-    return files_with_apis, is_error_present
+    return files_with_apis, is_error_present, auth_model_dict
 
                     
 

@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { getSchemas, editSchemaDetails, resolveSchema } from '../services/SchemaService';
+import { getSchemas, editSchemaDetails, resolveSchema, deleteSchema } from '../services/SchemaService';
 
 export const fetchSchemas = createAsyncThunk(
   'schema_configuration/fetchSchemas',
@@ -18,6 +18,18 @@ export const editSchema = createAsyncThunk(
   async ({ projectName, payload }, { rejectWithValue }) => {
     try {
       const response = await editSchemaDetails(projectName, payload);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const handleDeleteSchema = createAsyncThunk(
+  'schema_configuration/deleteSchema',
+  async ({ projectName, payload }, { rejectWithValue }) => {
+    try {
+      const response = await deleteSchema(projectName, payload);
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);

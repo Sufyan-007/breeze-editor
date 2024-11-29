@@ -49,7 +49,9 @@ def validate_route_path(route_obj,target_id, project_id="",skip_ids=[]):
     if 'parentId' in route_obj and route_obj.get('parentId') not in  [None, ""] and target_id:
         route_full_path = get_nodes_upper_lineage(route_obj['parentId'], project_id, TreeType["ROUTES"])+route_full_path
     for full_route_path in full_route_paths:
-        if  route_full_path== full_route_path.get("path"):
+        path = full_route_path.get('path')
+        path = '/' + path.strip('/')
+        if  route_full_path == path:
             raise Exception('route already exists..')
     return True
         
