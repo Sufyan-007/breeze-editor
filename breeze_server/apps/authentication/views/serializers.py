@@ -56,10 +56,11 @@ class LoginSerializer(serializers.Serializer):
         # request.user_datails = user_details
         # print(user.id)
         # Do not return the username or password, only the tokens
-        refresh = RefreshToken.for_user(user)
-        # refresh['username']=data['username']
+        refresh = RefreshToken()
+        refresh['user_id']=user.id
         
         return {
+            'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user_id':str(user.id)
         }
@@ -89,3 +90,17 @@ def get_all_user_data():
         # return jsonResponse({"error": "User not found"}, status=400)
         return {"error":"users not found"}   
     
+# def accessTokengenerator(id):
+#     try:
+#         user=UserProfile.objects.get(id=id)
+#         refresh = RefreshToken.for_user(user)
+#         # refresh['username']=data['username']
+#         user.refresh_token=refresh
+#         user.save()
+#         # access_token = str(refresh_token.access_token)
+#         return str(refresh.access_token)
+#     except Exception as e:
+#         return {"error":str(e)}
+    
+class RefreshTokenSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
