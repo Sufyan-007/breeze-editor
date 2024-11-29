@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   CustomRadioButtonField,
@@ -9,25 +9,64 @@ import {
 import { availableDependentVars, lifecycleTypes } from '../../constants/FormConstants';
 import { initialLifecycleConfig } from '../../constants/ResourcesFormData';
 
-function LifecycleConfigForm({ onSubmit, onCancel }) {
-  const [formData, setFormData] = useState(initialLifecycleConfig);
+function LifecycleConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
+  const [formData, setFormData] = useState(initialData || initialLifecycleConfig);
+  const [selectedDependencies, setSelectedDependencies] = useState(
+    (initialData?.dependencies?.values || []).map((dep) => dep.value)
+  );
+
+  useEffect(() => {
+    if (initialData?.dependencies) {
+      setSelectedDependencies(initialData.dependencies.values.map((dep) => dep.value));
+    }
+  }, [initialData]);
 
   const handleChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
+    let updatedData = { ...formData, [field]: value };
+
+    if (field === 'lifecycleType') {
+      if (value === 'onInitialMount') {
+        updatedData.dependencies = { type: 'ARRAY', values: [] };
+        setSelectedDependencies([]);
+      } else if (value === 'onDependency') {
+        updatedData.dependencies = { type: 'ARRAY', values: [] };
+      } else if (value === 'onEveryMount') {
+        updatedData.dependencies = null;
+        setSelectedDependencies([]);
+      }
+    } else if (field === 'dependencies') {
+      setSelectedDependencies(value);
+    }
+
+    setFormData(updatedData);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    let backendDependencies;
+    if (formData.lifecycleType !== 'onEveryMount') {
+      backendDependencies = {
+        type: 'ARRAY',
+        values: selectedDependencies.map((dep) => ({ type: 'CUSTOM', value: dep })),
+      };
+    } else {
+      backendDependencies = null;
+    }
+
+    const finalData = {
+      ...formData,
+      dependencies: backendDependencies,
+    };
+
+    onSubmit(finalData);
     setFormData(initialLifecycleConfig);
+    setSelectedDependencies([]);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialLifecycleConfig);
+    setSelectedDependencies([]);
     onCancel();
   };
 
@@ -57,9 +96,9 @@ function LifecycleConfigForm({ onSubmit, onCancel }) {
 
           {formData.lifecycleType === 'onDependency' && (
             <CustomMultiSelectField
-              name="dependentVars"
-              values={formData.dependentVars}
-              onChange={(value) => handleChange('dependentVars', value)}
+              name="dependencies"
+              values={selectedDependencies}
+              onChange={(value) => handleChange('dependencies', value)}
               options={availableDependentVars}
               config={{
                 label: 'Dependent Variables',
@@ -76,7 +115,12 @@ function LifecycleConfigForm({ onSubmit, onCancel }) {
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -86,6 +130,8 @@ function LifecycleConfigForm({ onSubmit, onCancel }) {
 LifecycleConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
+  formData: PropTypes.object,
+  editMode: PropTypes.bool,
 };
 
 export default LifecycleConfigForm;
