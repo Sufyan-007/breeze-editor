@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { CustomTextInput, CustomSelectField, MonacoEditor, CustomButtonField } from '../../../common/fields';
-import { BreezeDatatypes } from '../../component-configuration/constants/FormConstants';
 import ThemeContext from '../../../contexts/ThemeContext';
 
 function ExternalCompPropEditForm({ onSubmit, onCancel, initialData, selectedProp, addNewProp, editMode = false }) {
@@ -13,6 +12,11 @@ function ExternalCompPropEditForm({ onSubmit, onCancel, initialData, selectedPro
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
 
+  const PrimaryDatatypes = [
+    { value: 'STRING', label: 'String' },
+    { value: 'NUMBER', label: 'Number' },
+    { value: 'BOOLEAN', label: 'Boolean' },
+  ];
   //update formData when selectedProp or initialData changes
   useEffect(() => {
     if (selectedProp && initialData[selectedProp]) {
@@ -82,7 +86,7 @@ function ExternalCompPropEditForm({ onSubmit, onCancel, initialData, selectedPro
             name="dataType"
             value={formData.type}
             onChange={(value) => handleChange('type', value)}
-            options={BreezeDatatypes}
+            options={PrimaryDatatypes}
             config={{
               label: 'Data Type',
               groupClass: 'form-group mb-2',

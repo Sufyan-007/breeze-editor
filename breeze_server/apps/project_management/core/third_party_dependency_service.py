@@ -1,7 +1,8 @@
 from apps.common.utils.file_helpers.config_handler import get_breeze_config_file, write_json_file
 from apps.code_generator.core.generate_project import install_dependencies
 from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH
-
+import os, requests
+from dotenv import load_dotenv
 
 def get_app_config(project_id):
     return get_breeze_config_file(project_id, "APP_CONFIG")
@@ -22,6 +23,17 @@ def manage_dependencies(project_id, package_name, package_version=None, operatio
         app_basic_config["dependencies"] = {}
 
     dependencies = app_basic_config["dependencies"]
+    
+    load_dotenv()
+    SERVER_HOST = os.getenv("SERVER_HOST") 
+    THIRD_PARTY_PARSER_PORT = os.getenv("THIRD_PARTY_PARSER_PORT")
+    api_url= f"http://{SERVER_HOST}:{THIRD_PARTY_PARSER_PORT}/"
+    payload = {
+            "category": "third_party",
+            "fileName": package_name,
+            "fileVersion":package_version
+        }
+    requests.post(api_url,json=payload)
 
     if operation == "add":
         dependencies[package_name] = package_version
