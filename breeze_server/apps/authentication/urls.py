@@ -8,4 +8,6 @@ urlpatterns = [
     path('get-user/<str:param>/', user.get_user, name='get_user'),
     
     path('get-user/', user.get_user, name='get_all_users'),
+    
+    path('refreshtoken/',register.generate_access_token, name = 'refreshtoken'),
 ]
