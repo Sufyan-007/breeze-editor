@@ -29,7 +29,8 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('username');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('refreshToken');
     router.navigate('/login');
   };
 
@@ -93,15 +94,15 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
               <i className="bi bi-menu-button"></i>
             </button>
             {isMenuOpen && (
-              <div className="menu-dropdown position-absolute br-background-secondary shadow p-3 rounded">
-                <Link to="/user-management" className="d-block mb-2 br-text-tertiary" onClick={handleLinkClick}>
-                  User Management
+              <div className="menu-dropdown position-absolute br-background-primary shadow p-2 rounded">
+                <Link to="/user-management" className="d-block br-text-primary" onClick={handleLinkClick}>
+                  <i className="bi bi-people me-2"></i>User Management
                 </Link>
-                <Link to="/role-management" className="d-block mb-2 br-text-tertiary" onClick={handleLinkClick}>
-                  Role Management
+                <Link to="/role-management" className="d-block br-text-primary" onClick={handleLinkClick}>
+                  <i className="bi bi-person-fill-gear me-2"></i> Role Management
                 </Link>
-                <Link to="/all-projects" className="d-block br-text-tertiary" onClick={handleLinkClick}>
-                  All Projects
+                <Link to="/all-projects" className="d-block br-text-primary" onClick={handleLinkClick}>
+                  <i className="bi bi-cast me-2"></i>All Projects
                 </Link>
               </div>
             )}
@@ -115,14 +116,22 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
 
             {menuOpen && (
               <div
-                className="dropdown-menu show position-absolute px-2 br-background-primary rounded"
+                className="dropdown-menu show position-absolute px-1 br-background-primary rounded"
                 style={{ top: 45, right: 10, zIndex: 100, borderRadius: 0 }}
               >
-                <button type="button" className="dropdown-item br-text-primary" onClick={toggleOffCanvas}>
+                <button
+                  type="button"
+                  className="profile-menu-dropdown-item dropdown-item br-text-primary"
+                  onClick={toggleOffCanvas}
+                >
                   <i className="bi bi-person me-2"></i> Profile Settings
                 </button>
-                <button type="button" className="dropdown-item br-text-primary" onClick={handleLogout}>
-                  <i className="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                <button
+                  type="button"
+                  className="profile-menu-dropdown-item dropdown-item br-text-primary"
+                  onClick={handleLogout}
+                >
+                  <i className="bi bi-box-arrow-right me-2"></i> Logout
                 </button>
               </div>
             )}

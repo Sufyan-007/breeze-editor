@@ -1,11 +1,16 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
 import { BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 import { configTypeMapping, items } from '../constants/EditorList';
-import { getCodeDetails } from '../../../services/components/componentService';
+import {
+  addAstStatement,
+  getAstStatement,
+  getCodeDetails,
+  updateAstStatement,
+} from '../../../services/components/componentService';
 import { useParams } from 'react-router-dom';
 import useConfigurableMenuItems from '../hooks/useConfigurableMenuItems';
 
@@ -28,6 +33,7 @@ const ConfigurableMonacoEditor = ({
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const { showOffcanvas, closeOffcanvas } = useOffcanvas();
   const { projectName } = useParams();
+  const [statementId, setStatementId] = useState('');
 
   useEffect(() => {
     if (editor && editor.getValue() !== defaultValue) {
@@ -66,12 +72,13 @@ const ConfigurableMonacoEditor = ({
       const count = text.slice(0, index).length;
 
       const payload = {
-        type: node?.tag,
-        compId: node.id,
+        type: node?.tag, //removed
+        compId: node.id, // renamed as fileId
         index: count,
       };
       const result = await getCodeDetails(projectName, payload);
       const configType = result?.related_config?.type;
+      setStatementId(result?.related_config?.id || '');
       setFilteredItems(configType ? configTypeMapping[configType] || items : items);
     };
 
@@ -100,20 +107,47 @@ const ConfigurableMonacoEditor = ({
     };
   }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
-  const onSubmit = (value) => {
+  const onSubmit = async (value) => {
     console.log('value::>>', value);
+    const payload = {
+      fileId: node.id,
+      parentId: statementId,
+      config: value,
+    };
+    // await addAstStatement(projectName, payload);
     closeOffcanvas();
   };
+
+  const onUpdate = async (value) => {
+    console.log('value::>>', value);
+    const payload = {
+      fileId: node.id,
+      statementId: statementId,
+      config: value,
+    };
+    // await updateAstStatement(projectName, payload);
+    closeOffcanvas();
+  };
+
+  const getConfig = useCallback(async () => {
+    const payload = {
+      fileId: node.id,
+      statementId: statementId,
+    };
+    const config = await getAstStatement(projectName, payload);
+    return config;
+  }, [projectName, node.id, statementId]);
 
   const onCancel = () => {
     closeOffcanvas();
   };
 
-  const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel);
+  const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel, onUpdate, getConfig);
 
   const handleMenuItemClick = (item) => {
     const contentComponent = getConfigComponent(item);
-    showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, '40%');
+    const width = '40%';
+    showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
     setShowMenu(false);
   };
 

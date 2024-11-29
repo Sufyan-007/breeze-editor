@@ -1,34 +1,50 @@
 export const initialPropConfig = {
-  propName: '',
+  name: '',
   isRequired: false,
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
+};
+
+export const initialParamConfig = {
+  name: '',
+  dataType: 'STRING',
+  defaultValue: '',
+  description: '',
+};
+
+export const initialComponentConfig = {
+  type: 'REACT_COMPONENT',
+  name: '',
+  description: '',
+  propVars: [],
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
 };
 
 export const initialVariableConfig = {
   type: 'DECLARATION',
   varName: '',
   declarationType: 'const',
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
 };
 
 export const initialStateVarConfig = {
-  type: 'REACT_STATE_VAR',
+  type: 'REACT_USE_STATE',
   varName: '',
-  declarationType: 'const',
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
 };
 
 export const initialRefVarConfig = {
-  type: 'REACT_REF_VAR',
+  type: 'REACT_USE_REF',
   varName: '',
-  declarationType: 'const',
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
 };
@@ -41,24 +57,55 @@ export const initialImportConfig = {
 };
 
 export const initialFunctionConfig = {
-  functionName: '',
+  type: 'FUNCTION',
+  name: '',
   isAsync: false,
   isAnonymous: false,
   description: '',
-  params: [],
-  functionBody: '',
+  parameters: [],
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
 };
 
 export const initialLifecycleConfig = {
+  type: 'REACT_USE_EFFECT',
   description: '',
   lifecycleType: 'onInitialMount',
-  dependentVars: [],
-  lifecycleBody: '',
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
+  dependencies: { type: 'ARRAY', values: [] },
 };
-export const initialHookConfig = {
-  hookName: '',
-  hookDescription: '',
-  hookType: 'useMemo',
-  dependentVars: [],
-  functionParams: [],
+
+export const initialUseMemoConfig = {
+  type: 'REACT_USE_MEMO',
+  name: '',
+  description: '',
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
+  dependencies: { type: 'ARRAY', values: [] },
+};
+
+export const initialUseCallbackConfig = {
+  type: 'REACT_USE_CALLBACK',
+  name: '',
+  description: '',
+  callback: {
+    type: 'FUNCTION',
+    name: '',
+    isAsync: false,
+    isAnonymous: true,
+    description: '',
+    parameters: [],
+    bodyConfig: {
+      type: 'BLOCK',
+      statements: [],
+    },
+  },
+  dependencies: { type: 'ARRAY', values: [] },
 };

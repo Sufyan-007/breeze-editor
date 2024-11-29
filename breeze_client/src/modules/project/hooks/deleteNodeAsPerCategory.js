@@ -1,9 +1,11 @@
 import { deleteFileAction } from '../../resource-configuration/redux/resourcesActions';
 
 export const deleteNodeAsPerCategory = async (node, dispatch, projectName) => {
+  let response;
+
   switch (node.tag) {
     case 'RESOURCE':
-      await dispatch(deleteFileAction({ fileId: node.id, projectName: projectName }));
+      response = await dispatch(deleteFileAction({ fileId: node.id, projectName: projectName }));
       break;
     case 'COMPONENT':
       // here write your code
@@ -15,4 +17,5 @@ export const deleteNodeAsPerCategory = async (node, dispatch, projectName) => {
       console.error('Unknown category for delete');
       return null;
   }
+  return response;
 };

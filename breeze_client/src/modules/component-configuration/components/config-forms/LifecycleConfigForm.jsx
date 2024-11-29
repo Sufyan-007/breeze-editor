@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   CustomRadioButtonField,
@@ -9,25 +9,69 @@ import {
 import { availableDependentVars, lifecycleTypes } from '../../constants/FormConstants';
 import { initialLifecycleConfig } from '../../constants/ResourcesFormData';
 
-function LifecycleConfigForm({ onSubmit, onCancel }) {
+function LifecycleConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialLifecycleConfig);
+  const [selectedDependencies, setSelectedDependencies] = useState([]);
+
+  useEffect(() => {
+    if (editMode) {
+      // fetchConfig
+      // setFormData(existingData);
+      // if (existingData.lifecycleType === 'onDependency' && existingData.dependencies?.values) {
+      //   setSelectedDependencies(existingData.dependencies.values.map((dep) => dep.value));
+      // }
+    }
+  }, [editMode]);
 
   const handleChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
+    let updatedData = { ...formData, [field]: value };
+
+    if (field === 'lifecycleType') {
+      if (value === 'onInitialMount') {
+        updatedData.dependencies = { type: 'ARRAY', values: [] };
+        setSelectedDependencies([]);
+      } else if (value === 'onDependency') {
+        updatedData.dependencies = { type: 'ARRAY', values: [{ type: 'TOKEN', value: '' }] };
+        setSelectedDependencies([]);
+      } else if (value === 'onEveryMount') {
+        updatedData.dependencies = null;
+        setSelectedDependencies([]);
+      }
+    } else if (field === 'dependencies') {
+      setSelectedDependencies(value);
+    }
+
+    setFormData(updatedData);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    let transformedDependencies;
+    if (formData.lifecycleType === 'onDependency') {
+      transformedDependencies = {
+        type: 'ARRAY',
+        values: selectedDependencies.map((dep) => ({ type: 'TOKEN', value: dep })),
+      };
+    } else if (formData.lifecycleType === 'onInitialMount') {
+      transformedDependencies = { type: 'ARRAY', values: [] };
+    } else {
+      transformedDependencies = null;
+    }
+
+    const finalData = {
+      ...formData,
+      dependencies: transformedDependencies,
+    };
+
+    onSubmit(finalData);
     setFormData(initialLifecycleConfig);
+    setSelectedDependencies([]);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialLifecycleConfig);
+    setSelectedDependencies([]);
     onCancel();
   };
 
@@ -57,9 +101,9 @@ function LifecycleConfigForm({ onSubmit, onCancel }) {
 
           {formData.lifecycleType === 'onDependency' && (
             <CustomMultiSelectField
-              name="dependentVars"
-              values={formData.dependentVars}
-              onChange={(value) => handleChange('dependentVars', value)}
+              name="dependencies"
+              values={selectedDependencies}
+              onChange={(value) => handleChange('dependencies', value)}
               options={availableDependentVars}
               config={{
                 label: 'Dependent Variables',
@@ -76,7 +120,12 @@ function LifecycleConfigForm({ onSubmit, onCancel }) {
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -84,8 +133,9 @@ function LifecycleConfigForm({ onSubmit, onCancel }) {
 }
 
 LifecycleConfigForm.propTypes = {
-  onSubmit: PropTypes.func,
-  onCancel: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  editMode: PropTypes.bool,
 };
 
 export default LifecycleConfigForm;
