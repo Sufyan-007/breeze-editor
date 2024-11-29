@@ -9,17 +9,19 @@ import {
 import { availableDependentVars, lifecycleTypes } from '../../constants/FormConstants';
 import { initialLifecycleConfig } from '../../constants/ResourcesFormData';
 
-function LifecycleConfigForm({ onSubmit, onCancel, formData: initialData, editMode }) {
-  const [formData, setFormData] = useState(initialData || initialLifecycleConfig);
-  const [selectedDependencies, setSelectedDependencies] = useState(
-    (initialData?.dependencies?.values || []).map((dep) => dep.value)
-  );
+function LifecycleConfigForm({ onSubmit, onCancel, editMode }) {
+  const [formData, setFormData] = useState(initialLifecycleConfig);
+  const [selectedDependencies, setSelectedDependencies] = useState([]);
 
   useEffect(() => {
-    if (initialData?.dependencies) {
-      setSelectedDependencies(initialData.dependencies.values.map((dep) => dep.value));
+    if (editMode) {
+      // fetchConfig
+      // setFormData(existingData);
+      // if (existingData.lifecycleType === 'onDependency' && existingData.dependencies?.values) {
+      //   setSelectedDependencies(existingData.dependencies.values.map((dep) => dep.value));
+      // }
     }
-  }, [initialData]);
+  }, [editMode]);
 
   const handleChange = (field, value) => {
     let updatedData = { ...formData, [field]: value };
@@ -29,7 +31,8 @@ function LifecycleConfigForm({ onSubmit, onCancel, formData: initialData, editMo
         updatedData.dependencies = { type: 'ARRAY', values: [] };
         setSelectedDependencies([]);
       } else if (value === 'onDependency') {
-        updatedData.dependencies = { type: 'ARRAY', values: [] };
+        updatedData.dependencies = { type: 'ARRAY', values: [{ type: 'TOKEN', value: '' }] };
+        setSelectedDependencies([]);
       } else if (value === 'onEveryMount') {
         updatedData.dependencies = null;
         setSelectedDependencies([]);
@@ -43,19 +46,21 @@ function LifecycleConfigForm({ onSubmit, onCancel, formData: initialData, editMo
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let backendDependencies;
-    if (formData.lifecycleType !== 'onEveryMount') {
-      backendDependencies = {
+    let transformedDependencies;
+    if (formData.lifecycleType === 'onDependency') {
+      transformedDependencies = {
         type: 'ARRAY',
-        values: selectedDependencies.map((dep) => ({ type: 'CUSTOM', value: dep })),
+        values: selectedDependencies.map((dep) => ({ type: 'TOKEN', value: dep })),
       };
+    } else if (formData.lifecycleType === 'onInitialMount') {
+      transformedDependencies = { type: 'ARRAY', values: [] };
     } else {
-      backendDependencies = null;
+      transformedDependencies = null;
     }
 
     const finalData = {
       ...formData,
-      dependencies: backendDependencies,
+      dependencies: transformedDependencies,
     };
 
     onSubmit(finalData);
@@ -128,9 +133,8 @@ function LifecycleConfigForm({ onSubmit, onCancel, formData: initialData, editMo
 }
 
 LifecycleConfigForm.propTypes = {
-  onSubmit: PropTypes.func,
-  onCancel: PropTypes.func,
-  formData: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
   editMode: PropTypes.bool,
 };
 

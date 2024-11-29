@@ -1,14 +1,14 @@
 export const initialPropConfig = {
-  propName: '',
+  name: '',
   isRequired: false,
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
 };
 
 export const initialParamConfig = {
   name: '',
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
 };
@@ -17,32 +17,34 @@ export const initialComponentConfig = {
   type: 'REACT_COMPONENT',
   name: '',
   description: '',
-  propsVar: [],
+  propVars: [],
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
 };
 
 export const initialVariableConfig = {
   type: 'DECLARATION',
   varName: '',
   declarationType: 'const',
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
 };
 
 export const initialStateVarConfig = {
-  type: 'REACT_STATE_VAR',
+  type: 'REACT_USE_STATE',
   varName: '',
-  declarationType: 'const',
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
 };
 
 export const initialRefVarConfig = {
-  type: 'REACT_REF_VAR',
+  type: 'REACT_USE_REF',
   varName: '',
-  declarationType: 'const',
-  dataType: 'string',
+  dataType: 'STRING',
   defaultValue: '',
   description: '',
 };

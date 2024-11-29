@@ -1,10 +1,11 @@
 export const BreezeDatatypes = [
-  { value: 'string', label: 'String' },
-  { value: 'number', label: 'Number' },
-  { value: 'boolean', label: 'Boolean' },
-  { value: 'object', label: 'Object' },
-  { value: 'array', label: 'Array' },
-  { value: 'function', label: 'Function' },
+  { value: 'STRING', label: 'String' },
+  { value: 'NUMBER', label: 'Number' },
+  { value: 'BOOLEAN', label: 'Boolean' },
+  { value: 'OBJECT', label: 'Object' },
+  { value: 'ARRAY', label: 'Array' },
+  { value: 'FUNCTION', label: 'Function' },
+  { value: 'CUSTOM', label: 'Custom' },
 ];
 
 export const DeclarationTypes = [
@@ -39,4 +40,6 @@ export const availableDependentVars = [
   { label: 'Variable 1', value: 'var1' },
   { label: 'Variable 2', value: 'var2' },
   { label: 'Variable 3', value: 'var3' },
+  { label: 'Dep 1', value: 'dependency1' },
+  { label: 'Dep 2', value: 'dependency2' },
 ];

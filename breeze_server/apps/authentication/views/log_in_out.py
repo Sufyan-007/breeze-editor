@@ -30,11 +30,11 @@ def login(request):
         if serializer.is_valid():
             # print(serializer.validated_data["access"])
             request.session['auth_token'] =serializer.validated_data["access"] 
-            request.session.set_expiry(None)
+            # request.session.set_expiry(None)
             # request.user_datails = serializer.validated_data["user_details"]
             
             # return JsonResponse(serializer.validated_data, status=200)
-            return JsonResponse({'accessToken': serializer.validated_data["access"], 'username':'username'}, status=200)
+            return JsonResponse({'accessToken': serializer.validated_data["access"],'refreshToken':serializer.validated_data["refresh"], 'user_id':serializer.validated_data["user_id"]}, status=200)
         
         return JsonResponse(serializer.errors, status=400)
     except Exception as e:

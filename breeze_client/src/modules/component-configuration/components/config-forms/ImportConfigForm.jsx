@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   CustomTextInput,
@@ -9,14 +9,8 @@ import {
 import { initialImportConfig } from '../../constants/ResourcesFormData';
 import { ImportCategories, ImportTypes } from '../../constants/FormConstants';
 
-function ImportConfigForm({ onSubmit, onCancel, formData: initialData, editMode = false }) {
-  const [formData, setFormData] = useState(initialData || initialImportConfig);
-
-  useEffect(() => {
-    if (editMode && initialData) {
-      setFormData(initialData);
-    }
-  }, [initialData, editMode]);
+function ImportConfigForm({ onSubmit, onCancel, editMode = false }) {
+  const [formData, setFormData] = useState(initialImportConfig);
 
   const handleChange = (field, value) => {
     setFormData({
@@ -104,12 +98,6 @@ function ImportConfigForm({ onSubmit, onCancel, formData: initialData, editMode 
 ImportConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.shape({
-    importEntity: PropTypes.string,
-    importFrom: PropTypes.string,
-    importType: PropTypes.string,
-    category: PropTypes.string,
-  }),
   editMode: PropTypes.bool,
 };
 
