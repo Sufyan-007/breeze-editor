@@ -6,7 +6,7 @@ class ImportHelper:
         pass
 
     @staticmethod
-    def generate_imports_code(imports,projectId):
+    def generate_imports_code(imports,projectId, file_id):
         directory_management_service = DirectoryManager(projectId)
         import_statements = []
         import_statement_tree = []

@@ -234,11 +234,13 @@ def generate_file_code(projectId,fileId,config):
     meta_config = functionParser.get_meta_config()
     
     imports = deepcopy(config["IMPORTS"])
+    #get imported entitie's ids and add current entity's id to its usedIn array in the entity config
+    # id(entityId: string) : {type: string, fileId: string, dataType, usedIn: [](add current entity's id)}
     
     # imports["other"].extend(generated_imports["other"])
     # imports["components"].extend(generated_imports["components"])
     
-    imports,importTree = ImportHelper.generate_imports_code(imports,projectId)
+    imports,importTree = ImportHelper.generate_imports_code(imports,projectId, file_id=fileId)
     
     export_statements = ""
     

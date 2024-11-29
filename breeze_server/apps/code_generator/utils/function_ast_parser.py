@@ -12,7 +12,6 @@ class FunctionParser:
             'components':[],
         }
         self.meta_config = meta_config
-        self.scope = []
         
     def get_generated_imports(self):
         return self.generated_imports
@@ -20,7 +19,7 @@ class FunctionParser:
     def get_meta_config(self):
         return self.meta_config
     
-    def generate_statement_code(self,config,key_chaining=[]):
+    def generate_statement_code(self,config,key_chaining=[], parent_block_id=None):
         # if config.get('$ref'):
         #     entityType =config["entityType"]
         #     config = resolve_ref(projectId=self.projectId,entityType=entityType,entityId= config["$ref"],extras=config)
@@ -32,10 +31,10 @@ class FunctionParser:
         if not statement_id:
             statement_id = generate_uuid_as_key()
             config["id"] = statement_id
-        
         conf = {
             "index": "<>".join([str(x) for x in key_chaining]),
             "type":config["type"],
+            "parentBlockId":parent_block_id
         }
         self.meta_config[statement_id] = conf
         
@@ -49,21 +48,19 @@ class FunctionParser:
         }
         
         if config["type"][:5] =="REACT":
-            code,t = self.generate_react_code(config = config, key_chaining=key_chaining)
+            code, t = self.generate_react_code(config = config, key_chaining=key_chaining, parent_block_id=parent_block_id)
             if t:
                 tree["children"].append(t)
         elif config["type"] == "BLOCK":
             statements = []
-            
-            
+            if parent_block_id:
+                parent_scope = self.meta_config[parent_block_id]["parent_scope"] | self.meta_config[parent_block_id]["scope"]
+                conf["parent_scope"] = parent_scope
+            else: 
+                conf["parent_scope"] = {}        
+            conf["scope"] = {}
             for i,code in enumerate(config['statements']):
-                statement,t =  self.generate_statement_code(code,key_chaining=key_chaining+["statements",i])
-                # function_parser = FunctionParser(
-                #     projectId=self.projectId,
-                #     resources=self.scope+self.resources,
-                #     meta_config=self.meta_config
-                # )
-                # statement,t =  function_parser.generate_statement_code(code,key_chaining=key_chaining+["statements",i])
+                statement, t = self.generate_statement_code(code,key_chaining=key_chaining+["statements",i], parent_block_id=statement_id)
                 statements.append(statement)
                 tree["children"].append(t)
             
@@ -80,9 +77,11 @@ class FunctionParser:
             func_name = ""
             if not config.get('isAnonymous'):
                 func_name = f"const {config['name']} = "
+                if config['name'] in self.meta_config[parent_block_id]["scope"]:
+                    raise Exception("function name already declared..")
+                self.meta_config[parent_block_id]["scope"][config['name']] = statement_id
             
-            body,t= self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])
-            
+            body, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
             tree["children"].append(t)
             
             code = f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {", ".join([
@@ -102,16 +101,19 @@ class FunctionParser:
             else:
                 varName = config["varName"]
             if declaration_type == "const" or config.get("value",False):
-                value,t = self.get_value_code(config["value"], key_chaining=key_chaining+["value"])
+                value, t = self.get_value_code(config["value"], key_chaining=key_chaining+["value"], parent_block_id=parent_block_id)
                 if t:
                     tree["children"].append(t)
                 code = f"""{declaration_type} {varName} = {value}"""
             else:
                 code= f"""{declaration_type} {varName} """
+            if varName in self.meta_config[parent_block_id]["scope"]:
+                raise Exception("Varname arleady declared")
+            self.meta_config[parent_block_id]["scope"][varName] = statement_id
             
         elif config["type"] == "ASSIGNMENT": 
             varName = config["varName"]
-            value,t = self.get_value_code(config["value"], key_chaining=key_chaining+["value"])
+            value, t = self.get_value_code(config["value"], key_chaining=key_chaining+["value"], parent_block_id=parent_block_id)
             if t:
                 tree["children"].append(t)
                 
@@ -122,7 +124,7 @@ class FunctionParser:
         elif config['type'] == "FUNCTION_CALL":
             code = self.get_function_call_code(config,key_chaining=key_chaining)
         elif config['type']== "CHAINED_FUNCTIONS":
-            function_calls = [ self.get_function_call_code(func,True,key_chaining=key_chaining+["functions",i]) for i,func in enumerate(config["functions"]) ]
+            function_calls = [ self.get_function_call_code(func, True, key_chaining=key_chaining+["functions",i]) for i,func in enumerate(config["functions"]) ]
             isAwaited = ""
             if config.get("isAwaited", False):
                 isAwaited = "await "
@@ -132,25 +134,25 @@ class FunctionParser:
             code= config.get("body","")
         
         elif config['type'] == "IF_BLOCK":
-            cond,t =self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])
+            cond, t =self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"], parent_block_id=parent_block_id)
             if t:
                 tree["children"].append(t)
             
-            if_code,t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])
+            if_code, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
             tree["children"].append(t)
         
             code = f""" if ({cond}) {if_code} """
             if config.get('elseIf', False):
                 for x in config.get('elseIf'):
-                    cond2,t =self.get_value_code(x["condition"],key_chaining=key_chaining+["condition"])
+                    cond2, t = self.get_value_code(x["condition"],key_chaining=key_chaining+["condition"], parent_block_id=parent_block_id)
                     if t:
                         tree["children"].append(t)
-                    elif_body,t = self.generate_statement_code(x.get('bodyConfig',{},key_chaining=key_chaining+["bodyConfig"]))
+                    elif_body, t = self.generate_statement_code(x.get('bodyConfig',{},key_chaining=key_chaining+["bodyConfig"]), parent_block_id=parent_block_id)
                     tree["children"].append(t)
                     
                     code += f"""else if({cond2}) {elif_body}"""
             if config.get('elseBody', False):
-                else_body,t = self.generate_statement_code(config.get('elseBody',{}),key_chaining=key_chaining+["elseBody"])
+                else_body, t = self.generate_statement_code(config.get('elseBody',{}),key_chaining=key_chaining+["elseBody"], parent_block_id=parent_block_id)
                 tree["children"].append(t)
 
                 code += f"""else  {else_body}"""
@@ -164,7 +166,7 @@ class FunctionParser:
             else:
                 iterator = f"""{config["iterator"].get("declarationType","const ")} {config["iterator"]["name"]}"""
                 iterate = "in" if config.get('loopType')=="FOR_IN" else "of"
-                iterable,t = self.get_value_code(config["iterable"],key_chaining=key_chaining+["iterable"])
+                iterable, t = self.get_value_code(config["iterable"],key_chaining=key_chaining+["iterable"], parent_block_id=parent_block_id)
                 if t:
                     tree["children"].append(t)
                 code= f""" for ( {iterator} {iterate} {iterable})
@@ -173,50 +175,50 @@ class FunctionParser:
             pass
         
         elif config['type'] == 'TRY_CATCH':
-            tryBody,t = self.generate_statement_code(config["tryBody"],key_chaining=key_chaining+["tryBody"])
+            tryBody, t = self.generate_statement_code(config["tryBody"],key_chaining=key_chaining+["tryBody"], parent_block_id=parent_block_id)
             tree["children"].append(t)
             tryBody = f"""try {tryBody}"""
-            catchBody,t = self.generate_statement_code(config["catchBody"],key_chaining=key_chaining+["catchBody"])
+            catchBody, t = self.generate_statement_code(config["catchBody"],key_chaining=key_chaining+["catchBody"], parent_block_id=parent_block_id)
             tree["children"].append(t)
             catchBody = f"""catch (err) {catchBody}"""
             
             finallyBody = ""
             if config.get('finallyBody'):
-                finallyBody,t = self.generate_statement_code(config["finallyBody"],key_chaining=key_chaining+["finallyBody"])
+                finallyBody, t = self.generate_statement_code(config["finallyBody"],key_chaining=key_chaining+["finallyBody"], parent_block_id=parent_block_id)
                 tree["children"].append(t)
                 finallyBody = f"""finally {finallyBody}"""
             
             code= " ".join([tryBody,catchBody,finallyBody])
         
         elif config['type'] == "WHILE_BLOCK":
-            cond,t = self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])
+            cond, t = self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"], parent_block_id=parent_block_id)
             if t:
                 tree["children"].append(t)
                 
-            body, t =self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])
+            body, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
             tree["children"].append(t)
             code= f""" while ({cond}) {body} 
         """
         
         elif config['type'] == "DO_WHILE_BLOCK":
-            cond,t = self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"])
+            cond, t = self.get_value_code(config["condition"],key_chaining=key_chaining+["condition"], parent_block_id=parent_block_id)
             if t:
                 tree["children"].append(t)
-            body,t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"])
+            body, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
             tree["children"].append(t)
             code= f"""do  {body} while ({cond}) 
         """
         
         
         elif config['type'] == "RETURN":
-            val, t =self.get_value_code(config.get("value",{}),key_chaining=key_chaining+["value"])
+            val, t =self.get_value_code(config.get("value",{}),key_chaining=key_chaining+["value"], parent_block_id=parent_block_id)
             if t:
                 tree["children"].append(t)
             code= f""" return {val}
         """
         
         elif config["type"] == "OPERATION":
-            val,t = self.get_operation_code(config,key_chaining=key_chaining)
+            val, t = self.get_operation_code(config,key_chaining=key_chaining, parent_block_id=parent_block_id)
             code= f" {val} "
         
         elif config["type"] == "IMPORT":
@@ -231,7 +233,7 @@ class FunctionParser:
             code= f" /* {config['text']} */"
         
         elif config["type"] == "Element":
-            return self.generate_html(config,key_chaining=key_chaining)
+            return self.generate_html(config,key_chaining=key_chaining, parent_block_id=parent_block_id)
         
         tree["code"] = code
         
@@ -250,7 +252,7 @@ class FunctionParser:
         
     
     
-    def get_value_code(self,value, key_chaining=[]):
+    def get_value_code(self,value, key_chaining=[], parent_block_id=None):
         ref = value.get("$ref")
         type = value.get("type","UNDEFINED")
         code = ""
@@ -281,7 +283,7 @@ class FunctionParser:
             elif type == "OBJECT":
                 properties =[]
                 for x in value.get("properties"):
-                    prop,t = self.get_value_code(value['properties'][x],key_chaining=key_chaining+['properties',x])
+                    prop, t = self.get_value_code(value['properties'][x],key_chaining=key_chaining+['properties',x], parent_block_id=parent_block_id)
                     properties.append(f" {x} : {prop}" )
                 code= f"""{{ {",".join(properties)}}}"""
             
@@ -289,33 +291,33 @@ class FunctionParser:
                 # code= f"[{', '.join([ )])}]"
                 values =[]
                 for i,x in enumerate(value.get('values', [])):
-                    value,t = self.get_value_code(x,key_chaining=key_chaining+[i])
+                    value, t = self.get_value_code(x,key_chaining=key_chaining+[i], parent_block_id=parent_block_id)
                     values.append(value )
                     
                 code= f"""[ { ', '.join(values) } ]"""
             elif type == "OPERATION":
-                code, t= self.get_operation_code(value,key_chaining=key_chaining)
+                code, t = self.get_operation_code(value,key_chaining=key_chaining, parent_block_id=parent_block_id)
                 
             
             elif type == "FUNCTION" or type == "CALLBACK":
-                code, t= self.generate_statement_code(value, key_chaining=key_chaining)
+                code, t = self.generate_statement_code(value, key_chaining=key_chaining, parent_block_id=parent_block_id)
             
             elif type == "CUSTOM":
                 code= value["value"]
 
             elif type == "FUNCTION_CALL":
-                code,t= self.generate_statement_code(value, key_chaining=key_chaining)
+                code, t = self.generate_statement_code(value, key_chaining=key_chaining, parent_block_id=parent_block_id)
             
             elif type == "CHAINED_FUNCTIONS":
-                code,t= self.generate_statement_code(value, key_chaining=key_chaining)
+                code, t = self.generate_statement_code(value, key_chaining=key_chaining, parent_block_id=parent_block_id)
             
             elif type == "Element":
-                code,t = self.generate_statement_code(value,key_chaining=key_chaining)
+                code, t = self.generate_statement_code(value,key_chaining=key_chaining, parent_block_id=parent_block_id)
                 
-        return code,t
+        return code, t
         
         
-    def generate_html(self,config,key_chaining=[]):
+    def generate_html(self,config,key_chaining=[], parent_block_id=None):
         if config.get('elementType',"") == 'CUSTOM':
             tag =config.get("tagName") 
             if tag!=self.config.get('name'):
@@ -342,7 +344,7 @@ class FunctionParser:
         attributes = config.get('attributes', {})
         children = config.get('children', [])
 
-        attribute_str = ' '.join([f'{attr}={self.get_value_code(value,key_chaining=key_chaining+["attributes",attr])[0]}' for attr, value in attributes.items()])
+        attribute_str = ' '.join([f'{attr}={self.get_value_code(value,key_chaining=key_chaining+["attributes",attr], parent_block_id=parent_block_id)[0]}' for attr, value in attributes.items()])
         attribute_str = attribute_str+f" data-brz-id='{config['id']}'"
         open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
         close_tag = f'</{tag_name}>'
@@ -359,7 +361,7 @@ class FunctionParser:
         inner_code_tree = []
         inner_html= []
         for i,child in enumerate(children):
-            code,t = self.get_value_code(child,key_chaining=key_chaining+["children",i])
+            code, t = self.get_value_code(child,key_chaining=key_chaining+["children",i], parent_block_id=parent_block_id)
             inner_html.append(code)
             inner_code_tree.append(t)
             
@@ -371,12 +373,14 @@ class FunctionParser:
             "children" : inner_code_tree,
             "id" : config["id"]
         }
-        return f'{open_tag}{inner_html}{close_tag}' , tree
+        return f'{open_tag}{inner_html}{close_tag}', tree
     
         
     def get_function_call_code(self,config,disableAwait = False,key_chaining=[]):
         ref = config.get("$ref",None)
         if ref:
+            e = self.meta_config[ref]
+            self.meta_config[ref]["usedId"].append("statementId")
             functionConfig = resolve_ref(
                 projectId=self.projectId,
                 entityType=config.get("functionType","SERVICE"),
@@ -398,21 +402,21 @@ class FunctionParser:
         """
         
         
-    def get_parameter_mapping(self,config,key_chaining=[]):
+    def get_parameter_mapping(self,config,key_chaining=[], parent_block_id=None):
         param_list =[]
         for i,param in enumerate(config.get("parameters",[])):
-            val,t = self.get_value_code(param,key_chaining=key_chaining+["parameters",i])
+            val, t = self.get_value_code(param,key_chaining=key_chaining+["parameters",i], parent_block_id=parent_block_id)
             param_list.append(val)
         return ", ".join([str(x) for x in param_list])
     
-    def get_operation_code(self,config,key_chaining=[]):
+    def get_operation_code(self,config,key_chaining=[], parent_block_id=None):
         
         tree = []
         
         code= ""
         
         if config["operationType"] == "UNARY":
-            o1,t1 = self.get_value_code(config['operand'] )
+            o1, t1 = self.get_value_code(config['operand'], parent_block_id=parent_block_id)
             if t1:
                 if type(t1) is list:
                     tree+=t1
@@ -422,8 +426,8 @@ class FunctionParser:
             code= f" {config['operation']}{o1}"
 
         elif config["operationType"] == "BINARY":
-            operand1,t1 = self.get_value_code(config['operand1'], key_chaining=key_chaining+["operand1"] )
-            operand2,t2 = self.get_value_code(config['operand2'], key_chaining=key_chaining+["operand2"] )
+            operand1, t1 = self.get_value_code(config['operand1'], key_chaining=key_chaining+["operand1"], parent_block_id=parent_block_id)
+            operand2, t2 = self.get_value_code(config['operand2'], key_chaining=key_chaining+["operand2"], parent_block_id=parent_block_id)
             if t1:
                 if type(t1) is list:
                     tree+=t1
@@ -440,9 +444,9 @@ class FunctionParser:
             
         
         elif config["operationType"] == "TERNARY":
-            operand1,t1 = self.get_value_code(config['operand1'], key_chaining=key_chaining+["operand1"] )
-            operand2,t2 = self.get_value_code(config['operand2'], key_chaining=key_chaining+["operand2"] )
-            operand3,t3 = self.get_value_code(config['operand3'], key_chaining=key_chaining+["operand3"])
+            operand1, t1 = self.get_value_code(config['operand1'], key_chaining=key_chaining+["operand1"], parent_block_id=parent_block_id)
+            operand2, t2 = self.get_value_code(config['operand2'], key_chaining=key_chaining+["operand2"], parent_block_id=parent_block_id)
+            operand3, t3 = self.get_value_code(config['operand3'], key_chaining=key_chaining+["operand3"], parent_block_id=parent_block_id)
             if t1:
                 if type(t1) is list:
                     tree+=t1
@@ -461,13 +465,13 @@ class FunctionParser:
             
             code= f" ({operand1} )? ({operand2}) : ({operand3}) "
         
-        return code,tree
+        return code, tree
 
-    def generate_react_code(self,config,key_chaining=[]):
+    def generate_react_code(self,config,key_chaining=[], parent_block_id=None):
         code = ""
         t= None
         if config["type"]== "REACT_COMPONENT":
-            bodyCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"])
+            bodyCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
             props=[]
             for prop in config.get("propVars",[]):
                 props.append(prop["name"])
@@ -483,7 +487,7 @@ class FunctionParser:
             varName = "".join(varName.split())
             defaultValue = ""
             if config.get("defaultValue"):
-                defaultValue,t = self.get_value_code(config["defaultValue"],key_chaining=key_chaining+["defaultValue"])
+                defaultValue, t = self.get_value_code(config["defaultValue"],key_chaining=key_chaining+["defaultValue"], parent_block_id=parent_block_id)
             code = f"const [{varName},{varName.title()}] = useState({defaultValue})"
         
         elif config["type"] == "REACT_USE_REF":
@@ -491,13 +495,13 @@ class FunctionParser:
             varName = "".join(varName.split())
             defaultValue = ""
             if config.get("defaultValue"):
-                defaultValue,t = self.get_value_code(config["defaultValue"],key_chaining=key_chaining+["defaultValue"])
+                defaultValue, t = self.get_value_code(config["defaultValue"],key_chaining=key_chaining+["defaultValue"], parent_block_id=parent_block_id)
             code = f"const {varName} = useRef({defaultValue})"
         
         elif config["type"] == "REACT_USE_EFFECT":
-            blockCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"])
+            blockCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
             
-            if not config.get("dependencies") and config["dependencies"]!=[]:
+            if not config.get("dependencies") and config.get("dependencies")!=[]:
                 code = f"useEffect(()=>{blockCode})"
             else:
                 dependencies =[]
@@ -507,9 +511,9 @@ class FunctionParser:
                 code = f"useEffect(()=>{blockCode}, [{','.join(dependencies)}] )"
 
         elif config["type"] == "REACT_USE_CALLBACK":
-            callBackCode, t = self.generate_statement_code(config["callback"],key_chaining=key_chaining+["callback"])
+            callBackCode, t = self.generate_statement_code(config["callback"],key_chaining=key_chaining+["callback"], parent_block_id=parent_block_id)
             varname = config["varName"]
-            if not config.get("dependencies") and config["dependencies"]!=[]:
+            if not config.get("dependencies") and config.get("dependencies")!=[]:
                 code = f"const {varname} = useCallback({callBackCode})"
             else:
                 dependencies =[]
@@ -517,11 +521,10 @@ class FunctionParser:
                     value, _ = self.get_value_code(val)
                     dependencies.append(value)
                 code = f"const {varname} = useCallback({callBackCode}), [{','.join(dependencies)}] )"
-        
         elif config["type"] == "REACT_USE_MEMO":
-            blockCode,t = self.generate_statement_code(config["blockConfig"],key_chaining=key_chaining+["blockConfig"])
+            blockCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
             varname = config["varName"]
-            if not config.get("dependencies") and config["dependencies"]!=[]:
+            if not config.get("dependencies") and config.get("dependencies")!=[]:
                 code = f"const {varname} = useMemo(() => {blockCode})"
             else:
                 dependencies =[]
@@ -532,5 +535,5 @@ class FunctionParser:
                 
 
         
-        return code , t
+        return code, t
             
