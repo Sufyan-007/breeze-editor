@@ -51,6 +51,7 @@ class AuthApiModel:
     token_store: TokenStore = CustomizedAttr(TokenStore,[])
     errors: dict = CustomizedAttr(dict,[])
     is_authentication_api: bool = CustomizedAttr(bool,[])
+    interceptor_id: str = CustomizedAttr((str),[])
 
     def add_error(self, attribute, error_message):
         if attribute not in self.errors:
@@ -83,7 +84,8 @@ class AuthApiModel:
             # 'flow_type': self.flow_type,
             'token_store': self.token_store.as_dict() if self.token_store else None,
             'errors': self.errors if self.errors else None,
-            'is_authentication_api': self.is_authentication_api
+            'is_authentication_api': self.is_authentication_api,
+            'interceptor_id': self.interceptor_id
 
         }
     

@@ -35,4 +35,6 @@ def generate_service_files(request,project_id,type):
         metadata_content = json.load(file)
     security_schemes = metadata_content[module_id].get("security_schemes")
     generate_react_service(project_id,filename,service_type, module_id, security_schemes=security_schemes)
+    # generate_react_service(project_id, module_id+'_auth', "AUTH", module_id, security_schemes= {}, module_name='')
+
     return JsonResponse({"list" : []}, status = 201) 

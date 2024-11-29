@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ShowFunctions from './ShowFunctions';
 import { useParams } from 'react-router-dom';
-import { fetchFunctions, generateServiceFile } from '../redux/ApiClientActions';
+import { deleteModuleById, fetchFunctions, generateServiceFile } from '../redux/ApiClientActions';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
+import { deleteFileFromList } from '../redux/ApiClientReducers';
 
 function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setView, moduleName, setSelectedFile }) {
   const loading = useRef(0);
@@ -57,11 +58,6 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
     fetchFunctionsIfNeeded();
   }, [fetchFunctionsIfNeeded]);
 
-  // useEffect(() => {
-  //   if (Object.keys(functions).length === 0)
-  //     dispatch(fetchFunctions({ projectName, payload: { category: 'api_client', module: moduleId, files: fileId } }));
-  // }, [dispatch, fileId, projectName, moduleId, functions]);
-
   useEffect(() => {
     if (file?.functions) {
       const hasError = checkForErrors(file.functions);
@@ -80,7 +76,12 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
     setSelectedApi(api);
     setView('TEST');
   };
-
+  const handleFileDelete = async () => {
+    const res = await dispatch(
+      deleteModuleById({ projectName, payload: { moduleId: moduleId, fileId: fileId } })
+    ).unwrap();
+    if (res && res.message) dispatch(deleteFileFromList({ fileId }));
+  };
   const handleServiceGeneration = async () => {
     await dispatch(
       generateServiceFile({ type: 'ORDINARY', projectName, payload: { filename: fileId, moduleId: moduleId } })
@@ -101,16 +102,29 @@ function ShowFiles({ fileId, moduleId, setSelectedModule, setSelectedApi, setVie
           <i className="bi bi-file-earmark-fill" alt="file"></i>
           <span className={`${hasErrors ? 'text-danger' : ''} mx-2`} style={{ fontSize: '16px' }}>
             {file?.file.length > 30 ? `${file?.file.slice(0, 30)}...` : file?.file}
-          </span>{' '}
+          </span>
         </div>
-        <i className="bi bi-gear-wide-connected" onClick={handleServiceGeneration} title="generate-service"></i>
+        <div>
+          <i className="bi bi-gear-wide-connected mx-1" onClick={handleServiceGeneration} title="generate-service"></i>
+          <i className="bi bi-trash mx-1" onClick={handleFileDelete} title="delete-file"></i>
+        </div>
       </div>
       {file?.errors && file?.errors.length > 0 && <i className="bi bi-exclamation-circle" style={{ color: 'red' }}></i>}
       {isOpen && file?.functions.length > 0
         ? file.functions.map((functionId) => (
-            <ShowFunctions key={functionId} functionId={functionId} onFunctionClick={handleFunctionClick} />
+            <ShowFunctions
+              key={functionId}
+              functionId={functionId}
+              onFunctionClick={handleFunctionClick}
+              fileId={fileId}
+              moduleId={moduleId}
+            />
           ))
-        : isOpen && <span className="m-2 br-text-primary">No services found</span>}
+        : isOpen && (
+            <span className="mx-4 br-text-primary" style={{ fontSize: '14px' }}>
+              No Functions found
+            </span>
+          )}
     </div>
   );
 }

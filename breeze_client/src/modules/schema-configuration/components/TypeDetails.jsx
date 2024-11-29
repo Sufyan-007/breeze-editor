@@ -5,7 +5,7 @@ import { selectionTypes } from '../constants/templates';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId }) {
+function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId, isUnresolved }) {
   const [openResolve, setOpenResolve] = useState(false);
   const [resolvedName, setResolvedName] = useState('');
   const [schemaChoice, setSchemaChoice] = useState('new');
@@ -72,14 +72,16 @@ function TypeDetails({ typeData, onUpdate, index, onResolve, moduleId }) {
     <>
       <div className="row br-background-secondary">
         <div className="col-12 mb-2">
-          <CustomSelectField
-            name="moduleSelect"
-            value={type ? type : $ref}
-            onChange={(val) => changeType(val)}
-            options={combinedOptions}
-            className="form-select br-form-select form-select-sm"
-            sendSelectedOption={true}
-          />
+          {!isUnresolved && (
+            <CustomSelectField
+              name="moduleSelect"
+              value={type ? type : $ref}
+              onChange={(val) => changeType(val)}
+              options={combinedOptions}
+              className="form-select br-form-select form-select-sm"
+              sendSelectedOption={true}
+            />
+          )}
           {type === 'object' && !openResolve && (
             <>
               <i

@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchSchemas, editSchema, resolveSchemaProperties } from './schemaConfigActions';
+import { fetchSchemas, editSchema, resolveSchemaProperties, handleDeleteSchema } from './schemaConfigActions';
 
 const initialState = {
   schemaList: {},
@@ -9,7 +9,14 @@ const initialState = {
 const schemaConfigSlice = createSlice({
   name: 'schemas',
   initialState,
-  reducers: {},
+  reducers: {
+    deleteSchemaFromList: (state, action) => {
+      const { schemaId, moduleId } = action.payload;
+      if (state.schemaList[moduleId]) {
+        delete state.schemaList[moduleId][schemaId];
+      }
+    },
+  },
   extraReducers: (builder) => {
     const handleFetchSchemas = (builder) => {
       builder
@@ -44,6 +51,22 @@ const schemaConfigSlice = createSlice({
         });
     };
 
+    const handleDeleteschema = (builder) => {
+      builder
+        .addCase(handleDeleteSchema.pending, (state) => {
+          state.status = 'loading';
+          state.error = null;
+        })
+        .addCase(handleDeleteSchema.fulfilled, (state) => {
+          state.status = 'succeeded';
+          state.error = null;
+        })
+        .addCase(handleDeleteSchema.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.payload;
+        });
+    };
+
     const handleResolveSchema = (builder) => {
       builder
         .addCase(resolveSchemaProperties.pending, (state) => {
@@ -59,11 +82,11 @@ const schemaConfigSlice = createSlice({
           state.error = action.payload;
         });
     };
-
+    handleDeleteschema(builder);
     handleResolveSchema(builder);
     handleEditSchema(builder);
     handleFetchSchemas(builder);
   },
 });
-
+export const { deleteSchemaFromList } = schemaConfigSlice.actions;
 export default schemaConfigSlice.reducer;

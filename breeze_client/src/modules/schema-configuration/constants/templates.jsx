@@ -37,12 +37,13 @@ export const metaDataTemplate = {
 };
 
 export const basicTypeTemplate = [
+  { label: 'Select', value: '' },
   { label: 'string', value: 'string' },
   { label: 'boolean', value: 'boolean' },
   { label: 'number', value: 'number' },
   { label: 'integer', value: 'integer' },
   { label: 'any', value: 'any' },
-  { label: 'object', value: 'object' },
+  // { label: 'object', value: 'object' },
   { label: 'array', value: 'array', templates: [{ name: 'item' }] },
 ];
 
