@@ -96,7 +96,6 @@ function VariableConfigForm({ onSubmit, onCancel, editMode }) {
             language="javascript"
             height="100px"
             theme={projectTheme}
-            config={{ label: 'Default Value' }}
           />
           <CustomTextArea
             name="description"

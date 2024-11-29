@@ -1,16 +1,23 @@
 import PropTypes from 'prop-types';
 import { CustomButtonField, CustomTextArea, CustomTextInput } from '../../../../common/fields';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { initialComponentConfig, initialPropConfig } from '../../constants/ResourcesFormData';
 import PropConfigForm from './PropConfigForm';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
+import { validator } from '../../../../utils/Validator';
 
-function ComponentConfigForm({ onSubmit, onCancel, editMode }) {
+function ComponentConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const [formData, setFormData] = useState(initialComponentConfig);
   const [isPropFormVisible, setIsPropFormVisible] = useState(false);
   const [editPropIndex, setPropEditIndex] = useState(null);
   const [propData, setPropData] = useState(initialPropConfig);
   const { setOffcanvasSize } = useOffcanvas();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // useEffect(() => {
+  //   const config = getConfig();
+  //   console.log(config);
+  // }, [getConfig]);
 
   const handleChange = (field, value) => {
     setFormData({
@@ -59,13 +66,23 @@ function ComponentConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
-    if (!editMode) setFormData(initialComponentConfig);
+    setIsSubmitted(true);
+    const isFormValid = [formData.name].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
+    setFormData(initialComponentConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialComponentConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -80,12 +97,14 @@ function ComponentConfigForm({ onSubmit, onCancel, editMode }) {
             <div>
               <CustomTextInput
                 name="name"
-                value={formData.name || 'Main'}
+                value={formData.name || ''}
                 onChange={(value) => handleChange('name', value)}
                 config={{
                   label: 'Component Name',
                   groupClass: 'form-group mb-2',
                 }}
+                customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+                isSubmitted={isSubmitted}
               />
               <CustomTextArea
                 name="description"
@@ -174,9 +193,11 @@ function ComponentConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 ComponentConfigForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default ComponentConfigForm;

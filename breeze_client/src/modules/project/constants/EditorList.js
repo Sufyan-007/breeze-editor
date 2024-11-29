@@ -14,6 +14,7 @@ export const items = [
   'While Block',
   'Do While Block',
   'Try Catch',
+  'Custom Code',
 ];
 export const configTypeMapping = {
   ALL_IMPORTS: ['Edit Import', 'Add Import'],
@@ -32,6 +33,7 @@ export const configTypeMapping = {
     'While Block',
     'Do While Block',
     'Try Catch',
+    'Custom Code',
   ],
   RETURN_HTML_TREE: ['Html elements'],
   HTML_WRAP: ['Html elements'],

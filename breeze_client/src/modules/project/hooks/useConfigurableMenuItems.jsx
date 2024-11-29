@@ -13,19 +13,36 @@ import {
   ComponentConfigForm,
   StateVariableConfigForm,
   RefVarConfigForm,
+  CustomCode,
 } from '../../component-configuration/components/config-forms';
 
-const useConfigurableMenuItems = (onSubmit, onCancel) => {
+const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
   const getConfigComponent = (item) => {
     switch (item) {
       case 'Component Config':
-        return <ComponentConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+        return (
+          <ComponentConfigForm
+            getConfig={getConfig}
+            onSubmit={onSubmit}
+            onCancel={onCancel}
+            editMode={true}
+            onUpdate={onUpdate}
+          />
+        );
       case 'Add Import':
         return <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Edit Import':
         return <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} editMode={true} />;
       case 'Props':
-        return <ComponentConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+        return (
+          <ComponentConfigForm
+            getConfig={getConfig}
+            onSubmit={onSubmit}
+            onCancel={onCancel}
+            editMode={true}
+            onUpdate={onUpdate}
+          />
+        );
       case 'Variable':
         return <VariableConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Edit Variable':
@@ -72,6 +89,8 @@ const useConfigurableMenuItems = (onSubmit, onCancel) => {
         return <TryCatchConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Edit Try Catch':
         return <TryCatchConfigForm onSubmit={onSubmit} onCancel={onCancel} editMode={true} />;
+      case 'Custom Code':
+        return <CustomCode onSubmit={onSubmit} onCancel={onCancel} />;
       default:
         return null;
     }
