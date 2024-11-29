@@ -2,10 +2,20 @@ import { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Avatar from '../../assets/images/Ellipse 1.png';
 import BreezeOffCanvas from '../display/offcanvas/BreezeOffcanvas';
+import { useSelector } from 'react-redux';
 
-function ProfileOffCanvas({ show, onClose, username, userRole, onSave }) {
-  const [formData, setFormData] = useState({ name: username, role: userRole });
-  const [initialValues, setInitialValues] = useState({ name: username, role: userRole });
+function ProfileOffCanvas({ show, onClose, onSave }) {
+  const userDetails = useSelector((state) => state.user.userDetails);
+  const [formData, setFormData] = useState({
+    name: userDetails.username,
+    email: userDetails.email,
+    phoneNumber: userDetails.phone_number,
+  });
+  const [initialValues, setInitialValues] = useState({
+    name: userDetails.username,
+    email: userDetails.email,
+    phoneNumber: userDetails.phone_number,
+  });
   const [profilePicPreview, setProfilePicPreview] = useState(Avatar);
   const [profilePicFile, setProfilePicFile] = useState(null);
   const [isChanged, setIsChanged] = useState(false);
@@ -14,8 +24,26 @@ function ProfileOffCanvas({ show, onClose, username, userRole, onSave }) {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    if (userDetails) {
+      setFormData({
+        name: userDetails.username,
+        email: userDetails.email,
+        phoneNumber: userDetails.phone_number,
+      });
+      setInitialValues({
+        name: userDetails.username,
+        email: userDetails.email,
+        phoneNumber: userDetails.phone_number,
+      });
+    }
+  }, [userDetails]);
+
+  useEffect(() => {
     const hasChanged =
-      formData.name !== initialValues.name || formData.role !== initialValues.role || profilePicFile !== null;
+      formData.name !== initialValues.name ||
+      formData.email !== initialValues.email ||
+      formData.phoneNumber !== initialValues.phoneNumber ||
+      profilePicFile !== null;
     setIsChanged(hasChanged);
   }, [formData, initialValues, profilePicFile]);
 
@@ -57,7 +85,7 @@ function ProfileOffCanvas({ show, onClose, username, userRole, onSave }) {
 
     onSave(updatedData);
 
-    setInitialValues({ name: formData.name, role: formData.role });
+    setInitialValues({ name: formData.name, email: formData.email, phoneNumber: formData.phoneNumber });
     setProfilePicFile(null);
     setIsChanged(false);
   };
@@ -129,19 +157,29 @@ function ProfileOffCanvas({ show, onClose, username, userRole, onSave }) {
           <input
             type="text"
             className="form-control"
-            value={formData.name}
+            value={formData.name || ''}
             onChange={(e) => handleChange('name', e.target.value)}
             placeholder="Enter your name"
           />
         </div>
         <div className="form-group w-100 mt-3">
-          <label className="form-label br-text-primary">Role</label>
+          <label className="form-label br-text-primary">Email</label>
           <input
             type="text"
             className="form-control"
-            value={formData.role}
-            onChange={(e) => handleChange('role', e.target.value)}
-            placeholder="Enter your role"
+            value={formData.email || ''}
+            onChange={(e) => handleChange('email', e.target.value)}
+            placeholder="Enter your email"
+          />
+        </div>
+        <div className="form-group w-100 mt-3">
+          <label className="form-label br-text-primary">Phone Number</label>
+          <input
+            type="text"
+            className="form-control"
+            value={formData.phoneNumber || ''}
+            onChange={(e) => handleChange('phoneNumber', e.target.value)}
+            placeholder="Eg. 98989-98989"
           />
         </div>
 
@@ -156,8 +194,6 @@ function ProfileOffCanvas({ show, onClose, username, userRole, onSave }) {
 ProfileOffCanvas.propTypes = {
   show: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  username: PropTypes.string.isRequired,
-  userRole: PropTypes.string.isRequired,
   onSave: PropTypes.func.isRequired,
 };
 
