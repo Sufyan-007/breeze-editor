@@ -9,7 +9,7 @@ import {
 import { initialImportConfig } from '../../constants/ResourcesFormData';
 import { ImportCategories, ImportTypes } from '../../constants/FormConstants';
 
-function ImportConfigForm({ onSubmit, formData: initialData, editMode = false }) {
+function ImportConfigForm({ onSubmit, onCancel, formData: initialData, editMode = false }) {
   const [formData, setFormData] = useState(initialData || initialImportConfig);
 
   useEffect(() => {
@@ -26,10 +26,15 @@ function ImportConfigForm({ onSubmit, formData: initialData, editMode = false })
   };
 
   const handleSubmit = (e) => {
-    console.log('formData::>>', formData);
     e.preventDefault();
     onSubmit(formData);
     setFormData(initialImportConfig);
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    setFormData(initialImportConfig);
+    onCancel();
   };
 
   return (
@@ -80,6 +85,12 @@ function ImportConfigForm({ onSubmit, formData: initialData, editMode = false })
         <div className="d-flex justify-content-end">
           <CustomButtonField
             type="button"
+            label={'Cancel'}
+            className="btn br-secondary-button med-font mx-2"
+            onClick={handleCancel}
+          />
+          <CustomButtonField
+            type="button"
             label={editMode ? 'Update' : 'Submit'}
             className="btn btn-filled med-font"
             onClick={handleSubmit}
@@ -92,6 +103,7 @@ function ImportConfigForm({ onSubmit, formData: initialData, editMode = false })
 
 ImportConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
   formData: PropTypes.shape({
     importEntity: PropTypes.string,
     importFrom: PropTypes.string,

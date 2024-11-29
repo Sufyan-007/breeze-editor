@@ -1,6 +1,7 @@
 .tree-view {
   width: 100%;
   max-width: 400px;
+  height: 100%;
 }
 
 .tree-node {
@@ -14,6 +15,7 @@
 
 .tree-node:hover {
   background-color: var(--color-background);
+  opacity: 0.8;
 }
 
 .tree-node-icon {
@@ -38,7 +40,7 @@
   color: var(--color-text);
   display: flex;
   align-items: center;
-  gap: 10px; 
+  gap: 10px;
 }
 
 .tree-node-state i {
@@ -85,4 +87,3 @@
   align-items: center;
   justify-content: flex-start;
 }
-

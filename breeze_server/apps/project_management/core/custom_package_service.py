@@ -38,7 +38,6 @@ def check_existing_folder(project_name, file_name):
         if not os.path.exists(uploaded_resources_config_path):
             return False 
         
-        # Load the JSON content from the config file
         with open(uploaded_resources_config_path, 'r') as config_file:
             resources_config = json.load(config_file)
             
@@ -126,7 +125,6 @@ def get_zip_files(project_name):
         app_config, react_app_dir, app_config_dir = get_project_config(project_name)
         uploaded_resources_config_path = os.path.join(app_config_dir,'uploaded_resources_config.json')
 
-        # custom_uploads_path = os.path.join(react_app_dir,CUSTOM_UPLOADS)
         if not os.path.exists(uploaded_resources_config_path):
             return {'folders': []}
 

@@ -27,6 +27,8 @@ def rollback_config_file(project_name, category, filename, version=None, is_exce
     all_version_list = version_handler['versions'].keys()
     if not version:
         current_version = version_handler.get('current_version')
+    elif int(version_handler['current_version']) == int(version):
+        return f"file is already at version {version}..."
     elif int(version) >= 1 and str(int(version)) in all_version_list:
         current_version = int(version) + 1
     else:
@@ -88,7 +90,7 @@ def rollback_config_file(project_name, category, filename, version=None, is_exce
     # else:
     #     # exeption for current_version > 1 || == 1 both are managed
     #     pass
-    return version_handler.get("current_version")
+    return version_handler.get("current_version"), True
     
     
 def rollforward_config_file(project_name, category, filename, version=None):
@@ -113,6 +115,8 @@ def rollforward_config_file(project_name, category, filename, version=None):
     all_version_list = version_handler['versions'].keys()
     if not version:
         current_version = version_handler.get('current_version')
+    elif int(version_handler['current_version']) == int(version):
+        return f"file is already at version {version}..."
     elif int(version) > 1 and str(int(version)) in all_version_list:
         current_version = int(version)-1
     else:
@@ -120,18 +124,21 @@ def rollforward_config_file(project_name, category, filename, version=None):
     
     if str(current_version+1) in list(version_handler['versions'].keys()):
         version_handler['current_version'] = current_version + 1
-        for key in version_handler['changes']:
-            version_list = sorted(version_handler['changes'][key].keys())
-            if str(current_version+1) in version_list:
-                new_version_to_be_used = str(current_version+1)
-                flatten_json[key] = version_handler['changes'][key][new_version_to_be_used]
-            elif version:
+        if version:
+            for key in version_handler['changes']:
+                version_list = sorted(version_handler['changes'][key].keys())
                 for ver in version_list[::-1]:
                     if int(ver) <= int(version):
                         deleted_keys = version_handler.get('deleted_keys', {})
                         if not (str(ver) in deleted_keys and key in deleted_keys[str(ver)]):
                             flatten_json[key] = version_handler['changes'][key][ver]
                         break
+        else:
+            for key in version_handler['changes']:
+                version_list = sorted(version_handler['changes'][key].keys())
+                if str(current_version+1) in version_list:
+                    new_version_to_be_used = str(current_version+1)
+                    flatten_json[key] = version_handler['changes'][key][new_version_to_be_used]
         if version_handler.get('deleted_keys'):
             for key in version_handler['deleted_keys'].get(str(current_version + 1), {}):
                 flatten_json.pop(key, None)
@@ -143,7 +150,7 @@ def rollforward_config_file(project_name, category, filename, version=None):
     with open(f"{file_path}", "w") as jsconfig_file:
         jsconfig_file.write(json.dumps(flatten_json))
     generate_code_with_latest_config(project_name, {category: filename})
-    return version_handler.get("current_version")
+    return version_handler.get("current_version"), True
     
    
 def get_latest_config_version(project_name, category, filename):

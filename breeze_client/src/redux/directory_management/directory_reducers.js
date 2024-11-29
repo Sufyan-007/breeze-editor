@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { addNodeAsync, deleteNodeAsync, fetchFolderConfig, renameNodeAsync } from './directory_actions';
+import { addNodeAsync, deleteNodeAsync, fetchFolderConfig, moveNodeAsync, renameNodeAsync } from './directory_actions';
 import breezeConfigData from '../../modules/project/constants/DirectoryStructure';
 
 const initialState = {
@@ -56,6 +56,12 @@ const directorySlice = createSlice({
       if (parentId && state.directoryConfig[parentId]) {
         state.directoryConfig[parentId].children.push(newNode.id);
       }
+    },
+    cancelAllEditing: (state) => {
+      Object.keys(state.directoryConfig).forEach((nodeId) => {
+        state.directoryConfig[nodeId].isEditing = false;
+        delete state.directoryConfig[nodeId].tempName;
+      });
     },
   },
   extraReducers: (builder) => {
@@ -138,9 +144,37 @@ const directorySlice = createSlice({
       .addCase(deleteNodeAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+      })
+      // Handle move node
+      .addCase(moveNodeAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(moveNodeAsync.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        const { nodeId, targetId } = action.payload;
+
+        const node = state.directoryConfig[nodeId];
+        const oldParentId = node.parentId;
+
+        node.parentId = targetId;
+
+        if (oldParentId && state.directoryConfig[oldParentId]) {
+          state.directoryConfig[oldParentId].children = state.directoryConfig[oldParentId].children.filter(
+            (childId) => childId !== nodeId
+          );
+        }
+
+        if (targetId && state.directoryConfig[targetId]) {
+          state.directoryConfig[targetId].children.push(nodeId);
+        }
+      })
+      .addCase(moveNodeAsync.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
       });
   },
 });
 
-export const { addNode, updateNodeTempName, cancelRename, updateNodeEditing, cancelAdd } = directorySlice.actions;
+export const { addNode, updateNodeTempName, cancelRename, updateNodeEditing, cancelAdd, cancelAllEditing } =
+  directorySlice.actions;
 export default directorySlice.reducer;

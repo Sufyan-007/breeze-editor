@@ -3,14 +3,15 @@ import {
   addNodeApi,
   deleteNodeApi,
   getFolderConfig,
+  moveNodeApi,
   renameNodeApi,
 } from '../../modules/project/services/projectService';
 
 export const fetchFolderConfig = createAsyncThunk(
   'directory_management/fetchFolderConfig',
-  async ({ id = null, projectName }, { rejectWithValue }) => {
+  async ({ id = null, projectName, depth }, { rejectWithValue }) => {
     try {
-      const response = await getFolderConfig(id, projectName);
+      const response = await getFolderConfig(id, projectName, depth);
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -47,6 +48,18 @@ export const deleteNodeAsync = createAsyncThunk(
       return { nodeId };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to delete node');
+    }
+  }
+);
+
+export const moveNodeAsync = createAsyncThunk(
+  'directory/moveNode',
+  async ({ projectName, nodeId, targetId }, { rejectWithValue }) => {
+    try {
+      await moveNodeApi(projectName, nodeId, targetId);
+      return { nodeId, targetId };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to move node');
     }
   }
 );
