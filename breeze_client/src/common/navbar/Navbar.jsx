@@ -29,7 +29,8 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('username');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('refreshToken');
     router.navigate('/login');
   };
 

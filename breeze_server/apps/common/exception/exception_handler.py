@@ -1,7 +1,7 @@
 from rest_framework.views import exception_handler
 from rest_framework import exceptions
 from django.http import JsonResponse
-
+import jwt
 class customException(Exception):
     """Exception raised for custom error in the application."""
 
@@ -44,6 +44,11 @@ def custom_exception_handler(exc, context):
         return JsonResponse({'error': 'AttributeError: An attribute was referenced that does not exist.'}, status=400)
     elif isinstance(exc, customException):
         return JsonResponse({'error': exc.get_error_message(), 'errorBody': exc.get_error_body()}, status=exc.get_error_code())
+    elif isinstance(exc,jwt.ExpiredSignatureError):
+        return JsonResponse({'error':"access token expired"},status = 401)
+    elif isinstance(exc,jwt.exceptions.DecodeError):
+        return JsonResponse({'error':"access token expired"},status = 401)
+    
     
     if response is not None:
         return response
