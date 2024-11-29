@@ -1,6 +1,7 @@
 import json
 import os
 import threading
+import time
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from apps.common.constants.consts import CONFIG_PATH
@@ -31,6 +32,7 @@ def send_ws_status_periodically(project_id):
                             "message": message
                         }
                     )
+                    
         except FileNotFoundError:
             print(f"Error: {resource_config_path} file not found.")
         except Exception as e:
@@ -39,6 +41,6 @@ def send_ws_status_periodically(project_id):
     def periodic_task():
         while True:
             send_status()
-            threading.Event().wait(5)  
+            time.sleep(5)
 
     threading.Thread(target=periodic_task, daemon=True).start()

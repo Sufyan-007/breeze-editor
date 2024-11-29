@@ -34,6 +34,7 @@ function CustomZipPackagePage() {
   const [error, setError] = useState('');
   const [uploadStatus, setUploadStatus] = useState({});
   const wsStatus = useRef(null);
+  const ref = useRef();
   const dispatch = useDispatch();
   const { zipFiles, fileId, components, props } = useSelector((state) => state.zip);
   // const { removeTab } = useTabContext();
@@ -164,9 +165,11 @@ function CustomZipPackagePage() {
 
       try {
         setShowModal(false);
+
         await dispatch(uploadZipFileAction({ formData: submitData, projectName })).unwrap();
         await dispatch(fetchZipFilesAction(projectName)).unwrap();
         await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
+        ref.current.clear();
         resetForm();
       } catch (error) {
         setError('An error occurred. Please try again.');
@@ -227,7 +230,11 @@ function CustomZipPackagePage() {
     buttons: [
       {
         label: 'Cancel',
-        onClick: () => setShowModal(false),
+        onClick: () => {
+          ref.current.clear();
+          resetForm();
+          setShowModal(false);
+        },
         className: 'btn br-text-primary med-font',
       },
       {
@@ -372,6 +379,7 @@ function CustomZipPackagePage() {
           <div className="row">
             <div className="col mb-3">
               <CustomFileUploadField
+                ref={ref}
                 onFileSelect={handleFileSelect}
                 style={{
                   borderColor: '#666666',
