@@ -7,7 +7,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from dotenv import load_dotenv
 from ..core.custom_package_service import check_existing_folder, upload_file, delete_file, set_prop_config_service, update_resource_config , add_prop_config_service, delete_prop_config_service
-from apps.common.constants.consts import PORT  
 from drf_spectacular.utils import extend_schema
 from ..swagger_schema.custom_uploads_schema import add_custom_package_schema,get_custom_package_schema,delete_custom_package_schema
 from ..utils.get_uploaded_resources import get_uploaded_resources as get_resources
