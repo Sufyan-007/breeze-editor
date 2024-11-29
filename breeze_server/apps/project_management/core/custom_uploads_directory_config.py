@@ -44,10 +44,3 @@ def create_json_structure(directory_manager, folder_path,file_id, parent_id=None
             )
     
     return folder_node
-
-
-def save_json_to_file(json_data, output_path):
-    with open(output_path, 'w') as json_file:
-        json.dump(json_data, json_file, indent=4)
-    print(f"JSON config saved to {output_path}")
-        
