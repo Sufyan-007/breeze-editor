@@ -47,7 +47,7 @@ function BodySettings({ bodyData, onChange, moduleId }) {
   }, [bodyData]);
 
   useEffect(() => {
-    if (status === 'ready')
+    if (status === 'ready' && moduleId)
       dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
   }, [dispatch, projectName, moduleId, status]);
 

@@ -2,25 +2,38 @@ from ....common.utils.uuid_as_key import generate_uuid_as_key
 
 def object_converter(obj):
     
-    properties = obj.get("properties", {})
-    required = obj.get("required", [])
-    
-    # Convert top-level properties
-    # new_properties = convert_properties(properties)
-    new_properties = {}
-    for property, value in properties.items():
-        new_properties[property] = convert_type_to_config(value)
+    properties = obj.get("properties", None)
+    if properties:
+        required = obj.get("required", [])
+        
+        new_properties = {}
+        for property, value in properties.items():
+            new_properties[property] = convert_type_to_config(value)
 
-    
-    new_schema = {
-        'type': 'object',
-        'properties': new_properties,
-        'required': required
-    }
-    
-    if "additionalProperties" in obj:
-        new_schema["additionalProperties"] = convert_type_to_config(obj["additionalProperties"])
-
+        
+        new_schema = {
+            'type': 'object',
+            'properties': new_properties,
+            'required': required
+        }
+        
+        if "additionalProperties" in obj and obj["additionalProperties"]:
+            if type(obj["additionalProperties"]) ==dict and obj["additionalProperties"]!={} :
+                new_schema["additionalProperties"] = convert_type_to_config(obj["additionalProperties"])
+            else:
+                new_schema["additionalProperties"] = {
+                    "type":"any"
+                }
+    else:
+        new_schema = {
+            'type': 'object',
+        }
+        if "additionalProperties" in obj and type(obj["additionalProperties"]) ==dict and obj["additionalProperties"]!={} : 
+            new_schema["additionalProperties"] = convert_type_to_config(obj["additionalProperties"])
+        else:
+            new_schema["additionalProperties"] = {
+                "type":"any"
+            }
     return new_schema
 
 
@@ -65,12 +78,17 @@ def convert_type_to_config(input_type,with_wrap="anyOf"):
 
 
 
-def generate_ids(schema_content):
+def generate_ids(schema_content, isList=False):
     converted_data = {}
-    for key,val in schema_content.items():
-        id = generate_uuid_as_key()
-        val["name"] = key
-        converted_data[id]= val
+    if isList:
+        for schema in schema_content:
+            id = generate_uuid_as_key()
+            converted_data[id]= schema
+    else:
+        for key,val in schema_content.items():
+            id = generate_uuid_as_key()
+            val["name"] = key
+            converted_data[id]= val
     return converted_data
 
 

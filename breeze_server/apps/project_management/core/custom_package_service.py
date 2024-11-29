@@ -9,7 +9,8 @@ from apps.common.constants.consts import CONFIG_PATH, CONFIG_FILES_PATH , EXTERN
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists,create_dir_if_not_exists
 from apps.common.utils.file_helpers.json_handler import read_project_config_file
 from apps.directory_management.core.directory_management_service import DirectoryManager
-from .custom_uploads_directory_config import create_json_structure, save_json_to_file
+from .custom_uploads_directory_config import create_json_structure
+
 def save_extracted_file(file, path):
     create_parent_dir_if_not_exists(path)
 
@@ -151,7 +152,7 @@ def get_zip_files(project_name):
     except Exception as e:
         raise Exception(f"An error occurred while retrieving extracted folders: {str(e)}")
                 
-def delete_file(project_name, fileName, fileId):
+def delete_file(project_name, fileName, file_id):
     try:
         app_config, react_app_dir, app_config_dir = get_project_config(project_name)
         react_app_file_path = os.path.join(react_app_dir, EXTERNAL_COMPONENTS, fileName)
@@ -169,33 +170,33 @@ def delete_file(project_name, fileName, fileId):
             else:
                 print(f"{fileName} does not exist at {file_path} in {location_name}.")
 
-        delete_path(react_app_file_path, "React app")
+        
+        directory_manager = DirectoryManager(project_name)
+        directory_manager.delete_node(file_id, recursive=True)
+        
+        # delete_path(react_app_file_path, "React app")
         delete_path(external_components_config_path, "external components config")
- 
+  
         #delete the file object from resource config 
         if os.path.exists(uploaded_resources_config_path):
             with open(uploaded_resources_config_path, 'r+') as config_file:
                 data = json.load(config_file)
                 
-                # Check if the fileId exists and delete the object if found
-                if fileId in data:
-                    
-                    del data[fileId]
-                    print(f"File object with ID {fileId} deleted successfully from resource config.")
-                    
-                    # Write the updated data back to the JSON file
+                # Check if the file_id exists and delete the object if found
+                if file_id in data:
+                    del data[file_id]                
                     config_file.seek(0)
                     json.dump(data, config_file, indent=4)
                     config_file.truncate()
                 else:
-                    print(f"File object with ID {fileId} not found in resource config.")
+                    print(f"File object with ID {file_id} not found in resource config.")
         else:
             raise FileNotFoundError("Resource config file does not exist.")
     
     except Exception as e:
         raise Exception(f"Error deleting file or directory: {e}")
     
-def set_prop_config(project_name, file_name , component_id ,prop_id , new_prop_name=None, new_type=None, new_default_value=None ):
+def set_prop_config_service(project_name, file_name , component_id ,prop_id , new_prop_name=None, new_type=None, new_default_value=None ):
     try:
         #load the existing config for the project
         app_config, react_app_dir , app_config_dir = get_project_config(project_name)
@@ -226,7 +227,62 @@ def set_prop_config(project_name, file_name , component_id ,prop_id , new_prop_n
         return component_config
     except Exception as e:
         raise Exception(f"Error editing the props: {e}")
-        #raise exception errror
+
+  
+def add_prop_config_service(project_name, file_name , component_id ,prop_id , prop_name=None, type=None, default_value=None ):
+    try:
+        #load the existing config for the project
+        _, _, app_config_dir = get_project_config(project_name)
+        component_config_path= os.path.join(app_config_dir,"external_components_config",file_name,f"{component_id}.json")
+        if not os.path.exists(component_config_path):
+            raise FileNotFoundError("Component configuration file not found.")
+
+        with open(component_config_path, 'r') as file:
+            component_config= json.load(file)
+            
+        # Validate the props structure
+        if "props" not in component_config:
+            component_config["props"] = {}
+            
+        # Create the new prop configuration
+        new_prop = {
+            "prop_name": prop_name or "",
+            "type": type or "any",
+            "default_value": default_value or "",
+            "id": prop_id
+        }
+            
+        # Add the new prop to the props dictionary
+        component_config["props"][prop_id] = new_prop
+        
+        # Save the updated configuration back to the file
+        with open(component_config_path, 'w') as file:
+            json.dump(component_config, file, indent=4)
+            
+        return component_config
+    except Exception as e:
+        raise Exception(f"Error adding the props: {e}")
+
+def delete_prop_config_service(project_name, prop_id,file_name, component_id):
+    try:
+        _,_ ,app_config_dir = get_project_config(project_name)
+        component_config_path= os.path.join(app_config_dir,"external_components_config",file_name,f"{component_id}.json")
+        if not os.path.exists(component_config_path):
+            raise FileNotFoundError("Component configuration file not found.")
+ 
+        with open(component_config_path, 'r+') as file:
+            component_config= json.load(file)
+            
+            if 'props' not in component_config or prop_id not in component_config['props']:
+                    raise KeyError(f"Property with ID {prop_id} not found in the configuration.")
+            # Remove the prop with the specified prop_id
+            del component_config['props'][prop_id]
+            file.seek(0)
+            file.truncate()
+            json.dump(component_config, file, indent=4)
+             
+    except Exception as e:
+        raise Exception(f"Error deleting the props: {e}")
 
         
 def update_resource_config(project_name, file_name ,file_id, status,  tag="ZIP"):
