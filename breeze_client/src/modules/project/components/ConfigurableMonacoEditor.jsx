@@ -33,7 +33,7 @@ const ConfigurableMonacoEditor = ({
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const { showOffcanvas, closeOffcanvas } = useOffcanvas();
   const { projectName } = useParams();
-  const [statementId, setStatementId] = useState('');
+  // const [statementId, setStatementId] = useState('');
 
   useEffect(() => {
     if (editor && editor.getValue() !== defaultValue) {
@@ -78,7 +78,7 @@ const ConfigurableMonacoEditor = ({
       };
       const result = await getCodeDetails(projectName, payload);
       const configType = result?.related_config?.type;
-      setStatementId(result?.related_config?.id || '');
+      // setStatementId(result?.related_config?.id || '');
       setFilteredItems(configType ? configTypeMapping[configType] || items : items);
     };
 
@@ -109,34 +109,34 @@ const ConfigurableMonacoEditor = ({
 
   const onSubmit = async (value) => {
     console.log('value::>>', value);
-    const payload = {
-      fileId: node.id,
-      parentId: statementId,
-      config: value,
-    };
+    // const payload = {
+    //   fileId: node.id,
+    //   parentId: statementId,
+    //   config: value,
+    // };
     // await addAstStatement(projectName, payload);
     closeOffcanvas();
   };
 
   const onUpdate = async (value) => {
     console.log('value::>>', value);
-    const payload = {
-      fileId: node.id,
-      statementId: statementId,
-      config: value,
-    };
+    // const payload = {
+    //   fileId: node.id,
+    //   statementId: statementId,
+    //   config: value,
+    // };
     // await updateAstStatement(projectName, payload);
     closeOffcanvas();
   };
 
   const getConfig = useCallback(async () => {
-    const payload = {
-      fileId: node.id,
-      statementId: statementId,
-    };
-    const config = await getAstStatement(projectName, payload);
-    return config;
-  }, [projectName, node.id, statementId]);
+    // const payload = {
+    //   fileId: node.id,
+    //   statementId: statementId,
+    // };
+    // const config = await getAstStatement(projectName, payload);
+    // return config;
+  }, []);
 
   const onCancel = () => {
     closeOffcanvas();
