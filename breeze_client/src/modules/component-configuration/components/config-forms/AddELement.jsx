@@ -8,6 +8,8 @@ import {
   getLibraryComponents,
 } from '../../services/componentListService';
 import PropsConfig from '../helper-components/PropsConfig';
+import PreviewDisplay from '../helper-components/PreviewDisplay';
+import htmlElements from '../../constants/AllELements';
 
 const AddELement = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -16,9 +18,10 @@ const AddELement = () => {
   const [filteredComponentList, setFilteredComponentList] = useState([]);
   const [componentList, setComponentList] = useState({});
   const [searchValue, setSearchValue] = useState('');
-  const [selectedElements, setSelectedElements] = useState(null);
+  const [selectedElements, setSelectedElements] = useState([]);
+  const [showPreview, setShowPreview] = useState(0);
+  const [configuredPropsList, setconfiguredPropsList] = useState({});
   const { projectName } = useParams();
-
   useEffect(() => {
     async function fetchData() {
       const requestBody = {
@@ -40,6 +43,8 @@ const AddELement = () => {
       setSearchValue('');
       setComponentList(null);
       setSelectedElements(null);
+      setShowPreview(false);
+      setFilteredComponentList([]);
 
       try {
         if (selectedCategory === 'third_party' && selectedSubCategory) {
@@ -59,11 +64,17 @@ const AddELement = () => {
             setComponentList(componentsData);
             setFilteredComponentList(Object.entries(componentsData));
           }
-        } else if (selectedCategory === 'custom') {
+        } else if (selectedCategory === 'components') {
           const requestBodyCustomComponent = { category: 'components' };
           const customComponents = await getAllCustomComponents(projectName, requestBodyCustomComponent);
+          setSelectedSubCategory(null);
+
           setComponentList(customComponents || {});
           setFilteredComponentList(Object.entries(customComponents || []));
+        } else if (selectedCategory === 'html') {
+          setComponentList(htmlElements || {});
+          setSelectedSubCategory(null);
+          setFilteredComponentList(Object.entries(htmlElements || []));
         }
       } catch (error) {
         console.error('Error fetching components:', error);
@@ -74,7 +85,6 @@ const AddELement = () => {
   }, [projectName, selectedCategory, selectedSubCategory]);
 
   useEffect(() => {
-    // Filter componentList whenever searchValue changes
     const filtered = Object.entries(componentList || {}).filter(([key, name]) => {
       return name.toLowerCase().includes(searchValue.toLowerCase());
     });
@@ -92,6 +102,18 @@ const AddELement = () => {
     event.preventDefault();
     console.log('Add ELement', selectedElements);
   }
+  const handlePreviewClick = () => {
+    setShowPreview((prev) => {
+      // Check the current value of showPreview (prev)
+      if (prev === 0) {
+        return 1; // If it's 0, set to 1
+      } else if (prev % 2 !== 0) {
+        return 2; // If it's odd, set to 2
+      } else {
+        return 3; // If it's even (but not 0), set to 3
+      }
+    });
+  };
   // console.log(filteredComponentList);
   return (
     <div>
@@ -114,8 +136,8 @@ const AddELement = () => {
               <option key="html" value="html">
                 Html
               </option>
-              <option key="Custom" value="custom">
-                Custom
+              <option key="components" value="components">
+                Components
               </option>
               <option key="Third_Party" value="third_party">
                 Third_Party
@@ -156,7 +178,7 @@ const AddELement = () => {
           }}
         >
           <input
-            className="form-control br-background-secondary br-text-primary border-0 removeFocusedBorder"
+            className="form-control-sm br-background-secondary br-text-primary border-0 removeFocusedBorder w-100"
             type="search"
             placeholder="Search"
             aria-label="Search"
@@ -167,12 +189,13 @@ const AddELement = () => {
               //   setSelectedElements(null);
               // }
               setSearchValue(event.target.value);
+              // setShowPreview(0);
               setSelectedElements(null);
             }}
             value={searchValue}
           />
         </form>
-        {!selectedElements && (
+        {!selectedElements?.length > 0 && (
           <div
             style={{
               overflowY: 'scroll',
@@ -200,7 +223,7 @@ const AddELement = () => {
                   <li
                     className="list-group-item p-1 br-background-secondary br-text-primary listViewHover border-0 ps-4"
                     onClick={() => {
-                      setSelectedElements(value);
+                      setSelectedElements([key, value]);
                       setSearchValue(value);
                     }}
                     key={key}
@@ -215,17 +238,26 @@ const AddELement = () => {
           </div>
         )}
         <div>
-          {selectedElements && (
+          {selectedElements?.length > 0 && (
             <PropsConfig
               selectedCategory={selectedCategory}
               component={selectedElements}
               library={selectedSubCategory}
+              setconfiguredPropsList={setconfiguredPropsList}
             ></PropsConfig>
           )}
         </div>
       </div>
 
-      <div className="pt-3 d-flex justify-content-end">
+      <div className="pt-3 d-flex justify-content-between justify-content-end">
+        <div>
+          <CustomButtonField
+            type="button"
+            label="Preview"
+            className="addELementbtn run-btn med-font"
+            onClick={handlePreviewClick}
+          />
+        </div>
         <div>
           <CustomButtonField
             type="button"
@@ -235,6 +267,15 @@ const AddELement = () => {
           />
         </div>
       </div>
+      {showPreview != 0 && selectedElements?.length > 0 && (
+        <PreviewDisplay
+          showPreview={showPreview}
+          // key={showPreview}
+          component={selectedElements}
+          library={selectedCategory === 'third_party' ? selectedSubCategory : selectedCategory}
+          propsList={configuredPropsList}
+        ></PreviewDisplay>
+      )}
     </div>
   );
 };

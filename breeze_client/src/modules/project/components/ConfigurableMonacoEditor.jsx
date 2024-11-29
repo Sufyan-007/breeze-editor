@@ -113,7 +113,10 @@ const ConfigurableMonacoEditor = ({
 
   const handleMenuItemClick = (item) => {
     const contentComponent = getConfigComponent(item);
-    showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, '40%');
+    console.log('contentComponent', item, contentComponent);
+    let width = '40%';
+    if (item === 'Html elements') width = '60%';
+    showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
     setShowMenu(false);
   };
 

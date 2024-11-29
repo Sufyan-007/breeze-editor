@@ -60,9 +60,19 @@ export const getAllProps = async (projectName, payload) => {
   const url = `${BASE_URL}/api/project/query_resource/${projectName}/`;
   try {
     const response = await callApiClient(url, 'POST', payload);
-    return response;
+    return response?.data;
   } catch (error) {
     console.error('Error fetching components:', error.message);
     throw error;
   }
 };
+
+export async function getProjectPort(projectName) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/get-port/${projectName}`;
+  try {
+    const response = await callApiClient(url, 'GET');
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
