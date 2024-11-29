@@ -156,7 +156,10 @@ def _create_auth_arr_json( path_data, meta_data,security_schemes_models= []):
         if  isinstance(auth_data,dict):
             for security_name,scopes in auth_data.items():
                 scheme_details = security_schemes.get(security_name, {})
-                auth_type = scheme_details.get("scheme","") #changed from type to scheme
+                if scheme_details.get("scheme"):
+                    auth_type = scheme_details.get("scheme") 
+                elif scheme_details.get("type"):
+                    auth_type = scheme_details.get("type")
                 auth_type = auth_type.strip().upper()
                 if security_name.lower() == "bearerauth":
                     auth_type = "BEARER" 
@@ -175,23 +178,29 @@ def _create_auth_arr_json( path_data, meta_data,security_schemes_models= []):
                 auth_type= "NOAUTH"
                 if isinstance(security_item,str):
                     scheme_details = security_schemes.get(security_item, {})
-                    auth_type = scheme_details.get("scheme","")
+                    if scheme_details.get("scheme"):
+                        auth_type = scheme_details.get("scheme") 
+                    elif scheme_details.get("type"):
+                        auth_type = scheme_details.get("type")
                     auth_type = auth_type.strip().upper()
-                    if security_item.lower() == "bearerauth":
-                        auth_type = "BEARER" 
-                    elif security_item.lower() == "basicauth":
-                        auth_type = "BASIC"
+                    # if security_item.lower() == "bearerauth":
+                    #     auth_type = "BEARER" 
+                    # elif security_item.lower() == "basicauth":
+                    #     auth_type = "BASIC"
                 
                     
                 else:
                     for security_name, _ in security_item.items():
                         scheme_details = security_schemes.get(security_name, {})
-                        auth_type = scheme_details.get("scheme","")
+                        if scheme_details.get("scheme"):
+                            auth_type = scheme_details.get("scheme") 
+                        elif scheme_details.get("type"):
+                            auth_type = scheme_details.get("type")
                         auth_type = auth_type.strip().upper()
-                        if security_name.lower() == "bearerauth":
-                            auth_type = "BEARER" 
-                        elif security_name.lower() == "basicauth":
-                            auth_type = "BASIC"
+                        # if security_name.lower() == "bearerauth":
+                        #     auth_type = "BEARER" 
+                        # elif security_name.lower() == "basicauth":
+                        #     auth_type = "BASIC"
                 
                 login_api,token_api = _get_login_refresh_auth_id_from_models(auth_type,security_schemes_models)
                 arr_auth.append({
@@ -414,13 +423,16 @@ def create_response_arr_json( path_data, meta_data,schema_file_path):
     
 
 def generate_json_for_security_schema(schema_name,schema_data,meta_data):
+        servers = meta_data.get("servers")
+        if servers is None or len(servers) == 0:
+            servers = [{"url": "your_server_url"}]
         auth_obj = {
             "tags" : "auth",
             "body" : [],
             "request" : {"method" : "POST",
             "url": {
-                "servers": [{ "url": "https://petstore3.swagger.io/api/v3" }],
-                "baseurl": "https://petstore3.swagger.io/api/v3",
+                "servers": servers,
+                "baseurl": servers[0].get("url"),
                 "host": [],
                 "protocol": "HTTP",
                 "port": None,
@@ -435,9 +447,14 @@ def generate_json_for_security_schema(schema_name,schema_data,meta_data):
             "summary":"",
             "is_authentication_api" : False
         }
-
+        security_scheme = None
         auth_api_objects = []
-        if schema_data["scheme"].lower() == "basic":
+        if schema_data.get("scheme"):
+            security_scheme = schema_data.get("scheme").lower()
+        elif schema_data.get("type"):
+            security_scheme = schema_data.get("type").lower()
+            
+        if security_scheme == "basic":
             auth_obj["id"] = generate_uuid_as_key()
             auth_obj["operation_id"] = schema_name + "_basic"
             auth_obj["authentication_type"] = "BASIC"
@@ -445,7 +462,7 @@ def generate_json_for_security_schema(schema_name,schema_data,meta_data):
 
             auth_api_objects.append(auth_obj)
 
-        elif schema_data["scheme"].lower() == "bearer":
+        elif security_scheme == "bearer":
             auth_obj = copy.deepcopy(auth_obj)
             auth_obj["id"] = generate_uuid_as_key()
             auth_obj["operation_id"] =schema_name+"_login"
@@ -453,7 +470,7 @@ def generate_json_for_security_schema(schema_name,schema_data,meta_data):
             auth_obj["auth_api_type"] = "LOGIN"
             auth_api_objects.append(auth_obj)
             
-        elif schema_data["scheme"].lower() == "api_key":
+        elif security_scheme == "apikey":
             auth_obj = copy.deepcopy(auth_obj)
             auth_obj["id"] = generate_uuid_as_key()
             auth_obj["operation_id"] =schema_name+"_login"

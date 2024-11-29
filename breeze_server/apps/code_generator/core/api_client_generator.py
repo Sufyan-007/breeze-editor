@@ -11,6 +11,7 @@ from ...project_config_management.api_client_management.consts import WEBSOCKET_
 from ...common.utils.variable_name_convertor import convert_to_valid_variable_name
 from ...project_management.core.environment_management import get_env_config
 from ...common.utils.uuid_as_key import generate_uuid_as_key
+from ...project_config_management.api_client_management.utils.create_token_store import create_token_store
 def __init__( app_name):
     app_config_dir = f"{CONFIG_PATH}/{app_name}"
     app_config = read_project_config_file(
@@ -774,8 +775,10 @@ def generate_token_fetching_code(security_schemes, model):
             key_name = v.get("name")
     for res in  model.response:
         if res.status == StatusEnum.S_200:
+            schema = res.schema
+            if schema and "properties" in schema:
+                res.token_store = create_token_store(schema["properties"])
             token_store = res.token_store
-            break
     if token_store != {} and token_store != None:
         for prop, prop_info in token_store.items():
             if prop_info.get("store_in") == TokenStoreTypeEnum.LOCAL_STORAGE:

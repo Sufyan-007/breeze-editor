@@ -4,7 +4,7 @@ from ....common.utils.uuid_as_key import generate_uuid_as_key
 from .api_model_loader import ApiModelLoader
 from ....common.constants.consts import CONFIG_PATH, CLIENT_API
 from ..consts.module_interceptor_template import MODULE_INTERCEPTOR_CODE
-from ....code_generator.core.api_client_generator import generate_interceptors_code
+from ..utils.create_token_store import create_token_store
 from ....directory_management.core.directory_management_service import DirectoryManager
 from ....code_generator.core.api_client_generator import generate_react_service
 
@@ -108,17 +108,7 @@ def add_auth_function(auth_model, appName, moduleId,operation):
     return {'message': 'added successfully'},200
 
 
-def create_token_store(properties):
-    """Helper function to create token store from response schema properties."""
-    token_store = {}
-    for prop_name, prop_info in properties.items():
-        if prop_info.get("type") == 'string':
-            token_store[prop_name] = {"store_in": "LOCAL_STORAGE", "storage_key": prop_name}
-        elif prop_info.get("types"):
-            for type_info in prop_info.get("types"):
-                if type_info.get("type") == 'string':
-                    token_store[prop_name] = {"store_in": "LOCAL_STORAGE", "storage_key": prop_name}
-    return token_store
+
 
 def transfer_data_to_auth(filename, id_value, file_path, target_file_path, module_id, project_id, is_imported=False, replaced_function_id=None):
     auth_api_template = {
@@ -211,6 +201,6 @@ def transfer_data_to_auth(filename, id_value, file_path, target_file_path, modul
 
     # Generate the React service
     generate_react_service(project_id, f"{module_id}_auth", "AUTH", module_id, security_schemes={}, module_name='')
-
+    generate_react_service(project_id,filename,"ORDINARY",module_id,security_schemes, module_name='')
     return {"message": "Data transferred successfully."}, 200
 

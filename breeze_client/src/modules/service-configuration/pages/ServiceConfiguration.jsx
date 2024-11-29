@@ -188,14 +188,14 @@ function ServiceConfiguration() {
                   Service Function Configuration
                 </h5>
                 <div className="d-flex align-items-center">
-                  <CustomSelectField
+                  {/* <CustomSelectField
                     name="moduleSelect"
                     value={selectedModule ? selectedModule.name : ''}
                     onChange={(e) => handleModuleSelect(e)}
                     options={transformedOptions}
                     className="form-select br-form-select form-select-sm mt-3"
                     sendSelectedOption={true}
-                  />
+                  /> */}
                   <CustomButtonField
                     className="btn br-background-secondary br-text-primary mt-3 rounded-0 mx-3"
                     onClick={(e) => handleSubmit(e, false)}

@@ -18,6 +18,7 @@ const responseObject = {
     store_in: '',
     stored_key: '',
   },
+  properties: [],
 };
 
 function ResponseSettings({ responseData, onChange, isAuthApi, title, responseType, moduleId }) {
@@ -28,7 +29,6 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   const { status } = useSelector((state) => state.schemas);
   const dispatch = useDispatch();
   const { projectName } = useParams();
-  const [properties, setProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState(null);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
 
   const schemaOptions = schemaList
     ? Object.keys(schemaList)
-        .filter((key) => !Object.hasOwn(schemaList[key], 'isUnresolved')) // Check if 'isUnresolved' exists on the object
+        .filter((key) => !Object.hasOwn(schemaList[key], 'isUnresolved'))
         .map((key) => ({
           value: key,
           label: schemaList[key].name,
@@ -54,8 +54,6 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
           type: value.types[0].type,
         }));
         const filteredProps = props.filter((prop) => prop.type === 'string' || prop.type === 'integer');
-        setProperties(filteredProps);
-
         if (newResponse.status === 'S_200' && checkNewRes) {
           const initialTokenStore = {};
           filteredProps.forEach((prop) => {
@@ -69,31 +67,41 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
             token_store: initialTokenStore,
           }));
         }
+        return filteredProps;
       }
     },
     [newResponse.status]
   );
 
   useEffect(() => {
-    setResponse(responseData);
+    const resultantResponse = [];
     if (schemaList) {
       responseData.forEach((res) => {
         if (res.schema_name && schemaList[res.schema_name]) {
           const schema = schemaList[res.schema_name];
-          extractProperties(schema);
+          const props = extractProperties(schema);
+          const newRes = {
+            ...res,
+            properties: props,
+          };
+          resultantResponse.push(newRes);
+        } else {
+          resultantResponse.push(res);
         }
       });
+      setResponse(resultantResponse);
     }
   }, [responseData, schemaList, extractProperties]);
 
   useEffect(() => {
     if (newResponse.schema_name && schemaList[newResponse.schema_name]) {
       const schema = schemaList[newResponse.schema_name];
+      const props = extractProperties(schema, true);
       setNewResponse((prevState) => ({
         ...prevState,
         schema,
+        properties: props,
       }));
-      extractProperties(schema, true);
     }
   }, [newResponse.schema_name, schemaList, extractProperties]);
 
@@ -232,7 +240,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                         </tr>
                       </thead>
                       <tbody>
-                        {properties.map((prop, idx) => (
+                        {res.properties?.map((prop, idx) => (
                           <tr key={idx}>
                             <td className="br-background-secondary br-text-primary">
                               <input
@@ -342,7 +350,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
             onChange={(e) => handleSchemaChange(e)}
             options={schemaOptions}
           />
-          {isAuthApi && newResponse.status === 'S_200' && properties.length > 0 && (
+          {isAuthApi && newResponse.status === 'S_200' && newResponse.properties?.length > 0 && (
             <div className="mt-3 w-100">
               <table
                 className="table table-bordered br-background-secondary"
@@ -357,7 +365,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                   </tr>
                 </thead>
                 <tbody>
-                  {properties.map((prop, idx) => (
+                  {newResponse.properties?.map((prop, idx) => (
                     <tr key={idx} className="br-background-secondary br-text-primary">
                       <td className="br-background-secondary br-text-primary">
                         <input

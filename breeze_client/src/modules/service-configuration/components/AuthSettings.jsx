@@ -64,9 +64,12 @@ function AuthSettings({ authData, onChange, moduleId }) {
   };
 
   const loginApiOptions = login_apis
+    .filter((api, index, self) => {
+      return self.findIndex((t) => t.operation_id === api.operation_id) === index;
+    })
     .filter((api) => api.tokenConfig?.store_in !== 'DontSave')
     .map((api) => ({
-      label: api.tokenKey,
+      label: api.operation_id,
       value: api.tokenKey,
       dataSource: 'authApi',
     }));

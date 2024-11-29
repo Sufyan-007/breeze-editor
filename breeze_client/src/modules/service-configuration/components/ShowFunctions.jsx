@@ -1,12 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { deleteModuleById, transferToAuthFile } from '../redux/ApiClientActions';
+import { deleteModuleById, fetchModules, transferToAuthFile } from '../redux/ApiClientActions';
 import { useParams } from 'react-router-dom';
 import { deleteFunctionFromList } from '../redux/ApiClientReducers';
 import CustomModal from '../../../common/display/modal/BreezeModal';
 import { useState } from 'react';
 import { CustomSelectField } from '../../../common/fields';
-function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId, fileId }) {
+function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId, fileId, setSelectedAuthApi }) {
   const func = useSelector((state) => state.services.functionsList[functionId]);
   const authFunc = useSelector((state) => state.services.moduleList[moduleId]?.auth_apis[functionId]);
   const displayName = isAuth ? authFunc?.operation_id : func?.operation_id;
@@ -48,7 +48,12 @@ function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId, fileId }
         },
       })
     ).unwrap();
-    if (res && res.message) setModalVisible(false);
+    if (res && res.message) {
+      setModalVisible(false);
+      setSelectedAuthApi({});
+      await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+      dispatch(deleteFunctionFromList({ functionId: selectedFunction.value }));
+    }
   };
   return (
     <div key={functionId} className="mx-4 me-2 my-1 d-flex justify-content-between br-cursor-pointer">
@@ -61,9 +66,11 @@ function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId, fileId }
       </span>
       <div id="actions-div" className="d-flex">
         {isAuth && (
-          <i className="bi bi-download mx-2" title="import-from-functions" onClick={() => setModalVisible(true)}></i>
+          <i className="bi bi-upload mx-2" title="import-from-functions" onClick={() => setModalVisible(true)}></i>
         )}
-        <i className="bi bi-trash3" alt="delete" onClick={() => handleDelete(isAuth)} title="delete-function"></i>
+        {!isAuth && (
+          <i className="bi bi-trash3" alt="delete" onClick={() => handleDelete(isAuth)} title="delete-function"></i>
+        )}
       </div>
       <CustomModal
         isOpen={modalVisible}
@@ -88,6 +95,15 @@ function ShowFunctions({ functionId, onFunctionClick, isAuth, moduleId, fileId }
           onChange={(value) => setSelectedFunction(value)}
           sendSelectedOption={true}
         />
+        {/* <Select
+          className="br-background-secondary feature-fixed-select"
+          classNamePrefix="feature-react-select"
+          options={options}
+          value={selectedFunction?.value}
+          onChange={(value) => setSelectedFunction(value)}
+          placeholder="Select User"
+          isSearchable
+        /> */}
       </CustomModal>
     </div>
   );

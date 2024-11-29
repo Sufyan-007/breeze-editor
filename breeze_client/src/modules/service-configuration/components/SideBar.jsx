@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { CustomTextInput } from '../../../common/fields';
 import PropTypes from 'prop-types';
 
 import ShowFunctions from './ShowFunctions';
@@ -37,7 +35,7 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
           </h5>
           <div className="d-flex pe-1">
             <i
-              className="bi bi-plus-circle mx-1 mt-4"
+              className="bi bi-plus-circle mx-2 mt-4"
               title="add-module"
               style={{ cursor: 'pointer' }}
               onClick={() => {
@@ -45,7 +43,7 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
               }}
             ></i>
             <i
-              className="bi bi-cloud-arrow-up-fill mx-1 mt-4"
+              className="bi bi-upload mx-1 mt-4"
               title="upload-file"
               style={{ cursor: 'pointer' }}
               onClick={() => setView('IMPORT_API')}
@@ -97,6 +95,7 @@ function SideBar({ setView, setSelectedApi, setSelectedModule, saveTitle, setSel
                           onFunctionClick={() => onAuthSelect(funcVal, value.title, folderKey)}
                           isAuth={true}
                           moduleId={folderKey}
+                          setSelectedAuthApi={setSelectedAuthApi}
                         />
                       ))
                     : null
