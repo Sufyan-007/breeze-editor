@@ -87,4 +87,10 @@ export const funcConfigTemplates = {
     functionName: 'router.navigate',
     parameters: [{ type: 'STRING', value: '' }],
   },
+  consoleStatement: {
+    callType: 'console',
+    type: 'FUNCTION_CALL',
+    functionName: 'console.log',
+    parameters: [{ type: 'CUSTOM', value: '' }],
+  },
 };
