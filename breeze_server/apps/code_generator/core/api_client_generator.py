@@ -549,7 +549,10 @@ def set_request_headers( model, app_name):
 
 ## only for schema object .
 ## for type array is remaining
-def generate_request_body_schema(parent_key,schema_name,schema):
+def generate_request_body_schema(parent_key,schema_name,schema,module_id,app_name):
+    schema_file_path = f"{CONFIG_PATH}/{app_name}/models/{module_id}.json"
+    with open(schema_file_path, 'r') as f:
+        all_schemas = json.load(f)
     body = {}
     if "type" in schema:
         if schema.get("type") == "object":
@@ -557,9 +560,10 @@ def generate_request_body_schema(parent_key,schema_name,schema):
                 schema_name = parent_key+"."+schema_name
             for key,value in schema.get("properties",{}).items():
                 if "type" in value and value.get("type") == "object":
-                    body[key] = generate_request_body_schema(schema_name,key,value)
+                    s = '`${%s["%s"]}`' % (schema_name, key)
+                    body[key] = s.replace("'","")
                 else:
-                    s = '`${%s.%s}`'%(schema_name,key)
+                    s = '`${%s["%s"]}`' % (schema_name, key)
                     body[key] = s.replace("'","")
         else:
             body[parent_key] = parent_key
@@ -614,7 +618,7 @@ def set_request_body(model,app_name,module_id):
                     body_params = schema
                     raw_data = value
                     model_data = {}
-                    model_data = generate_request_body_schema(None,value,schema)  
+                    model_data = generate_request_body_schema(None,value,schema,module_id,app_name)  
                     variable_declaration = "let reqBody = %s"%(model_data)
                     raw_data = "reqBody";
 
@@ -628,7 +632,7 @@ def set_request_body(model,app_name,module_id):
                     body_params = schema
                     ## generate request body schema
                     model_data = {}
-                    model_data = generate_request_body_schema(None,schema_name,schema)  
+                    model_data = generate_request_body_schema(None,schema_name,schema,module_id,app_name)  
                     variable_declaration = "let reqBody = %s"%(model_data)
                     raw_data = "reqBody";
 
