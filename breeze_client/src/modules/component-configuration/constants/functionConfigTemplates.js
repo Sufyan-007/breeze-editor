@@ -93,4 +93,8 @@ export const funcConfigTemplates = {
     functionName: 'console.log',
     parameters: [{ type: 'CUSTOM', value: '' }],
   },
+  comment: {
+    type: 'COMMENT',
+    text: '',
+  },
 };
