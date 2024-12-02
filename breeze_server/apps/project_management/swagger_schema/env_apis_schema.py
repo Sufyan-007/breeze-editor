@@ -3,7 +3,7 @@ from ..data_models.serializers import *
 from drf_spectacular.utils import OpenApiResponse,OpenApiRequest,OpenApiExample
 from ...common.serializers.ResponseSerializers import ResponseStatus400Serializer
 set_env_schema = {
-    'rb':SetEnvironmentSerializer,
+    'rb':{'application/json':SetEnvironmentSerializer},
     'response_200':OpenApiResponse(
         description='success',
         response=SetEnvironmentResponse200Serializer,

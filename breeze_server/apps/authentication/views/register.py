@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 @csrf_exempt
 @require_POST
 @extend_schema(
-    request=RegisterSerializer,
+    request={'application/json':RegisterSerializer},
     responses={
         201:register_schema['response_201']
     },
@@ -102,7 +102,7 @@ def register(request):
 @csrf_exempt
 @require_POST
 @extend_schema(
-    request=None,
+    request={'application/json':RefreshTokenSerializer},
     responses=None,
     tags=['Auth']
 )

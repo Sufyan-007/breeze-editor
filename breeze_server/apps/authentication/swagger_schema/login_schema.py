@@ -2,6 +2,8 @@
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse,OpenApiExample
 from rest_framework import serializers
+from ..data_models.serializers import LoginBodySerializer,LoginResponseSerializer,ErrorResponseSerializer,LogoutResponseSerializer
+
 class LoginResponseSerializer(serializers.Serializer):
     accessToken = serializers.CharField()
     username = serializers.CharField()
@@ -13,14 +15,7 @@ class LogoutResponseSerializer(serializers.Serializer):
 
 login_schema ={
     'rb':{
-        'application/json': {
-            'type': 'object',
-            'properties': {
-                'username': {'type': 'string', 'description': 'username'},
-                'password': {'type': 'string', 'description': 'password'},
-            },
-            'required': ['username','password']
-        }
+        'application/json': LoginBodySerializer
     },
     'response_200': OpenApiResponse(
         description='success',

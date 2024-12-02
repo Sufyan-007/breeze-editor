@@ -123,9 +123,7 @@ add_route_schema ={
 #     },
 #     required=['path', 'componentId']  # Marking required fields
 # ),
-    'rb':OpenApiRequest(
-        request=AddRouteRequestBodySerializer
-    ),
+    'rb':{'application/json':AddRouteRequestBodySerializer},
     'response_500':OpenApiResponse(
         description='Request is failed due to an error.',
         response=ResponseStatus400Serializer
@@ -133,7 +131,7 @@ add_route_schema ={
 }
 
 update_route_schema = {
-    'rb':UpdateRouteRequestBodySerializer,
+    'rb':{'application/json':UpdateRouteRequestBodySerializer},
     'response_500':OpenApiResponse(
         description='Request is failed due to an error.',
         response=ResponseStatus400Serializer
