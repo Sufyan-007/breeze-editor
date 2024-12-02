@@ -4,7 +4,7 @@ from ..data_models.serializers import *
 from ...common.serializers.ResponseSerializers import ResponseStatus200Serializer,ResponseStatus400Serializer
 add_custom_package_schema = {
 
-'rb':AddCustomPackageRequestBodySerializer,
+'rb':{'application/json':AddCustomPackageRequestBodySerializer},
 'response_200':OpenApiResponse(
        description='success',
        response=ResponseStatus200Serializer,

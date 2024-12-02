@@ -12,7 +12,7 @@ manage_resource_schema ={
                 type=OpenApiTypes.STR
             )
         ],
-    'rb':ManageResourceRequestBodySerializer,
+    'rb':{'application/json':ManageResourceRequestBodySerializer},
 
     'response_200':OpenApiResponse(
         description='Query Resource',

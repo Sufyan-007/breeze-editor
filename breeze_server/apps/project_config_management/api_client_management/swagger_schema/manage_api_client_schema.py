@@ -27,7 +27,7 @@ generate_service_config_schema ={
 
 
 modify_function_config_schema={
-    'rb':ModifyFunctionConfigRequestBodySerializer,
+    'rb':{'application/json':ModifyFunctionConfigRequestBodySerializer},
     'response_200':OpenApiResponse(
         description='created',
         response=ResponseStatus200Serializer,
@@ -42,7 +42,7 @@ modify_function_config_schema={
 }
 
 transfer_to_auth_schema = {
-    'rb':TransferToAuthRequestBodySerializer,
+    'rb':{'application/json':TransferToAuthRequestBodySerializer},
     'response_200':OpenApiResponse(
         description='successful',
         response=ResponseStatus200Serializer,
@@ -57,7 +57,7 @@ transfer_to_auth_schema = {
 
 
 edit_module_title_schema = {
-    'rb':EditModuleTitleSerializer,
+    'rb':{'application/json':EditModuleTitleSerializer},
     'response_200':OpenApiResponse(
         description='Edit on a resource is successful',
         response=ResponseStatus200Serializer,
@@ -108,5 +108,5 @@ get_response_token_schema = {
 }
 
 add_module_schema = {
-    'rb':AddModuleRequestBodySerializer
+    'rb':{'application/json':AddModuleRequestBodySerializer}
 }

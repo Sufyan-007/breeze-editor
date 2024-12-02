@@ -24,4 +24,18 @@ class UserDetailsSerializer(serializers.Serializer):
     )
 
     class Meta:
-        ref_name = "UserDetails" 
+        ref_name = "UserDetails"
+        
+class LoginBodySerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+class LoginResponseSerializer(serializers.Serializer):
+    accessToken = serializers.CharField()
+    username = serializers.CharField()
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.CharField()
+
+class LogoutResponseSerializer(serializers.Serializer):
+    details = serializers.CharField()
+    

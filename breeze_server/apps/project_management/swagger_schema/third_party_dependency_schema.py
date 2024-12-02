@@ -12,7 +12,7 @@ add_third_party_dependency_schema = {
                 type=OpenApiTypes.STR
             )
     ],
-    'rb':AddOrUpdateThirdPartyRequestBodySerializer,
+    'rb':{'application/json':AddOrUpdateThirdPartyRequestBodySerializer},
     'response_200':OpenApiResponse(
         description='ok',
         response=ResponseStatus200Serializer,
@@ -67,7 +67,7 @@ update_third_party_dependency_schema = {
                 type=OpenApiTypes.STR
             )
     ],
-    'rb':AddOrUpdateThirdPartyRequestBodySerializer,
+    'rb':{'application/json':AddOrUpdateThirdPartyRequestBodySerializer},
     'response_200':OpenApiResponse(
             description='ok',
             response=ResponseStatus200Serializer,

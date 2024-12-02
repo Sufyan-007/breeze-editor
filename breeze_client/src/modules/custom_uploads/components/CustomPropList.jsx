@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CustomButtonField } from '../../../common/fields';
 import '../styles/CustomUploadSidebar.css';
 import '../../../../src/App.css';
-import {  useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import ExternalCompPropEditForm from './ExternalCompPropEditForm';
 import {
   updatePropConfigAction,

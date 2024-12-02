@@ -14,6 +14,8 @@ import {
   StateVariableConfigForm,
   RefVarConfigForm,
   CustomCode,
+  ConsoleStatementForm,
+  CommentConfigForm,
 } from '../../component-configuration/components/config-forms';
 
 const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
@@ -91,6 +93,10 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
         return <TryCatchConfigForm onSubmit={onSubmit} onCancel={onCancel} editMode={true} />;
       case 'Custom Code':
         return <CustomCode onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Console.log':
+        return <ConsoleStatementForm onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Add Comment':
+        return <CommentConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       default:
         return null;
     }
