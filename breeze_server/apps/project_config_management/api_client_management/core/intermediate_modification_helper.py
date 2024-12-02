@@ -85,6 +85,7 @@ def add_auth_function(auth_model, appName, moduleId,operation):
     json_data = {}
     if operation == "ADD":
         auth_model["id"] = generate_uuid_as_key()
+    auth_model["tags"] = "authApis"
     if not auth_model.get("auth_api_type"):
         auth_model["auth_api_type"] = "LOGIN"
     with open(folder_path) as fp:
@@ -114,7 +115,7 @@ def transfer_data_to_auth(filename, id_value, file_path, target_file_path, modul
     auth_api_template = {
         "id": "",
         "operation_id": "",
-        "tags": "",
+        "tags": "authApis",
         "auth_api_type": "LOGIN",
         "authentication_type": "BASIC",
         "request": {

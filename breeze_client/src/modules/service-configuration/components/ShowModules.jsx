@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
+import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions';
 
 function ShowModules({
   folderKey,
@@ -52,6 +53,7 @@ function ShowModules({
   const handleDeleteModule = async (moduleId) => {
     await dispatch(deleteModuleById({ projectName, payload: { moduleId } })).unwrap();
     await dispatch(fetchModules({ projectName, payload: { category: 'api_client' } })).unwrap();
+    await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 3 })).unwrap();
     setShowActions(false);
   };
   const toggleEditing = (title) => {
@@ -83,7 +85,9 @@ function ShowModules({
                 onChange={handleInputChange}
                 onBlur={() => {
                   const trimmedNewName = newModuleTitle.trim();
-                  if (value.title !== trimmedNewName) saveTitle(value.title, folderKey, trimmedNewName);
+                  if (value.title !== trimmedNewName && trimmedNewName.length !== 0) {
+                    saveTitle(value.title, folderKey, trimmedNewName);
+                  }
                   toggleEditing(value.title);
                 }}
                 onKeyDown={(e) => {

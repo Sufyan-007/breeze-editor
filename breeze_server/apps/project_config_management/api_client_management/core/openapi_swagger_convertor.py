@@ -427,7 +427,7 @@ def generate_json_for_security_schema(schema_name,schema_data,meta_data):
         if servers is None or len(servers) == 0:
             servers = [{"url": "your_server_url"}]
         auth_obj = {
-            "tags" : "auth",
+            "tags" : "authApis",
             "body" : [],
             "request" : {"method" : "POST",
             "url": {

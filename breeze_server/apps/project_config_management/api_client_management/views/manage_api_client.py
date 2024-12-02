@@ -176,7 +176,7 @@ def edit_module_title(request, project_id):
         module_id = data.get("moduleId")
         swagger_metadata_file_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
         swagger_schema_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
-        result,status = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title)
+        result,status = edit_module_title_helper(swagger_file_path=swagger_metadata_file_path,schema_index_file=swagger_schema_index_path, module_id=module_id, new_title=new_title, project_id=project_id)
         return JsonResponse(result,status=status)
 
 

@@ -59,7 +59,9 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
         return {"error": str(e)}, 500
 
 
-def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new_title):
+def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new_title,project_id):
+    if not new_title or not module_id:
+        return {"error": "Module name and module id required"},400
     if not os.path.exists(swagger_file_path):
         return {"error": "Module not found"},404
     with open(swagger_file_path, "r") as file:
@@ -78,6 +80,8 @@ def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new
         schema_data = json.load(file)
     schema_data[module_id] = new_title
     append_to_dict_file(schema_index_file, schema_data)
+    directory_manager = DirectoryManager(project_name=project_id)
+    directory_manager.rename_node(module_id, new_title)
     return {"message": "Module name edited Successfully"},200
 
 
