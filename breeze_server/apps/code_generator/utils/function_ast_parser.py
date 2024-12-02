@@ -339,8 +339,7 @@ class FunctionParser:
         tag_name = config['tagName']
         attributes = config.get('attributes', {})
         children = config.get('children', [])
-
-        attribute_str = ' '.join([f'{attr}={self.get_value_code(value,key_chaining=key_chaining+["attributes",attr])[0]}' for attr, value in attributes.items()])
+        attribute_str = ' '.join([f'{attr}={{{self.get_value_code(value,key_chaining=key_chaining+["attributes",attr])[0]}}}' for attr, value in attributes.items()])
         attribute_str = attribute_str+f" data-brz-id='{config['id']}'"
         open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
         close_tag = f'</{tag_name}>'
@@ -517,9 +516,9 @@ class FunctionParser:
                 code = f"const {varname} = useCallback({callBackCode}), [{','.join(dependencies)}] )"
         
         elif config["type"] == "REACT_USE_MEMO":
-            blockCode,t = self.generate_statement_code(config["blockConfig"],key_chaining=key_chaining+["blockConfig"])
+            blockCode,t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"])
             varname = config["varName"]
-            if not config.get("dependencies") and config["dependencies"]!=[]:
+            if not config.get("dependencies") and config.get("dependencies")!=[]:
                 code = f"const {varname} = useMemo(() => {blockCode})"
             else:
                 dependencies =[]

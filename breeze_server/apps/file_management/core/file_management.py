@@ -256,20 +256,20 @@ def generate_file_code(projectId,fileId,config):
         {export_statements}
     """
     
-    write_config_file(
-        project_name=projectId,
-        category=ResourceCategory.CODE_FILE.value,
-        filename=fileId+"_meta",
-        json_data=meta_config
-    )
     
     directoryManager = DirectoryManager(projectId)
     directoryManager.save_file(file_id=fileId,content=code,formatted=True)
     
     content = directoryManager.get_file_content(fileId)
     
-    code_tree = get_code_index(importTree+[tree], content)
+    code_tree = get_code_index(importTree+[tree], content, meta_config)
     
+    write_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId+"_meta",
+        json_data=meta_config
+    )
     pickle_dir = f"{CONFIG_PATH}/{projectId}/pickles/{fileId}.bytes"
     create_parent_dir_if_not_exists(pickle_dir)
     with open(pickle_dir,"wb") as file:
