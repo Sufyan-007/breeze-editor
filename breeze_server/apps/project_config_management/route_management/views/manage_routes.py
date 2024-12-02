@@ -9,6 +9,7 @@ from ..utils.utils import process_route_config, include_all_routes_accessory_dat
 from ..core.route_config_editor import delete_route as del_route
 from ..swagger_schema.manage_routes_schema import get_routes_schema,get_all_routes_fullpath_schema,add_route_schema,update_route_schema,delete_route_schema
 from drf_spectacular.utils import extend_schema
+from ..data_models.serializers import DeleteRouteRequestBodySerializer
 
 @extend_schema(
     methods=['GET'],
@@ -111,7 +112,7 @@ def update_route(request, project_id):
 
 @extend_schema(
     methods=['DELETE'],
-    request=delete_route_schema['rb'],
+    request=DeleteRouteRequestBodySerializer,
     responses={
         200:delete_route_schema['response_200'],
         500:delete_route_schema['response_500']

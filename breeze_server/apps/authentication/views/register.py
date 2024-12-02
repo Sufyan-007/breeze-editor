@@ -102,12 +102,9 @@ def register(request):
 @csrf_exempt
 @require_POST
 @extend_schema(
-    request=RegisterSerializer,
-    responses={
-        201:register_schema['response_201']
-    },
+    request=None,
+    responses=None,
     tags=['Auth']
-    
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])
