@@ -13,6 +13,5 @@ class CustomTokenAuthenticationScheme(OpenApiAuthenticationExtension):
         return {
             'type': 'http',
             'scheme': 'bearer',
-            "name": "Authorizatin",
             "description": "Token-based authentication with required prefix 'Token'"
             }

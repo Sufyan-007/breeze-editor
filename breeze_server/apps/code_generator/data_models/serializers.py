@@ -14,3 +14,9 @@ class GenerateServiceFileResponse201Serializer(serializers.Serializer):
         child=serializers.CharField(),
         help_text="An array of strings"
     )
+    
+class GetConfigByIndexRequestBodySerializer(serializers.Serializer):
+    type = serializers.CharField()
+    compId = serializers.CharField()
+    index = serializers.DictField()
+    
