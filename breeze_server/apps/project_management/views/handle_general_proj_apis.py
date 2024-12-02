@@ -55,11 +55,6 @@ def get_proj_metadata(request, project_id):
         500:add_schema['response_500']
     },
 )
-@extend_schema(
-    methods=['POST'],
-    request=None,
-    responses=None
-)
 @csrf_exempt
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])  # Set the parsers to handle form data
