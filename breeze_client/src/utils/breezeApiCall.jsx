@@ -56,7 +56,6 @@ export async function callApiClient(
 
     // if refresh token not available in localstorage
     if (!refresh_token) {
-      console.log('asd');
       router.navigate('/login');
     } else if (responseData.error === 'access token expired') {
       //get new access token from current refresh token
@@ -85,7 +84,7 @@ export async function callApiClient(
       // window.location.reload();
     } else {
       if (!response.ok) {
-        throw new Error(`API call failed with status ${response.status}`);
+        throw new Error(responseData.error || 'An unexpected error occurred');
       }
       if (showToaster && ['PUT', 'POST', 'DELETE'].includes(method.toUpperCase())) {
         toasterRoot.render(<BreezeToaster message="Operation successful!" type="success" />);
@@ -95,9 +94,9 @@ export async function callApiClient(
     return responseData;
   } catch (error) {
     console.error('API call error:', error);
-
+    const errorMessage = error.message || 'Operation failed. Please try again.';
     if (showToaster && ['PUT', 'POST', 'DELETE'].includes(method.toUpperCase())) {
-      toasterRoot.render(<BreezeToaster message="Operation failed. Please try again." type="error" />);
+      toasterRoot.render(<BreezeToaster message={errorMessage} type="error" />);
     }
 
     throw error;
