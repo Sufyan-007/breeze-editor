@@ -7,3 +7,35 @@ class RegisterSerializer(serializers.Serializer):
 
 class RegisterResponseSerializer(serializers.Serializer):
     accessToken = serializers.CharField()
+    
+class UserDetailsSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(
+        max_length=128,
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+    created_at = serializers.DateTimeField()
+    phone_number = serializers.CharField(max_length=15)
+    projects = serializers.ListField(
+        child=serializers.IntegerField()
+    )
+
+    class Meta:
+        ref_name = "UserDetails"
+        
+class LoginBodySerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+class LoginResponseSerializer(serializers.Serializer):
+    accessToken = serializers.CharField()
+    username = serializers.CharField()
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.CharField()
+
+class LogoutResponseSerializer(serializers.Serializer):
+    details = serializers.CharField()
+    

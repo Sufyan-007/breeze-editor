@@ -5,7 +5,7 @@ from ..data_models.serializers import AddOrEditSwaggerSerializer,DeleteSchemaSer
 from ....common.serializers.ResponseSerializers import ResponseStatus200Serializer,ResponseStatus400Serializer
     
 add_or_edit_swagger_schema = {
-    'rb':AddOrEditSwaggerSerializer,
+    'rb':{'application/json':AddOrEditSwaggerSerializer},
     'response_200':OpenApiResponse(
           description='created or edited',
           response=ResponseStatus200Serializer,

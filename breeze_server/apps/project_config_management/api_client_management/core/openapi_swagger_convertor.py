@@ -110,13 +110,13 @@ def prepare_api_models(json_data, project_name,isJson):
             print(traceback.format_exc())
             
             
-def create_request_json(path, path_data, operation, meta_data,module_id,security_schemes_models=[]):
+def create_request_json(path, path_data, operation, meta_data,module_id,security_schemes_models=[],schema_file_path=None):
         method = operation.strip().upper()
         
         auth_data = _create_auth_arr_json(path_data, meta_data=meta_data,security_schemes_models=security_schemes_models)
         url_data = _create_url_json(path,meta_data)
         parameters = _create_parameters_json(path_data.get("parameters"))
-        arr_body_data = _create_body_arr_json(path_data.get("requestBody", {}), meta_data= meta_data, module_id=module_id)
+        arr_body_data = _create_body_arr_json(path_data.get("requestBody", {}), meta_data= meta_data, module_id=module_id,schema_file_path = schema_file_path)
         request_obj = {
             "method":MethodsEnum[method].name, 
             "auth":auth_data, 
@@ -246,7 +246,9 @@ def _create_url_json(path, meta_data):
         }
         return url
     
-def _create_body_arr_json( body_data, meta_data,module_id):
+def _create_body_arr_json( body_data, meta_data,module_id,schema_file_path):
+        with open(schema_file_path, "r") as file:
+            all_schemas = json.load(file)
         arr_body = []
         file = None
         schema_name = None
@@ -275,7 +277,7 @@ def _create_body_arr_json( body_data, meta_data,module_id):
                 if "$ref" in schema: 
                     schema_name = schema.get("$ref",None)
                     schema_name = schema_name.split('/')[-1]
-                    body_schema = _create_schema(schema_name,schemas)
+                    body_schema = _create_schema(schema_name,schemas,None,all_schemas)
                 else:
                     is_anonymous = True
                     if schema.get("type") == "object":
@@ -288,7 +290,7 @@ def _create_body_arr_json( body_data, meta_data,module_id):
                             prop_ref = prop_data.get('$ref', None)
                             if prop_ref:
                                 prop_name = prop_ref.split('/')[-1]
-                                prop_schema = _create_schema(prop_name, schemas)
+                                prop_schema = _create_schema(prop_name, schemas,None,all_schemas)
                             else:
                                 prop_type = prop_data.get('type', '')
                                 prop_schema = {'type': prop_type}
@@ -299,7 +301,7 @@ def _create_body_arr_json( body_data, meta_data,module_id):
                                 items_ref = prop_data['items'].get('$ref', '')
                                 if items_ref:
                                     items_name = items_ref.split('/')[-1]
-                                    items_schema = _create_schema(items_name, schemas)
+                                    items_schema = _create_schema(items_name, schemas,None,all_schemas)
                                     prop_schema['items'] = items_schema
                                 else:
                                     prop_schema['items'] = prop_data['items']
@@ -323,7 +325,8 @@ def _create_body_arr_json( body_data, meta_data,module_id):
         return arr_body
     
     
-def _create_schema( schema_name, components_schemas, seen=None):
+def _create_schema( schema_name, components_schemas, seen=None,all_schemas=None):
+    #here we need to add
         if seen is None:
             seen = set()
         if schema_name in seen:
@@ -345,7 +348,11 @@ def _create_schema( schema_name, components_schemas, seen=None):
             prop_ref = prop_data.get('$ref', '')
             if prop_ref:
                 prop_name = prop_ref.split('/')[-1]
-                prop_schema = _create_schema(prop_name, components_schemas, seen=seen)
+                if prop_name in all_schemas:
+                    prop_schema = all_schemas.get(prop_name)
+                    prop_name = all_schemas.get(prop_name).get("name")
+                else:
+                    prop_schema = _create_schema(prop_name, components_schemas, seen=seen)
             else:
                 prop_type = prop_data.get('type', '')
                 prop_schema = {'type': prop_type}
@@ -427,7 +434,7 @@ def generate_json_for_security_schema(schema_name,schema_data,meta_data):
         if servers is None or len(servers) == 0:
             servers = [{"url": "your_server_url"}]
         auth_obj = {
-            "tags" : "auth",
+            "tags" : "authApis",
             "body" : [],
             "request" : {"method" : "POST",
             "url": {
@@ -643,7 +650,8 @@ def convert_to_json_data_model(tags_map, meta_data, module_id,schema_file_path, 
                     operation=operation,
                     meta_data=meta_data,
                     security_schemes_models=security_schemes_models,
-                    module_id=module_id
+                    module_id=module_id,
+                    schema_file_path = schema_file_path
                 )
 
                 body_items = request_obj["body"]

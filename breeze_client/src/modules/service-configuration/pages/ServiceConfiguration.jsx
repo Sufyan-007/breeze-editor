@@ -21,6 +21,7 @@ import { isValidApiStructure } from '../constants/ValidatorFunctions';
 import { fetchSchemas } from '../../schema-configuration/redux/schemaConfigActions';
 import ModuleSettings from '../components/ModuleSettings';
 import InterceptorSettings from '../components/InterceptorSettings';
+import { fetchFolderConfig } from '../../../redux/directory_management/directory_actions';
 function ServiceConfiguration() {
   const { transformedOptions, message, status } = useSelector((state) => state.services);
   const dispatch = useDispatch();
@@ -73,6 +74,7 @@ function ServiceConfiguration() {
       await dispatch(
         fetchSchemas({ projectName, payload: { category: 'models', module: newModuleId.module_id } })
       ).unwrap();
+      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 3 })).unwrap();
     } catch (error) {
       console.error('Error uploading file:', error);
     }

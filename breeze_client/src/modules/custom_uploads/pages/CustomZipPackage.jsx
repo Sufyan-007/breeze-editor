@@ -55,7 +55,6 @@ function CustomZipPackagePage() {
     };
     wsStatus.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log('data received from wb', message);
       const fileStatuses = message?.file_status?.file_statuses;
       if (fileStatuses) {
         setUploadStatus((prevStatuses) => ({
@@ -79,6 +78,10 @@ function CustomZipPackagePage() {
   }, []);
 
   useEffect(() => {
+    dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
+  }, [uploadStatus[fileId]]);
+
+  useEffect(() => {
     const folders = zipFiles?.folders || [];
 
     const initialUploadStatus = { ...uploadStatus };
@@ -98,7 +101,7 @@ function CustomZipPackagePage() {
 
   const getComponents = async (filename) => {
     try {
-      await dispatch(fetchZipFileComponentsAction({ filename, projectName }));
+      await dispatch(fetchZipFileComponentsAction({ filename, projectName })).unwrap();
     } catch (error) {
       console.error('Error fetching components:', error);
     }
@@ -115,11 +118,8 @@ function CustomZipPackagePage() {
           projectName: projectName,
         })
       ).unwrap();
-
       // Fetch updated zip files
       await dispatch(fetchZipFilesAction(projectName)).unwrap();
-
-      // Fetch updated folder config
       await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
     } catch (error) {
       console.error('An error occurred while deleting the file:', error);
@@ -168,7 +168,10 @@ function CustomZipPackagePage() {
 
         await dispatch(uploadZipFileAction({ formData: submitData, projectName })).unwrap();
         await dispatch(fetchZipFilesAction(projectName)).unwrap();
-        await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
+
+        // Fetch the updated folder configuration
+        // await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
+
         ref.current.clear();
         resetForm();
       } catch (error) {
