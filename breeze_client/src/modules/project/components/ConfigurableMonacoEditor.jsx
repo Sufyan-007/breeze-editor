@@ -82,7 +82,7 @@ const ConfigurableMonacoEditor = ({
       setFilteredItems(configType ? configTypeMapping[configType] || items : items);
     };
 
-    if (node?.tag === 'COMPONENTS') {
+    if (node?.tag === 'COMPONENTS' || node?.tag === 'CODE_FILE') {
       editorInstance.onContextMenu(async (e) => {
         e.event.preventDefault();
         e.event.stopPropagation();
@@ -98,7 +98,7 @@ const ConfigurableMonacoEditor = ({
       });
     }
 
-    if (node?.tag === 'COMPONENTS') {
+    if (node?.tag === 'COMPONENTS' || node?.tag === 'CODE_FILE') {
       editorInstance.onMouseDown(handleClick);
     }
 
@@ -146,7 +146,7 @@ const ConfigurableMonacoEditor = ({
 
   const handleMenuItemClick = (item) => {
     const contentComponent = getConfigComponent(item);
-    console.log('contentComponent', item, contentComponent);
+    // console.log('contentComponent', item, contentComponent);
     let width = '40%';
     if (item === 'Html elements') width = '60%';
     showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
