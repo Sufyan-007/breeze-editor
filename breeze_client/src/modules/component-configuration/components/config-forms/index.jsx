@@ -1,7 +1,6 @@
 import VariableConfigForm from './VariableConfigForm';
 import PropConfigForm from './PropConfigForm';
 import FunctionConfigForm from './FunctionConfigForm';
-import HookConfigForm from './HookConfigForm';
 import ImportConfigForm from './ImportConfigForm';
 import LifecycleConfigForm from './LifecycleConfigForm';
 import AddELement from './AddELement';
@@ -12,12 +11,13 @@ import TryCatchConfigForm from './TryCatchConfigForm';
 import ComponentConfigForm from './ComponentConfigForm';
 import StateVariableConfigForm from './StateVariableConfigForm';
 import RefVarConfigForm from './RefVarConfigForm';
+import UseMemoConfigForm from './UseMemoConfigForm';
+import UseCallbackConfigForm from './UseCallbackConfigForm';
 
 export {
   VariableConfigForm,
   PropConfigForm,
   FunctionConfigForm,
-  HookConfigForm,
   ImportConfigForm,
   LifecycleConfigForm,
   AddELement,
@@ -28,4 +28,6 @@ export {
   ComponentConfigForm,
   StateVariableConfigForm,
   RefVarConfigForm,
+  UseMemoConfigForm,
+  UseCallbackConfigForm,
 };

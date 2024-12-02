@@ -6,6 +6,20 @@ export const initialPropConfig = {
   description: '',
 };
 
+export const initialParamConfig = {
+  name: '',
+  dataType: 'string',
+  defaultValue: '',
+  description: '',
+};
+
+export const initialComponentConfig = {
+  type: 'REACT_COMPONENT',
+  name: '',
+  description: '',
+  propsVar: [],
+};
+
 export const initialVariableConfig = {
   type: 'DECLARATION',
   varName: '',
@@ -41,24 +55,55 @@ export const initialImportConfig = {
 };
 
 export const initialFunctionConfig = {
-  functionName: '',
+  type: 'FUNCTION',
+  name: '',
   isAsync: false,
   isAnonymous: false,
   description: '',
-  params: [],
-  functionBody: '',
+  parameters: [],
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
 };
 
 export const initialLifecycleConfig = {
+  type: 'REACT_USE_EFFECT',
   description: '',
   lifecycleType: 'onInitialMount',
-  dependentVars: [],
-  lifecycleBody: '',
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
+  dependencies: { type: 'ARRAY', values: [] },
 };
-export const initialHookConfig = {
-  hookName: '',
-  hookDescription: '',
-  hookType: 'useMemo',
-  dependentVars: [],
-  functionParams: [],
+
+export const initialUseMemoConfig = {
+  type: 'REACT_USE_MEMO',
+  name: '',
+  description: '',
+  bodyConfig: {
+    type: 'BLOCK',
+    statements: [],
+  },
+  dependencies: { type: 'ARRAY', values: [] },
+};
+
+export const initialUseCallbackConfig = {
+  type: 'REACT_USE_CALLBACK',
+  name: '',
+  description: '',
+  callback: {
+    type: 'FUNCTION',
+    name: '',
+    isAsync: false,
+    isAnonymous: true,
+    description: '',
+    parameters: [],
+    bodyConfig: {
+      type: 'BLOCK',
+      statements: [],
+    },
+  },
+  dependencies: { type: 'ARRAY', values: [] },
 };

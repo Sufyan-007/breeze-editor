@@ -31,8 +31,8 @@ export const lifecycleTypes = [
 ];
 
 export const hookTypes = [
-  { label: 'useMemo', value: 'useMemo' },
-  { label: 'useCallback', value: 'useCallback' },
+  { label: 'useMemo', value: 'REACT_USE_MEMO' },
+  { label: 'useCallback', value: 'REACT_USE_CALLBACK' },
 ];
 
 export const availableDependentVars = [
