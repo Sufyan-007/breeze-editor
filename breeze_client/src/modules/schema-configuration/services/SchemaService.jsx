@@ -22,3 +22,9 @@ export async function resolveSchema(projectName, payload) {
   const response = callApiClient(apiUrl, 'POST', payload, false, {}, true);
   return response;
 }
+
+export async function deleteSchema(projectName, payload) {
+  const apiUrl = `${BASE_URL}/api/config-editor/${projectName}/manage-api-client/delete-schema/`;
+  const response = callApiClient(apiUrl, 'DELETE', payload, false, {}, true);
+  return response;
+}

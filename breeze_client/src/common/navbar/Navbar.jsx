@@ -8,28 +8,33 @@ import darkLightModeSwitch from '../../assets/svgs/dark-light-mode-switch.svg';
 import './Navbar.css';
 import { router } from '../../routes/routing';
 import ProfileOffCanvas from './ProfileOffCanvas';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserDetails } from '../../redux/user/userActions';
 
 function Navbar({ currentPage = 'index', projectName = '' }) {
   const { toggleTheme } = useContext(ThemeContext);
-
+  const userDetails = useSelector((state) => state.user.userDetails);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showOffCanvas, setShowOffCanvas] = useState(false);
+  const dispatch = useDispatch();
 
   const menuRef = useRef(null);
   const profileMenuRef = useRef(null);
-
-  const username = localStorage.getItem('username') || 'John Doe';
-  const userRole = localStorage.getItem('userRole') || 'User';
 
   const toggleOffCanvas = () => setShowOffCanvas(!showOffCanvas);
 
   const toggleMenu = () => setMenuOpen((prev) => !prev);
   const toggleAppMenu = () => setIsMenuOpen((prev) => !prev);
 
+  useEffect(() => {
+    dispatch(fetchUserDetails());
+  }, [dispatch]);
+
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('username');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('refreshToken');
     router.navigate('/login');
   };
 
@@ -93,15 +98,15 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
               <i className="bi bi-menu-button"></i>
             </button>
             {isMenuOpen && (
-              <div className="menu-dropdown position-absolute br-background-secondary shadow p-3 rounded">
-                <Link to="/user-management" className="d-block mb-2 br-text-tertiary" onClick={handleLinkClick}>
-                  User Management
+              <div className="menu-dropdown position-absolute br-background-primary shadow p-2 rounded">
+                <Link to="/user-management" className="d-block br-text-primary" onClick={handleLinkClick}>
+                  <i className="bi bi-people me-2"></i>User Management
                 </Link>
-                <Link to="/role-management" className="d-block mb-2 br-text-tertiary" onClick={handleLinkClick}>
-                  Role Management
+                <Link to="/role-management" className="d-block br-text-primary" onClick={handleLinkClick}>
+                  <i className="bi bi-person-fill-gear me-2"></i> Role Management
                 </Link>
-                <Link to="/all-projects" className="d-block br-text-tertiary" onClick={handleLinkClick}>
-                  All Projects
+                <Link to="/all-projects" className="d-block br-text-primary" onClick={handleLinkClick}>
+                  <i className="bi bi-cast me-2"></i>All Projects
                 </Link>
               </div>
             )}
@@ -110,19 +115,27 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
           <div className="profile d-flex align-items-center ms-3 br-cursor-pointer" ref={profileMenuRef}>
             <div className="d-flex align-items-center" onClick={toggleMenu}>
               <img className="avatar" src={Avatar} alt="Profile Avatar" />
-              <span className="ms-2 small-font br-text-primary">{username}</span>
+              <span className="ms-2 small-font br-text-primary">{userDetails.username || 'user'}</span>
             </div>
 
             {menuOpen && (
               <div
-                className="dropdown-menu show position-absolute px-2 br-background-primary rounded"
+                className="dropdown-menu show position-absolute px-1 br-background-primary rounded"
                 style={{ top: 45, right: 10, zIndex: 100, borderRadius: 0 }}
               >
-                <button type="button" className="dropdown-item br-text-primary" onClick={toggleOffCanvas}>
+                <button
+                  type="button"
+                  className="profile-menu-dropdown-item dropdown-item br-text-primary"
+                  onClick={toggleOffCanvas}
+                >
                   <i className="bi bi-person me-2"></i> Profile Settings
                 </button>
-                <button type="button" className="dropdown-item br-text-primary" onClick={handleLogout}>
-                  <i className="bi bi-box-arrow-right text-danger me-2"></i> Logout
+                <button
+                  type="button"
+                  className="profile-menu-dropdown-item dropdown-item br-text-primary"
+                  onClick={handleLogout}
+                >
+                  <i className="bi bi-box-arrow-right me-2"></i> Logout
                 </button>
               </div>
             )}
@@ -130,13 +143,7 @@ function Navbar({ currentPage = 'index', projectName = '' }) {
         </div>
       </div>
 
-      <ProfileOffCanvas
-        show={showOffCanvas}
-        onClose={toggleOffCanvas}
-        username={username}
-        userRole={userRole}
-        onSave={handleSaveProfile}
-      />
+      <ProfileOffCanvas show={showOffCanvas} onClose={toggleOffCanvas} onSave={handleSaveProfile} />
     </nav>
   );
 }

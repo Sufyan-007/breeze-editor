@@ -26,6 +26,7 @@
     "@craftjs/core": "^0.2.10",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@mui/material": "^5.14.3",
     "@types/multer": "^1.4.12",
     "@types/unzipper": "^0.10.10",
     "@types/uuid": "^10.0.0",
@@ -33,7 +34,7 @@
     "framer-motion": "^11.5.4",
     "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.4",
-    "react-bootstrap": "^2.10.4",
+    "react-bootstrap": "^2.7.3",
     "ts-morph": "^23.0.0",
     "unzipper": "^0.12.3",
     "uuid": "^10.0.0"

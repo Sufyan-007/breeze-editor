@@ -10,11 +10,13 @@ import { BreezeDatatypes } from '../../constants/FormConstants';
 import { useCallback, useContext, useState } from 'react';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import { initialRefVarConfig } from '../../constants/ResourcesFormData';
+import { validator } from '../../../../utils/Validator';
 
-function RefVarConfigForm({ onSubmit, onCancel }) {
+function RefVarConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialRefVarConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = useCallback((field, value) => {
     setFormData((formData) => {
@@ -24,13 +26,26 @@ function RefVarConfigForm({ onSubmit, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    setIsSubmitted(true);
+    const isFormValid = [formData.varName].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
+    const transformedData = {
+      ...formData,
+      value: {
+        type: ['STRING', 'NUMBER', 'BOOLEAN'].includes(formData.dataType) ? formData.dataType : 'CUSTOM',
+        value: formData.defaultValue,
+      },
+    };
+    onSubmit(transformedData);
     setFormData(initialRefVarConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialRefVarConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -40,12 +55,14 @@ function RefVarConfigForm({ onSubmit, onCancel }) {
         <div>
           <CustomTextInput
             name="varName"
-            value={formData.varName}
+            value={formData.varName || ''}
             onChange={(value) => handleChange('varName', value)}
             config={{
               label: 'Variable Name',
               groupClass: 'form-group mb-2',
             }}
+            customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+            isSubmitted={isSubmitted}
           />
           <CustomSelectField
             name="dataType"
@@ -80,7 +97,12 @@ function RefVarConfigForm({ onSubmit, onCancel }) {
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -90,6 +112,7 @@ function RefVarConfigForm({ onSubmit, onCancel }) {
 RefVarConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
+  editMode: PropTypes.bool,
 };
 
 export default RefVarConfigForm;

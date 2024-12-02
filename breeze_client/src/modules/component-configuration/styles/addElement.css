@@ -13,3 +13,7 @@
     border: none;
     cursor: pointer;
 }
+
+.addELementWidth40{
+    width: 45%;
+}

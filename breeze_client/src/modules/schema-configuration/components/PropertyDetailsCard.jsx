@@ -11,6 +11,7 @@ function PropertyDetailsCard({
   moduleId,
   selectedSchema,
   onResolve,
+  isUnresolved,
 }) {
   const [newName, setNewName] = useState(propKey);
   const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +45,7 @@ function PropertyDetailsCard({
               </div>
               <div className="col-10">
                 <Types
+                  isUnresolved={isUnresolved}
                   propertyData={property}
                   onUpdate={(val) => handleChange(propKey, val)}
                   moduleId={moduleId}
@@ -62,7 +64,11 @@ function PropertyDetailsCard({
           onClick={() => toggleOpen()}
           style={{ cursor: 'pointer' }}
         >
-          <h6 className="mb-0 br-text-primary">{propKey}</h6>
+          <div>
+            <span className="mb-0 br-text-primary">{propKey}</span>
+            {isUnresolved && <i className="bi bi-exclamation-circle text-danger mx-2"></i>}
+          </div>
+
           <i
             className="bi bi-trash3 br-text-primary"
             alt="delete"

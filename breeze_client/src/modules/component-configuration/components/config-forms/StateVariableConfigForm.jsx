@@ -10,11 +10,13 @@ import { BreezeDatatypes } from '../../constants/FormConstants';
 import { useCallback, useContext, useState } from 'react';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import { initialStateVarConfig } from '../../constants/ResourcesFormData';
+import { validator } from '../../../../utils/Validator';
 
-function StateVariableConfigForm({ onSubmit, onCancel }) {
+function StateVariableConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialStateVarConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = useCallback((field, value) => {
     setFormData((formData) => {
@@ -24,13 +26,26 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    setIsSubmitted(true);
+    const isFormValid = [formData.varName].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
+    const transformedData = {
+      ...formData,
+      value: {
+        type: ['STRING', 'NUMBER', 'BOOLEAN'].includes(formData.dataType) ? formData.dataType : 'CUSTOM',
+        value: formData.defaultValue,
+      },
+    };
+    onSubmit(transformedData);
     setFormData(initialStateVarConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialStateVarConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -40,16 +55,18 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
         <div>
           <CustomTextInput
             name="varName"
-            value={formData.varName}
+            value={formData.varName || ''}
             onChange={(value) => handleChange('varName', value)}
             config={{
               label: 'Variable Name',
               groupClass: 'form-group mb-2',
             }}
+            customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+            isSubmitted={isSubmitted}
           />
           <CustomSelectField
             name="dataType"
-            value={formData.dataType}
+            value={formData.dataType || 'CUSTOM'}
             onChange={(value) => handleChange('dataType', value)}
             options={BreezeDatatypes}
             config={{
@@ -59,7 +76,7 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
           />
           <label className="form-label br-text-primary med-font fw-semibold">Default Value</label>
           <MonacoEditor
-            defaultValue={formData.defaultValue}
+            defaultValue={formData.defaultValue || ''}
             onChange={(value) => handleChange('defaultValue', value)}
             language="javascript"
             height="100px"
@@ -68,7 +85,7 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
           />
           <CustomTextArea
             name="description"
-            value={formData.description}
+            value={formData.description || ''}
             onChange={(value) => handleChange('description', value)}
             config={{ label: 'Description', groupClass: 'form-group my-2' }}
           />
@@ -80,7 +97,12 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
-          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+          <CustomButtonField
+            type="button"
+            label={editMode ? 'Update' : 'Submit'}
+            className="btn btn-filled med-font"
+            onClick={handleSubmit}
+          />
         </div>
       </div>
     </form>
@@ -90,6 +112,7 @@ function StateVariableConfigForm({ onSubmit, onCancel }) {
 StateVariableConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
+  editMode: PropTypes.bool,
 };
 
 export default StateVariableConfigForm;

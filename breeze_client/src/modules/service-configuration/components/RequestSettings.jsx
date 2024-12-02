@@ -31,15 +31,7 @@ function RequestSettings({ requestData, onChange, apiData, isAuthApi, title, req
 
   useEffect(() => {
     if (isAuthApi) {
-      if (
-        apiData.authentication_type === 'BEARER' ||
-        apiData.authentication_type === 'APIKEY' ||
-        apiData.authentication_type === 'OAUTH2'
-      ) {
-        setRequestProperties(['Url', 'Body', 'Headers']);
-      } else if (apiData.authentication_type === 'BASIC') {
-        setRequestProperties(['Body', 'Headers']);
-      }
+      setRequestProperties(['Url', 'Headers', 'Body']);
     } else if (apiData.is_open_api) {
       setRequestProperties(['Url', 'Body', 'Headers']);
       const updatedRequest = { ...requestData };

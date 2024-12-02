@@ -162,7 +162,7 @@ const AllProjects = () => {
         console.log('WebSocket connection closed');
       }
     };
-  }, []);
+  }, [projects]);
 
   useEffect(() => {
     if (wsStatus.current && wsStatus.current.readyState === WebSocket.OPEN) {

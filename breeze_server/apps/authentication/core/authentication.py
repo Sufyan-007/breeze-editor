@@ -31,11 +31,23 @@ class CustomTokenAuthentication(BaseAuthentication):
 
         # token_data = jwt.decode(token, options={"verify_signature": False})
         # token_data = jwt.decode(token, key=settings.SIMPLE_JWT["SIGNING_KEY"] , algorithms=["HS256"])
-        token_data = jwt.decode(token,key = "123456789" , algorithms=["HS256"])
-        print(token_data['user_id'])
+        
+        # try:
+        token_data = jwt.decode(token, key="123456789", algorithms=["HS256"])
+            # return JsonResponse({'message': 'Token is valid', 'data': payload})
+        # except jwt.ExpiredSignatureError:
+            
+        #     print("token has expired")
+
+        # except Exception as e:
+        #     print("token is invalid")
+            # Handle other exceptions (optional)
+            # return JsonResponse({'error': 'Invalid token', 'details': str(e)}, status=400)
+
+        # print(token_data)
         # token_data=AccessToken(token)
         if not token_data:
-            raise AuthenticationFailed('Invalid token.')
+            raise AuthenticationFailed("Invalid token.")
 
         # expiry = datetime.fromisoformat(token_data['expiry'])
         # if timezone.now() > expiry:
@@ -56,7 +68,7 @@ class CustomTokenAuthentication(BaseAuthentication):
         #     raise AuthenticationFailed({'message': 'Token has expired. Use new token.', 'new_token': new_token})
         user_details = get_user_data(token_data["user_id"])
         request.user_details = user_details
-        # print("jiji")
+        # print("")
         return (token_data, None)
 
 

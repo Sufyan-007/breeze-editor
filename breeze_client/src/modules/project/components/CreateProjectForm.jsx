@@ -111,7 +111,7 @@ const CreateProjectForm = ({ handleSubmit, isCreateProjectModalOpen, setIsCreate
                   onChange={(value) => handleInputChange('name', value)}
                   config={{ label: 'Application Name' }}
                   isSubmitted={isSubmitted}
-                  customValidations={[validator.REQUIRED]}
+                  customValidations={[validator.REQUIRED, validator.PROJECT_NAME_VALIDATION]}
                 />
               </div>
             </div>
