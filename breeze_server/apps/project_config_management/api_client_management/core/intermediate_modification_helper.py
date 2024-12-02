@@ -12,6 +12,10 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
     api_client_index_path = (
         f"{CONFIG_PATH}/{project_name}/{CLIENT_API}/{moduleId}/index.json"
     )
+    swagger_metadata_path = f"{CONFIG_PATH}/{project_name}/{CLIENT_API}/swagger_metadata.json"
+    with open(swagger_metadata_path, "r") as file:
+        swagger_metadata = json.load(file)
+    security_schemes = swagger_metadata[moduleId].get("security_schemes", {})
     if operation == "ADD":
         modified_api["id"] = generate_uuid_as_key()
 
@@ -45,7 +49,7 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
                 return {'error': 'Duplicate Function name'}, 409
             
             if modified_api["id"] in existing_data:
-                if tag != existing_data[modified_api["id"]].get("tags", "default"):
+                if tag != existing_data[modified_api["id"]].get("tags"):
                     new_file_id = generate_uuid_as_key()
                     new_file_path = os.path.join(folder_path, f"{new_file_id}.json")
                     for key, val in existing_index_data.items():
@@ -56,16 +60,21 @@ def process_api_data(operation, modified_api, filename, project_name, moduleId):
                         del existing_data[modified_api["id"]]
                         print(existing_data, "existing data")
                         append_to_dict_file(file_path, existing_data, False)
+                        generate_react_service(project_name,filename,"ORDINARY",moduleId,security_schemes, module_name='')
                         return {'message': 'added successfully'}, 200
+                    
 
                 else:
                     append_to_dict_file(file_path, resultant_model)
+                    generate_react_service(project_name,filename,"ORDINARY",moduleId,security_schemes, module_name='')
                     return {'message': 'added successfully'}, 200
             else:
                 append_to_dict_file(file_path, resultant_model)
+                generate_react_service(project_name,filename,"ORDINARY",moduleId,security_schemes, module_name='')
                 return {'message': 'added successfully'}, 200
         else:
             append_to_dict_file(file_path, resultant_model)
+            generate_react_service(project_name,filename,"ORDINARY",moduleId,security_schemes, module_name='')
             return {'message': 'added successfully'}, 200
     except Exception as e:
         print(traceback.format_exc())
