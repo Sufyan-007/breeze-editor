@@ -1,4 +1,3 @@
-from drf_yasg import openapi
 from drf_spectacular.utils import OpenApiRequest,OpenApiResponse
 from ..data_models.serializers import GenerateServiceFileRequestBodySerializer,GenerateServiceFileResponse201Serializer
 generate_service_file_schema = {
