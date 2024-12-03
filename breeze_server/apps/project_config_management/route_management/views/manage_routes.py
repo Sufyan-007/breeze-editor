@@ -100,7 +100,7 @@ def update_route(request, project_id):
         if has_something_changed:
             process_route_config(project_id, config_data)
         include_all_routes_accessory_data(project_id, [config_data[data['id']]])
-        # later will share the message in response...
+        # later: will share the message in response...
         if has_something_changed:
             message = 'changes were made successfully..!'
         else:
