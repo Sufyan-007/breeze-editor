@@ -12,6 +12,8 @@ from ...common.utils.variable_name_convertor import convert_to_valid_variable_na
 from ...project_management.core.environment_management import get_env_config
 from ...common.utils.uuid_as_key import generate_uuid_as_key
 from ...project_config_management.api_client_management.utils.create_token_store import create_token_store
+from apps.file_management.core.entity_management import EntityManager
+
 def __init__( app_name):
     app_config_dir = f"{CONFIG_PATH}/{app_name}"
     app_config = read_project_config_file(
@@ -38,12 +40,14 @@ def generate_react_service( app_name, filename, service_type, module_id,security
         interceptors_code = MODULE_INTERCEPTOR_CODE
         auth_interceptor_code = ''
         interceptors = []
+        all_function_metadata = []
         for key,config in auth_apis.items():
             model = ApiModelLoader.load_auth_api_model(config)
             auth_interceptor_code,interceptor_id = generate_interceptors_code(auth_service_content.get(module_id).get("interceptors",[]), model, security_schemes,auth_service_path,module_id)
             if interceptor_id != '':
                 model.interceptor_id = interceptor_id
-            react_functions,used_interceptor = generate_service_function(model, False, app_name,service_type, service_path= auth_service_path,module_id=module_id,security_scheme= {})
+            react_functions,used_interceptor, metadata = generate_service_function(model, False, app_name,service_type, service_path= auth_service_path,module_id=module_id,security_scheme= {})
+            all_function_metadata += metadata
             if used_interceptor != '':
                 interceptors.append(used_interceptor)
             map_services = _manage_service_tags(model.tags, react_functions, map_services)
@@ -52,19 +56,37 @@ def generate_react_service( app_name, filename, service_type, module_id,security
         directory_manager = DirectoryManager(project_name=app_name)
         directory_manager.save_file(interceptor_file_id,interceptors_code)
         create_service_files(map_services,app_name,fileId=filename,module_id=module_id, module_name=module_name,used_interceptors=interceptors)
+        addEntities(functionDetails = all_function_metadata,fileId=filename, projectId=app_name)
     else:
         service_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/{module_id}/{filename}"
         service_config = read_json_file(service_path)
         interceptors = []
+        all_function_meta= []
         for key,config in service_config.items():
             model = ApiModelLoader.load_api_model(config)
-            react_functions,used_interceptor = generate_service_function(model, False, app_name,service_type, service_path= service_path,module_id=module_id,security_scheme=security_schemes)
+            react_functions,used_interceptor, metadata = generate_service_function(model, False, app_name,service_type, service_path= service_path,module_id=module_id,security_scheme=security_schemes)
+            all_function_meta += metadata
             if used_interceptor != '':
                 interceptors.append(used_interceptor)
             map_services = _manage_service_tags(model.tags, react_functions, map_services)
         
         create_service_files(map_services,app_name,fileId=filename, module_id=module_id, module_name=module_name,used_interceptors=interceptors)
-        
+        addEntities(functionDetails = all_function_meta,fileId=filename, projectId=app_name)
+
+def addEntities(functionDetails, fileId, projectId):
+    entityManager = EntityManager(projectId=projectId)
+    if type(functionDetails) == dict:
+        functionDetails = [functionDetails]
+    
+    for function in functionDetails:
+        entityManager.add_or_update_entity(
+            entityId=function["id"],
+            fileId=fileId,
+            exportedAs=function["name"],
+            type="SERVICE",
+            defaultExport=False,
+            schema=function.get("schema",{"type" : "ANY"})
+        )
 def create_websocket_hook_file( filename, app_config):
     # preprare new service file for each tag
     folder_name = "hooks"
@@ -192,6 +214,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         "react_code" : react_code,
         "function_args" : function_args
     }
+    service_functions_metadata = []
     if len(new_model["request"]["body"]) > 0:
         for mode,body in body_items.items():
             variable_declaration = body.get("variable_declaration","")
@@ -286,8 +309,13 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
                 react_code = react_code.replace('{RESPONSE_CODE}',"")
 
             # react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
-            react_code = react_code.replace('{FUNC_NAME}',convert_to_valid_variable_name(func_name))
+            converted_name = convert_to_valid_variable_name(func_name)
+            react_code = react_code.replace('{FUNC_NAME}',converted_name)
             react_service_functions.append(react_code)
+            service_functions_metadata.append({
+                "id":model.id,
+                "name" : converted_name
+            })
     
     else:
         react_code = copy.deepcopy(common_data.get("react_code"))
@@ -363,9 +391,14 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             react_code = react_code.replace('{RESPONSE_CODE}',"")
 
         # react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
-        react_code = react_code.replace('{FUNC_NAME}',convert_to_valid_variable_name(func_name))
+        converted_name = convert_to_valid_variable_name(func_name)
+        react_code = react_code.replace('{FUNC_NAME}',converted_name)
         react_service_functions.append(react_code)
-    return react_service_functions,used_interceptor
+        service_functions_metadata.append({
+            "id":model.id,
+            "name" : converted_name
+        })
+    return react_service_functions,used_interceptor, service_functions_metadata
         
 def _manage_service_tags( tags, react_functions, map_services):
     # prepare dict obj for each tag

@@ -11,6 +11,7 @@ CONFIG_FILES_PATH = {
     'SWAGGER_CONFIG' : 'swagger_metadata',
     'RESOURCE_CONFIG' : 'uploaded_resources_config',
     'ENVIRONMENT_SETTINGS' : 'environment_settings',
+    'ENTITY_CONFIG' : 'entity_config',
 }
 
 MULTI_NODE_MULTI_FILE = ['components', 'services', 'api_client']

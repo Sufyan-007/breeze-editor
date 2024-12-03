@@ -11,6 +11,8 @@ from ...code_generator.utils.code_indexing import get_code_index
 import pickle
 from apps.common.constants.consts import CONFIG_PATH
 
+from .entity_management import EntityManager
+
 TEMPLATE_CODE_FILE = {
     "IMPORTS":{
       "other":[],
@@ -237,18 +239,45 @@ def generate_file_code(projectId,fileId,config):
     
     imports = deepcopy(config["IMPORTS"])
     
-    # imports["other"].extend(generated_imports["other"])
-    # imports["components"].extend(generated_imports["components"])
+    imports["other"].extend(generated_imports["other"])
+    imports["components"].extend(generated_imports["components"])
     
-    imports,importTree = ImportHelper.generate_imports_code(imports,projectId)
+    imports,importTree = ImportHelper.generate_imports_code(imports,projectId, fileId)
     
     export_statements = ""
     
-    if config["EXPORTS"].get("default"):
-        export_statements = f"export default {config['EXPORTS'].get('default')} ;" 
+    entityManager = EntityManager(projectId=projectId)
     
-    if config["EXPORTS"].get("others"):
-        export_statements += f"export {{ {', '.join(config['EXPORTS'].get('others'))} }}"
+    
+    if config["EXPORTS"].get("default"):
+        entityId = config["EXPORTS"].get("default")
+        exportEntity = meta_config[entityId]
+        
+        entityManager.add_or_update_entity(
+            entityId=entityId,
+            fileId = fileId,
+            exportedAs= exportEntity["name"],
+            type= exportEntity.get("type","NA"),
+            defaultExport=True
+        )
+        
+        export_statements = f'export default {exportEntity["name"]} ;'
+    
+    namedExports = []
+    for exportId in config["EXPORTS"].get("others"):
+        exportEntity = meta_config[exportId]
+        entityManager.add_or_update_entity(
+            entityId=exportId,
+            fileId = fileId,
+            exportedAs= exportEntity["name"],
+            type= exportEntity.get("type","NA"),
+            defaultExport=False
+        )
+        
+        namedExports.append(exportEntity["name"])
+        
+    if namedExports:
+        export_statements += f"export {{ {', '.join(namedExports)} }}"
     
     code  =f"""
         {imports}
