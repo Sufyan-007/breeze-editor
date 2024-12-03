@@ -2,14 +2,18 @@ import copy,json
 from ...common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH,CLIENT_API
 from ...common.utils.file_helpers.json_handler import read_json_file,read_project_config_file
 from ...project_config_management.api_client_management.core.api_model_loader import ApiModelLoader
-from ...project_config_management.api_client_management.utils.api_models import TokenStoreTypeEnum,AuthApiTypeEnum,ContentEnum,ModeEnum,AuthTypeEnum,ParamsInEnum
+from ...project_config_management.api_client_management.utils.api_models import TokenStoreTypeEnum,AuthApiTypeEnum,ContentEnum,ModeEnum,AuthTypeEnum,ParamsInEnum,StatusEnum
 from ...project_config_management.api_client_management.utils.append_dict_file import append_to_dict_file
-from ...common.utils.file_helpers.dir_handler import create_dir_if_not_exists
+from ...common.utils.file_helpers.config_handler import get_breeze_config_file
 from ...common.utils.file_helpers.json_handler import write_json_file
 from ...directory_management.core.directory_management_service import DirectoryManager
-from ...project_config_management.api_client_management.consts import WEBSOCKET_HOOK,RESPONSE_INTERCEPTOR,RESPONSE_STATUS_CONDITION,REQUEST_INTERCEPTOR,REFRESH_TOKEN_API
+from ...project_config_management.api_client_management.consts import WEBSOCKET_HOOK,RESPONSE_INTERCEPTOR,RESPONSE_STATUS_CONDITION,REQUEST_INTERCEPTOR,REFRESH_TOKEN_API,AUTH_INTERCEPTOR,MODULE_INTERCEPTOR_CODE
 from ...common.utils.variable_name_convertor import convert_to_valid_variable_name
 from ...project_management.core.environment_management import get_env_config
+from ...common.utils.uuid_as_key import generate_uuid_as_key
+from ...project_config_management.api_client_management.utils.create_token_store import create_token_store
+from apps.file_management.core.entity_management import EntityManager
+
 def __init__( app_name):
     app_config_dir = f"{CONFIG_PATH}/{app_name}"
     app_config = read_project_config_file(
@@ -31,25 +35,58 @@ def generate_react_service( app_name, filename, service_type, module_id,security
     elif service_type == "AUTH":
         auth_service_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/swagger_metadata"
         auth_service_content = read_json_file(auth_service_path)
+        interceptor_file_id = auth_service_content.get(module_id).get("interceptor_file_id")
         auth_apis = auth_service_content.get(module_id).get("auth_apis",{})
+        interceptors_code = MODULE_INTERCEPTOR_CODE
+        auth_interceptor_code = ''
+        interceptors = []
+        all_function_metadata = []
         for key,config in auth_apis.items():
             model = ApiModelLoader.load_auth_api_model(config)
-            react_functions = generate_service_function(model, False, app_name,service_type, service_path= auth_service_path,module_id=module_id)
-            
+            auth_interceptor_code,interceptor_id = generate_interceptors_code(auth_service_content.get(module_id).get("interceptors",[]), model, security_schemes,auth_service_path,module_id)
+            if interceptor_id != '':
+                model.interceptor_id = interceptor_id
+            react_functions,used_interceptor, metadata = generate_service_function(model, False, app_name,service_type, service_path= auth_service_path,module_id=module_id,security_scheme= {})
+            all_function_metadata += metadata
+            if used_interceptor != '':
+                interceptors.append(used_interceptor)
             map_services = _manage_service_tags(model.tags, react_functions, map_services)
-        
-        create_service_files(map_services,app_name,fileId=filename,module_id=module_id, module_name=module_name)
+        interceptors_code = interceptors_code.replace('{AUTH_INTERCEPTORS_CODE}',auth_interceptor_code)
+        interceptors_code = interceptors_code.replace('{AUTH_ERROR_INTERCEPTORS_CODE}', '')
+        directory_manager = DirectoryManager(project_name=app_name)
+        directory_manager.save_file(interceptor_file_id,interceptors_code)
+        create_service_files(map_services,app_name,fileId=filename,module_id=module_id, module_name=module_name,used_interceptors=interceptors)
+        addEntities(functionDetails = all_function_metadata,fileId=filename, projectId=app_name)
     else:
         service_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/{module_id}/{filename}"
         service_config = read_json_file(service_path)
+        interceptors = []
+        all_function_meta= []
         for key,config in service_config.items():
             model = ApiModelLoader.load_api_model(config)
-            react_functions = generate_service_function(model, False, app_name,service_type, service_path= service_path,module_id=module_id,security_scheme=security_schemes)
-            
+            react_functions,used_interceptor, metadata = generate_service_function(model, False, app_name,service_type, service_path= service_path,module_id=module_id,security_scheme=security_schemes)
+            all_function_meta += metadata
+            if used_interceptor != '':
+                interceptors.append(used_interceptor)
             map_services = _manage_service_tags(model.tags, react_functions, map_services)
         
-        create_service_files(map_services,app_name,fileId=filename, module_id=module_id, module_name=module_name)
-        
+        create_service_files(map_services,app_name,fileId=filename, module_id=module_id, module_name=module_name,used_interceptors=interceptors)
+        addEntities(functionDetails = all_function_meta,fileId=filename, projectId=app_name)
+
+def addEntities(functionDetails, fileId, projectId):
+    entityManager = EntityManager(projectId=projectId)
+    if type(functionDetails) == dict:
+        functionDetails = [functionDetails]
+    
+    for function in functionDetails:
+        entityManager.add_or_update_entity(
+            entityId=function["id"],
+            fileId=fileId,
+            exportedAs=function["name"],
+            type="SERVICE",
+            defaultExport=False,
+            schema=function.get("schema",{"type" : "ANY"})
+        )
 def create_websocket_hook_file( filename, app_config):
     # preprare new service file for each tag
     folder_name = "hooks"
@@ -65,6 +102,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     func_name = model.operation_id
     interceptor_code = ""
     response_interceptor_code = RESPONSE_INTERCEPTOR
+    used_interceptor = ""
     if service_type != "AUTH" and model.request.auth and len(model.request.auth) > 0 and model.request.auth[0].type != AuthTypeEnum.NOAUTH:
         ## currently only support for single auth
         ## need to handle all array of auth
@@ -75,7 +113,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             for k,v in security_scheme.items():
                 if v.get("type") == 'apiKey':
                     key_name = v.get("name")
-        interceptor_code = generate_api_interceptor(auth, app_name,module_id, key_name=key_name)
+        interceptor_code, used_interceptor = generate_api_interceptor(auth, app_name,module_id, key_name=key_name)
 
         # if auth and auth.token_api != "" and auth.token_api is not None:
         #     r_interceptor_code = self.set_response_interceptor(auth, app_name)
@@ -96,8 +134,8 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     else:
         react_code = """
             export const {FUNC_NAME} = async ({FUNC_ARGS}) => {
+                const localInstance = duplicateInstance(moduleInstance);
                 {AXIOS_OBJECT_DECLARATION}
-                const localInstance = axios.create();
                 {INTERCEPTOR_CODE}
                 {RESPONSE_INTERCEPTOR_CODE}
                 let resp = await localInstance.request(api)
@@ -136,7 +174,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     
     headers = combined_headers["body_headers"] if combined_headers else {}
     # set request body if given
-    body_items = set_request_body(model,app_name)
+    body_items = set_request_body(model,app_name,module_id)
     #needs to be changed when body will be a dictionary instead of list
     body_params = {"type": "OBJECT", "name": "BodyDetails", "properties": {}}
     if body_items:
@@ -155,12 +193,15 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     model_parameters.append({"type": "OBJECT", "name": "HeaderDetails", "properties": param_headers})
     new_model = model.as_dict()
     new_model["parameters"] = model_parameters
+    new_model["operation_id"] = convert_to_valid_variable_name(func_name)
     model_to_write = {new_model["id"]: new_model}
+    # model_to_write["operation_id"] = func_name
     if service_type == "AUTH":
-        with open(service_path, "r")as file:
+        service_path_with_ext = service_path + '.json'
+        with open(service_path_with_ext, "r")as file:
             swagger_content = json.load(file)
             swagger_content[module_id]["auth_apis"][new_model["id"]] = new_model
-            append_to_dict_file(service_path, swagger_content)
+            append_to_dict_file(service_path_with_ext, swagger_content)
     else:
         service_path += '.json' #will not be needed when using common functions
         append_to_dict_file(service_path, model_to_write)
@@ -173,6 +214,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         "react_code" : react_code,
         "function_args" : function_args
     }
+    service_functions_metadata = []
     if len(new_model["request"]["body"]) > 0:
         for mode,body in body_items.items():
             variable_declaration = body.get("variable_declaration","")
@@ -225,11 +267,12 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             ## set response conditions if provided
             r_status_conditions = []
             for res in model.response:
-                if res.status != "200" and res.status != "201":
+                if res.status != StatusEnum.S_200 and res.status != StatusEnum.S_201:
                     r_status = RESPONSE_STATUS_CONDITION%(res.status.value,res.description)
                     r_status_conditions.append(r_status)
             if len(r_status_conditions)> 0:
-                response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
+                # response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
+                response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}", "")
             else:
                 response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","")
 
@@ -237,8 +280,10 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             react_code = react_code.replace('{FUNC_ARGS}',function_args)
             react_code = react_code.replace('{AXIOS_OBJECT_DECLARATION}', axis_object_declation)
             react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
+            # react_code = react_code.replace(
+            #     '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
             react_code = react_code.replace(
-                '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
+                '{RESPONSE_INTERCEPTOR_CODE}', '')
             
             ## handle api response code
             if service_type == "AUTH":
@@ -264,8 +309,13 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
                 react_code = react_code.replace('{RESPONSE_CODE}',"")
 
             # react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
-            react_code = react_code.replace('{FUNC_NAME}',convert_to_valid_variable_name(func_name))
+            converted_name = convert_to_valid_variable_name(func_name)
+            react_code = react_code.replace('{FUNC_NAME}',converted_name)
             react_service_functions.append(react_code)
+            service_functions_metadata.append({
+                "id":model.id,
+                "name" : converted_name
+            })
     
     else:
         react_code = copy.deepcopy(common_data.get("react_code"))
@@ -300,11 +350,12 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         ## set response conditions if provided
         r_status_conditions = []
         for res in model.response:
-            if res.status != "200" and res.status != "201":
+            if res.status != StatusEnum.S_200 and res.status != StatusEnum.S_201:
                 r_status = RESPONSE_STATUS_CONDITION%(res.status.value,res.description)
                 r_status_conditions.append(r_status)
         if len(r_status_conditions)> 0:
-            response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
+            # response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","\n".join(r_status_conditions))
+            response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","")
         else:
             response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","")
 
@@ -312,9 +363,10 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         react_code = react_code.replace('{FUNC_ARGS}',function_args)
         react_code = react_code.replace('{AXIOS_OBJECT_DECLARATION}', axis_object_declation)
         react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
+        # react_code = react_code.replace(
+        #     '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
         react_code = react_code.replace(
-            '{RESPONSE_INTERCEPTOR_CODE}', response_interceptor_code)
-        
+            '{RESPONSE_INTERCEPTOR_CODE}', '')
         ## handle api response code
         if service_type == "AUTH":
             auth_api_type = model.auth_api_type
@@ -339,9 +391,14 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             react_code = react_code.replace('{RESPONSE_CODE}',"")
 
         # react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
-        react_code = react_code.replace('{FUNC_NAME}',convert_to_valid_variable_name(func_name))
+        converted_name = convert_to_valid_variable_name(func_name)
+        react_code = react_code.replace('{FUNC_NAME}',converted_name)
         react_service_functions.append(react_code)
-    return react_service_functions
+        service_functions_metadata.append({
+            "id":model.id,
+            "name" : converted_name
+        })
+    return react_service_functions,used_interceptor, service_functions_metadata
         
 def _manage_service_tags( tags, react_functions, map_services):
     # prepare dict obj for each tag
@@ -359,8 +416,23 @@ def _manage_service_tags( tags, react_functions, map_services):
             map_services[tags] = react_functions
     return map_services
 
-def create_service_files( map_services,project_name,fileId,module_id, module_name):
+def create_service_files( map_services,project_name,fileId,module_id, module_name, used_interceptors):
     content = "import axios from 'axios'\n"
+    content += "import { duplicateInstance } from '../interceptors';"
+    content += "import { moduleInstance } from './interceptors';"
+    imported_interceptors = set() 
+    if len(used_interceptors) > 0:
+        interceptors_to_import = []
+        
+        for interceptor in used_interceptors:
+            if interceptor not in imported_interceptors:
+                interceptors_to_import.append(interceptor)
+                imported_interceptors.add(interceptor)  
+        
+        if interceptors_to_import:
+            interceptors_str = ', '.join(interceptors_to_import)
+            content += f"import {{ {interceptors_str} }} from './interceptors';\n"
+
     directory_manager = DirectoryManager(project_name=project_name)
     for tag, func_arr in map_services.items():
         try:
@@ -423,16 +495,28 @@ def retrive_token_code(auth_api_id,auth_token_id,app_name, module_id ):
         
 
 def generate_api_interceptor( auth, app_name,module_id, key_name = ''):
+    swagger_file_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/swagger_metadata.json"
+    with open(swagger_file_path) as f:
+        swagger_metadata = json.load(f)
+    service_config = swagger_metadata.get(module_id).get("auth_apis")
+    auth_config = service_config.get(auth.login_api,None)
+    function_name = ""
+    interceptor_code = REQUEST_INTERCEPTOR
+    
+    if auth_config is not None:
+        function_name = "authInterceptor_" + auth_config.get("operation_id")
+        function_name = convert_to_valid_variable_name(function_name)
+    interceptor_code = interceptor_code.replace('{USED_INTERCEPTORS}', function_name)
+    
     type = auth.type
     auth_code = ""
-    interceptor_code = REQUEST_INTERCEPTOR
     key_name = key_name
     token = retrive_token_code(auth.login_api, auth.token_id, app_name,module_id)
     if token == '':
         token = "''"
     interceptor_code = interceptor_code.replace("{FETCH_TOKEN}",token)
     if type == AuthTypeEnum.BASIC:
-        auth_code = "config.headers.Authorization = `Basic ${token}`;"
+        auth_code = "request.headers.Authorization = `Basic ${token}`;"
 
     elif type == AuthTypeEnum.OAUTH2:
         auth_in_header = True
@@ -445,25 +529,25 @@ def generate_api_interceptor( auth, app_name,module_id, key_name = ''):
                 header_prefix = content.value
 
             if auth_in_header and len(header_prefix) > 0:
-                auth_code = "config.headers.Authorization = `%s ${token}`;" % (
+                auth_code = "request.headers.Authorization = `%s ${token}`;" % (
                     header_prefix)
             else:
-                auth_code = "config.headers.Authorization = token;"
+                auth_code = "request.headers.Authorization = token;"
 
     elif type == AuthTypeEnum.BEARER:
-        auth_code = "config.headers.Authorization = `Bearer ${token}`;"
+        auth_code = "request.headers.Authorization = `Bearer ${token}`;"
     elif type == AuthTypeEnum.APIKEY:
-        auth_code = f"config.headers.{key_name} = token;"
+        auth_code = f"request.headers.{key_name} = token;"
     else:
         raise NotImplementedError("Unknown type ",type)
 
     interceptor_code = interceptor_code.replace('{AUTH_CODE}', auth_code)
-    return interceptor_code
+    return interceptor_code, function_name
 
 ## needs to think for refresh token api response
 def set_response_interceptor( auth, app_name):
     interceptor_code = REFRESH_TOKEN_API
-    auth_api_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/auth" #ToDO
+    auth_api_path = f"{CONFIG_PATH}/{app_name}/{CLIENT_API}/auth"
     auth_api_config = read_json_file(auth_api_path)
     token_api_config = auth_api_config.get(auth.token_api)
     token_api_code = ""
@@ -498,7 +582,10 @@ def set_request_headers( model, app_name):
 
 ## only for schema object .
 ## for type array is remaining
-def generate_request_body_schema(parent_key,schema_name,schema):
+def generate_request_body_schema(parent_key,schema_name,schema,module_id,app_name):
+    schema_file_path = f"{CONFIG_PATH}/{app_name}/models/{module_id}.json"
+    with open(schema_file_path, 'r') as f:
+        all_schemas = json.load(f)
     body = {}
     if "type" in schema:
         if schema.get("type") == "object":
@@ -506,9 +593,10 @@ def generate_request_body_schema(parent_key,schema_name,schema):
                 schema_name = parent_key+"."+schema_name
             for key,value in schema.get("properties",{}).items():
                 if "type" in value and value.get("type") == "object":
-                    body[key] = generate_request_body_schema(schema_name,key,value)
+                    s = '`${%s["%s"]}`' % (schema_name, key)
+                    body[key] = s.replace("'","")
                 else:
-                    s = '`${%s.%s}`'%(schema_name,key)
+                    s = '`${%s["%s"]}`' % (schema_name, key)
                     body[key] = s.replace("'","")
         else:
             body[parent_key] = parent_key
@@ -523,7 +611,7 @@ def generate_request_body_schema(parent_key,schema_name,schema):
     return body_str
 
 
-def set_request_body(model,app_name):
+def set_request_body(model,app_name,module_id):
     body_params =[]
     
     if model.request.body is None:
@@ -563,7 +651,7 @@ def set_request_body(model,app_name):
                     body_params = schema
                     raw_data = value
                     model_data = {}
-                    model_data = generate_request_body_schema(None,value,schema)  
+                    model_data = generate_request_body_schema(None,value,schema,module_id,app_name)  
                     variable_declaration = "let reqBody = %s"%(model_data)
                     raw_data = "reqBody";
 
@@ -577,7 +665,7 @@ def set_request_body(model,app_name):
                     body_params = schema
                     ## generate request body schema
                     model_data = {}
-                    model_data = generate_request_body_schema(None,schema_name,schema)  
+                    model_data = generate_request_body_schema(None,schema_name,schema,module_id,app_name)  
                     variable_declaration = "let reqBody = %s"%(model_data)
                     raw_data = "reqBody";
 
@@ -593,13 +681,20 @@ def set_request_body(model,app_name):
             form_data = body.schema
             body_params = form_data
             params.append("BodyDetails")
+            #replace nested schema id with its name
+            schemas_path = f"{CONFIG_PATH}/{app_name}/models/{module_id}.json"
+            with open(schemas_path, 'r') as file:
+                schemas = json.load(file)
+            
             for key,item in form_data.get("properties",{}).items():
-                # params.append(key)
-                if item.get("type") == "text":
-                    # variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s}`);"%(key,key)
+                if key in schemas.keys():
+                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${BodyDetails['%s']}`);"%(schemas[key]["name"], schemas[key]["name"])
+                    
+                elif item.get("type") == "text":
                     variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${BodyDetails['%s']}`);"%(key, key)
+                    
                 else:
-                    variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s}`);"%(key,key)
+                    variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${BodyDetails['%s']}`);"%(key,key)
             raw_data = "bodyFormData"
         
         elif mode == ModeEnum.URLENCODED:
@@ -609,7 +704,6 @@ def set_request_body(model,app_name):
             body_params = form_data
             params.append("BodyDetails")
             for key,item in form_data.get("properties",{}).items():
-                # params.append(key)
                 variable_declaration = "\n" + variable_declaration+"formBody.push(`${encodeURIComponent('%s')} = ${encodeURIComponent(BodyDetails['%s'])}`);"%(key,key)
             raw_data = "formBody"
             variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
@@ -624,6 +718,8 @@ def set_request_body(model,app_name):
     return variable_declaration_arr
 
 def set_request_url(model,app_name):
+    app_basic_config = get_breeze_config_file(app_name)
+    build_tool = app_basic_config["buildTool"]
     function_args = []
     query_params = []
     path_params = []
@@ -642,7 +738,12 @@ def set_request_url(model,app_name):
     else:
         url = url_env+path
         config = get_env_config(project_id=app_name)
-        url = "${process.env.%s}" % config.get("envVars").get(url_env) + '/' + path
+        if build_tool == 'Vite':
+            # url = "${import.meta.env.%s}" % config.get("envVars").get(url_env) + '/' + path
+            url = "${import.meta.env.%s}" % config.get("envVars").get(url_env) + path
+        else:
+            url = "${process.env.%s}" % config.get("envVars").get(url_env) + path
+            # url = "${process.env.%s}" % config.get("envVars").get(url_env) + '/' + path
     new_query_params =[]
     new_path_params = []
     for params in model.request.parameters:
@@ -699,3 +800,104 @@ def generate_websocket_function( model, service_type):
     react_code = ""
     response_interceptor_code = response_interceptor_code.replace('{REFRESH_TOKEN_CONDITION}',"")
     
+
+
+def generate_token_fetching_code(security_schemes, model):
+    key_name = ''
+    token_store ={}
+    fetch_token = ''
+    auth_code = ''
+    for k,v in security_schemes.items():
+        if v.get("type") == 'apiKey':
+            key_name = v.get("name")
+    for res in  model.response:
+        if res.status == StatusEnum.S_200:
+            schema = res.schema
+            if schema and "properties" in schema:
+                res.token_store = create_token_store(schema["properties"])
+            token_store = res.token_store
+    if token_store != {} and token_store != None:
+        for prop, prop_info in token_store.items():
+            if prop_info.get("store_in") == TokenStoreTypeEnum.LOCAL_STORAGE:
+                fetch_token = "localStorage.getItem('%s')"%(prop_info["storage_key"])
+            elif prop_info.get("store_in") == TokenStoreTypeEnum.SESSION:
+                fetch_token = "sessionStorage.getItem('%s')"%(prop_info["storage_key"])
+            break
+                
+        if model.authentication_type == AuthTypeEnum.BEARER:
+            auth_code = "request.headers.Authorization = `Bearer ${token}`;"
+        elif model.authentication_type == AuthTypeEnum.APIKEY:
+            auth_code = f"request.headers.{key_name} = token;"
+        elif model.authentication_type == AuthTypeEnum.BASIC:
+            auth_code = f"request.headers.Authorization = token;"
+    return fetch_token,auth_code
+    
+def generate_interceptors_code(available_interceptors,model,security_schemes,auth_service_path,module_id):
+    if isinstance(model, dict):
+        model = ApiModelLoader.load_auth_api_model(model)
+    code = AUTH_INTERCEPTOR
+    new_interceptor = {}
+    auth_code = ''
+    new_name = "authInterceptor_" + model.operation_id
+    function_name =  convert_to_valid_variable_name(new_name)
+    fetch_token = ''
+    is_update = False
+    final_interceptor_code =''
+    if not auth_service_path.endswith(".json"):
+            auth_service_path += ".json"
+    with open(auth_service_path, 'r') as file:
+        swagger_content = json.load(file)
+    
+    if len(available_interceptors) > 0 :
+        for interceptor in available_interceptors:
+            if interceptor.get("type") == "REQUEST":
+                interceptor_name = interceptor.get("name")
+                # if interceptor_name == function_name:
+                if model.interceptor_id != '' and model.interceptor_id == interceptor.get("id"):
+                    new_code = AUTH_INTERCEPTOR
+                    fetch_token,auth_code = generate_token_fetching_code(security_schemes, model)
+                    if fetch_token != '' and auth_code != '':
+                        new_code = new_code.replace('{FETCH_TOKEN}',fetch_token)
+                        new_code = new_code.replace('{AUTH_CODE}',auth_code)
+                    else:
+                        new_code = new_code.replace('{FETCH_TOKEN}',"''")
+                        new_code = new_code.replace('{AUTH_CODE}',"''")
+                    new_code = new_code.replace('{INTERCEPTOR_NAME}',function_name)
+                    final_interceptor_code += new_code
+                    interceptor["interceptorCode"] = new_code
+                    swagger_content[module_id]["interceptors"] = available_interceptors
+                    append_to_dict_file(auth_service_path, swagger_content)
+                    is_update = True
+                else:
+                    final_interceptor_code += interceptor.get("interceptorCode")
+        
+    
+    if not is_update:
+        fetch_token,auth_code = generate_token_fetching_code(security_schemes, model)
+        if fetch_token != '' and auth_code != '':
+            code = code.replace('{FETCH_TOKEN}',fetch_token)
+            code = code.replace('{AUTH_CODE}',auth_code)
+        else:
+            code = code.replace('{FETCH_TOKEN}',"''")
+            code = code.replace('{AUTH_CODE}',"''")
+        code = code.replace('{INTERCEPTOR_NAME}',function_name)
+        
+        #generate the object
+        new_interceptor["id"] = generate_uuid_as_key()
+        new_interceptor["name"] = function_name
+        new_interceptor["interceptorCode"] = code
+        new_interceptor["type"] = "REQUEST"
+        new_interceptor["errorCode"] = ''
+        final_interceptor_code += code
+        
+            
+        current_module_interceptors = swagger_content[module_id]["interceptors"]
+        current_module_interceptors.append(new_interceptor)
+        swagger_content[module_id]["interceptors"] = current_module_interceptors
+        swagger_content[module_id]["auth_apis"][model.id]["interceptor_id"] = new_interceptor["id"]
+        append_to_dict_file(auth_service_path, swagger_content)
+    
+    if new_interceptor != {}:
+        return final_interceptor_code, new_interceptor["id"]
+    else:
+        return final_interceptor_code, ''

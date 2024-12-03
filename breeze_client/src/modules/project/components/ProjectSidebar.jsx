@@ -24,6 +24,7 @@ import {
 import CustomModal from '../../../common/display/modal/BreezeModal';
 import { useTabContext } from '../context/TabContext';
 import { deleteNodeAsPerCategory } from '../hooks/deleteNodeAsPerCategory';
+import { fetchFiles } from '../../resource-configuration/redux/resourcesActions';
 
 function ProjectSidebar() {
   const { directoryConfig } = useSelector((state) => state.directory);
@@ -86,17 +87,13 @@ function ProjectSidebar() {
   const handleDrop = async (destinationNode) => {
     if (!draggedNode) return;
 
-    const draggedNodeId = draggedNode.id;
     const destinationNodeId =
       destinationNode?.type === 'FILE' ? destinationNode.parentId : destinationNode?.id || 'ROOT';
 
-    if (draggedNodeId === destinationNodeId) {
-      console.warn('Cannot move node into itself');
-      return;
-    }
+    if (draggedNode.parentId === destinationNodeId || draggedNode.id === destinationNodeId) return;
 
     try {
-      await dispatch(moveNodeAsync({ projectName, nodeId: draggedNodeId, targetId: destinationNodeId })).unwrap();
+      await dispatch(moveNodeAsync({ projectName, nodeId: draggedNode.id, targetId: destinationNodeId })).unwrap();
     } catch (error) {
       console.error('Failed to move node:', error);
     } finally {
@@ -131,6 +128,7 @@ function ProjectSidebar() {
             if (nodeId === existingTab?.id) {
               selectTab(updatedNode);
             }
+            dispatch(fetchFiles({ projectName }));
           })
           .catch((err) => {
             console.error('Error renaming node:', err);
@@ -157,8 +155,10 @@ function ProjectSidebar() {
   };
   const confirmDelete = async () => {
     const node = directoryConfig[nodeToDelete];
-    await deleteNodeAsPerCategory(node, dispatch, projectName);
-    dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
+    const response = await deleteNodeAsPerCategory(node, dispatch, projectName);
+    if (response && response.payload.depth) {
+      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: response.payload.depth })).unwrap();
+    }
     removeTab(nodeToDelete);
     setModalOpen(false);
     setNodeToDelete(null);

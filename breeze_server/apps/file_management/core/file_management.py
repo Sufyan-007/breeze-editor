@@ -13,6 +13,8 @@ from apps.common.constants.consts import CONFIG_PATH
 from apps.code_generator.utils.static_configs import TEMPLATE_CODE_FILE, TEMPLATE_COMP_CONFIG
 from apps.common.utils.replace_variable import replace_variable
 
+from .entity_management import EntityManager
+
 def get_section_from_flattened_index(flattened_index, config, configMeta):
     if flattened_index not in configMeta:
         return None
@@ -237,39 +239,66 @@ def generate_file_code(projectId,fileId,config):
     #get imported entitie's ids and add current entity's id to its usedIn array in the entity config
     # id(entityId: string) : {type: string, fileId: string, dataType, usedIn: [](add current entity's id)}
     
-    # imports["other"].extend(generated_imports["other"])
-    # imports["components"].extend(generated_imports["components"])
+    imports["other"].extend(generated_imports["other"])
+    imports["components"].extend(generated_imports["components"])
     
-    imports,importTree = ImportHelper.generate_imports_code(imports,projectId, file_id=fileId)
+    imports,importTree = ImportHelper.generate_imports_code(imports,projectId, fileId)
     
     export_statements = ""
     
-    if config["EXPORTS"].get("default"):
-        export_statements = f"export default {config['EXPORTS'].get('default')} ;" 
+    entityManager = EntityManager(projectId=projectId)
     
-    if config["EXPORTS"].get("others"):
-        export_statements += f"export {{ {', '.join(config['EXPORTS'].get('others'))} }}"
+    
+    if config["EXPORTS"].get("default"):
+        entityId = config["EXPORTS"].get("default")
+        exportEntity = meta_config[entityId]
+        
+        entityManager.add_or_update_entity(
+            entityId=entityId,
+            fileId = fileId,
+            exportedAs= exportEntity["name"],
+            type= exportEntity.get("type","NA"),
+            defaultExport=True
+        )
+        
+        export_statements = f'export default {exportEntity["name"]} ;'
+    
+    namedExports = []
+    for exportId in config["EXPORTS"].get("others"):
+        exportEntity = meta_config[exportId]
+        entityManager.add_or_update_entity(
+            entityId=exportId,
+            fileId = fileId,
+            exportedAs= exportEntity["name"],
+            type= exportEntity.get("type","NA"),
+            defaultExport=False
+        )
+        
+        namedExports.append(exportEntity["name"])
+        
+    if namedExports:
+        export_statements += f"export {{ {', '.join(namedExports)} }}"
     
     code  =f"""
         {imports}
         {code}
         {export_statements}
     """
-
-    write_config_file(
-        project_name=projectId,
-        category=ResourceCategory.CODE_FILE.value,
-        filename=fileId+"_meta",
-        json_data=meta_config
-    )
+    
     
     directoryManager = DirectoryManager(projectId)
     directoryManager.save_file(file_id=fileId,content=code,formatted=True)
     
     content = directoryManager.get_file_content(fileId)
     
-    code_tree = get_code_index(importTree+[tree], content)
+    code_tree = get_code_index(importTree+[tree], content, meta_config)
     
+    write_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId+"_meta",
+        json_data=meta_config
+    )
     pickle_dir = f"{CONFIG_PATH}/{projectId}/pickles/{fileId}.bytes"
     create_parent_dir_if_not_exists(pickle_dir)
     with open(pickle_dir,"wb") as file:

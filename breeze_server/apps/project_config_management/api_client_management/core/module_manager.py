@@ -1,8 +1,9 @@
-import json,os
+import json,os,shutil
 from ..utils.append_dict_file import append_to_dict_file
 from ....common.utils.uuid_as_key import generate_uuid_as_key
+from ....common.constants.consts import CLIENT_API, CONFIG_PATH
 from ....directory_management.core.directory_management_service import DirectoryManager
-
+from ....code_generator.core.api_client_generator import generate_react_service
 
 def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, module_description,project_id):
     try:
@@ -41,6 +42,8 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
             index_file.write('{}') 
 
         directory_manager = DirectoryManager(project_name=project_id)
+        
+        directory_manager = DirectoryManager(project_name=project_id)
         directory_manager.add_node_to_config(
             parent_id= "SERVICES",
             tag= "SERVICES",
@@ -50,12 +53,15 @@ def add_module_helper(swagger_metadata_path, swagger_schema_path, module_name, m
             entity_id=module_id,
             isProtected=False
         )
+      
         return {"message": "Module added successfully."}, 200
     except Exception as e:
         return {"error": str(e)}, 500
 
 
-def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new_title):
+def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new_title,project_id):
+    if not new_title or not module_id:
+        return {"error": "Module name and module id required"},400
     if not os.path.exists(swagger_file_path):
         return {"error": "Module not found"},404
     with open(swagger_file_path, "r") as file:
@@ -74,4 +80,71 @@ def edit_module_title_helper(swagger_file_path,schema_index_file, module_id, new
         schema_data = json.load(file)
     schema_data[module_id] = new_title
     append_to_dict_file(schema_index_file, schema_data)
+    directory_manager = DirectoryManager(project_name=project_id)
+    directory_manager.rename_node(module_id, new_title)
     return {"message": "Module name edited Successfully"},200
+
+
+
+def delete_helper(project_id,module_id, file_id = None, function_id = None):
+    if module_id:
+        base_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/{module_id}"
+        swagger_metadata_path = f"{CONFIG_PATH}/{project_id}/{CLIENT_API}/swagger_metadata.json"
+        with open(swagger_metadata_path, "r") as file:
+            swagger_metadata = json.load(file)
+        if file_id:
+            file_path = f"{base_path}/{file_id}.json"
+            if function_id:
+                with open(file_path, "r") as file:
+                    file_data = json.load(file)
+                if function_id in file_data:
+                    del file_data[function_id]
+                    append_to_dict_file(file_path, file_data, False)
+                    security_schemes = swagger_metadata[module_id].get("security_schemes")
+                    generate_react_service(project_id,file_id,"ORDINARY",module_id,security_schemes)
+                    return {"message": "Function deleted successfully"},200
+            else:
+                index_file_path = f"{base_path}/index.json"
+                with open(index_file_path, "r") as file:
+                    index_data = json.load(file)
+                if file_id in index_data:
+                    del index_data[file_id]
+                    append_to_dict_file(index_file_path, index_data,False)
+                    os.remove(file_path)
+                    directory_manager = DirectoryManager(project_name=project_id)
+                    directory_manager.delete_node(file_id)
+                    return {"message": "File deleted successfully"},200
+                else:
+                    return {"error": "File not found"},404
+            pass
+        else:
+            if module_id in swagger_metadata:
+                
+                interceptor_file_id = swagger_metadata[module_id].get("interceptor_file_id")
+                
+                del swagger_metadata[module_id]
+                append_to_dict_file(swagger_metadata_path, swagger_metadata,False)
+                shutil.rmtree(base_path)
+                
+                #delete interceptor file
+                directory_manager = DirectoryManager(project_name=project_id)
+                directory_manager.delete_node(interceptor_file_id)
+                
+                #also delete related models
+                models_index_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
+                models_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
+                with open(models_index_path, 'r') as f:
+                    index_content = json.load(f)
+                del index_content[module_id]
+                append_to_dict_file(models_index_path, index_content, False)
+                os.remove(models_file_path)
+                
+                #remove from directory manager too
+                directory_manager = DirectoryManager(project_name=project_id)
+                directory_manager.delete_node(module_id, True)
+                return {"message": "Module deleted successfully"},200
+            else:
+                return {"error": "Module not found"},404
+    else:
+        return {"error": "Module id required"},400
+    

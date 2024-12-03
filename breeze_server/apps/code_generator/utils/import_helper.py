@@ -1,5 +1,6 @@
 from apps.common.utils.path_extractor import get_path_without_ext
 from apps.directory_management.core.directory_management_service import DirectoryManager
+from apps.file_management.core.entity_management import EntityManager
 
 class ImportHelper:
     def __init__(self):
@@ -8,6 +9,7 @@ class ImportHelper:
     @staticmethod
     def generate_imports_code(imports,projectId, file_id):
         directory_management_service = DirectoryManager(projectId)
+        entityManager = EntityManager(projectId)
         import_statements = []
         import_statement_tree = []
         
@@ -25,11 +27,13 @@ class ImportHelper:
                 import_statements.append(import_statement)
         
         for imp in imports["components"]:
-            path = "/"+directory_management_service.get_path_from_file_id(imp["fileId"],relative_path=True)
-            if imp["import_type"] == "FULL":
-                import_statement = f'import {imp["import_entity"]} from \'{path}\' ;'
+            importEntity = entityManager.get_and_use_entity(imp["id"],fileId=file_id)
+            
+            path = "/"+directory_management_service.get_path_from_file_id(importEntity["fileId"],relative_path=True)
+            if importEntity["defaultExport"]:
+                import_statement = f'import {importEntity["exportedAs"]} from \'{path}\' ;'
             else:
-                import_statement = f'import  {{ {imp["import_entity"]} }} from \'{path}\' ;'
+                import_statement = f'import  {{ {importEntity["exportedAs"]} }} from \'{path}\' ;'
                 
             import_statement_tree.append({
                 "type": "IMPORT",
@@ -41,13 +45,3 @@ class ImportHelper:
         import_statements = import_statements
         return '\n'.join(import_statements),import_statement_tree
 
-    @staticmethod
-    def handle_import(component_config, comp_config_index, all_store_config):
-        pass
-
-    @staticmethod
-    def gen_single_import(import_name, file_path):
-        comp_path = get_path_without_ext(file_path)
-
-        import_statement = f'import {import_name} from \'{comp_path}\';'
-        return import_statement

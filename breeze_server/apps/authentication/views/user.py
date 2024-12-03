@@ -3,11 +3,15 @@ from .serializers import get_user_data,get_all_user_data
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema
+from ..swagger_schema.user_schema import get_user_schema
 
 @extend_schema(
     tags=['Auth'],
     request=None,
-    responses=None,
+    responses={
+        200:get_user_schema['response_200'],
+        400:get_user_schema['response_400']
+    },
     operation_id='Get_user'
 )
 @csrf_exempt

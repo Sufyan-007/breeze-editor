@@ -23,6 +23,7 @@ function CustomZipPackagePage() {
   const [showOffCanvas, setShowOffCanvas] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [selectedFilename, setSelectedFilename] = useState(null);
+  const [selectedComponent, setSelectedComponent] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { projectName } = useParams();
   const [formData, setFormData] = useState({
@@ -33,8 +34,10 @@ function CustomZipPackagePage() {
   const [error, setError] = useState('');
   const [uploadStatus, setUploadStatus] = useState({});
   const wsStatus = useRef(null);
+  const ref = useRef();
   const dispatch = useDispatch();
   const { zipFiles, fileId, components, props } = useSelector((state) => state.zip);
+  // const { removeTab } = useTabContext();
 
   useEffect(() => {
     wsStatus.current = new WebSocket(`${import.meta.env.VITE_SOCKET_URL}/ws/external-comp-status/`);
@@ -52,22 +55,31 @@ function CustomZipPackagePage() {
     };
     wsStatus.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log('Received WebSocket message status:', message);
-
-      const fileStatuses = message?.file_status?.file_statuses; 
+      const fileStatuses = message?.file_status?.file_statuses;
       if (fileStatuses) {
-     
         setUploadStatus((prevStatuses) => ({
           ...prevStatuses,
           ...fileStatuses,
         }));
       }
-
     };
     wsStatus.current.onclose = () => {
       console.log('Disconnected from the WebSocket');
     };
+    wsStatus.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    return () => {
+      if (wsStatus.current) {
+        wsStatus.current.close();
+        console.log('WebSocket connection closed');
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
+  }, [uploadStatus[fileId]]);
 
   useEffect(() => {
     const folders = zipFiles?.folders || [];
@@ -89,27 +101,32 @@ function CustomZipPackagePage() {
 
   const getComponents = async (filename) => {
     try {
-      await dispatch(fetchZipFileComponentsAction({ filename, projectName }));
+      await dispatch(fetchZipFileComponentsAction({ filename, projectName })).unwrap();
     } catch (error) {
       console.error('Error fetching components:', error);
     }
   };
 
-  const handleDelete = () => {
-    if (fileToDelete) {
-      // Dispatch delete action
-      dispatch(
+  const handleDelete = async () => {
+    if (!fileToDelete) return;
+    try {
+      // Dispatch delete action and await its completion
+      await dispatch(
         deleteZipFileAction({
           fileName: fileToDelete.name,
           fileId: fileToDelete.zip_file_id,
           projectName: projectName,
         })
-      ).then(() => {
-        dispatch(fetchZipFilesAction(projectName));
-      });
+      ).unwrap();
+      // Fetch updated zip files
+      await dispatch(fetchZipFilesAction(projectName)).unwrap();
+      await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
+    } catch (error) {
+      console.error('An error occurred while deleting the file:', error);
+    } finally {
+      setShowDeleteModal(false);
+      setFileToDelete(null);
     }
-    setShowDeleteModal(false);
-    setFileToDelete(null);
   };
 
   const handleModal = () => {
@@ -148,15 +165,17 @@ function CustomZipPackagePage() {
 
       try {
         setShowModal(false);
-        await dispatch(uploadZipFileAction({ formData: submitData, projectName }));
 
-        await dispatch(fetchZipFilesAction(projectName));
-        await dispatch(fetchFolderConfig({ id: 'ROOT', projectName })).unwrap();
+        await dispatch(uploadZipFileAction({ formData: submitData, projectName })).unwrap();
+        await dispatch(fetchZipFilesAction(projectName)).unwrap();
 
-        // Reset the form and close the modal
+        // Fetch the updated folder configuration
+        // await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 2 })).unwrap();
+
+        ref.current.clear();
         resetForm();
       } catch (error) {
-        console.error('Error during file upload or fetching folder config:', error);
+        setError('An error occurred. Please try again.');
       }
     } else {
       setError('Please select a file.');
@@ -214,7 +233,11 @@ function CustomZipPackagePage() {
     buttons: [
       {
         label: 'Cancel',
-        onClick: () => setShowModal(false),
+        onClick: () => {
+          ref.current.clear();
+          resetForm();
+          setShowModal(false);
+        },
         className: 'btn br-text-primary med-font',
       },
       {
@@ -300,10 +323,11 @@ function CustomZipPackagePage() {
       </div>
     ),
   }));
-
-  const handleClick = (fileid, filename) => {
+  //fileid- component id , filename- zip file name
+  const handleClick = (component_id, filename) => {
+    setSelectedComponent(component_id);
     const payload = {
-      resource: fileid,
+      resource: component_id,
       select: ['props'],
     };
     dispatch(fetchZipFileComponentsAction({ filename, projectName, payload }));
@@ -358,6 +382,7 @@ function CustomZipPackagePage() {
           <div className="row">
             <div className="col mb-3">
               <CustomFileUploadField
+                ref={ref}
                 onFileSelect={handleFileSelect}
                 style={{
                   borderColor: '#666666',
@@ -440,7 +465,14 @@ function CustomZipPackagePage() {
           </div>
 
           <div style={{ flex: '1', paddingLeft: '20px', maxWidth: '80%' }}>
-            {props && <CustomPropsList components={components} props={props} />}
+            {props && (
+              <CustomPropsList
+                selectedFile={selectedFilename}
+                selectedComponentId={selectedComponent}
+                components={components}
+                props={props}
+              />
+            )}
           </div>
         </div>
       </BreezeOffCanvas>

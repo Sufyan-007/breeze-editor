@@ -35,6 +35,12 @@ export async function addNewModule(projectName, payload) {
   const response = callApiClient(apiUrl, 'POST', payload, false, {}, true);
   return response;
 }
+
+export async function deleteModule(projectName, payload) {
+  const apiUrl = `${BASE_URL}/api/config-editor/${projectName}/manage-api-client/delete/`;
+  const response = callApiClient(apiUrl, 'DELETE', payload, false, {}, true);
+  return response;
+}
 export async function getResponseTokens(projectName, moduleId, apiId) {
   const apiUrl = `${BASE_URL}/api/config-editor/${projectName}/manage-api-client/retrieve-response-tokens/${moduleId}/${apiId}/`;
   const response = callApiClient(apiUrl, 'GET', null, false, {}, true);

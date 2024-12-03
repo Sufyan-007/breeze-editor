@@ -1,4 +1,4 @@
-import json
+import json,jwt
 from ..utils import get_auth_file_path
 from ..utils import generate_token
 from ..utils import get_expiry_timestamp
@@ -9,16 +9,21 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from ..swagger_schema.register_schema import register_schema,RegisterSerializer
 from drf_spectacular.utils import extend_schema# # from ..models.Auth import models
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from datetime import datetime, timedelta
+from django.conf import settings
 # from rest_framework import serializers
 # from ..models import UserProfile
 # from django.contrib.auth.hashers import make_password
 
-from .serializers import UserProfileSerializer
+from .serializers import UserProfileSerializer,RefreshTokenSerializer
+from datetime import datetime, timezone
 
 @csrf_exempt
 @require_POST
 @extend_schema(
-    request=RegisterSerializer,
+    request={'application/json':RegisterSerializer},
     responses={
         201:register_schema['response_201']
     },
@@ -93,3 +98,39 @@ def register(request):
         # user.save()
         # print(user)
         # return user.username
+
+@csrf_exempt
+@require_POST
+@extend_schema(
+    request={'application/json':RefreshTokenSerializer},
+    responses=None,
+    tags=['Auth']
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def generate_access_token(request):
+    try:       
+        serializer = RefreshTokenSerializer() 
+        data=json.loads(request.body)
+        
+        token = data.get('refresh_token')
+        refresh_token = RefreshToken(token)
+        
+        
+        expiration_timestamp = refresh_token['exp']
+        # Convert to datetime and compare
+        expiration_date = datetime.fromtimestamp(expiration_timestamp, tz=timezone.utc)
+        isexpired = datetime.now(tz=timezone.utc) > expiration_date
+        if not isexpired:
+            access_token=refresh_token.access_token
+            serializer.access_token=access_token
+            access_token['user_id']=refresh_token['user_id']
+            return JsonResponse({'accessToken': str(serializer.access_token)}, status=200)
+        else:
+            return JsonResponse({'error':"refresh token expired"},status=401)
+            
+        
+    except Exception as e:
+        print(str(e))
+        return JsonResponse({"error":"refresh token expired"},status = 400)
+    # return refresh_token

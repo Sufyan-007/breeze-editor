@@ -2,6 +2,7 @@
 import copy
 from apps.common.utils.uuid_as_key import generate_uuid_as_key
 from .reference_helper import resolve_ref
+from apps.file_management.core.entity_management import EntityManager
 
 class FunctionParser:
     def __init__(self,projectId=None, resources=[],meta_config={}):
@@ -11,6 +12,7 @@ class FunctionParser:
             'other':[],
             'components':[],
         }
+        self.entity_manager = EntityManager(projectId)
         self.meta_config = meta_config
         
     def get_generated_imports(self):
@@ -36,6 +38,8 @@ class FunctionParser:
             "type":config["type"],
             "parentBlockId":parent_block_id
         }
+        if config.get("name") or config.get("varName"):
+            conf["name"] = config.get("varName") or config.get("name") 
         self.meta_config[statement_id] = conf
         
         code =""
@@ -253,14 +257,14 @@ class FunctionParser:
     
     
     def get_value_code(self,value, key_chaining=[], parent_block_id=None):
-        ref = value.get("$ref")
+        ref = None
         type = value.get("type","UNDEFINED")
         code = ""
         
         t= None
         
         if ref:
-            pass
+            raise NotImplementedError()
         else:
             if type == "STRING":
                 code= f" '{value['value']}' "
@@ -319,11 +323,15 @@ class FunctionParser:
         
     def generate_html(self,config,key_chaining=[], parent_block_id=None):
         if config.get('elementType',"") == 'CUSTOM':
-            tag =config.get("tagName") 
-            if tag!=self.config.get('name'):
-                if tag not in self.generated_imports['components']:
-                    self.generated_imports['components'].append(tag)
-                print("ImportExample",self.config['imports']['components'])
+            ref = config["$ref"]
+            entityDetails = self.entity_manager.get_entity(ref)
+            config["tagName"] = entityDetails["exportedAs"]
+            imp = {
+                "id":ref
+            }
+            if imp not in self.generated_imports["components"]:
+                self.generated_imports["components"].append(imp)
+        
         elif config.get('elementType',"") == 'THIRD_PARTY':
             tag = config.get("tagName")
             typeId = config.get("typeId")
@@ -379,20 +387,13 @@ class FunctionParser:
     def get_function_call_code(self,config,disableAwait = False,key_chaining=[]):
         ref = config.get("$ref",None)
         if ref:
-            e = self.meta_config[ref]
-            self.meta_config[ref]["usedId"].append("statementId")
-            functionConfig = resolve_ref(
-                projectId=self.projectId,
-                entityType=config.get("functionType","SERVICE"),
-                entityId=ref,
-                extras=config
-            )
-            functionName = functionConfig.get("name")
-            self.generated_imports["components"].append({
-                "import_type":"SINGLE",
-                "import_entity":functionName,
-                "fileId":config.get("fileId"),
-            })
+            functionConfig = self.entity_manager.get_entity(ref)
+            functionName = functionConfig["exportedAs"]
+            imp = {
+                "id":ref
+            }
+            if imp not in self.generated_imports["components"]:
+                self.generated_imports["components"].append(imp)
         else:
             functionName = config['functionName']
         isAwait = ""

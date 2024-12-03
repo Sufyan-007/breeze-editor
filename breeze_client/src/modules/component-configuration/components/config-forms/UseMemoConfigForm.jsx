@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import { CustomTextInput, CustomMultiSelectField, CustomButtonField, CustomTextArea } from '../../../../common/fields';
 import { availableDependentVars } from '../../constants/FormConstants';
 import { initialUseMemoConfig } from '../../constants/ResourcesFormData';
+import { validator } from '../../../../utils/Validator';
 
 function UseMemoConfigForm({ onSubmit, onCancel, editMode }) {
   const [formData, setFormData] = useState(initialUseMemoConfig);
   const [selectedDependencies, setSelectedDependencies] = useState([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (field, value) => {
     let updatedData = { ...formData, [field]: value };
@@ -22,12 +24,18 @@ function UseMemoConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    const isFormValid = [formData.name].every(Boolean);
+    if (!isFormValid) {
+      return;
+    }
     onSubmit(formData);
     if (!editMode) setFormData(initialUseMemoConfig);
   };
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialUseMemoConfig);
+    setIsSubmitted(false);
     onCancel();
   };
 
@@ -37,20 +45,22 @@ function UseMemoConfigForm({ onSubmit, onCancel, editMode }) {
         <div>
           <CustomTextInput
             name="hookName"
-            value={formData.name}
+            value={formData.name || ''}
             onChange={(value) => handleChange('name', value)}
             config={{ label: 'Hook Name', groupClass: 'form-group mb-2' }}
+            customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
+            isSubmitted={isSubmitted}
           />
           <CustomTextArea
             name="hookDescription"
-            value={formData.description}
+            value={formData.description || ''}
             onChange={(value) => handleChange('description', value)}
             config={{ label: 'Hook Description', groupClass: 'form-group mb-2' }}
           />
 
           <CustomMultiSelectField
             name="dependencies"
-            values={selectedDependencies}
+            values={selectedDependencies || []}
             onChange={(value) => handleChange('dependencies', value)}
             options={availableDependentVars}
             config={{

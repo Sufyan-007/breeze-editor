@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import TypeDetails from './TypeDetails';
 
-function Types({ propertyData, onUpdate, moduleId, selectedSchema, propertyName, onResolve }) {
+function Types({ propertyData, onUpdate, moduleId, selectedSchema, propertyName, onResolve, isUnresolved }) {
   const handleChange = (val, index) => {
     const updateProperty = { ...propertyData };
     updateProperty['types'] = updateProperty['types'].map((type, i) => (i === index ? val : type));
@@ -32,10 +32,11 @@ function Types({ propertyData, onUpdate, moduleId, selectedSchema, propertyName,
               selectedSchema={selectedSchema}
               propertyName={propertyName}
               onResolve={handleResolve}
+              isUnresolved={isUnresolved}
             />
           ))}
         </div>
-        <div className="col-1">
+        {/* <div className="col-1">
           <i
             className=" badge breeze-badge-active bi bi-plus-circle br-text-primary"
             style={{ cursor: 'pointer' }}
@@ -44,7 +45,7 @@ function Types({ propertyData, onUpdate, moduleId, selectedSchema, propertyName,
           >
             <span className="mx-1">Add</span>
           </i>
-        </div>
+        </div> */}
       </div>
     </>
   );

@@ -1,11 +1,16 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import PropTypes from 'prop-types';
 import { BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 import { configTypeMapping, items } from '../constants/EditorList';
-import { getCodeDetails } from '../../../services/components/componentService';
+import {
+  addAstStatement,
+  getAstStatement,
+  getCodeDetails,
+  updateAstStatement,
+} from '../../../services/components/componentService';
 import { useParams } from 'react-router-dom';
 import useConfigurableMenuItems from '../hooks/useConfigurableMenuItems';
 
@@ -28,6 +33,7 @@ const ConfigurableMonacoEditor = ({
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const { showOffcanvas, closeOffcanvas } = useOffcanvas();
   const { projectName } = useParams();
+  // const [statementId, setStatementId] = useState('');
 
   useEffect(() => {
     if (editor && editor.getValue() !== defaultValue) {
@@ -72,10 +78,11 @@ const ConfigurableMonacoEditor = ({
       };
       const result = await getCodeDetails(projectName, payload);
       const configType = result?.related_config?.type;
+      // setStatementId(result?.related_config?.id || '');
       setFilteredItems(configType ? configTypeMapping[configType] || items : items);
     };
 
-    if (node?.tag === 'COMPONENTS') {
+    if (node?.tag === 'COMPONENTS' || node?.tag === 'CODE_FILE') {
       editorInstance.onContextMenu(async (e) => {
         e.event.preventDefault();
         e.event.stopPropagation();
@@ -91,7 +98,7 @@ const ConfigurableMonacoEditor = ({
       });
     }
 
-    if (node?.tag === 'COMPONENTS') {
+    if (node?.tag === 'COMPONENTS' || node?.tag === 'CODE_FILE') {
       editorInstance.onMouseDown(handleClick);
     }
 
@@ -100,20 +107,48 @@ const ConfigurableMonacoEditor = ({
     };
   }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
-  const onSubmit = (value) => {
+  const onSubmit = async (value) => {
     console.log('value::>>', value);
+    // const payload = {
+    //   fileId: node.id,
+    //   parentId: statementId,
+    //   config: value,
+    // };
+    // await addAstStatement(projectName, payload);
     closeOffcanvas();
   };
+
+  const onUpdate = async (value) => {
+    console.log('value::>>', value);
+    // const payload = {
+    //   fileId: node.id,
+    //   statementId: statementId,
+    //   config: value,
+    // };
+    // await updateAstStatement(projectName, payload);
+    closeOffcanvas();
+  };
+
+  const getConfig = useCallback(async () => {
+    // const payload = {
+    //   fileId: node.id,
+    //   statementId: statementId,
+    // };
+    // const config = await getAstStatement(projectName, payload);
+    // return config;
+  }, []);
 
   const onCancel = () => {
     closeOffcanvas();
   };
 
-  const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel);
+  const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel, onUpdate, getConfig);
 
   const handleMenuItemClick = (item) => {
     const contentComponent = getConfigComponent(item);
-    const width = '40%';
+    // console.log('contentComponent', item, contentComponent);
+    let width = '40%';
+    if (item === 'Html elements') width = '60%';
     showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
     setShowMenu(false);
   };

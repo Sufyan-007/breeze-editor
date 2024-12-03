@@ -12,6 +12,7 @@ import {
   retrieveResponseTokens,
   addModule,
   generateServiceFile,
+  deleteModuleById,
 } from './ApiClientActions';
 
 const initialState = {
@@ -30,6 +31,24 @@ const serviceConfigSlice = createSlice({
   name: 'services',
   initialState,
   reducers: {
+    deleteFileFromList: (state, action) => {
+      const { fileId } = action.payload;
+      delete state.filesList[fileId];
+      Object.values(state.moduleList).forEach((module) => {
+        if (module.files && Array.isArray(module.files)) {
+          module.files = module.files.filter((file) => file !== fileId);
+        }
+      });
+    },
+    deleteFunctionFromList: (state, action) => {
+      const { functionId } = action.payload;
+      delete state.functionsList[functionId];
+      Object.values(state.filesList).forEach((file) => {
+        if (file.functions && Array.isArray(file.functions)) {
+          file.functions = file.functions.filter((func) => func !== functionId);
+        }
+      });
+    },
     resetState: () => initialState,
   },
   extraReducers: (builder) => {
@@ -86,7 +105,6 @@ const serviceConfigSlice = createSlice({
             state.functionsList[moduleId] = api;
           }
           state.status = 'succeeded';
-          state.message = action.payload;
         })
         .addCase(editFunction.rejected, (state, action) => {
           state.status = 'failed';
@@ -244,6 +262,22 @@ const serviceConfigSlice = createSlice({
           state.error = action.payload;
         });
     };
+    const handleDeleteModule = (builder) => {
+      builder
+        .addCase(deleteModuleById.pending, (state) => {
+          state.status = 'loading';
+        })
+        .addCase(deleteModuleById.fulfilled, (state, action) => {
+          state.status = 'succeeded';
+          state.message = action.payload;
+        })
+        .addCase(deleteModuleById.rejected, (state, action) => {
+          state.status = 'failed';
+          state.error = action.payload;
+        });
+    };
+
+    handleDeleteModule(builder);
     handleGenerateService(builder);
     handleAddModule(builder);
     handleFetchModules(builder);
@@ -259,5 +293,5 @@ const serviceConfigSlice = createSlice({
   },
 });
 
-export const { resetState } = serviceConfigSlice.actions;
+export const { resetState, deleteFileFromList, deleteFunctionFromList } = serviceConfigSlice.actions;
 export default serviceConfigSlice.reducer;

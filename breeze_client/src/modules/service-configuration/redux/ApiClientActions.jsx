@@ -7,6 +7,7 @@ import {
   getResponseTokens,
   transferToAuth,
   addNewModule,
+  deleteModule,
 } from '../services/IntermediateServices';
 import { generateService } from '../services/GeneratedService';
 import { getFiles, getFunctions, getModules } from '../services/CustomServiceServices';
@@ -134,6 +135,18 @@ export const addModule = createAsyncThunk(
   async ({ projectName, payload }, { rejectWithValue }) => {
     try {
       const response = await addNewModule(projectName, payload);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const deleteModuleById = createAsyncThunk(
+  'service_configuration/delete-module',
+  async ({ projectName, payload }, { rejectWithValue }) => {
+    try {
+      const response = await deleteModule(projectName, payload);
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);

@@ -13,6 +13,9 @@ import StateVariableConfigForm from './StateVariableConfigForm';
 import RefVarConfigForm from './RefVarConfigForm';
 import UseMemoConfigForm from './UseMemoConfigForm';
 import UseCallbackConfigForm from './UseCallbackConfigForm';
+import CustomCode from './CustomCode';
+import ConsoleStatementForm from './ConsoleStatementForm';
+import CommentConfigForm from './CommentConfigForm';
 
 export {
   VariableConfigForm,
@@ -30,4 +33,7 @@ export {
   RefVarConfigForm,
   UseMemoConfigForm,
   UseCallbackConfigForm,
+  CustomCode,
+  ConsoleStatementForm,
+  CommentConfigForm,
 };

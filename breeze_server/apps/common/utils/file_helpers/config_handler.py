@@ -155,8 +155,8 @@ def update_file_config(version_file_path, file_path, flatten_data_json, current_
         # TODO: upon completion of the flow discussion un/comment and/or update below code
         # if due to a concurrent modification the file have been modified
         # then we need to fetch the modification before continuing with our changes.
-        if check_version and int(current_version) != int(current_config_version):
-            raise Exception("please fetch the latest changes...")
+        # if check_version and int(current_version) != int(current_config_version):
+        #     raise Exception("please fetch the latest changes...")
         
         ## add new entry in the versions and store current time
         versions = file_version_json.get("versions",{})

@@ -5,7 +5,7 @@ from apps.common.constants.consts import CONFIG_FILES_PATH
 from apps.common.constants.consts import CONFIG_PATH
 from apps.common.utils.file_helpers.dir_handler import create_parent_dir_if_not_exists
 from apps.common.utils.formatter import format_by_prettier
-from apps.common.utils.file_helpers.json_handler import read_project_config_file
+from apps.common.utils.file_helpers.json_handler import read_project_config_file, write_json_file
 class DirectoryManager:
     def __init__(self,project_name):
         self.project_name = project_name
@@ -99,6 +99,16 @@ class DirectoryManager:
         with open(self.directory_config_path, 'w') as file:
             json.dump(self.directory_management_config, file, indent=2)
         
+        # Handle RESOURCE or ZIP tag updates
+        if node["tag"] in ["RESOURCE", "ZIP"]:
+            resource_config_path = f"{self.app_config_dir}/{CONFIG_FILES_PATH['RESOURCE_CONFIG']}"
+            existing_config = read_project_config_file(self.app_config_dir, CONFIG_FILES_PATH['RESOURCE_CONFIG'])
+            
+            # Update the name in the resource config if it exists
+            resource = existing_config.get(node_id)
+            if resource:
+                resource["name"] = new_name
+                write_json_file(f"{resource_config_path}.json", existing_config)
     
     def move_node(self, node_id, new_parent_id):
         node = self.directory_management_config.get(node_id)
@@ -139,7 +149,8 @@ class DirectoryManager:
         children = node.get("children",[])
         if children:
             if recursive:
-                for child in children:
+                # This is very intentioanl - Suf
+                for child in [x for x in children]:
                     self.delete_node(child,recursive=True)
             else:
                 raise Exception("Directory contains entries")

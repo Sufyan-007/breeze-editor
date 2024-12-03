@@ -62,4 +62,55 @@ const fetchZipFileComponentsService = async (selectedFilename, projectName, addi
   }
 };
 
-export { uploadZipFile, fetchZipFiles, deleteFile, fetchZipFileComponentsService };
+const setPropConfigService = async (projectName, submitData) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/set-prop-config/${projectName}`;
+  try {
+    const response = await callApiClient(url, 'PUT', submitData);
+    return response;
+  } catch (error) {
+    console.error('Error updating prop configuration:', error);
+    throw error;
+  }
+};
+
+const addPropConfigService = async (projectName, submitData) => {
+  console.log(projectName, submitData, 'in service ');
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/add-prop-config/${projectName}`;
+  try {
+    const response = await callApiClient(url, 'POST', submitData);
+    return response;
+  } catch (error) {
+    console.error('Error adding prop configuration:', error);
+    throw error;
+  }
+};
+
+const deletePropConfigService = async (projectName, propId, fileName, componentId) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/delete-prop-config/${projectName}`;
+  const payload = {
+    propId,
+    fileName,
+    componentId,
+  };
+  try {
+    const response = await callApiClient(url, 'DELETE', payload);
+    if (response) {
+      return { message: 'File deleted successfully' };
+    } else {
+      throw new Error(response.Error || 'Failed to delete the file');
+    }
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    throw error;
+  }
+};
+
+export {
+  uploadZipFile,
+  fetchZipFiles,
+  deleteFile,
+  fetchZipFileComponentsService,
+  setPropConfigService,
+  addPropConfigService,
+  deletePropConfigService,
+};

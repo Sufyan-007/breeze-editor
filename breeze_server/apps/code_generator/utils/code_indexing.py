@@ -108,7 +108,7 @@ class CodeTree:
 
 
 
-def get_code_index(statements,code):
+def get_code_index(statements,code,meta_config,b=0):
     tree=CodeTree()
     base = 0
     for statement in statements:
@@ -123,10 +123,13 @@ def get_code_index(statements,code):
             obj = {k:statement[k] for k in statement if k in ["id","type"] }
             if children:
                 childCode= code[indexes[0]:indexes[1]+1]
-                obj["children"] = get_code_index(children,childCode)
+                obj["children"] = get_code_index(children,childCode,meta_config,b=b+base)
             # print(base, base + indexes[0],base + indexes[1],obj)
             print(tree)
             tree.insertElem(base + indexes[0],base + indexes[1],obj)
+            if statement.get("id") and meta_config.get(statement["id"]):
+                meta_config[statement["id"]]["startIndex"] = b+base+indexes[0]
+                meta_config[statement["id"]]["endIndex"] = b+base+indexes[1]
             base += indexes[1]
             code = code[indexes[1]:]
     return tree

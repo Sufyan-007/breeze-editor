@@ -1,7 +1,7 @@
 from drf_yasg import openapi
 from drf_spectacular.utils import OpenApiParameter,OpenApiResponse,OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from ..data_models.serializers import GetAllResponse200Serializer,ProjectFormSerializer
+from ..data_models.serializers import GetAllResponse200Serializer,ProjectFormSerializer,AddResponse200Serializer
 from ...common.serializers.ResponseSerializers import ResponseStatus200Serializer,ResponseStatus400Serializer
 get_all_schema = {
 'response_200':GetAllResponse200Serializer
@@ -9,23 +9,13 @@ get_all_schema = {
 
 add_schema ={
     'form_data':ProjectFormSerializer,
-    'response_200':openapi.Response(
+    'response_200':OpenApiResponse(
             description='ok',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'name':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
+            response=AddResponse200Serializer
         ),
-    'response_500':openapi.Response(
+    'response_500':OpenApiResponse(
             description='Request is failed due to an error.',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'error':openapi.Schema(type=openapi.TYPE_STRING)
-                }
-            )
+            response = ResponseStatus400Serializer
     ),
 }
 

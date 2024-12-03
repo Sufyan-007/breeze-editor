@@ -22,11 +22,11 @@ function BodySettings({ bodyData, onChange, moduleId }) {
 
   const optionsMap = {
     RAW: RAW_OPTIONS,
-    URLENCODED: URLENCODED_OPTIONS,
-    BINARY: BINARY_OPTIONS,
-    FORMDATA: FORMDATA_OPTIONS,
-    TEXT: TEXT_OPTIONS,
-    FILE: FILE_OPTIONS,
+    // URLENCODED: URLENCODED_OPTIONS,
+    // BINARY: BINARY_OPTIONS,
+    // FORMDATA: FORMDATA_OPTIONS,
+    // TEXT: TEXT_OPTIONS,
+    // FILE: FILE_OPTIONS,
   };
 
   const handleChanges = (prop, value) => {
@@ -47,7 +47,7 @@ function BodySettings({ bodyData, onChange, moduleId }) {
   }, [bodyData]);
 
   useEffect(() => {
-    if (status === 'ready')
+    if (status === 'ready' && moduleId)
       dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
   }, [dispatch, projectName, moduleId, status]);
 
@@ -87,11 +87,11 @@ function BodySettings({ bodyData, onChange, moduleId }) {
           options={[
             { label: 'Select', value: '' },
             { label: 'RAW', value: 'RAW' },
-            { label: 'BINARY', value: 'BINARY' },
-            { label: 'FORMDATA', value: 'FORMDATA' },
-            { label: 'TEXT', value: 'TEXT' },
-            { label: 'FILE', value: 'FILE' },
-            { label: 'URLENCODED', value: 'URLENCODED' },
+            // { label: 'BINARY', value: 'BINARY' },
+            // { label: 'FORMDATA', value: 'FORMDATA' },
+            // { label: 'TEXT', value: 'TEXT' },
+            // { label: 'FILE', value: 'FILE' },
+            // { label: 'URLENCODED', value: 'URLENCODED' },
           ]}
           className="form-select br-form-select form-select-sm mt-3"
           config={{

@@ -21,19 +21,34 @@ function CustomBadge({
         {label} {isRequired && <span className="text-danger">*</span>}
       </label>
       <div className={config.badgeWrapperClass || 'home-badges-wrapper'}>
-        {options.map((option) => (
-          <span
-            className={`home-badge home-theme-badge ${selectedValue.includes(option.label) ? 'breeze-badge-active' : ''}`}
-            key={option.label}
-            onClick={() => {
-              onBadgeSelect(option.label);
-              setIsTouched(true);
-            }}
-          >
-            <img src={option.logo} alt={`${option.label} logo`} />
-            <span className="med-font ms-1">{option.label}</span>
-          </span>
-        ))}
+        {options.map((option) => {
+          const isOptionDisabled = option.disabled;
+          const isSelected = Array.isArray(selectedValue)
+            ? selectedValue.includes(option.label)
+            : selectedValue === option.label;
+
+          return (
+            <span
+              className={`home-badge home-theme-badge ${
+                isSelected ? 'breeze-badge-active' : ''
+              } ${isOptionDisabled ? 'br-badge-disabled' : ''}`}
+              key={option.label}
+              onClick={() => {
+                if (!isOptionDisabled) {
+                  onBadgeSelect(option.label);
+                  setIsTouched(true);
+                }
+              }}
+              style={{
+                opacity: isOptionDisabled ? 0.5 : 1,
+                cursor: isOptionDisabled ? 'not-allowed' : 'pointer',
+              }}
+            >
+              <img src={option.logo} alt={`${option.label} logo`} />
+              <span className="med-font ms-1">{option.label}</span>
+            </span>
+          );
+        })}
       </div>
       {showError && <p className="small-font text-danger mb-0">{displayErrorMessage}</p>}
     </div>
@@ -46,6 +61,7 @@ CustomBadge.propTypes = {
     PropTypes.shape({
       label: PropTypes.string.isRequired,
       logo: PropTypes.string.isRequired,
+      disabled: PropTypes.bool,
     })
   ).isRequired,
   selectedValue: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.string), PropTypes.string]).isRequired,
