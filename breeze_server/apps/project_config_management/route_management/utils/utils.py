@@ -45,6 +45,14 @@ def process_route_config(project_name, routing_config={}):
 def get_filtered_object(data, exclude_keys):
     return {key: value for key, value in data.items() if key not in exclude_keys}
 
+def get_params_from_route_path(route_path):
+    params = []
+    if route_path:
+        route_path = route_path.split("/")
+        for path in route_path:
+            if path.startswith(':'):
+                params.append(path[1:])
+    return params
 
 def get_routing_config(project_id="", routing_config={}):
     if routing_config == {}:
@@ -60,6 +68,7 @@ def get_routing_config(project_id="", routing_config={}):
 def rewrite_clean_route_config(project_name, updated_route_config, route_id, current_version):
     if route_id in updated_route_config:
         route = updated_route_config[route_id]
+        route['params'] = get_params_from_route_path(route.get('path'))
         keys_to_remove = [key for key, val in route.items() if val is None or val == [] or val == ""]
         for key in keys_to_remove:
             del route[key]
@@ -89,7 +98,8 @@ def is_valid_url_path(url_path):
         if path:
             segments = path.split('/')
             for segment in segments:
-                if segment and quote(segment, safe='-._~') != segment:
+                # Allow reserved characters like ':', '?', '&', and '#' in the path
+                if segment and quote(segment, safe='-._~:/?&=#') != segment:
                     return False
 
         # Validate query string
@@ -99,22 +109,24 @@ def is_valid_url_path(url_path):
                 key_value = part.split('=')
                 if len(key_value) == 2:
                     key, value = key_value
-                    if quote(key, safe='-._~[]') != key or quote(value, safe='-._~[]') != value:
+                    # Allow reserved characters in query keys and values
+                    if quote(key, safe='-._~:/?&=#[]') != key or quote(value, safe='-._~:/?&=#[]') != value:
                         return False
                 elif len(key_value) == 1:
                     key = key_value[0]
-                    if quote(key, safe='-._~[]') != key:
+                    if quote(key, safe='-._~:/?&=#[]') != key:
                         return False
                 else:
                     return False
 
         # Validate fragment (optional, can be ignored)
-        if fragment and quote(fragment, safe='-._~[]') != fragment:
+        if fragment and quote(fragment, safe='-._~:/?&=#[]') != fragment:
             return False
 
         return True
-    except Exception as e:
+    except Exception:
         return False
+
 def extract_function_details(js_function, id):
     function_pattern = r'(async\s+)?(?:function\s+(\w+)\s*)?\(([^)]*)\)\s*{([^}]*)}'
     match_function = re.search(function_pattern, js_function, re.DOTALL)
