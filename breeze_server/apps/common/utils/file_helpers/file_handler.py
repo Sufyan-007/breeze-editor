@@ -58,7 +58,7 @@ def empty_file_upload(file_name, parentFolderId, project_id):
     if not parentFolderId:
         return {"message": "Parent folder ID is missing or invalid."}, 400
 
-    directory_manager.add_node_to_config(
+    new_node = directory_manager.add_node_to_config(
         parent_id=parentFolderId,
         tag="CUSTOM",
         name=file_name,
@@ -68,7 +68,6 @@ def empty_file_upload(file_name, parentFolderId, project_id):
         isProtected=False
     )
     directory_manager.save_file(file_id, content, formatted=False)
-
-    return {"message": "Empty file created successfully"}, 201
+    return {"message": "Empty file created successfully", "new_node": new_node}, 201
 
    
