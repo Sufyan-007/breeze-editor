@@ -29,7 +29,7 @@ def rollback_config_file(project_name, category, filename, version=None, is_exce
     if not version:
         current_version = version_handler.get('current_version')
     elif int(version_handler['current_version']) == int(version):
-        raise customException(f"file is already at version {version}...", {}, 299, True)
+        raise customException(f"file is already at version {version}...", {}, 199, True)
     elif int(version) >= 1 and str(int(version)) in all_version_list:
         current_version = int(version) + 1
     else:
@@ -76,7 +76,7 @@ def rollback_config_file(project_name, category, filename, version=None, is_exce
             # will be done when components, services and other entities will start 
             # generating code files
         else:
-            raise customException(f"Already at the intial state of the file...", {}, 299, True)
+            raise customException(f"Already at the intial state of the file...", {}, 199, True)
                
     if is_exception and current_version > 1:        
         remove_version_greater_then_current_version(version_handler)
@@ -118,7 +118,7 @@ def rollforward_config_file(project_name, category, filename, version=None):
     if not version:
         current_version = version_handler.get('current_version')
     elif int(version_handler['current_version']) == int(version):
-        raise customException(f"file is already at version {version}...", {}, 299, True)
+        raise customException(f"file is already at version {version}...", {}, 199, True)
         
     elif int(version) > 1 and str(int(version)) in all_version_list:
         current_version = int(version)-1
@@ -146,7 +146,7 @@ def rollforward_config_file(project_name, category, filename, version=None):
             for key in version_handler['deleted_keys'].get(str(current_version + 1), {}):
                 flatten_json.pop(key, None)
     else:
-        raise customException(f"already reached the latest changes", {}, 299, True)
+        raise customException(f"already reached the latest changes", {}, 199, True)
                 
     with open(f"{version_file_path}", "w+") as jsconfig_version_file:
         jsconfig_version_file.write(json.dumps(version_handler))
