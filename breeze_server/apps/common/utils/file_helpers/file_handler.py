@@ -50,7 +50,7 @@ def get_file_path(projectId, file_id):
         return None
 
 def empty_file_upload(file_name, parentFolderId, project_id):
-    content = ""
+    content = "// New File"
     file_name = file_name or "untitled.txt"
     file_id = str(uuid.uuid4())
     directory_manager = DirectoryManager(project_name=project_id)
@@ -68,6 +68,6 @@ def empty_file_upload(file_name, parentFolderId, project_id):
         isProtected=False
     )
     directory_manager.save_file(file_id, content, formatted=False)
-    return {"message": "Empty file created successfully", "new_node": new_node}, 201
+    return {"message": "Empty file created successfully", "node": new_node}, 201
 
    

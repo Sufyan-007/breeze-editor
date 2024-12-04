@@ -13,7 +13,7 @@ const getAllUploadedFiles = async (projectName) => {
 const uploadFile = async (payload, projectName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/upload-file/${projectName}/`;
   try {
-    const response = await callApiClient(url, 'POST', payload, true, {}, false);
+    const response = await callApiClient(url, 'POST', payload, true, {}, true, true);
     return response;
   } catch (error) {
     console.error('Error uploading file:', error);

@@ -36,7 +36,7 @@ export const folderOptions = (
   },
   {
     label: 'Add Custom File',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'CUSTOM'),
     icon: React.createElement('i', { className: 'bi bi-file-earmark-code' }),
   },
   {
@@ -87,7 +87,7 @@ export const addFileOptions = (nodeId, handleContextMenuSelection) => [
   },
   {
     label: 'Add Custom File',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'CUSTOM'),
     icon: React.createElement('i', { className: 'bi bi-file-earmark-code' }),
   },
 ];
