@@ -16,6 +16,9 @@ import {
   CustomCode,
   ConsoleStatementForm,
   CommentConfigForm,
+  FunctionCall,
+  ServiceCall,
+  RouterNavigateConfigForm,
 } from '../../component-configuration/components/config-forms';
 
 const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
@@ -97,6 +100,12 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
         return <ConsoleStatementForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Add Comment':
         return <CommentConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Function Call':
+        return <FunctionCall onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Service Call':
+        return <ServiceCall onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Add Navigation':
+        return <RouterNavigateConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       default:
         return null;
     }
