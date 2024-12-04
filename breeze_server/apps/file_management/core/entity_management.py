@@ -8,9 +8,10 @@ class EntityManager:
         self.projectId = projectId
         self.app_config_dir = f"{CONFIG_PATH}/{projectId}"
         self.entity_config_path= os.path.join(CONFIG_PATH, self.projectId, f'{CONFIG_FILES_PATH["ENTITY_CONFIG"]}.json')
-        
-        self.entity_config = read_project_config_file(self.app_config_dir,CONFIG_FILES_PATH["ENTITY_CONFIG"])
-    
+        try:
+            self.entity_config = read_project_config_file(self.app_config_dir,CONFIG_FILES_PATH["ENTITY_CONFIG"])
+        except:
+            self.entity_config = {}
     def add_entity(self,entityId, fileId,exportedAs, type="", defaultExport=True,schema=None):
         if entityId in self.entity_config:
             raise Exception("Entity already exists")

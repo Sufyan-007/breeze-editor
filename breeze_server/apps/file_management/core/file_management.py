@@ -12,6 +12,7 @@ import pickle
 from apps.common.constants.consts import CONFIG_PATH
 from apps.code_generator.utils.static_configs import TEMPLATE_CODE_FILE, TEMPLATE_COMP_CONFIG
 from apps.common.utils.replace_variable import replace_variable
+from apps.common.utils.uuid_as_key import generate_uuid_as_key
 
 from .entity_management import EntityManager
 
@@ -177,7 +178,7 @@ def get_config_by_tag(tag,fileName,entityId):
 
 def add_code_file(projectId, fileName, parentId, file_id=None,  tag="CODE_FILE", entity_id=None, transaction_id=None):
     if file_id is None:
-        file_id = str(uuid.uuid4())
+        file_id = generate_uuid_as_key()
     if not parentId:
         parentId = "ROOT"
     if not entity_id:

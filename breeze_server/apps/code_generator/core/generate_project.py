@@ -129,7 +129,7 @@ def write_main_app_and_routing_component(app_config, routing_config):
     _id = app_config['defaultCompId']
     name = config_index.get(_id)
     transaction_id = get_transaction_id()
-    add_code_file(f"{app_config['name']}", name, "SRC", f"{_id}", "COMPONENTS", "MAIN", transaction_id)    
+    add_code_file(f"{app_config['name']}", name, "SRC", None, "COMPONENTS", f"{_id}", transaction_id)    
     
     directory_manager= DirectoryManager(app_config['name'])
     
