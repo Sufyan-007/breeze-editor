@@ -5,20 +5,24 @@ import jwt
 class customException(Exception):
     """Exception raised for custom error in the application."""
 
-    def __init__(self, message, error_body={}, error_code=400):
+    def __init__(self, message, response_body={}, status_code=400, warning=False):
         super().__init__(message)
         self.message = message
-        self.error_code = error_code
-        self.error_body = error_body
+        self.status_code = status_code
+        self.response_body = response_body
+        self.warning = warning
 
-    def get_error_message(self):
+    def get_response_message(self):
         return f"{self.message}"
     
-    def get_error_code(self):
-        return self.error_code
+    def get_status_code(self):
+        return self.status_code
     
-    def get_error_body(self):
-        return self.error_body
+    def get_response_body(self):
+        return self.response_body
+    
+    def is_warning(self):
+        return self.warning
 
 def custom_exception_handler(exc, context):
     
@@ -43,7 +47,7 @@ def custom_exception_handler(exc, context):
     elif isinstance(exc, AttributeError):
         return JsonResponse({'error': 'AttributeError: An attribute was referenced that does not exist.'}, status=400)
     elif isinstance(exc, customException):
-        return JsonResponse({'error': exc.get_error_message(), 'errorBody': exc.get_error_body()}, status=exc.get_error_code())
+        return JsonResponse({'error' if not exc.is_warning else 'warning': exc.get_response_message(), 'errorBody': exc.get_response_body()}, status=exc.get_status_code())
     elif isinstance(exc,jwt.ExpiredSignatureError):
         return JsonResponse({'error':"access token expired"},status = 401)
     elif isinstance(exc,jwt.exceptions.DecodeError):
