@@ -104,17 +104,37 @@ def manage_resource(request, param):
                     return JsonResponse(
                         {"error": "libname and libversion are missing"}, status=400
                     )
+            elif not module:
+                # selected_data={"component":True,"hooks":True ,"variables":True}
+                try:
+                    library = f"{libname}@{libversion}"
+                    config_path = os.path.join(
+                        THIRD_PARTY_CONFIG_PATH, library
+                    )
+                    for folder_name in os.listdir(config_path):
+                        index_json_path = os.path.join(config_path,folder_name, "index.json")
+                        if os.path.exists(index_json_path):
+                            # Check if the file is empty
+                            if os.path.getsize(index_json_path) > 0 and is_json_non_empty(index_json_path):
+                                selected_data[folder_name] = True
+                            else:
+                                selected_data[folder_name] = False
+                        else:
+                            selected_data[folder_name] = False  # If index.json doesn't exist
+                except Exception as e:
+                    return JsonResponse(
+                        {"error": "library is not installed"}, status=400
+                    )
+                
             else:
                 try:
                     library = f"{libname}@{libversion}"
-                    # print(library)
                     config_path = os.path.join(
-                        THIRD_PARTY_CONFIG_PATH, library, "component"
+                        THIRD_PARTY_CONFIG_PATH, library, module
                     )
                     if not resource:
                         config_path = os.path.join(config_path, INDEX)
                         selected_data = read_file(config_path)
-                        # print(selected_data)
                     else:
                         file_name = ""
                         with open(f"{config_path}/{INDEX}.json", "rb") as index_config:
@@ -199,22 +219,49 @@ def manage_resource(request, param):
                     {"error": "Enter Folder name as libname"}, status=400
                 )
 
-            folder_name = libname
-            if not resource:
-                config_path = os.path.join(
-                    CONFIG_PATH, projectname, EXTERNAL_COMPONENTS_CONFIG, folder_name, INDEX
-                )
-                selected_data = read_file(config_path)
-            elif resource:
+            elif not module:
+                folder = libname
                 try:
                     config_path = os.path.join(
-                        CONFIG_PATH, projectname, EXTERNAL_COMPONENTS_CONFIG, folder_name, resource
+                        CONFIG_PATH, projectname, EXTERNAL_COMPONENTS_CONFIG, folder
                     )
-                    selected_data = read_file(config_path)
+                    for folder_name in os.listdir(config_path):
+                        index_json_path = os.path.join(config_path,folder_name, "index.json")
+                        if os.path.exists(index_json_path):
+                            # Check if the file is empty
+                            if os.path.getsize(index_json_path) > 0 and is_json_non_empty(index_json_path):
+                                selected_data[folder_name] = True
+                            else: 
+                                selected_data[folder_name] = False
+                        else:
+                            selected_data[folder_name] = False  # If index.json doesn't exist
+                except Exception as e:
+                    return JsonResponse(
+                        {"error": "library is not installed"}, status=400
+                    )
+            
+            else:
+                try:
+                    folder = libname
+                    config_path = os.path.join(
+                        CONFIG_PATH, projectname, EXTERNAL_COMPONENTS_CONFIG, folder, module
+                    )
+                    if not resource:
+                        config_path = os.path.join(config_path, INDEX)
+                        selected_data = read_file(config_path)
+                    else:
+                        try:
+                            config_path = os.path.join(config_path, f"{resource}")
+                            selected_data = read_file(config_path)
+                        except Exception as e:
+                            return JsonResponse(
+                                {"error": "File are not present"}, status=400
+                            )
 
                 except Exception as e:
-                    return JsonResponse({"error": "File not present"}, status=400)
-            # selected_data = read_file(config_path)
+                    return JsonResponse(
+                        {"error": "Error while read data from external component. check given module and resource"}, status=400
+                    )
 
         if category in [ResourceCategory.MODEL.value]:
             if not module:
@@ -354,7 +401,6 @@ def manage_resource(request, param):
                     return JsonResponse(
                         {"error": "please provide module or resource"}, status=400
                     )
-
         return JsonResponse({"data": selected_data}, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -506,7 +552,13 @@ def ffilter_selected_data(selected_data, select_keys):
 
     return result
 
-
+def is_json_non_empty(file_path):
+    try:
+        with open(file_path,'r') as file:
+            data = json.load(file)
+            return bool(data)  # True if JSON contains data
+    except (json.JSONDecodeError, FileNotFoundError):
+        return False  # Invalid or missing JSON file
 
 
 
