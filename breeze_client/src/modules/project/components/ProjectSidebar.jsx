@@ -6,6 +6,7 @@ import { useTreeContext } from '../context/TreeContext';
 import CustomContextMenu from '../../../common/display/context-menu/BreezeContextMenu';
 import { addFileOptions } from '../constants/contextMenuOptions';
 import {
+  addCustomFile,
   addNodeAsync,
   fetchFolderConfig,
   moveNodeAsync,
@@ -74,8 +75,8 @@ function ProjectSidebar() {
     setSelectedNode(selectedNode);
   };
 
-  const handleContextMenuSelection = () => {
-    addNodeToTree({ type: 'FILE', parentId: 'ROOT', extension: 'jsx' });
+  const handleContextMenuSelection = (nodeId, type) => {
+    addNodeToTree({ type: type || 'FILE', parentId: 'ROOT', extension: 'jsx' });
   };
 
   const addNodeToTree = ({ type, parentId, extension }) => {
@@ -136,7 +137,16 @@ function ProjectSidebar() {
       }
     } else {
       // TODO : add folder api as per condition
-      dispatch(addNodeAsync({ projectId: projectName, node })).unwrap();
+      if (node?.type === 'CUSTOM') {
+        const formData = { filename: node.tempName, selectedFolderId: node.parentId, id: node.id };
+        const payload = new FormData();
+        Object.keys(formData).forEach((key) => {
+          payload.append(key, formData[key]);
+        });
+        dispatch(addCustomFile({ payload, projectName })).unwrap();
+      } else {
+        dispatch(addNodeAsync({ projectId: projectName, node })).unwrap();
+      }
     }
   };
 
@@ -230,7 +240,7 @@ function ProjectSidebar() {
                 <CustomContextMenu
                   ref={contextMenuRef}
                   menuItems={addFileOptions(selectedNodeId, handleContextMenuSelection)}
-                  onSelection={handleContextMenuSelection}
+                  onSelection={(value) => value()}
                   defaultOrientation={{ right: true, bottom: true }}
                 />
                 <button
