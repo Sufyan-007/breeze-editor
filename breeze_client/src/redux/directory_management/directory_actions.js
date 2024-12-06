@@ -6,6 +6,7 @@ import {
   moveNodeApi,
   renameNodeApi,
 } from '../../modules/project/services/projectService';
+import { uploadFile } from '../../modules/resource-configuration/services/ResourcesService';
 
 export const fetchFolderConfig = createAsyncThunk(
   'directory_management/fetchFolderConfig',
@@ -60,6 +61,17 @@ export const moveNodeAsync = createAsyncThunk(
       return { nodeId, targetId };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to move node');
+    }
+  }
+);
+
+export const addCustomFile = createAsyncThunk(
+  'directory/addCustomFile',
+  async ({ payload, projectName }, { rejectWithValue }) => {
+    try {
+      return await uploadFile(payload, projectName);
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to upload file.');
     }
   }
 );

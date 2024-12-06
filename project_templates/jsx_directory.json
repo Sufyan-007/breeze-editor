@@ -2,6 +2,7 @@
   "ROOT": {
     "parentId": null,
     "id": "ROOT",
+    "type": "DIRECTORY",
     "children": ["SRC", "PACKAGE_CONFIG", "EXTERNAL_COMPONENTS", "INDEX_HTML"]
   },
   "SRC": {

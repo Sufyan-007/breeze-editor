@@ -173,8 +173,12 @@ class DirectoryManager:
         
     #get path from file_id
     def get_path_from_file_id(self,file_id,relative_path=False):
-        if file_id=="ROOT":
-            return self.app_config['path']
+        if file_id == "ROOT":
+            if  relative_path:
+                return ""
+            else:
+                return self.app_config['path']
+        
         if file_id not in self.directory_management_config:
             raise Exception(f"File ID {file_id} not found in directory_management.json")
         entry = self.directory_management_config[file_id]
@@ -192,7 +196,6 @@ class DirectoryManager:
                 return os.path.join(self.app_config['path'], name)
         else:
             return os.path.join(self.get_path_from_file_id(entry["parentId"], relative_path=relative_path), name)
-        
         
     def get_file_content(self,id):
         path = self.get_path_from_file_id(id)

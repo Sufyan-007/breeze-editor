@@ -16,8 +16,8 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
   const childNodes = getChildren(node.id);
 
   const inputRef = useRef(null);
-  const handleContextMenuSelection = (nodeId) => {
-    parentMethods.addNodeToTree({ type: 'FILE', parentId: nodeId, extension: 'jsx' });
+  const handleContextMenuSelection = (nodeId, type) => {
+    parentMethods.addNodeToTree({ type: type || 'FILE', parentId: nodeId, extension: 'jsx' });
     setIsInContextMenu(false);
     if (!isExpanded(nodeId)) {
       toggleNode(nodeId);

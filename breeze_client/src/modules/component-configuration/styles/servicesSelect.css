@@ -1,0 +1,32 @@
+.services-select {
+    position: relative;
+    width: 100%;
+}
+
+.service-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 1px solid var(--color-text);
+    z-index: 1000;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 0.2rem;
+    background-color: var(--color-secondary);
+}
+
+.service-dropdown-item {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--color-text);
+    cursor: pointer;
+}
+
+.service-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.service-dropdown-item:hover {
+    background-color: var(--color-primary);
+}

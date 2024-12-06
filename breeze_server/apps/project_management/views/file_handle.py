@@ -8,7 +8,7 @@ from apps.project_management.core.resource_upload_service import update_config, 
 from drf_spectacular.utils import extend_schema
 from apps.common.constants.enums.tree_type import TreeType
 from apps.common.utils.tree_management import get_nodes_upper_lineage 
-
+from apps.common.utils.file_helpers.file_handler import empty_file_upload
 @extend_schema(
     methods=['POST'],
     request=None,
@@ -23,12 +23,14 @@ def upload_file(request, project_id):
         file_name = data.get('filename')
         description = data.get('description')
         parentFolderId = data.get('selectedFolderId')
-        if not file:
-            return JsonResponse({'error': 'No file provided.'}, status=400)
 
         if project_id is not None:
             if file_duplicacy(project_id, file_name):
                 return JsonResponse({'error': 'File with the same name already exists.'}, status=400)
+                
+        if not file:
+            response, status = empty_file_upload(file_name, parentFolderId, project_id)
+            return JsonResponse(response, status=status)
                 
         file_id = uf(project_id, file)
         destination_path = update_config(project_id, file_name, description, file_id, parentFolderId)

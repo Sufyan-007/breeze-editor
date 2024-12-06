@@ -83,6 +83,7 @@ export const funcConfigTemplates = {
   },
   addNavigation: {
     callType: 'navigation',
+    selectedRoute: '',
     type: 'FUNCTION_CALL',
     functionName: 'router.navigate',
     parameters: [{ type: 'STRING', value: '' }],

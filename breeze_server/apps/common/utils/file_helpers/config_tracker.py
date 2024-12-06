@@ -3,6 +3,7 @@ from pathlib import Path
 from apps.common.constants.consts import CONFIG_PATH, MULTI_NODE_MULTI_FILE
 from apps.common.utils.file_helpers.json_handler import write_json_file
 from apps.code_generator.core.generate_code import generate_code_with_latest_config
+from apps.common.exception.exception_handler import customException
 
 # rollback all files to there previous version
 def rollback_config_file(project_name, category, filename, version=None, is_exception=False):
@@ -28,7 +29,7 @@ def rollback_config_file(project_name, category, filename, version=None, is_exce
     if not version:
         current_version = version_handler.get('current_version')
     elif int(version_handler['current_version']) == int(version):
-        return f"file is already at version {version}..."
+        raise customException(f"file is already at version {version}...", {}, 199, True)
     elif int(version) >= 1 and str(int(version)) in all_version_list:
         current_version = int(version) + 1
     else:
@@ -76,21 +77,22 @@ def rollback_config_file(project_name, category, filename, version=None, is_exce
             # will be done when components, services and other entities will start 
             # generating code files
         else:
-            return "Already at the intial state of the file..."
+            raise customException(f"Already at the intial state of the file...", {}, 199, True)
                
+    if is_exception and current_version > 1:        
+        remove_version_greater_then_current_version(version_handler)
+        
     with open(f"{version_file_path}", "w+") as jsconfig_version_file:
         jsconfig_version_file.write(json.dumps(version_handler))
     with open(f"{file_path}", "w") as jsconfig_file:
         jsconfig_file.write(json.dumps(flatten_json))
     
-    # if not is_exception:
+    if not (current_version == 1 and is_exception):
         # rewrite generated projects file as per the current config
         # provided that the config is correct things will go the right way otherwise
         # exception will be raised and version errors will be encountered
-    generate_code_with_latest_config(project_name, {category: filename})
-    # else:
-    #     # exeption for current_version > 1 || == 1 both are managed
-    #     pass
+        generate_code_with_latest_config(project_name, {category: filename})
+        
     return version_handler.get("current_version"), True
     
     
@@ -117,7 +119,8 @@ def rollforward_config_file(project_name, category, filename, version=None):
     if not version:
         current_version = version_handler.get('current_version')
     elif int(version_handler['current_version']) == int(version):
-        return f"file is already at version {version}..."
+        raise customException(f"file is already at version {version}...", {}, 199, True)
+        
     elif int(version) > 1 and str(int(version)) in all_version_list:
         current_version = int(version)-1
     else:
@@ -144,7 +147,7 @@ def rollforward_config_file(project_name, category, filename, version=None):
             for key in version_handler['deleted_keys'].get(str(current_version + 1), {}):
                 flatten_json.pop(key, None)
     else:
-        return "already reached the latest changes"
+        raise customException(f"already reached the latest changes", {}, 199, True)
                 
     with open(f"{version_file_path}", "w+") as jsconfig_version_file:
         jsconfig_version_file.write(json.dumps(version_handler))
@@ -169,3 +172,26 @@ def get_latest_config_version(project_name, category, filename):
         
     all_version_list = list(version_handler.get('versions', []).keys())
     return all_version_list[-1], version_handler.get('current_version')
+
+
+def remove_version_greater_then_current_version(version_handler):
+    versions = version_handler.get("versions",{})
+    current_version = version_handler.get('current_version')
+    
+    # remove an extra version present in versions' stack and changes 
+    for version in list(versions.keys()):
+        if int(version) > int(current_version):
+            del versions[version]
+            
+    changes = version_handler.get("changes",{})
+    for change_obj in list(changes.values()):
+        for version in list(change_obj.keys()):
+            # change to del only a greater version
+            if int(version) > int(current_version):
+                del change_obj[version]
+
+    if not version_handler.get("deleted_keys"):
+        version_handler["deleted_keys"] = {}
+    for key in list(version_handler["deleted_keys"].keys()):
+        if int(key) >= int(current_version):
+            del version_handler["deleted_keys"][key]
