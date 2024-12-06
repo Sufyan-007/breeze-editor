@@ -308,7 +308,7 @@ function ProjectSidebar() {
               label: 'Delete',
               onClick: confirmDelete,
               className: 'btn btn-danger',
-              // disabled: true,
+              disabled: true,
             },
             {
               label: 'Cancel',

@@ -1,8 +1,8 @@
 const breezeConfigData = {
   'service-config': {
     id: 'service-config',
-    name: 'api.config',
-    extension: '',
+    name: 'api',
+    extension: 'config',
     type: 'CONFIG',
     children: [],
     wasOpen: false,
@@ -12,8 +12,8 @@ const breezeConfigData = {
   },
   'external-comp-config': {
     id: 'external-comp-config',
-    name: 'external-comp.config',
-    extension: '',
+    name: 'external-comp',
+    extension: 'config',
     type: 'CONFIG',
     children: [],
     wasOpen: false,
@@ -23,8 +23,8 @@ const breezeConfigData = {
   },
   'schema-config': {
     id: 'schema-config',
-    name: 'schema.config',
-    extension: '',
+    name: 'schema',
+    extension: 'config',
     type: 'CONFIG',
     children: [],
     wasOpen: false,
@@ -34,8 +34,8 @@ const breezeConfigData = {
   },
   'resource-config': {
     id: 'resource-config',
-    name: 'resource.config',
-    extension: '',
+    name: 'resource',
+    extension: 'config',
     type: 'CONFIG',
     children: [],
     wasOpen: false,
