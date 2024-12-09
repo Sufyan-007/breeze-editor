@@ -2,7 +2,7 @@
 import copy
 from apps.common.utils.uuid_as_key import generate_uuid_as_key
 from .reference_helper import resolve_ref
-from apps.file_management.core.entity_management import EntityManager
+from apps.entity_management.core.entity_management import EntityManager
 
 class FunctionParser:
     def __init__(self,projectId=None, resources=[],meta_config={}):

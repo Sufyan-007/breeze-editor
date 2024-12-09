@@ -6,8 +6,6 @@ urlpatterns = [
     path('add-statement/',file_views.add_statements),
     path('get-statement/',file_views.get_statement_config),
     path('update-statement/',file_views.update_statements),
-    
-    
 ]
 
 # api-client-generator/generate-react-api-client

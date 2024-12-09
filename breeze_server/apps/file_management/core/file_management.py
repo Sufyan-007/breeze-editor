@@ -14,7 +14,7 @@ from apps.code_generator.utils.static_configs import TEMPLATE_CODE_FILE, TEMPLAT
 from apps.common.utils.replace_variable import replace_variable
 from apps.common.utils.uuid_as_key import generate_uuid_as_key
 
-from .entity_management import EntityManager
+from apps.entity_management.core.entity_management import EntityManager
 
 def get_section_from_flattened_index(flattened_index, config, configMeta):
     if flattened_index not in configMeta:

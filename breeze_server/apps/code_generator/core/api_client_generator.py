@@ -12,7 +12,7 @@ from ...common.utils.variable_name_convertor import convert_to_valid_variable_na
 from ...project_management.core.environment_management import get_env_config
 from ...common.utils.uuid_as_key import generate_uuid_as_key
 from ...project_config_management.api_client_management.utils.create_token_store import create_token_store
-from apps.file_management.core.entity_management import EntityManager
+from apps.entity_management.core.entity_management import EntityManager
 
 def __init__( app_name):
     app_config_dir = f"{CONFIG_PATH}/{app_name}"

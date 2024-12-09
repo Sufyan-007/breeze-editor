@@ -35,6 +35,7 @@ urlpatterns = [
     path('get-file-path/', get_file_path.get_file_path),
     
     path('file/', include('apps.file_management.urls')),
+    path('entity/', include('apps.entity_management.urls'))
 ]
 
 # new endpoint -> /editor/get-file-path

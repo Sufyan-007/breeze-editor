@@ -1,6 +1,6 @@
 from apps.common.utils.path_extractor import get_path_without_ext
 from apps.directory_management.core.directory_management_service import DirectoryManager
-from apps.file_management.core.entity_management import EntityManager
+from apps.entity_management.core.entity_management import EntityManager
 
 class ImportHelper:
     def __init__(self):

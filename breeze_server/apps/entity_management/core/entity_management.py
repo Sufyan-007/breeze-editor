@@ -93,3 +93,13 @@ class EntityManager:
         for entityId, entity in self.entity_config.items():
             if entity["fileId"] == fileId:
                 self.delete_entity(entityId=entityId)
+
+    def get_all_entities_by_filters(self, filters):
+        filtered_entities = {}
+        for entityId, entity in self.entity_config.items():
+            if all(entity.get(key) == value for key, value in filters.items()):
+                filtered_entities[entityId] = entity
+        return filtered_entities
+
+            
+            
