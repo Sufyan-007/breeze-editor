@@ -219,7 +219,7 @@ def save_config_file(filename, project_name, category, json_data, version_file_p
                     "category": category,
                     "current_version": file_version_json["current_version"]
                 }
-            if category in MULTI_NODE_MULTI_FILE:
+            if category in MULTI_NODE_MULTI_FILE and filename[-5:] != '_meta':
                 # UPDATE INDEX.JSON WITH NEW KEY VALUE PAIR
                 index_file = open(f"{INDEX_FILE_PATH}")
                 index_file_content = json.load(index_file)

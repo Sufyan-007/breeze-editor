@@ -33,9 +33,12 @@ def get_routing_code(_route_config, _comp_config_index, _app_config):
     for ic_id in imported_components:
         related_comp = _comp_config_index[ic_id]
         directory_manager= DirectoryManager(_app_config["name"])
-        related_comp_file = read_config_file(_app_config.get('name'), ResourceCategory.COMPONENTS.value, ic_id)
-        file_id = related_comp_file.get('data', {}).get(related_comp, {}).get("file_id")
-        comp_path = directory_manager.get_path_from_file_id(file_id,relative_path=True)
+        # related_comp_file = read_config_file(_app_config.get('name'), ResourceCategory.COMPONENTS.value, ic_id)
+        # file_id = related_comp_file.get('data', {}).get(related_comp, {}).get("file_id")
+        
+        # TODO: need to watch out for all the ResourceCategory.COMPONENTS.value use cases 
+        # here component id is the file id which will changed later
+        comp_path = directory_manager.get_path_from_file_id(ic_id,relative_path=True)
         comp_path = get_path_without_ext(comp_path)
 
         import_statement = f'import {related_comp} from \'/{comp_path}\';'

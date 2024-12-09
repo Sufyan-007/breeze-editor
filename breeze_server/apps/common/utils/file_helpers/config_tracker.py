@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from apps.common.constants.consts import CONFIG_PATH
+from apps.common.constants.consts import CONFIG_PATH, MULTI_NODE_MULTI_FILE
 from apps.common.utils.file_helpers.json_handler import write_json_file
 from apps.code_generator.core.generate_code import generate_code_with_latest_config
 from apps.common.exception.exception_handler import customException
@@ -66,11 +66,12 @@ def rollback_config_file(project_name, category, filename, version=None, is_exce
     elif current_version == 1:
         if is_exception:
             # remove_the_newly_added_content_from_the_index_file
-            INDEX_FILE_PATH = f"{CONFIG_PATH}/{project_name}/{category}/index.json"
-            index_file = open(f"{INDEX_FILE_PATH}")
-            index_file_content = json.load(index_file)
-            index_file_content.pop(filename, None)
-            write_json_file(INDEX_FILE_PATH, index_file_content)
+            if category in MULTI_NODE_MULTI_FILE and filename[-5:] != '_meta':
+                INDEX_FILE_PATH = f"{CONFIG_PATH}/{project_name}/{category}/index.json"
+                index_file = open(f"{INDEX_FILE_PATH}")
+                index_file_content = json.load(index_file)
+                index_file_content.pop(filename, None)
+                write_json_file(INDEX_FILE_PATH, index_file_content)
             # TODO:
             # remove the newly generated code file or new content in those code files
             # will be done when components, services and other entities will start 

@@ -13,15 +13,14 @@ from drf_spectacular.utils import extend_schema
 @api_view(["POST"])
 def get_config_by_index(request,project_id):
     data = json.loads(request.body)
-    fileType = data["type"]
-    if fileType == "COMPONENTS":
-        compId = data["compId"]
-        path = f"{CONFIG_PATH}/{project_id}/pickles/{compId}.bytes"
-        with open(path, "rb") as file:
-            codeTree = pickle.load(file)
-        
-        code = codeTree[data["index"]]
-        if code and code.get("children"):
-            del code["children"]
-        return JsonResponse({"related_config":code}, status=200)
-    return JsonResponse({},status=200)
+
+    fileId = data["fileId"]
+    path = f"{CONFIG_PATH}/{project_id}/pickles/{fileId}.bytes"
+    with open(path, "rb") as file:
+        codeTree = pickle.load(file)
+    
+    code = codeTree[data["index"]]
+    if code and code.get("children"):
+        del code["children"]
+    return JsonResponse({"related_config":code}, status=200)
+    

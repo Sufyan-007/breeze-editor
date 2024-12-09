@@ -42,70 +42,35 @@ def add_dirs_configs(data, proj_data_request):
     # creating app_basic_config, component_config & routing config
     write_json_file(f"{app_config_path}.json", app_current_config)
     
-    create_resource_directory(data['name'], ResourceCategory.COMPONENTS.value)
     create_resource_directory(data['name'], ROUTING)
+    create_resource_directory(data['name'], ResourceCategory.CODE_FILE.value)
     create_dir_if_not_exists(f"{app_config_dir}/{EXTERNAL_COMPONENTS_CONFIG}") 
-    app_current_config = write_basic_main_comp_config(app_current_config)
-    write_routing_config(app_current_config)
     write_swagger_schema_config(app_config_dir)
 
     # entries in directory management
     create_directory_management_file(app_current_config)
-    update_directory_management_file(app_current_config)
+    app_current_config = set_basic_main_comp_details(app_current_config)
+    write_routing_config(app_current_config)
+    
     write_resource_config(app_current_config, proj_data_request)
     return app_current_config
 
-def write_basic_main_comp_config(app_config):
+def set_basic_main_comp_details(app_config):
     _id = generate_uuid_as_key()
     name = app_config['defaultComponent']
-    main_comp_config = {
-        app_config['defaultComponent'] : {
-            "name": name,
-            "id": _id,
-            "file_id":_id,
-            "imports": {
-                "components": [
-                ],
-                "other": [
-                ]
-            },
-            "propsVars": [],
-            "resources": [],
-            "html": { "_id": "Main" },
-            "wrapper_store": None,
-            "html_elements": {
-                "Main": {
-                    "type": "Element",
-                    "elementType": "HTML",
-                    "typeId": "DIV",
-                    "tagName": "div",
-                    "attributes": {
-                    "className": { "type": "LITERAL", "value": "" }
-                    },
-                    "children": [{ "_id": "Main-0" }]
-                },
-                "Main-0": { "type": "text", "text": "Hello world" }
-            }
-        }
-    }
 
     app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
-
     app_config_path = f"{app_config_dir}/{CONFIG_FILES_PATH['APP_CONFIG']}"
     app_config['defaultCompId'] = _id
     del app_config['defaultComponent']
     write_json_file(f"{app_config_path}.json", app_config)
-    transaction_id = get_transaction_id()
-    write_config_file( f"{app_config['name']}", ResourceCategory.COMPONENTS.value, f"{_id}", main_comp_config, None, transaction_id)
     
-    entry_in_config_index(app_config['name'], ResourceCategory.COMPONENTS, _id, name)
+    entry_in_config_index(app_config['name'], ResourceCategory.CODE_FILE, _id, name, return_empty=True)
     return app_config
     
 
 def write_routing_config(app_config):
-    app_config_dir = f"{CONFIG_PATH}/{app_config['name']}"
     default_path_id = generate_uuid_as_key()
-    sandbox_path_id = generate_uuid_as_key()
     basic_routing_config = {
         default_path_id : {
             "id": default_path_id,
@@ -114,7 +79,6 @@ def write_routing_config(app_config):
             "parentId": None
         }
     }
-    # write_json_file(f"{app_config_dir}/{CONFIG_FILES_PATH['ROUTING_CONFIG']}.json", basic_routing_config)
     transaction_id = get_transaction_id()
     write_config_file( f"{app_config['name']}", ROUTING, ROUTING, basic_routing_config, None, transaction_id)
 
@@ -157,8 +121,8 @@ def update_directory_management_file(app_config):
     directory_management_path =  f"{app_config_dir}/{CONFIG_FILES_PATH['DIRECTORY_MANAGEMENT']}"
     
     directory_management_config = read_json_file(directory_management_path)
-    comp_index_file = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
-    default_comp_name = comp_index_file[app_config['defaultCompId']]
+    index_file = read_json_file(f"{app_config_dir}/{ResourceCategory.CODE_FILE.value}/index")
+    default_comp_name = index_file[app_config['defaultCompId']]
     main_comp_id = app_config['defaultCompId']
     template_content = replace_node("DEFAULT_COMP",main_comp_id,directory_management_config)
     
@@ -174,8 +138,8 @@ def create_resource_directory(project_id, resource_category):
         write_json_file(f"{app_config_dir}/{resource_category}/index.json", {})
     create_dir_if_not_exists(f"{app_config_dir}/{resource_category}/versions")
     
-def entry_in_config_index(project_id, resource_category, key, value):
+def entry_in_config_index(project_id, resource_category, key, value, return_empty=False):
     app_config_dir = f"{CONFIG_PATH}/{project_id}"
-    index_file = read_json_file(f"{app_config_dir}/{resource_category.value}/index")
+    index_file = read_json_file(f"{app_config_dir}/{resource_category.value}/index", return_empty=return_empty)
     index_file[key] = value
     write_json_file(f"{app_config_dir}/{resource_category.value}/index.json", index_file)

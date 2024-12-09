@@ -33,7 +33,7 @@ class DirectoryManager:
         if not parent_node:
             raise IndexError("Given parent id does not exist")
         
-        if parent_node["type"] != "DIRECTORY":
+        if not parent_id=="ROOT" and parent_node["type"] != "DIRECTORY":
             raise NotADirectoryError("Parent is not a directory")
         
         if parent_node.get("isProtected",False) :

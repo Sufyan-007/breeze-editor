@@ -16,7 +16,8 @@ def generate_layout_route_key():
 
 def include_all_routes_accessory_data(project_name, nodes):
     app_config_dir = f"{CONFIG_PATH}/{project_name}"
-    comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
+    comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.CODE_FILE.value}/index")
+    # comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
     
     for route_obj in nodes:
         route_obj['componentName'] = comp_config_index[route_obj['componentId']]
@@ -26,7 +27,8 @@ def process_route_config(project_name, routing_config={}):
     try:
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
         app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
-        comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
+        comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.CODE_FILE.value}/index")
+        # comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
         if routing_config == {}:
             config_data_obj = read_config_file(project_name, "routing_config", "routing_config")
             if config_data_obj.get('err'):

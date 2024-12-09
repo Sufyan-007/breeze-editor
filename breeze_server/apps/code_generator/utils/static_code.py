@@ -37,3 +37,72 @@ Root_App_Code = f'''
     
     export default App;
     '''
+    
+SANDBOX_CODE = """
+    import React, { useState, useEffect, Fragment } from "react";
+    const SandBox = () => {
+        const [MyComponent, setMyComponent] = useState(() => () => <div>Sandbox</div>);
+        const [inputVal, setInputVal] = useState("");
+        const [componentDir, setComponentDir] = useState("");
+        const [customProps, setCustomProps] = useState({});
+
+        useEffect(() => {
+            const handleMessage = (event) => {
+                if (event.origin === "http://localhost:3000" || true) {
+                    if (event.data.type === "resource") {
+                        const resource = event.data.resource;
+                        if (resource.type === "component") {
+                            setComponentDir(resource.component.containingFile);
+                        }
+                        if (resource.type === "props") {
+                            setCustomProps(resource.props);
+                        }
+                    }
+                }
+            };
+            window.parent.postMessage(
+                { source: "APP", type: "request", request: { type: "component" } },
+                "*",
+            );
+            window.parent.postMessage(
+                { source: "APP", type: "request", request: { type: "props" } },
+                "*",
+            );
+
+            window.addEventListener("message", handleMessage);
+
+            return () => {
+                window.removeEventListener("message", handleMessage);
+            };
+        }, []);
+
+        useEffect(() => {
+            const loader = async () => {
+                try {
+                    const comp = await import(`/${componentDir}`);
+                    setMyComponent(() => comp.default || comp);
+                    console.log(comp)
+                } catch (error) {
+                    console.error("Failed to load component:", error);
+                }
+            };
+
+            if (componentDir) {
+                loader();
+            }
+        }, [componentDir]);
+
+        return (
+            <Fragment>
+                <div className="container-fluid" id="SandBox">
+                    
+                    <MyComponent {...customProps} id="SandBox-1-1" />
+
+                </div>
+            </Fragment>
+        );
+    };
+
+    export default SandBox;
+
+"""

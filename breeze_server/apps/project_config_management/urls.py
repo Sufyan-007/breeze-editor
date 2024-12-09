@@ -4,7 +4,7 @@ from .views import get_file_path
 
 urlpatterns = [
     
-    # TODO: create files in views and add required method
+    # create files in views and add required method
     # past endpoint: POST - /editor/write-config 
     # both POST, PUT and DELETE will be handled for all 
     
@@ -33,6 +33,9 @@ urlpatterns = [
     
     # APIs with derived data
     path('get-file-path/', get_file_path.get_file_path),
+    
+    path('file/', include('apps.file_management.urls')),
+    path('entity/', include('apps.entity_management.urls'))
 ]
 
 # new endpoint -> /editor/get-file-path
