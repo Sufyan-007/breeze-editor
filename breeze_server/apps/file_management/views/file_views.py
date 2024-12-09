@@ -9,7 +9,8 @@ def add(request,project_id):
     data = json.loads(request.body.decode("utf-8"))
     fileName = data['fileName']
     parentId = data.get('parentId')
-    node = file_management.add_code_file(projectId=project_id,fileName=fileName, parentId=parentId)
+    tag = data.get('type' , 'CODE_FILE')
+    node = file_management.add_code_file(projectId=project_id,fileName=fileName, parentId=parentId, tag=tag)
     return JsonResponse(node,status=200)
 
 

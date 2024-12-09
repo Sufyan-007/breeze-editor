@@ -72,8 +72,7 @@ const ConfigurableMonacoEditor = ({
       const count = text.slice(0, index).length;
 
       const payload = {
-        type: node?.tag, //removed
-        compId: node.id, // renamed as fileId
+        fileId: node.id,
         index: count,
       };
       const result = await getCodeDetails(projectName, payload);
