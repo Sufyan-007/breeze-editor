@@ -69,10 +69,10 @@ TEMPLATE_COMP_CONFIG = {
                         "statements": [
                             {
                                 "type": "REACT_USE_STATE",
-                                "varName": "num",
+                                "varName": "data",
                                 "defaultValue": {
                                     "type": "TOKEN",
-                                    "value": "10"
+                                    "value": "{}"
                                 }
                             },
                             {
