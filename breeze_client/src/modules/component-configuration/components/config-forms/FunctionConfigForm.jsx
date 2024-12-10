@@ -1,18 +1,27 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CustomTextInput, CustomCheckBoxField, CustomButtonField, CustomTextArea } from '../../../../common/fields';
 import { initialFunctionConfig, initialParamConfig } from '../../constants/ResourcesFormData';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
-import ParamForm from '../helper-components/ParamForm';
-import { validator } from '../../../../utils/Validator';
+import ParamForm from './ParamForm';
 
-function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
+function FunctionConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const [formData, setFormData] = useState(initialFunctionConfig);
   const [isParamFormVisible, setIsParamFormVisible] = useState(false);
   const [editParamIndex, setParamEditIndex] = useState(null);
   const [paramData, setParamData] = useState(initialParamConfig);
   const { setOffcanvasSize } = useOffcanvas();
-  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   const handleChange = (field, value) => {
     setFormData({
@@ -61,18 +70,16 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    const isFormValid = [formData.name].every(Boolean);
-    if (!isFormValid) {
-      return;
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
     }
-    onSubmit(formData);
     setFormData(initialFunctionConfig);
   };
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialFunctionConfig);
-    setIsSubmitted(false);
     onCancel();
   };
 
@@ -90,8 +97,6 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
                 value={formData.name || ''}
                 onChange={(value) => handleChange('name', value)}
                 config={{ label: 'Function Name', groupClass: 'form-group mb-2' }}
-                customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
-                isSubmitted={isSubmitted}
               />
               <div className="d-flex mt-3">
                 <CustomCheckBoxField
@@ -193,9 +198,11 @@ function FunctionConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 FunctionConfigForm.propTypes = {
-  onSubmit: PropTypes.func,
-  onCancel: PropTypes.func,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default FunctionConfigForm;

@@ -1,11 +1,14 @@
 export const BreezeDatatypes = [
   { value: 'STRING', label: 'String' },
-  { value: 'NUMBER', label: 'Number' },
+  { value: 'NUMERIC', label: 'Number' },
   { value: 'BOOLEAN', label: 'Boolean' },
   { value: 'OBJECT', label: 'Object' },
   { value: 'ARRAY', label: 'Array' },
   { value: 'FUNCTION', label: 'Function' },
   { value: 'CUSTOM', label: 'Custom' },
+  { value: 'UNDEFINED', label: 'Undefined' },
+  { value: 'NULL', label: 'Null' },
+  { value: 'TOKEN', label: 'Token' },
 ];
 
 export const DeclarationTypes = [

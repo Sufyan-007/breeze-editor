@@ -196,6 +196,10 @@ function ProjectDisplay() {
                   height={selectedNode.id !== 'ROUTE_COMPONENT' ? 'calc(100vh - 161px)' : 'calc(100vh - 230px)'}
                   language={editorLanguage}
                   node={selectedTab}
+                  onChange={(val) => {
+                    setEditorCode(val);
+                    updateTabContent(selectedNode.id, val, selectedNode.language);
+                  }}
                 />
               </div>
             </div>

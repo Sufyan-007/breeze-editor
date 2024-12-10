@@ -1,13 +1,24 @@
 import PropTypes from 'prop-types';
 import { CustomButtonField, CustomSwitchField, CustomTextInput } from '../../../../common/fields';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { validator } from '../../../../utils/Validator';
 
-function IfBlockConfigForm({ onSubmit, onCancel, editMode }) {
+function IfBlockConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const initialIfConfig = JSON.parse(JSON.stringify(funcConfigTemplates['ifBlock']));
   const [formData, setFormData] = useState({ ...initialIfConfig });
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   const updateCondition = (value) => {
     setFormData((state) => ({
@@ -63,7 +74,11 @@ function IfBlockConfigForm({ onSubmit, onCancel, editMode }) {
     if (!isFormValid) {
       return;
     }
-    onSubmit(formData);
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
     setFormData(initialIfConfig);
   };
 
@@ -166,9 +181,11 @@ function IfBlockConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 IfBlockConfigForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default IfBlockConfigForm;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   CustomTextInput,
@@ -10,10 +10,10 @@ import {
 import { availableDependentVars } from '../../constants/FormConstants';
 import { initialUseCallbackConfig, initialParamConfig } from '../../constants/ResourcesFormData';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
-import ParamForm from '../helper-components/ParamForm';
+import ParamForm from './ParamForm';
 import { validator } from '../../../../utils/Validator';
 
-function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
+function UseCallbackConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const [formData, setFormData] = useState(initialUseCallbackConfig);
   const [isParamFormVisible, setIsParamFormVisible] = useState(false);
   const [editParamIndex, setParamEditIndex] = useState(null);
@@ -22,20 +22,43 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
   const [selectedDependencies, setSelectedDependencies] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    const config = res.config;
+    const dependencyValues = config.dependencies.map((dep) => dep.value);
+    setFormData(config);
+    setSelectedDependencies(dependencyValues);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [editMode, fetchConfig]);
+
   const handleChange = (field, value) => {
     let updatedData = { ...formData };
 
-    if (field === 'dependencies') {
-      const formattedDependencies = value.map((dep) => ({ type: 'TOKEN', value: dep }));
-      updatedData = { ...updatedData, dependencies: formattedDependencies };
-      setSelectedDependencies(value);
-    } else if (field === 'isAsync') {
+    if (field === 'isAsync') {
       updatedData.callback.isAsync = value;
     } else {
       updatedData[field] = value;
     }
 
     setFormData(updatedData);
+  };
+
+  const handleDependenciesChange = (values) => {
+    setSelectedDependencies(values);
+    const dependencyRefs = values.map((val) => ({
+      type: 'TOKEN',
+      value: val,
+    }));
+
+    setFormData((prevData) => ({
+      ...prevData,
+      dependencies: dependencyRefs,
+    }));
   };
 
   const handleAddClick = () => {
@@ -78,13 +101,24 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    e.preventDefault();
     setIsSubmitted(true);
-    const isFormValid = [formData.name].every(Boolean);
+    const isFormValid = [formData.varName].every(Boolean);
     if (!isFormValid) {
       return;
     }
-    onSubmit(formData);
+    const formattedData = {
+      ...formData,
+      dependencies: formData.dependencies.map((dep) => ({
+        type: 'TOKEN',
+        value: dep.value,
+      })),
+    };
+
+    if (editMode) {
+      onUpdate(formattedData);
+    } else {
+      onSubmit(formattedData);
+    }
     setFormData(initialUseCallbackConfig);
   };
 
@@ -105,9 +139,9 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
           >
             <div>
               <CustomTextInput
-                name="hookName"
-                value={formData.name || ''}
-                onChange={(value) => handleChange('name', value)}
+                name="varName"
+                value={formData.varName || ''}
+                onChange={(value) => handleChange('varName', value)}
                 config={{ label: 'Hook Name', groupClass: 'form-group mb-2' }}
                 customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
                 isSubmitted={isSubmitted}
@@ -118,11 +152,10 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
                 onChange={(value) => handleChange('description', value)}
                 config={{ label: 'Hook Description', groupClass: 'form-group mb-2' }}
               />
-
               <CustomMultiSelectField
                 name="dependencies"
                 values={selectedDependencies || []}
-                onChange={(value) => handleChange('dependencies', value)}
+                onChange={handleDependenciesChange}
                 options={availableDependentVars}
                 config={{
                   label: 'Dependent Variables',
@@ -215,9 +248,11 @@ function UseCallbackConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 UseCallbackConfigForm.propTypes = {
+  getConfig: PropTypes.func,
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
   editMode: PropTypes.bool,
+  onUpdate: PropTypes.func,
 };
 
 export default UseCallbackConfigForm;
