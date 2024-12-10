@@ -28,24 +28,24 @@ export const initialVariableConfig = {
   type: 'DECLARATION',
   varName: '',
   declarationType: 'const',
-  dataType: 'STRING',
-  defaultValue: '',
+  dataType: 'CUSTOM',
+  value: { type: 'CUSTOM', value: '' },
   description: '',
 };
 
 export const initialStateVarConfig = {
   type: 'REACT_USE_STATE',
   varName: '',
-  dataType: 'STRING',
-  defaultValue: '',
+  dataType: 'CUSTOM',
+  defaultValue: { type: 'CUSTOM', value: '' },
   description: '',
 };
 
 export const initialRefVarConfig = {
   type: 'REACT_USE_REF',
   varName: '',
-  dataType: 'STRING',
-  defaultValue: '',
+  dataType: 'CUSTOM',
+  defaultValue: { type: 'CUSTOM', value: '' },
   description: '',
 };
 
@@ -77,23 +77,23 @@ export const initialLifecycleConfig = {
     type: 'BLOCK',
     statements: [],
   },
-  dependencies: { type: 'ARRAY', values: [] },
+  dependencies: [],
 };
 
 export const initialUseMemoConfig = {
   type: 'REACT_USE_MEMO',
-  name: '',
+  varName: '',
   description: '',
   bodyConfig: {
     type: 'BLOCK',
     statements: [],
   },
-  dependencies: { type: 'ARRAY', values: [] },
+  dependencies: [],
 };
 
 export const initialUseCallbackConfig = {
   type: 'REACT_USE_CALLBACK',
-  name: '',
+  varName: '',
   description: '',
   callback: {
     type: 'FUNCTION',
@@ -107,5 +107,5 @@ export const initialUseCallbackConfig = {
       statements: [],
     },
   },
-  dependencies: { type: 'ARRAY', values: [] },
+  dependencies: [],
 };

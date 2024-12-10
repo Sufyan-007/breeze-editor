@@ -1,13 +1,24 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
 import { validator } from '../../../../utils/Validator';
 
-function DoWhileConfigForm({ onSubmit, onCancel, editMode }) {
+function DoWhileConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const initialDoWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['doWhileBlock']));
   const [formData, setFormData] = useState({ ...initialDoWhileConfig });
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   function updateCondition(value) {
     setFormData((state) => {
@@ -23,7 +34,11 @@ function DoWhileConfigForm({ onSubmit, onCancel, editMode }) {
     if (!isFormValid) {
       return;
     }
-    onSubmit(formData);
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
     setFormData(initialDoWhileConfig);
   };
 
@@ -72,9 +87,11 @@ function DoWhileConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 DoWhileConfigForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default DoWhileConfigForm;

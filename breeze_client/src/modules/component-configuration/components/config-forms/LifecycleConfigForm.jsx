@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   CustomRadioButtonField,
@@ -9,61 +9,92 @@ import {
 import { availableDependentVars, lifecycleTypes } from '../../constants/FormConstants';
 import { initialLifecycleConfig } from '../../constants/ResourcesFormData';
 
-function LifecycleConfigForm({ onSubmit, onCancel, editMode }) {
+function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const [formData, setFormData] = useState(initialLifecycleConfig);
   const [selectedDependencies, setSelectedDependencies] = useState([]);
 
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    const config = res.config;
+    const dependencyValues = config.lifecycleType === 'onDependency' ? config.dependencies.map((dep) => dep.value) : [];
+    setFormData(config);
+    setSelectedDependencies(dependencyValues);
+  }, [getConfig]);
+
+  // To change when var api available.
+  // const fetchConfig = useCallback(async () => {
+  //   const res = await getConfig();
+  //   setFormData(res.config);
+  //   if (res.config.lifecycleType === 'onDependency') {
+  //     const dependencyValues = res.config.dependencies.map((dep) => dep.$ref);
+  //     setSelectedDependencies(dependencyValues);
+  //   }
+  // }, [getConfig]);
+  // Also modify at other places where 'TOKEN' used. { type: 'TOKEN', value: dep }
+
   useEffect(() => {
     if (editMode) {
-      // fetchConfig
-      // setFormData(existingData);
-      // if (existingData.lifecycleType === 'onDependency' && existingData.dependencies?.values) {
-      //   setSelectedDependencies(existingData.dependencies.values.map((dep) => dep.value));
-      // }
+      fetchConfig();
     }
-  }, [editMode]);
+  }, [editMode, fetchConfig]);
 
   const handleChange = (field, value) => {
     let updatedData = { ...formData, [field]: value };
 
     if (field === 'lifecycleType') {
       if (value === 'onInitialMount') {
-        updatedData.dependencies = { type: 'ARRAY', values: [] };
-        setSelectedDependencies([]);
-      } else if (value === 'onDependency') {
-        updatedData.dependencies = { type: 'ARRAY', values: [{ type: 'TOKEN', value: '' }] };
+        updatedData.dependencies = [];
         setSelectedDependencies([]);
       } else if (value === 'onEveryMount') {
         updatedData.dependencies = null;
         setSelectedDependencies([]);
+      } else if (value === 'onDependency') {
+        const dependencyRefs = selectedDependencies.map((dep) => ({
+          type: 'TOKEN',
+          value: dep,
+        }));
+        updatedData.dependencies = dependencyRefs;
       }
-    } else if (field === 'dependencies') {
-      setSelectedDependencies(value);
     }
 
     setFormData(updatedData);
   };
 
+  const handleDependenciesChange = (values) => {
+    setSelectedDependencies(values);
+    const dependencyRefs = values.map((val) => ({
+      type: 'TOKEN',
+      value: val,
+    }));
+
+    setFormData((prevData) => ({
+      ...prevData,
+      dependencies: dependencyRefs,
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    let transformedDependencies;
-    if (formData.lifecycleType === 'onDependency') {
-      transformedDependencies = {
-        type: 'ARRAY',
-        values: selectedDependencies.map((dep) => ({ type: 'TOKEN', value: dep })),
-      };
-    } else if (formData.lifecycleType === 'onInitialMount') {
-      transformedDependencies = { type: 'ARRAY', values: [] };
-    } else {
-      transformedDependencies = null;
-    }
+    const finalDependencies =
+      formData.lifecycleType === 'onDependency'
+        ? selectedDependencies.map((dep) => ({
+            type: 'TOKEN',
+            value: dep,
+          }))
+        : formData.lifecycleType === 'onInitialMount'
+          ? []
+          : null;
 
     const finalData = {
       ...formData,
-      dependencies: transformedDependencies,
+      dependencies: finalDependencies,
     };
 
-    onSubmit(finalData);
+    if (editMode) {
+      onUpdate(finalData);
+    } else {
+      onSubmit(finalData);
+    }
     setFormData(initialLifecycleConfig);
     setSelectedDependencies([]);
   };
@@ -103,7 +134,7 @@ function LifecycleConfigForm({ onSubmit, onCancel, editMode }) {
             <CustomMultiSelectField
               name="dependencies"
               values={selectedDependencies}
-              onChange={(value) => handleChange('dependencies', value)}
+              onChange={handleDependenciesChange}
               options={availableDependentVars}
               config={{
                 label: 'Dependent Variables',
@@ -116,7 +147,7 @@ function LifecycleConfigForm({ onSubmit, onCancel, editMode }) {
         <div className="d-flex justify-content-end">
           <CustomButtonField
             type="button"
-            label={'Cancel'}
+            label="Cancel"
             className="btn br-secondary-button med-font mx-2"
             onClick={handleCancel}
           />
@@ -133,9 +164,11 @@ function LifecycleConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 LifecycleConfigForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default LifecycleConfigForm;

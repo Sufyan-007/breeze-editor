@@ -14,7 +14,7 @@ function ExternalCompPropEditForm({ onSubmit, onCancel, initialData, selectedPro
 
   const PrimaryDatatypes = [
     { value: 'STRING', label: 'String' },
-    { value: 'NUMBER', label: 'Number' },
+    { value: 'NUMERIC', label: 'Number' },
     { value: 'BOOLEAN', label: 'Boolean' },
   ];
   //update formData when selectedProp or initialData changes

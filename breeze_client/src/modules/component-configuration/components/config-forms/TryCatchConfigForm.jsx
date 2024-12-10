@@ -1,11 +1,22 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomSwitchField } from '../../../../common/fields';
 
-function TryCatchConfigForm({ onSubmit, onCancel, editMode }) {
+function TryCatchConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const initialTryCatchConfig = JSON.parse(JSON.stringify(funcConfigTemplates['tryCatch']));
   const [formData, setFormData] = useState({ ...initialTryCatchConfig });
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   const toggleFinallyBody = () => {
     setFormData((state) => ({
@@ -16,7 +27,11 @@ function TryCatchConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
     setFormData(initialTryCatchConfig);
   };
 
@@ -64,9 +79,11 @@ function TryCatchConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 TryCatchConfigForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default TryCatchConfigForm;

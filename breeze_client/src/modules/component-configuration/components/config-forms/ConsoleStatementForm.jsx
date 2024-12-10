@@ -1,11 +1,20 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextArea } from '../../../../common/fields';
 
-function ConsoleStatementForm({ onSubmit, onCancel, formData: initialData, editMode }) {
+function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const initialConsoleConfig = JSON.parse(JSON.stringify(funcConfigTemplates['consoleStatement']));
-  const [formData, setFormData] = useState(initialData || { ...initialConsoleConfig });
+  const [formData, setFormData] = useState({ ...initialConsoleConfig });
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
 
   function updateText(value) {
     setFormData((state) => {
@@ -16,7 +25,11 @@ function ConsoleStatementForm({ onSubmit, onCancel, formData: initialData, editM
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
     if (!editMode) setFormData(initialConsoleConfig);
   };
 
@@ -62,10 +75,11 @@ function ConsoleStatementForm({ onSubmit, onCancel, formData: initialData, editM
 }
 
 ConsoleStatementForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  formData: PropTypes.object,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default ConsoleStatementForm;
