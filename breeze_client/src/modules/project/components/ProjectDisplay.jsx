@@ -197,8 +197,10 @@ function ProjectDisplay() {
                   language={editorLanguage}
                   node={selectedTab}
                   onChange={(val) => {
-                    setEditorCode(val);
-                    updateTabContent(selectedNode.id, val, selectedNode.language);
+                    if (selectedTab?.tag !== 'CUSTOM') {
+                      setEditorCode(val);
+                      updateTabContent(selectedTab.id, val, selectedTab.language);
+                    }
                   }}
                 />
               </div>
