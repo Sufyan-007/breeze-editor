@@ -23,7 +23,7 @@ export const folderOptions = (
   },
   {
     label: 'Add Service',
-    value: () => handleContextMenuSelection(nodeId, 'COMPONENTS'),
+    value: () => handleContextMenuSelection(nodeId, 'CODE_FILE'),
     icon: React.createElement('img', {
       src: logos.servicesLogo,
       alt: 'Services',
@@ -31,7 +31,7 @@ export const folderOptions = (
   },
   {
     label: 'Add Hook',
-    value: () => handleContextMenuSelection(nodeId, 'COMPONENTS'),
+    value: () => handleContextMenuSelection(nodeId, 'HOOKS'),
     icon: React.createElement('img', { src: logos.routesLogo, alt: 'Routes' }),
   },
   {
@@ -74,7 +74,7 @@ export const addFileOptions = (nodeId, handleContextMenuSelection) => [
   },
   {
     label: 'Add Service',
-    value: () => handleContextMenuSelection(nodeId, 'COMPONENTS'),
+    value: () => handleContextMenuSelection(nodeId, 'CODE_FILE'),
     icon: React.createElement('img', {
       src: logos.servicesLogo,
       alt: 'Services',
@@ -82,7 +82,7 @@ export const addFileOptions = (nodeId, handleContextMenuSelection) => [
   },
   {
     label: 'Add Hook',
-    value: () => handleContextMenuSelection(nodeId, 'COMPONENTS'),
+    value: () => handleContextMenuSelection(nodeId, 'HOOKS'),
     icon: React.createElement('img', { src: logos.routesLogo, alt: 'Routes' }),
   },
   {
