@@ -86,11 +86,26 @@ class FunctionParser:
                 self.meta_config[parent_block_id]["scope"][config['name']] = statement_id
             
             body, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
-            tree["children"].append(t)
+            params = []
+            schema = config["schema"]
             
-            code = f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {", ".join([
-                    self.get_function_param(p) for p in config.get("parameters",[])
-                ])} ) => {body}"""
+            if "$schema" in schema:
+                raise NotImplementedError()
+            
+            for i,param in enumerate(schema.get("parameters",[])):
+                if param.get("isRest"):
+                    params = f"...{param['name']}"
+                else:
+                    if param.get("defaultValue"):
+                        defaultValue, _t = self.get_value_code(param["defaultValue"],key_chaining=key_chaining+["schema","parameters",i,"defaultValue"], parent_block_id=parent_block_id)
+                        if _t:
+                            tree["children"].append(_t)
+                        params.append(f"{param['name']} = {defaultValue}")
+                    else:
+                        params.append(param['name'])
+                        
+            tree["children"].append(t)
+            code = f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {",".join(params)} ) => {body}"""
         
         
         elif config["type"] == "DECLARATION":
@@ -246,14 +261,6 @@ class FunctionParser:
     
     
     
-    def get_function_param(self,param):
-        if param.get('type',"ANY") != "OBJECT" or not param.get('properties',False) or not param.get("destructured",False) :
-            return param["name"]
-        else:
-            return f"""{{ {", ".join([
-                self.get_function_param(p) for p in param["properties"]
-                ])} }}"""
-        
     
     
     def get_value_code(self,value, key_chaining=[], parent_block_id=None):
@@ -352,7 +359,7 @@ class FunctionParser:
         attributes = config.get('attributes', {})
         children = config.get('children', [])
 
-        attribute_str = ' '.join([f'{attr}={self.get_value_code(value,key_chaining=key_chaining+["attributes",attr], parent_block_id=parent_block_id)[0]}' for attr, value in attributes.items()])
+        attribute_str = ' '.join([f'{attr}={{ {self.get_value_code(value,key_chaining=key_chaining+["attributes",attr], parent_block_id=parent_block_id)[0]}}}' for attr, value in attributes.items()])
         attribute_str = attribute_str+f" data-brz-id='{config['id']}'"
         open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
         close_tag = f'</{tag_name}>'

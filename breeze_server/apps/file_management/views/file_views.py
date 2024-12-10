@@ -27,7 +27,8 @@ def add_statements(request,project_id):
     fileId = data['fileId']
     parentId = data['parentId']
     config = data['config']
-    conf = file_management.add_statement(projectId=project_id,fileId=fileId,parentId=parentId,statement=config)
+    index = data.get('index')
+    conf = file_management.add_statement(projectId=project_id,fileId=fileId,parentId=parentId,statement=config, index=index)
     return JsonResponse(conf,status=200)
 
 @api_view(["POST"])

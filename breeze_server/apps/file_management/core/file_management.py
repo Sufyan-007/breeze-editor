@@ -77,7 +77,7 @@ def set_value_in_flattened_index(flattened_index, value, config, configMeta):
 
 
 
-def add_statement(projectId,fileId,parentId,statement):
+def add_statement(projectId,fileId,parentId,statement,index=None):
     fileConfig = read_config_file(
         project_name=projectId,
         category=ResourceCategory.CODE_FILE.value,
@@ -108,19 +108,28 @@ def add_statement(projectId,fileId,parentId,statement):
     parentIndex = parentConfigMeta["index"]
     
     if parentConfig["type"] == "BLOCK":
-        newIndex = parentIndex+"<>statements<>"+str(len(parentConfig["statements"]))
+        pos = 0
+        if index:
+            for x in parentConfig["statements"]:
+                x_m = fileConfigMeta[x["id"]]
+                if x_m["startIndex"] > index:
+                    break
+                pos += 1
+        parentConfig["statements"].insert(pos,statement)
+                
+    
     elif parentConfig["type"] == "Element":
         newIndex = parentIndex+"<>children<>"+str(len(parentConfig["children"]))
-    newMeta = {
-        "index": newIndex,
-        "type": "RAW"
-    }
-    
-    fileConfigMeta[id] = newMeta
-    
-    if not set_value_in_flattened_index(id,statement,fileConfig,fileConfigMeta):
-        raise Exception("Could not add statement")
+        newMeta = {
+            "index": newIndex,
+            "type": "RAW"
+        }
         
+        fileConfigMeta[id] = newMeta
+        
+        if not set_value_in_flattened_index(id,statement,fileConfig,fileConfigMeta):
+            raise Exception("Could not add statement")
+            
     
     generate_file_code(projectId=projectId,fileId=fileId,config=fileConfig)
     

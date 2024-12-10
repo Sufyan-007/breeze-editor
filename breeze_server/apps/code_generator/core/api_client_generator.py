@@ -314,7 +314,8 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             react_service_functions.append(react_code)
             service_functions_metadata.append({
                 "id":model.id,
-                "name" : converted_name
+                "name" : converted_name,
+                "schema": {"parameters": new_model["parameters"]}
             })
     
     else:
@@ -396,7 +397,8 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         react_service_functions.append(react_code)
         service_functions_metadata.append({
             "id":model.id,
-            "name" : converted_name
+            "name" : converted_name,
+            "schema": {"parameters": new_model["parameters"]}
         })
     return react_service_functions,used_interceptor, service_functions_metadata
         
