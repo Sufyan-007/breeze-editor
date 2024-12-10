@@ -1,14 +1,28 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CustomTextInput, CustomMultiSelectField, CustomButtonField, CustomTextArea } from '../../../../common/fields';
 import { availableDependentVars } from '../../constants/FormConstants';
 import { initialUseMemoConfig } from '../../constants/ResourcesFormData';
 import { validator } from '../../../../utils/Validator';
 
-function UseMemoConfigForm({ onSubmit, onCancel, editMode }) {
+function UseMemoConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const [formData, setFormData] = useState(initialUseMemoConfig);
   const [selectedDependencies, setSelectedDependencies] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    const config = res.config;
+    const dependencyValues = config.dependencies.map((dep) => dep.value);
+    setFormData(config);
+    setSelectedDependencies(dependencyValues);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [editMode, fetchConfig]);
 
   const handleChange = (field, value) => {
     let updatedData = { ...formData, [field]: value };
@@ -25,13 +39,26 @@ function UseMemoConfigForm({ onSubmit, onCancel, editMode }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitted(true);
-    const isFormValid = [formData.name].every(Boolean);
+    const isFormValid = [formData.varName].every(Boolean);
     if (!isFormValid) {
       return;
     }
-    onSubmit(formData);
-    if (!editMode) setFormData(initialUseMemoConfig);
+    const formattedData = {
+      ...formData,
+      dependencies: formData.dependencies.map((dep) => ({
+        type: 'TOKEN',
+        value: dep.value,
+      })),
+    };
+
+    if (editMode) {
+      onUpdate(formattedData);
+    } else {
+      onSubmit(formattedData);
+    }
+    setFormData(initialUseMemoConfig);
   };
+
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialUseMemoConfig);
@@ -45,8 +72,8 @@ function UseMemoConfigForm({ onSubmit, onCancel, editMode }) {
         <div>
           <CustomTextInput
             name="hookName"
-            value={formData.name || ''}
-            onChange={(value) => handleChange('name', value)}
+            value={formData.varName || ''}
+            onChange={(value) => handleChange('varName', value)}
             config={{ label: 'Hook Name', groupClass: 'form-group mb-2' }}
             customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
             isSubmitted={isSubmitted}
@@ -89,9 +116,11 @@ function UseMemoConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 UseMemoConfigForm.propTypes = {
+  getConfig: PropTypes.func,
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
   editMode: PropTypes.bool,
+  onUpdate: PropTypes.func,
 };
 
 export default UseMemoConfigForm;

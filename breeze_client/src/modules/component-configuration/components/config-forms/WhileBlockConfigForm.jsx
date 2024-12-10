@@ -1,13 +1,24 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
 import { validator } from '../../../../utils/Validator';
 
-function WhileBlockConfigForm({ onSubmit, onCancel, editMode }) {
+function WhileBlockConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const initialWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['whileBlock']));
   const [formData, setFormData] = useState({ ...initialWhileConfig });
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   function updateCondition(value) {
     setFormData((state) => {
@@ -23,7 +34,11 @@ function WhileBlockConfigForm({ onSubmit, onCancel, editMode }) {
     if (!isFormValid) {
       return;
     }
-    onSubmit(formData);
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
     setFormData(initialWhileConfig);
   };
 
@@ -75,6 +90,8 @@ WhileBlockConfigForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   editMode: PropTypes.bool,
+  getConfig: PropTypes.func,
+  onUpdate: PropTypes.func,
 };
 
 export default WhileBlockConfigForm;

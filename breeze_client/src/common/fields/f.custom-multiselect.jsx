@@ -8,6 +8,10 @@ function CustomMultiSelectDropdown({ config, name, values, onChange, options, cl
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  useEffect(() => {
+    setSelectedValues(values);
+  }, [values]);
+
   // Hook to detect clicks outside the dropdown and close it
   const useOnClickOutside = (ref, handler) => {
     useEffect(() => {

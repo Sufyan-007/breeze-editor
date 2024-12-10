@@ -10,7 +10,7 @@ import uuid
 from ...code_generator.utils.code_indexing import get_code_index
 import pickle
 from apps.common.constants.consts import CONFIG_PATH
-from apps.code_generator.utils.static_configs import TEMPLATE_CODE_FILE, TEMPLATE_COMP_CONFIG
+from apps.code_generator.utils.static_configs import TEMPLATE_CODE_FILE, TEMPLATE_COMP_CONFIG, TEMPLATE_HOOK_CONFIG
 from apps.common.utils.replace_variable import replace_variable
 from apps.common.utils.uuid_as_key import generate_uuid_as_key
 
@@ -178,6 +178,10 @@ def get_config_by_tag(tag,fileName,entityId):
         file_config = deepcopy(TEMPLATE_COMP_CONFIG)
         replace_variable(file_config,"DEFAULT_COMP_ID",entityId)
         replace_variable(file_config,"DEFAULT_COMP_NAME",fileName)
+    elif tag == "HOOKS":
+        file_config = deepcopy(TEMPLATE_HOOK_CONFIG)
+        replace_variable(file_config,"DEFAULT_HOOK_ID",entityId)
+        replace_variable(file_config,"DEFAULT_HOOK_NAME",fileName)
     elif tag == "CODE_FILE":
         file_config = deepcopy(TEMPLATE_CODE_FILE)
     else:

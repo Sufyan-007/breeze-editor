@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { CustomButtonField, CustomTextArea, CustomTextInput } from '../../../../common/fields';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { initialComponentConfig, initialPropConfig } from '../../constants/ResourcesFormData';
 import PropConfigForm from './PropConfigForm';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
@@ -14,10 +14,16 @@ function ComponentConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
   const { setOffcanvasSize } = useOffcanvas();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // useEffect(() => {
-  //   const config = getConfig();
-  //   console.log(config);
-  // }, [getConfig]);
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   const handleChange = (field, value) => {
     setFormData({
@@ -102,6 +108,7 @@ function ComponentConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
                 config={{
                   label: 'Component Name',
                   groupClass: 'form-group mb-2',
+                  disabled: editMode,
                 }}
                 customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
                 isSubmitted={isSubmitted}

@@ -1,14 +1,25 @@
-import { useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, MonacoEditor } from '../../../../common/fields';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import PropTypes from 'prop-types';
 
-function CustomCode({ onSubmit, onCancel, editMode }) {
+function CustomCode({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const initialCustomCodeConfig = JSON.parse(JSON.stringify(funcConfigTemplates['customCode']));
   const [formData, setFormData] = useState({ ...initialCustomCodeConfig });
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   const updateCode = (value) => {
     setFormData((state) => {
@@ -23,7 +34,11 @@ function CustomCode({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
     setFormData(initialCustomCodeConfig);
   };
 
@@ -46,7 +61,7 @@ function CustomCode({ onSubmit, onCancel, editMode }) {
             }}
             id={generateUniqueId}
             language="javascript"
-            height="300px"
+            height="450px"
             theme={projectTheme}
           />
         </div>
@@ -70,9 +85,11 @@ function CustomCode({ onSubmit, onCancel, editMode }) {
 }
 
 CustomCode.propTypes = {
-  onSubmit: PropTypes.func,
-  onCancel: PropTypes.func,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default CustomCode;

@@ -88,6 +88,7 @@ function ImportConfigForm({ onSubmit, onCancel, editMode = false }) {
             label={editMode ? 'Update' : 'Submit'}
             className="btn btn-filled med-font"
             onClick={handleSubmit}
+            disabled={true}
           />
         </div>
       </div>

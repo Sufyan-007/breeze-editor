@@ -196,6 +196,12 @@ function ProjectDisplay() {
                   height={selectedNode.id !== 'ROUTE_COMPONENT' ? 'calc(100vh - 161px)' : 'calc(100vh - 230px)'}
                   language={editorLanguage}
                   node={selectedTab}
+                  onChange={(val) => {
+                    if (selectedTab?.tag !== 'CUSTOM') {
+                      setEditorCode(val);
+                      updateTabContent(selectedTab.id, val, selectedTab.language);
+                    }
+                  }}
                 />
               </div>
             </div>

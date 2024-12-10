@@ -13,6 +13,7 @@ import {
 } from '../../../services/components/componentService';
 import { useParams } from 'react-router-dom';
 import useConfigurableMenuItems from '../hooks/useConfigurableMenuItems';
+import { getFileCode } from '../services/projectService';
 
 const ConfigurableMonacoEditor = ({
   defaultValue = '',
@@ -33,7 +34,7 @@ const ConfigurableMonacoEditor = ({
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const { showOffcanvas, closeOffcanvas } = useOffcanvas();
   const { projectName } = useParams();
-  // const [statementId, setStatementId] = useState('');
+  const [statementId, setStatementId] = useState('');
 
   useEffect(() => {
     if (editor && editor.getValue() !== defaultValue) {
@@ -50,12 +51,13 @@ const ConfigurableMonacoEditor = ({
   }, [editor, onChange]);
 
   useEffect(() => {
+    const isSpecificTag = ['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag);
     const editorInstance = monaco.editor.create(editorRef.current, {
       value: value,
       language: language,
       theme: projectTheme,
-      readOnly: node?.tag === 'COMPONENTS' ? 'true' : readOnlyMode,
-      contextmenu: node?.tag === 'COMPONENTS' ? 'false' : 'true',
+      readOnly: isSpecificTag ? 'true' : readOnlyMode,
+      contextmenu: isSpecificTag ? 'false' : 'true',
     });
     setEditor(editorInstance);
 
@@ -72,17 +74,16 @@ const ConfigurableMonacoEditor = ({
       const count = text.slice(0, index).length;
 
       const payload = {
-        type: node?.tag, //removed
-        compId: node.id, // renamed as fileId
+        fileId: node.id,
         index: count,
       };
       const result = await getCodeDetails(projectName, payload);
       const configType = result?.related_config?.type;
-      // setStatementId(result?.related_config?.id || '');
-      setFilteredItems(configType ? configTypeMapping[configType] || items : items);
+      setStatementId(result?.related_config?.id || '');
+      setFilteredItems(configType ? configTypeMapping[configType] || items : []);
     };
 
-    if (node?.tag === 'COMPONENTS' || node?.tag === 'CODE_FILE') {
+    if (['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag)) {
       editorInstance.onContextMenu(async (e) => {
         e.event.preventDefault();
         e.event.stopPropagation();
@@ -98,7 +99,7 @@ const ConfigurableMonacoEditor = ({
       });
     }
 
-    if (node?.tag === 'COMPONENTS' || node?.tag === 'CODE_FILE') {
+    if (['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag)) {
       editorInstance.onMouseDown(handleClick);
     }
 
@@ -108,35 +109,37 @@ const ConfigurableMonacoEditor = ({
   }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
   const onSubmit = async (value) => {
-    console.log('value::>>', value);
-    // const payload = {
-    //   fileId: node.id,
-    //   parentId: statementId,
-    //   config: value,
-    // };
-    // await addAstStatement(projectName, payload);
+    const payload = {
+      fileId: node.id,
+      parentId: statementId,
+      config: value,
+    };
+    await addAstStatement(projectName, payload);
+    const data = await getFileCode(projectName, node.id);
+    onChange(data.code);
     closeOffcanvas();
   };
 
   const onUpdate = async (value) => {
-    console.log('value::>>', value);
-    // const payload = {
-    //   fileId: node.id,
-    //   statementId: statementId,
-    //   config: value,
-    // };
-    // await updateAstStatement(projectName, payload);
+    const payload = {
+      fileId: node.id,
+      statementId: statementId,
+      config: value,
+    };
+    await updateAstStatement(projectName, payload);
+    const data = await getFileCode(projectName, node.id);
+    onChange(data.code);
     closeOffcanvas();
   };
 
   const getConfig = useCallback(async () => {
-    // const payload = {
-    //   fileId: node.id,
-    //   statementId: statementId,
-    // };
-    // const config = await getAstStatement(projectName, payload);
-    // return config;
-  }, []);
+    const payload = {
+      fileId: node.id,
+      statementId: statementId,
+    };
+    const config = await getAstStatement(projectName, payload);
+    return config;
+  }, [projectName, node?.id, statementId]);
 
   const onCancel = () => {
     closeOffcanvas();
