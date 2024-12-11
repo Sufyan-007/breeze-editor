@@ -1,7 +1,8 @@
-import json
+import json,os
 from ..utils.append_dict_file import append_to_dict_file
 from ....common.utils.uuid_as_key import generate_uuid_as_key
 from ..utils.set_unresolved_key import set_unresolved_keys
+from ....common.constants.consts import CONFIG_PATH
 def delete_schema_helper(schema_file_path,schemaId):
     try:
         with open(schema_file_path, "r+") as file:
@@ -80,3 +81,61 @@ def resolve_schemas_helper(schema_file_path, schemaId, new_schema_name, details,
             return {"error": f"Schema '{schemaId}' not found."}, 404
     except Exception as e:
         return {"error": str(e)}, 500
+    
+
+def get_all_schemas_helper(project_id):
+    folder_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
+    try:
+        with open(folder_path, 'r') as file:
+            try:
+                index_data = json.load(file)
+            except json.JSONDecodeError:
+                return {"error": "The index file contains invalid JSON."}, 500
+        all_schemas = []
+        for module_id in index_data.keys():
+            module_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
+            if os.path.exists(module_file_path):
+                try:
+                    with open(module_file_path, 'r') as module_file:
+                        module_data = json.load(module_file)
+                        all_schemas.extend(module_data.values())  
+                except json.JSONDecodeError:
+                    return {"error": f"Module file '{module_id}.json' contains invalid JSON."}, 500
+                except Exception as e:
+                    return {"error": f"Error reading file '{module_id}.json': {str(e)}"}, 500
+            else:
+                return {"error": f"Module file '{module_id}.json' not found."}, 404
+
+        return {"schemas": all_schemas}, 200
+    except Exception as e:
+        return {"error": f"An unexpected error occurred: {str(e)}"}, 500
+
+def get_schema_by_id_helper( project_id, schema_id):
+    folder_path = f"{CONFIG_PATH}/{project_id}/models/index.json"
+    try:
+        with open(folder_path, 'r') as file:
+            try:
+                index_data = json.load(file)
+            except json.JSONDecodeError:
+                return {"error": "The index file contains invalid JSON."}, 500
+
+        for module_id in index_data.keys():
+            module_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
+            if os.path.exists(module_file_path):
+                try:
+                    with open(module_file_path, 'r') as module_file:
+                        module_data = json.load(module_file)
+                        if schema_id in module_data:
+                            return {"schema": module_data[schema_id]}, 200
+                except json.JSONDecodeError:
+                    return {"error": f"Module file '{module_id}.json' contains invalid JSON."}, 500
+                except Exception as e:
+                    return {"error": f"Error reading file '{module_id}.json': {str(e)}"}, 500
+            else:
+                continue
+
+        return {"error": f"Schema with ID '{schema_id}' not found."}, 404
+    except Exception as e:
+        return {"error": f"An unexpected error occurred: {str(e)}"}, 500
+
+        
