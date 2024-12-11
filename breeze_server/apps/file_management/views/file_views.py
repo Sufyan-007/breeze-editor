@@ -51,3 +51,33 @@ def get_statement_config(request,project_id):
         return JsonResponse(res,status=200)
     except KeyError as e:
         return JsonResponse({"err":"Key not found"},statu=404)
+    
+@api_view(['POST'])
+def get_imports(request,project_id):
+    data = json.loads(request.body.decode('utf-8'))
+    fileId = data['fileId']
+    res = file_management.get_import_config(project_id,fileId)
+    return JsonResponse(res,status=200)
+
+@api_view(['POST'])
+def update_imports(request,project_id):
+    data = json.loads(request.body.decode('utf-8'))
+    fileId = data['fileId']
+    imports = data["imports"]
+    res = file_management.set_import_config(project_id,fileId, importConfig= imports)
+    return JsonResponse(res,status=200)
+
+@api_view(['POST'])
+def get_exports(request, project_id):
+    data = json.loads(request.body.decode('utf-8'))
+    fileId = data['fileId']
+    res = file_management.get_export_config(project_id, fileId)
+    return JsonResponse(res, status=200)
+
+@api_view(['POST'])
+def update_exports(request, project_id):
+    data = json.loads(request.body.decode('utf-8'))
+    fileId = data['fileId']
+    exports = data["exports"]
+    res = file_management.set_export_config(project_id, fileId, exportConfig=exports)
+    return JsonResponse(res, status=200)

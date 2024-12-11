@@ -7,6 +7,7 @@ TEMPLATE_CODE_FILE = {
     },
     "BLOCK": {
         "type": "BLOCK",
+        "id":"$FILE_ID",
         "noWrap": 1,
         "statements": [{"type": "COMMENT", "text": " Happy coding!!"}],
     },
@@ -36,6 +37,7 @@ TEMPLATE_COMP_CONFIG = {
     "BLOCK": {
         "type": "BLOCK",
         "noWrap": 1,
+        "id":"$FILE_ID",
         "statements": [
             {
                 "type": "REACT_COMPONENT",
@@ -93,6 +95,7 @@ TEMPLATE_HOOK_CONFIG = {
     "EXPORTS": {"default": "DEFAULT_HOOK_ID", "others": []},
     "BLOCK": {
         "type": "BLOCK",
+        "id":"$FILE_ID",
         "noWrap": 1,
         "statements": [
             {
