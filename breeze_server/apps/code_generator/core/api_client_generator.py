@@ -79,7 +79,6 @@ def addEntities(functionDetails, fileId, projectId):
         functionDetails = [functionDetails]
     
     for function in functionDetails:
-        # function_schema = generate_function_schema(function.get("schema"))
         entityManager.add_or_update_entity(
             entityId=function["id"],
             fileId=fileId,
@@ -88,24 +87,6 @@ def addEntities(functionDetails, fileId, projectId):
             defaultExport=False,
             schema=function.get("schema",{"type" : "ANY"})
         )
-        
-        
-def generate_function_schema(parameters_config):
-    function_template = {
-        "type": "FUNCTION",
-        "parameters": [],
-        "returnType":{}
-    }
-    parameters = []
-    for parameter in parameters_config:
-        if parameter.get("properties"):
-            for param in parameter:
-                new_param = {
-                    "name": param.get("name"),
-                    "destructured": False,
-                    "schema": {},
-                    "defaultValue": {}
-                }
                 
 
 
