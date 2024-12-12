@@ -15,7 +15,7 @@ export const folderOptions = (
   },
   {
     label: 'Add Component',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'COMPONENTS'),
     icon: React.createElement('img', {
       src: logos.componentsLogo,
       alt: 'Components',
@@ -23,7 +23,7 @@ export const folderOptions = (
   },
   {
     label: 'Add Service',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'CODE_FILE'),
     icon: React.createElement('img', {
       src: logos.servicesLogo,
       alt: 'Services',
@@ -31,12 +31,12 @@ export const folderOptions = (
   },
   {
     label: 'Add Hook',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'HOOKS'),
     icon: React.createElement('img', { src: logos.routesLogo, alt: 'Routes' }),
   },
   {
     label: 'Add Custom File',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'CUSTOM'),
     icon: React.createElement('i', { className: 'bi bi-file-earmark-code' }),
   },
   {
@@ -66,7 +66,7 @@ export const fileOptions = (nodeId, handleRename, handleRemoveNode) => [
 export const addFileOptions = (nodeId, handleContextMenuSelection) => [
   {
     label: 'Add Component',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'COMPONENTS'),
     icon: React.createElement('img', {
       src: logos.componentsLogo,
       alt: 'Components',
@@ -74,7 +74,7 @@ export const addFileOptions = (nodeId, handleContextMenuSelection) => [
   },
   {
     label: 'Add Service',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'CODE_FILE'),
     icon: React.createElement('img', {
       src: logos.servicesLogo,
       alt: 'Services',
@@ -82,12 +82,12 @@ export const addFileOptions = (nodeId, handleContextMenuSelection) => [
   },
   {
     label: 'Add Hook',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'HOOKS'),
     icon: React.createElement('img', { src: logos.routesLogo, alt: 'Routes' }),
   },
   {
     label: 'Add Custom File',
-    value: () => handleContextMenuSelection(nodeId),
+    value: () => handleContextMenuSelection(nodeId, 'CUSTOM'),
     icon: React.createElement('i', { className: 'bi bi-file-earmark-code' }),
   },
 ];

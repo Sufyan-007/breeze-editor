@@ -5,6 +5,9 @@ def find_ignore_whitespace(target, query):
     def clean_text(text):
         text = text.replace("'", '"')  # Replace double quotes with single quotes
         text = text.replace(';', '')   # Remove semicolons
+        text = text.replace('(', '')   # Remove semicolons
+        text = text.replace(')', '')   # Remove semicolons
+        text = text.replace(',', '')   # Remove semicolons
         text = re.sub(r'[\s\r\n]+', '', text)  # Remove all whitespace and newline
         return text
 
@@ -14,7 +17,7 @@ def find_ignore_whitespace(target, query):
     match = re.search(re.escape(cleaned_query), cleaned_target)
     
     if not match:
-        return None 
+        raise IndexError("No match found ") 
     
     start_index_cleaned = match.start()
     end_index_cleaned = match.end()
@@ -24,7 +27,7 @@ def find_ignore_whitespace(target, query):
     cleaned_idx = 0
     
     for original_idx, char in enumerate(target):
-        if not char.isspace() and char!="\n" and char!=";":
+        if not char.isspace() and char!="\n" and char!=";" and char!=")" and char!="(" and char!=",":
             if cleaned_idx == start_index_cleaned:
 
                 original_indices.append(original_idx)
@@ -96,23 +99,37 @@ class CodeTree:
                 return True
         return False
     
+    def __str__(self):
+        print("OBJ")
+        for k,v in self.codes.items():
+            print("   {}:{}".format(k,v))
+        return ""
 
 
 
 
-def get_code_index(statements,code):
+def get_code_index(statements,code,meta_config,b=0):
     tree=CodeTree()
+    base = 0
     for statement in statements:
-        indexes = find_ignore_whitespace(code,statement["code"])
-        if len(indexes) !=2:
-            continue
-        children = statement.get("children")
-        if indexes ==None:
-            raise Exception()
-        
-        obj = {k:statement[k] for k in statement if k in ["id","type"] }
-        if children:
-            childCode= code[indexes[0]:indexes[1]+1]
-            obj["children"] = get_code_index(children,childCode)
-        tree.insertElem(indexes[0],indexes[1],obj)
+        if statement:
+            indexes = find_ignore_whitespace(code,statement["code"])
+            if len(indexes) !=2:
+                continue
+            children = statement.get("children")
+            if indexes ==None:
+                raise Exception()
+            
+            obj = {k:statement[k] for k in statement if k in ["id","type"] }
+            if children:
+                childCode= code[indexes[0]:indexes[1]+1]
+                obj["children"] = get_code_index(children,childCode,meta_config,b=b+base)
+            # print(base, base + indexes[0],base + indexes[1],obj)
+            print(tree)
+            tree.insertElem(base + indexes[0],base + indexes[1],obj)
+            if statement.get("id") and meta_config.get(statement["id"]):
+                meta_config[statement["id"]]["startIndex"] = b+base+indexes[0]
+                meta_config[statement["id"]]["endIndex"] = b+base+indexes[1]
+            base += indexes[1]
+            code = code[indexes[1]:]
     return tree

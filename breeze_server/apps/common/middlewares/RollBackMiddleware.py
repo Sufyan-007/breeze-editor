@@ -26,7 +26,6 @@ class RollbackMiddleware(MiddlewareMixin):
                     rollback_config_file(file_obj['project_name'], file_obj['category'], file_obj['filename'], None, True)
                 except Exception as e:
                     print(f"Error rolling back file {file_obj.get('filename')}: {e}")
-
         else:
             print('nothing to rollback')
         

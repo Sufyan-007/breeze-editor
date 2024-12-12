@@ -11,7 +11,8 @@ def generate_code_with_latest_config(project_name, category_filename_data):
     app_config_dir = f"{CONFIG_PATH}/{project_name}"
     app_config = read_project_config_file(app_config_dir, CONFIG_FILES_PATH['APP_CONFIG'])
     
-    comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
+    # comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.COMPONENTS.value}/index")
+    comp_config_index = read_json_file(f"{app_config_dir}/{ResourceCategory.CODE_FILE.value}/index")
     
     # reading routing config
     config_data_obj = read_config_file(project_name, "routing_config", "routing_config")

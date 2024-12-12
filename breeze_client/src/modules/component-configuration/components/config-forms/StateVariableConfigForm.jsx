@@ -7,19 +7,36 @@ import {
   MonacoEditor,
 } from '../../../../common/fields';
 import { BreezeDatatypes } from '../../constants/FormConstants';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import { initialStateVarConfig } from '../../constants/ResourcesFormData';
 import { validator } from '../../../../utils/Validator';
 
-function StateVariableConfigForm({ onSubmit, onCancel, editMode }) {
+function StateVariableConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const [formData, setFormData] = useState(initialStateVarConfig);
   const { theme } = useContext(ThemeContext);
   const projectTheme = theme === 'dark' ? 'vs-dark' : 'vs';
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
+
   const handleChange = useCallback((field, value) => {
     setFormData((formData) => {
+      if (field === 'defaultValue') {
+        return {
+          ...formData,
+          defaultValue: { type: 'CUSTOM', value },
+        };
+      }
       return { ...formData, [field]: value };
     });
   }, []);
@@ -31,14 +48,11 @@ function StateVariableConfigForm({ onSubmit, onCancel, editMode }) {
     if (!isFormValid) {
       return;
     }
-    const transformedData = {
-      ...formData,
-      value: {
-        type: ['STRING', 'NUMBER', 'BOOLEAN'].includes(formData.dataType) ? formData.dataType : 'CUSTOM',
-        value: formData.defaultValue,
-      },
-    };
-    onSubmit(transformedData);
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
     setFormData(initialStateVarConfig);
   };
 
@@ -76,7 +90,7 @@ function StateVariableConfigForm({ onSubmit, onCancel, editMode }) {
           />
           <label className="form-label br-text-primary med-font fw-semibold">Default Value</label>
           <MonacoEditor
-            defaultValue={formData.defaultValue || ''}
+            defaultValue={formData.defaultValue.value || ''}
             onChange={(value) => handleChange('defaultValue', value)}
             language="javascript"
             height="100px"
@@ -110,9 +124,11 @@ function StateVariableConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 StateVariableConfigForm.propTypes = {
-  onSubmit: PropTypes.func,
-  onCancel: PropTypes.func,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default StateVariableConfigForm;

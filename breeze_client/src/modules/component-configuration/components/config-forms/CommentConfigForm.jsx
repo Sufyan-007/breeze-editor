@@ -1,11 +1,22 @@
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextArea } from '../../../../common/fields';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-function CommentConfigForm({ onSubmit, onCancel, editMode }) {
+function CommentConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
   const initialCommentConfig = JSON.parse(JSON.stringify(funcConfigTemplates['comment']));
   const [formData, setFormData] = useState({ ...initialCommentConfig });
+
+  const fetchConfig = useCallback(async () => {
+    const res = await getConfig();
+    setFormData(res.config);
+  }, [getConfig]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   const updateText = (value) => {
     setFormData((state) => {
@@ -16,7 +27,11 @@ function CommentConfigForm({ onSubmit, onCancel, editMode }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (editMode) {
+      onUpdate(formData);
+    } else {
+      onSubmit(formData);
+    }
     setFormData(initialCommentConfig);
   };
 
@@ -60,9 +75,11 @@ function CommentConfigForm({ onSubmit, onCancel, editMode }) {
 }
 
 CommentConfigForm.propTypes = {
-  onSubmit: PropTypes.func,
-  onCancel: PropTypes.func,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
 export default CommentConfigForm;

@@ -1,5 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { addNodeAsync, deleteNodeAsync, fetchFolderConfig, moveNodeAsync, renameNodeAsync } from './directory_actions';
+import {
+  addCustomFile,
+  addNodeAsync,
+  deleteNodeAsync,
+  fetchFolderConfig,
+  moveNodeAsync,
+  renameNodeAsync,
+} from './directory_actions';
 import breezeConfigData from '../../modules/project/constants/DirectoryStructure';
 
 const initialState = {
@@ -93,32 +100,21 @@ const directorySlice = createSlice({
       })
       .addCase(addNodeAsync.fulfilled, (state, action) => {
         state.status = 'succeeded';
+        const tempNode = action.meta.arg;
         const node = action.payload;
-        if (state.directoryConfig[node.id]) {
-          state.directoryConfig[node.id].name = node.tempName;
-          delete state.directoryConfig[node.id].tempName;
-          state.directoryConfig[node.id].isEditing = false;
-          state.directoryConfig[node.id].isNew = false;
+        if (!state.directoryConfig[node.id]) {
+          state.directoryConfig[node.id] = node;
+        }
+        if (state.directoryConfig[tempNode.node['id']]) {
+          delete state.directoryConfig[tempNode.node['id']];
+        }
+        const parentId = tempNode.node['parentId'];
+        if (parentId && state.directoryConfig[parentId]?.children) {
+          state.directoryConfig[parentId].children = state.directoryConfig[parentId].children
+            .filter((childId) => childId !== tempNode.node['id'])
+            .concat(node.id);
         }
       })
-      //TODO : when connected with API
-      // .addCase(addNodeAsync.fulfilled, (state, action) => {
-      //   state.status = 'succeeded';
-      //   const tempNode = action.meta.arg;
-      //   const node = action.payload;
-      //   if (!state.directoryConfig[node.id]) {
-      //     state.directoryConfig[node.id] = node;
-      //   }
-      //   if (state.directoryConfig[tempNode.node['id']]) {
-      //     delete state.directoryConfig[tempNode.node['id']];
-      //   }
-      //   const parentId = tempNode.node['parentId'];
-      //   if (parentId && state.directoryConfig[parentId]?.children) {
-      //     state.directoryConfig[parentId].children = state.directoryConfig[parentId].children
-      //       .filter((childId) => childId !== tempNode.node['id'])
-      //       .concat(node.id);
-      //   }
-      // })
       .addCase(addNodeAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
@@ -186,6 +182,34 @@ const directorySlice = createSlice({
         }
       })
       .addCase(moveNodeAsync.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      .addCase(addCustomFile.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(addCustomFile.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        const { payload } = action.meta.arg;
+        const tempNode = {};
+        for (const [key, value] of payload.entries()) {
+          tempNode[key] = value;
+        }
+        const { node } = action.payload;
+        if (!state.directoryConfig[node.id]) {
+          state.directoryConfig[node.id] = node;
+        }
+        if (state.directoryConfig[tempNode['id']]) {
+          delete state.directoryConfig[tempNode['id']];
+        }
+        const parentId = tempNode['selectedFolderId'];
+        if (parentId && state.directoryConfig[parentId]?.children) {
+          state.directoryConfig[parentId].children = state.directoryConfig[parentId].children
+            .filter((childId) => childId !== tempNode['id'])
+            .concat(node.id);
+        }
+      })
+      .addCase(addCustomFile.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       });
