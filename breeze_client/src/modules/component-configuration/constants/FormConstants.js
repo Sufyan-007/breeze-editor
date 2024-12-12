@@ -5,7 +5,7 @@ export const BreezeDatatypes = [
   { value: 'OBJECT', label: 'Object' },
   { value: 'ARRAY', label: 'Array' },
   { value: 'FUNCTION', label: 'Function' },
-  { value: 'CUSTOM', label: 'Custom' },
+  { value: 'ANY', label: 'Any' },
   { value: 'UNDEFINED', label: 'Undefined' },
   { value: 'NULL', label: 'Null' },
   { value: 'TOKEN', label: 'Token' },

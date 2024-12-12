@@ -19,6 +19,9 @@ import CommentConfigForm from './CommentConfigForm';
 import FunctionCall from './FunctionCall';
 import ServiceCall from './ServiceCall';
 import RouterNavigateConfigForm from './RouterNavigateConfigForm';
+import FunctionCallEdit from './FunctionCallEdit';
+import ReturnConfigForm from './ReturnConfigForm';
+import ExportConfigForm from './ExportConfigForm';
 
 export {
   VariableConfigForm,
@@ -42,4 +45,7 @@ export {
   FunctionCall,
   ServiceCall,
   RouterNavigateConfigForm,
+  FunctionCallEdit,
+  ReturnConfigForm,
+  ExportConfigForm,
 };

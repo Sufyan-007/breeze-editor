@@ -7,6 +7,7 @@ import { useOffcanvas } from '../../../contexts/OffcanvasContext';
 import { configTypeMapping, items } from '../constants/EditorList';
 import {
   addAstStatement,
+  deleteAstStatement,
   getAstStatement,
   getCodeDetails,
   updateAstStatement,
@@ -25,6 +26,7 @@ const ConfigurableMonacoEditor = ({
   node = {},
 }) => {
   const editorRef = useRef(null);
+  const countRef = useRef(0);
   const [editor, setEditor] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [filteredItems, setFilteredItems] = useState(items);
@@ -51,7 +53,7 @@ const ConfigurableMonacoEditor = ({
   }, [editor, onChange]);
 
   useEffect(() => {
-    const isSpecificTag = ['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag);
+    const isSpecificTag = ['COMPONENTS', 'HOOKS', 'CODE_FILE', 'SERVICES'].includes(node?.tag);
     const editorInstance = monaco.editor.create(editorRef.current, {
       value: value,
       language: language,
@@ -69,9 +71,9 @@ const ConfigurableMonacoEditor = ({
       const model = editorInstance.getModel();
       const position = editorInstance.getPosition();
       const index = model.getOffsetAt(position);
-      // const character = model.getValue()[index];
       const text = model.getValue();
       const count = text.slice(0, index).length;
+      countRef.current = count;
 
       const payload = {
         fileId: node.id,
@@ -113,6 +115,7 @@ const ConfigurableMonacoEditor = ({
       fileId: node.id,
       parentId: statementId,
       config: value,
+      index: countRef.current,
     };
     await addAstStatement(projectName, payload);
     const data = await getFileCode(projectName, node.id);
@@ -132,6 +135,16 @@ const ConfigurableMonacoEditor = ({
     closeOffcanvas();
   };
 
+  const deleteStatement = async () => {
+    const payload = {
+      fileId: node.id,
+      statementId: statementId,
+    };
+    await deleteAstStatement(projectName, payload);
+    const data = await getFileCode(projectName, node.id);
+    onChange(data.code);
+  };
+
   const getConfig = useCallback(async () => {
     const payload = {
       fileId: node.id,
@@ -148,11 +161,14 @@ const ConfigurableMonacoEditor = ({
   const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel, onUpdate, getConfig);
 
   const handleMenuItemClick = (item) => {
-    const contentComponent = getConfigComponent(item);
-    // console.log('contentComponent', item, contentComponent);
-    let width = '40%';
-    if (item === 'Html elements') width = '60%';
-    showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
+    if (item === 'Delete') {
+      deleteStatement();
+    } else {
+      const contentComponent = getConfigComponent(item);
+      let width = '40%';
+      if (item === 'Html elements') width = '60%';
+      showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
+    }
     setShowMenu(false);
   };
 

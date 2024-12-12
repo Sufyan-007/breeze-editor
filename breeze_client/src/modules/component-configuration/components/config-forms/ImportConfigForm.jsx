@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
 import {
   CustomTextInput,
   CustomRadioButtonField,
@@ -8,9 +7,11 @@ import {
 } from '../../../../common/fields';
 import { initialImportConfig } from '../../constants/ResourcesFormData';
 import { ImportCategories, ImportTypes } from '../../constants/FormConstants';
+import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
 
-function ImportConfigForm({ onSubmit, onCancel, editMode = false }) {
+function ImportConfigForm() {
   const [formData, setFormData] = useState(initialImportConfig);
+  const { closeOffcanvas } = useOffcanvas();
 
   const handleChange = (field, value) => {
     setFormData({
@@ -21,14 +22,13 @@ function ImportConfigForm({ onSubmit, onCancel, editMode = false }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
     setFormData(initialImportConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
     setFormData(initialImportConfig);
-    onCancel();
+    closeOffcanvas();
   };
 
   return (
@@ -85,7 +85,7 @@ function ImportConfigForm({ onSubmit, onCancel, editMode = false }) {
           />
           <CustomButtonField
             type="button"
-            label={editMode ? 'Update' : 'Submit'}
+            label={'Submit'}
             className="btn btn-filled med-font"
             onClick={handleSubmit}
             disabled={true}
@@ -95,11 +95,5 @@ function ImportConfigForm({ onSubmit, onCancel, editMode = false }) {
     </form>
   );
 }
-
-ImportConfigForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  editMode: PropTypes.bool,
-};
 
 export default ImportConfigForm;

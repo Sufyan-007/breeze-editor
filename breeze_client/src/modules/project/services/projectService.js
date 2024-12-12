@@ -162,3 +162,25 @@ export const moveNodeApi = async (projectName, nodeId, targetId) => {
     throw error;
   }
 };
+
+export const getEntityConfig = async (projectName, payload) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/entity/get-entity-config/`;
+  try {
+    const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
+    return response;
+  } catch (error) {
+    console.error('Error fetching data:', error.message);
+    throw error;
+  }
+};
+
+export const getEntityConfigById = async (projectName, entity_id) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/entity/get-entity-config-by-id/${entity_id}/`;
+  try {
+    const response = await callApiClient(url, 'GET', null, false, {}, true, false);
+    return response;
+  } catch (error) {
+    console.error('Error fetching data:', error.message);
+    throw error;
+  }
+};

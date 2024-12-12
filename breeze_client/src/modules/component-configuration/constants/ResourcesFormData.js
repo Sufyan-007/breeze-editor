@@ -2,14 +2,14 @@ export const initialPropConfig = {
   name: '',
   isRequired: false,
   dataType: 'STRING',
-  defaultValue: '',
+  defaultValue: { type: 'CUSTOM', value: '""' },
   description: '',
 };
 
 export const initialParamConfig = {
   name: '',
   dataType: 'STRING',
-  defaultValue: '',
+  defaultValue: { type: 'CUSTOM', value: '""' },
   description: '',
 };
 
@@ -28,7 +28,7 @@ export const initialVariableConfig = {
   type: 'DECLARATION',
   varName: '',
   declarationType: 'const',
-  dataType: 'CUSTOM',
+  dataType: 'STRING',
   value: { type: 'CUSTOM', value: '' },
   description: '',
 };
@@ -36,7 +36,7 @@ export const initialVariableConfig = {
 export const initialStateVarConfig = {
   type: 'REACT_USE_STATE',
   varName: '',
-  dataType: 'CUSTOM',
+  dataType: 'STRING',
   defaultValue: { type: 'CUSTOM', value: '' },
   description: '',
 };
@@ -44,7 +44,7 @@ export const initialStateVarConfig = {
 export const initialRefVarConfig = {
   type: 'REACT_USE_REF',
   varName: '',
-  dataType: 'CUSTOM',
+  dataType: 'STRING',
   defaultValue: { type: 'CUSTOM', value: '' },
   description: '',
 };
@@ -108,7 +108,14 @@ export const initialUseCallbackConfig = {
     isAsync: false,
     isAnonymous: true,
     description: '',
-    parameters: [],
+    schema: {
+      type: 'FUNCTION',
+      returnType: {
+        selection: 'anyOf',
+        types: [{ type: 'any' }],
+      },
+      parameters: [],
+    },
     bodyConfig: {
       type: 'BLOCK',
       statements: [],
