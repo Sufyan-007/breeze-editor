@@ -57,6 +57,7 @@ const AddELement = () => {
               category: 'third_party',
               libname: libName,
               libversion: version,
+              module: 'component',
             };
 
             const libraryComponents = await getLibraryComponents(projectName, requestBodyThirdParty);

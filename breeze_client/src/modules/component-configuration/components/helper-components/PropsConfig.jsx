@@ -24,6 +24,7 @@ const PropsConfig = ({ selectedCategory, component = null, library = '', setconf
             select: ['props'],
             libname: libName,
             libversion: version,
+            module: 'component',
           };
 
           const propList = await getAllProps(projectName, payLoad);
