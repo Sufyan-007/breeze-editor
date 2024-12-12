@@ -62,7 +62,14 @@ export const initialFunctionConfig = {
   isAsync: false,
   isAnonymous: false,
   description: '',
-  parameters: [],
+  schema: {
+    type: 'FUNCTION',
+    returnType: {
+      selection: 'anyOf',
+      types: [{ type: 'any' }],
+    },
+    parameters: [],
+  },
   bodyConfig: {
     type: 'BLOCK',
     statements: [],

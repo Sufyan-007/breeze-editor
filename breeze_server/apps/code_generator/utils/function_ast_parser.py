@@ -96,7 +96,7 @@ class FunctionParser:
                 if param.get("isRest"):
                     params = f"...{param['name']}"
                 else:
-                    if param.get("defaultValue"):
+                    if False and param.get("defaultValue"):
                         defaultValue, _t = self.get_value_code(param["defaultValue"],key_chaining=key_chaining+["schema","parameters",i,"defaultValue"], parent_block_id=parent_block_id)
                         if _t:
                             tree["children"].append(_t)

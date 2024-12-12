@@ -115,8 +115,9 @@ def add_statement(projectId,fileId,parentId,statement,index=None):
                 if x_m["startIndex"] > index:
                     break
                 pos += 1
-        parentConfig["statements"].insert(pos,statement)
-                
+            parentConfig["statements"].insert(pos,statement)
+        else:
+            parentConfig["statements"].append(statement)
     
     elif parentConfig["type"] == "Element":
         newIndex = parentIndex+"<>children<>"+str(len(parentConfig["children"]))
