@@ -11,7 +11,7 @@ import PropsConfig from '../helper-components/PropsConfig';
 import PreviewDisplay from '../helper-components/PreviewDisplay';
 import htmlElements from '../../constants/AllELements';
 
-const AddELement = () => {
+const AddELement = ({ onSubmit }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [allThirdPartyLibraries, setAllThirdPartyLibraries] = useState({});
@@ -101,6 +101,13 @@ const AddELement = () => {
 
   function addELement(event) {
     event.preventDefault();
+    onSubmit({
+      type: 'Element',
+      // "elementType": "THIRD_PARTY",
+      tagName: selectedElements[1],
+      // "library": "react-bootstrap",
+      children: [],
+    });
     console.log('Add ELement', selectedElements);
   }
   const handlePreviewClick = () => {
