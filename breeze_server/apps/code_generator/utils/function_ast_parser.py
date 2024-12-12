@@ -358,8 +358,9 @@ class FunctionParser:
         tag_name = config['tagName']
         attributes = config.get('attributes', {})
         children = config.get('children', [])
+        id = config.get('id')
 
-        attribute_str = ' '.join([f'{attr}={{ {self.get_value_code(value,key_chaining=key_chaining+["attributes",attr], parent_block_id=parent_block_id)[0]}}}' for attr, value in attributes.items()])
+        attribute_str = ' '.join([f'{attr}={{ {self.get_value_code(value,key_chaining=key_chaining+["attributes",attr], parent_block_id=id)[0]}}}' for attr, value in attributes.items()])
         attribute_str = attribute_str+f" data-brz-id='{config['id']}'"
         open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
         close_tag = f'</{tag_name}>'
@@ -376,7 +377,7 @@ class FunctionParser:
         inner_code_tree = []
         inner_html= []
         for i,child in enumerate(children):
-            code, t = self.get_value_code(child,key_chaining=key_chaining+["children",i], parent_block_id=parent_block_id)
+            code, t = self.get_value_code(child,key_chaining=key_chaining+["children",i], parent_block_id=id)
             inner_html.append(code)
             inner_code_tree.append(t)
             
