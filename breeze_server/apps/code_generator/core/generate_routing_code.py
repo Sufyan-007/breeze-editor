@@ -5,6 +5,7 @@ from apps.common.utils.path_extractor import get_path_without_ext
 from apps.common.constants.consts import NEW_LINE_CHAR, CONFIG_PATH
 from apps.common.constants.enums.ResourceCategory import ResourceCategory
 from apps.common.utils.file_helpers.config_handler import read_config_file
+from apps.code_generator.utils.import_helper import ImportHelper
 
 def get_base_route_list(route_config):
     base_route_ids_list = []
@@ -26,24 +27,17 @@ def get_routing_code(_route_config, _comp_config_index, _app_config):
         if rt.get('hydrateFallbackElementId') is not None and rt['hydrateFallbackElementId'] not in imported_components:
             imported_components.append(rt['hydrateFallbackElementId'])
 
+    imported_components = [{"id": comp_id} for comp_id in imported_components]
     
-    # Handle import for components
-    app_config_dir = f"{CONFIG_PATH}/{_app_config.get('name')}"
-    import_statements = []
-    for ic_id in imported_components:
-        related_comp = _comp_config_index[ic_id]
-        directory_manager= DirectoryManager(_app_config["name"])
-        # related_comp_file = read_config_file(_app_config.get('name'), ResourceCategory.COMPONENTS.value, ic_id)
-        # file_id = related_comp_file.get('data', {}).get(related_comp, {}).get("file_id")
-        
-        # TODO: need to watch out for all the ResourceCategory.COMPONENTS.value use cases 
-        # here component id is the file id which will changed later
-        comp_path = directory_manager.get_path_from_file_id(ic_id,relative_path=True)
-        comp_path = get_path_without_ext(comp_path)
-
-        import_statement = f'import {related_comp} from \'/{comp_path}\';'
-        import_statements.append(import_statement)
-    print(import_statements)
+    imports,_ =  ImportHelper.generate_imports_code(
+        imports={
+            "other": [],
+            "components" : imported_components
+        },
+        projectId=_app_config.get('name'),
+        file_id="ROUTE_COMPONENT"
+    )
+    print(imports)
     base_route_ids_list = get_base_route_list(_route_config)
     routing_code = generate_routing_code(_route_config, _comp_config_index, base_route_ids_list, False)
     print("---------routing_code---------")
@@ -54,7 +48,7 @@ def get_routing_code(_route_config, _comp_config_index, _app_config):
     print("---------generated_code---------")
     print(generated_code)
     generated_code =  f'''
-        {NEW_LINE_CHAR.join(import_statements)}
+        {imports}
 
         {generated_code}    
     '''
