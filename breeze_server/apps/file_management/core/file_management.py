@@ -174,6 +174,51 @@ def update_statement(projectId,fileId,statementId,statement):
     
     return {}
 
+def delete_statement(projectId, fileId, statementId):
+    fileConfig = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId
+    )["data"]
+    fileConfigMeta = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId+"_meta"
+    )["data"]
+
+    try:
+        configMeta = fileConfigMeta[statementId]
+    except KeyError:
+        raise KeyError("Could not find key %s" % statementId)
+
+    parentBlockId = configMeta.get('parentBlockId')
+    if not parentBlockId:
+        raise KeyError("parentBlockId not found for statement %s" % statementId)
+
+    parentBlockConfig = get_section_from_flattened_index(parentBlockId, fileConfig, fileConfigMeta)
+    if not parentBlockConfig:
+        raise KeyError("Could not find parent block for statement %s" % statementId)
+
+    if parentBlockConfig["type"] == "BLOCK":
+        parentBlockConfig["statements"] = [stmt for stmt in parentBlockConfig["statements"] if stmt["id"] != statementId]
+    elif parentBlockConfig["type"] == "Element":
+        parentBlockConfig["children"] = [child for child in parentBlockConfig["children"] if child["id"] != statementId]
+    else:
+        raise TypeError("Unexpected parent block type")
+
+    del fileConfigMeta[statementId]
+
+    generate_file_code(projectId=projectId, fileId=fileId, config=fileConfig)
+
+    write_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId,
+        json_data=fileConfig
+    )
+    return {}
+
+
 def get_config_by_tag(tag,fileName,fileId,entityId):
     if tag == "COMPONENTS":
         file_config = deepcopy(TEMPLATE_COMP_CONFIG)

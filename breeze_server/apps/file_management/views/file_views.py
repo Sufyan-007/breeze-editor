@@ -41,6 +41,15 @@ def update_statements(request,project_id):
     conf = file_management.update_statement(projectId=project_id,fileId=fileId,statementId=statementId,statement=config)
     return JsonResponse(conf,status=200)
 
+@api_view(["POST"])
+def delete_statement(request,project_id):
+    data = json.loads(request.body.decode('utf8'))
+    fileId = data['fileId']
+    statementId = data['statementId']
+    conf = file_management.delete_statement(projectId=project_id,fileId=fileId,statementId=statementId)
+    return JsonResponse(conf,status=200)
+
+
 @api_view(['POST'])
 def get_statement_config(request,project_id):
     data = json.loads(request.body.decode('utf-8'))
