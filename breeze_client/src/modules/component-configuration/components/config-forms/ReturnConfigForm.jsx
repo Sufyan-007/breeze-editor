@@ -3,9 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { CustomButtonField, CustomTextArea } from '../../../../common/fields';
 
-function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
-  const initialConsoleConfig = JSON.parse(JSON.stringify(funcConfigTemplates['consoleStatement']));
-  const [formData, setFormData] = useState({ ...initialConsoleConfig });
+function ReturnConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
+  const initialReturnConfig = JSON.parse(JSON.stringify(funcConfigTemplates['return']));
+  const [formData, setFormData] = useState({ ...initialReturnConfig });
 
   const fetchConfig = useCallback(async () => {
     const res = await getConfig();
@@ -20,7 +20,10 @@ function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
 
   function updateText(value) {
     setFormData((state) => {
-      state.parameters[0].value = value;
+      state.value = {
+        type: 'TOKEN',
+        value: value,
+      };
       return { ...state };
     });
   }
@@ -32,12 +35,12 @@ function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
     } else {
       onSubmit(formData);
     }
-    if (!editMode) setFormData(initialConsoleConfig);
+    if (!editMode) setFormData(initialReturnConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialConsoleConfig);
+    setFormData(initialReturnConfig);
     onCancel();
   };
 
@@ -47,11 +50,11 @@ function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
         <div>
           <div>
             <CustomTextArea
-              name="statement"
-              value={formData?.parameters[0].value}
+              name="Return Value"
+              value={formData?.value?.value || ''}
               onChange={(value) => updateText(value)}
               config={{
-                label: 'Write down the content.',
+                label: 'Return content',
                 groupClass: 'form-group mb-2',
               }}
             />
@@ -76,7 +79,7 @@ function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
   );
 }
 
-ConsoleStatementForm.propTypes = {
+ReturnConfigForm.propTypes = {
   getConfig: PropTypes.func,
   editMode: PropTypes.bool,
   onSubmit: PropTypes.func,
@@ -84,4 +87,4 @@ ConsoleStatementForm.propTypes = {
   onCancel: PropTypes.func,
 };
 
-export default ConsoleStatementForm;
+export default ReturnConfigForm;

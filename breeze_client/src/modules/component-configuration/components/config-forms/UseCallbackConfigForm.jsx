@@ -83,19 +83,37 @@ function UseCallbackConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpda
   };
 
   const handleDeleteParam = (index) => {
-    const updatedParams = formData.callback.parameters.filter((_, i) => i !== index);
-    setFormData({ ...formData, callback: { ...formData.callback, parameters: updatedParams } });
+    const updatedParams = formData.callback.schema.parameters.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      callback: {
+        ...formData.callback,
+        schema: {
+          ...formData.callback.schema,
+          parameters: updatedParams,
+        },
+      },
+    });
     clearParamForm();
   };
 
   const addOrUpdateParam = (paramData) => {
-    const updatedParams = [...formData.callback.parameters];
+    const updatedParams = [...formData.callback.schema.parameters];
     if (editParamIndex !== null) {
       updatedParams[editParamIndex] = paramData;
     } else {
       updatedParams.push(paramData);
     }
-    setFormData({ ...formData, callback: { ...formData.callback, parameters: updatedParams } });
+    setFormData({
+      ...formData,
+      callback: {
+        ...formData.callback,
+        schema: {
+          ...formData.callback.schema,
+          parameters: updatedParams,
+        },
+      },
+    });
     clearParamForm();
   };
 
@@ -175,8 +193,8 @@ function UseCallbackConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpda
                     <i className="bi bi-plus-circle br-text-primary"></i>
                   </div>
                 </div>
-                {formData.callback.parameters.length > 0 &&
-                  formData.callback.parameters.map((param, index) => (
+                {formData.callback.schema.parameters.length > 0 &&
+                  formData.callback.schema.parameters.map((param, index) => (
                     <div
                       key={index}
                       className="br-background-primary my-1 py-1 px-2 d-flex justify-content-between"
@@ -208,7 +226,7 @@ function UseCallbackConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpda
                       </div>
                     </div>
                   ))}
-                {formData.callback.parameters.length === 0 && (
+                {formData.callback.schema.parameters.length === 0 && (
                   <span className="med-font br-text-primary">No Params Present</span>
                 )}
               </div>

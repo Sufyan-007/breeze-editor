@@ -92,7 +92,7 @@ function VariableConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
           />
           <CustomSelectField
             name="dataType"
-            value={formData.dataType || 'CUSTOM'}
+            value={formData.dataType || 'STRING'}
             onChange={(value) => handleChange('dataType', value)}
             options={BreezeDatatypes}
             config={{

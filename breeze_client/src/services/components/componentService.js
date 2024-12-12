@@ -36,3 +36,9 @@ export async function getAstStatement(projectName, payload) {
   const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
   return response;
 }
+
+export async function deleteAstStatement(projectName, payload) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/file/delete-statement/`;
+  const response = await callApiClient(url, 'POST', payload, false, {}, true, true);
+  return response;
+}

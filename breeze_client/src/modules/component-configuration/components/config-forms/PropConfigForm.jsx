@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import ThemeContext from '../../../../contexts/ThemeContext';
 import {
@@ -23,12 +23,17 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
     setFormData(initialData);
   }, [initialData]);
 
-  const handleChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
+  const handleChange = useCallback((field, value) => {
+    setFormData((formData) => {
+      if (field === 'defaultValue') {
+        return {
+          ...formData,
+          defaultValue: { type: 'CUSTOM', value },
+        };
+      }
+      return { ...formData, [field]: value };
     });
-  };
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -69,7 +74,7 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
             <div className="col-4 mt-3">
               <CustomCheckBoxField
                 name="isRequired"
-                value={formData.isRequired || false}
+                value={formData?.isRequired || false}
                 onChange={(value) => handleChange('isRequired', value)}
                 config={{ label: 'Is Required', groupClass: 'form-check mt-3' }}
               />
@@ -77,7 +82,7 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
           </div>
           <CustomSelectField
             name="dataType"
-            value={formData.dataType || 'CUSTOM'}
+            value={formData?.dataType || 'STRING'}
             onChange={(value) => handleChange('dataType', value)}
             options={BreezeDatatypes}
             config={{
@@ -87,7 +92,7 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
           />
           <label className="form-label br-text-primary med-font fw-semibold">Default Value</label>
           <MonacoEditor
-            defaultValue={formData.defaultValue || ''}
+            defaultValue={formData?.defaultValue?.value || ''}
             onChange={(value) => handleChange('defaultValue', value)}
             language="javascript"
             height="100px"
@@ -96,7 +101,7 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
           />
           <CustomTextArea
             name="description"
-            value={formData.description || ''}
+            value={formData?.description || ''}
             onChange={(value) => handleChange('description', value)}
             config={{ label: 'Description', groupClass: 'form-group my-2' }}
           />
@@ -127,7 +132,7 @@ PropConfigForm.propTypes = {
     name: PropTypes.string,
     isRequired: PropTypes.bool,
     dataType: PropTypes.string,
-    defaultValue: PropTypes.string,
+    defaultValue: PropTypes.object,
     description: PropTypes.string,
   }),
   editMode: PropTypes.bool,

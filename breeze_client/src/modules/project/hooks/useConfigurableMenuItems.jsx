@@ -19,11 +19,16 @@ import {
   FunctionCall,
   ServiceCall,
   RouterNavigateConfigForm,
+  FunctionCallEdit,
+  ReturnConfigForm,
+  ExportConfigForm,
 } from '../../component-configuration/components/config-forms';
 
 const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
   const getConfigComponent = (item) => {
     switch (item) {
+      case 'Configure Imports':
+        return <ImportConfigForm />;
       case 'Component Config':
         return (
           <ComponentConfigForm
@@ -34,10 +39,6 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
             onUpdate={onUpdate}
           />
         );
-      case 'Add Import':
-        return <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Edit Import':
-        return <ImportConfigForm onSubmit={onSubmit} onCancel={onCancel} editMode={true} />;
       case 'Props':
         return (
           <ComponentConfigForm
@@ -208,12 +209,28 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
             onUpdate={onUpdate}
           />
         );
+      case 'Return Statement':
+        return <ReturnConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Edit Return':
+        return (
+          <ReturnConfigForm
+            getConfig={getConfig}
+            onSubmit={onSubmit}
+            onCancel={onCancel}
+            editMode={true}
+            onUpdate={onUpdate}
+          />
+        );
       case 'Function Call':
         return <FunctionCall onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Service Call':
         return <ServiceCall onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Edit Function Call':
+        return <FunctionCallEdit onUpdate={onUpdate} onCancel={onCancel} getConfig={getConfig} />;
       case 'Add Navigation':
         return <RouterNavigateConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
+      case 'Configure Exports':
+        return <ExportConfigForm />;
       default:
         return null;
     }

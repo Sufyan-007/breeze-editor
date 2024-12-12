@@ -101,20 +101,20 @@ function FunctionConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
               <div className="d-flex mt-3">
                 <CustomCheckBoxField
                   name="isAsync"
-                  value={formData.isAsync || false}
+                  value={formData?.isAsync || false}
                   onChange={(value) => handleChange('isAsync', value)}
                   config={{ label: 'Is Async', groupClass: 'form-check me-2' }}
                 />
                 <CustomCheckBoxField
                   name="isAnonymous"
-                  value={formData.isAnonymous || false}
+                  value={formData?.isAnonymous || false}
                   onChange={(value) => handleChange('isAnonymous', value)}
                   config={{ label: 'Is Anonymous', groupClass: 'form-check mx-2' }}
                 />
               </div>
               <CustomTextArea
                 name="description"
-                value={formData.description || ''}
+                value={formData?.description || ''}
                 onChange={(value) => handleChange('description', value)}
                 config={{ label: 'Description', groupClass: 'form-group mb-2' }}
               />

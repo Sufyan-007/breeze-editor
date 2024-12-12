@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   CustomTextInput,
@@ -22,12 +22,17 @@ function ParamForm({ param, onSubmit, onCancel, editMode }) {
     setFormData(param);
   }, [param]);
 
-  const handleParamChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
+  const handleParamChange = useCallback((field, value) => {
+    setFormData((formData) => {
+      if (field === 'defaultValue') {
+        return {
+          ...formData,
+          defaultValue: { type: 'CUSTOM', value },
+        };
+      }
+      return { ...formData, [field]: value };
     });
-  };
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,7 +69,7 @@ function ParamForm({ param, onSubmit, onCancel, editMode }) {
           />
           <CustomSelectField
             name="dataType"
-            value={formData.dataType || 'CUSTOM'}
+            value={formData.dataType || 'STRING'}
             onChange={(value) => handleParamChange('dataType', value)}
             options={BreezeDatatypes}
             config={{
@@ -76,7 +81,7 @@ function ParamForm({ param, onSubmit, onCancel, editMode }) {
           />
           <label className="form-label br-text-primary med-font fw-semibold">Default Value</label>
           <MonacoEditor
-            defaultValue={formData.defaultValue || ''}
+            defaultValue={formData.defaultValue.value || ''}
             onChange={(value) => handleParamChange('defaultValue', value)}
             language="javascript"
             height="100px"
