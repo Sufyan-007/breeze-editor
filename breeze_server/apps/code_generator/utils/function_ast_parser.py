@@ -21,7 +21,7 @@ class FunctionParser:
     def get_meta_config(self):
         return self.meta_config
     
-    def generate_statement_code(self,config,key_chaining=[], parent_block_id=None):
+    def generate_statement_code(self,config,key_chaining=[], parent_block_id=None, init_scope={}):
         # if config.get('$ref'):
         #     entityType =config["entityType"]
         #     config = resolve_ref(projectId=self.projectId,entityType=entityType,entityId= config["$ref"],extras=config)
@@ -62,7 +62,7 @@ class FunctionParser:
                 conf["parent_scope"] = parent_scope
             else: 
                 conf["parent_scope"] = {}        
-            conf["scope"] = {}
+            conf["scope"] = init_scope
             for i,code in enumerate(config['statements']):
                 statement, t = self.generate_statement_code(code,key_chaining=key_chaining+["statements",i], parent_block_id=statement_id)
                 statements.append(statement)
@@ -85,24 +85,35 @@ class FunctionParser:
                     raise Exception("function name already declared..")
                 self.meta_config[parent_block_id]["scope"][config['name']] = statement_id
             
-            body, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
             params = []
-            schema = config["schema"]
             
+            schema = config["schema"]
             if "$schema" in schema:
                 raise NotImplementedError()
             
             for i,param in enumerate(schema.get("parameters",[])):
-                if param.get("isRest"):
-                    params = f"...{param['name']}"
+                if param.get("isDestructured",False):
+                    raise NotImplementedError()
                 else:
-                    if param.get("defaultValue"):
-                        defaultValue, _t = self.get_value_code(param["defaultValue"],key_chaining=key_chaining+["schema","parameters",i,"defaultValue"], parent_block_id=parent_block_id)
-                        if _t:
-                            tree["children"].append(_t)
-                        params.append(f"{param['name']} = {defaultValue}")
+                    param_id = param.get("id")
+                    if not param_id:
+                        param_id = generate_uuid_as_key()
+                        param["id"] = param_id
+                    self.meta_config[param_id] = {
+                        "index": "<>".join([str(x) for x in key_chaining+["schema","parameters",i]]),
+                        "type": "PARAM",
+                    }
+                    if param.get("isRest"):
+                        params = f"...{param['name']}"
                     else:
-                        params.append(param['name'])
+                        if param.get("defaultValue"):
+                            defaultValue, _t = self.get_value_code(param["defaultValue"],key_chaining=key_chaining+["schema","parameters",i,"defaultValue"], parent_block_id=parent_block_id)
+                            if _t:
+                                tree["children"].append(_t)
+                            params.append(f"{param['name']} = {defaultValue}")
+                        else:
+                            params.append(param['name'])
+            body, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
                         
             tree["children"].append(t)
             code = f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {",".join(params)} ) => {body}"""
@@ -480,11 +491,23 @@ class FunctionParser:
         code = ""
         t= None
         if config["type"]== "REACT_COMPONENT":
-            bodyCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
-            props=[]
-            for prop in config.get("propVars",[]):
+            param_scope = {}
+            props = []
+            for i,prop in enumerate(config.get("propVars",[])):
+                prop_id = prop.get("id")
+                if not prop_id:
+                    prop_id = generate_uuid_as_key()
+                    prop["id"] = prop_id
+                self.meta_config[prop_id] = {
+                    "index": "<>".join([str(x) for x in key_chaining+["propVars",i]]),
+                    "type": "PROP_VAR",
+                    "parentBlockId": parent_block_id
+                }
+                param_scope[prop["name"]] = prop_id
                 props.append(prop["name"])
+            bodyCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id, init_scope=param_scope)
             if config.get("hasImperativeHandling"):
+                
                 code = f""" const {config["name"]} = forwardRef( ({{ {','.join(props)} }}, ref) => {bodyCode} )"""
             else:
                 code = f""" const {config["name"]} = ({{ {','.join(props)} }}) => {bodyCode} """
