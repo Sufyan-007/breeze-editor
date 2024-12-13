@@ -325,6 +325,7 @@ def generate_file_code(projectId,fileId,config):
             entityId=entityId,
             fileId = fileId,
             exportedAs= exportEntity["name"],
+            schema=exportEntity.get("schema",{"type":"ANY"}),
             type= exportEntity.get("type","NA"),
             defaultExport=True
         )
@@ -339,6 +340,7 @@ def generate_file_code(projectId,fileId,config):
             fileId = fileId,
             exportedAs= exportEntity["name"],
             type= exportEntity.get("type","NA"),
+            schema=exportEntity.get("schema",{"type":"ANY"}),
             defaultExport=False
         )
         

@@ -484,12 +484,18 @@ class FunctionParser:
             props=[]
             for prop in config.get("propVars",[]):
                 props.append(prop["name"])
-            
             if config.get("hasImperativeHandling"):
                 code = f""" const {config["name"]} = forwardRef( ({{ {','.join(props)} }}, ref) => {bodyCode} )"""
-                
             else:
                 code = f""" const {config["name"]} = ({{ {','.join(props)} }}) => {bodyCode} """
+            
+            
+            config["schema"] = {
+                "props": config.get("propVars",[]),
+                "hasImperativeHandling": config.get("hasImperativeHandling",False)   
+            }
+            
+            self.meta_config[config["id"]]["schema"] = config["schema"]
             
         elif config["type"] == "REACT_USE_STATE":
             varName = config["varName"]
