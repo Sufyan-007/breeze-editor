@@ -12,18 +12,31 @@ import { GENERATED_PROJECTS, UPLOADED_ZIP_DIR } from './consts';
 // Load the environment variables from the specified .env file
 dotenv.config({ path: process.env.dotenv_config_path });
 
+// import  { OpenAI } from 'openai';
+
+
 // Determine which environment-specific file to load based on NODE_ENV
 const env = process.env.NODE_ENV || 'development'; // Default to 'development'
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
 const HOST = process.env.HOST || "localhost";
+let noOfrequest = 0;
 app.use(express.json());
 
 let resp = {
   "error" : false,
   "message" : "",
 };  
+
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
+import { GoogleGenerativeAI,SchemaType } from "@google/generative-ai";
+
+// Access your API key as an environment variable
+const key:any = process.env.API_KEY
+const genAI = new GoogleGenerativeAI(key);
 
 app.post('/', (req, res) => {
   
@@ -115,6 +128,84 @@ app.post('/custom', (req, res) => {
   }
 });
 
+// // Generate JSDoc endpoint
+// app.post('/generate-jsdoc', async(req, res) => {
+//   const { functionText } = req.body;
+
+//   if (!functionText) {
+//       return res.status(400).json({ error: 'Function text is required' });
+//   }
+
+//   try {
+//       // Generate JSDoc using OpenAI
+//       const prompt = `
+// Generate a JSDoc comment for the following function:
+// ${functionText}
+// `;
+//       const response = await openai.completions.create({
+//           model: 'gpt-4o-mini', // or use a similar model
+//           prompt: prompt,
+//           max_tokens: 150,
+//           temperature: 0.7,
+//       });
+
+//       const jsDoc = response.choices[0].text?.trim();
+//       res.json({ jsDoc });
+//   } catch (error) {
+//       res.status(500).json({ error: 'Failed to generate JSDoc'});
+//   }
+// });
+
+// app.post('/generate-hooks-description', async (req, res) => {
+//   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" }});
+//   const functionTexts = req.body.slice(0, 30);
+
+//   const prompts = functionTexts.map((element: any) => ({
+//     _id: element._id,
+//     functionText: element.functionText,
+//   }));
+
+//   const prompt = `Generate JSDoc comments for the following functions. Return the results as a JSON array where each object has: _id, functionText, uses, and tagsAndItsComment (an array of objects with tagName and comment).  The input functions are: ${JSON.stringify(prompts)}
+
+// Example Output (JSON):
+// [
+//   {
+//     "_id": "someId1",
+//     "functionText": "function myFunc(a: number): string",
+//     "uses": "This function does X",
+//     "tagsAndItsComment": [
+//       {"tagName": "param", "comment": "Parameter a"},
+//       {"tagName": "return", "comment": "The result string"}
+//     ]
+//   },
+//   {
+//     "_id": "someId2",
+//     "functionText": "anotherFunction()",
+//     "uses": "Another function does Y",
+//     "tagsAndItsComment": []
+//   }
+// ]`;
+
+// const result = await model.generateContent(prompt);
+// const generatedDescription:string|undefined= result.response?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+// // const generatedDescriptions = result?.response?.candidates?.map((candidate) => {
+// //  if (candidate.content?.parts?.length > 0) {
+
+// //   return candidate.content?.parts?.text;
+// //   //  return {
+// //   //    _id: prompts.find((p:any) => p.functionText === candidate.functionText)?._id, // Find matching _id
+// //   //    description: candidate.content.parts[0].text,
+// //   //  };
+// //  }; // Handle cases where a description might not be generated;
+
+// // Filter out any null values from generatedDescriptions (optional)
+// // const filteredDescriptions = generatedDescriptions.filter((desc) => desc !== null);
+
+// // res.send(filteredDescriptions);
+// // res.setHeader('Content-Type', 'application/json');
+// res.json(generatedDescription);
+// });
 app.listen(PORT, HOST, () => {
   console.log(`Server is running on http://${HOST}:${PORT}`);
 });
