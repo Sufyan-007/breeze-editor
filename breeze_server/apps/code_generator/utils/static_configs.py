@@ -129,7 +129,14 @@ TEMPLATE_HOOK_CONFIG = {
                             "isAsync": False,
                             "isAnonymous": False,
                             "description": "",
-                            "parameters": [],
+                            "schema": {
+                                "type": "FUNCTION",
+                                "returnType": {
+                                    "selection": "anyOf",
+                                    "types": [{"type": "any"}],
+                                },
+                                "parameters": [],
+                            },
                             "bodyConfig": {
                                 "type": "BLOCK",
                                 "statements": [],
