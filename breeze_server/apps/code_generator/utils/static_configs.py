@@ -7,7 +7,7 @@ TEMPLATE_CODE_FILE = {
     },
     "BLOCK": {
         "type": "BLOCK",
-        "id":"$FILE_ID",
+        "id": "$FILE_ID",
         "noWrap": 1,
         "statements": [{"type": "COMMENT", "text": " Happy coding!!"}],
     },
@@ -37,15 +37,27 @@ TEMPLATE_COMP_CONFIG = {
     "BLOCK": {
         "type": "BLOCK",
         "noWrap": 1,
-        "id":"$FILE_ID",
+        "id": "$FILE_ID",
         "statements": [
             {
                 "type": "REACT_COMPONENT",
                 "id": "DEFAULT_COMP_ID",
                 "name": "DEFAULT_COMP_NAME",
                 "propVars": [
-                    {"dataType": "STRING", "name": "prop1"},
-                    {"dataType": "STRING", "name": "prop2"},
+                    {
+                        "name": "prop1",
+                        "dataType": {
+                            "selection": "anyOf",
+                            "types": [{"type": "ANY"}],
+                        },
+                    },
+                    {
+                        "name": "prop2",
+                        "dataType": {
+                            "selection": "anyOf",
+                            "types": [{"type": "ANY"}],
+                        },
+                    },
                 ],
                 "bodyConfig": {
                     "type": "BLOCK",
@@ -54,6 +66,10 @@ TEMPLATE_COMP_CONFIG = {
                             "type": "REACT_USE_STATE",
                             "varName": "data",
                             "defaultValue": {"type": "TOKEN", "value": "{}"},
+                            "dataType": {
+                                "selection": "anyOf",
+                                "types": [{"type": "ANY"}],
+                            },
                         },
                         {
                             "type": "RETURN",
@@ -95,7 +111,7 @@ TEMPLATE_HOOK_CONFIG = {
     "EXPORTS": {"default": "DEFAULT_HOOK_ID", "others": []},
     "BLOCK": {
         "type": "BLOCK",
-        "id":"$FILE_ID",
+        "id": "$FILE_ID",
         "noWrap": 1,
         "statements": [
             {
@@ -103,7 +119,13 @@ TEMPLATE_HOOK_CONFIG = {
                 "id": "DEFAULT_HOOK_ID",
                 "name": "DEFAULT_HOOK_NAME",
                 "propVars": [
-                    {"dataType": "STRING", "name": "initialValue"},
+                    {
+                        "name": "initialValue",
+                        "dataType": {
+                            "selection": "anyOf",
+                            "types": [{"type": "ANY"}],
+                        },
+                    },
                 ],
                 "bodyConfig": {
                     "type": "BLOCK",
@@ -112,6 +134,10 @@ TEMPLATE_HOOK_CONFIG = {
                             "type": "REACT_USE_STATE",
                             "varName": "state",
                             "defaultValue": {"type": "TOKEN", "value": "initialValue"},
+                            "dataType": {
+                                "selection": "anyOf",
+                                "types": [{"type": "ANY"}],
+                            },
                         },
                         {
                             "type": "REACT_USE_EFFECT",

@@ -1,11 +1,6 @@
 import PropTypes from 'prop-types';
-import {
-  CustomButtonField,
-  CustomSelectField,
-  CustomTextArea,
-  CustomTextInput,
-  MonacoEditor,
-} from '../../../../common/fields';
+import { CustomButtonField, CustomTextArea, CustomTextInput, MonacoEditor } from '../../../../common/fields';
+import Select from 'react-select';
 import { BreezeDatatypes } from '../../constants/FormConstants';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import ThemeContext from '../../../../contexts/ThemeContext';
@@ -29,12 +24,23 @@ function StateVariableConfigForm({ getConfig, onSubmit, onCancel, editMode, onUp
     }
   }, [fetchConfig, editMode]);
 
+  const transformToReactSelectOptions = (data) => data.map((item) => ({ value: item.value, label: item.label }));
+
   const handleChange = useCallback((field, value) => {
     setFormData((formData) => {
       if (field === 'defaultValue') {
         return {
           ...formData,
           defaultValue: { type: 'CUSTOM', value },
+        };
+      }
+      if (field === 'dataType') {
+        return {
+          ...formData,
+          dataType: {
+            ...formData.dataType,
+            types: value.map((option) => ({ type: option.value })),
+          },
         };
       }
       return { ...formData, [field]: value };
@@ -78,15 +84,18 @@ function StateVariableConfigForm({ getConfig, onSubmit, onCancel, editMode, onUp
             customValidations={[validator.REQUIRED, validator.CANNOT_CONTAIN_SPACE]}
             isSubmitted={isSubmitted}
           />
-          <CustomSelectField
+          <label className="form-label br-text-primary med-font fw-semibold">Data Type</label>
+          <span className="text-danger"> *</span>
+          <Select
+            isMulti
             name="dataType"
-            value={formData.dataType || 'STRING'}
+            value={transformToReactSelectOptions(BreezeDatatypes).filter((option) =>
+              formData.dataType.types.map((type) => type.type).includes(option.value)
+            )}
             onChange={(value) => handleChange('dataType', value)}
-            options={BreezeDatatypes}
-            config={{
-              label: 'Data Type',
-              groupClass: 'form-group mb-2',
-            }}
+            options={transformToReactSelectOptions(BreezeDatatypes)}
+            className="react-select-container mb-3"
+            classNamePrefix="react-select"
           />
           <label className="form-label br-text-primary med-font fw-semibold">Default Value</label>
           <MonacoEditor
