@@ -87,6 +87,9 @@ def addEntities(functionDetails, fileId, projectId):
             defaultExport=False,
             schema=function.get("schema",{"type" : "ANY"})
         )
+                
+
+
 def create_websocket_hook_file( filename, app_config):
     # preprare new service file for each tag
     folder_name = "hooks"
@@ -167,7 +170,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     
     # set request headers
     combined_headers = set_request_headers(model,app_name)
-    param_headers = combined_headers["param_headers"] if combined_headers else []
+    param_headers = combined_headers["param_headers"] if combined_headers else {}
     if combined_headers.get("header_argument"):
         function_args.append(combined_headers.get("header_argument"))
     
@@ -585,12 +588,13 @@ def set_response_interceptor( auth, app_name):
     return interceptor_code
 
 def set_request_headers( model, app_name):
-    headers = {"param_headers": [], "body_headers": {}, "header_argument": ''}
+    headers = {"param_headers": {}, "body_headers": {}, "header_argument": ''}
     if model.request.headers:
         headers["header_argument"] = "HeaderDetails"
         for header in model.request.headers:
             if header.type == "USER_INPUT":
-                headers["param_headers"].append({"name": header.key, "type": "STRING"})
+                headers["param_headers"][header.key] = {"selection": 'anyOf', "types":[{"type": "STRING"}]}
+                # headers["param_headers"].append({"name": header.key, "type": "STRING"})
                 headers["body_headers"][header.key] = {"type": header.type, "value":f"HeaderDetails.{header.key}"}
             elif header.type == "STATIC":
                 headers["body_headers"][header.key] = {"type": header.type, "value":header.value}
@@ -766,12 +770,13 @@ def set_request_url(model,app_name):
         else:
             url = "${process.env.%s}" % config.get("envVars").get(url_env) + path
             # url = "${process.env.%s}" % config.get("envVars").get(url_env) + '/' + path
-    new_query_params =[]
-    new_path_params = []
+    new_query_params ={}
+    new_path_params = {}
     for params in model.request.parameters:
         if params.param_in == ParamsInEnum.QUERY:
             if params.param_type == "USER_INPUT":
-                new_query_params.append({"name":params.name, "type":params.type})
+                new_query_params[params.name] = {"selection": 'anyOf', "types":[{"type": params.type}]}
+                # new_query_params.append({"name":params.name, "types" : [{"type":params.type}]})
                 query_params.append("%s=${QueryParameters.%s}" % (params.name, params.name))
                 if 'QueryParameters' not in function_args:
                     function_args.append('QueryParameters')
@@ -787,7 +792,8 @@ def set_request_url(model,app_name):
             
         elif params.param_in == ParamsInEnum.PATH:
             if params.param_type == "USER_INPUT":
-                new_path_params.append({"name":params.name, "type":params.type})
+                new_path_params[params.name] = {"selection": "anyOf", "types":[{"type": params.type}]}
+                # new_path_params.append({"name":params.name, "types" : [{"type":params.type}]})
                 url=url.replace(f"{{{params.name}}}", f"${{PathParameters.{params.name}}}")
                 if 'PathParameters' not in function_args:
                     function_args.append('PathParameters')

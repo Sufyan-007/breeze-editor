@@ -1,7 +1,7 @@
-import json
+import json,os
 from django.http import JsonResponse
 from ....common.constants.consts import CONFIG_PATH
-from ..core.schema_manager import add_or_edit_schema_helper, delete_schema_helper, resolve_schemas_helper
+from ..core.schema_manager import add_or_edit_schema_helper, delete_schema_helper, resolve_schemas_helper,get_all_schemas_helper,get_schema_by_id_helper
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from ..swagger_schema.manage_schema_schema import add_or_edit_swagger_schema,delete_schema_swagger
@@ -74,4 +74,18 @@ def resolve_schemas(request,project_id):
     existing_schema_id = data.get("existingSchemaId")
     schema_file_path = f"{CONFIG_PATH}/{project_id}/models/{module_id}.json"
     result,status = resolve_schemas_helper(schema_file_path=schema_file_path, schemaId=schema_id, new_schema_name=new_schema_name, details=schema_details, property_details=property_details, existing_schema_id = existing_schema_id)
+    return JsonResponse(result, status=status)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_all_schemas(request,project_id):
+    result,status = get_all_schemas_helper(project_id)
+    return JsonResponse(result, status=status)
+    
+    
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_schema_by_id(request,project_id,schema_id):
+    result,status = get_schema_by_id_helper(project_id, schema_id)
     return JsonResponse(result, status=status)
