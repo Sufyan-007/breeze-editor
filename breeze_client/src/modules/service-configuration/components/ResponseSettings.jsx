@@ -29,8 +29,6 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   const { status } = useSelector((state) => state.schemas);
   const dispatch = useDispatch();
   const { projectName } = useParams();
-  // const [selectedProperty, setSelectedProperty] = useState(null);
-
   useEffect(() => {
     if (status === 'ready' && moduleId)
       dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
@@ -109,15 +107,35 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     const updatedResponse = [...response];
 
     if (field === 'schema_name') {
+      const schema = value.schema;
+      const properties = schema?.properties
+        ? Object.keys(schema.properties).map((key) => ({
+            name: key,
+            type: schema.properties[key].types[0].type,
+          }))
+        : [];
+      const tokenStore = {};
+      properties.forEach((prop) => {
+        if (prop.type === 'string' || prop.type === 'integer') {
+          tokenStore[prop.name] = {
+            store_in: 'LOCAL_STORAGE',
+            storage_key: '',
+          };
+        }
+      });
+
       updatedResponse[index] = {
         ...updatedResponse[index],
-        ['schema']: value['schema'],
-        [field]: value['value'],
+        schema: schema,
+        schema_name: value.value,
+        token_store: tokenStore,
       };
+
       setResponse(updatedResponse);
       onChange(responseType, updatedResponse);
       return;
     }
+
     if (subField && subProperty) {
       updatedResponse[index] = {
         ...updatedResponse[index],
@@ -140,6 +158,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     } else {
       updatedResponse[index] = { ...updatedResponse[index], [field]: value };
     }
+
     setResponse(updatedResponse);
     onChange(responseType, updatedResponse);
   };
@@ -181,10 +200,6 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
       },
     });
   };
-
-  // const handlePropertySelection = (propName) => {
-  //   setSelectedProperty((prev) => (prev === propName ? null : propName));
-  // };
 
   const renderResponses = () => {
     if (!response || response.length === 0) {
