@@ -1,14 +1,20 @@
 export const initialPropConfig = {
   name: '',
   isRequired: false,
-  dataType: 'STRING',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   defaultValue: { type: 'CUSTOM', value: '""' },
   description: '',
 };
 
 export const initialParamConfig = {
   name: '',
-  dataType: 'STRING',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   defaultValue: { type: 'CUSTOM', value: '""' },
   description: '',
 };
@@ -28,7 +34,10 @@ export const initialVariableConfig = {
   type: 'DECLARATION',
   varName: '',
   declarationType: 'const',
-  dataType: 'STRING',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   value: { type: 'CUSTOM', value: '' },
   description: '',
 };
@@ -36,7 +45,10 @@ export const initialVariableConfig = {
 export const initialStateVarConfig = {
   type: 'REACT_USE_STATE',
   varName: '',
-  dataType: 'STRING',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   defaultValue: { type: 'CUSTOM', value: '' },
   description: '',
 };
@@ -44,7 +56,10 @@ export const initialStateVarConfig = {
 export const initialRefVarConfig = {
   type: 'REACT_USE_REF',
   varName: '',
-  dataType: 'STRING',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   defaultValue: { type: 'CUSTOM', value: '' },
   description: '',
 };
