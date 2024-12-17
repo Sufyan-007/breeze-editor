@@ -7,6 +7,7 @@ import CustomContextMenu from '../../../common/display/context-menu/BreezeContex
 import { addFileOptions } from '../constants/contextMenuOptions';
 import {
   addCustomFile,
+  addFolderAsync,
   addNodeAsync,
   fetchFolderConfig,
   moveNodeAsync,
@@ -114,6 +115,7 @@ function ProjectSidebar() {
   const handleInputSubmit = (nodeId) => {
     const node = directoryConfig[nodeId];
     if (!node.isNew) {
+      // Handle renaming of existing nodes
       if (node?.tempName.trim()) {
         dispatch(renameNodeAsync({ projectId: projectName, nodeId, newName: node.tempName }))
           .unwrap()
@@ -136,7 +138,7 @@ function ProjectSidebar() {
           });
       }
     } else {
-      // TODO : add folder api as per condition
+      // Handle creation of new nodes
       if (node?.type === 'CUSTOM') {
         const formData = { filename: node.tempName, selectedFolderId: node.parentId, id: node.id };
         const payload = new FormData();
@@ -144,6 +146,20 @@ function ProjectSidebar() {
           payload.append(key, formData[key]);
         });
         dispatch(addCustomFile({ payload, projectName })).unwrap();
+      } else if (node?.type === 'DIRECTORY') {
+        const folderPayload = {
+          parentId: node.parentId,
+          folderName: node.tempName,
+          projectId: projectName,
+        };
+        dispatch(addFolderAsync(folderPayload))
+          .unwrap()
+          .then(() => {
+            dispatch(fetchFolderConfig({ id: node.parentId, projectName, depth: 1 }));
+          })
+          .catch((err) => {
+            console.error('Error adding folder:', err);
+          });
       } else {
         dispatch(addNodeAsync({ projectId: projectName, node })).unwrap();
       }
