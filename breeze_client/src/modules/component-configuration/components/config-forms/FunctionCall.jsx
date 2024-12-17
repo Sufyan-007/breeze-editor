@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
-import '../../styles/servicesSelect.css';
 import { CustomButtonField, CustomCheckBoxField, CustomTextInput } from '../../../../common/fields';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { useParams } from 'react-router-dom';

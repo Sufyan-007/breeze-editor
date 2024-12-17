@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  CustomTextInput,
-  CustomMultiSelectField,
-  CustomButtonField,
-  CustomTextArea,
-  CustomCheckBoxField,
-} from '../../../../common/fields';
+import { CustomTextInput, CustomButtonField, CustomTextArea, CustomCheckBoxField } from '../../../../common/fields';
+import CreatableSelect from 'react-select/creatable';
 import { availableDependentVars } from '../../constants/FormConstants';
 import { initialUseCallbackConfig, initialParamConfig } from '../../constants/ResourcesFormData';
 import { useOffcanvas } from '../../../../contexts/OffcanvasContext';
@@ -25,7 +20,10 @@ function UseCallbackConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpda
   const fetchConfig = useCallback(async () => {
     const res = await getConfig();
     const config = res.config;
-    const dependencyValues = config.dependencies.map((dep) => dep.value);
+    const dependencyValues = config.dependencies.map((dep) => ({
+      label: dep.value,
+      value: dep.value,
+    }));
     setFormData(config);
     setSelectedDependencies(dependencyValues);
   }, [getConfig]);
@@ -48,11 +46,11 @@ function UseCallbackConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpda
     setFormData(updatedData);
   };
 
-  const handleDependenciesChange = (values) => {
-    setSelectedDependencies(values);
-    const dependencyRefs = values.map((val) => ({
+  const handleDependenciesChange = (options) => {
+    setSelectedDependencies(options);
+    const dependencyRefs = options.map((opt) => ({
       type: 'TOKEN',
-      value: val,
+      value: opt.value,
     }));
 
     setFormData((prevData) => ({
@@ -170,16 +168,18 @@ function UseCallbackConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpda
                 onChange={(value) => handleChange('description', value)}
                 config={{ label: 'Hook Description', groupClass: 'form-group mb-2' }}
               />
-              <CustomMultiSelectField
-                name="dependencies"
-                values={selectedDependencies || []}
-                onChange={handleDependenciesChange}
-                options={availableDependentVars}
-                config={{
-                  label: 'Dependent Variables',
-                  groupClass: 'form-group mb-3',
-                }}
-              />
+              <div className="form-group mb-3">
+                <label className="form-label br-text-primary med-font fw-semibold me-2">Dependent Variables</label>
+                <CreatableSelect
+                  isMulti
+                  value={selectedDependencies}
+                  onChange={handleDependenciesChange}
+                  options={availableDependentVars}
+                  placeholder="Add dependent variables..."
+                  className="react-select-container br-background-secondary br-text-primary"
+                  classNamePrefix="react-select"
+                />
+              </div>
               <div>
                 <CustomCheckBoxField
                   name="isAsync"
