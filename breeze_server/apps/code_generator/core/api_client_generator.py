@@ -841,9 +841,12 @@ def generate_token_fetching_code(security_schemes, model):
     for res in  model.response:
         if res.status == StatusEnum.S_200:
             schema = res.schema
-            if schema and "properties" in schema:
-                res.token_store = create_token_store(schema["properties"])
-            token_store = res.token_store
+            if res.token_store:
+                token_store = res.token_store
+            else:
+                if schema and "properties" in schema:
+                    res.token_store = create_token_store(schema["properties"])
+            # token_store = res.token_store
     if token_store != {} and token_store != None:
         for prop, prop_info in token_store.items():
             if prop_info.get("store_in") == TokenStoreTypeEnum.LOCAL_STORAGE:

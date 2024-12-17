@@ -134,6 +134,9 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Your project description',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    "SERVERS": [
+        {"url": "http://localhost:8000", "description": "Local Server"}
+    ]
     # 'SECURITY':[{'TokenAuth':[]}],
     # OTHER SETTINGS
 }
