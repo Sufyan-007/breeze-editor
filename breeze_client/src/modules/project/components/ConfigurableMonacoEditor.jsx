@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
-import { configTypeMapping, items } from '../constants/EditorList';
+import { configTypeMapping, items, outerBlockItems } from '../constants/EditorList';
 import {
   addAstStatement,
   deleteAstStatement,
@@ -81,8 +81,8 @@ const ConfigurableMonacoEditor = ({
       };
       const result = await getCodeDetails(projectName, payload);
       const configType = result?.related_config?.type;
-      setStatementId(result?.related_config?.id || '');
-      setFilteredItems(configType ? configTypeMapping[configType] || items : []);
+      setStatementId(result?.related_config?.id || node?.id);
+      setFilteredItems(configType ? configTypeMapping[configType] || items : outerBlockItems);
     };
 
     if (['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag)) {

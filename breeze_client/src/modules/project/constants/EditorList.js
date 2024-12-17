@@ -66,3 +66,19 @@ export const configTypeMapping = {
   FUNCTION_CALL: ['Edit Function Call', 'Delete'],
   RETURN: ['Edit Return', 'Delete'],
 };
+export const outerBlockItems = [
+  'Variable',
+  'Function',
+  'If Block',
+  'While Block',
+  'Do While Block',
+  'Try Catch',
+  'Custom Code',
+  'Add Comment',
+  'Console.log',
+  'Configure Imports',
+  'Configure Exports',
+  'Function Call',
+  'Service Call',
+  'Return Statement',
+];
