@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
+import PropTypes from 'prop-types';
+
 import '../../styles/addElement.css';
 import { CustomButtonField } from '../../../../common/fields';
 import {
@@ -11,17 +13,28 @@ import PropsConfig from '../helper-components/PropsConfig';
 import PreviewDisplay from '../helper-components/PreviewDisplay';
 import htmlElements from '../../constants/AllELements';
 
-const AddELement = ({ onSubmit }) => {
+const AddELement = ({ onSubmit, getConfig, onUpdate, editMode = false }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [config, setConfig] = useState({});
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [allThirdPartyLibraries, setAllThirdPartyLibraries] = useState({});
   const [filteredComponentList, setFilteredComponentList] = useState([]);
   const [componentList, setComponentList] = useState({});
   const [searchValue, setSearchValue] = useState('');
-  const [selectedElements, setSelectedElements] = useState([]);
+  const [selectedElements, setSelectedElements] = useState(null);
   const [showPreview, setShowPreview] = useState(0);
   const [configuredPropsList, setconfiguredPropsList] = useState({});
   const { projectName } = useParams();
+
+  const fetchConfig = async () => {
+    const res = await getConfig();
+    // setFormData(res.config);
+    setConfig(res.config);
+    setSelectedCategory(res.config?.selectedCategory);
+    setSelectedElements(res.config?.tagName);
+    setSearchValue(res.config?.tagName);
+    setconfiguredPropsList(res.config?.attributes);
+  };
   useEffect(() => {
     async function fetchData() {
       const requestBody = {
@@ -40,9 +53,7 @@ const AddELement = ({ onSubmit }) => {
 
   useEffect(() => {
     async function fetchData() {
-      setSearchValue('');
       setComponentList(null);
-      setSelectedElements(null);
       setShowPreview(false);
       setFilteredComponentList([]);
 
@@ -84,7 +95,9 @@ const AddELement = ({ onSubmit }) => {
 
     fetchData();
   }, [projectName, selectedCategory, selectedSubCategory]);
-
+  useEffect(() => {
+    if (editMode) fetchConfig();
+  }, [editMode, getConfig]);
   useEffect(() => {
     const filtered = Object.entries(componentList || {}).filter(([key, name]) => {
       return name.toLowerCase().includes(searchValue.toLowerCase());
@@ -94,20 +107,36 @@ const AddELement = ({ onSubmit }) => {
 
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
+    setSearchValue('');
+    setSelectedElements(null);
   };
   const handleSubCategoryChange = (event) => {
     setSelectedSubCategory(event.target.value);
+    setSearchValue('');
+    setSelectedElements(null);
   };
 
   function addELement(event) {
     event.preventDefault();
-    onSubmit({
-      type: 'Element',
-      // "elementType": "THIRD_PARTY",
-      tagName: selectedElements[1],
-      // "library": "react-bootstrap",
-      children: [],
-    });
+    if (editMode) {
+      onUpdate({
+        ...config,
+        tagName: selectedElements,
+        selectedCategory: selectedCategory,
+        attributes: configuredPropsList,
+      });
+    } else {
+      onSubmit({
+        type: 'Element',
+        // "elementType": "THIRD_PARTY",
+        tagName: selectedElements,
+        selectedCategory: selectedCategory,
+        // "library": "react-bootstrap",
+        children: [],
+        attributes: configuredPropsList,
+      });
+    }
+
     console.log('Add ELement', selectedElements);
   }
   const handlePreviewClick = () => {
@@ -203,7 +232,7 @@ const AddELement = ({ onSubmit }) => {
             value={searchValue}
           />
         </form>
-        {!selectedElements?.length > 0 && (
+        {!selectedElements && (
           <div
             style={{
               overflowY: 'scroll',
@@ -231,7 +260,7 @@ const AddELement = ({ onSubmit }) => {
                   <li
                     className="list-group-item p-1 br-background-secondary br-text-primary listViewHover border-0 ps-4"
                     onClick={() => {
-                      setSelectedElements([key, value]);
+                      setSelectedElements(value);
                       setSearchValue(value);
                     }}
                     key={key}
@@ -246,12 +275,14 @@ const AddELement = ({ onSubmit }) => {
           </div>
         )}
         <div>
-          {selectedElements?.length > 0 && (
+          {selectedElements && (
             <PropsConfig
               selectedCategory={selectedCategory}
               component={selectedElements}
               library={selectedSubCategory}
               setconfiguredPropsList={setconfiguredPropsList}
+              // configuredPropsList={configuredPropsList}
+              {...(editMode && { configuredPropsList })}
             ></PropsConfig>
           )}
         </div>
@@ -269,13 +300,13 @@ const AddELement = ({ onSubmit }) => {
         <div>
           <CustomButtonField
             type="button"
-            label="Add"
+            label={editMode ? 'Update' : 'Add'}
             className="addELementbtn run-btn med-font"
             onClick={addELement}
           />
         </div>
       </div>
-      {showPreview != 0 && selectedElements?.length > 0 && (
+      {showPreview != 0 && selectedElements && (
         <PreviewDisplay
           showPreview={showPreview}
           // key={showPreview}
@@ -286,6 +317,13 @@ const AddELement = ({ onSubmit }) => {
       )}
     </div>
   );
+};
+
+AddELement.propTypes = {
+  onSubmit: PropTypes.func,
+  getConfig: PropTypes.func,
+  onUpdate: PropTypes.func,
+  editMode: PropTypes.bool,
 };
 
 export default AddELement;

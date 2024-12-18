@@ -151,7 +151,7 @@ const ConfigurableMonacoEditor = ({
     const contentComponent = getConfigComponent(item);
     // console.log('contentComponent', item, contentComponent);
     let width = '40%';
-    if (item === 'Add elements') width = '60%';
+    if (item === 'Add elements' || item === 'Edit elements') width = '60%';
     showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
     setShowMenu(false);
   };
