@@ -61,3 +61,22 @@ export const RESPONSE_OPTIONS = [
   // { value: 'MP4', label: 'Video MP4 (video/mp4)' },
   // { value: 'MPEG', label: 'Audio MPEG (audio/mpeg)' },
 ];
+
+export const STATUS_CODES = [
+  { label: 'Select', value: '' },
+  { label: '200', value: 'S_200' }, // OK
+  { label: '201', value: 'S_201' }, // Created
+  { label: '204', value: 'S_204' }, // No Content
+  { label: '400', value: 'S_400' }, // Bad Request
+  { label: '401', value: 'S_401' }, // Unauthorized
+  { label: '403', value: 'S_403' }, // Forbidden
+  { label: '404', value: 'S_404' }, // Not Found
+  { label: '405', value: 'S_405' }, // Method Not Allowed
+  { label: '408', value: 'S_408' }, // Request Timeout
+  { label: '409', value: 'S_409' }, // Conflict
+  { label: '410', value: 'S_410' }, // Gone
+  { label: '500', value: 'S_500' }, // Internal Server Error
+  { label: '502', value: 'S_502' }, // Bad Gateway
+  { label: '503', value: 'S_503' }, // Service Unavailable
+  { label: '504', value: 'S_504' }, // Gateway Timeout
+];
