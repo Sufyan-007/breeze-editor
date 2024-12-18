@@ -269,15 +269,16 @@ def _create_body_arr_json( body_data, meta_data,module_id,schema_file_path):
                     'properties': {},
                     'required': []
                 }
-                if "$ref" in schema: 
-                    schema_name = schema.get("$ref",None)
-                    schema_name = schema_name.split('/')[-1]
-                # schema_id = self.get_schema_id_by_name(schema_name, module_id)
                
                 if "$ref" in schema: 
                     schema_name = schema.get("$ref",None)
                     schema_name = schema_name.split('/')[-1]
-                    body_schema = _create_schema(schema_name,schemas,None,all_schemas)
+                    # body_schema = _create_schema(schema_name,schemas,None,all_schemas)
+                    for id,val in all_schemas.items():
+                        if schema_name in val["name"]:
+                            body_schema = val
+                            schema_name = id
+                            break
                 else:
                     is_anonymous = True
                     if schema.get("type") == "object":
@@ -517,110 +518,119 @@ def append_auth_json(auth_model, appName,moduleId):
             with open(folder_path, "w") as file:
                 json.dump(json_data,file, cls=EnhancedJSONEncoder)
                 
-                
+
 def classified_tags_and_method(open_api_json_data, file_path):
-        paths = open_api_json_data.get('paths', {})
-        tags_map = {
-            "default" : []
-        }
-        all_schemas = []
-        seen_schemas = set()
-        def process_schema_data(content_data,tags,path,operation):
-            extracted_schema = content_data.get("schema")
-            schema = {}
-            if extracted_schema.get("type") and extracted_schema["type"]== 'object':
-                schema = object_converter(extracted_schema)
-                schema["schemaType"] = "modals"
-                
-            elif "$ref" in extracted_schema:
-                pass
-                # schema_name = extracted_schema.get("$ref",None)
-                # schema_name = schema_name.split('/')[-1]
-                # for values in combined_schemas.values():
-                #     if schema_name in values["name"]:
-                #         #later we will replace the ids
-                #         pass
-            
-            else:
-                schema = convert_type_to_config(extracted_schema)
-                schema["schemaType"] = "combined_schema"
-            schema_str = json.dumps(schema, sort_keys=True)
-            
-            # Check if this schema has already been processed
-            if schema_str != '{}' and schema_str not in seen_schemas:
-                seen_schemas.add(schema_str)
-                schema_name_parts = []
-                
-                if tags:
-                    schema_name_parts.append(tags[0])  
-                path_segments = path.strip('/').split('/')                
-                last_valid_segment = None
-                for segment in reversed(path_segments):
-                    if not segment.startswith("{") and "?" not in segment: 
-                        last_valid_segment = segment
-                        break
-                
-                if last_valid_segment:
-                    schema_name_parts.append(last_valid_segment.replace('-', '_'))  
-                else:
-                    schema_name_parts.append("unknown") 
-                
-                schema_name_parts.append(operation.lower())  
-                
-                schema_name_base = '_'.join(schema_name_parts)
-                
-                schema["name"] = f"schema_{schema_name_base}".lower()
-                
-                if any(existing_schema["name"] == schema["name"] for existing_schema in all_schemas):
-                    schema["name"] = f"schema_{schema_name_base}_{hashlib.md5(schema_str.encode('utf-8')).hexdigest()[:6]}"
-                
-                schema["name"] = schema["name"]  
-                
-                all_schemas.append(schema)
-                
-        for path, path_data in paths.items():
-            for operation in ["get", "post", "put", "patch", "delete", "head", "options", "trace"]:
-                operation_data = path_data.get(operation)
-                if not operation_data: 
-                    continue
-                tags = operation_data.get("tags", None)
-                request_body = operation_data.get("requestBody")
-                response = operation_data.get("responses")
-                if request_body:
-                    for _, content_data in request_body.get("content").items():
-                        process_schema_data(content_data, tags, path, operation)
-                            
-                if response:
-                    for res_data in response.values():
-                        if res_data.get("content"):
-                            for content_data in res_data.get("content").values():
-                                process_schema_data(content_data,tags,path,operation)  
-                                              
-                if isinstance(tags,list):
-                    for tag in tags:
-                        if tag not in tags_map:
-                            tags_map[tag] = []
-                        tags_map[tag].append((path, operation, operation_data))
-                
-                elif isinstance(tags,str):
-                    if tags not in tags_map:
-                        tags_map[tags] = []
-                    tags_map[tags].append((path, operation, operation_data))
-                else:
-                    operation_data["tag"] = "default"
-                    tags_map["default"].append((path, operation, operation_data))
-        schema_with_ids = generate_ids(all_schemas, True)
-        set_unresolved_keys(schema_with_ids)
-        append_to_dict_file(file_path,schema_with_ids)
+    paths = open_api_json_data.get('paths', {})
+    tags_map = {
+        "default": []
+    }
+    all_schemas = []
+    seen_schemas = {}
+
+    def process_schema_data(content_data, tags, path, operation):
+        extracted_schema = content_data.get("schema")
+        schema = {}
+        schema_name = ''
         
-        with open(file_path) as fp:
-            combined_schemas = json.load(fp)
+        if extracted_schema.get("type") and extracted_schema["type"] == 'object':
+            schema = object_converter(extracted_schema)
+            schema["schemaType"] = "modals"
+        elif "$ref" in extracted_schema:
+            return None
+        else:
+            schema = convert_type_to_config(extracted_schema)
+            schema["schemaType"] = "combined_schema"
             
-        for key, val in combined_schemas.items():
-            replace_variable(combined_schemas, f"#/components/schemas/{val['name']}",key)
+        schema_str = json.dumps(schema, sort_keys=True)
+        
+        if schema_str in seen_schemas:
+            return seen_schemas[schema_str]
+        
+        if schema_str != '{}' and schema_str not in seen_schemas:
+            seen_schemas[schema_str] = None  
+
+            schema_name_parts = []
             
-        append_to_dict_file(file_path,combined_schemas)
-        return tags_map
+            if tags:
+                schema_name_parts.append(tags[0])
+            
+            path_segments = path.strip('/').split('/')
+            last_valid_segment = None
+            
+            for segment in reversed(path_segments):
+                if not segment.startswith("{") and "?" not in segment:
+                    last_valid_segment = segment
+                    break
+            
+            if last_valid_segment:
+                schema_name_parts.append(last_valid_segment.replace('-', '_'))
+            else:
+                schema_name_parts.append("unknown")
+            
+            schema_name_parts.append(operation.lower())
+            schema_name_base = '_'.join(schema_name_parts)
+            
+            schema["name"] = f"schema_{schema_name_base}".lower()
+            
+            if any(existing_schema["name"] == schema["name"] for existing_schema in all_schemas):
+                schema["name"] = f"schema_{schema_name_base}_{hashlib.md5(schema_str.encode('utf-8')).hexdigest()[:6]}"
+            
+            schema_name = schema["name"]
+            schema["name"] = schema_name  
+            
+            all_schemas.append(schema)
+            seen_schemas[schema_str] = schema_name  
+            return schema_name
+
+            
+                
+    for path, path_data in paths.items():
+        for operation in ["get", "post", "put", "patch", "delete", "head", "options", "trace"]:
+            operation_data = path_data.get(operation)
+            if not operation_data: 
+                continue
+            tags = operation_data.get("tags", None)
+            request_body = operation_data.get("requestBody")
+            response = operation_data.get("responses")
+            schema_name = ''
+            if request_body:
+                for key, content_data in request_body.get("content").items():
+                    schema_name =  process_schema_data(content_data, tags, path, operation)
+                    if schema_name:
+                        operation_data["requestBody"]["content"][key]["schema"] = {"$ref":f"#/components/schemas/{schema_name}"}
+                        
+            if response:
+                for status_code, res_data in response.items():
+                    if res_data.get("content"):
+                        for key, content_data in res_data.get("content").items():  
+                            schema_name = process_schema_data(content_data, tags, path, operation)  
+                            if schema_name :
+                                operation_data["responses"][status_code]["content"][key]["schema"] = {"$ref":f"#/components/schemas/{schema_name}"}
+            if isinstance(tags,list):
+                for tag in tags:
+                    if tag not in tags_map:
+                        tags_map[tag] = []
+                    tags_map[tag].append((path, operation, operation_data))
+            
+            elif isinstance(tags,str):
+                if tags not in tags_map:
+                    tags_map[tags] = []
+                tags_map[tags].append((path, operation, operation_data))
+            else:
+                operation_data["tag"] = "default"
+                tags_map["default"].append((path, operation, operation_data))
+    schema_with_ids = generate_ids(all_schemas, True)
+    set_unresolved_keys(schema_with_ids)
+    append_to_dict_file(file_path,schema_with_ids)
+    
+    with open(file_path) as fp:
+        combined_schemas = json.load(fp)
+        
+    for key, val in combined_schemas.items():
+        replace_variable(combined_schemas, f"#/components/schemas/{val['name']}",key)
+        
+    append_to_dict_file(file_path,combined_schemas)
+    return tags_map
     
 
 def create_api_model_obj(operation_data, request_obj_new, tag, id, funcName,meta_data,schema_file_path):
