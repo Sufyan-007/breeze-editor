@@ -24,14 +24,6 @@ function FunctionCallEdit({ onUpdate, onCancel, getConfig }) {
     });
   };
 
-  const handleAddParam = () => {
-    setParams((prev) => [...prev, { name: 'Param 1', type: 'CUSTOM', value: '' }]);
-  };
-
-  const handleDeleteParam = (index) => {
-    setParams((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     onUpdate({ ...formData, parameters: params });
@@ -48,18 +40,8 @@ function FunctionCallEdit({ onUpdate, onCancel, getConfig }) {
     <div className="state-variable-config-form h-100">
       <div className="d-flex flex-column justify-content-between h-100">
         <div>
-          <div className="d-flex justify-content-between">
-            <div>
-              <span className="fw-bold large-font br-text-primary">
-                Function Name: {formData.functionName || 'N/A'}
-              </span>
-            </div>
-            <div
-              className="br-text-primary fw-semibold large-font br-cursor-pointer text-decoration-underline"
-              onClick={handleAddParam}
-            >
-              <i className="bi bi-plus-circle br-text-primary"></i> Add Param
-            </div>
+          <div>
+            <span className="fw-bold large-font br-text-primary">Function Name: {formData.functionName || 'N/A'}</span>
           </div>
           {params.length > 0 ? (
             params.map((param, index) => (
@@ -78,9 +60,6 @@ function FunctionCallEdit({ onUpdate, onCancel, getConfig }) {
                   config={{ label: '' }}
                   onChange={(value) => handleParamChange(index, 'value', value)}
                 />
-                <div onClick={() => handleDeleteParam(index)} role="button" className="mx-2 mt-1">
-                  <i className="bi bi-trash br-text-primary"></i>
-                </div>
               </div>
             ))
           ) : (

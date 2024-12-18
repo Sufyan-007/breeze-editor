@@ -135,12 +135,10 @@ function UseCallbackConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpda
     } else {
       onSubmit(formattedData);
     }
-    setFormData(initialUseCallbackConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialUseCallbackConfig);
     setIsSubmitted(false);
     onCancel();
   };

@@ -35,12 +35,10 @@ function ReturnConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate })
     } else {
       onSubmit(formData);
     }
-    if (!editMode) setFormData(initialReturnConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialReturnConfig);
     onCancel();
   };
 

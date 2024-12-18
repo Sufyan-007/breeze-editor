@@ -59,12 +59,10 @@ function RefVarConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate })
     } else {
       onSubmit(formData);
     }
-    setFormData(initialRefVarConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialRefVarConfig);
     setIsSubmitted(false);
     onCancel();
   };

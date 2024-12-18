@@ -94,13 +94,11 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
     } else {
       onSubmit(finalData);
     }
-    setFormData(initialLifecycleConfig);
     setSelectedDependencies([]);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialLifecycleConfig);
     setSelectedDependencies([]);
     onCancel();
   };

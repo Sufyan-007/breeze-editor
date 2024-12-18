@@ -39,12 +39,10 @@ function WhileBlockConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
     } else {
       onSubmit(formData);
     }
-    setFormData(initialWhileConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialWhileConfig);
     setIsSubmitted(false);
     onCancel();
   };

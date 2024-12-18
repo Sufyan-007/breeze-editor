@@ -59,12 +59,10 @@ function StateVariableConfigForm({ getConfig, onSubmit, onCancel, editMode, onUp
     } else {
       onSubmit(formData);
     }
-    setFormData(initialStateVarConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialStateVarConfig);
     setIsSubmitted(false);
     onCancel();
   };

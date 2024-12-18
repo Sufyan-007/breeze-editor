@@ -5,7 +5,7 @@ export const initialPropConfig = {
     selection: 'anyOf',
     types: [{ type: 'ANY' }],
   },
-  defaultValue: { type: 'CUSTOM', value: '""' },
+  defaultValue: '',
   description: '',
 };
 
@@ -15,7 +15,7 @@ export const initialParamConfig = {
     selection: 'anyOf',
     types: [{ type: 'ANY' }],
   },
-  defaultValue: { type: 'CUSTOM', value: '""' },
+  defaultValue: '',
   description: '',
 };
 
@@ -38,7 +38,7 @@ export const initialVariableConfig = {
     selection: 'anyOf',
     types: [{ type: 'ANY' }],
   },
-  value: { type: 'CUSTOM', value: '' },
+  value: '',
   description: '',
 };
 

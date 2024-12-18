@@ -32,12 +32,10 @@ function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
     } else {
       onSubmit(formData);
     }
-    if (!editMode) setFormData(initialConsoleConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialConsoleConfig);
     onCancel();
   };
 

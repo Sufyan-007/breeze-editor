@@ -34,7 +34,7 @@ function VariableConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
 
   const handleChange = useCallback((field, value) => {
     setFormData((formData) => {
-      if (field === 'value') {
+      if (field === 'value' && value) {
         return {
           ...formData,
           value: { type: 'CUSTOM', value },
@@ -65,12 +65,10 @@ function VariableConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
     } else {
       onSubmit(formData);
     }
-    setFormData(initialVariableConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialVariableConfig);
     setIsSubmitted(false);
     onCancel();
   };
@@ -108,14 +106,14 @@ function VariableConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
             isMulti
             name="dataType"
             value={transformToReactSelectOptions(BreezeDatatypes).filter((option) =>
-              formData.dataType.types.map((type) => type.type).includes(option.value)
+              formData?.dataType?.types.map((type) => type?.type).includes(option?.value)
             )}
             onChange={(value) => handleChange('dataType', value)}
             options={transformToReactSelectOptions(BreezeDatatypes)}
             className="react-select-container mb-3"
             classNamePrefix="react-select"
           />
-          <label className="form-label br-text-primary med-font fw-semibold">Default Value</label>
+          <label className="form-label br-text-primary med-font fw-semibold">Value</label>
           {formData.declarationType === 'const' && <span className="text-danger"> *</span>}
           <MonacoEditor
             defaultValue={formData.value?.value || ''}

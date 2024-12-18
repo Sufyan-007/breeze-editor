@@ -97,7 +97,7 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
             isMulti
             name="dataType"
             value={transformToReactSelectOptions(BreezeDatatypes).filter((option) =>
-              formData.dataType.types.map((type) => type.type).includes(option.value)
+              formData?.dataType?.types.map((type) => type?.type).includes(option?.value)
             )}
             onChange={(value) => handleChange('dataType', value)}
             options={transformToReactSelectOptions(BreezeDatatypes)}
@@ -140,8 +140,8 @@ function PropConfigForm({ onSubmit, onCancel, formData: initialData, editMode = 
 }
 
 PropConfigForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func,
+  onCancel: PropTypes.func,
   formData: PropTypes.shape({
     name: PropTypes.string,
     isRequired: PropTypes.bool,

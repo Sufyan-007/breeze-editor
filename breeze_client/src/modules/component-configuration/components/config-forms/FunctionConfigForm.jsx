@@ -75,11 +75,9 @@ function FunctionConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
     } else {
       onSubmit(formData);
     }
-    setFormData(initialFunctionConfig);
   };
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialFunctionConfig);
     onCancel();
   };
 

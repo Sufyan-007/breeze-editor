@@ -61,9 +61,9 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileI
             onUpdate={onUpdate}
           />
         );
-      case 'State Variable':
+      case 'Use State':
         return <StateVariableConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Edit State Variable':
+      case 'Edit Use State':
         return (
           <StateVariableConfigForm
             getConfig={getConfig}
@@ -73,9 +73,9 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileI
             onUpdate={onUpdate}
           />
         );
-      case 'Ref Variable':
+      case 'Use Ref':
         return <RefVarConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
-      case 'Edit Ref Variable':
+      case 'Edit Use Ref':
         return (
           <RefVarConfigForm
             getConfig={getConfig}

@@ -63,12 +63,10 @@ function UseMemoConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }
     } else {
       onSubmit(formattedData);
     }
-    setFormData(initialUseMemoConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialUseMemoConfig);
     setIsSubmitted(false);
     onCancel();
   };

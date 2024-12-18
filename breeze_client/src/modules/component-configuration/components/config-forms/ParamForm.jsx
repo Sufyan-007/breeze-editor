@@ -19,7 +19,7 @@ function ParamForm({ param, onSubmit, onCancel, editMode }) {
 
   const handleParamChange = useCallback((field, value) => {
     setFormData((formData) => {
-      if (field === 'defaultValue') {
+      if (field === 'defaultValue' && value) {
         return {
           ...formData,
           defaultValue: { type: 'CUSTOM', value },
