@@ -2,15 +2,23 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .app_startup_manager import RUNNING_APPS
-from ..utils.custom_upload_status_tracker import send_ws_status_periodically
+from ..utils.custom_upload_status_tracker import send_ws_status_periodically,thread_ids
 
 class EchoConsumer(WebsocketConsumer):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__thread_id = None
+    
     def connect(self):
         print("=====socket connection established========")
         self.accept()
 
     def disconnect(self, close_code):
         print("=====socket disconnected========")
+        if self.__thread_id:
+            thread_ids[self.__thread_id] = False
+            pass
         pass
 
     def receive(self, text_data=None, bytes_data=None):
@@ -52,8 +60,8 @@ class EchoConsumer(WebsocketConsumer):
                     }
                 }
             )
-            send_ws_status_periodically(self.group_name)
-            
+            t_id = send_ws_status_periodically(self.group_name)
+            self.__thread_id = t_id
     def project_progress(self, event):
         self.send(text_data=json.dumps({"progress": event["message"]}))
 
