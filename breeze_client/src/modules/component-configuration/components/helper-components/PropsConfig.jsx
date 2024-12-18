@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 import PropTypes from 'prop-types';
 import { elementAttributes } from '../../constants/AllELements';
 import { getAllProps } from '../../services/componentListService';
+import PropsDynamicInput from './PropsDynamicInput';
 const PropsConfig = ({
   selectedCategory,
   component = null,
@@ -45,39 +46,14 @@ const PropsConfig = ({
   }, [selectedCategory, component, library, projectName]);
 
   if (!component) return null;
-  const handlePropChange = (e, prop_name) => {
+  const handlePropChange = (e, prop_name, type) => {
     const newValue = e.target.value;
-
     setconfiguredPropsList((prev) => ({
       ...prev,
-      [prop_name]: { type: 'STRING', value: newValue },
+      [prop_name]: { type: type, value: newValue },
     }));
   };
-  const getAllQuotedStringsContent = (typeString) => {
-    const regex = /"([^"]*)"/g;
-    const matches = typeString.match(regex)?.map((str) => str.replace(/"/g, ''));
-    return matches || [];
-  };
-  const determineInputType = (typeString) => {
-    const typeCounts = {
-      // boolean: typeString.includes('boolean') ? 1 : 0,
-      number: typeString.includes('number') ? 1 : 0,
-      string: typeString.includes('string') ? 1 : 0,
-    };
-
-    const validTypeCount = Object.values(typeCounts).reduce((sum, count) => sum + count, 0);
-
-    if (validTypeCount > 1) {
-      return 'text';
-    }
-
-    // if (typeCounts.boolean === 1) return 'checkbox';
-    if (typeCounts.number === 1) return 'number';
-    if (typeCounts.string === 1) return 'text';
-
-    // Default fallback
-    return 'text';
-  };
+  console.log(configuredPropsList);
   return (
     <>
       <div
@@ -108,15 +84,17 @@ const PropsConfig = ({
                 data-bs-placement="top" // Options: top, bottom, left, right
                 title={property.type}
               >
-                <span className="br-text-primary">{property.prop_name}</span>
-                <span className="w-25">
-                  {/* <input
+                <span className="br-text-primary" style={{ fontSize: '14px' }}>
+                  {property.prop_name}
+                </span>
+                {/* <span className="w-25"> */}
+                {/* <input
                     className="form-control-sm w-100 br-background-secondary br-text-primary border-0 removeFocusedBorder"
                     type="text"
                     defaultValue={property.default_value}
                     onChange={(e) => handlePropChange(e, property.prop_name)}
                   /> */}
-                  {getAllQuotedStringsContent(property.type).length > 0 ? (
+                {/* {getAllQuotedStringsContent(property.type).length > 0 ? (
                     <select
                       className="form-control-sm w-100 br-background-secondary br-text-primary border-0 removeFocusedBorder"
                       defaultValue={property.default_value}
@@ -145,7 +123,12 @@ const PropsConfig = ({
                       }}
                     />
                   )}
-                </span>
+                </span> */}
+                <PropsDynamicInput
+                  property={property}
+                  handlePropChange={handlePropChange}
+                  configuredPropsList={configuredPropsList}
+                />
               </div>
             ))
           ) : (
