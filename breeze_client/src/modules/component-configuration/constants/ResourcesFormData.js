@@ -65,11 +65,14 @@ export const initialRefVarConfig = {
 };
 
 export const initialImportConfig = {
-  importEntity: '',
-  importFrom: '',
-  importType: 'single',
-  category: 'component',
+  import_entity: '',
+  from: '',
+  import_type: 'SINGLE',
+  TYPE: 'THIRD_PARTY',
+  module: '',
 };
+
+export const initialExportConfig = { default: '', others: [] };
 
 export const initialFunctionConfig = {
   type: 'FUNCTION',

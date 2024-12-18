@@ -110,6 +110,11 @@ const ConfigurableMonacoEditor = ({
     };
   }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
+  const updateFileCode = async () => {
+    const data = await getFileCode(projectName, node?.id);
+    onChange(data.code);
+  };
+
   const onSubmit = async (value) => {
     const payload = {
       fileId: node.id,
@@ -118,8 +123,7 @@ const ConfigurableMonacoEditor = ({
       index: countRef.current,
     };
     await addAstStatement(projectName, payload);
-    const data = await getFileCode(projectName, node.id);
-    onChange(data.code);
+    await updateFileCode();
     closeOffcanvas();
   };
 
@@ -130,8 +134,7 @@ const ConfigurableMonacoEditor = ({
       config: value,
     };
     await updateAstStatement(projectName, payload);
-    const data = await getFileCode(projectName, node.id);
-    onChange(data.code);
+    await updateFileCode();
     closeOffcanvas();
   };
 
@@ -141,8 +144,7 @@ const ConfigurableMonacoEditor = ({
       statementId: statementId,
     };
     await deleteAstStatement(projectName, payload);
-    const data = await getFileCode(projectName, node.id);
-    onChange(data.code);
+    await updateFileCode();
   };
 
   const getConfig = useCallback(async () => {
@@ -158,7 +160,14 @@ const ConfigurableMonacoEditor = ({
     closeOffcanvas();
   };
 
-  const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel, onUpdate, getConfig);
+  const { getConfigComponent } = useConfigurableMenuItems(
+    onSubmit,
+    onCancel,
+    onUpdate,
+    getConfig,
+    node?.id,
+    updateFileCode
+  );
 
   const handleMenuItemClick = (item) => {
     if (item === 'Delete') {
@@ -167,6 +176,7 @@ const ConfigurableMonacoEditor = ({
       const contentComponent = getConfigComponent(item);
       let width = '40%';
       if (item === 'Html elements') width = '60%';
+      if (item === 'Configure Imports') width = '60%';
       showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
     }
     setShowMenu(false);

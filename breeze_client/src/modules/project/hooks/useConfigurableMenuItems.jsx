@@ -24,11 +24,11 @@ import {
   ExportConfigForm,
 } from '../../component-configuration/components/config-forms';
 
-const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
+const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileId, updateFileCode) => {
   const getConfigComponent = (item) => {
     switch (item) {
       case 'Configure Imports':
-        return <ImportConfigForm />;
+        return <ImportConfigForm fileId={fileId} updateFileCode={updateFileCode} />;
       case 'Component Config':
         return (
           <ComponentConfigForm
@@ -230,7 +230,7 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig) => {
       case 'Add Navigation':
         return <RouterNavigateConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Configure Exports':
-        return <ExportConfigForm />;
+        return <ExportConfigForm fileId={fileId} updateFileCode={updateFileCode} />;
       default:
         return null;
     }

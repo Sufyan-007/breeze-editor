@@ -184,3 +184,15 @@ export const getEntityConfigById = async (projectName, entity_id) => {
     throw error;
   }
 };
+
+// common service function for all query resource api calls.
+export const fetchResources = async (projectName, payload) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/project/query_resource/${projectName}/`;
+  try {
+    const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
+    return response;
+  } catch (error) {
+    console.error('Error fetching components:', error.message);
+    throw error;
+  }
+};

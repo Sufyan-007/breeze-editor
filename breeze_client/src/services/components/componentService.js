@@ -42,3 +42,27 @@ export async function deleteAstStatement(projectName, payload) {
   const response = await callApiClient(url, 'POST', payload, false, {}, true, true);
   return response;
 }
+
+export async function updateImports(projectName, payload) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/file/update-imports/`;
+  const response = await callApiClient(url, 'POST', payload, false, {}, true, true);
+  return response;
+}
+
+export async function getImports(projectName, payload) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/file/get-imports/`;
+  const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
+  return response;
+}
+
+export async function updateExports(projectName, payload) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/file/update-exports/`;
+  const response = await callApiClient(url, 'POST', payload, false, {}, true, true);
+  return response;
+}
+
+export async function getExports(projectName, payload) {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/config-editor/${projectName}/file/get-exports/`;
+  const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
+  return response;
+}
