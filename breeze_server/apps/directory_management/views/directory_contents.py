@@ -57,3 +57,11 @@ def move(request,project_id):
     directoryManager.move_node(node_id=data["file_id"],new_parent_id=data["new_parent_id"])
     return JsonResponse({},status=200)
 
+@api_view(["POST"])
+def add_folder(request,project_id):
+    data = json.loads(request.body.decode("utf-8"))
+    folderName = data['folderName']
+    parentId = data.get('parentId')
+    directory_manager = DirectoryManager(project_name=project_id)
+    node = directory_manager.add_node_to_config(parent_id=parentId, name=folderName, tag="FOLDER", node_type="DIRECTORY")
+    return JsonResponse(node,status=200)

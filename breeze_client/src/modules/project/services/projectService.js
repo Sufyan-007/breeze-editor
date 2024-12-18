@@ -118,6 +118,22 @@ export const addNodeApi = async (projectName, node) => {
   }
 };
 
+export const addFolderApi = async (projectId, { parentId, folderName }) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectId}/add-folder/`;
+  const payload = {
+    folderName,
+    parentId,
+  };
+
+  try {
+    const response = await callApiClient(url, 'POST', payload, false, {}, true, true);
+    return response;
+  } catch (error) {
+    console.error('Error adding folder:', error.message);
+    throw error;
+  }
+};
+
 export const renameNodeApi = async (projectName, nodeId, newName) => {
   const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/rename-file/`;
   const payload = {

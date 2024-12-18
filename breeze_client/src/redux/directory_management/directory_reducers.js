@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import {
   addCustomFile,
+  addFolderAsync,
   addNodeAsync,
   deleteNodeAsync,
   fetchFolderConfig,
@@ -115,9 +116,27 @@ const directorySlice = createSlice({
             .concat(node.id);
         }
       })
+
+      // add folder
       .addCase(addNodeAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+      })
+      .addCase(addFolderAsync.fulfilled, (state, action) => {
+        const { parentId, ...newNode } = action.payload;
+        if (state.directoryConfig[parentId]?.children) {
+          state.directoryConfig[parentId].children.push(newNode.id);
+        }
+
+        Object.keys(state.directoryConfig).forEach((nodeId) => {
+          const node = state.directoryConfig[nodeId];
+          if (node.isNew || node.name === '' || node.tempName) {
+            delete state.directoryConfig[nodeId];
+          }
+        });
+      })
+      .addCase(addFolderAsync.rejected, (state, action) => {
+        console.error('Error adding folder:', action.payload);
       })
 
       // rename node

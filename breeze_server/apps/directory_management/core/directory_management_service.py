@@ -75,6 +75,9 @@ class DirectoryManager:
         }|({"children":[]} if node_type=="DIRECTORY" else {"extension":ext})
         
         self.directory_management_config[new_id] = new_node
+
+        if node_type == "DIRECTORY":
+            os.makedirs(self.get_path_from_file_id(new_id), exist_ok=True)
         
         with open(self.directory_config_path, 'w') as file:
             json.dump(self.directory_management_config, file, indent=2)

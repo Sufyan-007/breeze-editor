@@ -1,5 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+  addFolderApi,
   addNodeApi,
   deleteNodeApi,
   getFolderConfig,
@@ -72,6 +73,22 @@ export const addCustomFile = createAsyncThunk(
       return await uploadFile(payload, projectName);
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to upload file.');
+    }
+  }
+);
+
+export const addFolderAsync = createAsyncThunk(
+  'directory/addFolder',
+  async ({ projectId, parentId, folderName }, { rejectWithValue }) => {
+    try {
+      const response = await addFolderApi(projectId, {
+        parentId,
+        folderName,
+      });
+      return response;
+    } catch (error) {
+      console.error('Error adding folder:', error.message);
+      return rejectWithValue(error.response?.data?.message || 'Failed to add folder');
     }
   }
 );
