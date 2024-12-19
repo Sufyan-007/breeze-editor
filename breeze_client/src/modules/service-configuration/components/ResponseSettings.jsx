@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CustomSelectField, CustomTextInput } from '../../../common/fields';
-import { RESPONSE_OPTIONS } from '../constants/Content-Types';
+import { RESPONSE_OPTIONS, STATUS_CODES } from '../constants/Content-Types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { fetchSchemas } from '../../schema-configuration/redux/schemaConfigActions';
@@ -29,8 +29,6 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
   const { status } = useSelector((state) => state.schemas);
   const dispatch = useDispatch();
   const { projectName } = useParams();
-  // const [selectedProperty, setSelectedProperty] = useState(null);
-
   useEffect(() => {
     if (status === 'ready' && moduleId)
       dispatch(fetchSchemas({ projectName, payload: { category: 'models', module: moduleId } })).unwrap();
@@ -45,7 +43,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
           schema: schemaList[key],
         }))
     : [];
-
+  schemaOptions.push({ label: 'Select', value: '' });
   const extractProperties = useCallback(
     (schema, checkNewRes = false) => {
       if (schema && schema.properties) {
@@ -109,15 +107,35 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     const updatedResponse = [...response];
 
     if (field === 'schema_name') {
+      const schema = value.schema;
+      const properties = schema?.properties
+        ? Object.keys(schema.properties).map((key) => ({
+            name: key,
+            type: schema.properties[key].types[0].type,
+          }))
+        : [];
+      const tokenStore = {};
+      properties.forEach((prop) => {
+        if (prop.type === 'string' || prop.type === 'integer') {
+          tokenStore[prop.name] = {
+            store_in: 'LOCAL_STORAGE',
+            storage_key: '',
+          };
+        }
+      });
+
       updatedResponse[index] = {
         ...updatedResponse[index],
-        ['schema']: value['schema'],
-        [field]: value['value'],
+        schema: schema,
+        schema_name: value.value,
+        token_store: tokenStore,
       };
+
       setResponse(updatedResponse);
       onChange(responseType, updatedResponse);
       return;
     }
+
     if (subField && subProperty) {
       updatedResponse[index] = {
         ...updatedResponse[index],
@@ -140,6 +158,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     } else {
       updatedResponse[index] = { ...updatedResponse[index], [field]: value };
     }
+
     setResponse(updatedResponse);
     onChange(responseType, updatedResponse);
   };
@@ -182,10 +201,6 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
     });
   };
 
-  // const handlePropertySelection = (propName) => {
-  //   setSelectedProperty((prev) => (prev === propName ? null : propName));
-  // };
-
   const renderResponses = () => {
     if (!response || response.length === 0) {
       return null;
@@ -212,13 +227,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
                     label="Status"
                     value={res.status}
                     onChange={(e) => handleInputChange(index, 'status', e)}
-                    options={[
-                      { label: 'S_200', value: 'S_200' },
-                      { label: 'S_201', value: 'S_201' },
-                      { label: 'S_400', value: 'S_400' },
-                      { label: 'S_404', value: 'S_404' },
-                      { label: 'S_500', value: 'S_500' },
-                    ]}
+                    options={STATUS_CODES}
                   />
                   <ResponseForm
                     label="Schema"
@@ -335,14 +344,7 @@ function ResponseSettings({ responseData, onChange, isAuthApi, title, responseTy
             label="Status"
             value={newResponse.status}
             onChange={(e) => setNewResponse({ ...newResponse, status: e })}
-            options={[
-              { value: '', label: 'Select' },
-              { label: 'S_200', value: 'S_200' },
-              { label: 'S_201', value: 'S_201' },
-              { label: 'S_400', value: 'S_400' },
-              { label: 'S_404', value: 'S_404' },
-              { label: 'S_500', value: 'S_500' },
-            ]}
+            options={STATUS_CODES}
           />
           <ResponseForm
             label="Schema"
