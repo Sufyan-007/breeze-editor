@@ -56,3 +56,7 @@ export const availableServices = [
   { id: 6, serviceName: 'login', fileName: 'authentication.jsx', moduleName: 'User Management' },
   { id: 7, serviceName: 'logout', fileName: 'authentication.jsx', moduleName: 'User Management' },
 ];
+export const inputTypeMapping = Object.freeze({
+  text: 'STRING',
+  number: 'NUMERIC',
+});

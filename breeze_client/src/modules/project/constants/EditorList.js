@@ -26,8 +26,8 @@ export const configTypeMapping = {
   IMPORT: ['Edit Import'],
   REACT_COMPONENT: ['Component Config', 'Props'],
   RETURN_HTML_TREE: ['Html elements'],
-  HTML_WRAP: ['Html elements'],
-  HTML: ['Html elements'],
+  HTML_WRAP: ['Add elements'],
+  HTML: ['Add elements', 'Edit elements'],
   BLOCK: [
     'Variable',
     'State Variable',
