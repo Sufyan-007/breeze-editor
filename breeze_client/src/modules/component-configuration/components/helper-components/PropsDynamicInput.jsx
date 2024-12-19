@@ -53,14 +53,15 @@ const PropsDynamicInput = ({ property, handlePropChange, configuredPropsList }) 
       ) : (
         <input
           className="form-control-sm w-100 br-background-secondary br-text-primary border-0 removeFocusedBorder"
-          type={inputType}
+          // type={inputType}
+          type="text"
           value={
             configuredPropsList &&
             (configuredPropsList[property.prop_name]
               ? configuredPropsList[property.prop_name]?.value
               : property.default_value)
           }
-          onChange={(e) => handlePropChange(e, prop_name, inputTypeMapping[inputType])}
+          onChange={(e) => handlePropChange(e, prop_name, 'CUSTOM')}
         />
       )}
     </span>
