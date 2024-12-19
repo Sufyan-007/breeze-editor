@@ -220,8 +220,9 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileI
           />
         );
       case 'Function Call':
+        return <ServiceCall onSubmit={onSubmit} onCancel={onCancel} callType={'functionCall'} />;
       case 'Service Call':
-        return <ServiceCall onSubmit={onSubmit} onCancel={onCancel} />;
+        return <ServiceCall onSubmit={onSubmit} onCancel={onCancel} callType={'serviceCall'} />;
       case 'Edit Function Call':
         return (
           <ServiceCall
