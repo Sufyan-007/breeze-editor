@@ -16,7 +16,6 @@ import {
   CustomCode,
   ConsoleStatementForm,
   CommentConfigForm,
-  FunctionCall,
   ServiceCall,
   RouterNavigateConfigForm,
   ReturnConfigForm,
@@ -221,7 +220,6 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileI
           />
         );
       case 'Function Call':
-        return <FunctionCall onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Service Call':
         return <ServiceCall onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Edit Function Call':
