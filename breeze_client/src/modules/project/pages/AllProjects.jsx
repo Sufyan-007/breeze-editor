@@ -80,6 +80,11 @@ const AllProjects = () => {
   };
 
   const handleDeleteProject = async (projectName) => {
+    const openTabsInfo = JSON.parse(localStorage.getItem('openTabsInfo')) || {};
+    if (openTabsInfo[projectName]) {
+      delete openTabsInfo[projectName];
+      localStorage.setItem('openTabsInfo', JSON.stringify(openTabsInfo));
+    }
     await deleteProject(projectName);
     fetchProjects();
   };
