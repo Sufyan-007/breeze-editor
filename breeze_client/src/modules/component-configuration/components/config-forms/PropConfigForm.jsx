@@ -146,7 +146,7 @@ PropConfigForm.propTypes = {
     name: PropTypes.string,
     isRequired: PropTypes.bool,
     dataType: PropTypes.object,
-    defaultValue: PropTypes.object || PropTypes.string,
+    defaultValue: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
     description: PropTypes.string,
   }),
   editMode: PropTypes.bool,
