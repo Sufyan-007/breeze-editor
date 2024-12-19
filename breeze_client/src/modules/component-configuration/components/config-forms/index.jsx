@@ -16,10 +16,8 @@ import UseCallbackConfigForm from './UseCallbackConfigForm';
 import CustomCode from './CustomCode';
 import ConsoleStatementForm from './ConsoleStatementForm';
 import CommentConfigForm from './CommentConfigForm';
-import FunctionCall from './FunctionCall';
 import ServiceCall from './ServiceCall';
 import RouterNavigateConfigForm from './RouterNavigateConfigForm';
-import FunctionCallEdit from './FunctionCallEdit';
 import ReturnConfigForm from './ReturnConfigForm';
 import ExportConfigForm from './ExportConfigForm';
 
@@ -42,10 +40,8 @@ export {
   CustomCode,
   ConsoleStatementForm,
   CommentConfigForm,
-  FunctionCall,
   ServiceCall,
   RouterNavigateConfigForm,
-  FunctionCallEdit,
   ReturnConfigForm,
   ExportConfigForm,
 };
