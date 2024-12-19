@@ -19,7 +19,6 @@ import {
   FunctionCall,
   ServiceCall,
   RouterNavigateConfigForm,
-  FunctionCallEdit,
   ReturnConfigForm,
   ExportConfigForm,
 } from '../../component-configuration/components/config-forms';
@@ -226,7 +225,15 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileI
       case 'Service Call':
         return <ServiceCall onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Edit Function Call':
-        return <FunctionCallEdit onUpdate={onUpdate} onCancel={onCancel} getConfig={getConfig} />;
+        return (
+          <ServiceCall
+            getConfig={getConfig}
+            onSubmit={onSubmit}
+            onCancel={onCancel}
+            editMode={true}
+            onUpdate={onUpdate}
+          />
+        );
       case 'Add Navigation':
         return <RouterNavigateConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Configure Exports':
