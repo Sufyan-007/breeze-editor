@@ -85,8 +85,10 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileI
             onUpdate={onUpdate}
           />
         );
-      case 'Html elements':
-        return <AddELement />;
+      case 'Add elements':
+        return <AddELement onSubmit={onSubmit} getConfig={getConfig} />;
+      case 'Edit elements':
+        return <AddELement onSubmit={onSubmit} getConfig={getConfig} onUpdate={onUpdate} editMode={true} />;
       case 'Function':
         return <FunctionConfigForm onSubmit={onSubmit} onCancel={onCancel} />;
       case 'Edit Function':

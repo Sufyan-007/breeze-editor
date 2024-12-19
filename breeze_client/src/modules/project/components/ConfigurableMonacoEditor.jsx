@@ -175,7 +175,7 @@ const ConfigurableMonacoEditor = ({
     } else {
       const contentComponent = getConfigComponent(item);
       let width = '40%';
-      if (item === 'Html elements') width = '60%';
+      if (item === 'Add elements' || item === 'Edit elements') width = '60%';
       if (item === 'Configure Imports') width = '60%';
       showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
     }

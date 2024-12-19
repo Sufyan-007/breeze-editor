@@ -28,8 +28,8 @@ export const configTypeMapping = {
   EXPORT: ['Configure Exports'],
   REACT_COMPONENT: ['Component Config', 'Props'],
   RETURN_HTML_TREE: ['Html elements'],
-  HTML_WRAP: ['Html elements'],
-  HTML: ['Html elements'],
+  HTML_WRAP: ['Add elements'],
+  HTML: ['Add elements', 'Edit elements'],
   BLOCK: [
     'Variable',
     'Use State',

@@ -56,3 +56,7 @@ export const scopeOptions = {
   test: '',
   Main: '',
 };
+export const inputTypeMapping = Object.freeze({
+  text: 'STRING',
+  number: 'NUMERIC',
+});

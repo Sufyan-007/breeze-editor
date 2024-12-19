@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { getProjectPort } from '../../services/componentListService';
 import PreviewCustomStyling from './PreviewCustomStyling';
+import PropTypes from 'prop-types';
+
 const PreviewDisplay = ({ showPreview, component, library = null, propsList }) => {
   const [projectPort, setProjectPort] = useState(3000);
   const { projectName } = useParams();
@@ -58,7 +60,7 @@ const PreviewDisplay = ({ showPreview, component, library = null, propsList }) =
             iframe.contentWindow.postMessage(
               {
                 type: 'resource',
-                resource: { type: 'props', props: propsList },
+                resource: { type: 'props', props: convertObject(propsList) },
               },
               '*'
             );
@@ -115,7 +117,7 @@ const PreviewDisplay = ({ showPreview, component, library = null, propsList }) =
                 resource: {
                   isPreview: true,
                   type: 'component',
-                  component: { name: component[1], library: libName, sandboxStyle: sandboxStyle },
+                  component: { name: component, library: libName, sandboxStyle: sandboxStyle },
                 },
               },
               '*'
@@ -153,7 +155,7 @@ const PreviewDisplay = ({ showPreview, component, library = null, propsList }) =
         resource: {
           isPreview: true,
           type: 'component',
-          component: { name: component[1], library: libName, sandboxStyle: sandboxStyle, styles: styles },
+          component: { name: component, library: libName, sandboxStyle: sandboxStyle, styles: styles },
         },
       },
       '*'
@@ -161,11 +163,24 @@ const PreviewDisplay = ({ showPreview, component, library = null, propsList }) =
     iframe.contentWindow.postMessage(
       {
         type: 'resource',
-        resource: { type: 'props', props: propsList },
+        resource: { type: 'props', props: convertObject(propsList) },
       },
       '*'
     );
   }, [showPreview, styles]);
+  const convertObject = (inputObj) => {
+    const result = {};
+    // Iterate through the keys at the top level
+    Object.keys(inputObj).forEach((key) => {
+      // Extract the second-level object's values (assuming the desired value is the last key)
+      const innerObj = inputObj[key];
+      const values = Object.values(innerObj);
+
+      // Take the last value (e.g., "e" from {b: "c", d: "e"})
+      result[key] = values[values.length - 1];
+    });
+    return result;
+  };
 
   return (
     <div className="d-flex justify-content-between">
@@ -197,5 +212,10 @@ const PreviewDisplay = ({ showPreview, component, library = null, propsList }) =
     </div>
   );
 };
-
+PreviewDisplay.propTypes = {
+  showPreview: PropTypes.number,
+  component: PropTypes.oneOfType([PropTypes.string, PropTypes.oneOf([null])]),
+  library: PropTypes.string,
+  propsList: PropTypes.object,
+};
 export default PreviewDisplay;

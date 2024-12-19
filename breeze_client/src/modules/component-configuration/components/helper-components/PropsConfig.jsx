@@ -3,16 +3,23 @@ import { useParams } from 'react-router';
 import PropTypes from 'prop-types';
 import { elementAttributes } from '../../constants/AllELements';
 import { getAllProps } from '../../services/componentListService';
-const PropsConfig = ({ selectedCategory, component = null, library = '', setconfiguredPropsList }) => {
+import PropsDynamicInput from './PropsDynamicInput';
+const PropsConfig = ({
+  selectedCategory,
+  component = null,
+  library = '',
+  setconfiguredPropsList,
+  configuredPropsList,
+}) => {
   const [props, setProps] = useState({});
   const { projectName } = useParams();
   useEffect(() => {
     async function fetchData() {
       try {
         if (selectedCategory === 'html') {
-          const propList = elementAttributes.data[component[1]] || {};
+          const propList = elementAttributes.data[component] || {};
           setProps(propList);
-          setconfiguredPropsList({});
+          // setconfiguredPropsList({});
         } else {
           const match = library.match(/^(.*)@([^@]+)$/);
           const libName = match ? match[1] : null;
@@ -20,10 +27,11 @@ const PropsConfig = ({ selectedCategory, component = null, library = '', setconf
 
           const payLoad = {
             category: selectedCategory,
-            resource: selectedCategory === 'components' ? component[0] : component[1],
+            resource: selectedCategory === 'components' ? component : component,
             select: ['props'],
             libname: libName,
             libversion: version,
+            module: 'component',
           };
 
           const propList = await getAllProps(projectName, payLoad);
@@ -38,15 +46,14 @@ const PropsConfig = ({ selectedCategory, component = null, library = '', setconf
   }, [selectedCategory, component, library, projectName]);
 
   if (!component) return null;
-  const handlePropChange = (e, prop_name) => {
+  const handlePropChange = (e, prop_name, type) => {
     const newValue = e.target.value;
-
     setconfiguredPropsList((prev) => ({
       ...prev,
-      [prop_name]: newValue,
+      [prop_name]: { type: type, value: newValue },
     }));
   };
-
+  console.log(configuredPropsList);
   return (
     <>
       <div
@@ -77,15 +84,51 @@ const PropsConfig = ({ selectedCategory, component = null, library = '', setconf
                 data-bs-placement="top" // Options: top, bottom, left, right
                 title={property.type}
               >
-                <span className="br-text-primary">{property.prop_name}</span>
-                <span>
-                  <input
+                <span className="br-text-primary" style={{ fontSize: '14px' }}>
+                  {property.prop_name}
+                </span>
+                {/* <span className="w-25"> */}
+                {/* <input
                     className="form-control-sm w-100 br-background-secondary br-text-primary border-0 removeFocusedBorder"
                     type="text"
                     defaultValue={property.default_value}
                     onChange={(e) => handlePropChange(e, property.prop_name)}
-                  />
-                </span>
+                  /> */}
+                {/* {getAllQuotedStringsContent(property.type).length > 0 ? (
+                    <select
+                      className="form-control-sm w-100 br-background-secondary br-text-primary border-0 removeFocusedBorder"
+                      defaultValue={property.default_value}
+                      onChange={(e) => handlePropChange(e, property.prop_name)}
+                    >
+                      <option value="">Select an option</option>
+                      {getAllQuotedStringsContent(property.type).map((option, index) => (
+                        <option key={index} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      className="form-control-sm w-100 br-background-secondary br-text-primary border-0 removeFocusedBorder"
+                      type={determineInputType(property.type)}
+                      // defaultValue={property.default_value}
+                      value={
+                        configuredPropsList &&
+                        (configuredPropsList[property.prop_name]
+                          ? configuredPropsList[property.prop_name]?.value
+                          : property.default_value)
+                      }
+                      onChange={(e) => {
+                        handlePropChange(e, property.prop_name);
+                      }}
+                    />
+                  )}
+                </span> */}
+                <PropsDynamicInput
+                  property={property}
+                  handlePropChange={handlePropChange}
+                  configuredPropsList={configuredPropsList}
+                />
               </div>
             ))
           ) : (
@@ -101,6 +144,8 @@ PropsConfig.propTypes = {
   selectedCategory: PropTypes.string.isRequired,
   component: PropTypes.arrayOf(PropTypes.string),
   library: PropTypes.string,
+  setconfiguredPropsList: PropTypes.func,
+  configuredPropsList: PropTypes.object,
 };
 
 PropsConfig.defaultProps = {
