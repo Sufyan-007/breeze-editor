@@ -6,7 +6,7 @@ import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
 import { getEntityConfig } from '../../../project/services/projectService';
 import { useParams } from 'react-router-dom';
 
-function ServiceCall({ getConfig, onSubmit, onCancel, editMode, onUpdate, callType }) {
+function ServiceCall({ getConfig, onSubmit, onCancel, editMode, onUpdate, callType = 'serviceCall' }) {
   const { projectName } = useParams();
   const initialConfig = JSON.parse(JSON.stringify(funcConfigTemplates[callType]));
   const [formData, setFormData] = useState({ ...initialConfig });
