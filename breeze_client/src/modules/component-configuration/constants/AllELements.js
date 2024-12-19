@@ -1,460 +1,3 @@
-// export const elements = {
-//   HTML: [
-//     {
-//       name: 'DOCTYPE html',
-//       id: 'DOCTYPE HTML',
-//     },
-//     {
-//       name: 'a',
-//       id: 'A',
-//     },
-//     {
-//       name: 'abbr',
-//       id: 'ABBR',
-//     },
-//     {
-//       name: 'area',
-//       id: 'AREA',
-//     },
-//     {
-//       name: 'article',
-//       id: 'ARTICLE',
-//     },
-//     {
-//       name: 'aside',
-//       id: 'ASIDE',
-//     },
-//     {
-//       name: 'audio',
-//       id: 'AUDIO',
-//     },
-//     {
-//       name: 'b',
-//       id: 'B',
-//     },
-//     {
-//       name: 'base',
-//       id: 'BASE',
-//     },
-//     {
-//       name: 'bdi',
-//       id: 'BDI',
-//     },
-//     {
-//       name: 'bdo',
-//       id: 'BDO',
-//     },
-//     {
-//       name: 'blockquote',
-//       id: 'BLOCKQUOTE',
-//     },
-//     {
-//       name: 'br',
-//       id: 'BR',
-//     },
-//     {
-//       name: 'button',
-//       id: 'BUTTON',
-//     },
-//     {
-//       name: 'canvas',
-//       id: 'CANVAS',
-//     },
-//     {
-//       name: 'caption',
-//       id: 'CAPTION',
-//     },
-//     {
-//       name: 'cite',
-//       id: 'CITE',
-//     },
-//     {
-//       name: 'code',
-//       id: 'CODE',
-//     },
-//     {
-//       name: 'col',
-//       id: 'COL',
-//     },
-//     {
-//       name: 'colgroup',
-//       id: 'COLGROUP',
-//     },
-//     {
-//       name: 'content',
-//       id: 'CONTENT',
-//     },
-//     {
-//       name: 'data',
-//       id: 'DATA',
-//     },
-//     {
-//       name: 'datalist',
-//       id: 'DATALIST',
-//     },
-//     {
-//       name: 'dd',
-//       id: 'DD',
-//     },
-//     {
-//       name: 'del',
-//       id: 'DEL',
-//     },
-//     {
-//       name: 'details',
-//       id: 'DETAILS',
-//     },
-//     {
-//       name: 'dfn',
-//       id: 'DFN',
-//     },
-//     {
-//       name: 'dialog',
-//       id: 'DIALOG',
-//     },
-//     {
-//       name: 'div',
-//       id: 'DIV',
-//     },
-//     {
-//       name: 'dl',
-//       id: 'DL',
-//     },
-//     {
-//       name: 'dt',
-//       id: 'DT',
-//     },
-//     {
-//       name: 'element',
-//       id: 'ELEMENT',
-//     },
-//     {
-//       name: 'em',
-//       id: 'EM',
-//     },
-//     {
-//       name: 'embed',
-//       id: 'EMBED',
-//     },
-//     {
-//       name: 'fieldset',
-//       id: 'FIELDSET',
-//     },
-//     {
-//       name: 'figcaption',
-//       id: 'FIGCAPTION',
-//     },
-//     {
-//       name: 'figure',
-//       id: 'FIGURE',
-//     },
-//     {
-//       name: 'footer',
-//       id: 'FOOTER',
-//     },
-//     {
-//       name: 'form',
-//       id: 'FORM',
-//     },
-//     {
-//       name: 'h1',
-//       id: 'H1',
-//     },
-//     {
-//       name: 'h2',
-//       id: 'H2',
-//     },
-//     {
-//       name: 'h3',
-//       id: 'H3',
-//     },
-//     {
-//       name: 'h4',
-//       id: 'H4',
-//     },
-//     {
-//       name: 'h5',
-//       id: 'H5',
-//     },
-//     {
-//       name: 'h6',
-//       id: 'H6',
-//     },
-//     {
-//       name: 'head',
-//       id: 'HEAD',
-//     },
-//     {
-//       name: 'header',
-//       id: 'HEADER',
-//     },
-//     {
-//       name: 'hr',
-//       id: 'HR',
-//     },
-//     {
-//       name: 'i',
-//       id: 'I',
-//     },
-//     {
-//       name: 'iframe',
-//       id: 'IFRAME',
-//     },
-//     {
-//       name: 'img',
-//       id: 'IMG',
-//     },
-//     {
-//       name: 'input',
-//       id: 'INPUT',
-//     },
-//     {
-//       name: 'ins',
-//       id: 'INS',
-//     },
-//     {
-//       name: 'kbd',
-//       id: 'KBD',
-//     },
-//     {
-//       name: 'label',
-//       id: 'LABEL',
-//     },
-//     {
-//       name: 'legend',
-//       id: 'LEGEND',
-//     },
-//     {
-//       name: 'li',
-//       id: 'LI',
-//     },
-//     {
-//       name: 'link',
-//       id: 'LINK',
-//     },
-//     {
-//       name: 'main',
-//       id: 'MAIN',
-//     },
-//     {
-//       name: 'map',
-//       id: 'MAP',
-//     },
-//     {
-//       name: 'mark',
-//       id: 'MARK',
-//     },
-//     {
-//       name: 'menu',
-//       id: 'MENU',
-//     },
-//     {
-//       name: 'menuitem',
-//       id: 'MENUITEM',
-//     },
-//     {
-//       name: 'meta',
-//       id: 'META',
-//     },
-//     {
-//       name: 'meter',
-//       id: 'METER',
-//     },
-//     {
-//       name: 'nav',
-//       id: 'NAV',
-//     },
-//     {
-//       name: 'noscript',
-//       id: 'NOSCRIPT',
-//     },
-//     {
-//       name: 'object',
-//       id: 'OBJECT',
-//     },
-//     {
-//       name: 'ol',
-//       id: 'OL',
-//     },
-//     {
-//       name: 'optgroup',
-//       id: 'OPTGROUP',
-//     },
-//     {
-//       name: 'option',
-//       id: 'OPTION',
-//     },
-//     {
-//       name: 'output',
-//       id: 'OUTPUT',
-//     },
-//     {
-//       name: 'p',
-//       id: 'P',
-//     },
-//     {
-//       name: 'param',
-//       id: 'PARAM',
-//     },
-//     {
-//       name: 'picture',
-//       id: 'PICTURE',
-//     },
-//     {
-//       name: 'pre',
-//       id: 'PRE',
-//     },
-//     {
-//       name: 'progress',
-//       id: 'PROGRESS',
-//     },
-//     {
-//       name: 'q',
-//       id: 'Q',
-//     },
-//     {
-//       name: 'rp',
-//       id: 'RP',
-//     },
-//     {
-//       name: 'rt',
-//       id: 'RT',
-//     },
-//     {
-//       name: 'rtc',
-//       id: 'RTC',
-//     },
-//     {
-//       name: 'ruby',
-//       id: 'RUBY',
-//     },
-//     {
-//       name: 's',
-//       id: 'S',
-//     },
-//     {
-//       name: 'samp',
-//       id: 'SAMP',
-//     },
-//     {
-//       name: 'script',
-//       id: 'SCRIPT',
-//     },
-//     {
-//       name: 'section',
-//       id: 'SECTION',
-//     },
-//     {
-//       name: 'select',
-//       id: 'SELECT',
-//     },
-//     {
-//       name: 'shadow',
-//       id: 'SHADOW',
-//     },
-//     {
-//       name: 'small',
-//       id: 'SMALL',
-//     },
-//     {
-//       name: 'source',
-//       id: 'SOURCE',
-//     },
-//     {
-//       name: 'span',
-//       id: 'SPAN',
-//     },
-//     {
-//       name: 'strong',
-//       id: 'STRONG',
-//     },
-//     {
-//       name: 'style',
-//       id: 'STYLE',
-//     },
-//     {
-//       name: 'sub',
-//       id: 'SUB',
-//     },
-//     {
-//       name: 'summary',
-//       id: 'SUMMARY',
-//     },
-//     {
-//       name: 'sup',
-//       id: 'SUP',
-//     },
-//     {
-//       name: 'table',
-//       id: 'TABLE',
-//     },
-//     {
-//       name: 'tbody',
-//       id: 'TBODY',
-//     },
-//     {
-//       name: 'td',
-//       id: 'TD',
-//     },
-//     {
-//       name: 'template',
-//       id: 'TEMPLATE',
-//     },
-//     {
-//       name: 'textarea',
-//       id: 'TEXTAREA',
-//     },
-//     {
-//       name: 'tfoot',
-//       id: 'TFOOT',
-//     },
-//     {
-//       name: 'th',
-//       id: 'TH',
-//     },
-//     {
-//       name: 'thead',
-//       id: 'THEAD',
-//     },
-//     {
-//       name: 'time',
-//       id: 'TIME',
-//     },
-//     {
-//       name: 'title',
-//       id: 'TITLE',
-//     },
-//     {
-//       name: 'tr',
-//       id: 'TR',
-//     },
-//     {
-//       name: 'track',
-//       id: 'TRACK',
-//     },
-//     {
-//       name: 'u',
-//       id: 'U',
-//     },
-//     {
-//       name: 'ul',
-//       id: 'UL',
-//     },
-//     {
-//       name: 'var',
-//       id: 'VAR',
-//     },
-//     {
-//       name: 'video',
-//       id: 'VIDEO',
-//     },
-//     {
-//       name: 'wbr',
-//       id: 'WBR',
-//     },
-//   ],
-// };
-
 const htmlElements = {
   1: 'div',
   2: 'span',
@@ -477,6 +20,25 @@ const htmlElements = {
   19: 'legend',
   20: 'datalist',
   21: 'output',
+  22: 'img',
+  23: 'nav',
+  24: 'header',
+  25: 'footer',
+  26: 'section',
+  27: 'article',
+  28: 'aside',
+  29: 'main',
+  30: 'h1',
+  31: 'h2',
+  32: 'h3',
+  33: 'h4',
+  34: 'h5',
+  35: 'h6',
+  36: 'p',
+  37: 'br',
+  38: 'hr',
+  39: 'pre',
+  40: 'code',
 };
 
 export default htmlElements;
@@ -503,6 +65,12 @@ const elementAttributes = {
           default_value: '',
           id: 'div_003',
         },
+        div_004: {
+          prop_name: 'onClick',
+          type: 'function | undefined',
+          default_value: null,
+          id: 'div_004',
+        },
       },
     },
     span: {
@@ -524,6 +92,12 @@ const elementAttributes = {
           type: 'CSSProperties | undefined',
           default_value: '',
           id: 'span_003',
+        },
+        span_004: {
+          prop_name: 'onClick',
+          type: 'function | undefined',
+          default_value: null,
+          id: 'span_004',
         },
       },
     },
@@ -547,6 +121,12 @@ const elementAttributes = {
           default_value: '',
           id: 'a_003',
         },
+        a_004: {
+          prop_name: 'onClick',
+          type: 'function | undefined',
+          default_value: null,
+          id: 'a_004',
+        },
       },
     },
     input: {
@@ -569,6 +149,12 @@ const elementAttributes = {
           default_value: '',
           id: 'input_003',
         },
+        input_004: {
+          prop_name: 'onChange',
+          type: 'function | undefined',
+          default_value: null,
+          id: 'input_004',
+        },
       },
     },
     button: {
@@ -584,6 +170,12 @@ const elementAttributes = {
           type: 'boolean | undefined',
           default_value: false,
           id: 'button_002',
+        },
+        button_003: {
+          prop_name: 'type',
+          type: 'string',
+          default_value: 'button',
+          id: 'button_003',
         },
       },
     },
@@ -607,6 +199,12 @@ const elementAttributes = {
           default_value: '',
           id: 'form_003',
         },
+        form_004: {
+          prop_name: 'onSubmit',
+          type: 'function | undefined',
+          default_value: null,
+          id: 'form_004',
+        },
       },
     },
     textarea: {
@@ -629,6 +227,12 @@ const elementAttributes = {
           default_value: '',
           id: 'textarea_003',
         },
+        textarea_004: {
+          prop_name: 'onChange',
+          type: 'function | undefined',
+          default_value: null,
+          id: 'textarea_004',
+        },
       },
     },
     select: {
@@ -645,6 +249,12 @@ const elementAttributes = {
           default_value: false,
           id: 'select_002',
         },
+        select_003: {
+          prop_name: 'onChange',
+          type: 'function | undefined',
+          default_value: null,
+          id: 'select_003',
+        },
       },
     },
     option: {
@@ -660,6 +270,34 @@ const elementAttributes = {
           type: 'boolean | undefined',
           default_value: false,
           id: 'option_002',
+        },
+      },
+    },
+    img: {
+      props: {
+        img_001: {
+          prop_name: 'src',
+          type: 'string | undefined',
+          default_value: '',
+          id: 'img_001',
+        },
+        img_002: {
+          prop_name: 'alt',
+          type: 'string | undefined',
+          default_value: '',
+          id: 'img_002',
+        },
+        img_003: {
+          prop_name: 'width',
+          type: 'number | string | undefined',
+          default_value: '',
+          id: 'img_003',
+        },
+        img_004: {
+          prop_name: 'height',
+          type: 'number | string | undefined',
+          default_value: '',
+          id: 'img_004',
         },
       },
     },

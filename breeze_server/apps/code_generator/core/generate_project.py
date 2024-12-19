@@ -129,8 +129,16 @@ def write_main_app_and_routing_component(app_config, routing_config):
     _id = app_config['defaultCompId']
     name = config_index.get(_id)
     transaction_id = get_transaction_id()
-    add_code_file(f"{app_config['name']}", name, "COMPONENTS", f"{_id}", "COMPONENTS", f"{_id}", transaction_id)    
-    
+    # add_code_file(f"{app_config['name']}", name, "COMPONENTS", f"{_id}", "COMPONENTS", f"{_id}", transaction_id)    
+    add_code_file(
+        projectId=app_config['name'],
+        fileName=name,
+        parentId="COMPONENTS",
+        file_id=None,
+        tag="COMPONENTS",
+        entity_id=_id,
+        transaction_id=transaction_id
+    )
     directory_manager= DirectoryManager(app_config['name'])
     
     # write App.jsx component (in src/components folder of generated project)

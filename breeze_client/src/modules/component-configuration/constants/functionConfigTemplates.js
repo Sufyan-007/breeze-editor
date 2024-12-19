@@ -63,7 +63,6 @@ export const funcConfigTemplates = {
   serviceCall: {
     callType: 'serviceCall',
     type: 'FUNCTION_CALL',
-    functionName: '',
     parameters: [],
   },
   tryCatch: {

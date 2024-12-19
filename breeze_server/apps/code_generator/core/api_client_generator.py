@@ -179,27 +179,37 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     # set request body if given
     body_items = set_request_body(model,app_name,module_id)
     #needs to be changed when body will be a dictionary instead of list
-    # body_params = {"type": "OBJECT", "name": "BodyDetails", "properties": {}}
     body_params = {"name":"BodyDetails", "destructured": False, "schema": {"selection": "anyOf", "types":[]}}
+    model_parameters = []
     if body_items:
         if body_items.get("RAW"):
             body_params["schema"]["types"].append(body_items["RAW"]["body_params"])
+            if len (body_items["RAW"]["body_params"]) >0:
+                model_parameters.append(body_params)
         elif body_items.get("BINARY"):
             body_params["schema"]["types"].append(body_items["BINARY"]["body_params"])
-        else:
-            body_params["schema"]["types"].append({"type": "OBJECT", "properties": {}})
-        if body_params:
-            body_params["name"] = "BodyDetails";
+            if len (body_items["BINARY"]["body_params"]) >0:
+                model_parameters.append(body_params)
+        elif body_items.get("FORMDATA"):
+            body_params["schema"]["types"].append(body_items["FORMDATA"]["body_params"])
+            if len (body_items["FORMDATA"]["body_params"]) >0:
+                model_parameters.append(body_params)
+        elif body_items.get("URLENCODED"):
+            body_params["schema"]["types"].append(body_items["URLENCODED"]["body_params"])
+            if len (body_items["URLENCODED"]["body_params"]) >0:
+                model_parameters.append(body_params)
+            # model_parameters.append(body_params)
     #writing all the required parameters into the config
     ######################################################################################################
-    model_parameters = []
-    model_parameters.append({"name": "PathParameters","destructured": False, "schema":{"selection":"anyOf","types": [{"type": "OBJECT",  "properties": path_params}]}})
-    model_parameters.append({"name": "QueryParameters","destructured": False, "schema":{"selection":"anyOf","types": [{"type": "OBJECT",  "properties": query_params}]}})
+    if "PathParameters" in function_args:
+        model_parameters.append({"name": "PathParameters","destructured": False, "schema":{"selection":"anyOf","types": [{"type": "OBJECT",  "properties": path_params}]}})
+    if "QueryParameters" in function_args:
+        model_parameters.append({"name": "QueryParameters","destructured": False, "schema":{"selection":"anyOf","types": [{"type": "OBJECT",  "properties": query_params}]}})
     # model_parameters.append({"type": "OBJECT", "name": "QueryParameters", "properties": query_params})
-    model_parameters.append(body_params)
-    model_parameters.append({"name": "HeaderDetails","destructured": False, "schema":{"selection":"anyOf","types": [{"type": "OBJECT",  "properties": param_headers}]}})
-
-    # model_parameters.append({"type": "OBJECT", "name": "HeaderDetails", "properties": param_headers})
+    if "HeaderDetails" in function_args:
+        model_parameters.append({"name": "HeaderDetails","destructured": False, "schema":{"selection":"anyOf","types": [{"type": "OBJECT",  "properties": param_headers}]}})
+    #writing all the required parameters into the config
+    ######################################################################################################
     new_model = model.as_dict()
     new_model["parameters"] = model_parameters
     new_model["operation_id"] = convert_to_valid_variable_name(func_name)
@@ -323,7 +333,8 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             react_service_functions.append(react_code)
             service_functions_metadata.append({
                 "id":model.id,
-                "name" : converted_name
+                "name" : converted_name,
+                "schema": {"parameters": new_model["parameters"]}
             })
     
     else:
@@ -405,7 +416,12 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         react_service_functions.append(react_code)
         service_functions_metadata.append({
             "id":model.id,
-            "name" : converted_name
+            "name" : converted_name,
+            "schema": {
+                "parameters": new_model["parameters"],
+                "type" : "FUNCTION",
+                "isAsync" : True
+            },
         })
     return react_service_functions,used_interceptor, service_functions_metadata
         

@@ -39,12 +39,10 @@ function CustomCode({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
     } else {
       onSubmit(formData);
     }
-    setFormData(initialCustomCodeConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialCustomCodeConfig);
     onCancel();
   };
 

@@ -5,7 +5,7 @@ import { CustomButtonField, CustomSelectField, CustomTextInput } from '../../../
 import { getAllRoutesFullPath, getRouteDetails } from '../../../../services/routing/routingService';
 import { useParams } from 'react-router-dom';
 
-function RouterNavigateConfigForm({ onSubmit, onCancel, editMode }) {
+function RouterNavigateConfigForm({ onSubmit, onCancel }) {
   const initialRoutingNavigateConfig = JSON.parse(JSON.stringify(funcConfigTemplates['addNavigation']));
   const [formData, setFormData] = useState({ ...initialRoutingNavigateConfig });
   const [availableRoutes, setAvailableRoutes] = useState([{ label: 'Select Route', value: '' }]);
@@ -106,7 +106,7 @@ function RouterNavigateConfigForm({ onSubmit, onCancel, editMode }) {
           />
           <CustomButtonField
             type="button"
-            label={editMode ? 'Update' : 'Submit'}
+            label={'Submit'}
             className="btn btn-filled med-font"
             onClick={handleSubmit}
           />
@@ -119,7 +119,6 @@ function RouterNavigateConfigForm({ onSubmit, onCancel, editMode }) {
 RouterNavigateConfigForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
-  editMode: PropTypes.bool,
 };
 
 export default RouterNavigateConfigForm;

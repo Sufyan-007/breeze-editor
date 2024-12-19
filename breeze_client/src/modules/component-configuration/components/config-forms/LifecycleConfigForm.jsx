@@ -1,11 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import {
-  CustomRadioButtonField,
-  CustomMultiSelectField,
-  CustomButtonField,
-  CustomTextInput,
-} from '../../../../common/fields';
+import CreatableSelect from 'react-select/creatable';
+import { CustomRadioButtonField, CustomButtonField, CustomTextInput } from '../../../../common/fields';
 import { availableDependentVars, lifecycleTypes } from '../../constants/FormConstants';
 import { initialLifecycleConfig } from '../../constants/ResourcesFormData';
 
@@ -16,7 +12,10 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
   const fetchConfig = useCallback(async () => {
     const res = await getConfig();
     const config = res.config;
-    const dependencyValues = config.lifecycleType === 'onDependency' ? config.dependencies.map((dep) => dep.value) : [];
+    const dependencyValues =
+      config.lifecycleType === 'onDependency'
+        ? config.dependencies.map((dep) => ({ label: dep.value, value: dep.value }))
+        : [];
     setFormData(config);
     setSelectedDependencies(dependencyValues);
   }, [getConfig]);
@@ -51,7 +50,7 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
       } else if (value === 'onDependency') {
         const dependencyRefs = selectedDependencies.map((dep) => ({
           type: 'TOKEN',
-          value: dep,
+          value: dep.value,
         }));
         updatedData.dependencies = dependencyRefs;
       }
@@ -60,11 +59,11 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
     setFormData(updatedData);
   };
 
-  const handleDependenciesChange = (values) => {
-    setSelectedDependencies(values);
-    const dependencyRefs = values.map((val) => ({
+  const handleDependenciesChange = (options) => {
+    setSelectedDependencies(options);
+    const dependencyRefs = options.map((opt) => ({
       type: 'TOKEN',
-      value: val,
+      value: opt.value,
     }));
 
     setFormData((prevData) => ({
@@ -79,7 +78,7 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
       formData.lifecycleType === 'onDependency'
         ? selectedDependencies.map((dep) => ({
             type: 'TOKEN',
-            value: dep,
+            value: dep.value,
           }))
         : formData.lifecycleType === 'onInitialMount'
           ? []
@@ -95,13 +94,11 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
     } else {
       onSubmit(finalData);
     }
-    setFormData(initialLifecycleConfig);
     setSelectedDependencies([]);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialLifecycleConfig);
     setSelectedDependencies([]);
     onCancel();
   };
@@ -131,16 +128,18 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
           />
 
           {formData.lifecycleType === 'onDependency' && (
-            <CustomMultiSelectField
-              name="dependencies"
-              values={selectedDependencies}
-              onChange={handleDependenciesChange}
-              options={availableDependentVars}
-              config={{
-                label: 'Dependent Variables',
-                groupClass: 'form-group mb-2',
-              }}
-            />
+            <div className="form-group mb-2">
+              <label className="form-label br-text-primary med-font fw-semibold me-2">Dependent Variables</label>
+              <CreatableSelect
+                isMulti
+                value={selectedDependencies}
+                onChange={handleDependenciesChange}
+                options={availableDependentVars}
+                placeholder="Add dependent variables..."
+                className="react-select-container br-background-secondary br-text-primary"
+                classNamePrefix="react-select"
+              />
+            </div>
           )}
         </div>
 

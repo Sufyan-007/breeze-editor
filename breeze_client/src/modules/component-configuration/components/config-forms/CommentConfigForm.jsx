@@ -32,12 +32,10 @@ function CommentConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }
     } else {
       onSubmit(formData);
     }
-    setFormData(initialCommentConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialCommentConfig);
     onCancel();
   };
 

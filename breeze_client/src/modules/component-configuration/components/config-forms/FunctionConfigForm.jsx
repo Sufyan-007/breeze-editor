@@ -45,19 +45,19 @@ function FunctionConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
   };
 
   const handleDeleteParam = (index) => {
-    const updatedParams = formData.parameters.filter((_, i) => i !== index);
-    setFormData({ ...formData, parameters: updatedParams });
+    const updatedParams = formData.schema.parameters.filter((_, i) => i !== index);
+    setFormData({ ...formData, schema: { ...formData.schema, parameters: updatedParams } });
     clearParamForm();
   };
 
   const addOrUpdateParam = (paramData) => {
-    const updatedParams = [...formData.parameters];
+    const updatedParams = [...formData.schema.parameters];
     if (editParamIndex !== null) {
       updatedParams[editParamIndex] = paramData;
     } else {
       updatedParams.push(paramData);
     }
-    setFormData({ ...formData, parameters: updatedParams });
+    setFormData({ ...formData, schema: { ...formData.schema, parameters: updatedParams } });
     clearParamForm();
   };
 
@@ -75,11 +75,9 @@ function FunctionConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
     } else {
       onSubmit(formData);
     }
-    setFormData(initialFunctionConfig);
   };
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialFunctionConfig);
     onCancel();
   };
 
@@ -101,20 +99,20 @@ function FunctionConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
               <div className="d-flex mt-3">
                 <CustomCheckBoxField
                   name="isAsync"
-                  value={formData.isAsync || false}
+                  value={formData?.isAsync || false}
                   onChange={(value) => handleChange('isAsync', value)}
                   config={{ label: 'Is Async', groupClass: 'form-check me-2' }}
                 />
                 <CustomCheckBoxField
                   name="isAnonymous"
-                  value={formData.isAnonymous || false}
+                  value={formData?.isAnonymous || false}
                   onChange={(value) => handleChange('isAnonymous', value)}
                   config={{ label: 'Is Anonymous', groupClass: 'form-check mx-2' }}
                 />
               </div>
               <CustomTextArea
                 name="description"
-                value={formData.description || ''}
+                value={formData?.description || ''}
                 onChange={(value) => handleChange('description', value)}
                 config={{ label: 'Description', groupClass: 'form-group mb-2' }}
               />
@@ -125,8 +123,8 @@ function FunctionConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
                     <i className="bi bi-plus-circle br-text-primary"></i>
                   </div>
                 </div>
-                {formData.parameters.length > 0 &&
-                  formData.parameters.map((param, index) => (
+                {formData.schema.parameters.length > 0 &&
+                  formData.schema.parameters.map((param, index) => (
                     <div
                       key={index}
                       className="br-background-primary my-1 py-1 px-2 d-flex justify-content-between"
@@ -158,7 +156,7 @@ function FunctionConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate 
                       </div>
                     </div>
                   ))}
-                {formData.parameters.length === 0 && (
+                {formData.schema.parameters.length === 0 && (
                   <span className="med-font br-text-primary">No Params Present</span>
                 )}
               </div>

@@ -82,12 +82,10 @@ function ComponentConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
     } else {
       onSubmit(formData);
     }
-    setFormData(initialComponentConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialComponentConfig);
     setIsSubmitted(false);
     onCancel();
   };

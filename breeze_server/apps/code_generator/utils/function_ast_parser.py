@@ -21,7 +21,7 @@ class FunctionParser:
     def get_meta_config(self):
         return self.meta_config
     
-    def generate_statement_code(self,config,key_chaining=[], parent_block_id=None):
+    def generate_statement_code(self,config,key_chaining=[], parent_block_id=None, init_scope={}):
         # if config.get('$ref'):
         #     entityType =config["entityType"]
         #     config = resolve_ref(projectId=self.projectId,entityType=entityType,entityId= config["$ref"],extras=config)
@@ -62,7 +62,7 @@ class FunctionParser:
                 conf["parent_scope"] = parent_scope
             else: 
                 conf["parent_scope"] = {}        
-            conf["scope"] = {}
+            conf["scope"] = init_scope
             for i,code in enumerate(config['statements']):
                 statement, t = self.generate_statement_code(code,key_chaining=key_chaining+["statements",i], parent_block_id=statement_id)
                 statements.append(statement)
@@ -85,12 +85,38 @@ class FunctionParser:
                     raise Exception("function name already declared..")
                 self.meta_config[parent_block_id]["scope"][config['name']] = statement_id
             
-            body, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
-            tree["children"].append(t)
+            params = []
             
-            code = f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {", ".join([
-                    self.get_function_param(p) for p in config.get("parameters",[])
-                ])} ) => {body}"""
+            schema = config["schema"]
+            if "$schema" in schema:
+                raise NotImplementedError()
+            
+            for i,param in enumerate(schema.get("parameters",[])):
+                if param.get("isDestructured",False):
+                    raise NotImplementedError()
+                else:
+                    param_id = param.get("id")
+                    if not param_id:
+                        param_id = generate_uuid_as_key()
+                        param["id"] = param_id
+                    self.meta_config[param_id] = {
+                        "index": "<>".join([str(x) for x in key_chaining+["schema","parameters",i]]),
+                        "type": "PARAM",
+                    }
+                    if param.get("isRest"):
+                        params = f"...{param['name']}"
+                    else:
+                        if param.get("defaultValue"):
+                            defaultValue, _t = self.get_value_code(param["defaultValue"],key_chaining=key_chaining+["schema","parameters",i,"defaultValue"], parent_block_id=parent_block_id)
+                            if _t:
+                                tree["children"].append(_t)
+                            params.append(f"{param['name']} = {defaultValue}")
+                        else:
+                            params.append(param['name'])
+            body, t = self.generate_statement_code(config.get('bodyConfig',{}),key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
+                        
+            tree["children"].append(t)
+            code = f"""{func_name} {"" if config.get('isAsync') is not True else "async"} ( {",".join(params)} ) => {body}"""
         
         
         elif config["type"] == "DECLARATION":
@@ -246,14 +272,6 @@ class FunctionParser:
     
     
     
-    def get_function_param(self,param):
-        if param.get('type',"ANY") != "OBJECT" or not param.get('properties',False) or not param.get("destructured",False) :
-            return param["name"]
-        else:
-            return f"""{{ {", ".join([
-                self.get_function_param(p) for p in param["properties"]
-                ])} }}"""
-        
     
     
     def get_value_code(self,value, key_chaining=[], parent_block_id=None):
@@ -351,8 +369,9 @@ class FunctionParser:
         tag_name = config['tagName']
         attributes = config.get('attributes', {})
         children = config.get('children', [])
+        id = config.get('id')
 
-        attribute_str = ' '.join([f'{attr}={self.get_value_code(value,key_chaining=key_chaining+["attributes",attr], parent_block_id=parent_block_id)[0]}' for attr, value in attributes.items()])
+        attribute_str = ' '.join([f'{attr}={{ {self.get_value_code(value,key_chaining=key_chaining+["attributes",attr], parent_block_id=id)[0]}}}' for attr, value in attributes.items()])
         attribute_str = attribute_str+f" data-brz-id='{config['id']}'"
         open_tag = f'<{tag_name} {attribute_str}>' if attribute_str else f'<{tag_name}>'
         close_tag = f'</{tag_name}>'
@@ -369,7 +388,7 @@ class FunctionParser:
         inner_code_tree = []
         inner_html= []
         for i,child in enumerate(children):
-            code, t = self.get_value_code(child,key_chaining=key_chaining+["children",i], parent_block_id=parent_block_id)
+            code, t = self.get_value_code(child,key_chaining=key_chaining+["children",i], parent_block_id=id)
             inner_html.append(code)
             inner_code_tree.append(t)
             
@@ -472,16 +491,34 @@ class FunctionParser:
         code = ""
         t= None
         if config["type"]== "REACT_COMPONENT":
-            bodyCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id)
-            props=[]
-            for prop in config.get("propVars",[]):
+            param_scope = {}
+            props = []
+            for i,prop in enumerate(config.get("propVars",[])):
+                prop_id = prop.get("id")
+                if not prop_id:
+                    prop_id = generate_uuid_as_key()
+                    prop["id"] = prop_id
+                self.meta_config[prop_id] = {
+                    "index": "<>".join([str(x) for x in key_chaining+["propVars",i]]),
+                    "type": "PROP_VAR",
+                    "parentBlockId": parent_block_id
+                }
+                param_scope[prop["name"]] = prop_id
                 props.append(prop["name"])
-            
+            bodyCode, t = self.generate_statement_code(config["bodyConfig"],key_chaining=key_chaining+["bodyConfig"], parent_block_id=parent_block_id, init_scope=param_scope)
             if config.get("hasImperativeHandling"):
-                code = f""" const {config["name"]} = forwardRef( ({{ {','.join(props)} }}, ref) => {bodyCode} )"""
                 
+                code = f""" const {config["name"]} = forwardRef( ({{ {','.join(props)} }}, ref) => {bodyCode} )"""
             else:
                 code = f""" const {config["name"]} = ({{ {','.join(props)} }}) => {bodyCode} """
+            
+            
+            config["schema"] = {
+                "props": config.get("propVars",[]),
+                "hasImperativeHandling": config.get("hasImperativeHandling",False)   
+            }
+            
+            self.meta_config[config["id"]]["schema"] = config["schema"]
             
         elif config["type"] == "REACT_USE_STATE":
             varName = config["varName"]

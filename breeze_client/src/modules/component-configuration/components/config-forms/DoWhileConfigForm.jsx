@@ -39,12 +39,10 @@ function DoWhileConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }
     } else {
       onSubmit(formData);
     }
-    setFormData(initialDoWhileConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialDoWhileConfig);
     setIsSubmitted(false);
     onCancel();
   };

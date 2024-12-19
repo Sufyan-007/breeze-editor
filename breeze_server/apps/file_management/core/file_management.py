@@ -77,7 +77,7 @@ def set_value_in_flattened_index(flattened_index, value, config, configMeta):
 
 
 
-def add_statement(projectId,fileId,parentId,statement):
+def add_statement(projectId,fileId,parentId,statement,index=None):
     fileConfig = read_config_file(
         project_name=projectId,
         category=ResourceCategory.CODE_FILE.value,
@@ -108,19 +108,29 @@ def add_statement(projectId,fileId,parentId,statement):
     parentIndex = parentConfigMeta["index"]
     
     if parentConfig["type"] == "BLOCK":
-        newIndex = parentIndex+"<>statements<>"+str(len(parentConfig["statements"]))
+        pos = 0
+        if index:
+            for x in parentConfig["statements"]:
+                x_m = fileConfigMeta[x["id"]]
+                if x_m["startIndex"] > index:
+                    break
+                pos += 1
+            parentConfig["statements"].insert(pos,statement)
+        else:
+            parentConfig["statements"].append(statement)
+    
     elif parentConfig["type"] == "Element":
         newIndex = parentIndex+"<>children<>"+str(len(parentConfig["children"]))
-    newMeta = {
-        "index": newIndex,
-        "type": "RAW"
-    }
-    
-    fileConfigMeta[id] = newMeta
-    
-    if not set_value_in_flattened_index(id,statement,fileConfig,fileConfigMeta):
-        raise Exception("Could not add statement")
+        newMeta = {
+            "index": newIndex,
+            "type": "RAW"
+        }
         
+        fileConfigMeta[id] = newMeta
+        
+        if not set_value_in_flattened_index(id,statement,fileConfig,fileConfigMeta):
+            raise Exception("Could not add statement")
+            
     
     generate_file_code(projectId=projectId,fileId=fileId,config=fileConfig)
     
@@ -164,17 +174,65 @@ def update_statement(projectId,fileId,statementId,statement):
     
     return {}
 
-def get_config_by_tag(tag,fileName,entityId):
+def delete_statement(projectId, fileId, statementId):
+    fileConfig = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId
+    )["data"]
+    fileConfigMeta = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId+"_meta"
+    )["data"]
+
+    try:
+        configMeta = fileConfigMeta[statementId]
+    except KeyError:
+        raise KeyError("Could not find key %s" % statementId)
+
+    parentBlockId = configMeta.get('parentBlockId')
+    if not parentBlockId:
+        raise KeyError("parentBlockId not found for statement %s" % statementId)
+
+    parentBlockConfig = get_section_from_flattened_index(parentBlockId, fileConfig, fileConfigMeta)
+    if not parentBlockConfig:
+        raise KeyError("Could not find parent block for statement %s" % statementId)
+
+    if parentBlockConfig["type"] == "BLOCK":
+        parentBlockConfig["statements"] = [stmt for stmt in parentBlockConfig["statements"] if stmt["id"] != statementId]
+    elif parentBlockConfig["type"] == "Element":
+        parentBlockConfig["children"] = [child for child in parentBlockConfig["children"] if child["id"] != statementId]
+    else:
+        raise TypeError("Unexpected parent block type")
+
+    del fileConfigMeta[statementId]
+
+    generate_file_code(projectId=projectId, fileId=fileId, config=fileConfig)
+
+    write_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId,
+        json_data=fileConfig
+    )
+    return {}
+
+
+def get_config_by_tag(tag,fileName,fileId,entityId):
     if tag == "COMPONENTS":
         file_config = deepcopy(TEMPLATE_COMP_CONFIG)
         replace_variable(file_config,"DEFAULT_COMP_ID",entityId)
         replace_variable(file_config,"DEFAULT_COMP_NAME",fileName)
+        replace_variable(file_config,"$FILE_ID",fileId)
     elif tag == "HOOKS":
         file_config = deepcopy(TEMPLATE_HOOK_CONFIG)
         replace_variable(file_config,"DEFAULT_HOOK_ID",entityId)
+        replace_variable(file_config,"$FILE_ID",fileId)
         replace_variable(file_config,"DEFAULT_HOOK_NAME",fileName)
     elif tag == "CODE_FILE":
         file_config = deepcopy(TEMPLATE_CODE_FILE)
+        replace_variable(file_config,"$FILE_ID",fileId)
     else:
         raise NotImplementedError()
     file_config["name"] = fileName
@@ -186,7 +244,7 @@ def add_code_file(projectId, fileName, parentId, file_id=None,  tag="CODE_FILE",
     if not parentId:
         parentId = "ROOT"
     if not entity_id:
-        entity_id = file_id
+        entity_id = generate_uuid_as_key()
 
     directoryManager = DirectoryManager(projectId)
     node = directoryManager.add_node_to_config(
@@ -199,7 +257,12 @@ def add_code_file(projectId, fileName, parentId, file_id=None,  tag="CODE_FILE",
         entity_id=entity_id
     )
    
-    file_config = get_config_by_tag(tag, fileName, entity_id)
+    file_config = get_config_by_tag(
+        tag=tag,
+        fileName=fileName,
+        fileId = file_id,
+        entityId=entity_id
+    )
     generate_file_code(
         projectId=projectId,
         fileId=file_id,
@@ -262,6 +325,7 @@ def generate_file_code(projectId,fileId,config):
             entityId=entityId,
             fileId = fileId,
             exportedAs= exportEntity["name"],
+            schema=exportEntity.get("schema",{"type":"ANY"}),
             type= exportEntity.get("type","NA"),
             defaultExport=True
         )
@@ -276,6 +340,7 @@ def generate_file_code(projectId,fileId,config):
             fileId = fileId,
             exportedAs= exportEntity["name"],
             type= exportEntity.get("type","NA"),
+            schema=exportEntity.get("schema",{"type":"ANY"}),
             defaultExport=False
         )
         
@@ -330,3 +395,69 @@ def get_statement_config(projectId,fileId,statementId):
     
     
     return {"config":config,"configMeta":configMeta}
+
+def get_import_config(projectId, fileId):
+    fileConfig = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId
+    )["data"]
+    
+    if "IMPORTS" not in fileConfig:
+        raise KeyError("No imports found in the file configuration")
+    
+    return fileConfig["IMPORTS"]
+
+
+def get_export_config(projectId, fileId):
+    fileConfig = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId
+    )["data"]
+    
+    if "EXPORTS" not in fileConfig:
+        raise KeyError("No exports found in the file configuration")
+    
+    return fileConfig["EXPORTS"]
+
+
+def set_import_config(projectId, fileId, importConfig):
+    fileConfig = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId
+    )["data"]
+    
+    fileConfig["IMPORTS"] = importConfig
+    
+    generate_file_code(projectId=projectId, fileId=fileId, config=fileConfig)
+    
+    write_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId,
+        json_data=fileConfig
+    )
+    
+    return {}
+
+def set_export_config(projectId, fileId, exportConfig):
+    fileConfig = read_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId
+    )["data"]
+    
+    fileConfig["EXPORTS"] = exportConfig
+    
+    generate_file_code(projectId=projectId, fileId=fileId, config=fileConfig)
+    
+    write_config_file(
+        project_name=projectId,
+        category=ResourceCategory.CODE_FILE.value,
+        filename=fileId,
+        json_data=fileConfig
+    )
+    
+    return {}

@@ -13,8 +13,10 @@ function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
   }, [getConfig]);
 
   useEffect(() => {
-    fetchConfig();
-  }, [fetchConfig]);
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
 
   function updateText(value) {
     setFormData((state) => {
@@ -30,12 +32,10 @@ function ConsoleStatementForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
     } else {
       onSubmit(formData);
     }
-    if (!editMode) setFormData(initialConsoleConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialConsoleConfig);
     onCancel();
   };
 
