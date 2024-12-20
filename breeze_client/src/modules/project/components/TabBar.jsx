@@ -12,7 +12,6 @@ function TabBar() {
   const handleTabClose = (nodeId) => {
     removeTab(nodeId);
   };
-
   return (
     <div className="mb-2">
       <div className="project-tab-bar d-flex small-font">

@@ -9,4 +9,5 @@ urlpatterns = [
     path('delete/',delete_file),
     path('rename-file/',rename_file),
     path('move-file/',move),
+    path('search-file/', manage_directory_json.get_directory_nodes_by_search)
 ]

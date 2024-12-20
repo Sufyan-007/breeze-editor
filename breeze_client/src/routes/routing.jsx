@@ -1,11 +1,11 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from '../modules/authentication/pages/login/Login';
-import ProjectPage from '../modules/project/pages/ProjectPage';
 import AllProjects from '../modules/project/pages/AllProjects';
 import PropTypes from 'prop-types';
 import UserManagement from '../modules/user-management/pages/UserManagement';
 import RoleManagement from '../modules/role-management/pages/RoleManagement';
 import { OffcanvasProvider } from '../contexts/OffcanvasContext';
+import ProjectPageWrapper from '../modules/project/pages/ProjectPageWrapper';
 const isAuthenticated = () => {
   return !!localStorage.getItem('accessToken');
 };
@@ -72,7 +72,7 @@ export const router = createBrowserRouter([
     element: (
       // <ProtectedRoute>
       <OffcanvasProvider>
-        <ProjectPage />
+        <ProjectPageWrapper />
       </OffcanvasProvider>
       // </ProtectedRoute>
     ),

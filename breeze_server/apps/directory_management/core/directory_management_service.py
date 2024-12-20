@@ -18,6 +18,19 @@ class DirectoryManager:
         self.language = self.app_config.get('language',"javascript")
         self.isTypeScript = self.language == 'typescript'
 
+    def search_files(self, search_word):
+        search_word = search_word.lower()
+        matched_files = []
+
+        for node_id, node_data in self.directory_management_config.items():
+            if node_data.get("type") == "FILE" and search_word in node_data.get("name", "").lower():
+                matched_files.append({
+                    key: value if isinstance(value, (str, int, float, list, dict, bool, type(None))) else str(value)
+                    for key, value in node_data.items()
+                })
+
+        return matched_files
+
     def save_file(self, file_id, content,formatted=True):
         path = self.get_path_from_file_id(file_id)
         create_parent_dir_if_not_exists(path)
