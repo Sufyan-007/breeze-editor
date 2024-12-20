@@ -212,3 +212,14 @@ export const fetchResources = async (projectName, payload) => {
     throw error;
   }
 };
+
+export const getFileListBySearchTerm = async (projectName, payload) => {
+  const url = `${import.meta.env.VITE_BREEZE_BACKEND_HOST}/api/directory/${projectName}/search-file/`;
+  try {
+    const response = await callApiClient(url, 'POST', payload, false, {}, true, false);
+    return response;
+  } catch (error) {
+    console.error('Error fetching components:', error.message);
+    throw error;
+  }
+};
