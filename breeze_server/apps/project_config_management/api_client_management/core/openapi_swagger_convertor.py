@@ -10,6 +10,7 @@ from .api_model_loader import ApiModelLoader
 from ..utils.api_models import MethodsEnum,AuthApiTypeEnum,AuthTypeEnum
 from ..utils.schema_conversion import convert_type_to_config, generate_ids,object_converter
 from ....common.utils.replace_variable import replace_variable
+from ....common.utils.variable_name_convertor import convert_to_valid_variable_name
 from ..utils.set_unresolved_key import set_unresolved_keys
 def prepare_api_models(json_data, project_name,isJson):
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
@@ -570,10 +571,11 @@ def classified_tags_and_method(open_api_json_data, file_path):
             schema_name_parts.append(operation.lower())
             schema_name_base = '_'.join(schema_name_parts)
             
-            schema["name"] = f"schema_{schema_name_base}".lower()
+            schema_name_base = convert_to_valid_variable_name(schema_name_base)
+            schema["name"] = f"Schema_{schema_name_base}"
             
             if any(existing_schema["name"] == schema["name"] for existing_schema in all_schemas):
-                schema["name"] = f"schema_{schema_name_base}_{hashlib.md5(schema_str.encode('utf-8')).hexdigest()[:6]}"
+                schema["name"] = f"Schema_{schema_name_base}_{hashlib.md5(schema_str.encode('utf-8')).hexdigest()[:6]}"
             
             schema_name = schema["name"]
             schema["name"] = schema_name  

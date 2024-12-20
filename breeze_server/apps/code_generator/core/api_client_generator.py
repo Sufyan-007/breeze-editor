@@ -138,6 +138,9 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         react_code = """
             export const {FUNC_NAME} = async ({FUNC_ARGS}) => {
                 const localInstance = duplicateInstance(moduleInstance);
+                {LOOP_QUERY_PARAMS}
+                let url = {URL}
+                {QUERY_CONDITION}
                 {AXIOS_OBJECT_DECLARATION}
                 {INTERCEPTOR_CODE}
                 {RESPONSE_INTERCEPTOR_CODE}
@@ -150,7 +153,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     axis_object_declation = """
         const api = {
             {METHOD},
-            url : {URL},
+            url : url,
             {HEADERS},
             {BODY}
         };
@@ -162,6 +165,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     #write the parameters to the config file
     path_params = url_obj.get("path_params")
     query_params = url_obj.get("query_params")
+    query_parameters = url_obj.get("query_parameters")
     
     
     ## set api method
@@ -271,7 +275,8 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
                 axis_object_declation = axis_object_declation.replace('{HEADERS},',"")
 
             ## set function args comma seperated
-            function_args = ",".join(function_args)
+            function_args = [arg if isinstance(arg, str) else json.dumps(arg, ensure_ascii=False) for arg in function_args]
+            function_args = ", ".join(function_args)
             
             ## set response conditions if provided
             r_status_conditions = []
@@ -287,6 +292,27 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
 
             react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
             react_code = react_code.replace('{FUNC_ARGS}',function_args)
+            if query_parameters:
+                destructured_query_params = ', '.join(query_parameters)
+                # react_code = react_code.replace('{QUERY_PARAMS}', f"{{{destructured_query_params}}}")
+                query_params_loop = f"""
+                const queryParams = {{{destructured_query_params}}};
+                const queryString = Object.entries(queryParams)
+                                    .filter(([_, value]) => value !== undefined && value !== null && value !== "") 
+                                    .map(([key, value]) => `${{encodeURIComponent(key)}}=${{encodeURIComponent(value)}}`)
+                                    .join('&');
+                """
+                query_conditon = f"if (queryString) {{ url += `?${{queryString}}`;}}"
+
+                react_code = react_code.replace('{LOOP_QUERY_PARAMS}', query_params_loop)
+                react_code = react_code.replace('{QUERY_CONDITION}', query_conditon)
+            else:
+                react_code = react_code.replace('{QUERY_PARAMS}', "{}")
+                react_code = react_code.replace('{LOOP_QUERY_PARAMS}', '')
+                react_code = react_code.replace('{QUERY_CONDITION}', '')
+
+
+            # react_code = react_code.replace('{QUERY_PARAMS}',f"{{{json.dumps(query_parameters)}}}")
             react_code = react_code.replace('{AXIOS_OBJECT_DECLARATION}', axis_object_declation)
             react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
             # react_code = react_code.replace(
@@ -354,7 +380,8 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             axis_object_declation = axis_object_declation.replace('{HEADERS},',"")
 
         ## set function args comma seperated
-        function_args = ",".join(function_args)
+        function_args = [arg if isinstance(arg, str) else json.dumps(arg, ensure_ascii=False) for arg in function_args]
+        function_args = ", ".join(function_args)
         
         ## set response conditions if provided
         r_status_conditions = []
@@ -370,6 +397,28 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
 
         react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
         react_code = react_code.replace('{FUNC_ARGS}',function_args)
+        if query_parameters:
+            destructured_query_params = ', '.join(query_parameters)
+            # react_code = react_code.replace('{QUERY_PARAMS}', f"{{{destructured_query_params}}}")
+            query_params_loop = f"""
+            const queryParams = {{{destructured_query_params}}};
+            const queryString = Object.entries(queryParams) 
+            .filter(([_, value]) => value !== undefined && value !== null && value !== "")
+            .map(([key, value]) => `${{encodeURIComponent(key)}}=${{encodeURIComponent(value)}}`)
+            .join('&');
+            """
+            query_conditon = f"if (queryString) {{ url += `?${{queryString}}`;}}"
+
+            react_code = react_code.replace('{LOOP_QUERY_PARAMS}', query_params_loop)
+            react_code = react_code.replace('{QUERY_CONDITION}', query_conditon)
+        else:
+            react_code = react_code.replace('{QUERY_PARAMS}', "{}")
+            react_code = react_code.replace('{LOOP_QUERY_PARAMS}', '')
+            react_code = react_code.replace('{QUERY_CONDITION}', '')
+
+
+
+        # react_code = react_code.replace('{QUERY_PARAMS}',f"{{{json.dumps(query_parameters)}}}")
         react_code = react_code.replace('{AXIOS_OBJECT_DECLARATION}', axis_object_declation)
         react_code = react_code.replace('{INTERCEPTOR_CODE}', interceptor_code)
         # react_code = react_code.replace(
@@ -399,7 +448,6 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         else:
             react_code = react_code.replace('{RESPONSE_CODE}',"")
 
-        # react_code = react_code.replace('{FUNC_NAME}',func_name+"_"+mode.lower())
         converted_name = convert_to_valid_variable_name(func_name)
         react_code = react_code.replace('{FUNC_NAME}',converted_name)
         react_service_functions.append(react_code)
@@ -622,6 +670,9 @@ def generate_request_body_schema(parent_key,schema_name,schema,module_id,app_nam
 
 
 def set_request_body(model,app_name,module_id):
+    schema_file_path = f"{CONFIG_PATH}/{app_name}/models/{module_id}.json"
+    with open(schema_file_path, 'r') as file:
+        all_schemas = json.load(file)
     body_params =[]
     
     if model.request.body is None:
@@ -666,11 +717,11 @@ def set_request_body(model,app_name,module_id):
                     raw_data = "reqBody";
 
                 else:
-                
-                    # schema_name = body.schema_name
-                    schema_name = "BodyDetails"
-                    # params.append(schema_name)
-                    params.append("BodyDetails")
+                    schema_name = body.schema_name
+                    for id,val in all_schemas.items():
+                        if schema_name == id:
+                            schema_name = val.get("name")
+                    params.append(schema_name)
                     schema = body.schema
                     body_params = schema
                     ## generate request body schema
@@ -690,7 +741,11 @@ def set_request_body(model,app_name,module_id):
             variable_declaration = "let bodyFormData = new FormData();"
             form_data = body.schema
             body_params = form_data
-            params.append("BodyDetails")
+            schema_name = body.schema_name
+            for id,val in all_schemas.items():
+                if schema_name == id:
+                    schema_name = val.get("name")
+            params.append(schema_name)
             #replace nested schema id with its name
             schemas_path = f"{CONFIG_PATH}/{app_name}/models/{module_id}.json"
             with open(schemas_path, 'r') as file:
@@ -698,13 +753,13 @@ def set_request_body(model,app_name,module_id):
             
             for key,item in form_data.get("properties",{}).items():
                 if key in schemas.keys():
-                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${BodyDetails['%s']}`);"%(schemas[key]["name"], schemas[key]["name"])
+                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s['%s']}`);"%(schemas[key]["name"],schema_name, schemas[key]["name"])
                     
                 elif item.get("type") == "text":
-                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${BodyDetails['%s']}`);"%(key, key)
+                    variable_declaration = "\n" + variable_declaration +"bodyFormData.append('%s', `${%s['%s']}`);"%(key,schema_name, key)
                     
                 else:
-                    variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${BodyDetails['%s']}`);"%(key,key)
+                    variable_declaration = "\n" + variable_declaration+"bodyFormData.append('%s', `${%s['%s']}`);"%(key,schema_name,key)
             raw_data = "bodyFormData"
         
         elif mode == ModeEnum.URLENCODED:
@@ -712,9 +767,13 @@ def set_request_body(model,app_name,module_id):
             variable_declaration = "let formBody = [];"
             form_data = body.schema
             body_params = form_data
-            params.append("BodyDetails")
+            schema_name = body.schema_name
+            for id,val in all_schemas.items():
+                if schema_name == id:
+                    schema_name = val.get("name")
+            params.append(schema_name)
             for key,item in form_data.get("properties",{}).items():
-                variable_declaration = "\n" + variable_declaration+"formBody.push(`${encodeURIComponent('%s')} = ${encodeURIComponent(BodyDetails['%s'])}`);"%(key,key)
+                variable_declaration = "\n" + variable_declaration+"formBody.push(`${encodeURIComponent('%s')} = ${encodeURIComponent(%s['%s'])}`);"%(key,schema_name,key)
             raw_data = "formBody"
             variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
 
@@ -732,6 +791,7 @@ def set_request_url(model,app_name):
     build_tool = app_basic_config["buildTool"]
     function_args = []
     query_params = []
+    other_query_params = []
     path_params = []
     query = ""
     path = ""
@@ -760,31 +820,34 @@ def set_request_url(model,app_name):
         if params.param_in == ParamsInEnum.QUERY:
             if params.param_type == "USER_INPUT":
                 new_query_params[params.name] = {"selection": 'anyOf', "types":[{"type": params.type}]}
+                query_params.append(params.name)
                 # new_query_params.append({"name":params.name, "types" : [{"type":params.type}]})
-                query_params.append("%s=${QueryParameters.%s}" % (params.name, params.name))
-                if 'QueryParameters' not in function_args:
-                    function_args.append('QueryParameters')
-            elif params.param_type == "STATIC":
-                query_params.append("%s=%s"%(params.name,params.value))
+                # query_params.append("%s=${QueryParameters.%s}" % (params.name, params.name))
+                # if 'QueryParameters' not in function_args:
+                #     function_args.append('QueryParameters')
+            # elif params.param_type == "STATIC":
+            #     query_params.append("%s=%s"%(params.name,params.value))
             elif params.param_type == "LOCAL_STORAGE":
-                query_params.append("%s=${localStorage.getItem('%s')}" % (params.name, params.storage_key))
+                other_query_params.append("%s=${localStorage.getItem('%s')}" % (params.name, params.storage_key))
 
             elif params.param_type == "SESSION_STORAGE":
-                query_params.append("%s=${sessionStorage.getItem('%s')}" % (params.name, params.storage_key))
+                other_query_params.append("%s=${sessionStorage.getItem('%s')}" % (params.name, params.storage_key))
                 
 
             
         elif params.param_in == ParamsInEnum.PATH:
             if params.param_type == "USER_INPUT":
                 new_path_params[params.name] = {"selection": "anyOf", "types":[{"type": params.type}]}
+                url=url.replace(f"{{{params.name}}}", f"${{{params.name}}}")
+                path_params.append(params.name)
                 # new_path_params.append({"name":params.name, "types" : [{"type":params.type}]})
-                url=url.replace(f"{{{params.name}}}", f"${{PathParameters.{params.name}}}")
-                if 'PathParameters' not in function_args:
-                    function_args.append('PathParameters')
-            elif params.param_type == "STATIC":
-                if not params.value:
-                    params.value = ""
-                url=url.replace(f"{{{params.name}}}",params.value)
+                # url=url.replace(f"{{{params.name}}}", f"${{PathParameters.{params.name}}}")
+                # if 'PathParameters' not in function_args:
+                #     function_args.append('PathParameters')
+            # elif params.param_type == "STATIC":
+            #     if not params.value:
+            #         params.value = ""
+                # url=url.replace(f"{{{params.name}}}",params.value)
             elif params.param_type == "LOCAL_STORAGE":
                 url=url.replace(f"{{{params.name}}}", "${localStorage.getItem('%s')}"%(params.storage_key))
             elif params.param_type == "SESSION_STORAGE":
@@ -792,17 +855,32 @@ def set_request_url(model,app_name):
                
             
 
-    if len(query_params) > 0:
-        query = '&'.join(query_params)
+    if len(other_query_params) > 0:
+        query = '&'.join(other_query_params)
         query = "?"+query
         url = url + query
-    
+        
+    destructured_query_params = {}
+    for param in query_params:
+        destructured_query_params[param] = param
+    destructured_query_params = ", ".join(query_params)
+    if len(destructured_query_params)>0:
+        function_args.append(f"{{ {destructured_query_params} }}")
+        
+        
+    destructured_path_params = {}
+    for param in path_params:
+        destructured_path_params[param] = param
+    destructured_path_params = ", ".join(path_params)
+    if len(destructured_path_params)>0:
+        function_args.append(f"{{ {destructured_path_params} }}")
     axios_url = "`%s`"%(url)
     return {
         "axios_url" : axios_url,
         "function_args" : function_args,
         "path_params" : new_path_params,
-        "query_params" : new_query_params
+        "query_params" : new_query_params,
+        "query_parameters": query_params
     }
 
 
