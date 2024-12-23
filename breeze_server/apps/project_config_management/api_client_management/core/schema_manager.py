@@ -126,7 +126,8 @@ def get_schema_by_id_helper( project_id, schema_id):
                     with open(module_file_path, 'r') as module_file:
                         module_data = json.load(module_file)
                         if schema_id in module_data:
-                            return {"schema": module_data[schema_id]}, 200
+                            resolved_schema = resolve_refs(module_data[schema_id], module_data)
+                            return {"schema": resolved_schema}, 200
                 except json.JSONDecodeError:
                     return {"error": f"Module file '{module_id}.json' contains invalid JSON."}, 500
                 except Exception as e:
@@ -139,3 +140,32 @@ def get_schema_by_id_helper( project_id, schema_id):
         return {"error": f"An unexpected error occurred: {str(e)}"}, 500
 
         
+
+def resolve_refs(schema, all_schemas):
+    if not schema:
+        return schema
+
+    if "types" in schema:
+        resolved_types = []
+        for type_entry in schema["types"]:
+            if "$ref" in type_entry:
+                ref_id = type_entry["$ref"]
+                if ref_id in all_schemas:
+                    resolved_schema = resolve_refs(all_schemas[ref_id], all_schemas)
+                    resolved_type = resolved_schema.get("properties", {})  
+                    resolved_types.append({"type": "OBJECT", "properties": resolved_type})
+                else:
+                    raise ValueError(f"Reference ID '{ref_id}' not found in all_schemas.")
+            else:
+                resolved_types.append(resolve_refs(type_entry, all_schemas))  
+        schema["types"] = resolved_types
+
+    if "properties" in schema:
+        for key, value in schema["properties"].items():
+            schema["properties"][key] = resolve_refs(value, all_schemas)
+
+    if "templateInputs" in schema:
+        schema["templateInputs"] = [resolve_refs(input_entry, all_schemas) for input_entry in schema["templateInputs"]]
+
+    return schema
+
