@@ -219,10 +219,11 @@ def _create_parameters_json( parameter_data):
         parameters = []
         if parameter_data and len(parameter_data) > 0:
             for param in parameter_data:
-                valid_param_name = convert_to_valid_variable_name(param.get("name"))
+                valid_param_name = param.get("name")
+                valid_param_name = valid_param_name.replace("-","_")
                 parameters.append({
                     "param_in": param.get("in","").strip(),
-                    "name":valid_param_name,
+                    "name": valid_param_name,
                     "type":param.get("schema",param).get("type").strip().upper(),
                     "required":param.get("required"),
                     "description":param.get("description")

@@ -306,14 +306,17 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             react_code = react_code.replace('{FUNC_ARGS}',function_args)
             react_code = react_code.replace('{STORAGE_PARAMS_DECLARATION}',storage_params_declaration)
             if query_parameters:
-                destructured_query_params = ', '.join(query_parameters)
-                # react_code = react_code.replace('{QUERY_PARAMS}', f"{{{destructured_query_params}}}")
+                query_params_obj = {}
+                for param in query_parameters:
+                    key_param = param.replace('_', '-')  
+                    query_params_obj[key_param] = param
+                query_params_str = ", ".join([f'"{key}": {value}' for key, value in query_params_obj.items()]) 
                 query_params_loop = f"""
-                const queryParams = {{{destructured_query_params}}};
-                const queryString = Object.entries(queryParams)
-                                    .filter(([_, value]) => value !== undefined && value !== null && value !== "") 
-                                    .map(([key, value]) => `${{encodeURIComponent(key)}}=${{encodeURIComponent(value)}}`)
-                                    .join('&');
+                const queryParams = {{{query_params_str}}};
+                const queryString = Object.entries(queryParams) 
+                .filter(([_, value]) => value !== undefined && value !== null && value !== "")
+                .map(([key, value]) => `${{encodeURIComponent(key)}}=${{encodeURIComponent(value)}}`)
+                .join('&');
                 """
                 query_conditon = f"if (queryString) {{ url += `?${{queryString}}`;}}"
 
@@ -413,10 +416,13 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
         react_code = react_code.replace('{STORAGE_PARAMS_DECLARATION}',storage_params_declaration)
         react_code = react_code.replace('{FUNC_ARGS}',function_args)
         if query_parameters:
-            destructured_query_params = ', '.join(query_parameters)
-            # react_code = react_code.replace('{QUERY_PARAMS}', f"{{{destructured_query_params}}}")
+            query_params_obj = {}
+            for param in query_parameters:
+                key_param = param.replace('_', '-')  
+                query_params_obj[key_param] = param 
+            query_params_str = ", ".join([f'"{key}": {value}' for key, value in query_params_obj.items()]) 
             query_params_loop = f"""
-            const queryParams = {{{destructured_query_params}}};
+            const queryParams = {{{query_params_str}}};
             const queryString = Object.entries(queryParams) 
             .filter(([_, value]) => value !== undefined && value !== null && value !== "")
             .map(([key, value]) => `${{encodeURIComponent(key)}}=${{encodeURIComponent(value)}}`)
@@ -784,7 +790,7 @@ def set_request_body(model,app_name,module_id):
         
         elif mode == ModeEnum.URLENCODED:
             headers.append({"key" : "content-type","value" : ContentEnum.URLENCODED.value})
-            variable_declaration = "let formBody = [];"
+            variable_declaration = ""
             form_data = body.schema
             body_params = form_data
             schema_name = body.schema_name
@@ -792,10 +798,17 @@ def set_request_body(model,app_name,module_id):
                 if schema_name == id:
                     schema_name = val.get("name")
             params.append(schema_name)
-            for key,item in form_data.get("properties",{}).items():
-                variable_declaration = "\n" + variable_declaration+"formBody.push(`${encodeURIComponent('%s')} = ${encodeURIComponent(%s['%s'])}`);"%(key,schema_name,key)
+            variable_declaration = f""" const formBody = Object.entries({schema_name})
+                .map(
+                ([key, value]) =>
+                `${{encodeURIComponent(key)}}=${{encodeURIComponent(value)}}`
+                )
+                .join("&");"""
             raw_data = "formBody"
-            variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
+            # for key,item in form_data.get("properties",{}).items():
+            #     variable_declaration = "\n" + variable_declaration+"formBody.push(`${encodeURIComponent('%s')} = ${encodeURIComponent(%s['%s'])}`);"%(key,schema_name,key)
+            # raw_data = "formBody"
+            # variable_declaration = "\n" + variable_declaration+'formBody = formBody.join("&");'
 
         variable_declaration_arr[mode.name]= {
                 "headers" : headers,
@@ -805,6 +818,17 @@ def set_request_body(model,app_name,module_id):
                 "body_params": body_params
         }
     return variable_declaration_arr
+
+def process_path_array(path_array):
+    def convert_and_retain_braces(part):
+        if part.startswith("{") and part.endswith("}"):
+            inner_content = part[1:-1]
+            converted_content = convert_to_valid_variable_name(inner_content)
+            return f"{{{converted_content}}}"
+        else:
+            return part
+    
+    return "/".join(convert_and_retain_braces(part) for part in path_array)
 
 def set_request_url(model,app_name):
     app_basic_config = get_breeze_config_file(app_name)
@@ -819,7 +843,8 @@ def set_request_url(model,app_name):
     
     url_obj =  model.request.url
     baseurl = url_obj.baseurl
-    path = "/".join(url_obj.path)
+    path_array = url_obj.path  
+    path = process_path_array(path_array)
     url = ""
     
     ## check if user has provided enviornment for baseURL
@@ -888,20 +913,6 @@ def set_request_url(model,app_name):
         query = "?"+query
         url = url + query
         
-    # destructured_query_params = {}
-    # for param in query_params:
-    #     destructured_query_params[param] = param
-    # destructured_query_params = ", ".join(query_params)
-    # if len(destructured_query_params)>0:
-    #     function_args.append(f"{{ {destructured_query_params} }}")
-        
-        
-    # destructured_path_params = {}
-    # for param in path_params:
-    #     destructured_path_params[param] = param
-    # destructured_path_params = ", ".join(path_params)
-    # if len(destructured_path_params)>0:
-    #     function_args.append(f"{{ {destructured_path_params} }}")
     for param in query_params:
         function_args.append(param)
     for param in path_params:
