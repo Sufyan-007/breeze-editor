@@ -1,170 +1,273 @@
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import Select from 'react-select';
+import { CustomButtonField, CustomCheckBoxField, CustomTextInput } from '../../../../common/fields';
+import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
+import { getEntityConfig } from '../../../project/services/projectService';
+import { useParams } from 'react-router-dom';
 
-function ServiceCall({ onSubmit, onCancel, editMode }) {
-  return <div>ServiceCall</div>;
+function ServiceCall({ getConfig, onSubmit, onCancel, editMode, onUpdate, callType = 'serviceCall' }) {
+  const { projectName } = useParams();
+  const initialConfig = JSON.parse(JSON.stringify(funcConfigTemplates[callType]));
+  const [formData, setFormData] = useState({ ...initialConfig });
+  const [availableFunctions, setAvailableFunctions] = useState([]);
+  const [selectedFunction, setSelectedFunction] = useState(null);
+  const [checkedItems, setCheckedItems] = useState({
+    thenCatch: false,
+    declarationCall: false,
+    awaitCall: false,
+  });
+  const [parameterValues, setParameterValues] = useState({});
+
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        if (callType == 'serviceCall') {
+          const response = await getEntityConfig(projectName, { filters: { type: 'SERVICE' } });
+          const services = Object.values(response?.data || []).map((service) => ({
+            value: service.id,
+            label: service.exportedAs,
+            ...service,
+          }));
+          setAvailableFunctions(services);
+        } else if (callType == 'functionCall') {
+          // call functions api
+          const functions = [];
+          setAvailableFunctions(functions);
+        } else {
+          console.log('Custom function');
+        }
+      } catch (error) {
+        console.error('Error fetching available services:', error.message);
+      }
+    }
+    fetchServices();
+  }, [projectName]);
+
+  const fetchConfig = useCallback(async () => {
+    try {
+      const res = await getConfig();
+      if (res?.config?.$ref) {
+        const matchedService = availableFunctions.find((service) => service.id === res.config.$ref);
+        if (matchedService) {
+          setSelectedFunction(matchedService);
+          setFormData((prev) => ({
+            ...prev,
+            ...res.config,
+          }));
+          setParameterValues(
+            res.config.parameters?.reduce((acc, param) => {
+              acc[param.name] = param.value;
+              return acc;
+            }, {}) || {}
+          );
+          setCheckedItems((prev) => ({
+            ...prev,
+            awaitCall: !!res.config.isAwaited,
+            thenCatch: res.config.isAwaited ? false : prev.thenCatch,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching config:', error);
+    }
+  }, [getConfig, availableFunctions]);
+
+  useEffect(() => {
+    if (editMode) {
+      fetchConfig();
+    }
+  }, [fetchConfig, editMode]);
+
+  const handleSelectChange = (selectedOption) => {
+    setSelectedFunction(selectedOption);
+    setParameterValues({});
+    setFormData((prev) => ({
+      ...prev,
+      $ref: selectedOption.id,
+    }));
+  };
+
+  const handleCheckboxChange = (field, value) => {
+    setCheckedItems((prevState) => ({
+      ...prevState,
+      [field]: value,
+      ...(field === 'thenCatch' && value ? { awaitCall: false } : {}),
+      ...(field === 'awaitCall' && value ? { thenCatch: false } : {}),
+    }));
+  };
+
+  const handleParameterChange = (paramName, value) => {
+    setParameterValues((prevState) => ({
+      ...prevState,
+      [paramName]: value,
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      parameters: Object.entries({ ...parameterValues, [paramName]: value }).map(([name, value]) => ({
+        name,
+        type: 'CUSTOM',
+        value,
+      })),
+    }));
+  };
+
+  const transformConfig = () => {
+    let config = { ...formData };
+
+    config.isAwaited = checkedItems.awaitCall;
+    if (checkedItems.thenCatch) {
+      config = {
+        type: 'CHAINED_FUNCTIONS',
+        functions: [
+          config,
+          {
+            callType: 'functionCall',
+            type: 'FUNCTION_CALL',
+            functionName: 'then',
+            parameters: [
+              {
+                type: 'FUNCTION',
+                isAnonymous: true,
+                schema: {
+                  type: 'FUNCTION',
+                  returnType: {
+                    selection: 'anyOf',
+                    types: [{ type: 'any' }],
+                  },
+                  parameters: [{ name: 'res', type: 'CUSTOM' }],
+                },
+                bodyConfig: { type: 'BLOCK', statements: [] },
+              },
+            ],
+          },
+          {
+            callType: 'functionCall',
+            type: 'FUNCTION_CALL',
+            functionName: 'catch',
+            parameters: [
+              {
+                type: 'FUNCTION',
+                isAnonymous: true,
+                schema: {
+                  type: 'FUNCTION',
+                  returnType: {
+                    selection: 'anyOf',
+                    types: [{ type: 'any' }],
+                  },
+                  parameters: [{ name: 'err', type: 'CUSTOM' }],
+                },
+                bodyConfig: { type: 'BLOCK', statements: [] },
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (checkedItems.declarationCall) {
+      config = {
+        type: 'DECLARATION',
+        varName: 'response',
+        value: config,
+        declarationType: 'const',
+      };
+    }
+
+    return config;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const finalConfig = transformConfig();
+    if (editMode) {
+      onUpdate(finalConfig);
+    } else {
+      onSubmit(finalConfig);
+    }
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    onCancel();
+  };
+
+  return (
+    <div className="service-call-config-form h-100">
+      <div className="d-flex flex-column justify-content-between h-100">
+        <div>
+          <div className="br-text-primary large-font mb-2">Select a Service</div>
+          <Select
+            options={availableFunctions}
+            value={selectedFunction}
+            onChange={handleSelectChange}
+            className="react-select-container br-background-secondary br-text-primary"
+            classNamePrefix="react-select"
+            placeholder="Search services..."
+            isDisabled={editMode}
+          />
+          {selectedFunction && (
+            <>
+              <div className="br-text-primary large-font mb-1 mt-3">Configure your service call</div>
+              <div className="small-font br-text-primary mb-2">Note : Async Function required for awaitCall.</div>
+              <div className="d-flex">
+                {(editMode ? ['awaitCall'] : ['thenCatch', 'declarationCall', 'awaitCall']).map((field) => (
+                  <CustomCheckBoxField
+                    key={field}
+                    name={field}
+                    value={checkedItems[field]}
+                    onChange={(value) => handleCheckboxChange(field, value)}
+                    config={{
+                      label: field === 'thenCatch' ? 'Then Catch' : field,
+                      groupClass: 'form-check me-2',
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+          {selectedFunction?.schema?.parameters?.length > 0 && (
+            <div className="mt-1">
+              <div className="br-text-primary large-font mb-2">Parameter Mapping</div>
+              {selectedFunction.schema.parameters.map((param) => (
+                <div key={param.name} className="mb-2 px-1">
+                  <CustomTextInput
+                    name={param.name}
+                    value={parameterValues[param.name] || ''}
+                    onChange={(value) => handleParameterChange(param.name, value)}
+                    config={{
+                      label: param.name,
+                      groupClass: 'form-group d-flex',
+                      labelClass: 'me-3 br-text-primary med-font col-3 fw-semibold',
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="d-flex justify-content-end">
+          <CustomButtonField
+            type="button"
+            label="Cancel"
+            className="btn br-secondary-button med-font mx-2"
+            onClick={handleCancel}
+          />
+          <CustomButtonField type="button" label="Submit" className="btn btn-filled med-font" onClick={handleSubmit} />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 ServiceCall.propTypes = {
-  onSubmit: PropTypes.func,
-  onCancel: PropTypes.func,
+  getConfig: PropTypes.func,
   editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
+  onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
+  callType: PropTypes.string,
 };
+
 export default ServiceCall;
-
-// import PropTypes from 'prop-types';
-// import { useEffect, useState } from 'react';
-// import { availableServices } from '../../constants/FormConstants';
-// import '../../styles/servicesSelect.css';
-// import { CustomButtonField, CustomCheckBoxField, CustomTextInput } from '../../../../common/fields';
-// import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
-
-// function ServiceCall({ onSubmit, onCancel, editMode }) {
-//   const initialServiceCallConfig = JSON.parse(JSON.stringify(funcConfigTemplates['serviceCall']));
-//   const [formData, setFormData] = useState({ ...initialServiceCallConfig });
-//   const [searchQuery, setSearchQuery] = useState('');
-//   const [debouncedQuery, setDebouncedQuery] = useState('');
-//   const [filteredOptions, setFilteredOptions] = useState(availableServices);
-//   const [selectedService, setSelectedService] = useState(null);
-//   const [checkedItems, setCheckedItems] = useState({
-//     thenCatch: false,
-//     declarationCall: false,
-//     awaitCall: false,
-//   });
-
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       setDebouncedQuery(searchQuery);
-//     }, 300);
-
-//     return () => clearTimeout(timer);
-//   }, [searchQuery]);
-
-//   useEffect(() => {
-//     const filterData = availableServices.filter((item) =>
-//       item.serviceName.toLowerCase().includes(debouncedQuery.toLowerCase())
-//     );
-//     setFilteredOptions(filterData);
-//   }, [debouncedQuery]);
-
-//   const handleSelect = (service) => {
-//     setSelectedService(service);
-//     setSearchQuery('');
-//     setFilteredOptions([]);
-//     console.log('Selected Service:', service);
-//   };
-
-//   const handleCheckboxChange = (field, value) => {
-//     setCheckedItems((prevState) => {
-//       const updatedItems = { ...prevState, [field]: value };
-
-//       if (field === 'thenCatch' && value) {
-//         updatedItems.awaitCall = false;
-//       } else if (field === 'awaitCall' && value) {
-//         updatedItems.thenCatch = false;
-//       }
-
-//       return updatedItems;
-//     });
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     onSubmit({});
-//   };
-
-//   const handleCancel = (e) => {
-//     e.preventDefault();
-//     onCancel();
-//   };
-
-//   return (
-//     <div className="service-call-config-form h-100">
-//       <div className="d-flex flex-column justify-content-between h-100">
-//         <div>
-//           <div className="services-select">
-//             <CustomTextInput
-//               name="query"
-//               value={searchQuery}
-//               onChange={(value) => setSearchQuery(value)}
-//               config={{
-//                 label: 'Select Service',
-//                 groupClass: 'form-group mb-2',
-//               }}
-//               placeholder="Search.."
-//             />
-//             <ul
-//               className="service-dropdown-menu"
-//               style={{ display: searchQuery ? 'block' : 'none', maxHeight: '200px', overflowY: 'auto' }}
-//             >
-//               {filteredOptions.map((item) => (
-//                 <li
-//                   key={item.id}
-//                   className="service-dropdown-item br-text-primary d-flex justify-content-between med-font"
-//                   onClick={() => handleSelect(item)}
-//                 >
-//                   <div>
-//                     <strong>{item.serviceName} </strong>- {item.fileName}
-//                   </div>
-//                   <div>({item.moduleName})</div>
-//                 </li>
-//               ))}
-//               {filteredOptions.length === 0 && (
-//                 <li key={0} className="service-dropdown-item br-text-primary">
-//                   No service found
-//                 </li>
-//               )}
-//             </ul>
-//           </div>
-
-//           <div className="br-text-primary large-font mb-2">
-//             <strong>Selected Service : {selectedService?.serviceName}</strong>
-//           </div>
-
-//           <div className="br-text-primary large-font mb-2">Configure your service call</div>
-//           <div className="d-flex">
-//             <CustomCheckBoxField
-//               name="thenCatch"
-//               value={checkedItems.thenCatch || false}
-//               onChange={(value) => handleCheckboxChange('thenCatch', value)}
-//               config={{ label: 'Then catch', groupClass: 'form-check me-2' }}
-//             />
-//             <CustomCheckBoxField
-//               name="declarationCall"
-//               value={checkedItems.declarationCall || false}
-//               onChange={(value) => handleCheckboxChange('declarationCall', value)}
-//               config={{ label: 'Declaration', groupClass: 'form-check me-2' }}
-//             />
-//             <CustomCheckBoxField
-//               name="awaitCall"
-//               value={checkedItems.awaitCall || false}
-//               onChange={(value) => handleCheckboxChange('awaitCall', value)}
-//               config={{ label: 'Await', groupClass: 'form-check me-2' }}
-//             />
-//           </div>
-//           <div className="br-text-primary large-font mb-2">Param Mapping</div>
-//         </div>
-//         <div className="d-flex justify-content-end">
-//           <CustomButtonField
-//             type="button"
-//             label={'Cancel'}
-//             className="btn br-secondary-button med-font mx-2"
-//             onClick={handleCancel}
-//           />
-//           <CustomButtonField
-//             type="button"
-//             label={editMode ? 'Update' : 'Submit'}
-//             className="btn btn-filled med-font"
-//             onClick={handleSubmit}
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// ServiceCall.propTypes = {
-//   onSubmit: PropTypes.func,
-//   onCancel: PropTypes.func,
-//   editMode: PropTypes.bool,
-// };
-// export default ServiceCall;

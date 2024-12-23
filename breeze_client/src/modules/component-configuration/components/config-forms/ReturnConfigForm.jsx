@@ -1,13 +1,11 @@
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
 import { funcConfigTemplates } from '../../constants/functionConfigTemplates';
-import { CustomButtonField, CustomTextInput } from '../../../../common/fields';
-import { validator } from '../../../../utils/Validator';
+import { CustomButtonField, CustomTextArea } from '../../../../common/fields';
 
-function WhileBlockConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
-  const initialWhileConfig = JSON.parse(JSON.stringify(funcConfigTemplates['whileBlock']));
-  const [formData, setFormData] = useState({ ...initialWhileConfig });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+function ReturnConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
+  const initialReturnConfig = JSON.parse(JSON.stringify(funcConfigTemplates['return']));
+  const [formData, setFormData] = useState({ ...initialReturnConfig });
 
   const fetchConfig = useCallback(async () => {
     const res = await getConfig();
@@ -20,20 +18,18 @@ function WhileBlockConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
     }
   }, [fetchConfig, editMode]);
 
-  function updateCondition(value) {
+  function updateText(value) {
     setFormData((state) => {
-      state.condition.value = value;
+      state.value = {
+        type: 'TOKEN',
+        value: value,
+      };
       return { ...state };
     });
   }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    const isFormValid = [formData.condition.value].every(Boolean);
-    if (!isFormValid) {
-      return;
-    }
     if (editMode) {
       onUpdate(formData);
     } else {
@@ -43,25 +39,22 @@ function WhileBlockConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setIsSubmitted(false);
     onCancel();
   };
 
   return (
-    <form className="whileBlock-config-form h-100">
+    <form className="console-config-form h-100">
       <div className="d-flex flex-column justify-content-between h-100">
         <div>
           <div>
-            <CustomTextInput
-              name="whileCondition"
-              value={formData?.condition.value || ''}
-              onChange={(value) => updateCondition(value)}
+            <CustomTextArea
+              name="Return Value"
+              value={formData?.value?.value || ''}
+              onChange={(value) => updateText(value)}
               config={{
-                label: 'While Condition',
+                label: 'Return content',
                 groupClass: 'form-group mb-2',
               }}
-              customValidations={[validator.REQUIRED]}
-              isSubmitted={isSubmitted}
             />
           </div>
         </div>
@@ -84,12 +77,12 @@ function WhileBlockConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdat
   );
 }
 
-WhileBlockConfigForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  editMode: PropTypes.bool,
+ReturnConfigForm.propTypes = {
   getConfig: PropTypes.func,
+  editMode: PropTypes.bool,
+  onSubmit: PropTypes.func,
   onUpdate: PropTypes.func,
+  onCancel: PropTypes.func,
 };
 
-export default WhileBlockConfigForm;
+export default ReturnConfigForm;

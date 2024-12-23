@@ -99,7 +99,7 @@ def manage_resource(request, param):
             if not libname or not libversion:
                 if not resource:
                     config_path = os.path.join(THIRD_PARTY_CONFIG_PATH,INDEX)
-                    selected_data = read_file(config_path)
+                    selected_data = read_file(config_path,return_empty=True)
                 else:
                     return JsonResponse(
                         {"error": "libname and libversion are missing"}, status=400

@@ -123,7 +123,7 @@ def get_code_index(statements,code,meta_config,b=0):
             obj = {k:statement[k] for k in statement if k in ["id","type"] }
             if children:
                 childCode= code[indexes[0]:indexes[1]+1]
-                obj["children"] = get_code_index(children,childCode,meta_config,b=b+base)
+                obj["children"] = get_code_index(children,childCode,meta_config,b=b+base+indexes[0])
             # print(base, base + indexes[0],base + indexes[1],obj)
             print(tree)
             tree.insertElem(base + indexes[0],base + indexes[1],obj)

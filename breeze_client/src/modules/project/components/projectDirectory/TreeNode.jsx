@@ -179,6 +179,12 @@ function TreeNode({ node, level, toggleNode, expandedNodes, getChildren, hasChil
                 onClick={(e) => e.stopPropagation()}
                 ref={inputRef}
                 placeholder="Enter name"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleInputSubmit();
+                  }
+                }}
               />
               <button
                 onClick={(e) => {

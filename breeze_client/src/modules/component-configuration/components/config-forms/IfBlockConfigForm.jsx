@@ -79,12 +79,10 @@ function IfBlockConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }
     } else {
       onSubmit(formData);
     }
-    setFormData(initialIfConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialIfConfig);
     setIsSubmitted(false);
     onCancel();
   };

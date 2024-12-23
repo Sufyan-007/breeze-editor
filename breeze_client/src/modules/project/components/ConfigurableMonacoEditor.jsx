@@ -4,9 +4,10 @@ import PropTypes from 'prop-types';
 import { BreezeList } from '../../../common/display';
 import ThemeContext from '../../../contexts/ThemeContext';
 import { useOffcanvas } from '../../../contexts/OffcanvasContext';
-import { configTypeMapping, items } from '../constants/EditorList';
+import { configTypeMapping, items, outerBlockItems } from '../constants/EditorList';
 import {
   addAstStatement,
+  deleteAstStatement,
   getAstStatement,
   getCodeDetails,
   updateAstStatement,
@@ -25,6 +26,7 @@ const ConfigurableMonacoEditor = ({
   node = {},
 }) => {
   const editorRef = useRef(null);
+  const countRef = useRef(0);
   const [editor, setEditor] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [filteredItems, setFilteredItems] = useState(items);
@@ -51,7 +53,7 @@ const ConfigurableMonacoEditor = ({
   }, [editor, onChange]);
 
   useEffect(() => {
-    const isSpecificTag = ['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag);
+    const isSpecificTag = ['COMPONENTS', 'HOOKS', 'CODE_FILE', 'SERVICES'].includes(node?.tag);
     const editorInstance = monaco.editor.create(editorRef.current, {
       value: value,
       language: language,
@@ -69,9 +71,9 @@ const ConfigurableMonacoEditor = ({
       const model = editorInstance.getModel();
       const position = editorInstance.getPosition();
       const index = model.getOffsetAt(position);
-      // const character = model.getValue()[index];
       const text = model.getValue();
       const count = text.slice(0, index).length;
+      countRef.current = count;
 
       const payload = {
         fileId: node.id,
@@ -79,8 +81,8 @@ const ConfigurableMonacoEditor = ({
       };
       const result = await getCodeDetails(projectName, payload);
       const configType = result?.related_config?.type;
-      setStatementId(result?.related_config?.id || '');
-      setFilteredItems(configType ? configTypeMapping[configType] || items : []);
+      setStatementId(result?.related_config?.id || node?.id);
+      setFilteredItems(configType ? configTypeMapping[configType] || items : outerBlockItems);
     };
 
     if (['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag)) {
@@ -108,15 +110,20 @@ const ConfigurableMonacoEditor = ({
     };
   }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
+  const updateFileCode = async () => {
+    const data = await getFileCode(projectName, node?.id);
+    onChange(data.code);
+  };
+
   const onSubmit = async (value) => {
     const payload = {
       fileId: node.id,
       parentId: statementId,
       config: value,
+      index: countRef.current,
     };
     await addAstStatement(projectName, payload);
-    const data = await getFileCode(projectName, node.id);
-    onChange(data.code);
+    await updateFileCode();
     closeOffcanvas();
   };
 
@@ -127,9 +134,17 @@ const ConfigurableMonacoEditor = ({
       config: value,
     };
     await updateAstStatement(projectName, payload);
-    const data = await getFileCode(projectName, node.id);
-    onChange(data.code);
+    await updateFileCode();
     closeOffcanvas();
+  };
+
+  const deleteStatement = async () => {
+    const payload = {
+      fileId: node.id,
+      statementId: statementId,
+    };
+    await deleteAstStatement(projectName, payload);
+    await updateFileCode();
   };
 
   const getConfig = useCallback(async () => {
@@ -145,14 +160,25 @@ const ConfigurableMonacoEditor = ({
     closeOffcanvas();
   };
 
-  const { getConfigComponent } = useConfigurableMenuItems(onSubmit, onCancel, onUpdate, getConfig);
+  const { getConfigComponent } = useConfigurableMenuItems(
+    onSubmit,
+    onCancel,
+    onUpdate,
+    getConfig,
+    node?.id,
+    updateFileCode
+  );
 
   const handleMenuItemClick = (item) => {
-    const contentComponent = getConfigComponent(item);
-    // console.log('contentComponent', item, contentComponent);
-    let width = '40%';
-    if (item === 'Html elements') width = '60%';
-    showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
+    if (item === 'Delete') {
+      deleteStatement();
+    } else {
+      const contentComponent = getConfigComponent(item);
+      let width = '40%';
+      if (item === 'Add elements' || item === 'Edit elements') width = '60%';
+      if (item === 'Configure Imports') width = '60%';
+      showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
+    }
     setShowMenu(false);
   };
 

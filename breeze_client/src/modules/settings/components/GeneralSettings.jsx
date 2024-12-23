@@ -43,7 +43,6 @@ const GeneralSettings = () => {
           author: res.author,
           description: res.description,
         });
-        console.log(res)
         if (res.logoId && res.logoId !== 'null' && res.logoId !== '') {
           getProjectLogo(res.name, res.logoId)
             .then((response) => response.blob())

@@ -5,7 +5,7 @@ export const BreezeDatatypes = [
   { value: 'OBJECT', label: 'Object' },
   { value: 'ARRAY', label: 'Array' },
   { value: 'FUNCTION', label: 'Function' },
-  { value: 'CUSTOM', label: 'Custom' },
+  { value: 'ANY', label: 'Any' },
   { value: 'UNDEFINED', label: 'Undefined' },
   { value: 'NULL', label: 'Null' },
   { value: 'TOKEN', label: 'Token' },
@@ -18,14 +18,18 @@ export const DeclarationTypes = [
 ];
 
 export const ImportTypes = [
-  { label: 'Single', value: 'single' },
-  { label: 'Full', value: 'full' },
+  { label: 'Single', value: 'SINGLE' },
+  { label: 'Full', value: 'FULL' },
 ];
 
-export const ImportCategories = [
+export const ImportCategories = [{ label: 'Third Party', value: 'THIRD_PARTY' }];
+
+export const ImportModules = [
+  { label: 'Select', value: '' },
   { label: 'Component', value: 'component' },
-  { label: 'Services', value: 'services' },
-  { label: 'Third Party', value: 'thirdparty' },
+  { label: 'Variable', value: 'variables' },
+  { label: 'Function', value: 'functions' },
+  { label: 'Hook', value: 'hooks' },
 ];
 
 export const lifecycleTypes = [
@@ -47,12 +51,12 @@ export const availableDependentVars = [
   { label: 'Dep 2', value: 'dependency2' },
 ];
 
-export const availableServices = [
-  { id: 1, serviceName: 'getAllUsers', fileName: 'users.jsx', moduleName: 'User Management' },
-  { id: 2, serviceName: 'createUser', fileName: 'users.jsx', moduleName: 'User Management' },
-  { id: 3, serviceName: 'getUserById', fileName: 'users.jsx', moduleName: 'User Management' },
-  { id: 4, serviceName: 'updateUser', fileName: 'users.jsx', moduleName: 'User Management' },
-  { id: 5, serviceName: 'deleteUser', fileName: 'users.jsx', moduleName: 'User Management' },
-  { id: 6, serviceName: 'login', fileName: 'authentication.jsx', moduleName: 'User Management' },
-  { id: 7, serviceName: 'logout', fileName: 'authentication.jsx', moduleName: 'User Management' },
-];
+export const scopeOptions = {
+  data: '',
+  test: '',
+  Main: '',
+};
+export const inputTypeMapping = Object.freeze({
+  text: 'STRING',
+  number: 'NUMERIC',
+});

@@ -62,21 +62,25 @@ echo "Installing JavaScript dependencies..."
 npm install --prefix "$BASE_DIR/third_party_package_parser/"
 npm install --prefix "$BASE_DIR/breeze_client/"
 
-# make configuration directory
-mkdir -p "$BASE_SIR/configurations" 
+# Make configuration directory
+mkdir -p "$BASE_DIR/configurations"
 
 # Start breeze_server server
 echo "Starting breeze_server server in staging mode..."
 export RUN_ENV=staging
-python3 breeze_server/manage.py runserver > "$BASE_DIR/breeze_server.log" 2>&1 &
+nohup python3 breeze_server/manage.py runserver > "$BASE_DIR/breeze_server.log" 2>&1 &
+BREEZE_SERVER_PID=$!
 
 # Start third_party_package_parser server
 echo "Starting third_party_package_parser server in staging mode..."
-# npm run staging --prefix ."$BASE_DIR/third_party_package_parser/" > /dev/null 2>> "$BASE_DIR/third_party_package_parser.log" &
-npm run staging --prefix "third_party_package_parser/" > "$BASE_DIR/third_party_package_parser.log" 2>&1 &
+nohup npm run staging --prefix "$BASE_DIR/third_party_package_parser/" > "$BASE_DIR/third_party_package_parser.log" 2>&1 &
+THIRD_PARTY_PACKAGE_PARSER_PID=$!
 
-# start breeze_client server
-npm run staging --prefix "$BASE_DIR/breeze_client/" > /dev/null 2>> "$BASE_DIR/breeze_client.log"  &
+# Start breeze_client server
+echo "Starting breeze_client server in staging mode..."
+nohup npm run staging --prefix "$BASE_DIR/breeze_client/" > "$BASE_DIR/breeze_client.log" 2>&1 &
+BREEZE_CLIENT_PID=$!
 
-# Wait for all 3 servers to start
-wait
+# Script exits here while background processes keep running
+echo "All servers are started and running in the background."
+exit 0

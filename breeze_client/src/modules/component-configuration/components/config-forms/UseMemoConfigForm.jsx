@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { CustomTextInput, CustomMultiSelectField, CustomButtonField, CustomTextArea } from '../../../../common/fields';
+import Select from 'react-select/creatable';
+import { CustomTextInput, CustomButtonField, CustomTextArea } from '../../../../common/fields';
 import { availableDependentVars } from '../../constants/FormConstants';
 import { initialUseMemoConfig } from '../../constants/ResourcesFormData';
 import { validator } from '../../../../utils/Validator';
@@ -13,7 +14,10 @@ function UseMemoConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }
   const fetchConfig = useCallback(async () => {
     const res = await getConfig();
     const config = res.config;
-    const dependencyValues = config.dependencies.map((dep) => dep.value);
+    const dependencyValues = config.dependencies.map((dep) => ({
+      label: dep.value,
+      value: dep.value,
+    }));
     setFormData(config);
     setSelectedDependencies(dependencyValues);
   }, [getConfig]);
@@ -28,7 +32,10 @@ function UseMemoConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }
     let updatedData = { ...formData, [field]: value };
 
     if (field === 'dependencies') {
-      const formattedDependencies = value.map((dep) => ({ type: 'TOKEN', value: dep }));
+      const formattedDependencies = value.map((dep) => ({
+        type: 'TOKEN',
+        value: dep.value,
+      }));
       updatedData = { ...updatedData, dependencies: formattedDependencies };
       setSelectedDependencies(value);
     }
@@ -56,12 +63,10 @@ function UseMemoConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }
     } else {
       onSubmit(formattedData);
     }
-    setFormData(initialUseMemoConfig);
   };
 
   const handleCancel = (e) => {
     e.preventDefault();
-    setFormData(initialUseMemoConfig);
     setIsSubmitted(false);
     onCancel();
   };
@@ -85,16 +90,18 @@ function UseMemoConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }
             config={{ label: 'Hook Description', groupClass: 'form-group mb-2' }}
           />
 
-          <CustomMultiSelectField
-            name="dependencies"
-            values={selectedDependencies || []}
-            onChange={(value) => handleChange('dependencies', value)}
-            options={availableDependentVars}
-            config={{
-              label: 'Dependent Variables',
-              groupClass: 'form-group mb-3',
-            }}
-          />
+          <div className="form-group mb-3">
+            <label className="form-label br-text-primary med-font fw-semibold me-2">Dependent Variables</label>
+            <Select
+              isMulti
+              value={selectedDependencies}
+              onChange={(value) => handleChange('dependencies', value)}
+              options={availableDependentVars}
+              placeholder="Add dependent variables..."
+              className="react-select-container br-background-secondary br-text-primary"
+              classNamePrefix="react-select"
+            />
+          </div>
         </div>
         <div className="d-flex justify-content-end">
           <CustomButtonField

@@ -1,14 +1,20 @@
 export const initialPropConfig = {
   name: '',
   isRequired: false,
-  dataType: 'STRING',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   defaultValue: '',
   description: '',
 };
 
 export const initialParamConfig = {
   name: '',
-  dataType: 'STRING',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   defaultValue: '',
   description: '',
 };
@@ -28,15 +34,21 @@ export const initialVariableConfig = {
   type: 'DECLARATION',
   varName: '',
   declarationType: 'const',
-  dataType: 'CUSTOM',
-  value: { type: 'CUSTOM', value: '' },
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
+  value: '',
   description: '',
 };
 
 export const initialStateVarConfig = {
   type: 'REACT_USE_STATE',
   varName: '',
-  dataType: 'CUSTOM',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   defaultValue: { type: 'CUSTOM', value: '' },
   description: '',
 };
@@ -44,17 +56,23 @@ export const initialStateVarConfig = {
 export const initialRefVarConfig = {
   type: 'REACT_USE_REF',
   varName: '',
-  dataType: 'CUSTOM',
+  dataType: {
+    selection: 'anyOf',
+    types: [{ type: 'ANY' }],
+  },
   defaultValue: { type: 'CUSTOM', value: '' },
   description: '',
 };
 
 export const initialImportConfig = {
-  importEntity: '',
-  importFrom: '',
-  importType: 'single',
-  category: 'component',
+  import_entity: '',
+  from: '',
+  import_type: 'SINGLE',
+  TYPE: 'THIRD_PARTY',
+  module: '',
 };
+
+export const initialExportConfig = { default: '', others: [] };
 
 export const initialFunctionConfig = {
   type: 'FUNCTION',
@@ -62,7 +80,14 @@ export const initialFunctionConfig = {
   isAsync: false,
   isAnonymous: false,
   description: '',
-  parameters: [],
+  schema: {
+    type: 'FUNCTION',
+    returnType: {
+      selection: 'anyOf',
+      types: [{ type: 'any' }],
+    },
+    parameters: [],
+  },
   bodyConfig: {
     type: 'BLOCK',
     statements: [],
@@ -101,7 +126,14 @@ export const initialUseCallbackConfig = {
     isAsync: false,
     isAnonymous: true,
     description: '',
-    parameters: [],
+    schema: {
+      type: 'FUNCTION',
+      returnType: {
+        selection: 'anyOf',
+        types: [{ type: 'any' }],
+      },
+      parameters: [],
+    },
     bodyConfig: {
       type: 'BLOCK',
       statements: [],
