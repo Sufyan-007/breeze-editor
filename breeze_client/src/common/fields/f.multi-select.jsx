@@ -1,8 +1,8 @@
 // /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 
-import { useRef, useEffect, useState } from 'react'
-import "../styles.css"
+import { useRef, useEffect, useState } from 'react';
+import '../styles.css';
 
 const PRESET_TEMPLATES = {
   form: ({ onClick, data, value }) => {
@@ -12,8 +12,8 @@ const PRESET_TEMPLATES = {
 
     const item = data[2];
     const formName = item.name;
-    const accountName = item.account ? item.account.name : "";
-    const className = value === data[0] ? "item active" : "item";
+    const accountName = item.account ? item.account.name : '';
+    const className = value === data[0] ? 'item active' : 'item';
 
     return (
       <div onClick={handleClick} className={className}>
@@ -31,7 +31,7 @@ const PRESET_TEMPLATES = {
     const item = data[2];
     const alarmName = item.name;
     const accountName = item.account.name;
-    const className = value === data[0] ? "item active" : "item";
+    const className = value === data[0] ? 'item active' : 'item';
 
     return (
       <div onClick={handleClick} className={className}>
@@ -47,8 +47,8 @@ const PRESET_TEMPLATES = {
     };
 
     const shortName = data[2][0];
-    const longName = data[2][1].split(",");
-    const className = value === data[0] ? "item active" : "item";
+    const longName = data[2][1].split(',');
+    const className = value === data[0] ? 'item active' : 'item';
 
     return (
       <div onClick={handleClick} className={className}>
@@ -73,9 +73,8 @@ const MultiSelectWrapper = ({ onClick, data, value, children }) => {
   console.log(data);
   console.log(value);
   console.log(children);
-  
-  const iconClass =
-    value && value.includes(data[0]) ? "bi bi-check-square" : "bi bi-square";
+
+  const iconClass = value && value.includes(data[0]) ? 'bi bi-check-square' : 'bi bi-square';
 
   return (
     <div className="breeze-select-multi-item" onClick={handleClick}>
@@ -98,19 +97,19 @@ const MultiSelectWrapper = ({ onClick, data, value, children }) => {
 const processExternalOptions = (options, hProp) => {
   const optionsMap = {};
   console.log(hProp);
-  options.forEach(option => {
+  options.forEach((option) => {
     if (!optionsMap[option.id]) {
       optionsMap[option.id] = { ...option, children: [] };
     }
   });
 
-  Object.values(optionsMap).forEach(option => {
+  Object.values(optionsMap).forEach((option) => {
     if (option.parent_id && optionsMap[option.parent_id]) {
       optionsMap[option.parent_id].children.push(option);
     }
   });
 
-  const cleaned = Object.values(optionsMap).filter(item => !item.parent_id);
+  const cleaned = Object.values(optionsMap).filter((item) => !item.parent_id);
 
   return cleaned;
 };
@@ -119,7 +118,7 @@ const recurseOptions = (items, label, val, level = 0) => {
   const options = [];
   const dashes = level > 0 ? ' '.repeat(level) + '-' : '';
 
-  items.forEach(option => {
+  items.forEach((option) => {
     const itemLabel = `${dashes} ${option[label]}`;
     options.push([option[val], itemLabel]);
 
@@ -133,9 +132,13 @@ const recurseOptions = (items, label, val, level = 0) => {
 };
 
 const Item = ({ onClick, data, value, multiple }) => {
-  const className = value === data[0] ? "item active" : "item";
+  const className = value === data[0] ? 'item active' : 'item';
   const handleClick = multiple ? null : () => onClick(data);
-  return <div className={className} onClick={handleClick}>{data[1]}</div>;
+  return (
+    <div className={className} onClick={handleClick}>
+      {data[1]}
+    </div>
+  );
 };
 
 const init = (value, config, setInitialLoaded, toggle, setState) => {
@@ -158,34 +161,33 @@ const init = (value, config, setInitialLoaded, toggle, setState) => {
 
     let isPrefix = false;
     if (config.optionsSource.prefixed) {
-      const suspects = config.optionsSource.prefixed.filter(item => item[0] === value);
+      const suspects = config.optionsSource.prefixed.filter((item) => item[0] === value);
       if (suspects.length > 0) isPrefix = true;
     }
 
     if (!isPrefix) {
-      let queryBuilder = {}
-      queryBuilder.tx("com.ewars.resource", [resource, value, select, null])
-        .then((resp) => {
-          if (resp) {
-            const newOptions = [[resp[config.optionsSource.valSource], resp[config.optionsSource.labelSource]]];
-            setState(prevState => ({
-              ...prevState,
-              options: [...newOptions, ...prevState.options]
-            }));
+      let queryBuilder = {};
+      queryBuilder.tx('com.ewars.resource', [resource, value, select, null]).then((resp) => {
+        if (resp) {
+          const newOptions = [[resp[config.optionsSource.valSource], resp[config.optionsSource.labelSource]]];
+          setState((prevState) => ({
+            ...prevState,
+            options: [...newOptions, ...prevState.options],
+          }));
 
-            if (config?.optionsSource?.additional) {
-              const additionalOptions = config.optionsSource.additional.map(option => {
-                const optionValue = option[0] ?? "null";
-                return [optionValue, option[1]];
-              });
-              setState(prevState => ({
-                ...prevState,
-                options: [...additionalOptions, ...prevState.options]
-              }));
-            }
+          if (config?.optionsSource?.additional) {
+            const additionalOptions = config.optionsSource.additional.map((option) => {
+              const optionValue = option[0] ?? 'null';
+              return [optionValue, option[1]];
+            });
+            setState((prevState) => ({
+              ...prevState,
+              options: [...additionalOptions, ...prevState.options],
+            }));
           }
-          setInitialLoaded(true);
-        });
+        }
+        setInitialLoaded(true);
+      });
     } else {
       setInitialLoaded(true);
     }
@@ -196,15 +198,13 @@ const GenUniqueId = () => Math.random().toString(36).substring(2, 9);
 
 const HandleSingleSelect = ({ emptyText, value, options, prefixed, onClick }) => {
   const name = value
-    ? options.find((item) => item[0] === value)?.[1] ||
-      prefixed?.find((item) => item[0] === value)?.[1] ||
-      emptyText
-    : emptyText || "NO_SELECTION";
+    ? options.find((item) => item[0] === value)?.[1] || prefixed?.find((item) => item[0] === value)?.[1] || emptyText
+    : emptyText || 'NO_SELECTION';
 
-    console.log(value);
-    console.log(options);
-    console.log(name);
-    
+  console.log(value);
+  console.log(options);
+  console.log(name);
+
   return (
     <div className="handle" onClick={onClick}>
       <table width="100%">
@@ -234,14 +234,14 @@ function SelectField(props) {
     ItemTemplate,
     addNoSelection = true,
     styleClass,
-  } = props
-  
+  } = props;
+
   const selectorRef = useRef(null);
   const [state, setState] = useState({
-    showOptions:false,
+    showOptions: false,
     rawOptions: [],
     options: [],
-    placeKey: GenUniqueId()
+    placeKey: GenUniqueId(),
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
@@ -257,18 +257,18 @@ function SelectField(props) {
   useEffect(() => {
     document.addEventListener('click', handleBodyClick);
     return () => {
-        document.removeEventListener('click', handleBodyClick);
+      document.removeEventListener('click', handleBodyClick);
     };
   }, []); // Empty dependency array means this effect runs only once
 
   useEffect(() => {
     if (config?.optionsSource && value) {
       if (value !== previousValue.current) {
-          init(value, config, setInitialLoaded, toggle, setState);
-        }
+        init(value, config, setInitialLoaded, toggle, setState);
+      }
     } else {
-        setInitialLoaded(true);
-        setState(prevState => ({ ...prevState, options: config.options }));
+      setInitialLoaded(true);
+      setState((prevState) => ({ ...prevState, options: config.options }));
     }
     previousValue.current = value;
   }, [config, value]);
@@ -289,23 +289,23 @@ function SelectField(props) {
         const optionsH = processExternalOptions(state.rawOptions, config.optionsSource.hierarchyProp);
         optionsList = recurseOptions(optionsH, config.optionsSource.labelSource, config.optionsSource.valSource, 0);
       } else {
-        optionsList = state.rawOptions.map(item => [
+        optionsList = state.rawOptions.map((item) => [
           item[config.optionsSource.valSource],
           item[config.optionsSource.labelSource],
-          item
+          item,
         ]);
 
         if (config.optionsSource.additional) {
-          config.optionsSource.additional.forEach(option => {
-            const optionValue = option[0] == null ? "null" : option[0];
+          config.optionsSource.additional.forEach((option) => {
+            const optionValue = option[0] == null ? 'null' : option[0];
             optionsList.unshift([optionValue, option[1]]);
           });
         }
       }
 
-      setState(prevState => ({
+      setState((prevState) => ({
         ...prevState,
-        options: optionsList
+        options: optionsList,
       }));
     }
   }, [config, state.rawOptions, isLoaded]);
@@ -322,37 +322,38 @@ function SelectField(props) {
       const join = config.optionsSource.join || null;
       const orderby = config.optionsSource.orderby || null;
 
-      let queryBuilder = {}
-      queryBuilder.tx("com.ewars.query", [resource, select, config.optionsSource.query, orderby, null, null, join])
-        .then(resp => {
+      let queryBuilder = {};
+      queryBuilder
+        .tx('com.ewars.query', [resource, select, config.optionsSource.query, orderby, null, null, join])
+        .then((resp) => {
           let optionsList = [];
 
           if (config.optionsSource.hierarchical) {
             const optionsH = processExternalOptions(resp, config.optionsSource.hierarchyProp);
             optionsList = recurseOptions(optionsH, config.optionsSource.labelSource, config.optionsSource.valSource, 0);
           } else {
-            optionsList = resp.map(item => [
+            optionsList = resp.map((item) => [
               item[config.optionsSource.valSource],
               item[config.optionsSource.labelSource],
-              item
+              item,
             ]);
 
             if (config.optionsSource.additional) {
-              config.optionsSource.additional.forEach(option => {
-                const optionValue = option[0] == null ? "null" : option[0];
+              config.optionsSource.additional.forEach((option) => {
+                const optionValue = option[0] == null ? 'null' : option[0];
                 optionsList.unshift([optionValue, option[1]]);
               });
             }
 
-            setState(prevState => ({
+            setState((prevState) => ({
               ...prevState,
-              rawOptions: resp
+              rawOptions: resp,
             }));
           }
 
-          setState(prevState => ({
+          setState((prevState) => ({
             ...prevState,
-            options: optionsList
+            options: optionsList,
           }));
           setIsLoaded(true);
         });
@@ -360,17 +361,13 @@ function SelectField(props) {
   }, [config, isLoaded]);
 
   const getOptions = () => {
-    return config.options.length
-      ? config.options
-      : state.options.length
-      ? state.options
-      : [];
+    return config.options.length ? config.options : state.options.length ? state.options : [];
   };
 
   const processConfig = (config) => {
     return {
-        ...config,
-        multiple: config?.multiple ?? false,
+      ...config,
+      multiple: config?.multiple ?? false,
     };
   };
 
@@ -386,14 +383,14 @@ function SelectField(props) {
     const value = config.optionsSource
       ? state.rawOptions.map((item) => item[config.optionsSource.valSource])
       : config.options.map((item) => item[0]);
-    // here value is array of keys where key is a unique identifier 
+    // here value is array of keys where key is a unique identifier
     // its an array here since we can suse selectAll multi-select
     onUpdate(selectedName, value, path, null);
   };
 
   const onPrefixSelect = (e) => {
     if (readOnly) return;
-    const val = e.target.getAttribute("data-value");
+    const val = e.target.getAttribute('data-value');
     const selectedName = config.nameOverride || name;
     setState((prevState) => ({ ...prevState, showOptions: false }));
     onUpdate(selectedName, val, path, null);
@@ -406,21 +403,19 @@ function SelectField(props) {
     const selectedPath = path || name;
 
     const node = config.optionsSource
-      ? state.rawOptions.find(
-          (result) => result[config.optionsSource.valSource] === item[0]
-        )
+      ? state.rawOptions.find((result) => result[config.optionsSource.valSource] === item[0])
       : item;
 
-      console.log(node);
-      console.log(state);
-      
+    console.log(node);
+    console.log(state);
+
     // if is a single select
     if (!config.multiple) {
       onUpdate(selectedName, item[0], selectedPath, node);
     } else {
       // for adding or removing a selected option
       console.log(value);
-      
+
       let newVal = Array.isArray(value) ? [...value] : [];
       if (!newVal.includes(item[0])) {
         newVal.push(item[0]);
@@ -428,118 +423,93 @@ function SelectField(props) {
         newVal = newVal.filter((p) => p !== item[0]);
       }
       console.log(newVal);
-      
+
       onUpdate(selectedName, newVal, selectedPath, node);
     }
   };
 
   const getOptionDisplay = () => {
-    return (
-      state.options.find((option) => option[0] === value)?.[1] || "NO_1SELECTION"
-    );
+    return state.options.find((option) => option[0] === value)?.[1] || 'NO_1SELECTION';
   };
-
 
   const dataClassName = `breeze-select-data ${styleClass ? styleClass : ''}`;
 
   const multiple = config?.multiple ?? false;
 
   if (!initialLoaded) {
-      return (
-          <div className="breeze-select">
-              <div className="handle">
-                  <i className="fal fa-spin fa-circle-o-notch"></i>
-              </div>
-          </div>
-      );
+    return (
+      <div className="breeze-select">
+        <div className="handle">
+          <i className="fal fa-spin fa-circle-o-notch"></i>
+        </div>
+      </div>
+    );
   }
 
   let currentConfig = processConfig();
-  !currentConfig ? console.log(currentConfig) : ''
-  
+  !currentConfig ? console.log(currentConfig) : '';
+
   if (readOnly && !multiple) {
-      const value = getOptionDisplay();
-      return (
-          <input type="text" disabled={true} value={value} />
-      );
+    const value = getOptionDisplay();
+    return <input type="text" disabled={true} value={value} />;
   }
 
   const rawOptions = getOptions();
   console.log(rawOptions);
-  
 
   let finalItemTemplate = ItemTemplate || config.ItemTemplate || Item;
   const templateName = template || config.template || null;
   const TemplateComponent = templateName ? PRESET_TEMPLATES[templateName] : finalItemTemplate;
 
-  let options = rawOptions.map(option => {
+  let options = rawOptions.map((option) => {
     const id = GenUniqueId();
 
     // wraps each single option in the dropdown
     let item = (
-        <TemplateComponent
-            readOnly={readOnly}
-            multiple={multiple}
-            data={option}
-            onClick={onChange}
-            value={value}
-            key={id}
-        />
+      <TemplateComponent
+        readOnly={readOnly}
+        multiple={multiple}
+        data={option}
+        onClick={onChange}
+        value={value}
+        key={id}
+      />
     );
 
     // converts the option into a multi-select's option
     if (multiple) {
-        item = (
-            <MultiSelectWrapper
-                readOnly={readOnly}
-                data={option}
-                onClick={onChange}
-                value={value}
-                key={id}
-            >
-                {item}
-            </MultiSelectWrapper>
-        );
+      item = (
+        <MultiSelectWrapper readOnly={readOnly} data={option} onClick={onChange} value={value} key={id}>
+          {item}
+        </MultiSelectWrapper>
+      );
     }
-    
+
     return item;
   });
   console.log(options);
   console.log(state.showOptions);
 
-
   let prefixed = [];
   if (config?.optionsSource?.prefixed) {
     prefixed = config.optionsSource.prefixed;
-    prefixed.forEach(item => {
-        options.unshift(
-            <div
-                key={item[0]}
-                className="item"
-                data-key={item[0]}
-                data-value={item[0]}
-                onClick={onPrefixSelect}
-            >
-                {item[1]}
-            </div>
-        );
+    prefixed.forEach((item) => {
+      options.unshift(
+        <div key={item[0]} className="item" data-key={item[0]} data-value={item[0]} onClick={onPrefixSelect}>
+          {item[1]}
+        </div>
+      );
 
-        rawOptions.push(item);
+      rawOptions.push(item);
     });
   }
 
   if (!multiple && addNoSelection === true) {
-      options.unshift(
-          <div
-              key={state.placeKey}
-              className="item"
-              data-key={state.placeKey}
-              data-value="null"
-              onClick={onChange}
-          >
-              No Selection
-          </div>
-      );
+    options.unshift(
+      <div key={state.placeKey} className="item" data-key={state.placeKey} data-value="null" onClick={onChange}>
+        No Selection
+      </div>
+    );
   }
 
   if (config?.optionsSource && !isLoaded) {
@@ -552,26 +522,28 @@ function SelectField(props) {
   return (
     <div ref={selectorRef} className={handleClass} onClick={multiple ? null : handleBodyClick} style={handleStyle}>
       {!multiple ? (
-          <HandleSingleSelect
-              onClick={toggle}
-              emptyText={config.emptyText}
-              value={value}
-              prefixed={prefixed}
-              options={rawOptions}
-          />
+        <HandleSingleSelect
+          onClick={toggle}
+          emptyText={config.emptyText}
+          value={value}
+          prefixed={prefixed}
+          options={rawOptions}
+        />
       ) : null}
-      {!state.showOptions ? (
-          <div className={dataClassName}>
-              {options}
-          </div>
-      ) : null}
+      {!state.showOptions ? <div className={dataClassName}>{options}</div> : null}
       {multiple && !readOnly ? (
-          <div style={{ padding: 8, borderTop: "1px solid #CCC" }}>
-              <a onClick={selectAll} href="#">{"SELECT_ALL"}</a> | <a onClick={selectNone} href="#">{"SELECT_NONE"}</a>
-          </div>
+        <div style={{ padding: 8, borderTop: '1px solid #CCC' }}>
+          <a onClick={selectAll} href="#">
+            {'SELECT_ALL'}
+          </a>{' '}
+          |{' '}
+          <a onClick={selectNone} href="#">
+            {'SELECT_NONE'}
+          </a>
+        </div>
       ) : null}
     </div>
   );
 }
 
-export default SelectField
+export default SelectField;
