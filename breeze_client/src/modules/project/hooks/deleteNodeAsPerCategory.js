@@ -5,6 +5,7 @@ export const deleteNodeAsPerCategory = async (node, dispatch, projectName) => {
 
   switch (node.tag) {
     case 'RESOURCE':
+    case 'CUSTOM':
       response = await dispatch(deleteFileAction({ fileId: node.id, projectName: projectName }));
       break;
     case 'COMPONENT':

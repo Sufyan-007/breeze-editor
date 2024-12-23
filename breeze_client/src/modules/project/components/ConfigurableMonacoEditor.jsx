@@ -59,54 +59,73 @@ const ConfigurableMonacoEditor = ({
       language: language,
       theme: projectTheme,
       readOnly: isSpecificTag ? 'true' : readOnlyMode,
-      contextmenu: isSpecificTag ? 'false' : 'true',
     });
     setEditor(editorInstance);
 
-    const handleClick = async (e) => {
-      if (e && e.event.buttons !== 1) {
-        return;
-      }
-
-      const model = editorInstance.getModel();
-      const position = editorInstance.getPosition();
-      const index = model.getOffsetAt(position);
-      const text = model.getValue();
-      const count = text.slice(0, index).length;
-      countRef.current = count;
-
-      const payload = {
-        fileId: node.id,
-        index: count,
-      };
-      const result = await getCodeDetails(projectName, payload);
-      const configType = result?.related_config?.type;
-      setStatementId(result?.related_config?.id || node?.id);
-      setFilteredItems(configType ? configTypeMapping[configType] || items : outerBlockItems);
-    };
-
+    let breezeConfigAction;
     if (['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag)) {
-      editorInstance.onContextMenu(async (e) => {
-        e.event.preventDefault();
-        e.event.stopPropagation();
-        await new Promise((r) => setTimeout(r, 5));
-        await handleClick();
-        const { clientX, clientY } = e.event.browserEvent;
-        setMenuPosition({ x: clientX, y: clientY });
-        setShowMenu(true);
+      const calculateMenuPosition = (domPosition) => {
+        const editorContainer = editorRef.current.getBoundingClientRect();
+        const editorScrollTop = editorRef.current.scrollTop || 0;
+
+        return {
+          x: editorContainer.left + domPosition.left,
+          y: editorContainer.top + domPosition.top - editorScrollTop + domPosition.height,
+        };
+      };
+
+      const menuConfig = async (editorInstance) => {
+        const position = editorInstance.getPosition();
+        const domPosition = editorInstance.getScrolledVisiblePosition(position);
+        if (domPosition) {
+          const menuPosition = calculateMenuPosition(domPosition);
+          setMenuPosition(menuPosition);
+
+          const model = editorInstance.getModel();
+          const index = model.getOffsetAt(position);
+          countRef.current = index;
+
+          const payload = {
+            fileId: node.id,
+            index,
+          };
+          const result = await getCodeDetails(projectName, payload);
+          const configType = result?.related_config?.type;
+
+          setStatementId(result?.related_config?.id || node?.id);
+          setFilteredItems(configType ? configTypeMapping[configType] || items : outerBlockItems);
+
+          setShowMenu(true);
+        }
+      };
+
+      const handleAltEnter = async (e) => {
+        if (e.keyCode === monaco.KeyCode.Enter && e.altKey) {
+          e.preventDefault();
+          await menuConfig(editorInstance);
+        }
+      };
+
+      breezeConfigAction = editorInstance.addAction({
+        id: 'breeze-config',
+        label: 'Breeze Config',
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 0,
+        run: async (editor) => {
+          await menuConfig(editor);
+        },
       });
+
+      editorInstance.onKeyDown(handleAltEnter);
 
       editorInstance.onMouseDown(() => {
         setShowMenu(false);
       });
     }
 
-    if (['COMPONENTS', 'HOOKS', 'CODE_FILE'].includes(node?.tag)) {
-      editorInstance.onMouseDown(handleClick);
-    }
-
     return () => {
       editorInstance.dispose();
+      if (breezeConfigAction) breezeConfigAction.dispose();
     };
   }, [language, readOnlyMode, value, projectTheme, node, projectName]);
 
@@ -156,6 +175,18 @@ const ConfigurableMonacoEditor = ({
     return config;
   }, [projectName, node?.id, statementId]);
 
+  const getScope = useCallback(
+    async (parentId) => {
+      const payload = {
+        fileId: node.id,
+        statementId: parentId,
+      };
+      const config = await getAstStatement(projectName, payload);
+      return config;
+    },
+    [projectName, node?.id]
+  );
+
   const onCancel = () => {
     closeOffcanvas();
   };
@@ -165,6 +196,7 @@ const ConfigurableMonacoEditor = ({
     onCancel,
     onUpdate,
     getConfig,
+    getScope,
     node?.id,
     updateFileCode
   );
@@ -175,8 +207,7 @@ const ConfigurableMonacoEditor = ({
     } else {
       const contentComponent = getConfigComponent(item);
       let width = '40%';
-      if (item === 'Add elements' || item === 'Edit elements') width = '60%';
-      if (item === 'Configure Imports') width = '60%';
+      if (item === 'Add elements' || item === 'Edit elements' || item === 'Configure Imports') width = '60%';
       showOffcanvas(contentComponent, item || 'Component Configuration', 'end', true, width);
     }
     setShowMenu(false);

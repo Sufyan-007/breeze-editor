@@ -22,7 +22,7 @@ import {
   ExportConfigForm,
 } from '../../component-configuration/components/config-forms';
 
-const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileId, updateFileCode) => {
+const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, getScope, fileId, updateFileCode) => {
   const getConfigComponent = (item) => {
     switch (item) {
       case 'Configure Imports':
@@ -105,6 +105,7 @@ const useConfigurableMenuItems = (onSubmit, onCancel, onUpdate, getConfig, fileI
         return (
           <LifecycleConfigForm
             getConfig={getConfig}
+            getScope={getScope}
             onSubmit={onSubmit}
             onCancel={onCancel}
             editMode={true}

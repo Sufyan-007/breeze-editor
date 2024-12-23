@@ -11,6 +11,7 @@ export const initialPropConfig = {
 
 export const initialParamConfig = {
   name: '',
+  isRequired: false,
   dataType: {
     selection: 'anyOf',
     types: [{ type: 'ANY' }],
