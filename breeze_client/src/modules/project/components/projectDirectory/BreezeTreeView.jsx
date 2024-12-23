@@ -6,21 +6,33 @@ function BreezeTreeView({ treeDataObject, expandedNodes, toggleNode, parentMetho
   const getChildren = (nodeId) => {
     const parentNode = treeDataObject[nodeId];
     if (!parentNode || !parentNode.children) return [];
-    return parentNode.children.map((childId) => treeDataObject[childId]);
+
+    const children = parentNode.children.map((childId) => treeDataObject[childId]);
+
+    return children.sort((a, b) => {
+      if (a.type === 'DIRECTORY' && b.type !== 'DIRECTORY') return -1;
+      if (a.type !== 'DIRECTORY' && b.type === 'DIRECTORY') return 1;
+      if (a.type === 'CONFIG' && b.type !== 'CONFIG') return 1;
+      if (a.type !== 'CONFIG' && b.type === 'CONFIG') return -1;
+      return a.name.localeCompare(b.name);
+    });
   };
 
-  const hasChildren = (node) => {
-    return node.children && node.children.length > 0;
-  };
+  const hasChildren = (node) => node.children && node.children.length > 0;
 
-  const isExpanded = (nodeId) => {
-    return !!expandedNodes[nodeId];
-  };
+  const isExpanded = (nodeId) => !!expandedNodes[nodeId];
 
   return (
     <div className="tree-view">
       {Object.values(treeDataObject)
         .filter((node) => node.parentId === null || node.parentId === 'ROOT')
+        .sort((a, b) => {
+          if (a.type === 'DIRECTORY' && b.type !== 'DIRECTORY') return -1;
+          if (a.type !== 'DIRECTORY' && b.type === 'DIRECTORY') return 1;
+          if (a.type === 'CONFIG' && b.type !== 'CONFIG') return 1;
+          if (a.type !== 'CONFIG' && b.type === 'CONFIG') return -1;
+          return a.name.localeCompare(b.name);
+        })
         .map((node) => (
           <TreeNode
             key={node.id}
