@@ -5,9 +5,10 @@ import { CustomRadioButtonField, CustomButtonField, CustomTextInput } from '../.
 import { availableDependentVars, lifecycleTypes } from '../../constants/FormConstants';
 import { initialLifecycleConfig } from '../../constants/ResourcesFormData';
 
-function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate }) {
+function LifecycleConfigForm({ getConfig, getScope, onSubmit, onCancel, editMode, onUpdate }) {
   const [formData, setFormData] = useState(initialLifecycleConfig);
   const [selectedDependencies, setSelectedDependencies] = useState([]);
+  // const [availableDependentVars, setAvailableDependentVars] = useState([]);
 
   const fetchConfig = useCallback(async () => {
     const res = await getConfig();
@@ -18,17 +19,17 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
         : [];
     setFormData(config);
     setSelectedDependencies(dependencyValues);
-  }, [getConfig]);
+
+    const result = await getScope(res?.configMeta?.parentBlockId);
+    const scopeVars = Object.entries(result.configMeta.scope).map(([label, value]) => ({
+      label,
+      value,
+    }));
+    console.log('scopeVars::>>', scopeVars);
+  }, [getConfig, getScope]);
 
   // To change when var api available.
-  // const fetchConfig = useCallback(async () => {
-  //   const res = await getConfig();
-  //   setFormData(res.config);
-  //   if (res.config.lifecycleType === 'onDependency') {
-  //     const dependencyValues = res.config.dependencies.map((dep) => dep.$ref);
-  //     setSelectedDependencies(dependencyValues);
-  //   }
-  // }, [getConfig]);
+  // const dependencyValues = res.config.dependencies.map((dep) => dep.$ref);
   // Also modify at other places where 'TOKEN' used. { type: 'TOKEN', value: dep }
 
   useEffect(() => {
@@ -164,6 +165,7 @@ function LifecycleConfigForm({ getConfig, onSubmit, onCancel, editMode, onUpdate
 
 LifecycleConfigForm.propTypes = {
   getConfig: PropTypes.func,
+  getScope: PropTypes.func,
   editMode: PropTypes.bool,
   onSubmit: PropTypes.func,
   onUpdate: PropTypes.func,
