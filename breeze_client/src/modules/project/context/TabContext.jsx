@@ -99,6 +99,41 @@ export const TabProvider = ({ children, projectName }) => {
     [selectedTab, setSelectedNode, setSelectedNodeId]
   );
 
+  const removeAllTabs = useCallback(() => {
+    setOpenTabs((prevTabs) => {
+      if (prevTabs.length > 1) {
+        const firstTab = prevTabs[0];
+        setSelectedTab(firstTab);
+        setSelectedNode(firstTab);
+        setSelectedNodeId(firstTab.id);
+        return [firstTab];
+      }
+      return prevTabs;
+    });
+  }, [setSelectedNode, setSelectedNodeId]);
+
+  const removeOtherTabs = useCallback((nodeId) => {
+    setOpenTabs((prevTabs) => {
+      const node = prevTabs.find((tab) => tab.id === nodeId);
+      setSelectedTab(node);
+      setSelectedNode(node);
+      setSelectedNodeId(node.id);
+      return [node];
+    });
+  }, []);
+
+  const removeTabsToTheRight = useCallback((nodeId) => {
+    setOpenTabs((prevTabs) => {
+      const node = prevTabs.find((tab) => tab.id === nodeId);
+      const index = prevTabs.findIndex((tab) => tab.id === nodeId);
+      const tabsToTheRight = prevTabs.slice(0, index + 1);
+      setSelectedTab(node);
+      setSelectedNode(node);
+      setSelectedNodeId(node.id);
+      return tabsToTheRight;
+    });
+  }, []);
+
   const updateTabContent = useCallback((nodeId, code, language) => {
     setOpenTabs((prevTabs) => prevTabs.map((tab) => (tab.id === nodeId ? { ...tab, code, language } : tab)));
   }, []);
@@ -115,7 +150,18 @@ export const TabProvider = ({ children, projectName }) => {
 
   return (
     <TabContext.Provider
-      value={{ openTabs, selectedTab, addTab, removeTab, selectTab, updateTabContent, setActiveConfigTab }}
+      value={{
+        openTabs,
+        selectedTab,
+        addTab,
+        removeTab,
+        selectTab,
+        updateTabContent,
+        setActiveConfigTab,
+        removeAllTabs,
+        removeOtherTabs,
+        removeTabsToTheRight,
+      }}
     >
       {children}
     </TabContext.Provider>
