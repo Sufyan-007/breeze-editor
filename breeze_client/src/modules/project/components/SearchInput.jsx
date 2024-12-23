@@ -97,11 +97,15 @@ const SearchInput = ({ projectName, setShowSearch, setFileList, setLoading }) =>
                 className={`bi ${getIconClass(file?.extension).iconClass}`}
                 style={{ color: getIconClass(file?.extension).color }}
               />
-              <span>{file.name}</span>
+              <span>
+                {file.name}
+                {file.extension && <>.{file.extension === 'SX' ? 'jsx' : file.extension}</>}
+              </span>
             </div>
           ))}
         </div>
       )}
+      {fileList.length === 0 && <div className="br-text-primary m-1">No matching results</div>}
     </div>
   );
 };
