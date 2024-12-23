@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import { useState, useRef, useEffect } from 'react';
+import CustomModal from '../../../common/display/modal/BreezeModal';
 
-function ProjectCard({
+const ProjectCard = ({
   isCreateNew = false,
   projectName = 'project',
   projectImageSrc = '',
@@ -9,8 +10,9 @@ function ProjectCard({
   onClick = () => {},
   onDelete = () => {},
   projectStatus = 'Fetching..',
-}) {
+}) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const menuRef = useRef(null);
 
   const toggleMenu = (e) => {
@@ -20,8 +22,17 @@ function ProjectCard({
 
   const handleDelete = (e) => {
     e.stopPropagation();
-    onDelete();
+    setIsModalOpen(true);
     setMenuOpen(false);
+  };
+
+  const cancelDelete = () => {
+    setIsModalOpen(false);
+  };
+
+  const confirmDelete = () => {
+    onDelete();
+    setIsModalOpen(false);
   };
 
   useEffect(() => {
@@ -38,56 +49,81 @@ function ProjectCard({
   }, []);
 
   return (
-    <div
-      className={`col-md-3 m-0 p-0 br-background-primary ${isCreateNew ? 'home-new-card br-background-secondary' : 'home-project-card'}`}
-    >
-      {isCreateNew ? (
-        <div className="h-100 d-flex align-items-center justify-content-center" onClick={onClick}>
-          <button type="button" className="btn modal-btn btn-theme color-text">
-            <i className="bi bi-plus-circle br-text-primary"></i>
-            <span className="ms-1 med-font fw-bold br-text-primary">Create new project</span>
-          </button>
-        </div>
-      ) : (
-        <div className="pb-3">
-          <div className="d-flex justify-content-between p-3">
-            <div className="d-flex justify-content-start">
-              <img src={iconSrc} className="mx-2" alt="icon" />
-              <span className="med-font text-nowrap ms-2 br-text-primary">{projectName}</span>
-            </div>
-            <div className="home-action-buttons position-relative" ref={menuRef}>
-              <span className="badge breeze-badge">
-                <span className="med-font">{projectStatus}</span>
-              </span>
-              <i
-                className="bi bi-three-dots-vertical br-text-primary"
-                onClick={toggleMenu}
-                style={{ cursor: 'pointer' }}
-              ></i>
-              {menuOpen && (
-                <div
-                  className="dropdown-menu show position-absolute px-2 br-background-primary rounded"
-                  style={{ top: 30, left: 65, zIndex: 1000, borderRadius: 0 }}
-                >
-                  <button
-                    type="button"
-                    className="project-card-dropdown-item dropdown-item p-0 br-text-primary"
-                    onClick={handleDelete}
+    <>
+      <div
+        className={`col-md-3 m-0 p-0 br-background-primary ${
+          isCreateNew ? 'home-new-card br-background-secondary' : 'home-project-card'
+        }`}
+      >
+        {isCreateNew ? (
+          <div className="h-100 d-flex align-items-center justify-content-center" onClick={onClick}>
+            <button type="button" className="btn modal-btn btn-theme color-text">
+              <i className="bi bi-plus-circle br-text-primary"></i>
+              <span className="ms-1 med-font fw-bold br-text-primary">Create new project</span>
+            </button>
+          </div>
+        ) : (
+          <div className="pb-3">
+            <div className="d-flex justify-content-between p-3">
+              <div className="d-flex justify-content-start">
+                <img src={iconSrc} className="mx-2" alt="icon" />
+                <span className="med-font text-nowrap ms-2 br-text-primary">{projectName}</span>
+              </div>
+              <div className="home-action-buttons position-relative" ref={menuRef}>
+                <span className="badge breeze-badge">
+                  <span className="med-font">{projectStatus}</span>
+                </span>
+                <i
+                  className="bi bi-three-dots-vertical br-text-primary"
+                  onClick={toggleMenu}
+                  style={{ cursor: 'pointer' }}
+                ></i>
+                {menuOpen && (
+                  <div
+                    className="dropdown-menu show position-absolute px-2 br-background-primary rounded"
+                    style={{ top: 30, left: 65, zIndex: 1000 }}
                   >
-                    <i className="bi bi-trash-fill text-danger me-1"></i> Delete
-                  </button>
-                </div>
-              )}
+                    <button
+                      type="button"
+                      className="project-card-dropdown-item dropdown-item p-0 br-text-primary"
+                      onClick={handleDelete}
+                    >
+                      <i className="bi bi-trash-fill text-danger me-1"></i> Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="card mx-3" onClick={onClick}>
+              <img src={projectImageSrc} alt={`${projectName} image`} />
             </div>
           </div>
-          <div className="card mx-3" onClick={onClick}>
-            <img src={projectImageSrc} alt={`${projectName} image`} />
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+      <CustomModal
+        isOpen={isModalOpen}
+        onClose={cancelDelete}
+        header={{ title: 'Confirm Deletion' }}
+        footer={{
+          buttons: [
+            {
+              label: 'Delete',
+              onClick: confirmDelete,
+              className: 'btn btn-danger',
+            },
+            {
+              label: 'Cancel',
+              onClick: cancelDelete,
+              className: 'btn btn-secondary',
+            },
+          ],
+        }}
+      >
+        <p>Are you sure you want to delete this project? This action cannot be undone.</p>
+      </CustomModal>
+    </>
   );
-}
+};
 
 ProjectCard.propTypes = {
   isCreateNew: PropTypes.bool,

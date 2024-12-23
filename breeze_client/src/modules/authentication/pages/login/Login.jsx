@@ -15,13 +15,11 @@ function Login() {
     password: '',
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [usernameError, setUsernameError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [error, setError] = useState('');
 
   const handleInputChange = (name, value) => {
     setUserDetails({ ...userDetails, [name]: value });
-    setUsernameError('');
-    setPasswordError('');
+    setError('');
   };
 
   const handleLogin = async (username, password) => {
@@ -37,8 +35,7 @@ function Login() {
         const errorMessage = response.non_field_errors?.[0];
 
         if (errorMessage) {
-          setUsernameError(errorMessage.includes('User does not exist.') ? errorMessage : '');
-          setPasswordError(errorMessage.includes('Incorrect password.') ? errorMessage : '');
+          setError('Invalid credentials');
         }
       }
     } catch (error) {
@@ -99,7 +96,6 @@ function Login() {
                     customValidations={[validator.REQUIRED, validator.USERNAME_VALIDATION]}
                     isSubmitted={isSubmitted}
                   />
-                  {usernameError && <div className="text-danger small-font mt-1">{usernameError}</div>}{' '}
                 </div>
                 <div className="mb-3 authentication-form-box">
                   <CustomTextInput
@@ -115,7 +111,7 @@ function Login() {
                     customValidations={[validator.REQUIRED]}
                     isSubmitted={isSubmitted}
                   />
-                  {passwordError && <div className="text-danger small-font mt-1">{passwordError}</div>}{' '}
+                  {error && <div className="text-danger small-font mt-1">{error}</div>}{' '}
                 </div>
 
                 <div className="">

@@ -94,6 +94,10 @@ def generate_service_config(request, collectionType, project_id):
                         isProtected=False,
                         ext="SX"
                     )
+                    if not len(auth_apis) > 0:
+                        module_interceptor_code = module_interceptor_code.replace('{AUTH_INTERCEPTORS_CODE}', '')
+                        module_interceptor_code = module_interceptor_code.replace('{AUTH_ERROR_INTERCEPTORS_CODE}', '')
+                        
                     directory_manager.save_file(file_id=module_interceptor_id, content=module_interceptor_code)
                     current_module["interceptor_file_id"] = module_interceptor_id
                     swagger_metadata_content[module_id] = current_module
