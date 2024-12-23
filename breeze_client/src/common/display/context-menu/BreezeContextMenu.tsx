@@ -8,8 +8,8 @@ import React, {
   useImperativeHandle,
   useRef,
   useState,
-} from "react";
-import { createPortal } from "react-dom";
+} from 'react';
+import { createPortal } from 'react-dom';
 import './styles.css';
 export interface MenuItem<T> {
   label: string;
@@ -22,14 +22,14 @@ export interface MenuItem<T> {
 }
 interface CustomContextMenuProps<T> {
   menuItems: Array<MenuItem<T>>;
-  onSelection: (val: MenuItem<T>["value"]) => unknown;
+  onSelection: (val: MenuItem<T>['value']) => unknown;
   width?: number;
   elemHeight?: number;
   defaultOrientation?: {
     right: boolean;
     bottom: boolean;
   };
-  getChildren?: MenuItem<T>["getChildren"];
+  getChildren?: MenuItem<T>['getChildren'];
 }
 export interface CustomContextMenuRef {
   handleEvent: (e: React.MouseEvent) => void;
@@ -88,42 +88,37 @@ const CustomContextMenu = forwardRef(
       [defaultOrientation, elemHeight, menuItems.length, width]
     );
     const menuRef = useRef<HTMLUListElement>(null);
-    useImperativeHandle(
-      ref,
-      () => {
-        return {
-          handleEvent: (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            setMenuPosition(event.clientX, event.clientY);
-            setShow(true);
-          },
-          openContextMenu: ({ x, y }) => {
-            setPosition({ x, y });
-            setShow(true);
-          },
-        };
-      },
-      [setMenuPosition]
-    );
+    useImperativeHandle(ref, () => {
+      return {
+        handleEvent: (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setMenuPosition(event.clientX, event.clientY);
+          setShow(true);
+        },
+        openContextMenu: ({ x, y }) => {
+          setPosition({ x, y });
+          setShow(true);
+        },
+      };
+    }, [setMenuPosition]);
     useEffect(() => {
       // console.log(document.body.clientHeight);
       const handler = (e: MouseEvent) => {
-        if (
-          !(e.target instanceof Node && menuRef.current?.contains(e.target))
-        ) {
+        if (!(e.target instanceof Node && menuRef.current?.contains(e.target))) {
           setShow(false);
         }
-      }
-      document.addEventListener("click", handler);
-      document.addEventListener("contextmenu", handler)
+      };
+      document.addEventListener('click', handler);
+      document.addEventListener('contextmenu', handler);
       return () => {
-        document.removeEventListener("click", handler);
-        document.addEventListener("contextmenu", handler)
-      }
+        document.removeEventListener('click', handler);
+        document.addEventListener('contextmenu', handler);
+      };
     }, []);
     return (
-      show && createPortal(
+      show &&
+      createPortal(
         <CustomContextMenuView
           menuItems={menuItems}
           onSelection={selectionAndClose}
@@ -132,23 +127,22 @@ const CustomContextMenu = forwardRef(
           elemHeight={elemHeight}
           position={position}
           getChildren={getChildren}
-        />
-        , document.body, "context"
+        />,
+        document.body,
+        'context'
       )
     );
   }
-) as <T>(
-  props: CustomContextMenuProps<T> & { ref?: Ref<CustomContextMenuRef> }
-) => ReactElement;
+) as <T>(props: CustomContextMenuProps<T> & { ref?: Ref<CustomContextMenuRef> }) => ReactElement;
 export default CustomContextMenu;
 interface CustomContextMenuViewProps<T> {
-  menuItems: CustomContextMenuProps<T>["menuItems"];
+  menuItems: CustomContextMenuProps<T>['menuItems'];
   menuRef?: React.RefObject<HTMLUListElement>;
-  onSelection: CustomContextMenuProps<T>["onSelection"];
-  width: NonNullable<CustomContextMenuProps<T>["width"]>;
-  elemHeight: NonNullable<CustomContextMenuProps<T>["elemHeight"]>;
+  onSelection: CustomContextMenuProps<T>['onSelection'];
+  width: NonNullable<CustomContextMenuProps<T>['width']>;
+  elemHeight: NonNullable<CustomContextMenuProps<T>['elemHeight']>;
   position: { x: number; y: number };
-  getChildren?: CustomContextMenuProps<T>["getChildren"];
+  getChildren?: CustomContextMenuProps<T>['getChildren'];
 }
 const CustomContextMenuView = <T,>({
   menuItems,
@@ -170,7 +164,8 @@ const CustomContextMenuView = <T,>({
             height: elemHeight * menuItems.length + 8,
             left: position.x,
             top: position.y,
-          }}>
+          }}
+        >
           {menuItems.map((menuItem, index) => {
             return (
               <CustomContextMenuItem<T>
@@ -189,11 +184,11 @@ const CustomContextMenuView = <T,>({
   );
 };
 interface CustomContextMenuItemProps<T> {
-  menuItem: CustomContextMenuProps<T>["menuItems"][0];
-  onSelection: CustomContextMenuProps<T>["onSelection"];
-  width: NonNullable<CustomContextMenuProps<T>["width"]>;
-  elemHeight: NonNullable<CustomContextMenuProps<T>["elemHeight"]>;
-  getChildren?: CustomContextMenuProps<T>["getChildren"];
+  menuItem: CustomContextMenuProps<T>['menuItems'][0];
+  onSelection: CustomContextMenuProps<T>['onSelection'];
+  width: NonNullable<CustomContextMenuProps<T>['width']>;
+  elemHeight: NonNullable<CustomContextMenuProps<T>['elemHeight']>;
+  getChildren?: CustomContextMenuProps<T>['getChildren'];
 }
 const CustomContextMenuItem = <T,>({
   menuItem,
@@ -256,7 +251,8 @@ const CustomContextMenuItem = <T,>({
           }
         }}
         onMouseLeave={handleMouseLeave}
-        style={{ height: elemHeight }}>
+        style={{ height: elemHeight }}
+      >
         <span className="d-flex justify-content-between">
           {menuItem.label}
           {menuItem.hasChildren && (

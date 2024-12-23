@@ -1,41 +1,40 @@
-@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 
 :root {
-  --color-blue: #006EB9;
+  --color-blue: #006eb9;
   --color-blue-hover: #035891;
   --color-white: #fff;
   --color-red: #d9534f;
-  --color-red-hover:#b30000;
-
+  --color-red-hover: #b30000;
 }
 
 body.dark {
-  --color-primary: #1E1F1C;
+  --color-primary: #1e1f1c;
   --color-secondary: #272822;
-  --color-tertiary: #FAFAFA;
-  --color-text: #A5A5A4;
-  --color-subtext: rgb(165, 165, 164, .2);
+  --color-tertiary: #fafafa;
+  --color-text: #a5a5a4;
+  --color-subtext: rgb(165, 165, 164, 0.2);
   --color-background: rgba(165, 165, 164, 0.5);
-  --badge-bg-color: #1E1F1C;
-  --badge-text-color: #A5A5A4;
+  --badge-bg-color: #1e1f1c;
+  --badge-text-color: #a5a5a4;
   --project-card-border: none;
 }
 
 body.light {
-  --color-primary: #FFFFFF;
-  --color-secondary: #F7F7F7;
+  --color-primary: #ffffff;
+  --color-secondary: #f7f7f7;
   --color-tertiary: #272822;
   --color-text: #252525;
   --color-subtext: #686864;
-  --color-background: #D8D7DD;
-  --badge-bg-color: #D8D7DD;
+  --color-background: #d8d7dd;
+  --badge-bg-color: #d8d7dd;
   --badge-text-color: #252525;
-  --project-card-border: 2px solid #D8D7DD;
+  --project-card-border: 2px solid #d8d7dd;
 }
 
 body {
   margin: 0;
-  font-family: "Lato", sans-serif;
+  font-family: 'Lato', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

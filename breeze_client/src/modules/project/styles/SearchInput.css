@@ -38,7 +38,8 @@
   border-bottom: 1px solid rgba(128, 128, 128, 0.5);
 }
 
-.search-result-item:hover, .search-result-item.selected {
+.search-result-item:hover,
+.search-result-item.selected {
   background-color: var(--color-secondary);
 }
 

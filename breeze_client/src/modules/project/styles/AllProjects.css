@@ -5,7 +5,7 @@
 }
 
 .home-new-card {
-  border: #D8D7DD 2px dotted;
+  border: #d8d7dd 2px dotted;
   border-radius: 6px;
   cursor: pointer;
 }
@@ -32,7 +32,7 @@
 .home-block {
   width: 7rem;
   height: 5rem;
-  content: "";
+  content: '';
 }
 
 .home-badges-wrapper {
@@ -60,5 +60,4 @@
 
 .project-card-dropdown-item:hover {
   background-color: var(--color-secondary) !important;
-
 }

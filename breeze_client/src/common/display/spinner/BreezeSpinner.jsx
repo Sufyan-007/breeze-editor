@@ -3,10 +3,10 @@ import './BreezeSpinner.css';
 
 const BreezeSpinner = ({
   show,
-  animation = 'border', 
-  color = 'primary', 
-  size = 'md', 
-  message = '', 
+  animation = 'border',
+  color = 'primary',
+  size = 'md',
+  message = '',
   role = 'status',
   ariaHidden = true,
 }) => {
@@ -29,13 +29,13 @@ const BreezeSpinner = ({
 };
 
 BreezeSpinner.propTypes = {
-  show: PropTypes.bool.isRequired, 
-  animation: PropTypes.oneOf(['border', 'grow']), 
-  color: PropTypes.string, 
+  show: PropTypes.bool.isRequired,
+  animation: PropTypes.oneOf(['border', 'grow']),
+  color: PropTypes.string,
   size: PropTypes.oneOf(['sm', 'md']),
-  message: PropTypes.string, 
-  role: PropTypes.string, 
-  ariaHidden: PropTypes.bool, 
+  message: PropTypes.string,
+  role: PropTypes.string,
+  ariaHidden: PropTypes.bool,
 };
 
 export default BreezeSpinner;

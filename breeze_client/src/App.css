@@ -27,11 +27,11 @@
 }
 
 .color-red {
-  color: var(--color-red)
+  color: var(--color-red);
 }
 
 .color-red:hover {
-  color: var(--color-red-hover)
+  color: var(--color-red-hover);
 }
 
 .navbar {
@@ -231,11 +231,11 @@
 ::-webkit-scrollbar {
   width: 2px;
   height: 2px;
-  background-color: #D8D7DD;
+  background-color: #d8d7dd;
   border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #A5A5A4;
+  background: #a5a5a4;
   border-radius: 3px;
 }
