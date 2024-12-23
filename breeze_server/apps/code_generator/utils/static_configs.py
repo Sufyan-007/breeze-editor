@@ -170,13 +170,7 @@ TEMPLATE_HOOK_CONFIG = {
                         },
                         {
                             "type": "RETURN",
-                            "value": {
-                                "type": "ARRAY",
-                                "values": [
-                                    {"type": "CUSTOM", "value": "state"},
-                                    {"type": "CUSTOM", "value": "updateState"},
-                                ],
-                            },
+                            "value": {"type": "CUSTOM", "value": "[state, updateState]"},
                         },
                     ],
                 },
