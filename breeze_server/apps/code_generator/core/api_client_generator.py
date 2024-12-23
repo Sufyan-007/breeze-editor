@@ -140,6 +140,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
                 const localInstance = duplicateInstance(moduleInstance);
                 {LOOP_QUERY_PARAMS}
                 let url = {URL}
+                {STORAGE_PARAMS_DECLARATION}
                 {QUERY_CONDITION}
                 {AXIOS_OBJECT_DECLARATION}
                 {INTERCEPTOR_CODE}
@@ -166,6 +167,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
     path_params = url_obj.get("path_params")
     query_params = url_obj.get("query_params")
     query_parameters = url_obj.get("query_parameters")
+    storage_params_declaration = url_obj.get("storage_params_declaration")
     
     
     ## set api method
@@ -275,7 +277,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
                 axis_object_declation = axis_object_declation.replace('{HEADERS},',"")
 
             ## set function args comma seperated
-            function_args = [arg if isinstance(arg, str) else json.dumps(arg, ensure_ascii=False) for arg in function_args]
+            # function_args = [arg if isinstance(arg, str) else json.dumps(arg, ensure_ascii=False) for arg in function_args]
             function_args = ", ".join(function_args)
             
             ## set response conditions if provided
@@ -292,6 +294,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
 
             react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
             react_code = react_code.replace('{FUNC_ARGS}',function_args)
+            react_code = react_code.replace('{STORAGE_PARAMS_DECLARATION}',storage_params_declaration)
             if query_parameters:
                 destructured_query_params = ', '.join(query_parameters)
                 # react_code = react_code.replace('{QUERY_PARAMS}', f"{{{destructured_query_params}}}")
@@ -380,7 +383,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             axis_object_declation = axis_object_declation.replace('{HEADERS},',"")
 
         ## set function args comma seperated
-        function_args = [arg if isinstance(arg, str) else json.dumps(arg, ensure_ascii=False) for arg in function_args]
+        # function_args = [arg if isinstance(arg, str) else json.dumps(arg, ensure_ascii=False) for arg in function_args]
         function_args = ", ".join(function_args)
         
         ## set response conditions if provided
@@ -396,6 +399,7 @@ def generate_service_function( model, anonymous, app_name,service_type, service_
             response_interceptor_code = response_interceptor_code.replace("{RESPONSE_STATUS_CONDITION}","")
 
         react_code = react_code.replace('{URL}',url_obj.get("axios_url"))
+        react_code = react_code.replace('{STORAGE_PARAMS_DECLARATION}',storage_params_declaration)
         react_code = react_code.replace('{FUNC_ARGS}',function_args)
         if query_parameters:
             destructured_query_params = ', '.join(query_parameters)
@@ -789,6 +793,7 @@ def set_request_body(model,app_name,module_id):
 def set_request_url(model,app_name):
     app_basic_config = get_breeze_config_file(app_name)
     build_tool = app_basic_config["buildTool"]
+    storage_params_declaration = ''
     function_args = []
     query_params = []
     other_query_params = []
@@ -817,25 +822,7 @@ def set_request_url(model,app_name):
     new_query_params ={}
     new_path_params = {}
     for params in model.request.parameters:
-        if params.param_in == ParamsInEnum.QUERY:
-            if params.param_type == "USER_INPUT":
-                new_query_params[params.name] = {"selection": 'anyOf', "types":[{"type": params.type}]}
-                query_params.append(params.name)
-                # new_query_params.append({"name":params.name, "types" : [{"type":params.type}]})
-                # query_params.append("%s=${QueryParameters.%s}" % (params.name, params.name))
-                # if 'QueryParameters' not in function_args:
-                #     function_args.append('QueryParameters')
-            # elif params.param_type == "STATIC":
-            #     query_params.append("%s=%s"%(params.name,params.value))
-            elif params.param_type == "LOCAL_STORAGE":
-                other_query_params.append("%s=${localStorage.getItem('%s')}" % (params.name, params.storage_key))
-
-            elif params.param_type == "SESSION_STORAGE":
-                other_query_params.append("%s=${sessionStorage.getItem('%s')}" % (params.name, params.storage_key))
-                
-
-            
-        elif params.param_in == ParamsInEnum.PATH:
+        if params.param_in == ParamsInEnum.PATH:
             if params.param_type == "USER_INPUT":
                 new_path_params[params.name] = {"selection": "anyOf", "types":[{"type": params.type}]}
                 url=url.replace(f"{{{params.name}}}", f"${{{params.name}}}")
@@ -852,6 +839,31 @@ def set_request_url(model,app_name):
                 url=url.replace(f"{{{params.name}}}", "${localStorage.getItem('%s')}"%(params.storage_key))
             elif params.param_type == "SESSION_STORAGE":
                 url=url.replace(f"{{{params.name}}}", "${sessionStorage.getItem('%s')}"%(params.storage_key))
+        
+        elif params.param_in == ParamsInEnum.QUERY:
+            if params.param_type == "USER_INPUT":
+                new_query_params[params.name] = {"selection": 'anyOf', "types":[{"type": params.type}]}
+                query_params.append(params.name)
+                # new_query_params.append({"name":params.name, "types" : [{"type":params.type}]})
+                # query_params.append("%s=${QueryParameters.%s}" % (params.name, params.name))
+                # if 'QueryParameters' not in function_args:
+                #     function_args.append('QueryParameters')
+            # elif params.param_type == "STATIC":
+            #     query_params.append("%s=%s"%(params.name,params.value))
+            elif params.param_type == "LOCAL_STORAGE":
+                storage_value = "const %s = localStorage.getItem('%s');" % (params.name, params.storage_key)
+                condition = f"if ({params.name} !== null && {params.name} !== undefined && {params.name} !== '') {{\n"
+                storage_params_declaration += f" {storage_value} {condition}   url += `&{params.name}=${{encodeURIComponent({params.name})}}`;\n"
+                storage_params_declaration += "}\n"
+                # other_query_params.append("%s=${localStorage.getItem('%s')}" % (params.name, params.storage_key))
+
+            elif params.param_type == "SESSION_STORAGE":
+                storage_params_declaration += "const %s = sessionStorage.getItem('%s');\n" % (params.name, params.storage_key)
+                # other_query_params.append("%s=${sessionStorage.getItem('%s')}" % (params.name, params.storage_key))
+                
+
+            
+        
                
             
 
@@ -860,27 +872,33 @@ def set_request_url(model,app_name):
         query = "?"+query
         url = url + query
         
-    destructured_query_params = {}
+    # destructured_query_params = {}
+    # for param in query_params:
+    #     destructured_query_params[param] = param
+    # destructured_query_params = ", ".join(query_params)
+    # if len(destructured_query_params)>0:
+    #     function_args.append(f"{{ {destructured_query_params} }}")
+        
+        
+    # destructured_path_params = {}
+    # for param in path_params:
+    #     destructured_path_params[param] = param
+    # destructured_path_params = ", ".join(path_params)
+    # if len(destructured_path_params)>0:
+    #     function_args.append(f"{{ {destructured_path_params} }}")
     for param in query_params:
-        destructured_query_params[param] = param
-    destructured_query_params = ", ".join(query_params)
-    if len(destructured_query_params)>0:
-        function_args.append(f"{{ {destructured_query_params} }}")
-        
-        
-    destructured_path_params = {}
+        function_args.append(param)
     for param in path_params:
-        destructured_path_params[param] = param
-    destructured_path_params = ", ".join(path_params)
-    if len(destructured_path_params)>0:
-        function_args.append(f"{{ {destructured_path_params} }}")
+        function_args.append(param)
+        
     axios_url = "`%s`"%(url)
     return {
         "axios_url" : axios_url,
         "function_args" : function_args,
         "path_params" : new_path_params,
         "query_params" : new_query_params,
-        "query_parameters": query_params
+        "query_parameters": query_params,
+        "storage_params_declaration" : storage_params_declaration
     }
 
 
