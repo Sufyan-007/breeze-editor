@@ -10,6 +10,7 @@ from .api_model_loader import ApiModelLoader
 from ..utils.api_models import MethodsEnum,AuthApiTypeEnum,AuthTypeEnum
 from ..utils.schema_conversion import convert_type_to_config, generate_ids,object_converter
 from ....common.utils.replace_variable import replace_variable
+from ....common.utils.variable_name_convertor import convert_to_valid_variable_name
 from ..utils.set_unresolved_key import set_unresolved_keys
 def prepare_api_models(json_data, project_name,isJson):
         app_config_dir = f"{CONFIG_PATH}/{project_name}"
@@ -218,9 +219,11 @@ def _create_parameters_json( parameter_data):
         parameters = []
         if parameter_data and len(parameter_data) > 0:
             for param in parameter_data:
+                valid_param_name = param.get("name")
+                valid_param_name = valid_param_name.replace("-","_")
                 parameters.append({
                     "param_in": param.get("in","").strip(),
-                    "name":param.get("name"),
+                    "name": valid_param_name,
                     "type":param.get("schema",param).get("type").strip().upper(),
                     "required":param.get("required"),
                     "description":param.get("description")
@@ -531,64 +534,78 @@ def classified_tags_and_method(open_api_json_data, file_path):
         extracted_schema = content_data.get("schema")
         schema = {}
         schema_name = ''
-        
-        if extracted_schema.get("type") and extracted_schema["type"] == 'object':
-            schema = object_converter(extracted_schema)
-            schema["schemaType"] = "modals"
-        elif "$ref" in extracted_schema:
-            return None
-        else:
-            schema = convert_type_to_config(extracted_schema)
-            schema["schemaType"] = "combined_schema"
-            
-        schema_str = json.dumps(schema, sort_keys=True)
-        
-        if schema_str in seen_schemas:
-            return seen_schemas[schema_str]
-        
-        if schema_str != '{}' and schema_str not in seen_schemas:
-            seen_schemas[schema_str] = None  
-
-            schema_name_parts = []
-            
-            if tags:
-                schema_name_parts.append(tags[0])
-            
-            path_segments = path.strip('/').split('/')
-            last_valid_segment = None
-            
-            for segment in reversed(path_segments):
-                if not segment.startswith("{") and "?" not in segment:
-                    last_valid_segment = segment
-                    break
-            
-            if last_valid_segment:
-                schema_name_parts.append(last_valid_segment.replace('-', '_'))
+        if extracted_schema :
+            if extracted_schema.get("type") and extracted_schema["type"] == 'object':
+                schema = object_converter(extracted_schema)
+                schema["schemaType"] = "modals"
+            elif "$ref" in extracted_schema:
+                return None
             else:
-                schema_name_parts.append("unknown")
+                schema = convert_type_to_config(extracted_schema)
+                schema["schemaType"] = "combined_schema"
+                
+            schema_str = json.dumps(schema, sort_keys=True)
             
-            schema_name_parts.append(operation.lower())
-            schema_name_base = '_'.join(schema_name_parts)
+            if schema_str in seen_schemas:
+                return seen_schemas[schema_str]
             
-            schema["name"] = f"schema_{schema_name_base}".lower()
-            
-            if any(existing_schema["name"] == schema["name"] for existing_schema in all_schemas):
-                schema["name"] = f"schema_{schema_name_base}_{hashlib.md5(schema_str.encode('utf-8')).hexdigest()[:6]}"
-            
-            schema_name = schema["name"]
-            schema["name"] = schema_name  
-            
-            all_schemas.append(schema)
-            seen_schemas[schema_str] = schema_name  
-            return schema_name
+            if schema_str != '{}' and schema_str not in seen_schemas:
+                seen_schemas[schema_str] = None  
+
+                schema_name_parts = []
+                
+                if tags:
+                    schema_name_parts.append(tags[0])
+                
+                path_segments = path.strip('/').split('/')
+                last_valid_segment = None
+                
+                for segment in reversed(path_segments):
+                    if not segment.startswith("{") and "?" not in segment:
+                        last_valid_segment = segment
+                        break
+                
+                if last_valid_segment:
+                    schema_name_parts.append(last_valid_segment.replace('-', '_'))
+                else:
+                    schema_name_parts.append("unknown")
+                
+                schema_name_parts.append(operation.lower())
+                schema_name_base = '_'.join(schema_name_parts)
+                
+                schema_name_base = convert_to_valid_variable_name(schema_name_base)
+                schema["name"] = f"Schema_{schema_name_base}"
+                
+                if any(existing_schema["name"] == schema["name"] for existing_schema in all_schemas):
+                    schema["name"] = f"Schema_{schema_name_base}_{hashlib.md5(schema_str.encode('utf-8')).hexdigest()[:6]}"
+                
+                schema_name = schema["name"]
+                schema["name"] = schema_name  
+                
+                all_schemas.append(schema)
+                seen_schemas[schema_str] = schema_name  
+                return schema_name
+            else:
+                return None
 
             
                 
     for path, path_data in paths.items():
+        extra_parameters = []
+        if path_data.get("parameters"):
+            extra_parameters = path_data.get("parameters")
         for operation in ["get", "post", "put", "patch", "delete", "head", "options", "trace"]:
             operation_data = path_data.get(operation)
+            parameters = []
             if not operation_data: 
                 continue
+            else:
+                parameters = operation_data.get("parameters",[])
+            new_parameters_data = []
+            new_parameters_data.extend(parameters)
+            new_parameters_data.extend(extra_parameters)
+            operation_data["parameters"] = new_parameters_data
+            # operation_data["parameters"].extend(parameters + extra_parameters)
             tags = operation_data.get("tags", None)
             request_body = operation_data.get("requestBody")
             response = operation_data.get("responses")

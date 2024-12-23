@@ -64,9 +64,9 @@ function ServiceConfiguration() {
     formData.append('file', file);
     try {
       const payload = { category: 'api_client' };
-      const newModuleId = await dispatch(convertFile({ projectName, collectionType, formData })).unwrap();
       setShow(false);
       setView('TEST');
+      const newModuleId = await dispatch(convertFile({ projectName, collectionType, formData })).unwrap();
       await dispatch(fetchModules({ projectName, payload })).unwrap();
       await dispatch(
         fetchFiles({ projectName, payload: { category: 'api_client', module: newModuleId.module_id } })
@@ -76,6 +76,7 @@ function ServiceConfiguration() {
       ).unwrap();
       await dispatch(fetchFolderConfig({ id: 'ROOT', projectName, depth: 3 })).unwrap();
     } catch (error) {
+      setView('TEST');
       console.error('Error uploading file:', error);
     }
   };
