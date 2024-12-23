@@ -1,5 +1,6 @@
 from apps.common.constants.consts import CONFIG_PATH,CONFIG_FILES_PATH
 from apps.common.utils.file_helpers.json_handler import read_project_config_file, write_json_file
+from apps.directory_management.core.directory_management_service import DirectoryManager
 import os,json
 
 
@@ -27,8 +28,7 @@ class EntityManager:
         }
         self.entity_config[entityId] = entity
         
-        with open(self.entity_config_path, 'w') as file:
-            json.dump(self.entity_config, file, indent=2)
+        self.dump_entities()
     
     def add_or_update_entity(self, entityId, fileId,exportedAs, type="", defaultExport=True,schema=None):
         entity = {
@@ -47,8 +47,7 @@ class EntityManager:
         
         self.entity_config[entityId] = entity
         
-        with open(self.entity_config_path, 'w') as file:
-            json.dump(self.entity_config, file, indent=2)    
+        self.dump_entities()
         
     def get_entity(self,entityId):
         return self.entity_config[entityId]
@@ -68,9 +67,7 @@ class EntityManager:
                 self.entity_config[entityId]["usedIn"].append(fileId)
             
             
-            with open(self.entity_config_path, 'w') as file:
-                json.dump(self.entity_config, file, indent=2)
-            
+            self.dump_entities(skip_generation=True)            
             return self.get_entity(entityId=entityId)
         
         else:
@@ -86,8 +83,7 @@ class EntityManager:
         else:
             del self.entity_config[entityId]
             
-        with open(self.entity_config_path, 'w') as file:
-            json.dump(self.entity_config, file, indent=2)
+        self.dump_entities()
             
     def delete_file_entities(self, fileId):
         for entityId, entity in self.entity_config.items():
@@ -101,5 +97,27 @@ class EntityManager:
                 filtered_entities[entityId] = entity
         return filtered_entities
 
+    def dump_entities(self, skip_generation=False):
+        with open(self.entity_config_path, 'w') as file:
+            json.dump(self.entity_config, file, indent=2)   
+        if not skip_generation:
+            directory_manager = DirectoryManager(self.projectId)
+            try:
+                directory_manager.add_node_to_config(
+                    name="all_entities",
+                    parent_id="SRC",
+                    tag="ENTITY",
+                    node_type="FILE",
+                    file_id="ALL_ENTITIES",
+                    ext="SX"
+                )
+            except KeyError:
+                pass
             
-            
+            exported_entities = []
+            for entityId, entity in self.entity_config.items():
+                if entity["defaultExport"]:
+                    exported_entities.append(f'export {{ default as entity_{entityId} }} from "/{directory_manager.get_path_from_file_id(entity["fileId"], relative_path=True) }"'.replace("\\", "/"))
+                else:
+                    exported_entities.append(f'export {{ {entity["exportedAs"]} as entity_{entityId} }} from "/{directory_manager.get_path_from_file_id(entity["fileId"], relative_path=True) }"'.replace("\\", "/"))
+            directory_manager.save_file("ALL_ENTITIES", "\n".join(exported_entities))

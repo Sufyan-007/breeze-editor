@@ -29,7 +29,7 @@ class ImportHelper:
         for imp in imports["components"]:
             importEntity = entityManager.get_and_use_entity(imp["id"],fileId=file_id)
             
-            path = "/"+directory_management_service.get_path_from_file_id(importEntity["fileId"],relative_path=True)
+            path = "/"+directory_management_service.get_path_from_file_id(importEntity["fileId"],relative_path=True).replace("\\", "/")
             if importEntity["defaultExport"]:
                 import_statement = f'import {importEntity["exportedAs"]} from \'{path}\' ;'
             else:
